@@ -1,0 +1,39 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.env*
+venv/
+ENV/
+env/
+
+# IDE / Editor
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db

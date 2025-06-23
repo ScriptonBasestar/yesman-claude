@@ -1,0 +1,140 @@
+● Bash(go version)
+  ⎿  Running…
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   go version                                                      │
+│   Check current Go version                                        │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│ ❯ 1. Yes                                                          │
+│   2. Yes, and don't ask again for go commands in                  │
+│   /home/archmagece/mywork/familybook/familybook-engine-fiber      │
+│   3. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+-------------------------------------------------
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   asdf list golang                                                │
+│   List installed Go versions                                      │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│ ❯ 1. Yes                                                          │
+│   2. Yes, and don't ask again for asdf list commands in           │
+│   /home/archmagece/mywork/familybook/familybook-engine-fiber      │
+│   3. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+------------------------------------------------
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   asdf reshim golang && go install                                │
+│   github.com/sqlc-dev/sqlc/cmd/sqlc@latest                        │
+│   Refresh Go shims and install sqlc                               │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│ ❯ 1. Yes                                                          │
+│   2. Yes, and don't ask again for asdf reshim commands in         │
+│   /home/archmagece/mywork/familybook/familybook-engine-fiber      │
+│   3. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+----------------------------------------------------------
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   asdf uninstall golang 1.24.4 && asdf install golang 1.24.4 &&   │
+│    asdf reshim golang                                             │
+│   Reinstall Go 1.24.4                                             │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│   1. Yes                                                          │
+│ ❯2. Yes, and don't ask again for asdf uninstall and asdf install  │
+│  commands in                                                      │
+│  /home/archmagece/mywork/familybook/familybook-engine-fiber       │
+│   3. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+
+--------------------------------------------------------------------
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   go env GOROOT && ls -la $(go env                                │
+│   GOROOT)/pkg/tool/linux_amd64/                                   │
+│   Check Go root and toolchain                                     │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│ ❯ 1. Yes                                                          │
+│   2. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+-------------------------------------------------------------------
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   export GOROOT=$HOME/.asdf/installs/golang/1.24.4/go && export   │
+│    PATH=$GOROOT/bin:$PATH && go version && go install             │
+│   github.com/sqlc-dev/sqlc/cmd/sqlc@latest                        │
+│   Use asdf Go and install sqlc                                    │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│ ❯ 1. Yes                                                          │
+│   2. Yes, and don't ask again for similar commands in             │
+│   /home/archmagece/mywork/familybook/familybook-engine-fiber      │
+│   3. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+
+-------------------------------------------------------------------------
+
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Create file                                                       │
+│ ╭───────────────────────────────────────────────────────────────╮ │
+│ │ set_go_env.sh                                                 │ │
+│ │                                                               │ │
+│ │ #!/bin/bash                                                   │ │
+│ │ export GOROOT=$HOME/.asdf/installs/golang/1.24.4/go           │ │
+│ │ export PATH=$GOROOT/bin:$PATH                                 │ │
+│ │ export GOPATH=$HOME/go                                        │ │
+│ │ export GO111MODULE=on                                         │ │
+│ │ echo "Go environment set to use asdf Go 1.24.4"               │ │
+│ │ go version                                                    │ │
+│ ╰───────────────────────────────────────────────────────────────╯ │
+│ Do you want to create set_go_env.sh?                              │
+│ ❯ 1. Yes                                                          │
+│   2. Yes, and don't ask again this session (shift+tab)            │
+│   3. No, and tell Claude what to do differently (esc)             │
+│                                                                   │
+╰───────────────────────────────────────────────────────────────────╯
+
+-------------------------------------------------------------------------
+
+╭───────────────────────────────────────────────────────────────────╮
+│ Bash command                                                      │
+│                                                                   │
+│   chmod +x ./set_go_env.sh && source ./set_go_env.sh              │
+│   Set up Go environment                                           │
+│                                                                   │
+│ Do you want to proceed?                                           │
+│   1. Yes                                                          │
+│ ❯ 2. Yes, and don't ask again for source commands in              │
+│   /home/archmagece/mywork/familybook/familybook-engine-fiber      │
+│   3. No, and tell Claude what to do differently (esc)             │
+╰───────────────────────────────────────────────────────────────────╯
+
+
+----------------------------------------------------------------
+
+
+
