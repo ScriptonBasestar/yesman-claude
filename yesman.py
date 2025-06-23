@@ -149,64 +149,15 @@ def cli():
     """Yesman - Claude automation tool"""
     pass
 
-@cli.command()
-def show():
-    """List all available project sessions"""
-    config = YesmanConfig()
-    tmux_manager = TmuxManager(config)
-    tmux_manager.list_sessions()
+from commands.show import show
+from commands.session import session
+from commands.setup import setup
+from commands.teardown import teardown
 
-@cli.command()
-@click.argument('session_name')
-def session(session_name: str):
-    """Create or attach tmux session for given project session"""
-    config = YesmanConfig()
-    tmux_manager = TmuxManager(config)
-    # Load projects
-    projects_data = tmux_manager.load_projects()
-    sessions = projects_data.get("sessions", {})
-    if session_name not in sessions:
-        click.echo(f"Session '{session_name}' not found in projects.yaml")
-        tmux_manager.list_sessions()
-        return
-    projects = sessions[session_name]
-    if tmux_manager.create_session(session_name, projects):
-        click.echo(f"Created session: {session_name}")
-    else:
-        click.echo(f"Session {session_name} already exists.")
-    subprocess.run(["tmux", "attach-session", "-t", session_name])
-
-@cli.command()
-def setup():
-    """Create all tmux sessions defined in projects.yaml"""
-    config = YesmanConfig()
-    tmux_manager = TmuxManager(config)
-    projects_data = tmux_manager.load_projects()
-    sessions = projects_data.get("sessions", {})
-    if not sessions:
-        click.echo("No sessions defined in projects.yaml")
-        return
-    for name, projects in sessions.items():
-        if tmux_manager.create_session(name, projects):
-            click.echo(f"Created session: {name}")
-        else:
-            click.echo(f"Session {name} already exists.")
-    click.echo("All sessions setup completed.")
-
-@cli.command()
-def teardown():
-    """Kill all tmux sessions defined in projects.yaml"""
-    config = YesmanConfig()
-    tmux_manager = TmuxManager(config)
-    projects_data = tmux_manager.load_projects()
-    sessions = projects_data.get("sessions", {})
-    if not sessions:
-        click.echo("No sessions defined in projects.yaml")
-        return
-    for name in sessions.keys():
-        subprocess.run(["tmux", "kill-session", "-t", name])
-        click.echo(f"Killed session: {name}")
-    click.echo("All sessions torn down.")
+cli.add_command(show)
+cli.add_command(session)
+cli.add_command(setup)
+cli.add_command(teardown)
 
 if __name__ == "__main__":
     cli()
