@@ -1,0 +1,14 @@
+
+sessions:
+  homepage:
+    - path: ~/workspace/homepage-backend
+      name: homepage-backend
+    - path: ~/workspace/homepage-frontend
+      name: homepage-frontend
+  shoppingmall:
+    - path: ~/workspace/shoppingmall-backend
+      name: shoppingmall-backend
+    - path: ~/workspace/shoppingmall-frontend
+      name: shoppingmall-frontend
+    - path: ~/workspace/shoppingmall-crawler
+      name: shoppingmall-crawler
