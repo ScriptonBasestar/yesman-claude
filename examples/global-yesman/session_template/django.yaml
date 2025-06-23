@@ -1,0 +1,12 @@
+session_name: "{{ session_name }}"
+start_directory: "{{ start_dir }}"
+before_script: uv sync
+windows:
+  - window_name: django server
+    layout: even-horizontal
+    panes:
+      - claude
+      - uv run ./manage.py runserver
+  - window_name: django logs
+    panes:
+      - tail -f django.log

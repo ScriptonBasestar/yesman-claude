@@ -1,0 +1,12 @@
+session_name: my uv project
+start_directory: "{{ start_dir }}"
+before_script: uv sync
+windows:
+- window_name: django server
+  focus: true
+  panes:
+    - blank
+    - uv run ./manage.py runserver
+- window_name: django logs
+  panes:
+    - tail -f django.log

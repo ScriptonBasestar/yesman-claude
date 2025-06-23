@@ -1,0 +1,18 @@
+session_name: "{{ session_name }}"
+start_directory: "{{ start_dir }}"
+before_script:
+  - make build
+  - make setup
+windows:
+  - window_name: backend
+    layout: even-horizontal
+    start_directory: ./backend
+    panes:
+      - claude
+      - make run
+  - window_name: frontend
+    layout: even-horizontal
+    start_directory: ./frontend
+    panes:
+      - claude
+      - pnpm dev
