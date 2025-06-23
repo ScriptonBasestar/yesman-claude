@@ -70,9 +70,12 @@ def load_patterns():
 
 # 패턴이 매칭되는지 확인
 def match_pattern(buffer, patterns_by_group):
+    # Check last 1000 chars for better matching
+    recent_buffer = buffer[-1000:] if len(buffer) > 1000 else buffer
+    
     for group, patterns in patterns_by_group.items():
         for pattern in patterns:
-            if pattern in buffer:
+            if pattern.lower() in recent_buffer.lower():
                 return group, pattern
     return None, None
 
@@ -98,6 +101,10 @@ def run_claude_code():
         ]
     )
     logger = logging.getLogger("auto_claude")
+    
+    logger.info(f"Loaded config: {config}")
+    logger.info(f"Choice config: {choice_config}")
+    logger.info(f"Loaded patterns: {patterns_by_group}")
 
     child = pexpect.spawn("claude", encoding='utf-8', timeout=None)
     # Adjust child pty size to match current terminal
@@ -125,7 +132,11 @@ def run_claude_code():
         except pexpect.exceptions.TIMEOUT:
             idle_time = time.time() - last_output_time
 
-            if choice_config and idle_time >= 1.0:
+            # Check more frequently for patterns (0.5 seconds instead of 1.0)
+            if choice_config and idle_time >= 0.5:
+                # Log current buffer for debugging
+                logger.debug(f"Buffer content (last 500 chars): {buffer[-500:]}")
+                
                 matched_group, matched = match_pattern(buffer, patterns_by_group)
                 if matched_group and matched_group in choice_config:
                     answer = choice_config[matched_group]
@@ -135,7 +146,44 @@ def run_claude_code():
                     buffer = ""
                     continue
                 else:
+                    # Check for common Claude prompts even without pattern files
+                    recent_buffer = buffer[-500:] if len(buffer) > 500 else buffer
+                    
+                    # Check for numbered options (looking for patterns like "1) " or "1. ")
+                    has_option_1 = any(pattern in recent_buffer for pattern in ["1)", "1.", "1:"])
+                    has_option_2 = any(pattern in recent_buffer for pattern in ["2)", "2.", "2:"])
+                    has_option_3 = any(pattern in recent_buffer for pattern in ["3)", "3.", "3:"])
+                    
+                    # Yes/No patterns
+                    if any(keyword in recent_buffer.lower() for keyword in ["(y/n)", "yes/no", "continue?", "proceed?"]):
+                        if "yn" in choice_config:
+                            answer = choice_config["yn"]
+                            logger.info(f"Default y/n pattern detected, auto-selecting: '{answer}'")
+                            print(f"\n🧠 기본 yes/no 패턴 감지 → '{answer}' 자동 선택\n")
+                            child.sendline(str(answer))
+                            buffer = ""
+                            continue
+                    # 1-3 options
+                    elif has_option_1 and has_option_2 and has_option_3:
+                        if "123" in choice_config:
+                            answer = choice_config["123"]
+                            logger.info(f"Default 1-3 pattern detected, auto-selecting: '{answer}'")
+                            print(f"\n🧠 기본 1-3 선택 패턴 감지 → '{answer}' 자동 선택\n")
+                            child.sendline(str(answer))
+                            buffer = ""
+                            continue
+                    # 1-2 options
+                    elif has_option_1 and has_option_2 and not has_option_3:
+                        if "12" in choice_config:
+                            answer = choice_config["12"]
+                            logger.info(f"Default 1-2 pattern detected, auto-selecting: '{answer}'")
+                            print(f"\n🧠 기본 1-2 선택 패턴 감지 → '{answer}' 자동 선택\n")
+                            child.sendline(str(answer))
+                            buffer = ""
+                            continue
+                    
                     # No auto-match: switch to interactive mode for manual selection
+                    logger.info("No pattern matched, switching to interactive mode")
                     print("\nℹ️ No automatic pattern matched. Entering interactive mode for manual input...\n")
                     child.interact()
                     # Reset buffer and timer
