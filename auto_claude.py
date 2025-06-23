@@ -4,6 +4,7 @@ import time
 import os
 import glob
 import yaml
+import logging
 
 # 패턴 디렉토리 경로
 PATTERN_DIRS = {
@@ -75,11 +76,28 @@ def match_pattern(buffer, patterns_by_group):
 
 def run_claude_code():
     config = load_config()
-    auto_select_enabled = config.get("auto_select_on_pattern", False)
-    auto_select_map = config.get("auto_select", {})
+    
+    # Get choice configuration (previously auto_select)
+    choice_config = config.get("choise", config.get("choice", {}))
     patterns_by_group = load_patterns()
+    
+    # Set up logging
+    log_level = config.get("log_level", "INFO").upper()
+    log_path = config.get("log_path", "~/tmp/logs/yesman/")
+    log_path = os.path.expanduser(log_path)
+    os.makedirs(log_path, exist_ok=True)
+    
+    logging.basicConfig(
+        level=getattr(logging, log_level),
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(os.path.join(log_path, "auto_claude.log")),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger("auto_claude")
 
-    child = pexpect.spawn("sbyes claude", encoding='utf-8', timeout=None)
+    child = pexpect.spawn("claude", encoding='utf-8', timeout=None)
     child.logfile = sys.stdout
 
     buffer = ""
@@ -101,16 +119,13 @@ def run_claude_code():
         except pexpect.exceptions.TIMEOUT:
             idle_time = time.time() - last_output_time
 
-            if (auto_select_map or auto_select_enabled) and idle_time >= 1.0:
+            if choice_config and idle_time >= 1.0:
                 matched_group, matched = match_pattern(buffer, patterns_by_group)
-                if matched_group:
-                    if matched_group in auto_select_map:
-                        answer = auto_select_map[matched_group]
-                        print(f"\n🧠 매칭된 그룹: '{matched_group}' 패턴: '{matched}' → '{answer}' 자동 선택\n")
-                        child.sendline(str(answer))
-                    elif auto_select_enabled:
-                        print(f"\n🧠 매칭된 그룹: '{matched_group}' 패턴: '{matched}' → '1' 자동 선택\n")
-                        child.sendline("1")
+                if matched_group and matched_group in choice_config:
+                    answer = choice_config[matched_group]
+                    logger.info(f"Pattern matched - Group: '{matched_group}', Pattern: '{matched}', Auto-selecting: '{answer}'")
+                    print(f"\n🧠 매칭된 그룹: '{matched_group}' 패턴: '{matched}' → '{answer}' 자동 선택\n")
+                    child.sendline(str(answer))
                     buffer = ""
                     continue
 
