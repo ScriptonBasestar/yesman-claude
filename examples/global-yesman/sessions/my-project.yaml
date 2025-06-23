@@ -1,0 +1,13 @@
+session_name: homepage
+windows:
+  - window_name: my-awesome-project
+    start_directory: ~/dev/my-awesome-project  # <-- IMPORTANT: Change this to your project path
+    layout: even-horizontal # Creates two panes, left and right
+    panes:
+      - shell_command:
+          - 'claude' # This will run in the left pane
+      - # This will be an empty shell in the right pane
+  - window_name: another-project
+    start_directory: ~/dev/another-project # <-- IMPORTANT: Change this to your project path
+    panes:
+      - # A single pane window 

@@ -7,6 +7,10 @@ import subprocess
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
+import tmuxp
+from tmuxp.workspace.builder import WorkspaceBuilder
+from tmuxp.config import import_workspace
+import libtmux
 
 class YesmanConfig:
     def __init__(self):
@@ -66,83 +70,47 @@ class TmuxManager:
     def __init__(self, config: YesmanConfig):
         self.config = config
         self.logger = logging.getLogger("yesman.tmux")
-        self.projects_path = Path.home() / ".yesman" / "projects.yaml"
-    
-    def load_projects(self) -> Dict[str, Any]:
-        if not self.projects_path.exists():
-            self.logger.warning(f"Projects file not found: {self.projects_path}")
-            return {}
-        
-        with open(self.projects_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
-    
-    def create_session(self, session_name: str, projects: list):
-        """Create tmux session with specified projects"""
-        self.logger.info(f"Creating tmux session: {session_name}")
-        
-        # Check if session already exists
-        result = subprocess.run(
-            ["tmux", "has-session", "-t", session_name],
-            capture_output=True
-        )
-        
-        if result.returncode == 0:
-            self.logger.warning(f"Session {session_name} already exists")
+        self.sessions_path = Path.home() / ".yesman" / "sessions"
+        self.sessions_path.mkdir(parents=True, exist_ok=True)
+
+    def create_session(self, session_name: str) -> bool:
+        """Create tmux session from a YAML config file"""
+        session_file = self.sessions_path / f"{session_name}.yaml"
+        if not session_file.is_file():
+            self.logger.error(f"Session config file not found: {session_file}")
+            self.list_sessions()
             return False
-        
-        # Create new session
-        subprocess.run([
-            "tmux", "new-session", "-d", "-s", session_name
-        ])
-        
-        for idx, project in enumerate(projects):
-            if idx > 0:
-                # Create new window for each project after the first
-                subprocess.run([
-                    "tmux", "new-window", "-t", f"{session_name}:{idx}",
-                    "-n", project["name"]
-                ])
-            else:
-                # Rename first window
-                subprocess.run([
-                    "tmux", "rename-window", "-t", f"{session_name}:0",
-                    project["name"]
-                ])
+
+        try:
+            workspace_config = import_workspace(session_file, expand=True)
             
-            # Split pane horizontally
-            subprocess.run([
-                "tmux", "split-window", "-h", "-t", f"{session_name}:{idx}"
-            ])
+            server = libtmux.Server()
             
-            # Left pane: run claude
-            subprocess.run([
-                "tmux", "send-keys", "-t", f"{session_name}:{idx}.0",
-                f"cd {project['path']} && python {Path(__file__).parent}/auto_claude.py",
-                "Enter"
-            ])
-            
-            # Right pane: regular terminal
-            subprocess.run([
-                "tmux", "send-keys", "-t", f"{session_name}:{idx}.1",
-                f"cd {project['path']}", "Enter"
-            ])
-        
-        return True
-    
+            session_name_from_config = workspace_config.get("session_name", session_name)
+
+            if server.find_where({"session_name": session_name_from_config}):
+                self.logger.warning(f"Session {session_name_from_config} already exists.")
+                return False
+
+            builder = WorkspaceBuilder(workspace_config, server=server)
+            builder.build()
+            self.logger.info(f"Session {session_name_from_config} created successfully.")
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to create session from {session_file}: {e}")
+            return False
+
     def list_sessions(self):
-        """List all project sessions"""
-        projects = self.load_projects()
-        sessions = projects.get("sessions", {})
+        """List all available session configs"""
+        sessions = [f.stem for f in self.sessions_path.glob("*.yaml")]
         
         if not sessions:
-            click.echo("No sessions defined in projects.yaml")
+            click.echo("No session configs found in ~/.yesman/sessions/")
             return
         
-        click.echo("Available sessions:")
-        for session_name, projects in sessions.items():
-            click.echo(f"  - {session_name} ({len(projects)} projects)")
-            for project in projects:
-                click.echo(f"    • {project['name']} ({project['path']})")
+        click.echo("Available session configs:")
+        for session_name in sessions:
+            click.echo(f"  - {session_name}")
 
 @click.group()
 def cli():

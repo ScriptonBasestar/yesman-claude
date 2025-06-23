@@ -1,32 +1,51 @@
 import click
 import subprocess
 import os
+from pathlib import Path
 from yesman import YesmanConfig, TmuxManager
+from tmuxp.config import import_workspace
 
-@click.command()
+@click.group()
+def session():
+    """Manage tmux sessions"""
+    pass
+
+@session.command('create')
 @click.argument('session_name')
-def session(session_name: str):
-    """Create or attach tmux session for given project session"""
+def create_session(session_name: str):
+    """Create and attach tmux session from a config file."""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
-    sessions = tmux_manager.load_projects().get("sessions", {})
-    if session_name not in sessions:
-        click.echo(f"Session '{session_name}' not found")
+    
+    session_file = Path.home() / ".yesman" / "sessions" / f"{session_name}.yaml"
+    
+    # We need the real session name from the config for attaching
+    try:
+        workspace_config = import_workspace(session_file, expand=True)
+        session_name_from_config = workspace_config.get("session_name", session_name)
+    except Exception:
+        click.echo(f"Could not read session config: {session_file}")
         tmux_manager.list_sessions()
         return
-    projects = sessions[session_name]
-    if tmux_manager.create_session(session_name, projects):
-        click.echo(f"Created session: {session_name}")
-    else:
-        click.echo(f"Session {session_name} already exists.")
+
+    if tmux_manager.create_session(session_name):
+        click.echo(f"Created session: {session_name_from_config}")
+    
     # Attach to session
-    click.echo(f"Connecting to session: {session_name}")
+    click.echo(f"Connecting to session: {session_name_from_config}")
     if os.environ.get("TMUX"):
         # Already inside tmux, switch to the session
         try:
-            subprocess.run(["tmux", "switch-client", "-t", session_name], check=True)
+            subprocess.run(["tmux", "switch-client", "-t", session_name_from_config], check=True)
         except subprocess.CalledProcessError:
-            click.echo("Failed to switch client. The session might be attached elsewhere.")
+             subprocess.run(["tmux", "attach-session", "-t", session_name_from_config])
     else:
         # Outside tmux, attach to the session
-        subprocess.run(["tmux", "attach-session", "-t", session_name]) 
+        subprocess.run(["tmux", "attach-session", "-t", session_name_from_config])
+
+@session.command('list')
+def list_sessions_cmd():
+    """List available session configurations."""
+    config = YesmanConfig()
+    tmux_manager = TmuxManager(config)
+    tmux_manager.list_sessions() 

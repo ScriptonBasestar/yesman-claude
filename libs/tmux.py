@@ -1,0 +1,22 @@
+import tmuxp
+import yaml
+from jinja2 import Template
+from pathlib import Path
+
+def generate(session_name: str, start_dir: str):
+    template_path = Path(__file__).parent / "session_template.yaml"
+    with open(template_path, encoding="utf-8") as f:
+        raw = f.read()
+
+    # 템플릿 렌더링
+    rendered = Template(raw).render(
+        session_name=session_name,
+        start_dir=start_dir,
+    )
+
+    # YAML → dict
+    return yaml.safe_load(rendered)
+
+if __name__ == "__main__":
+    config = generate(session_name="my-uv-project", start_dir="~/workspace/uv")
+    tmuxp.cli.load_workspace(config)
