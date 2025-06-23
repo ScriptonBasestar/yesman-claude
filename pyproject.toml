@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yesman-claude"
+version = "0.1.0"
+authors = [
+    {name = "Yesman Claude Developer"},
+]
+description = "Automated Claude CLI tool with project management"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.0",
+    "pyyaml>=5.4",
+    "pexpect>=4.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/yesman-claude"
+
+[project.scripts]
+yesman = "yesman:cli"
+
+[tool.setuptools]
+py-modules = ["yesman", "auto_claude"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["yesman*"] 
