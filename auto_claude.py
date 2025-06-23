@@ -5,6 +5,8 @@ import os
 import glob
 import yaml
 import logging
+import signal
+import shutil
 
 # 패턴 디렉토리 경로
 PATTERN_DIRS = {
@@ -98,6 +100,10 @@ def run_claude_code():
     logger = logging.getLogger("auto_claude")
 
     child = pexpect.spawn("claude", encoding='utf-8', timeout=None)
+    # Adjust child pty size to match current terminal
+    rows, cols = shutil.get_terminal_size()
+    child.setwinsize(rows, cols)
+    signal.signal(signal.SIGWINCH, lambda sig, frm: child.setwinsize(*shutil.get_terminal_size()))
     child.logfile = sys.stdout
 
     buffer = ""
@@ -127,6 +133,14 @@ def run_claude_code():
                     print(f"\n🧠 매칭된 그룹: '{matched_group}' 패턴: '{matched}' → '{answer}' 자동 선택\n")
                     child.sendline(str(answer))
                     buffer = ""
+                    continue
+                else:
+                    # No auto-match: switch to interactive mode for manual selection
+                    print("\nℹ️ No automatic pattern matched. Entering interactive mode for manual input...\n")
+                    child.interact()
+                    # Reset buffer and timer
+                    buffer = ""
+                    last_output_time = time.time()
                     continue
 
         except pexpect.exceptions.EOF:
