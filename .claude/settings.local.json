@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(chmod:*)",
-      "Bash(uv:*)"
+      "Bash(uv:*)",
+      "WebFetch(domain:textual.textualize.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(./yesman.py ls)",
+      "Bash(tmux list-sessions:*)",
+      "Bash(timeout:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
