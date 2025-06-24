@@ -7,7 +7,7 @@ def dashboard(refresh):
     """Run dashboard to monitor all yesman sessions"""
     click.echo("Starting yesman dashboard...")
     try:
-        run_dashboard()
+        run_dashboard(refresh)
     except KeyboardInterrupt:
         pass  # Already handled in run_dashboard
     except Exception as e:

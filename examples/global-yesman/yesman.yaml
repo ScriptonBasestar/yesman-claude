@@ -1,5 +1,5 @@
 # notest, debug, info, warning, error, critical
-log_level: info
+log_level: warning
 log_path: ~/tmp/logs/yesman/
 
 choice:

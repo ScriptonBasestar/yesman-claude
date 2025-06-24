@@ -9,6 +9,44 @@ import os
 from datetime import datetime
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
+from textual.app import App
+from textual.widgets import Header, Footer, DataTable
+from textual.reactive import reactive
+from textual import events
+from rich.console import Console
+
+class DashboardApp(App):
+    sessions_info = reactive([])
+
+    async def on_mount(self) -> None:
+        await self.mount(Header())
+        await self.mount(Footer())
+        self.table = DataTable()
+        await self.mount(self.table)
+        self.set_interval(2, self.refresh_data)
+
+    async def refresh_data(self) -> None:
+        self.sessions_info = self.get_session_info()
+        self.update_table()
+
+    def update_table(self) -> None:
+        self.table.clear()
+        self.table.add_columns("Project", "Session", "Template", "Status", "Controller")
+        for info in self.sessions_info:
+            status_icon = "🟢" if info['status'] == 'running' else "🔴"
+            controller_icon = "🤖" if info['controller_status'] == 'running' else "❌"
+            self.table.add_row(
+                info['project_name'],
+                info['session_name'],
+                info['template'],
+                status_icon,
+                controller_icon
+            )
+
+    def get_session_info(self) -> List[Dict[str, Any]]:
+        """Retrieve session information from the Dashboard instance"""
+        dashboard = Dashboard()
+        return dashboard.get_session_info()
 
 class Dashboard:
     def __init__(self):
@@ -16,7 +54,23 @@ class Dashboard:
         self.tmux_manager = TmuxManager(self.config)
         self.server = libtmux.Server()
         self.logger = logging.getLogger("yesman.dashboard")
+        self.console = Console()
+        # 파일 로깅만 사용하도록 설정 (console 핸들러 비활성화)
+        self.logger.propagate = False
+        log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
+        log_path = Path(os.path.expanduser(log_path_str))
+        log_path.mkdir(parents=True, exist_ok=True)
+        dashboard_log_file = log_path / "dashboard.log"
+        file_handler = logging.FileHandler(dashboard_log_file)
+        file_handler.setLevel(self.logger.level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+        # libtmux 로그 출력 억제
+        libtmux_logger = logging.getLogger('libtmux')
+        libtmux_logger.setLevel(logging.WARNING)
         
+
     def get_session_info(self) -> List[Dict[str, Any]]:
         """Get information about all yesman sessions"""
         sessions_info = []
@@ -120,30 +174,12 @@ class Dashboard:
         return "\n".join(output)
     
     def run_dashboard(self, refresh_interval: float = 2.0):
-        """Run the dashboard with periodic updates"""
+        """Run the dashboard with periodic updates using textual"""
         self.logger.info("Starting yesman dashboard")
-        
-        try:
-            while True:
-                # Clear screen
-                os.system('clear' if os.name == 'posix' else 'cls')
-                
-                # Get and display session information
-                sessions_info = self.get_session_info()
-                dashboard_text = self.format_dashboard(sessions_info)
-                print(dashboard_text)
-                
-                # Wait before refresh
-                time.sleep(refresh_interval)
-                
-        except KeyboardInterrupt:
-            self.logger.info("Dashboard stopped by user")
-            print("\nDashboard stopped.")
-        except Exception as e:
-            self.logger.error(f"Error in dashboard: {e}")
-            raise
+        app = DashboardApp()
+        app.run()
 
-def run_dashboard():
+def run_dashboard(refresh_interval: float = 2.0):
     """Run the dashboard"""
     dashboard = Dashboard()
-    dashboard.run_dashboard()
+    dashboard.run_dashboard(refresh_interval)
