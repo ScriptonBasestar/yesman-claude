@@ -2,7 +2,7 @@
 sessions:
   proj_django:
     template_name: django
-    session:
+    override:
       session_name: django
       start_directory: ~/workspace/proj_django
       before_script: uv sync
@@ -14,6 +14,6 @@ sessions:
             - uv run ./manage.py runserver
   proj_django2:
     template_name: django
-    session:
+    override:
       session_name: django2
       start_directory: ~/workspace/proj_django2
