@@ -63,7 +63,15 @@ def setup():
             "window_name": "controller",
             "layout": "even-horizontal",
             "panes": [
-                {"claude": {}},
+                {
+                    "command": "yesman controller {{ session_name }}",
+                    "args": [],
+                    "cwd": "~",
+                    "env": {},
+                    "shell": True,
+                    "pty": True,
+                    "encoding": "utf-8",
+                },
             ]
         })
 
