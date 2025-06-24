@@ -3,7 +3,7 @@
 ## 현재 기술 스택
 
 ### 언어
-- **Python**: 메인 개발 언어 (auto_claude.py)
+- **Python**: 메인 개발 언어
 
 ### 필수 라이브러리
 - **PyYAML**: YAML 설정 파일 파싱
@@ -12,7 +12,7 @@
 
 ### 시스템 의존성
 - **tmux**: 터미널 멀티플렉서
-- **Claude CLI**: claude 명령어 실행
+- **Claude Code**: claude 명령어 실행
 
 ## 추가 예정 기술
 
@@ -25,6 +25,5 @@
 - **pytest-mock**: 모킹 지원
 
 ### 개발 도구
-- **black**: 코드 포매터
-- **flake8**: 린터
+- **ruff**: Linter 및 코드 포매터
 - **mypy**: 타입 체킹
