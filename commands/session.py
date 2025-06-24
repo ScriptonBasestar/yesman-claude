@@ -30,7 +30,7 @@ def create_session(session_name: str):
         session_name_from_config = workspace_config.get("session_name", session_name)
     except Exception:
         click.echo(f"Could not read session config: {session_file}")
-        tmux_manager.list_sessions()
+        tmux_manager.list_templates()
         return
 
     if tmux_manager.create_session(session_name):
