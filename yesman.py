@@ -7,10 +7,9 @@ import subprocess
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
-import tmuxp
-from tmuxp.workspace.builder import WorkspaceBuilder
-from tmuxp.config import import_workspace
-import libtmux
+from tmuxp.workspace.builder import WorkspaceBuilder  # type: ignore
+from tmuxp.workspace.loader import expand, trickle  # type: ignore
+import libtmux  # type: ignore
 
 class YesmanConfig:
     def __init__(self):
@@ -82,7 +81,10 @@ class TmuxManager:
             return False
 
         try:
-            workspace_config = import_workspace(session_file, expand=True)
+            with open(session_file, "r", encoding="utf-8") as f:
+                config_dict = yaml.safe_load(f) or {}
+            workspace_config = expand(config_dict, cwd=session_file.parent)
+            workspace_config = trickle(workspace_config)
             
             server = libtmux.Server()
             
@@ -111,6 +113,22 @@ class TmuxManager:
         click.echo("Available session configs:")
         for session_name in sessions:
             click.echo(f"  - {session_name}")
+
+    def load_projects(self) -> Dict[str, Any]:
+        """Load project sessions defined in projects.yaml"""
+        global_path = Path.home() / ".yesman" / "projects.yaml"
+        local_path = Path.cwd() / ".yesman" / "projects.yaml"
+        projects: Dict[str, Any] = {}
+        # Load global projects
+        if global_path.exists():
+            with open(global_path, "r", encoding="utf-8") as f:
+                projects = yaml.safe_load(f) or {}
+        # Override with local projects if present
+        if local_path.exists():
+            with open(local_path, "r", encoding="utf-8") as f:
+                local_projects = yaml.safe_load(f) or {}
+            projects = {**projects, **local_projects}
+        return projects
 
 @click.group()
 def cli():
