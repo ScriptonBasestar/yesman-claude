@@ -3,61 +3,51 @@ import click
 import yaml
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
 from libs.yesman_config import YesmanConfig
 from tmuxp.workspace.builder import WorkspaceBuilder  # type: ignore
-from tmuxp.workspace.loader import expand, trickle  # type: ignore
+from tmuxp.workspace.loader import expand  # type: ignore
 import libtmux  # type: ignore
 
 class TmuxManager:
     def __init__(self, config: YesmanConfig):
         self.config = config
         self.logger = logging.getLogger("yesman.tmux")
-        # Directory for session configs
-        self.templates = Path.home() / ".yesman" / "templates"
-        self.templates.mkdir(parents=True, exist_ok=True)
         # Directory for session templates
         self.templates_path = Path.home() / ".yesman" / "templates"
         self.templates_path.mkdir(parents=True, exist_ok=True)
 
-    def create_session(self, session_name: str, template_name: str) -> bool:
-        """Create tmux session from a YAML config file in sessions directory"""
-        session_file = self.templates / f"{template_name}.yaml"
-        if not session_file.is_file():
-            self.logger.error(f"Session config file not found: {session_file}")
-            self.list_templates()
-            return False
+    def create_session(self, session_name: str, config_dict: Dict) -> bool:
+        """Create tmux session from a YAML config file in templates directory"""
         try:
-            with open(session_file, "r", encoding="utf-8") as f:
-                config_dict = yaml.safe_load(f) or {}
-            workspace_config = expand(config_dict, cwd=session_file.parent)
-            workspace_config = trickle(workspace_config)
             server = libtmux.Server()
-            session_name_from_config = workspace_config.get("session_name", session_name)
+            session_name_from_config = config_dict.get("session_name", session_name)
 
             if server.find_where({"session_name": session_name_from_config}):
                 self.logger.warning(f"Session {session_name_from_config} already exists.")
                 return False
+            
+            # print("--------------------------------")
+            # # print(config_dict)
+            # print(yaml.dump(config_dict))
+            # print("--------------------------------")
+            config_dict = expand(config_dict, cwd=self.templates_path)
+            # print(yaml.dump(config_dict))
+            # print("--------------------------------")
 
-            builder = WorkspaceBuilder(workspace_config, server=server)
+            builder = WorkspaceBuilder(config_dict, server=server)
             builder.build()
             self.logger.info(f"Session {session_name_from_config} created successfully.")
             return True
         except Exception as e:
-            self.logger.error(f"Failed to create session from {session_file}: {e}")
+            # print e
+            raise e
+            self.logger.error(f"Failed to create session from {session_name}: {e}")
             return False
 
-    def list_templates(self) -> None:
-        """List all available session templates"""
-        templates = [f.stem for f in self.templates_path.glob("*.yaml")]
-        
-        if not templates:
-            click.echo("No session templates found in ~/.yesman/templates/")
-            return
-        
-        click.echo("Available session templates:")
-        for template_name in templates:
-            click.echo(f"  - {template_name}")
+    def get_templates(self) -> List[str]:
+        """Get all available session templates"""
+        return [f.stem for f in self.templates_path.glob("*.yaml")]
 
     def load_projects(self) -> Dict[str, Any]:
         """Load project sessions defined in projects.yaml"""
