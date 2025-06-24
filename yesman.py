@@ -13,6 +13,7 @@ from commands.setup import setup
 from commands.teardown import teardown
 from commands.controller import controller
 from commands.dashboard import dashboard
+from commands.enter import enter
 
 cli.add_command(ls)
 cli.add_command(show)
@@ -20,6 +21,7 @@ cli.add_command(setup)
 cli.add_command(teardown)
 cli.add_command(controller)
 cli.add_command(dashboard)
+cli.add_command(enter)
 
 if __name__ == "__main__":
     cli()

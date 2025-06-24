@@ -29,6 +29,16 @@ pip install -e . --config-settings editable_mode=compat
 
 # Teardown all sessions from projects.yaml
 ./yesman.py teardown
+
+# Enter (attach to) a tmux session
+./yesman.py enter [session_name]
+./yesman.py enter  # Interactive selection
+
+# Run controller for a specific session
+./yesman.py controller <session_name>
+
+# Run dashboard to monitor all sessions
+./yesman.py dashboard
 ```
 
 ### Testing and Linting
