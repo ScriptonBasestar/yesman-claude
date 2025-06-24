@@ -220,9 +220,23 @@ class Controller:
                 return True
         return False
 
+    def is_input_state(self, content: str) -> bool:
+        """Detect if Claude Code is in an input state"""
+        input_patterns = [
+            r"\s*>",  # Detects a prompt waiting for input
+        ]
+        for pattern in input_patterns:
+            if re.search(pattern, content):
+                return True
+        return False
+
     def auto_trust_if_needed(self):
         """trust 프롬프트가 있으면 1을 입력"""
         content = self.capture_pane_content()
+        # Claude Code가 입력 중인지 확인
+        if self.is_input_state(content):
+            self.logger.info("[INFO] Claude Code가 입력 중입니다. 자동 입력을 건너뜁니다.")
+            return False
         # 마지막 박스의 내용을 확인
         last_box_start = content.rfind("╭")
         last_box_end = content.rfind("╰")
