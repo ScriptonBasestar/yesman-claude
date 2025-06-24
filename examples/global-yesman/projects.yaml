@@ -1,4 +1,3 @@
-
 sessions:
   proj_django:
     template_name: django

@@ -13,26 +13,27 @@ class TmuxManager:
     def __init__(self, config: YesmanConfig):
         self.config = config
         self.logger = logging.getLogger("yesman.tmux")
+        # Directory for session configs
+        self.templates = Path.home() / ".yesman" / "templates"
+        self.templates.mkdir(parents=True, exist_ok=True)
+        # Directory for session templates
         self.templates_path = Path.home() / ".yesman" / "templates"
         self.templates_path.mkdir(parents=True, exist_ok=True)
 
-    def create_session(self, template_name: str) -> bool:
-        """Create tmux session from a YAML config file"""
-        template_file = self.templates_path / f"{template_name}.yaml"
-        if not template_file.is_file():
-            self.logger.error(f"Session config file not found: {template_file}")
+    def create_session(self, session_name: str, template_name: str) -> bool:
+        """Create tmux session from a YAML config file in sessions directory"""
+        session_file = self.templates / f"{template_name}.yaml"
+        if not session_file.is_file():
+            self.logger.error(f"Session config file not found: {session_file}")
             self.list_templates()
             return False
-
         try:
-            with open(template_file, "r", encoding="utf-8") as f:
+            with open(session_file, "r", encoding="utf-8") as f:
                 config_dict = yaml.safe_load(f) or {}
-            workspace_config = expand(config_dict, cwd=template_file.parent)
+            workspace_config = expand(config_dict, cwd=session_file.parent)
             workspace_config = trickle(workspace_config)
-            
             server = libtmux.Server()
-            
-            session_name_from_config = workspace_config.get("session_name", template_name)
+            session_name_from_config = workspace_config.get("session_name", session_name)
 
             if server.find_where({"session_name": session_name_from_config}):
                 self.logger.warning(f"Session {session_name_from_config} already exists.")
@@ -43,10 +44,10 @@ class TmuxManager:
             self.logger.info(f"Session {session_name_from_config} created successfully.")
             return True
         except Exception as e:
-            self.logger.error(f"Failed to create session from {template_file}: {e}")
+            self.logger.error(f"Failed to create session from {session_file}: {e}")
             return False
 
-    def list_templates(self):
+    def list_templates(self) -> None:
         """List all available session templates"""
         templates = [f.stem for f in self.templates_path.glob("*.yaml")]
         
