@@ -1,10 +1,19 @@
 
 sessions:
   proj_django:
-    template:
+    template_name: django
+    session:
       session_name: django
-      start_dir: ~/workspace/proj_django
-  proj_shop:
-    template:
-      session_name: shop
-      start_dir: ~/workspace/proj_shop
+      start_directory: ~/workspace/proj_django
+      before_script: uv sync
+      windows:
+        - window_name: django server
+          layout: even-horizontal
+          panes:
+            - claude
+            - uv run ./manage.py runserver
+  proj_django2:
+    template_name: django
+    session:
+      session_name: django2
+      start_directory: ~/workspace/proj_django2
