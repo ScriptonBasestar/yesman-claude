@@ -3,8 +3,8 @@ from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 
 @click.command()
-def ls():
-    """List all available projects"""
+def show():
+    """List all running tmux sessions"""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
-    tmux_manager.list_templates()
+    tmux_manager.list_running_sessions()

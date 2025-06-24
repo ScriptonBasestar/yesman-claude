@@ -7,7 +7,7 @@ def setup():
     """Create all tmux sessions defined in projects.yaml"""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
-    sessions = tmux_manager.load_projects().get("projects", {})
+    sessions = tmux_manager.load_projects().get("sessions", {})
     if not sessions:
         click.echo("No sessions defined in projects.yaml")
         return
