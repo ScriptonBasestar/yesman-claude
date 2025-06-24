@@ -1,4 +1,6 @@
 sessions:
+  yesman_dashboard:
+    template_name: dashboard
   proj_django:
     template_name: django
     override:
@@ -11,6 +13,7 @@ sessions:
           panes:
             - claude
             - uv run ./manage.py runserver
+            - yesman controller django
   proj_django2:
     template_name: django
     override:
