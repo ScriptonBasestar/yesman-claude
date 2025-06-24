@@ -1,6 +1,7 @@
 import click
 import subprocess
-from yesman import YesmanConfig, TmuxManager
+from libs.yesman_config import YesmanConfig
+from libs.tmux_manager import TmuxManager
 
 @click.command()
 def teardown():

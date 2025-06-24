@@ -1,5 +1,5 @@
 session_name: "{{ session_name }}"
-start_directory: "{{ start_dir }}"
+start_directory: "{{ start_directory }}"
 before_script:
   - make build
   - make setup

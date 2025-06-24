@@ -2,9 +2,10 @@ import click
 import subprocess
 import os
 from pathlib import Path
-from yesman import YesmanConfig, TmuxManager
 import yaml
 from tmuxp.workspace.loader import expand, trickle  # type: ignore
+from libs.yesman_config import YesmanConfig
+from libs.tmux_manager import TmuxManager
 
 @click.group()
 def session():
@@ -46,10 +47,3 @@ def create_session(session_name: str):
     else:
         # Outside tmux, attach to the session
         subprocess.run(["tmux", "attach-session", "-t", session_name_from_config])
-
-@session.command('list')
-def list_sessions_cmd():
-    """List available session configurations."""
-    config = YesmanConfig()
-    tmux_manager = TmuxManager(config)
-    tmux_manager.list_sessions() 
