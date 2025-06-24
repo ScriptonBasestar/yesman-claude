@@ -3,7 +3,8 @@ import subprocess
 import os
 from pathlib import Path
 from yesman import YesmanConfig, TmuxManager
-from tmuxp.config import import_workspace
+import yaml
+from tmuxp.workspace.loader import expand, trickle  # type: ignore
 
 @click.group()
 def session():
@@ -21,7 +22,10 @@ def create_session(session_name: str):
     
     # We need the real session name from the config for attaching
     try:
-        workspace_config = import_workspace(session_file, expand=True)
+        with open(session_file, "r", encoding="utf-8") as f:
+            config_dict = yaml.safe_load(f) or {}
+        workspace_config = expand(config_dict, cwd=session_file.parent)
+        workspace_config = trickle(workspace_config)
         session_name_from_config = workspace_config.get("session_name", session_name)
     except Exception:
         click.echo(f"Could not read session config: {session_file}")
