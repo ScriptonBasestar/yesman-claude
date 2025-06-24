@@ -8,14 +8,15 @@ from typing import Optional, Dict, Any
 import subprocess
 import re
 from libs.yesman_config import YesmanConfig
+import sys
 
 class Controller:
     def __init__(self, session_name: str, pane_id: Optional[str] = None):
         self.session_name = session_name
-        self.pane_id = pane_id if pane_id else 0
+        self.pane_id = pane_id if pane_id is not None else 0
         self.server = libtmux.Server()
         self.config = YesmanConfig()
-        
+
         # Setup console logger for immediate feedback
         self.logger = logging.getLogger(f"yesman.controller.{session_name}")
         
@@ -106,8 +107,8 @@ class Controller:
     
     def capture_pane_content(self, lines: int = 50) -> str:
         """Capture the current content of the claude pane"""
-        # Capture pane content
-        content = self.claude_pane.cmd("capture-pane", "-p", "-S", f"-{lines}").stdout
+        # Capture only the visible pane content
+        content = self.claude_pane.cmd("capture-pane", "-p", "-S", "-").stdout
         return "\n".join(content)
     
     def send_input(self, text: str):
@@ -191,6 +192,52 @@ class Controller:
         
         return ''
     
+    def detect_trust_prompt(self, content: str) -> bool:
+        """화면에 trust 프롬프트가 있는지 감지"""
+        trust_patterns = [
+            r"Do you trust the files in this folder\?",
+            r"Claude Code may read files in this folder",
+            r"Yes, proceed",
+        ]
+        for pattern in trust_patterns:
+            if pattern in content:
+                return True
+        return False
+
+    def is_idle_screen(self, content: str) -> bool:
+        """claude가 대기(웰컴/팁/프롬프트) 상태인지 감지"""
+        idle_patterns = [
+            r"Welcome to Claude Code!",
+            r"/help for help",
+            r"Tip: Use /memory",
+            r"cwd: ",
+            r"for shortcuts",
+            r"Try \"fix typecheck errors\"",
+            r"\s*>\s*$",  # 빈 프롬프트
+        ]
+        for pattern in idle_patterns:
+            if pattern in content:
+                return True
+        return False
+
+    def auto_trust_if_needed(self):
+        """trust 프롬프트가 있으면 1을 입력"""
+        content = self.capture_pane_content()
+        # 마지막 박스의 내용을 확인
+        last_box_start = content.rfind("╭")
+        last_box_end = content.rfind("╰")
+        if last_box_start != -1 and last_box_end != -1:
+            last_box_content = content[last_box_start:last_box_end]
+            # 1. trust 프롬프트가 마지막 박스에 있으면 무조건 1 입력
+            if self.detect_trust_prompt(last_box_content):
+                self.logger.info("[AUTO] 'Do you trust the files in this folder?' 프롬프트 감지됨. 1 입력.")
+                self.send_input('1')
+                return True
+        # 2. 그 외에 idle 화면이면 아무것도 하지 않음
+        if self.is_idle_screen(content):
+            return False
+        return False
+    
     def monitor_and_control(self, interval: float = 1.0):
         """Main monitoring loop"""
         self.logger.info(f"Starting controller for session '{self.session_name}'")
@@ -198,56 +245,39 @@ class Controller:
         self.logger.info(f"Check interval: {interval}s")
         self.logger.info("Controller is running. Press Ctrl+C to stop.")
         
-        last_content = ""
-        idle_time = 0
-        check_count = 0
-        
-        while True:
-            try:
-                check_count += 1
-                
-                # Capture current pane content
-                current_content = self.capture_pane_content()
-                
-                # Check if content has changed
-                if current_content != last_content:
-                    content_diff = len(current_content) - len(last_content)
-                    self.logger.debug(f"Content changed (diff: {content_diff:+d} chars)")
-                    last_content = current_content
-                    idle_time = 0
+        # claude 콘솔이 아니면 경고 후 종료
+        current_cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+        if "claude" not in current_cmd.lower():
+            self.logger.error("현재 창이 claude 콘솔이 아닙니다. 컨트롤러를 종료합니다.")
+            click.echo("[경고] 현재 창이 claude 콘솔이 아닙니다. 컨트롤러를 종료합니다.")
+            return
+
+        last_content = self.capture_pane_content()
+        shown_progress_text = False
+        try:
+            while True:
+                time.sleep(interval)
+                content = self.capture_pane_content()
+                # Claude Code가 실행 중인지 확인
+                current_cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+                if "claude" in current_cmd.lower():
+                    # trust 프롬프트 자동 응답
+                    if self.auto_trust_if_needed():
+                        continue
+                if content == last_content:
+                    if not shown_progress_text:
+                        click.echo("진행중: ", nl=False)
+                        shown_progress_text = True
+                    # 1초에 1개씩만 네모 추가
+                    click.echo("□", nl=False)
+                    sys.stdout.flush()
                 else:
-                    idle_time += interval
-                    if check_count % 10 == 0:  # Log every 10 checks
-                        self.logger.debug(f"No change detected. Idle time: {idle_time:.1f}s")
-                
-                # If idle for more than 1 second, check for prompts
-                if idle_time >= 1.0:
-                    prompt_info = self.detect_prompt_type(current_content)
-                    if prompt_info:
-                        self.logger.info(f"🔍 Detected prompt type: {prompt_info['type']}")
-                        if prompt_info['type'] == 'numbered':
-                            self.logger.info(f"   Options found: {prompt_info['count']}")
-                            for opt in prompt_info['options'][:3]:  # Show first 3 options
-                                self.logger.info(f"   - [{opt['number']}] {opt['text'][:50]}...")
-                        
-                        response = self.auto_respond(prompt_info)
-                        if response:
-                            self.logger.info(f"🤖 Auto-responding with: '{response}' (type: {type(response).__name__})")
-                            self.send_input(response)
-                            self.send_input('\n')  # Send Enter key
-                            idle_time = 0  # Reset idle time after responding
-                            check_count = 0  # Reset check count
-                        else:
-                            self.logger.debug("No response generated for prompt")
-                
-                time.sleep(interval)
-                
-            except KeyboardInterrupt:
-                self.logger.info("Controller stopped by user")
-                break
-            except Exception as e:
-                self.logger.error(f"Error in controller: {e}", exc_info=True)
-                time.sleep(interval)
+                    click.echo("\r", nl=False)  # 줄 초기화
+                    shown_progress_text = False
+                last_content = content
+        except KeyboardInterrupt:
+            self.logger.info("Controller stopped by user.")
+            click.echo("\n컨트롤러가 중지되었습니다.")
 
 def run_controller(session_name: str, pane_id: Optional[str] = None):
     """Run the controller for a specific session"""
