@@ -35,49 +35,38 @@ def setup():
         
         # Prepare variables for template rendering
         override_conf = sess_conf.get("override", {})
-        config_dict = {
-            "session_name": override_conf.get("session_name", session_name),
-            "start_directory": override_conf.get("start_directory", "~"),
-            **override_conf
-        }
-
-        # template_conf에 config_dict를 덮어씌우기
-        for key, value in config_dict.items():
-            if key in template_conf:
-                if isinstance(template_conf[key], list) and isinstance(value, list):
-                    template_conf[key] = value
-                else:
-                    template_conf[key] = value
         
-        # Apply overrides after rendering
+        # Start with template configuration as base
+        config_dict = template_conf.copy()
+        
+        # Apply default values
+        config_dict["session_name"] = override_conf.get("session_name", session_name)
+        config_dict["start_directory"] = override_conf.get("start_directory", "~")
+        
+        # Apply all overrides
         for key, value in override_conf.items():
-            if key in config_dict:
-                if isinstance(config_dict[key], list) and isinstance(value, list):
-                    # For lists like windows, merge intelligently
-                    config_dict[key] = value
-                else:
-                    config_dict[key] = value
+            config_dict[key] = value
         
         # window를 하나 추가해서 controller 실행
-        config_dict["windows"].append({
-            "window_name": "controller",
-            "layout": "even-horizontal",
-            "panes": [
-                {
-                    "command": "yesman controller {{ session_name }}",
-                    "args": [],
-                    "cwd": "~",
-                    "env": {},
-                    "shell": True,
-                    "pty": True,
-                    "encoding": "utf-8",
-                },
-            ]
-        })
+        # config_dict가 windows 키를 가지고 있는지 확인
+        if "windows" not in config_dict:
+            config_dict["windows"] = []
+        
+        # controller window 추가
+        # actual_session_name = config_dict.get("session_name", session_name)
+        # config_dict["windows"].append({
+        #     "window_name": "controller",
+        #     "panes": [
+        #         f"yesman controller {actual_session_name}"
+        #     ]
+        # })
 
         # Create tmux session
         if tmux_manager.create_session(session_name, config_dict):
             click.echo(f"Created session: {session_name}")
         else:
             click.echo(f"Session {session_name} already exists or failed to create.")
+
+    tmux_manager.list_running_sessions()
+
     click.echo("All sessions setup completed.") 

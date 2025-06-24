@@ -2,7 +2,7 @@
 log_level: info
 log_path: ~/tmp/logs/yesman/
 
-choise:
+choice:
   yn: yes
   '123': 1
   '12': 1
