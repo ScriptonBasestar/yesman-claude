@@ -4,14 +4,21 @@ from libs.tmux_manager import TmuxManager
 import yaml
 
 @click.command()
-def setup():
-    """Create all tmux sessions defined in projects.yaml"""
+@click.argument('session_name', required=False)
+def setup(session_name):
+    """Create all tmux sessions defined in projects.yaml; or only a specified session if provided."""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
     sessions = tmux_manager.load_projects().get("sessions", {})
     if not sessions:
         click.echo("No sessions defined in projects.yaml")
         return
+    # If a specific session is provided, only set up that session
+    if session_name:
+        if session_name not in sessions:
+            click.echo(f"Session {session_name} not defined in projects.yaml")
+            return
+        sessions = {session_name: sessions[session_name]}
     for session_name, sess_conf in sessions.items():
         template_name = sess_conf.get("template_name")
 
@@ -41,7 +48,8 @@ def setup():
         
         # Apply default values
         config_dict["session_name"] = override_conf.get("session_name", session_name)
-        config_dict["start_directory"] = override_conf.get("start_directory", "~")
+        # config_dict["start_directory"] = override_conf.get("start_directory", "~")
+        config_dict["start_directory"] = override_conf.get("start_directory", pwd)
         
         # Apply all overrides
         for key, value in override_conf.items():

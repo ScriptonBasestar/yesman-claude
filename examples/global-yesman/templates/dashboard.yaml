@@ -1,5 +1,5 @@
 session_name: yesman-dashboard
-start_directory: ~/
+start_directory: ~/tmp
 windows:
   - window_name: dashboard
     panes:
