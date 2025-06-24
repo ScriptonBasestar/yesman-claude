@@ -14,12 +14,17 @@ Yesman-Claude is a CLI automation tool that manages tmux sessions and automates 
 make dev-install
 # or directly:
 pip install -e . --config-settings editable_mode=compat
+
+# Alternative using uv (recommended for development)
+uv run ./yesman.py --help
 ```
 
 ### Running Commands
 ```bash
 # List available templates and projects
 ./yesman.py ls
+# or with uv:
+uv run ./yesman.py ls
 
 # Show running tmux sessions  
 ./yesman.py show
@@ -34,10 +39,10 @@ pip install -e . --config-settings editable_mode=compat
 ./yesman.py enter [session_name]
 ./yesman.py enter  # Interactive selection
 
-# Run controller for a specific session
+# Run controller for a specific session (monitors Claude Code interactions)
 ./yesman.py controller <session_name>
 
-# Run dashboard to monitor all sessions
+# Run TUI dashboard to monitor all sessions
 ./yesman.py dashboard
 ```
 
@@ -78,6 +83,18 @@ Configuration merge modes:
 - Lists available templates and running sessions
 - Handles project loading and session lifecycle
 
+**Controller** (`libs/controller.py`):
+- Monitors Claude Code sessions for interactive prompts
+- Auto-responds to trust prompts and selection menus
+- Detects idle states and input states in Claude Code
+- Provides real-time feedback with progress indicators
+
+**Dashboard** (`libs/dashboard.py`):
+- TUI application built with Textual for monitoring sessions
+- Shows project status, session state, and controller activity
+- Real-time updates every 2 seconds
+- Displays session windows and panes with type detection
+
 **Session Templates**:
 - Support Jinja2-style variable substitution (removed in latest version)
 - Can be overridden per-project in projects.yaml
@@ -89,9 +106,17 @@ Configuration merge modes:
 
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
-3. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
+3. **Controller Operation**: The controller (`libs/controller.py:255`) runs a monitoring loop that:
+   - Captures tmux pane content every second
+   - Detects Claude Code trust prompts and auto-responds with "1"
+   - Shows progress indicators for ongoing operations
+   - Automatically exits if the monitored pane is not running Claude
 
-4. **Logging**: Configured via `yesman.yaml` with configurable log levels and paths.
+4. **Dashboard Architecture**: Uses Textual framework for TUI with reactive data updates. Dashboard displays project configurations from `projects.yaml` and real-time tmux session status.
+
+5. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
+
+6. **Logging**: Configured via `yesman.yaml` with configurable log levels and paths. Controller and dashboard use separate log files.
 
 ## Current Limitations
 
@@ -108,6 +133,15 @@ Configuration merge modes:
 - Performance improvements with caching
 - Multi-engine support (GPT, Claude-3, etc.)
 
+## Development Workflow
+
+When working on this codebase:
+
+1. **Adding New Commands**: Create new command files in `commands/` directory and register them in `yesman.py`
+2. **Controller Modifications**: The controller logic is in `libs/controller.py`. Pattern detection happens in `detect_prompt_type()` and auto-response in `auto_respond()`
+3. **Dashboard Updates**: TUI components are in `libs/dashboard.py` using Textual framework
+4. **Configuration Changes**: Global config structure is defined in `YesmanConfig` class
+
 ## Dependencies
 
 Core dependencies (from pyproject.toml):
@@ -116,3 +150,4 @@ Core dependencies (from pyproject.toml):
 - pexpect>=4.8 - Process automation
 - tmuxp>=1.55.0 - Tmux session management
 - libtmux>=0.46.2 - Python tmux bindings
+- textual>=0.1.18 - TUI framework for dashboard
