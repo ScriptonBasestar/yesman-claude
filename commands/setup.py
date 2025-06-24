@@ -1,7 +1,6 @@
 import click
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
-from pathlib import Path
 import yaml
 
 @click.command()
@@ -32,6 +31,7 @@ def setup():
             except Exception as e:
                 click.echo(f"Failed to read template {template_file}: {e}")
                 continue
+
         
         # Prepare variables for template rendering
         override_conf = sess_conf.get("override", {})
@@ -40,6 +40,14 @@ def setup():
             "start_directory": override_conf.get("start_directory", "~"),
             **override_conf
         }
+
+        # template_conf에 config_dict를 덮어씌우기
+        for key, value in config_dict.items():
+            if key in template_conf:
+                if isinstance(template_conf[key], list) and isinstance(value, list):
+                    template_conf[key] = value
+                else:
+                    template_conf[key] = value
         
         # Apply overrides after rendering
         for key, value in override_conf.items():
@@ -50,6 +58,14 @@ def setup():
                 else:
                     config_dict[key] = value
         
+        # window를 하나 추가해서 controller 실행
+        config_dict["windows"].append({
+            "window_name": "controller",
+            "layout": "even-horizontal",
+            "panes": [
+                {"claude": {}},
+            ]
+        })
 
         # Create tmux session
         if tmux_manager.create_session(session_name, config_dict):

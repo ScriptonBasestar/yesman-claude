@@ -1,0 +1,6 @@
+session_name: yesman-dashboard
+start_directory: ~/
+windows:
+  - window_name: dashboard
+    panes:
+      - yesman dashboard
