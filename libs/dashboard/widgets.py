@@ -25,6 +25,13 @@ class ProjectPanel(Static):
             self.session_info = session_info
             super().__init__()
     
+    class ControllerToggle(Message):
+        """Message when controller is toggled"""
+        def __init__(self, session_info: 'SessionInfo', enable: bool) -> None:
+            self.session_info = session_info
+            self.enable = enable
+            super().__init__()
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.sessions_info = []
@@ -52,6 +59,7 @@ class ProjectPanel(Static):
     def compose(self) -> ComposeResult:
         tree = TextualTree("📊 Tmux Sessions", id="session-tree")
         tree.show_root = False
+        tree.auto_expand = True  # Always expand nodes
         yield tree
     
     def update_sessions(self, sessions: list[SessionInfo], stats: DashboardStats) -> None:
@@ -67,6 +75,7 @@ class ProjectPanel(Static):
             # Add stats header
             stats_node = tree.root.add(f"📊 Stats: {stats.total_sessions} sessions, {stats.running_sessions} running, {stats.active_controllers} controllers")
             stats_node.expand()
+            stats_node.allow_expand = False  # Prevent collapsing
             
             if not sessions:
                 tree.root.add("[dim]No sessions found. Run './yesman.py setup' first.[/]")
@@ -91,24 +100,29 @@ class ProjectPanel(Static):
         session_label = f"{status_icon} {session.project_name} ({session.session_name})"
         session_node = root_node.add(session_label, data=session)
         session_node.expand()
+        session_node.allow_expand = False  # Prevent collapsing
         
         # Add session info
         info_node = session_node.add(f"📋 Template: {session.template}")
         
-        # Controller status
+        # Controller status with clickable indicator
         if session.controller_status == 'running':
-            controller_text = "🤖 Controller: Active"
+            controller_text = "[on reverse] ▶ [/] Controller: Active"
+            controller_data = {"type": "controller", "status": "running", "session": session}
         elif session.controller_status == 'not running':
-            controller_text = "🔧 Controller: Ready"
+            controller_text = "[dim] ◼ [/] Controller: Ready"
+            controller_data = {"type": "controller", "status": "ready", "session": session}
         else:
-            controller_text = "❓ Controller: Unknown"
+            controller_text = "[dim] ◼ [/] Controller: Unknown"
+            controller_data = {"type": "controller", "status": "unknown", "session": session}
         
-        session_node.add(controller_text)
+        controller_node = session_node.add(controller_text, data=controller_data)
         
         # Add windows if running
         if session.windows:
             windows_node = session_node.add(f"🪟 Windows ({len(session.windows)})")
             windows_node.expand()
+            windows_node.allow_expand = False  # Prevent collapsing
             
             for window in session.windows:
                 # Window node
@@ -132,10 +146,38 @@ class ProjectPanel(Static):
     
     def on_tree_node_selected(self, event: TextualTree.NodeSelected) -> None:
         """Handle tree node selection"""
-        if event.node.data and hasattr(event.node.data, 'session_name'):
-            self.selected_session = event.node.data
-            self.post_message(self.SessionSelected(event.node.data))
-            self.logger.info(f"Selected session: {event.node.data.session_name}")
+        if event.node.data:
+            # Check if it's a controller node
+            if isinstance(event.node.data, dict) and event.node.data.get("type") == "controller":
+                self._toggle_controller(event.node.data)
+                event.stop()  # Prevent further processing
+            # Check if it's a session node
+            elif hasattr(event.node.data, 'session_name'):
+                self.selected_session = event.node.data
+                self.post_message(self.SessionSelected(event.node.data))
+                self.logger.info(f"Selected session: {event.node.data.session_name}")
+    
+    def on_tree_node_expanded(self, event: TextualTree.NodeExpanded) -> None:
+        """Keep nodes expanded"""
+        pass  # Do nothing, let it expand
+    
+    def on_tree_node_collapsed(self, event: TextualTree.NodeCollapsed) -> None:
+        """Prevent nodes from collapsing"""
+        event.node.expand()  # Re-expand immediately
+        event.stop()  # Stop the collapse event
+    
+    def _toggle_controller(self, controller_data: dict) -> None:
+        """Toggle controller on/off"""
+        session = controller_data["session"]
+        status = controller_data["status"]
+        
+        # Send controller toggle message
+        if status == "running":
+            self.post_message(self.ControllerToggle(session, False))
+        elif status == "ready":
+            self.post_message(self.ControllerToggle(session, True))
+        
+        self.logger.info(f"Toggling controller for {session.session_name}: {status}")
 
 
 class ControlPanel(Static):

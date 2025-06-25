@@ -102,6 +102,21 @@ class DashboardApp(App):
         if self._control_panel:
             self._control_panel.update_session(event.session_info)
             self.logger.info(f"Session selected: {event.session_info.session_name}")
+    
+    def on_project_panel_controller_toggle(self, event: ProjectPanel.ControllerToggle) -> None:
+        """Handle controller toggle from ProjectPanel"""
+        if self._control_panel:
+            # First update the session if different
+            if self._control_panel.current_session != event.session_info:
+                self._control_panel.update_session(event.session_info)
+            
+            # Then toggle the controller
+            if event.enable:
+                self._control_panel.start_controller()
+            else:
+                self._control_panel.stop_controller()
+            
+            self.logger.info(f"Controller toggle for {event.session_info.session_name}: {'start' if event.enable else 'stop'}")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses"""
