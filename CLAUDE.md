@@ -39,8 +39,6 @@ uv run ./yesman.py ls
 ./yesman.py enter [session_name]
 ./yesman.py enter  # Interactive selection
 
-# Run controller for a specific session (monitors Claude Code interactions)
-./yesman.py controller <session_name>
 
 # Run TUI dashboard to monitor all sessions
 ./yesman.py dashboard
@@ -83,7 +81,7 @@ Configuration merge modes:
 - Lists available templates and running sessions
 - Handles project loading and session lifecycle
 
-**Controller** (`libs/controller.py`):
+**ClaudeManager** (`libs/dashboard/claude_manager.py`):
 - Monitors Claude Code sessions for interactive prompts
 - Auto-responds to trust prompts and selection menus
 - Detects idle states and input states in Claude Code
@@ -91,7 +89,7 @@ Configuration merge modes:
 
 **Dashboard** (`libs/dashboard.py`):
 - TUI application built with Textual for monitoring sessions
-- Shows project status, session state, and controller activity
+- Shows project status, session state, and claude manager activity
 - Real-time updates every 2 seconds
 - Displays session windows and panes with type detection
 
@@ -106,7 +104,7 @@ Configuration merge modes:
 
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
-3. **Controller Operation**: The controller (`libs/controller.py:255`) runs a monitoring loop that:
+3. **Claude Manager Operation**: The claude manager (`libs/dashboard/claude_manager.py:155`) runs a monitoring loop that:
    - Captures tmux pane content every second
    - Detects Claude Code trust prompts and auto-responds with "1"
    - Shows progress indicators for ongoing operations
@@ -116,7 +114,7 @@ Configuration merge modes:
 
 5. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
 
-6. **Logging**: Configured via `yesman.yaml` with configurable log levels and paths. Controller and dashboard use separate log files.
+6. **Logging**: Configured via `yesman.yaml` with configurable log levels and paths. Claude manager and dashboard use separate log files.
 
 ## Current Limitations
 
@@ -138,7 +136,7 @@ Configuration merge modes:
 When working on this codebase:
 
 1. **Adding New Commands**: Create new command files in `commands/` directory and register them in `yesman.py`
-2. **Controller Modifications**: The controller logic is in `libs/controller.py`. Pattern detection happens in `detect_prompt_type()` and auto-response in `auto_respond()`
+2. **Claude Manager Modifications**: The claude manager logic is in `libs/dashboard/claude_manager.py`. Pattern detection happens in `detect_prompt_type()` and auto-response in `auto_respond()`
 3. **Dashboard Updates**: TUI components are in `libs/dashboard.py` using Textual framework
 4. **Configuration Changes**: Global config structure is defined in `YesmanConfig` class
 

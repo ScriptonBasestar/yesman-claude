@@ -1,6 +1,6 @@
 # Claude Code Selection Patterns
 
-This document contains patterns detected by the yesman controller for automatic response.
+This document contains patterns detected by the yesman claude_manager for automatic response.
 
 ## Trust Prompts
 
@@ -122,7 +122,7 @@ Confirm? [Y/n]
 **Key Elements**: 
 - User input visible after ">"
 - Box expanded to show input
-- Controller should NOT interrupt
+- Claude manager should NOT interrupt
 
 ### Pattern 11: Tip Screen
 ```
@@ -137,10 +137,10 @@ cwd: /path/to/directory
 ```
 **Detection**: Ready for input, no auto response
 
-## Controller Behavior
+## Claude Manager Behavior
 
 ### Auto Next Feature
-When enabled, the controller will:
+When enabled, the claude_manager will:
 1. Detect when Claude process exits
 2. Automatically restart Claude with the selected model
 3. Continue monitoring for prompts
@@ -152,7 +152,7 @@ When enabled, the controller will:
 
 ## Pattern Detection Logic
 
-The controller uses these methods:
+The claude_manager uses these methods:
 1. **capture_pane_content()**: Gets last 50 lines of tmux pane
 2. **detect_prompt_type()**: Identifies pattern type
 3. **auto_respond()**: Generates appropriate response

@@ -13,7 +13,7 @@ sessions:
           panes:
             - claude
             - uv run ./manage.py runserver
-            - yesman controller django
+            - htop
   proj_django2:
     template_name: django
     override:

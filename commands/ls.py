@@ -24,7 +24,11 @@ def ls():
     if projects:
         click.echo("Configured projects:")
         for project_name, project_conf in projects.items():
-            template = project_conf.get("template_name", "N/A")
+            template_name = project_conf.get("template_name")
+            if template_name is None:
+                template = "none"
+            else:
+                template = template_name
             override = project_conf.get("override", {})
             session_name = override.get("session_name", project_name)
             click.echo(f"  - {project_name} (template: {template}, session: {session_name})")
