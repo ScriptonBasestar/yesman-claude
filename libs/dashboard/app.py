@@ -8,7 +8,7 @@ from textual import events
 import logging
 from pathlib import Path
 
-from .widgets import ProjectPanel, ControlPanel, InfoPanel
+from .widgets import ProjectPanel, ControlPanel, LogViewerPanel
 from .session_manager import SessionManager
 from .models import DashboardStats
 from .styles import DASHBOARD_CSS
@@ -71,9 +71,9 @@ class DashboardApp(App):
             self._control_panel.border_title = "🎮 Controller Operations"
             yield self._control_panel
             
-            info_panel = InfoPanel(id="info-panel")
-            info_panel.border_title = "📋 Session Details"
-            yield info_panel
+            log_panel = LogViewerPanel(id="log-panel")
+            log_panel.border_title = "📋 Live Logs"
+            yield log_panel
         yield CustomFooter()
 
     def on_mount(self) -> None:

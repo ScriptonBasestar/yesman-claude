@@ -52,7 +52,7 @@ Tree > .tree--highlight {
     background: $panel;
 }
 
-#info-panel {
+#log-panel {
     border: round $accent;
     border-title-align: center;
     border-title-style: bold;
@@ -60,6 +60,14 @@ Tree > .tree--highlight {
     border-title-background: $surface;
     padding: 1;
     background: $panel;
+}
+
+/* Log viewer styling */
+#log-viewer {
+    background: $surface;
+    padding: 0 1;
+    overflow-y: auto;
+    height: 100%;
 }
 
 /* Button styling */

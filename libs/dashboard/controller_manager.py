@@ -19,13 +19,20 @@ class DashboardController:
     def __init__(self, session_name: str, pane_id: Optional[str] = None):
         self.session_name = session_name
         self.pane_id = pane_id
-        self.controller = Controller(session_name, pane_id)
+        self.controller = None
         self.is_running = False
         self.is_auto_next_enabled = False
         self.selected_model = "default"
         self.logger = self._setup_logger()
         self.status_callback: Optional[Callable] = None
         self.activity_callback: Optional[Callable] = None
+        
+        # Try to initialize controller, but don't fail if session doesn't exist
+        try:
+            self.controller = Controller(session_name, pane_id)
+        except ValueError as e:
+            self.logger.warning(f"Could not initialize controller: {e}")
+            self._update_status(f"[yellow]Session '{session_name}' not found[/]")
 
     def _setup_logger(self) -> logging.Logger:
         """Setup logger for dashboard controller"""
@@ -66,6 +73,11 @@ class DashboardController:
     
     def start(self) -> bool:
         """Start the controller"""
+        if not self.controller:
+            self._update_status(f"[red]Cannot start: Session '{self.session_name}' not found[/]")
+            self.logger.error(f"Cannot start controller: Session '{self.session_name}' not found")
+            return False
+            
         if self.is_running:
             self._update_status("[yellow]Controller already running[/]")
             return False
@@ -96,6 +108,11 @@ class DashboardController:
     
     def restart_claude_pane(self) -> bool:
         """Restart Claude pane"""
+        if not self.controller:
+            self._update_status(f"[red]Cannot restart: Session '{self.session_name}' not found[/]")
+            self.logger.error(f"Cannot restart Claude pane: Session '{self.session_name}' not found")
+            return False
+            
         try:
             self._update_status("[yellow]Restarting Claude pane...[/]")
             
@@ -137,6 +154,11 @@ class DashboardController:
     
     async def _monitor_loop(self):
         """Main monitoring loop that runs in background"""
+        if not self.controller:
+            self.logger.error(f"Cannot start monitoring: no controller for {self.session_name}")
+            self.is_running = False
+            return
+            
         self.logger.info(f"Starting monitoring loop for {self.session_name}")
         last_content = ""
         
