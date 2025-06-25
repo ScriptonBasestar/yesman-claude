@@ -1,4 +1,5 @@
 import click
+import sys
 from libs.dashboard import run_dashboard
 
 @click.command()
@@ -12,4 +13,4 @@ def dashboard(refresh):
         pass  # Already handled in run_dashboard
     except Exception as e:
         click.echo(f"Dashboard error: {e}", err=True)
-        raise click.Exit(1)
+        sys.exit(1)
