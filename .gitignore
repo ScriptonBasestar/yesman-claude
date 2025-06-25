@@ -37,3 +37,8 @@ env/
 # Windows
 Thumbs.db
 ehthumbs.db
+
+# Runtime
+*.log
+*.logs
+logs/

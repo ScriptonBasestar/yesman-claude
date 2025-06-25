@@ -147,8 +147,46 @@ CustomFooter {
     color: $text;
 }
 
-#model-select {
+#model-radio {
     width: 1fr;
+    layout: horizontal;
+}
+
+#model-radio RadioButton {
+    margin: 0 1 0 0;
+    text-style: none;
+}
+
+#model-radio RadioButton:hover {
+    background: $boost;
+}
+
+/* RadioButton styles */
+RadioButton {
+    padding: 0 1;
+}
+
+RadioButton > .toggle--label {
+    color: $text-muted;
+}
+
+RadioButton.-on > .toggle--label {
+    color: $primary;
+    text-style: bold;
+}
+
+RadioButton.-on > .toggle--button {
+    color: $primary;
+}
+
+RadioButton:focus > .toggle--label {
+    text-style: underline;
+}
+
+/* Switch and auto status */
+#auto-status-text {
+    margin: 0 0 0 1;
+    text-style: bold;
 }
 
 #auto-next-switch {
@@ -160,5 +198,15 @@ CustomFooter {
     margin: 1 0 0 0;
     color: $text-muted;
     text-style: italic;
+}
+
+#controller-activity {
+    text-align: center;
+    margin: 0 0 0 0;
+    color: $accent;
+    text-style: bold;
+    background: $surface;
+    padding: 0 1;
+    border: round;
 }
 """

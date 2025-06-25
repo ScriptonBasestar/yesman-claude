@@ -213,7 +213,10 @@ class Controller:
             r"cwd: ",
             r"for shortcuts",
             r"Try \"fix typecheck errors\"",
-            r"\s*>\s*$",  # 빈 프롬프트
+            r"Tips for getting started:",
+            r"Ask Claude to create a new app",
+            r"> Try \"create a util",  # 빈 프롬프트 예시
+            r"│ > \s*│",  # 빈 프롬프트 박스
         ]
         for pattern in idle_patterns:
             if pattern in content:
@@ -222,11 +225,14 @@ class Controller:
 
     def is_input_state(self, content: str) -> bool:
         """Detect if Claude Code is in an input state"""
-        input_patterns = [
-            r"\s*>",  # Detects a prompt waiting for input
-        ]
-        for pattern in input_patterns:
-            if re.search(pattern, content):
+        # Check if user is typing (non-empty prompt)
+        lines = content.strip().split('\n')
+        for line in lines:
+            # Look for prompt box with user input
+            if re.search(r"│\s*>\s*\S+", line):  # > followed by non-whitespace
+                return True
+            # Also check for incomplete Korean input or other text
+            if re.search(r"│\s*>\s*[ㄱ-ㅎㅏ-ㅣ가-힣]", line):  # Korean characters
                 return True
         return False
 

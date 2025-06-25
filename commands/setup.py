@@ -2,6 +2,7 @@ import click
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 import yaml
+import os
 
 @click.command()
 @click.argument('session_name', required=False)
@@ -49,11 +50,47 @@ def setup(session_name):
         # Apply default values
         config_dict["session_name"] = override_conf.get("session_name", session_name)
         # config_dict["start_directory"] = override_conf.get("start_directory", "~")
-        config_dict["start_directory"] = override_conf.get("start_directory", pwd)
+        config_dict["start_directory"] = override_conf.get("start_directory", os.getcwd())
         
         # Apply all overrides
         for key, value in override_conf.items():
             config_dict[key] = value
+        
+        # Validate start_directory exists
+        start_dir = config_dict.get("start_directory")
+        if start_dir:
+            # Expand user home directory if needed
+            expanded_dir = os.path.expanduser(start_dir)
+            if not os.path.exists(expanded_dir):
+                click.echo(f"❌ Error: start_directory '{start_dir}' does not exist for session '{session_name}'")
+                click.echo(f"   Resolved path: {expanded_dir}")
+                continue
+            if not os.path.isdir(expanded_dir):
+                click.echo(f"❌ Error: start_directory '{start_dir}' is not a directory for session '{session_name}'")
+                continue
+            # Update with expanded path
+            config_dict["start_directory"] = expanded_dir
+        
+        # Validate window start_directories if specified
+        windows = config_dict.get("windows", [])
+        for i, window in enumerate(windows):
+            window_start_dir = window.get("start_directory")
+            if window_start_dir:
+                # If relative path, make it relative to session start_directory
+                if not os.path.isabs(window_start_dir):
+                    base_dir = config_dict.get("start_directory", os.getcwd())
+                    window_start_dir = os.path.join(base_dir, window_start_dir)
+                
+                expanded_window_dir = os.path.expanduser(window_start_dir)
+                if not os.path.exists(expanded_window_dir):
+                    click.echo(f"❌ Error: Window '{window.get('window_name', i)}' start_directory '{window.get('start_directory')}' does not exist")
+                    click.echo(f"   Resolved path: {expanded_window_dir}")
+                    continue
+                if not os.path.isdir(expanded_window_dir):
+                    click.echo(f"❌ Error: Window '{window.get('window_name', i)}' start_directory '{window.get('start_directory')}' is not a directory")
+                    continue
+                # Update with expanded path
+                window["start_directory"] = expanded_window_dir
         
         # window를 하나 추가해서 controller 실행
         # config_dict가 windows 키를 가지고 있는지 확인

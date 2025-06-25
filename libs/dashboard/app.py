@@ -109,19 +109,11 @@ class DashboardApp(App):
         
         if self._control_panel:
             if button_id == "start-controller-btn":
-                if self._control_panel.current_session:
-                    session_name = self._control_panel.current_session.session_name
-                    self._control_panel.update_status(f"[green]Starting controller for {session_name}...[/]")
-                    # TODO: Implement actual controller start
-                else:
-                    self._control_panel.update_status("[red]No session selected[/]")
+                self._control_panel.start_controller()
+            elif button_id == "stop-controller-btn":
+                self._control_panel.stop_controller()
             elif button_id == "restart-claude-btn":
-                if self._control_panel.current_session:
-                    session_name = self._control_panel.current_session.session_name
-                    self._control_panel.update_status(f"[yellow]Restarting Claude pane for {session_name}...[/]")
-                    # TODO: Implement Claude pane restart
-                else:
-                    self._control_panel.update_status("[red]No session selected[/]")
+                self._control_panel.restart_claude_pane()
 
     def on_key(self, event: events.Key) -> None:
         """Handle key press events"""
