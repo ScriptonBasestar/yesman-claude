@@ -1,11 +1,15 @@
 """UI widgets for dashboard"""
 
-from textual.widgets import Static, Button
-from textual.containers import Container
+from textual.widgets import Static, Button, Tree as TextualTree
+from textual.containers import Container, ScrollableContainer
 from textual.app import ComposeResult
 import logging
 from pathlib import Path
 import os
+from rich.text import Text
+from rich.panel import Panel
+from rich.table import Table
+from rich.tree import Tree
 
 from .models import SessionInfo, DashboardStats
 
@@ -38,76 +42,85 @@ class ProjectPanel(Static):
         return logger
         
     def compose(self) -> ComposeResult:
-        yield Static(
-            "[bold cyan]Quick Stats:[/]\n\n"
-            "[dim]Loading sessions...[/]",
-            id="session-content"
-        )
+        tree = TextualTree("📊 Tmux Sessions", id="session-tree")
+        tree.show_root = False
+        yield tree
     
     def update_sessions(self, sessions: list[SessionInfo], stats: DashboardStats) -> None:
         """Update the panel with session information"""
         self.sessions_info = sessions
-        content = self._format_sessions(sessions, stats)
         
         try:
-            sessions_content = self.query_one("#session-content", Static)
-            sessions_content.update(content)
+            tree = self.query_one("#session-tree", TextualTree)
+            
+            # Clear existing content
+            tree.clear()
+            
+            # Add stats header
+            stats_node = tree.root.add(f"📊 Stats: {stats.total_sessions} sessions, {stats.running_sessions} running, {stats.active_controllers} controllers")
+            stats_node.expand()
+            
+            if not sessions:
+                tree.root.add("[dim]No sessions found. Run './yesman.py setup' first.[/]")
+            else:
+                # Add sessions to tree
+                for session in sessions:
+                    self._add_session_to_tree(tree.root, session)
+            
             self.logger.info(f"Updated {len(sessions)} sessions")
         except Exception as e:
             self.logger.error(f"Error updating sessions: {e}", exc_info=True)
     
-    def _format_sessions(self, sessions: list[SessionInfo], stats: DashboardStats) -> str:
-        """Format session information for display"""
-        if not sessions:
-            return "[dim]No sessions found. Run './yesman.py setup' first.[/]"
+    def _add_session_to_tree(self, root_node, session: SessionInfo) -> None:
+        """Add a session to the tree structure"""
+        # Session status and icon
+        if session.status == 'running':
+            status_icon = "🟢"
+        else:
+            status_icon = "🔴"
         
-        lines = []
+        # Create session node
+        session_label = f"{status_icon} {session.project_name} ({session.session_name})"
+        session_node = root_node.add(session_label)
+        session_node.expand()
         
-        # Summary stats
-        lines.append(f"Sessions: {stats.running_sessions}/{stats.total_sessions} running")
-        lines.append(f"Controllers: {stats.active_controllers} active")
-        lines.append("")
+        # Add session info
+        info_node = session_node.add(f"📋 Template: {session.template}")
         
-        # Project details
-        for session in sessions:
-            # Status indicators
-            status_icon = "●" if session.status == 'running' else "○"
-            
-            # Controller status
-            if session.controller_status == 'running':
-                controller_text = "🤖 Active"
-            elif session.controller_status == 'not running':
-                controller_text = "�� Ready"
-            else:
-                controller_text = "❓ Unknown"
-            
-            # Project header
-            lines.append(f"{status_icon} {session.project_name}")
-            lines.append(f"  Session: {session.session_name}")
-            lines.append(f"  Template: {session.template}")
-            lines.append(f"  Controller: {controller_text}")
-            
-            # Windows and panes info
-            if session.windows:
-                lines.append(f"  Windows: {len(session.windows)}")
-                for window in session.windows:
-                    pane_count = len(window.panes)
-                    claude_panes = sum(1 for p in window.panes if p.is_claude)
-                    controller_panes = sum(1 for p in window.panes if p.is_controller)
-                    
-                    window_info = f"    [{window.index}] {window.name} ({pane_count} panes"
-                    if claude_panes:
-                        window_info += f", {claude_panes} Claude"
-                    if controller_panes:
-                        window_info += f", {controller_panes} Controller"
-                    window_info += ")"
-                    lines.append(window_info)
-            else:
-                lines.append("  No windows")
-            
-            lines.append("")
+        # Controller status
+        if session.controller_status == 'running':
+            controller_text = "🤖 Controller: Active"
+        elif session.controller_status == 'not running':
+            controller_text = "🔧 Controller: Ready"
+        else:
+            controller_text = "❓ Controller: Unknown"
         
-        return "\n".join(lines)
+        session_node.add(controller_text)
+        
+        # Add windows if running
+        if session.windows:
+            windows_node = session_node.add(f"🪟 Windows ({len(session.windows)})")
+            windows_node.expand()
+            
+            for window in session.windows:
+                # Window node
+                window_label = f"[{window.index}] {window.name}"
+                window_node = windows_node.add(window_label)
+                
+                # Add panes
+                if window.panes:
+                    for i, pane in enumerate(window.panes):
+                        if pane.is_claude:
+                            pane_label = f"🔵 Pane {i}: Claude"
+                        elif pane.is_controller:
+                            pane_label = f"🟡 Pane {i}: Controller"
+                        else:
+                            pane_label = f"⚪ Pane {i}: {pane.command}"
+                        window_node.add(pane_label)
+                else:
+                    window_node.add("No panes")
+        else:
+            session_node.add("[dim]No windows[/]")
 
 
 class ControlPanel(Static):

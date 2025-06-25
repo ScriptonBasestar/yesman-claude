@@ -13,7 +13,12 @@
       "Bash(timeout:*)",
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(python:*)",
+      "Bash(pkill:*)",
+      "Bash(timeout 5 python -m yesman dashboard 2>&1)",
+      "Bash(timeout 5 python -m yesman dashboard:*)",
+      "Bash(timeout 10 python -m:*)"
     ],
     "deny": []
   }

@@ -68,8 +68,9 @@ class DashboardApp(App):
 
     def on_mount(self) -> None:
         """Start periodic refresh when app is mounted"""
+        # Give widgets time to mount before refreshing
+        self.set_timer(0.1, self.refresh_data)
         self.set_interval(2, self.refresh_data)
-        self.refresh_data()
 
     def refresh_data(self) -> None:
         """Refresh session data"""
