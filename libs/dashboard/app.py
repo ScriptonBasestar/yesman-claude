@@ -97,20 +97,31 @@ class DashboardApp(App):
         except Exception as e:
             self.logger.error(f"Error refreshing data: {e}", exc_info=True)
     
+    def on_project_panel_session_selected(self, event: ProjectPanel.SessionSelected) -> None:
+        """Handle session selection from ProjectPanel"""
+        if self._control_panel:
+            self._control_panel.update_session(event.session_info)
+            self.logger.info(f"Session selected: {event.session_info.session_name}")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses"""
         button_id = event.button.id
         
         if self._control_panel:
-            if button_id == "start-btn":
-                self._control_panel.update_status("[green]Action: Starting controller...[/]")
-                # TODO: Implement actual controller start
-            elif button_id == "stop-btn":
-                self._control_panel.update_status("[red]Action: Stopping controller...[/]")
-                # TODO: Implement actual controller stop
-            elif button_id == "restart-btn":
-                self._control_panel.update_status("[yellow]Action: Restarting session...[/]")
-                # TODO: Implement actual session restart
+            if button_id == "start-controller-btn":
+                if self._control_panel.current_session:
+                    session_name = self._control_panel.current_session.session_name
+                    self._control_panel.update_status(f"[green]Starting controller for {session_name}...[/]")
+                    # TODO: Implement actual controller start
+                else:
+                    self._control_panel.update_status("[red]No session selected[/]")
+            elif button_id == "restart-claude-btn":
+                if self._control_panel.current_session:
+                    session_name = self._control_panel.current_session.session_name
+                    self._control_panel.update_status(f"[yellow]Restarting Claude pane for {session_name}...[/]")
+                    # TODO: Implement Claude pane restart
+                else:
+                    self._control_panel.update_status("[red]No session selected[/]")
 
     def on_key(self, event: events.Key) -> None:
         """Handle key press events"""
