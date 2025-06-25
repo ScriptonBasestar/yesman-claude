@@ -1,8 +1,9 @@
 """UI widgets for dashboard"""
 
-from textual.widgets import Static, Button, Tree as TextualTree
-from textual.containers import Container, ScrollableContainer
+from textual.widgets import Static, Button, Tree as TextualTree, Select, Switch
+from textual.containers import Container, ScrollableContainer, Horizontal, Vertical
 from textual.app import ComposeResult
+from textual.message import Message
 import logging
 from pathlib import Path
 import os
@@ -17,10 +18,16 @@ from .models import SessionInfo, DashboardStats
 class ProjectPanel(Static):
     """Left panel showing tmux project status"""
     
+    class SessionSelected(Message):
+        """Message when a session is selected"""
+        def __init__(self, session_info: 'SessionInfo') -> None:
+            self.session_info = session_info
+            super().__init__()
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.sessions_info = []
-        self.selected_project = None
+        self.selected_session = None
         self.logger = self._setup_logger()
         
     def _setup_logger(self) -> logging.Logger:
@@ -81,7 +88,7 @@ class ProjectPanel(Static):
         
         # Create session node
         session_label = f"{status_icon} {session.project_name} ({session.session_name})"
-        session_node = root_node.add(session_label)
+        session_node = root_node.add(session_label, data=session)
         session_node.expand()
         
         # Add session info
@@ -121,22 +128,64 @@ class ProjectPanel(Static):
                     window_node.add("No panes")
         else:
             session_node.add("[dim]No windows[/]")
+    
+    def on_tree_node_selected(self, event: TextualTree.NodeSelected) -> None:
+        """Handle tree node selection"""
+        if event.node.data and hasattr(event.node.data, 'session_name'):
+            self.selected_session = event.node.data
+            self.post_message(self.SessionSelected(event.node.data))
+            self.logger.info(f"Selected session: {event.node.data.session_name}")
 
 
 class ControlPanel(Static):
     """Right top panel for controller operations"""
     
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.current_session = None
+    
     def compose(self) -> ComposeResult:
-        yield Button("▶️  Start Controller", id="start-btn", variant="success")
-        yield Button("⏹️  Stop Controller", id="stop-btn", variant="error")
-        yield Button("🔄 Restart Session", id="restart-btn", variant="warning")
-        yield Static("[dim]No action selected[/]", id="selected-info")
+        with Vertical():
+            yield Static("[dim]No session selected[/]", id="session-title")
+            
+            with Horizontal():
+                yield Button("🔄 Restart Claude", id="restart-claude-btn", variant="warning")
+                yield Button("▶️ Start Controller", id="start-controller-btn", variant="success")
+            
+            with Horizontal():
+                yield Static("Model:", classes="control-label")
+                yield Select([
+                    ("Default", "default"),
+                    ("Claude Opus", "opus"),
+                    ("Claude Sonnet", "sonnet"),
+                ], value="default", id="model-select")
+            
+            with Horizontal():
+                yield Static("Auto Next:", classes="control-label")
+                yield Switch(value=False, id="auto-next-switch")
+            
+            yield Static("[dim]Ready[/]", id="control-status")
+    
+    def update_session(self, session_info) -> None:
+        """Update controls for selected session"""
+        self.current_session = session_info
+        try:
+            title = self.query_one("#session-title", Static)
+            title.update(f"[bold]{session_info.session_name}[/] ({session_info.project_name})")
+            
+            status = self.query_one("#control-status", Static)
+            if session_info.controller_status == 'running':
+                status.update("[green]Controller: Active[/]")
+            else:
+                status.update("[yellow]Controller: Ready[/]")
+        except Exception:
+            pass
     
     def update_status(self, message: str) -> None:
         """Update the status message"""
         try:
-            selected_info = self.query_one("#selected-info", Static)
-            selected_info.update(message)
+            status = self.query_one("#control-status", Static)
+            status.update(message)
         except Exception:
             pass
 

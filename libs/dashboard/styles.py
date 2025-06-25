@@ -130,4 +130,35 @@ CustomFooter {
     width: 1fr;
     padding: 0 1;
 }
+
+/* Control panel specific styling */
+#session-title {
+    text-align: center;
+    margin: 0 0 1 0;
+    color: $primary;
+    text-style: bold;
+}
+
+.control-label {
+    width: auto;
+    min-width: 10;
+    text-align: right;
+    margin: 0 1 0 0;
+    color: $text;
+}
+
+#model-select {
+    width: 1fr;
+}
+
+#auto-next-switch {
+    width: auto;
+}
+
+#control-status {
+    text-align: center;
+    margin: 1 0 0 0;
+    color: $text-muted;
+    text-style: italic;
+}
 """
