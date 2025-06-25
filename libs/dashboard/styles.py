@@ -24,6 +24,15 @@ DASHBOARD_CSS = """
     box-sizing: border-box;
 }
 
+/* Tree controller node styling */
+Tree > .tree--cursor {
+    background: $boost;
+}
+
+Tree > .tree--highlight {
+    text-style: bold;
+}
+
 #session-content {
     padding: 1;
     color: $text;
