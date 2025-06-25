@@ -11,6 +11,8 @@
       "Bash(./yesman.py ls)",
       "Bash(tmux list-sessions:*)",
       "Bash(timeout:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
       "Bash(rm:*)"
     ],
     "deny": []
