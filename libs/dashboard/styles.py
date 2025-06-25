@@ -28,6 +28,8 @@ DASHBOARD_CSS = """
     padding: 1;
     color: $text;
     text-align: left;
+    height: 100%;
+    overflow-y: auto;
 }
 
 /* Control panel styling */
