@@ -49,8 +49,7 @@ class YesmanConfig:
             level=getattr(logging, log_level),
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
+                logging.FileHandler(log_file)
             ]
         )
         self.logger = logging.getLogger("yesman")

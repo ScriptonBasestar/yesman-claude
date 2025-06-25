@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import click
 import time
 import libtmux
 import logging
@@ -8,7 +7,6 @@ from typing import Optional, Dict, Any
 import subprocess
 import re
 from libs.yesman_config import YesmanConfig
-import sys
 
 class Controller:
     def __init__(self, session_name: str, pane_id: Optional[str] = None):
@@ -17,20 +15,25 @@ class Controller:
         self.server = libtmux.Server()
         self.config = YesmanConfig()
 
-        # Setup console logger for immediate feedback
+        # Setup file-only logger
         self.logger = logging.getLogger(f"yesman.controller.{session_name}")
+        self.logger.setLevel(logging.INFO)
+        self.logger.propagate = False
         
-        # Add console handler if not already present
-        if not any(isinstance(h, logging.StreamHandler) for h in self.logger.handlers):
-            console_handler = logging.StreamHandler()
-            console_handler.setFormatter(
-                logging.Formatter('%(asctime)s - [CONTROLLER] %(levelname)s - %(message)s')
-            )
-            self.logger.addHandler(console_handler)
+        # Set up file handler only
+        from pathlib import Path
+        log_path = Path("~/tmp/logs/yesman/").expanduser()
+        log_path.mkdir(parents=True, exist_ok=True)
         
-        # Set log level based on config or default to INFO
-        log_level = self.config.get('log_level', 'info').upper()
-        self.logger.setLevel(getattr(logging, log_level, logging.INFO))
+        log_file = log_path / f"controller_{session_name}.log"
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        
+        # Remove any existing handlers and add only file handler
+        self.logger.handlers.clear()
+        self.logger.addHandler(file_handler)
         
         # Find the session and claude pane
         self.logger.info(f"Initializing controller for session: {session_name}")
@@ -269,7 +272,6 @@ class Controller:
         current_cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
         if "claude" not in current_cmd.lower():
             self.logger.error("현재 창이 claude 콘솔이 아닙니다. 컨트롤러를 종료합니다.")
-            click.echo("[경고] 현재 창이 claude 콘솔이 아닙니다. 컨트롤러를 종료합니다.")
             return
 
         last_content = self.capture_pane_content()
@@ -286,18 +288,13 @@ class Controller:
                         continue
                 if content == last_content:
                     if not shown_progress_text:
-                        click.echo("진행중: ", nl=False)
+                        self.logger.debug("Progress tracking...")
                         shown_progress_text = True
-                    # 1초에 1개씩만 네모 추가
-                    click.echo("□", nl=False)
-                    sys.stdout.flush()
                 else:
-                    click.echo("\r", nl=False)  # 줄 초기화
                     shown_progress_text = False
                 last_content = content
         except KeyboardInterrupt:
             self.logger.info("Controller stopped by user.")
-            click.echo("\n컨트롤러가 중지되었습니다.")
 
 def run_controller(session_name: str, pane_id: Optional[str] = None):
     """Run the controller for a specific session"""

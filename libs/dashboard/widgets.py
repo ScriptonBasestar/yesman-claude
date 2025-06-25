@@ -1,6 +1,6 @@
 """UI widgets for dashboard"""
 
-from textual.widgets import Static, Button, Tree as TextualTree, Select, Switch, RadioSet, RadioButton
+from textual.widgets import Static, Button, Tree as TextualTree, Select, Switch, RadioSet, RadioButton, RichLog
 from textual.containers import Container, ScrollableContainer, Horizontal, Vertical
 from textual.app import ComposeResult
 from textual.message import Message
@@ -239,18 +239,22 @@ class ControlPanel(Static):
         self.current_controller = self.controller_manager.get_controller(session_info.session_name)
         
         # Set up callbacks for status updates
-        self.current_controller.set_status_callback(self._on_controller_status)
-        self.current_controller.set_activity_callback(self._on_controller_activity)
+        if self.current_controller:
+            self.current_controller.set_status_callback(self._on_controller_status)
+            self.current_controller.set_activity_callback(self._on_controller_activity)
         
         try:
             title = self.query_one("#session-title", Static)
             title.update(f"[bold]{session_info.session_name}[/] ({session_info.project_name})")
             
             # Update status based on controller state
-            if self.current_controller.is_running:
-                self.update_status("[green]Controller: Active[/]")
+            if self.current_controller:
+                if self.current_controller.is_running:
+                    self.update_status("[green]Controller: Active[/]")
+                else:
+                    self.update_status("[yellow]Controller: Ready[/]")
             else:
-                self.update_status("[yellow]Controller: Ready[/]")
+                self.update_status("[red]Session not found[/]")
                 
         except Exception as e:
             self.logger.error(f"Error updating session: {e}")
@@ -326,21 +330,191 @@ class ControlPanel(Static):
                 self.logger.error(f"Error updating auto status: {e}")
 
 
-class InfoPanel(Static):
-    """Right bottom panel showing session details"""
+class LogViewerPanel(Static):
+    """Right bottom panel showing real-time logs"""
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.log_files = []
+        self.logger = self._setup_logger()
+        self._last_positions = {}  # Track last read position for each file
+        
+    def _setup_logger(self) -> logging.Logger:
+        """Setup logger for log viewer panel"""
+        logger = logging.getLogger("yesman.dashboard.log_viewer")
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+        
+        log_path = Path("~/tmp/logs/yesman/").expanduser()
+        log_path.mkdir(parents=True, exist_ok=True)
+        
+        log_file = log_path / "log_viewer.log"
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        
+        return logger
     
     def compose(self) -> ComposeResult:
-        yield Static(
-            "[bold cyan]Quick Stats:[/]\n\n"
-            "[green]●[/] [bold]Active Features:[/]\n"
-            "  • Real-time session monitoring\n"
-            "  • Controller status tracking\n"
-            "  • Window/pane detection\n"
-            "  • Claude integration status\n\n"
-            "[yellow]●[/] [bold]Keyboard Shortcuts:[/]\n"
-            "  • [bold]Ctrl+C[/] - Exit dashboard\n"
-            "  • [bold]R[/] - Refresh data\n"
-            "  • [bold]?[/] - Show help\n\n"
-            "[dim]Dashboard updates every 2 seconds[/]",
-            id="info-content"
-        )
+        yield RichLog(highlight=True, markup=True, id="log-viewer")
+    
+    def on_mount(self) -> None:
+        """Setup log file monitoring when mounted"""
+        try:
+            # Test if we can write to the log widget
+            log_widget = self.query_one("#log-viewer", RichLog)
+            log_widget.write("[green]Log Viewer Initialized[/]")
+            
+            self._setup_log_files()
+            # Show initial recent logs
+            self._show_recent_logs()
+            self.set_interval(0.5, self._update_logs)  # Update every 0.5 seconds
+        except Exception as e:
+            # If there's any error, try to log it
+            self.logger.error(f"Error in on_mount: {e}")
+    
+    def _show_recent_logs(self) -> None:
+        """Show last 20 lines from each log file on startup"""
+        try:
+            log_widget = self.query_one("#log-viewer", RichLog)
+            log_widget.write("[bold cyan]===== Dashboard Started - Recent Logs =====[/]")
+            
+            # Debug: Show number of files being monitored
+            log_widget.write(f"[yellow]Monitoring {len(self.log_files)} log files[/]")
+            
+            for file_path in self.log_files:
+                if file_path.exists():
+                    try:
+                        # Debug: Show file being read
+                        log_widget.write(f"[dim]Reading: {file_path.name}[/]")
+                        
+                        with open(file_path, 'r') as f:
+                            lines = f.readlines()
+                            # Get last 5 lines from each file
+                            recent_lines = lines[-5:] if len(lines) > 5 else lines
+                            for line in recent_lines:
+                                if line.strip():
+                                    formatted_line = self._format_log_line(line, file_path.name)
+                                    if formatted_line:
+                                        log_widget.write(formatted_line)
+                            # Update position to end of file
+                            self._last_positions[str(file_path)] = file_path.stat().st_size
+                    except Exception as e:
+                        log_widget.write(f"[red]Error reading {file_path.name}: {e}[/]")
+                        self.logger.error(f"Error reading recent logs from {file_path}: {e}")
+                else:
+                    log_widget.write(f"[red]File not found: {file_path}[/]")
+                        
+            log_widget.write("[bold cyan]===== Live Monitoring Started =====[/]")
+        except Exception as e:
+            self.logger.error(f"Error showing recent logs: {e}")
+    
+    def _setup_log_files(self) -> None:
+        """Setup list of log files to monitor"""
+        log_path = Path("~/tmp/logs/yesman/").expanduser()
+        self.log_files = []
+        
+        try:
+            if not log_path.exists():
+                log_widget = self.query_one("#log-viewer", RichLog)
+                log_widget.write(f"[red]Log directory not found: {log_path}[/]")
+                return
+                
+            # Add specific log files
+            specific_files = ["yesman.log", "dashboard.log", "control_panel.log"]
+            for filename in specific_files:
+                file_path = log_path / filename
+                if file_path.exists():
+                    self.log_files.append(file_path)
+                    self._last_positions[str(file_path)] = 0  # Start from beginning
+            
+            # Add all controller and dashboard_controller logs
+            for pattern in ["controller_*.log", "dashboard_controller_*.log"]:
+                for file_path in log_path.glob(pattern):
+                    if file_path.exists():
+                        self.log_files.append(file_path)
+                        self._last_positions[str(file_path)] = 0  # Start from beginning
+            
+            self.logger.info(f"Monitoring {len(self.log_files)} log files")
+            
+        except Exception as e:
+            try:
+                log_widget = self.query_one("#log-viewer", RichLog)
+                log_widget.write(f"[red]Error setting up log files: {e}[/]")
+            except:
+                pass
+            self.logger.error(f"Error in _setup_log_files: {e}")
+    
+    def _update_logs(self) -> None:
+        """Read new log entries and display them"""
+        try:
+            log_widget = self.query_one("#log-viewer", RichLog)
+            
+            # Read from all monitored log files
+            for file_path in self.log_files:
+                if file_path.exists():
+                    self._read_log_file(file_path, log_widget)
+                        
+        except Exception as e:
+            self.logger.error(f"Error updating logs: {e}")
+            # Also show error in the log widget
+            log_widget.write(f"[red]Error reading logs: {e}[/]")
+    
+    def _read_log_file(self, file_path: Path, log_widget: RichLog) -> None:
+        """Read new content from a specific log file"""
+        try:
+            file_str = str(file_path)
+            current_size = file_path.stat().st_size
+            last_pos = self._last_positions.get(file_str, 0)
+            
+            if current_size > last_pos:
+                with open(file_path, 'r') as f:
+                    f.seek(last_pos)
+                    new_content = f.read()
+                    
+                    # Process and display new log lines
+                    for line in new_content.splitlines():
+                        if line.strip():
+                            formatted_line = self._format_log_line(line, file_path.name)
+                            log_widget.write(formatted_line)
+                    
+                    self._last_positions[file_str] = current_size
+                    
+        except Exception as e:
+            self.logger.error(f"Error reading {file_path}: {e}")
+    
+    def _format_log_line(self, line: str, filename: str) -> str:
+        """Format log line with color based on level"""
+        # Skip empty lines
+        if not line.strip():
+            return ""
+            
+        # Determine log level and apply color
+        if "ERROR" in line or "CRITICAL" in line:
+            color = "red"
+            emoji = "❌"
+        elif "WARNING" in line or "WARN" in line:
+            color = "yellow"
+            emoji = "⚠️"
+        elif "INFO" in line:
+            color = "green"
+            emoji = "ℹ️"
+        elif "DEBUG" in line:
+            color = "dim cyan"
+            emoji = "🔍"
+        else:
+            color = "white"
+            emoji = "📝"
+        
+        # Extract source from filename
+        source = filename.replace(".log", "").replace("_", " ").replace("dashboard controller", "ctrl")
+        
+        # Truncate long lines
+        max_line_length = 200
+        if len(line) > max_line_length:
+            line = line[:max_line_length] + "..."
+        
+        # Format: [source] emoji message
+        return f"[dim cyan]{source:>15}[/] {emoji} [{color}]{line.strip()}[/]"
