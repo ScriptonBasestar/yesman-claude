@@ -1,6 +1,6 @@
 """UI widgets for dashboard"""
 
-from textual.widgets import Static, Button, Tree as TextualTree, Select, Switch
+from textual.widgets import Static, Button, Tree as TextualTree, Select, Switch, RadioSet, RadioButton
 from textual.containers import Container, ScrollableContainer, Horizontal, Vertical
 from textual.app import ComposeResult
 from textual.message import Message
@@ -13,6 +13,7 @@ from rich.table import Table
 from rich.tree import Tree
 
 from .models import SessionInfo, DashboardStats
+from .controller_manager import ControllerManager
 
 
 class ProjectPanel(Static):
@@ -143,6 +144,27 @@ class ControlPanel(Static):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current_session = None
+        self.controller_manager = ControllerManager()
+        self.current_controller = None
+        self.logger = self._setup_logger()
+        
+    def _setup_logger(self) -> logging.Logger:
+        """Setup logger for control panel"""
+        logger = logging.getLogger("yesman.dashboard.control_panel")
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+        
+        log_path = Path("~/tmp/logs/yesman/").expanduser()
+        log_path.mkdir(parents=True, exist_ok=True)
+        
+        log_file = log_path / "control_panel.log"
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        
+        return logger
     
     def compose(self) -> ComposeResult:
         with Vertical():
@@ -151,33 +173,55 @@ class ControlPanel(Static):
             with Horizontal():
                 yield Button("🔄 Restart Claude", id="restart-claude-btn", variant="warning")
                 yield Button("▶️ Start Controller", id="start-controller-btn", variant="success")
+                yield Button("⏹️ Stop Controller", id="stop-controller-btn", variant="error")
+            
+            yield Static("Model:", classes="control-label")
+            with RadioSet(id="model-radio"):
+                yield RadioButton("Default", value=True, id="default-radio")
+                yield RadioButton("Opus4", value=False, id="opus-radio") 
+                yield RadioButton("Sonnet4", value=False, id="sonnet-radio")
             
             with Horizontal():
-                yield Static("Model:", classes="control-label")
-                yield Select([
-                    ("Default", "default"),
-                    ("Claude Opus", "opus"),
-                    ("Claude Sonnet", "sonnet"),
-                ], value="default", id="model-select")
-            
-            with Horizontal():
-                yield Static("Auto Next:", classes="control-label")
-                yield Switch(value=False, id="auto-next-switch")
+                yield Static("Auto:", classes="control-label")
+                yield Switch(value=True, id="auto-next-switch")
+                yield Static("[green]ON[/]", id="auto-status-text")
             
             yield Static("[dim]Ready[/]", id="control-status")
+            yield Static("[dim]No activity[/]", id="controller-activity")
     
     def update_session(self, session_info) -> None:
         """Update controls for selected session"""
         self.current_session = session_info
+        
+        # Get controller for this session
+        self.current_controller = self.controller_manager.get_controller(session_info.session_name)
+        
+        # Set up callbacks for status updates
+        self.current_controller.set_status_callback(self._on_controller_status)
+        self.current_controller.set_activity_callback(self._on_controller_activity)
+        
         try:
             title = self.query_one("#session-title", Static)
             title.update(f"[bold]{session_info.session_name}[/] ({session_info.project_name})")
             
-            status = self.query_one("#control-status", Static)
-            if session_info.controller_status == 'running':
-                status.update("[green]Controller: Active[/]")
+            # Update status based on controller state
+            if self.current_controller.is_running:
+                self.update_status("[green]Controller: Active[/]")
             else:
-                status.update("[yellow]Controller: Ready[/]")
+                self.update_status("[yellow]Controller: Ready[/]")
+                
+        except Exception as e:
+            self.logger.error(f"Error updating session: {e}")
+    
+    def _on_controller_status(self, message: str):
+        """Callback for controller status updates"""
+        self.update_status(message)
+    
+    def _on_controller_activity(self, activity: str):
+        """Callback for controller activity updates"""
+        try:
+            activity_widget = self.query_one("#controller-activity", Static)
+            activity_widget.update(f"[cyan]{activity}[/]")
         except Exception:
             pass
     
@@ -188,6 +232,56 @@ class ControlPanel(Static):
             status.update(message)
         except Exception:
             pass
+    
+    def start_controller(self) -> bool:
+        """Start controller for current session"""
+        if not self.current_controller:
+            self.update_status("[red]No session selected[/]")
+            return False
+        return self.current_controller.start()
+    
+    def stop_controller(self) -> bool:
+        """Stop controller for current session"""
+        if not self.current_controller:
+            self.update_status("[red]No session selected[/]")
+            return False
+        return self.current_controller.stop()
+    
+    def restart_claude_pane(self) -> bool:
+        """Restart Claude pane for current session"""
+        if not self.current_controller:
+            self.update_status("[red]No session selected[/]")
+            return False
+        return self.current_controller.restart_claude_pane()
+    
+    def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
+        """Handle model radio button change"""
+        if event.radio_set.id == "model-radio" and self.current_controller:
+            # Map radio button IDs to model names
+            model_map = {
+                "default-radio": "default",
+                "opus-radio": "opus",
+                "sonnet-radio": "sonnet"
+            }
+            
+            if event.pressed and event.pressed.id in model_map:
+                model = model_map[event.pressed.id]
+                self.current_controller.set_model(model)
+    
+    def on_switch_changed(self, event: Switch.Changed) -> None:
+        """Handle auto next switch change"""
+        if event.switch.id == "auto-next-switch":
+            try:
+                status_text = self.query_one("#auto-status-text", Static)
+                if event.value:
+                    status_text.update("[green]ON[/]")
+                else:
+                    status_text.update("[red]OFF[/]")
+                
+                if self.current_controller:
+                    self.current_controller.set_auto_next(event.value)
+            except Exception as e:
+                self.logger.error(f"Error updating auto status: {e}")
 
 
 class InfoPanel(Static):

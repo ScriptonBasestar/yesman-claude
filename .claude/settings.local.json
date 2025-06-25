@@ -18,7 +18,9 @@
       "Bash(pkill:*)",
       "Bash(timeout 5 python -m yesman dashboard 2>&1)",
       "Bash(timeout 5 python -m yesman dashboard:*)",
-      "Bash(timeout 10 python -m:*)"
+      "Bash(timeout 10 python -m:*)",
+      "Bash(tmux list-panes:*)",
+      "Bash(tmux capture-pane:*)"
     ],
     "deny": []
   }

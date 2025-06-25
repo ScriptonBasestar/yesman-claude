@@ -16,9 +16,3 @@
 ## 나중에
 - 브랜치 자동분할 멀티 agent 구동기능
 - LLM으로 출력 판단하여 선택 자동 결정<br>참고: `FEATURES.md` - 향후기능
-
-ProjectPanel에서 tree항목에서 세션이 focus되면 우측의 ControllerPanel에 자동으로 현재 세션에 대한 컨트롤러가 표시되도록.
-- 세션이름
-- claude pane 재시작
-- model선택(default, opus, sonnet)
-- auto next
