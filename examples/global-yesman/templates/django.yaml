@@ -7,7 +7,7 @@ windows:
     panes:
       - claude
       - uv run ./manage.py runserver
-      - yesman controller {{ session_name }}
+      - htop
   - window_name: django logs
     panes:
       - tail -f django.log

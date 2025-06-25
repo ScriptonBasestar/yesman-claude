@@ -92,19 +92,6 @@ def setup(session_name):
                 # Update with expanded path
                 window["start_directory"] = expanded_window_dir
         
-        # window를 하나 추가해서 controller 실행
-        # config_dict가 windows 키를 가지고 있는지 확인
-        if "windows" not in config_dict:
-            config_dict["windows"] = []
-        
-        # controller window 추가
-        # actual_session_name = config_dict.get("session_name", session_name)
-        # config_dict["windows"].append({
-        #     "window_name": "controller",
-        #     "panes": [
-        #         f"yesman controller {actual_session_name}"
-        #     ]
-        # })
 
         # Create tmux session
         if tmux_manager.create_session(session_name, config_dict):

@@ -20,7 +20,9 @@
       "Bash(timeout 5 python -m yesman dashboard:*)",
       "Bash(timeout 10 python -m:*)",
       "Bash(tmux list-panes:*)",
-      "Bash(tmux capture-pane:*)"
+      "Bash(tmux capture-pane:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

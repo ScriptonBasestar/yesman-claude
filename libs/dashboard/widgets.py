@@ -13,7 +13,7 @@ from rich.table import Table
 from rich.tree import Tree
 
 from .models import SessionInfo, DashboardStats
-from .controller_manager import ControllerManager
+from .claude_manager import ClaudeManager
 
 
 class ProjectPanel(Static):
@@ -37,6 +37,7 @@ class ProjectPanel(Static):
         self.sessions_info = []
         self.selected_session = None
         self.logger = self._setup_logger()
+        self.claude_manager = ClaudeManager()
         
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with file-only output"""
@@ -69,6 +70,9 @@ class ProjectPanel(Static):
         try:
             tree = self.query_one("#session-tree", TextualTree)
             
+            # Store expansion state before clearing
+            expansion_state = self._get_expansion_state(tree)
+            
             # Clear existing content
             tree.clear()
             
@@ -83,6 +87,9 @@ class ProjectPanel(Static):
                 # Add sessions to tree
                 for session in sessions:
                     self._add_session_to_tree(tree.root, session)
+            
+            # Restore expansion state after rebuilding
+            self._restore_expansion_state(tree, expansion_state)
             
             self.logger.info(f"Updated {len(sessions)} sessions")
         except Exception as e:
@@ -99,8 +106,7 @@ class ProjectPanel(Static):
         # Create session node
         session_label = f"{status_icon} {session.project_name} ({session.session_name})"
         session_node = root_node.add(session_label, data=session)
-        session_node.expand()
-        session_node.allow_expand = False  # Prevent collapsing
+        # Don't force expand here - let restoration handle it
         
         # Add session info
         info_node = session_node.add(f"📋 Template: {session.template}")
@@ -121,8 +127,7 @@ class ProjectPanel(Static):
         # Add windows if running
         if session.windows:
             windows_node = session_node.add(f"🪟 Windows ({len(session.windows)})")
-            windows_node.expand()
-            windows_node.allow_expand = False  # Prevent collapsing
+            # Don't force expand here - let restoration handle it
             
             for window in session.windows:
                 # Window node
@@ -144,6 +149,51 @@ class ProjectPanel(Static):
         else:
             session_node.add("[dim]No windows[/]")
     
+    def _get_expansion_state(self, tree: TextualTree) -> dict:
+        """Get current expansion state of tree nodes"""
+        expansion_state = {}
+        
+        def _collect_state(node, path=""):
+            # Create a unique path for each node based on its label
+            node_path = f"{path}/{node.label}" if path else str(node.label)
+            expansion_state[node_path] = node.is_expanded
+            
+            # Recursively collect state for children
+            for child in node.children:
+                _collect_state(child, node_path)
+        
+        if tree.root and tree.root.children:
+            for child in tree.root.children:
+                _collect_state(child)
+        
+        return expansion_state
+    
+    def _restore_expansion_state(self, tree: TextualTree, expansion_state: dict) -> None:
+        """Restore expansion state of tree nodes"""
+        
+        def _restore_state(node, path=""):
+            # Create the same unique path used during collection
+            node_path = f"{path}/{node.label}" if path else str(node.label)
+            
+            # Restore expansion state if we have it
+            if node_path in expansion_state:
+                if expansion_state[node_path]:
+                    node.expand()
+                else:
+                    node.collapse()
+            else:
+                # Default behavior for new nodes - expand stats and session nodes
+                if "📊 Stats:" in str(node.label) or any(icon in str(node.label) for icon in ["🟢", "🔴"]):
+                    node.expand()
+            
+            # Recursively restore state for children
+            for child in node.children:
+                _restore_state(child, node_path)
+        
+        if tree.root and tree.root.children:
+            for child in tree.root.children:
+                _restore_state(child)
+    
     def on_tree_node_selected(self, event: TextualTree.NodeSelected) -> None:
         """Handle tree node selection"""
         if event.node.data:
@@ -158,13 +208,14 @@ class ProjectPanel(Static):
                 self.logger.info(f"Selected session: {event.node.data.session_name}")
     
     def on_tree_node_expanded(self, event: TextualTree.NodeExpanded) -> None:
-        """Keep nodes expanded"""
-        pass  # Do nothing, let it expand
+        """Handle node expansion"""
+        # Allow normal expansion behavior now that we preserve state
+        pass
     
     def on_tree_node_collapsed(self, event: TextualTree.NodeCollapsed) -> None:
-        """Prevent nodes from collapsing"""
-        event.node.expand()  # Re-expand immediately
-        event.stop()  # Stop the collapse event
+        """Handle node collapse"""
+        # Allow normal collapse behavior now that we preserve state
+        pass
     
     def _toggle_controller(self, controller_data: dict) -> None:
         """Toggle controller on/off"""
@@ -186,7 +237,7 @@ class ControlPanel(Static):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current_session = None
-        self.controller_manager = ControllerManager()
+        self.claude_manager = ClaudeManager()
         self.current_controller = None
         self.logger = self._setup_logger()
         
@@ -236,7 +287,7 @@ class ControlPanel(Static):
         self.current_session = session_info
         
         # Get controller for this session
-        self.current_controller = self.controller_manager.get_controller(session_info.session_name)
+        self.current_controller = self.claude_manager.get_controller(session_info.session_name)
         
         # Set up callbacks for status updates
         if self.current_controller:
