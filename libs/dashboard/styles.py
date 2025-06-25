@@ -107,4 +107,27 @@ Footer {
     background: $surface;
     color: $text-muted;
 }
+
+/* Custom footer styling */
+CustomFooter {
+    background: $surface;
+    color: $text-muted;
+    height: 1;
+    dock: bottom;
+}
+
+#footer-container {
+    height: 1;
+    width: 100%;
+    background: $surface;
+    padding: 0 1;
+}
+
+.footer-key {
+    text-align: center;
+    color: $text-muted;
+    background: $surface;
+    width: 1fr;
+    padding: 0 1;
+}
 """

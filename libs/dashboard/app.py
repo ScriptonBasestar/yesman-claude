@@ -1,8 +1,8 @@
 """Main dashboard application"""
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Button
-from textual.containers import Container
+from textual.widgets import Header, Footer, Button, Static
+from textual.containers import Container, Horizontal
 from textual.reactive import reactive
 from textual import events
 import logging
@@ -12,6 +12,16 @@ from .widgets import ProjectPanel, ControlPanel, InfoPanel
 from .session_manager import SessionManager
 from .models import DashboardStats
 from .styles import DASHBOARD_CSS
+
+
+class CustomFooter(Static):
+    """Custom footer with keyboard shortcuts"""
+    
+    def compose(self) -> ComposeResult:
+        with Horizontal(id="footer-container"):
+            yield Static("🚪 [bold]Ctrl+C[/bold] Exit", classes="footer-key")
+            yield Static("🔄 [bold]R[/bold] Refresh", classes="footer-key")
+            yield Static("❓ [bold]?[/bold] Help", classes="footer-key")
 
 
 class DashboardApp(App):
@@ -64,7 +74,7 @@ class DashboardApp(App):
             info_panel = InfoPanel(id="info-panel")
             info_panel.border_title = "📋 Session Details"
             yield info_panel
-        yield Footer()
+        yield CustomFooter()
 
     def on_mount(self) -> None:
         """Start periodic refresh when app is mounted"""
