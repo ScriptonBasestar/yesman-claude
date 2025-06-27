@@ -22,7 +22,14 @@
       "Bash(tmux list-panes:*)",
       "Bash(tmux capture-pane:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(pip3:*)",
+      "Bash(make:*)",
+      "Bash(./yesman.py --help)",
+      "Bash(./yesman.py:*)",
+      "Bash(tmux new-session:*)",
+      "Bash(tmux kill-session:*)",
+      "Bash(true)"
     ],
     "deny": []
   }
