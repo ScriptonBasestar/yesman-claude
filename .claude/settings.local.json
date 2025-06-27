@@ -29,7 +29,10 @@
       "Bash(./yesman.py:*)",
       "Bash(tmux new-session:*)",
       "Bash(tmux kill-session:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(../yesman.py setup test-integration)",
+      "Bash(tmux list-windows:*)",
+      "Bash(tmux send-keys:*)"
     ],
     "deny": []
   }
