@@ -64,8 +64,17 @@ def setup(session_name):
             if not os.path.exists(expanded_dir):
                 click.echo(f"❌ Error: start_directory '{start_dir}' does not exist for session '{session_name}'")
                 click.echo(f"   Resolved path: {expanded_dir}")
-                continue
-            if not os.path.isdir(expanded_dir):
+                if click.confirm(f"Would you like to create the missing directory '{expanded_dir}'?"):
+                    try:
+                        os.makedirs(expanded_dir, exist_ok=True)
+                        click.echo(f"✅ Created directory: {expanded_dir}")
+                    except Exception as e:
+                        click.echo(f"❌ Failed to create directory: {e}")
+                        continue
+                else:
+                    click.echo(f"⏭️  Skipping session '{session_name}'")
+                    continue
+            elif not os.path.isdir(expanded_dir):
                 click.echo(f"❌ Error: start_directory '{start_dir}' is not a directory for session '{session_name}'")
                 continue
             # Update with expanded path
@@ -73,6 +82,7 @@ def setup(session_name):
         
         # Validate window start_directories if specified
         windows = config_dict.get("windows", [])
+        validation_failed = False
         for i, window in enumerate(windows):
             window_start_dir = window.get("start_directory")
             if window_start_dir:
@@ -83,14 +93,30 @@ def setup(session_name):
                 
                 expanded_window_dir = os.path.expanduser(window_start_dir)
                 if not os.path.exists(expanded_window_dir):
-                    click.echo(f"❌ Error: Window '{window.get('window_name', i)}' start_directory '{window.get('start_directory')}' does not exist")
+                    window_name = window.get('window_name', f'window_{i}')
+                    click.echo(f"❌ Error: Window '{window_name}' start_directory '{window.get('start_directory')}' does not exist")
                     click.echo(f"   Resolved path: {expanded_window_dir}")
-                    continue
-                if not os.path.isdir(expanded_window_dir):
+                    if click.confirm(f"Would you like to create the missing directory '{expanded_window_dir}'?"):
+                        try:
+                            os.makedirs(expanded_window_dir, exist_ok=True)
+                            click.echo(f"✅ Created directory: {expanded_window_dir}")
+                        except Exception as e:
+                            click.echo(f"❌ Failed to create directory: {e}")
+                            validation_failed = True
+                            break
+                    else:
+                        click.echo(f"⏭️  Skipping session '{session_name}' due to missing window directory")
+                        validation_failed = True
+                        break
+                elif not os.path.isdir(expanded_window_dir):
                     click.echo(f"❌ Error: Window '{window.get('window_name', i)}' start_directory '{window.get('start_directory')}' is not a directory")
-                    continue
+                    validation_failed = True
+                    break
                 # Update with expanded path
                 window["start_directory"] = expanded_window_dir
+        
+        if validation_failed:
+            continue
         
 
         # Create tmux session

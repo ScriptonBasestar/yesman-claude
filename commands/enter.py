@@ -1,6 +1,7 @@
 import click
 import subprocess
 import libtmux
+import sys
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 
@@ -72,6 +73,12 @@ def enter(session_name, list_sessions):
             click.echo("Available sessions:")
             tmux_manager.list_running_sessions()
             return
+    
+    # Check if running in interactive terminal
+    if not sys.stdin.isatty():
+        click.echo("❌ Error: 'enter' command requires an interactive terminal")
+        click.echo("💡 Tip: Run this command directly in your terminal, not through pipes or scripts")
+        return
     
     # Attach to the session
     click.echo(f"Attaching to session: {session_name}")
