@@ -5,7 +5,7 @@
 
 [x] dashboard의 Controller Operations에서 restart claude버튼을 누르면 tmux에 claude라는 커맨드를 전달하는데 기존 claude code가 실행중인 경우 프롬프트로 claude가 입력된다. 해당 pane의 claude code를 먼저 종료 시킨 후에 claude를 다시 실행시켜야 한다.
 
-[ ] 이 선택화면이 자동으로 넘어가지 않는다. 처리해줘.
+[x] 이 선택화면이 자동으로 넘어가지 않는다. 처리해줘.
 
 ```
 ⏺ Read(shared/src/main/kotlin/com/dripter/shared/service/VideoProcessingService.kt)
