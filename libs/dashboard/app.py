@@ -7,6 +7,8 @@ from textual.reactive import reactive
 from textual import events
 import logging
 from pathlib import Path
+import os
+import sys
 
 from .widgets import ProjectPanel, ControlPanel, LogViewerPanel
 from .session_manager import SessionManager
@@ -34,9 +36,43 @@ class DashboardApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.session_manager = SessionManager()
-        self.logger = self._setup_logger()
         self._project_panel = None
         self._control_panel = None
+        self.logger = self._setup_logger()
+        self._check_terminal_compatibility()
+        
+    def _check_terminal_compatibility(self) -> None:
+        """Check terminal compatibility and set up environment if needed"""
+        term = os.environ.get('TERM', '')
+        colorterm = os.environ.get('COLORTERM', '')
+        
+        # List of known compatible terminals
+        compatible_terms = [
+            'xterm', 'xterm-256color', 'xterm-color',
+            'screen', 'screen-256color',
+            'tmux', 'tmux-256color',
+            'rxvt', 'rxvt-unicode', 'rxvt-unicode-256color',
+            'linux', 'vt100', 'vt220'
+        ]
+        
+        # Check if terminal is compatible
+        is_compatible = any(term.startswith(t) for t in compatible_terms)
+        
+        if not is_compatible:
+            # Try to set a compatible TERM
+            os.environ['TERM'] = 'xterm-256color'
+            self.logger.warning(f"Terminal '{term}' may not be compatible. Setting TERM=xterm-256color")
+        
+        # Force color support if not set
+        if not colorterm and not os.environ.get('FORCE_COLOR'):
+            os.environ['FORCE_COLOR'] = '1'
+            
+        # Check if we're in a real terminal
+        if not sys.stdout.isatty():
+            self.logger.error("Not running in a terminal. Dashboard requires interactive terminal.")
+            print("Error: Dashboard must be run in an interactive terminal.")
+            print("If running from a script, use: script -q /dev/null ./yesman.py dashboard")
+            sys.exit(1)
         
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with file-only output"""
