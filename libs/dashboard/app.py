@@ -14,6 +14,7 @@ from .widgets import ProjectPanel, ControlPanel, LogViewerPanel
 from .session_manager import SessionManager
 from .models import DashboardStats
 from .styles import DASHBOARD_CSS
+from .simple_view import run_simple_dashboard
 
 
 class CustomFooter(Static):
@@ -73,6 +74,13 @@ class DashboardApp(App):
             print("Error: Dashboard must be run in an interactive terminal.")
             print("If running from a script, use: script -q /dev/null ./yesman.py dashboard")
             sys.exit(1)
+            
+        # Check if we should fallback to simple mode
+        if os.environ.get('YESMAN_SIMPLE_MODE', '').lower() in ('1', 'true', 'yes'):
+            self.logger.info("Simple mode requested via YESMAN_SIMPLE_MODE")
+            print("Starting dashboard in simple mode...")
+            run_simple_dashboard()
+            sys.exit(0)
         
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with file-only output"""
