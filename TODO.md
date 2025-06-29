@@ -33,6 +33,6 @@
 
 ## System Setup
 
-[ ] Ensure proper log directory setup with correct permissions
+[x] Ensure proper log directory setup with correct permissions
 - 관련 ISSUE: Log Directory Permissions (Issue #9)
 - 위치: ~/tmp/logs/yesman/

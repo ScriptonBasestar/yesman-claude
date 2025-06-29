@@ -5,6 +5,7 @@ from pathlib import Path
 
 from libs.yesman_config import YesmanConfig
 from .app import DashboardApp
+from ..utils import ensure_log_directory
 
 
 class Dashboard:
@@ -20,8 +21,7 @@ class Dashboard:
         logger.propagate = False
         
         log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
-        log_path = Path(log_path_str).expanduser()
-        log_path.mkdir(parents=True, exist_ok=True)
+        log_path = ensure_log_directory(Path(log_path_str))
         
         log_file = log_path / "dashboard.log"
         file_handler = logging.FileHandler(log_file)
