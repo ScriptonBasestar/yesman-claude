@@ -8,6 +8,7 @@ from typing import Optional, Dict, Any, Callable
 from pathlib import Path
 import libtmux
 import subprocess
+import threading
 
 
 class DashboardController:
@@ -26,6 +27,8 @@ class DashboardController:
         self.status_callback: Optional[Callable] = None
         self.activity_callback: Optional[Callable] = None
         self.response_history = []  # Track auto-response history
+        self._monitor_thread = None
+        self._loop = None
         
         # Try to initialize session, but don't fail if session doesn't exist
         try:
@@ -53,11 +56,32 @@ class DashboardController:
         for window in self.session.list_windows():
             for pane in window.list_panes():
                 try:
+                    # Check both command and pane content
                     cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
-                    if "claude" in cmd.lower():
+                    
+                    # Capture pane content to check for Claude indicators
+                    capture_result = pane.cmd("capture-pane", "-p")
+                    content = "\n".join(capture_result.stdout) if capture_result.stdout else ""
+                    
+                    # Enhanced Claude detection patterns
+                    claude_indicators = [
+                        "claude" in cmd.lower(),
+                        "Welcome to Claude Code" in content,
+                        "? for shortcuts" in content,
+                        "Claude Code" in content,
+                        "anthropic" in content.lower(),
+                        "claude.ai" in content.lower()
+                    ]
+                    
+                    if any(claude_indicators):
+                        self.logger.info(f"Found Claude pane: {window.name}:{pane.index}")
                         return pane
-                except Exception:
+                        
+                except Exception as e:
+                    self.logger.debug(f"Error checking pane {window.name}:{pane.index}: {e}")
                     continue
+        
+        self.logger.warning("No Claude pane found in any window")
         return None
 
     def _setup_logger(self) -> logging.Logger:
@@ -99,6 +123,13 @@ class DashboardController:
     
     def start(self) -> bool:
         """Start the controller"""
+        # Re-initialize in case session was created after initialization
+        if not self.claude_pane:
+            try:
+                self._initialize_session()
+            except Exception:
+                pass
+                
         if not self.claude_pane:
             self._update_status(f"[red]Cannot start: No Claude pane in session '{self.session_name}'[/]")
             return False
@@ -111,14 +142,16 @@ class DashboardController:
             self.is_running = True
             self._update_status(f"[green]Starting claude manager for {self.session_name}[/]")
             
-            # Start the monitoring loop in background
-            asyncio.create_task(self._monitor_loop())
+            # Start monitoring in a separate thread with its own event loop
+            self._monitor_thread = threading.Thread(target=self._run_monitor_loop, daemon=True)
+            self._monitor_thread.start()
+            
             return True
             
         except Exception as e:
             self.is_running = False
             self._update_status(f"[red]Failed to start claude manager: {e}[/]")
-            self.logger.error(f"Failed to start claude manager: {e}")
+            self.logger.error(f"Failed to start claude manager: {e}", exc_info=True)
             return False
     
     def stop(self) -> bool:
@@ -128,6 +161,15 @@ class DashboardController:
             return False
         
         self.is_running = False
+        
+        # Stop the event loop if it's running
+        if self._loop and self._loop.is_running():
+            self._loop.call_soon_threadsafe(self._loop.stop)
+        
+        # Wait for thread to finish
+        if self._monitor_thread and self._monitor_thread.is_alive():
+            self._monitor_thread.join(timeout=2.0)
+        
         self._update_status(f"[red]Stopped claude manager for {self.session_name}[/]")
         return True
     
@@ -289,6 +331,19 @@ class DashboardController:
     def get_response_history(self) -> list:
         """Get the response history"""
         return self.response_history
+
+    def _run_monitor_loop(self):
+        """Run the monitor loop in its own thread with event loop"""
+        self._loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self._loop)
+        
+        try:
+            self._loop.run_until_complete(self._monitor_loop())
+        except Exception as e:
+            self.logger.error(f"Monitor loop error: {e}", exc_info=True)
+        finally:
+            self._loop.close()
+            self.is_running = False
 
     async def _monitor_loop(self):
         """Main monitoring loop that runs in background"""

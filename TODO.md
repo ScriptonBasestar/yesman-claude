@@ -17,7 +17,7 @@
 
 ## Claude Manager
 
-[ ] Fix Claude Manager Auto-Start Failure
+[x] Fix Claude Manager Auto-Start Failure
 - 관련 ISSUE: Claude Manager Auto-Start Failure (Issue #6)
 - 위치: libs/dashboard/claude_manager.py:47-60
 
