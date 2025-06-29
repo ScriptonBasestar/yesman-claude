@@ -182,9 +182,8 @@ class DashboardController:
         try:
             self._update_status("[yellow]Restarting Claude pane...[/]")
             
-            # Send Ctrl+C to stop current claude process
-            self.claude_pane.send_keys("C-c")
-            time.sleep(1)
+            # Force kill any existing claude process and clear the pane
+            self._terminate_claude_process()
             
             # Start claude with selected model
             claude_cmd = self._get_claude_command()
@@ -197,6 +196,47 @@ class DashboardController:
             self._update_status(f"[red]Failed to restart Claude pane: {e}[/]")
             self.logger.error(f"Failed to restart Claude pane: {e}")
             return False
+    
+    def _terminate_claude_process(self) -> None:
+        """Terminate any existing claude process in the pane"""
+        try:
+            # Send multiple Ctrl+C to ensure termination
+            self.claude_pane.send_keys("C-c")
+            time.sleep(0.5)
+            self.claude_pane.send_keys("C-c")
+            time.sleep(0.5)
+            
+            # Send Ctrl+D to exit any interactive shell
+            self.claude_pane.send_keys("C-d")
+            time.sleep(0.5)
+            
+            # Clear the screen and any remaining input
+            self.claude_pane.send_keys("clear")
+            time.sleep(0.5)
+            
+            # Wait for processes to fully terminate
+            max_attempts = 5
+            for attempt in range(max_attempts):
+                try:
+                    # Check if claude is still running by checking the command
+                    cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+                    if "claude" not in cmd.lower():
+                        self.logger.info(f"Claude process terminated after {attempt + 1} attempts")
+                        break
+                except Exception:
+                    # If we can't get the command, assume it's terminated
+                    break
+                    
+                # Try more aggressive termination
+                self.claude_pane.send_keys("C-c")
+                time.sleep(1)
+            
+            # Final clear and prepare for new command
+            self.claude_pane.send_keys("clear")
+            time.sleep(0.2)
+            
+        except Exception as e:
+            self.logger.warning(f"Error during claude process termination: {e}")
     
     def _get_claude_command(self) -> str:
         """Get claude command based on selected model"""

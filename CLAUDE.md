@@ -109,6 +109,7 @@ Configuration merge modes:
    - Detects Claude Code trust prompts and auto-responds with "1"
    - Shows progress indicators for ongoing operations
    - Automatically exits if the monitored pane is not running Claude
+   - Provides safe restart functionality that properly terminates existing Claude processes
 
 4. **Dashboard Architecture**: Uses Textual framework for TUI with reactive data updates. Dashboard displays project configurations from `projects.yaml` and real-time tmux session status.
 
