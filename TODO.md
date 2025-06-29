@@ -21,13 +21,13 @@
 - 관련 ISSUE: Claude Manager Auto-Start Failure (Issue #6)
 - 위치: libs/dashboard/claude_manager.py:47-60
 
-[ ] Enhance Claude detection patterns
+[x] Enhance Claude detection patterns
 - 관련 ISSUE: Claude Manager Auto-Start Failure (Issue #6)
 - 위치: libs/dashboard/claude_manager.py
 
 ## Performance Optimization
 
-[ ] Implement smart dependency check for pnpm install
+[x] Implement smart dependency check for pnpm install
 - 관련 ISSUE: Inefficient Package Installation (Issue #7)
 - 위치: projects.yaml
 

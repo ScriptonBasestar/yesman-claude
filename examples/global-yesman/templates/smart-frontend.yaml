@@ -1,0 +1,18 @@
+# Smart frontend template with dependency optimization
+session_name: frontend
+start_directory: ./
+windows:
+  - window_name: main
+    layout: even-horizontal
+    panes:
+      - claude
+      - shell_command: |
+          # Smart dependency check - only install if needed
+          if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules/.package-lock.json" ]; then
+            echo "Dependencies missing or outdated, installing..."
+            pnpm install
+          else
+            echo "Dependencies up to date, skipping install"
+          fi
+          # Start dev server after dependency check
+          pnpm dev
