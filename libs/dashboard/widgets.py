@@ -300,7 +300,13 @@ class ControlPanel(Static):
             # Update status based on controller state
             if self.current_controller:
                 if self.current_controller.is_running:
-                    self.update_status("[green]Controller: Active[/]")
+                    # Get collection stats
+                    try:
+                        stats = self.current_controller.get_collection_stats()
+                        file_count = stats.get('total_files', 0)
+                        self.update_status(f"[green]Controller: Active[/] | [cyan]Collected: {file_count} files[/]")
+                    except Exception:
+                        self.update_status("[green]Controller: Active[/]")
                 else:
                     self.update_status("[yellow]Controller: Ready[/]")
             else:

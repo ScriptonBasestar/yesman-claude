@@ -10,6 +10,7 @@ import libtmux
 import subprocess
 import threading
 from ..utils import ensure_log_directory, get_default_log_path
+from .content_collector import ClaudeContentCollector
 
 
 class DashboardController:
@@ -30,6 +31,7 @@ class DashboardController:
         self.response_history = []  # Track auto-response history
         self._monitor_thread = None
         self._loop = None
+        self.content_collector = ClaudeContentCollector(session_name)
         
         # Try to initialize session, but don't fail if session doesn't exist
         try:
@@ -393,6 +395,14 @@ class DashboardController:
     def get_response_history(self) -> list:
         """Get the response history"""
         return self.response_history
+    
+    def get_collection_stats(self) -> dict:
+        """Get content collection statistics"""
+        return self.content_collector.get_collection_stats()
+    
+    def cleanup_old_collections(self, days_to_keep: int = 7) -> int:
+        """Clean up old collection files"""
+        return self.content_collector.cleanup_old_files(days_to_keep)
 
     def _run_monitor_loop(self):
         """Run the monitor loop in its own thread with event loop"""
@@ -448,6 +458,8 @@ class DashboardController:
                     
                     # Detect and respond to selection prompts
                     prompt_info = self.detect_prompt_type(content)
+                    response = None
+                    
                     if prompt_info:
                         self.logger.debug(f"Detected prompt type: {prompt_info}")
                         response = self.auto_respond(prompt_info)
@@ -467,6 +479,13 @@ class DashboardController:
                         # Log content snippets for debugging when no prompt is detected
                         if len(content.strip()) > 0 and any(indicator in content.lower() for indicator in ['?', 'yes', 'no', '[1]', '1.', '❯']):
                             self.logger.debug(f"Content contains prompt indicators but no pattern matched: {content[-200:]}")
+                    
+                    # Collect content for pattern analysis
+                    if content != last_content and len(content.strip()) > 0:
+                        try:
+                            self.content_collector.collect_interaction(content, prompt_info, response)
+                        except Exception as e:
+                            self.logger.error(f"Failed to collect content: {e}")
                     
                     # Update activity if content changed
                     if content != last_content:

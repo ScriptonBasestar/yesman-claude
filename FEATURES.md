@@ -46,6 +46,7 @@ Yesman-Claude is a CLI automation tool that manages tmux sessions and automates 
 - **Auto-Start/Stop** - Controllers can be started and stopped dynamically from dashboard
 - **Session Recovery** - Re-initializes connections when sessions are recreated
 - **Graceful Shutdown** - Properly terminates monitoring threads and event loops
+- **Content Collection** - Automatically collects Claude Code interactions for pattern analysis and future improvement
 
 ## ⚙️ Configuration System
 
