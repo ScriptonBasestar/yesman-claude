@@ -25,6 +25,7 @@ class DashboardController:
         self.logger = self._setup_logger()
         self.status_callback: Optional[Callable] = None
         self.activity_callback: Optional[Callable] = None
+        self.response_history = []  # Track auto-response history
         
         # Try to initialize session, but don't fail if session doesn't exist
         try:
@@ -227,13 +228,32 @@ class DashboardController:
             r'\(y/n\)',
             r'\(yes/no\)',
             r'\[Y/n\]',
+            r'\[y/N\]',
             r'Continue\?',
-            r'Proceed\?'
+            r'Proceed\?',
+            r'Overwrite\?',
+            r'Replace\?',
+            r'Delete\?',
+            r'Remove\?',
+            r'Are you sure\?',
+            r'Do you want to'
         ]
         
         for pattern in yn_patterns:
             if re.search(pattern, content, re.IGNORECASE):
                 return {'type': 'yn'}
+        
+        # Check for directory creation prompts
+        if re.search(r"Would you like to create the missing directory", content, re.IGNORECASE):
+            return {'type': 'yn', 'context': 'create_directory'}
+        
+        # Check for file overwrite prompts
+        if re.search(r"already exists.*overwrite", content, re.IGNORECASE):
+            return {'type': 'yn', 'context': 'overwrite_file'}
+            
+        # Check for Claude-specific prompts
+        if re.search(r"Would you like me to", content, re.IGNORECASE):
+            return {'type': 'yn', 'context': 'claude_suggestion'}
         
         return None
     
@@ -249,6 +269,26 @@ class DashboardController:
         """Send input to Claude pane"""
         if self.claude_pane:
             self.claude_pane.send_keys(text)
+    
+    def _record_response(self, prompt_type: str, response: str, content: str):
+        """Record auto-response in history"""
+        import datetime
+        record = {
+            'timestamp': datetime.datetime.now().isoformat(),
+            'prompt_type': prompt_type,
+            'response': response,
+            'content_snippet': content[-200:]  # Last 200 chars for context
+        }
+        self.response_history.append(record)
+        self.logger.info(f"Auto-response recorded: {prompt_type} -> {response}")
+        
+        # Keep only last 100 responses
+        if len(self.response_history) > 100:
+            self.response_history = self.response_history[-100:]
+    
+    def get_response_history(self) -> list:
+        """Get the response history"""
+        return self.response_history
 
     async def _monitor_loop(self):
         """Main monitoring loop that runs in background"""
@@ -286,6 +326,7 @@ class DashboardController:
                     # Auto-respond to trust prompts
                     if self.auto_trust_if_needed():
                         self._update_activity("✅ Auto-responded to trust prompt")
+                        self._record_response("trust_prompt", "1", content)
                         continue
                     
                     # Detect and respond to selection prompts
@@ -294,6 +335,9 @@ class DashboardController:
                         response = self.auto_respond(prompt_info)
                         if response:
                             self.send_input(response)
+                            context = prompt_info.get('context', prompt_info['type'])
+                            self._record_response(context, response, content)
+                            
                             if prompt_info['type'] == 'numbered':
                                 self._update_activity(f"🔢 Auto-selected option {response}")
                             elif prompt_info['type'] == 'yn':

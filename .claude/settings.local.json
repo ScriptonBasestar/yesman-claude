@@ -32,7 +32,12 @@
       "Bash(true)",
       "Bash(../yesman.py setup test-integration)",
       "Bash(tmux list-windows:*)",
-      "Bash(tmux send-keys:*)"
+      "Bash(tmux send-keys:*)",
+      "Bash(tmux ls:*)",
+      "Bash(tmux new-window:*)",
+      "Bash(touch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
