@@ -7,11 +7,11 @@
 - 관련 ISSUE: Dashboard Terminal Output Corruption (Issue #5)
 - 위치: libs/dashboard/app.py:27-40
 
-[ ] Add terminal compatibility checks
+[x] Add terminal compatibility checks
 - 관련 ISSUE: Dashboard Terminal Output Corruption (Issue #5)
 - 위치: libs/dashboard/app.py
 
-[ ] Implement fallback safe mode for incompatible terminals
+[x] Implement fallback safe mode for incompatible terminals
 - 관련 ISSUE: Dashboard Terminal Output Corruption (Issue #5)
 - 위치: libs/dashboard/app.py
 
