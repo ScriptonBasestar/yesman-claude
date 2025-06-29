@@ -48,7 +48,7 @@
 ## IMPROVE-001: 스마트 세션 캐싱 (Performance)
 **우선순위**: HIGH
 
-[ ] SessionCache 클래스 설계 및 구조 정의 (TTL, 캐시 키 전략, 메모리 관리)
+[x] SessionCache 클래스 설계 및 구조 정의 (TTL, 캐시 키 전략, 메모리 관리)
 - 관련 ISSUE: 대시보드 2초마다 전체 세션 조회로 인한 성능 저하
 - 위치: libs/dashboard/session_cache.py
 
