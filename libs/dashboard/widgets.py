@@ -14,6 +14,7 @@ from rich.tree import Tree
 
 from .models import SessionInfo, DashboardStats
 from .claude_manager import ClaudeManager
+from ..utils import ensure_log_directory, get_default_log_path
 
 
 class ProjectPanel(Static):
@@ -45,8 +46,7 @@ class ProjectPanel(Static):
         logger.setLevel(logging.INFO)
         logger.propagate = False
         
-        log_path = Path("~/tmp/logs/yesman/").expanduser()
-        log_path.mkdir(parents=True, exist_ok=True)
+        log_path = ensure_log_directory(get_default_log_path())
         
         log_file = log_path / "project_panel.log"
         file_handler = logging.FileHandler(log_file)
@@ -247,8 +247,7 @@ class ControlPanel(Static):
         logger.setLevel(logging.INFO)
         logger.propagate = False
         
-        log_path = Path("~/tmp/logs/yesman/").expanduser()
-        log_path.mkdir(parents=True, exist_ok=True)
+        log_path = ensure_log_directory(get_default_log_path())
         
         log_file = log_path / "control_panel.log"
         file_handler = logging.FileHandler(log_file)

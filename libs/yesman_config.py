@@ -4,6 +4,7 @@ import yaml
 import logging
 from pathlib import Path
 from typing import Dict, Any
+from .utils import ensure_log_directory
 
 class YesmanConfig:
     def __init__(self):
@@ -39,9 +40,8 @@ class YesmanConfig:
     
     def _setup_logging(self):
         log_level = self.config.get("log_level", "INFO").upper()
-        log_path = self.config.get("log_path", "~/tmp/logs/yesman/")
-        log_path = Path(os.path.expanduser(log_path))
-        log_path.mkdir(parents=True, exist_ok=True)
+        log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
+        log_path = ensure_log_directory(Path(log_path_str))
         
         log_file = log_path / "yesman.log"
         
