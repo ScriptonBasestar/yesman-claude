@@ -294,15 +294,23 @@ class DashboardController:
     
     def detect_prompt_type(self, content: str) -> Optional[Dict[str, Any]]:
         """Detect type of prompt in content"""
-        # Check for numbered selections
-        numbered_pattern = r'\[(\d+)\]\s+(.+?)(?=\n|\[|$)'
-        numbered_matches = re.findall(numbered_pattern, content, re.MULTILINE)
+        # Check for numbered selections - multiple patterns
+        numbered_patterns = [
+            r'\[(\d+)\]\s+(.+?)(?=\n|\[|$)',  # [1] Yes format
+            r'❯?\s*(\d+)\.\s+(.+?)(?=\n|\d\.|$)',  # ❯ 1. Yes format or 1. Yes format
+            r'(\d+)\)\s+(.+?)(?=\n|\d\)|$)'   # 1) Yes format
+        ]
         
-        if len(numbered_matches) >= 2:
+        all_matches = []
+        for pattern in numbered_patterns:
+            matches = re.findall(pattern, content, re.MULTILINE)
+            all_matches.extend(matches)
+        
+        if len(all_matches) >= 2:
             return {
                 'type': 'numbered',
-                'options': numbered_matches,
-                'count': len(numbered_matches)
+                'options': all_matches,
+                'count': len(all_matches)
             }
         
         # Check for yes/no prompts
@@ -334,8 +342,22 @@ class DashboardController:
             return {'type': 'yn', 'context': 'overwrite_file'}
             
         # Check for Claude-specific prompts
-        if re.search(r"Would you like me to", content, re.IGNORECASE):
-            return {'type': 'yn', 'context': 'claude_suggestion'}
+        claude_specific_patterns = [
+            r"Would you like me to",
+            r"Do you want to make this edit",
+            r"Do you want to.*\?",
+            r"Should I.*\?",
+            r"Would you like to.*\?",
+            r"Shall I.*\?",
+            r"Apply this change\?",
+            r"Make this edit\?",
+            r"Continue with.*\?",
+            r"Proceed with.*\?"
+        ]
+        
+        for pattern in claude_specific_patterns:
+            if re.search(pattern, content, re.IGNORECASE):
+                return {'type': 'yn', 'context': 'claude_suggestion'}
         
         return None
     
@@ -427,8 +449,10 @@ class DashboardController:
                     # Detect and respond to selection prompts
                     prompt_info = self.detect_prompt_type(content)
                     if prompt_info:
+                        self.logger.debug(f"Detected prompt type: {prompt_info}")
                         response = self.auto_respond(prompt_info)
                         if response:
+                            self.logger.info(f"Auto-responding '{response}' to {prompt_info['type']} prompt")
                             self.send_input(response)
                             context = prompt_info.get('context', prompt_info['type'])
                             self._record_response(context, response, content)
@@ -437,6 +461,12 @@ class DashboardController:
                                 self._update_activity(f"🔢 Auto-selected option {response}")
                             elif prompt_info['type'] == 'yn':
                                 self._update_activity(f"✅ Auto-responded: {response}")
+                        else:
+                            self.logger.warning(f"No response generated for prompt type: {prompt_info}")
+                    else:
+                        # Log content snippets for debugging when no prompt is detected
+                        if len(content.strip()) > 0 and any(indicator in content.lower() for indicator in ['?', 'yes', 'no', '[1]', '1.', '❯']):
+                            self.logger.debug(f"Content contains prompt indicators but no pattern matched: {content[-200:]}")
                     
                     # Update activity if content changed
                     if content != last_content:
