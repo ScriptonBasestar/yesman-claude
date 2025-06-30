@@ -24,7 +24,7 @@ class DashboardController:
         self.session = None
         self.claude_pane = None
         self.is_running = False
-        self.is_auto_next_enabled = False
+        self.is_auto_next_enabled = True  # Enable auto-response by default
         self.selected_model = "default"
         self.logger = self._setup_logger()
         self.status_callback: Optional[Callable] = None
@@ -272,7 +272,7 @@ class DashboardController:
         try:
             # Get the last N lines from the pane
             result = self.claude_pane.cmd("capture-pane", "-p", "-S", f"-{lines}")
-            return result.stdout[0] if result.stdout else ""
+            return "\n".join(result.stdout) if result.stdout else ""
         except Exception as e:
             self.logger.error(f"Error capturing pane content: {e}")
             return ""
@@ -296,6 +296,97 @@ class DashboardController:
         if self.detect_trust_prompt(content):
             self.send_input("1")
             return True
+        return False
+    
+    def auto_respond_to_selection(self, prompt_info) -> bool:
+        """Auto-respond to selection prompts (1,2,3 choices)"""
+        if not self.is_auto_next_enabled:
+            self.logger.debug("Auto-response disabled, skipping")
+            return False
+            
+        self.logger.info(f"Attempting auto-response for prompt type: {prompt_info.type.value}")
+        
+        try:
+            from .prompt_detector import PromptType
+            
+            if prompt_info.type == PromptType.NUMBERED_SELECTION:
+                # 편집 확인 프롬프트들에 대한 자동 응답
+                question = prompt_info.question.lower()
+                
+                # 편집 관련 프롬프트 - 기본적으로 "1" (Yes) 선택
+                edit_keywords = [
+                    "do you want to make this edit",
+                    "edit to",
+                    "make this change",
+                    "apply this edit",
+                    "proceed with edit",
+                    "confirm edit"
+                ]
+                
+                # 계속 진행 관련 프롬프트 - 기본적으로 "1" (첫 번째 옵션) 선택
+                continue_keywords = [
+                    "what would you like",
+                    "please select", 
+                    "choose an option",
+                    "select from",
+                    "which option"
+                ]
+                
+                response = "1"  # 기본 응답
+                
+                # 특정 패턴 매칭으로 응답 결정
+                if any(keyword in question for keyword in edit_keywords):
+                    response = "1"  # Yes, proceed with edit
+                    self.logger.info(f"Auto-responding to edit prompt with: {response}")
+                elif any(keyword in question for keyword in continue_keywords):
+                    response = "1"  # Select first option
+                    self.logger.info(f"Auto-responding to selection prompt with: {response}")
+                elif "don't ask again" in question or "auto-accept" in question:
+                    response = "2"  # Don't ask again option
+                    self.logger.info(f"Auto-responding to auto-accept prompt with: {response}")
+                else:
+                    # 기본적으로 첫 번째 옵션 선택
+                    response = "1"
+                    self.logger.info(f"Auto-responding to unknown prompt with default: {response}")
+                
+                # 응답 전송
+                self.send_input(response)
+                
+                # 응답 기록
+                self._record_response(prompt_info.type.value, response, prompt_info.question)
+                
+                return True
+            
+            elif prompt_info.type == PromptType.BINARY_CHOICE:
+                # y/n 형태의 프롬프트
+                question = prompt_info.question.lower()
+                
+                if "continue" in question or "proceed" in question:
+                    response = "y"
+                elif "trust" in question:
+                    response = "y"
+                else:
+                    response = "y"  # 기본적으로 yes
+                
+                self.send_input(response)
+                self._record_response(prompt_info.type.value, response, prompt_info.question)
+                self.logger.info(f"Auto-responding to binary choice with: {response}")
+                return True
+            
+            elif prompt_info.type == PromptType.LOGIN_REDIRECT:
+                # Login redirect prompts - typically "Press Enter to continue"
+                question = prompt_info.question.lower()
+                
+                if "continue" in question or "press enter" in question:
+                    response = ""  # Just press Enter
+                    self.send_input(response)
+                    self._record_response(prompt_info.type.value, "Enter", prompt_info.question)
+                    self.logger.info(f"Auto-responding to login redirect with Enter")
+                    return True
+                
+        except Exception as e:
+            self.logger.error(f"Error in auto_respond_to_selection: {e}")
+            
         return False
     
     def check_for_prompt(self, content: str) -> Optional[PromptInfo]:
@@ -399,10 +490,10 @@ class DashboardController:
                             else:
                                 self._update_status("[yellow]Claude not running. Auto-restart disabled.[/]")
                                 continue
-                    except Exception:
-                        # If we can't get the command, assume Claude is not running
-                        self._update_status("[yellow]Could not check Claude status[/]")
-                        continue
+                    except Exception as e:
+                        # Log error but don't stop monitoring - Claude might still be responding
+                        self.logger.debug(f"Could not check Claude command: {e}")
+                        # Don't continue here - let it proceed to prompt detection
                     
                     # Auto-respond to trust prompts
                     if self.auto_trust_if_needed():
@@ -410,10 +501,19 @@ class DashboardController:
                         self._record_response("trust_prompt", "1", content)
                         continue
                     
-                    # Check for prompts (no auto-response)
+                    # Check for prompts and auto-respond if enabled
                     prompt_info = self.check_for_prompt(content)
                     
                     if prompt_info:
+                        # Try auto-response first if auto_next is enabled
+                        if self.is_auto_next_enabled:
+                            if self.auto_respond_to_selection(prompt_info):
+                                self._update_activity(f"✅ Auto-responded to {prompt_info.type.value}")
+                                self._record_response(prompt_info.type.value, "auto", content)
+                                self.clear_prompt_state()
+                                continue
+                        
+                        # If auto-response didn't handle it, show waiting status
                         self._update_activity(f"⏳ Waiting for input: {prompt_info.type.value}")
                         self.logger.debug(f"Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
                     elif self.waiting_for_input:
