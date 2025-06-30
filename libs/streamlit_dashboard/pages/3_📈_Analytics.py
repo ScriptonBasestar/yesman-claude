@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 # Add parent directories to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from libs.dashboard.session_manager import SessionManager
-from libs.dashboard.claude_manager import ClaudeManager
+from libs.core.session_manager import SessionManager
+from libs.core.claude_manager import ClaudeManager
 
 st.set_page_config(
     page_title="Analytics & Monitoring",

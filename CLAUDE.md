@@ -40,7 +40,7 @@ uv run ./yesman.py ls
 ./yesman.py enter  # Interactive selection
 
 
-# Run TUI dashboard to monitor all sessions
+# Run Streamlit web dashboard to monitor all sessions
 ./yesman.py dashboard
 ```
 
@@ -54,8 +54,10 @@ Currently no test suite or linting is configured. Future plans include:
 
 ### Directory Structure
 - `yesman.py` - Main CLI entry point using Click
-- `commands/` - CLI command implementations (ls, show, setup, teardown)
-- `libs/` - Core functionality (YesmanConfig, TmuxManager)
+- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard)
+- `libs/core/` - Core functionality (SessionManager, ClaudeManager, models)
+- `libs/streamlit_dashboard/` - Streamlit web dashboard application
+- `libs/` - Additional functionality (YesmanConfig, TmuxManager)
 - `patterns/` - Auto-response patterns for selection prompts
 - `examples/global-yesman/` - Example configuration files
 
@@ -81,17 +83,17 @@ Configuration merge modes:
 - Lists available templates and running sessions
 - Handles project loading and session lifecycle
 
-**ClaudeManager** (`libs/dashboard/claude_manager.py`):
+**ClaudeManager** (`libs/core/claude_manager.py`):
 - Monitors Claude Code sessions for interactive prompts
 - Auto-responds to trust prompts and selection menus
 - Detects idle states and input states in Claude Code
 - Provides real-time feedback with progress indicators
 
-**Dashboard** (`libs/dashboard.py`):
-- TUI application built with Textual for monitoring sessions
+**Streamlit Dashboard** (`libs/streamlit_dashboard/app.py`):
+- Web application built with Streamlit for monitoring sessions
 - Shows project status, session state, and claude manager activity
-- Real-time updates every 2 seconds
-- Displays session windows and panes with type detection
+- Real-time updates with auto-refresh capability
+- Interactive controller management and session monitoring
 
 **Session Templates**:
 - Support Jinja2-style variable substitution (removed in latest version)
@@ -104,14 +106,14 @@ Configuration merge modes:
 
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
-3. **Claude Manager Operation**: The claude manager (`libs/dashboard/claude_manager.py:155`) runs a monitoring loop that:
+3. **Claude Manager Operation**: The claude manager (`libs/core/claude_manager.py:155`) runs a monitoring loop that:
    - Captures tmux pane content every second
    - Detects Claude Code trust prompts and auto-responds with "1"
    - Shows progress indicators for ongoing operations
    - Automatically exits if the monitored pane is not running Claude
    - Provides safe restart functionality that properly terminates existing Claude processes
 
-4. **Dashboard Architecture**: Uses Textual framework for TUI with reactive data updates. Dashboard displays project configurations from `projects.yaml` and real-time tmux session status.
+4. **Dashboard Architecture**: Uses Streamlit framework for web-based dashboard with reactive data updates. Dashboard displays project configurations from `projects.yaml` and real-time tmux session status.
 
 5. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
 
@@ -137,8 +139,8 @@ Configuration merge modes:
 When working on this codebase:
 
 1. **Adding New Commands**: Create new command files in `commands/` directory and register them in `yesman.py`
-2. **Claude Manager Modifications**: The claude manager logic is in `libs/dashboard/claude_manager.py`. Pattern detection happens in `detect_prompt_type()` and auto-response in `auto_respond()`
-3. **Dashboard Updates**: TUI components are in `libs/dashboard.py` using Textual framework
+2. **Claude Manager Modifications**: The claude manager logic is in `libs/core/claude_manager.py`. Pattern detection happens in `detect_prompt_type()` and auto-response in `auto_respond()`
+3. **Dashboard Updates**: Web dashboard components are in `libs/streamlit_dashboard/` using Streamlit framework
 4. **Configuration Changes**: Global config structure is defined in `YesmanConfig` class
 
 ## Dependencies
@@ -149,4 +151,4 @@ Core dependencies (from pyproject.toml):
 - pexpect>=4.8 - Process automation
 - tmuxp>=1.55.0 - Tmux session management
 - libtmux>=0.46.2 - Python tmux bindings
-- textual>=0.1.18 - TUI framework for dashboard
+- streamlit>=1.28.0 - Web framework for dashboard
