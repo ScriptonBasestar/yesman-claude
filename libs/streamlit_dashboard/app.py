@@ -178,79 +178,77 @@ def render_header():
 
 
 def render_session_card(session: SessionInfo):
-    """Render a session card"""
+    """Render a session as a horizontal card"""
     # Session status icon
     status_icon = "🟢" if session.status == "running" else "🔴"
     
-    # Controller status
-    controller_status = "Unknown"
-    controller_class = "controller-ready"
+    # Get controller info
+    controller_status = "❓ Unknown"
+    model = "N/A"
     
     try:
         controller = st.session_state.claude_manager.get_controller(session.session_name)
-        if controller and controller.is_running:
-            controller_status = "Active"
-            controller_class = "controller-active"
+        if controller:
+            if controller.is_running:
+                controller_status = "🟢 Active"
+            else:
+                controller_status = "⚪ Ready"
+            model = controller.selected_model
         else:
-            controller_status = "Ready"
-            controller_class = "controller-ready"
+            controller_status = "❓ Not Available"
     except Exception:
-        pass
+        controller_status = "❌ Error"
     
     with st.container():
+        # Create a card-like container
         st.markdown(f"""
-        <div class="session-card">
-            <h4>{status_icon} {session.project_name} ({session.session_name})</h4>
-            <p><strong>Template:</strong> {session.template}</p>
-            <p><strong>Status:</strong> {session.status}</p>
-            <p><strong>Windows:</strong> {len(session.windows)}</p>
+        <div style="
+            background-color: #2d2d2d;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #00d4aa;
+            margin-bottom: 1rem;
+        ">
+            <h4 style="margin: 0 0 0.5rem 0;">{status_icon} {session.project_name} ({session.session_name})</h4>
         </div>
         """, unsafe_allow_html=True)
         
-        # Controller controls
-        col1, col2 = st.columns(2)
+        # Main info in columns
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            if st.button(f"🎮 Controller: {controller_status}", 
-                        key=f"controller_{session.session_name}",
-                        help="Click to toggle controller"):
-                toggle_controller(session.session_name, controller_status)
+            st.write(f"**Template:** {session.template}")
+            st.write(f"**Status:** {session.status}")
         
         with col2:
-            if st.button("📋 Select", key=f"select_{session.session_name}"):
-                st.session_state.selected_session = session.session_name
-                add_activity_log("info", f"Selected session: {session.session_name}")
-                st.rerun()
+            st.write(f"**Model:** {model}")
+            st.write(f"**Controller:** {controller_status}")
+        
+        with col3:
+            st.write(f"**Total Windows:** {len(session.windows)}")
+            total_panes = sum(len(window.panes) for window in session.windows)
+            st.write(f"**Total Panes:** {total_panes}")
+        
+        with col4:
+            # Windows and Panes details
+            if session.windows:
+                st.write("**Windows:**")
+                for window in session.windows:
+                    st.write(f"Window [{window.index}] {window.name} ({len(window.panes)} panes)")
+                    for i, pane in enumerate(window.panes):
+                        pane_type = ""
+                        if pane.is_claude:
+                            pane_type = " 🔵 (Claude)"
+                        elif pane.is_controller:
+                            pane_type = " 🟡 (Controller)"
+                        st.write(f"• Pane {i}: {pane.command}{pane_type}")
+            else:
+                st.write("**Windows:** None")
+        
+        st.divider()
 
 
-def toggle_controller(session_name: str, current_status: str):
-    """Toggle controller for a session"""
-    try:
-        controller = st.session_state.claude_manager.get_controller(session_name)
-        if not controller:
-            st.error(f"Controller not found for session: {session_name}")
-            return
-        
-        if current_status == "Active":
-            success = controller.stop()
-            action = "stopped"
-        else:
-            success = controller.start()
-            action = "started"
-        
-        if success:
-            st.success(f"Controller {action} for {session_name}")
-            add_activity_log("success", f"Controller {action} for {session_name}")
-        else:
-            st.error(f"Failed to {action.replace('ped', '')} controller for {session_name}")
-            add_activity_log("error", f"Failed to {action.replace('ped', '')} controller for {session_name}")
-        
-        time.sleep(0.5)  # Brief pause for user feedback
-        st.rerun()
-        
-    except Exception as e:
-        st.error(f"Error toggling controller: {e}")
-        add_activity_log("error", f"Error toggling controller: {e}")
+
 
 
 def render_main_content():
@@ -261,16 +259,12 @@ def render_main_content():
         st.warning("No sessions found. Run `./yesman.py setup` to create sessions.")
         return
     
-    # Session grid
+    # Sessions cards
     st.subheader("📊 Tmux Sessions")
     
-    # Create columns for session cards
-    cols_per_row = 2
-    for i in range(0, len(sessions), cols_per_row):
-        cols = st.columns(cols_per_row)
-        for j, session in enumerate(sessions[i:i+cols_per_row]):
-            with cols[j]:
-                render_session_card(session)
+    # Display each session as a horizontal card
+    for session in sessions:
+        render_session_card(session)
 
 
 def render_controller_sidebar():
