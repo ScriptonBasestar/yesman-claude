@@ -500,11 +500,10 @@ def main():
     # Add initial log
     if not st.session_state.activity_logs:
         add_activity_log("info", "Dashboard initialized")
-    
+
     # Render sidebar
     render_settings_sidebar()
-    render_controller_sidebar()
-    
+
     # Render main content
     render_main_content()
     
