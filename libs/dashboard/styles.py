@@ -1,6 +1,70 @@
 """CSS styles for dashboard"""
 
 DASHBOARD_CSS = """
+/* Prompt input widget styling */
+#prompt-input-container {
+    border: round $warning;
+    border-title-align: center;
+    border-title-color: $warning;
+    background: $surface;
+    padding: 1;
+    margin: 1;
+    max-height: 10;
+}
+
+#prompt-input-container.hidden {
+    display: none;
+}
+
+#prompt-question {
+    text-style: bold;
+    color: $warning;
+    margin: 1 0;
+}
+
+#text-input {
+    margin: 1 0;
+    border: round $primary;
+}
+
+#text-input.hidden {
+    display: none;
+}
+
+#button-container {
+    layout: horizontal;
+    align: center middle;
+    height: auto;
+    margin: 1 0;
+}
+
+#button-container.hidden {
+    display: none;
+}
+
+#radio-container {
+    margin: 1 0;
+}
+
+#radio-container.hidden {
+    display: none;
+}
+
+#control-buttons {
+    layout: horizontal;
+    align: center middle;
+    height: auto;
+    margin: 1 0;
+}
+
+Button {
+    margin: 0 1;
+    min-width: 10;
+}
+
+RadioButton {
+    margin: 0 0 1 0;
+}
 /* Main layout */
 #main-container {
     layout: grid;

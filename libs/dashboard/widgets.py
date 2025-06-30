@@ -14,6 +14,7 @@ from rich.tree import Tree
 
 from .models import SessionInfo, DashboardStats
 from .claude_manager import ClaudeManager
+from .prompt_input_widget import PromptInputWidget
 from ..utils import ensure_log_directory, get_default_log_path
 
 
@@ -280,6 +281,9 @@ class ControlPanel(Static):
             
             yield Static("[dim]Ready[/]", id="control-status")
             yield Static("[dim]No activity[/]", id="controller-activity")
+            
+            # Prompt input widget
+            yield PromptInputWidget(id="prompt-input")
     
     def update_session(self, session_info) -> None:
         """Update controls for selected session"""
@@ -324,8 +328,43 @@ class ControlPanel(Static):
         try:
             activity_widget = self.query_one("#controller-activity", Static)
             activity_widget.update(f"[cyan]{activity}[/]")
-        except Exception:
-            pass
+            
+            # Check if controller is waiting for input
+            if self.current_controller and "⏳ Waiting for input:" in activity:
+                self._check_and_show_prompt()
+                
+        except Exception as e:
+            self.logger.error(f"Error updating activity: {e}")
+    
+    def _check_and_show_prompt(self):
+        """Check if controller has a prompt and show input widget"""
+        if not self.current_controller:
+            return
+        
+        try:
+            prompt_info = self.current_controller.get_current_prompt()
+            if prompt_info:
+                prompt_widget = self.query_one("#prompt-input", PromptInputWidget)
+                prompt_widget.set_submit_callback(self._on_prompt_submitted)
+                prompt_widget.show_prompt(prompt_info)
+                self.logger.info(f"Showing prompt input for: {prompt_info.type.value}")
+        except Exception as e:
+            self.logger.error(f"Error showing prompt: {e}")
+    
+    def _on_prompt_submitted(self, response: str):
+        """Handle prompt response submission"""
+        if self.current_controller:
+            try:
+                # Send response to Claude
+                self.current_controller.send_input(response)
+                self.current_controller.clear_prompt_state()
+                
+                self.logger.info(f"Sent response to Claude: '{response}'")
+                self.update_status(f"[green]Response sent: {response}[/]")
+                
+            except Exception as e:
+                self.logger.error(f"Error sending response: {e}")
+                self.update_status(f"[red]Error sending response: {e}[/]")
     
     def update_status(self, message: str) -> None:
         """Update the status message"""

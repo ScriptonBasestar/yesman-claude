@@ -11,6 +11,7 @@ import subprocess
 import threading
 from ..utils import ensure_log_directory, get_default_log_path
 from .content_collector import ClaudeContentCollector
+from .prompt_detector import ClaudePromptDetector, PromptInfo
 
 
 class DashboardController:
@@ -32,6 +33,9 @@ class DashboardController:
         self._monitor_thread = None
         self._loop = None
         self.content_collector = ClaudeContentCollector(session_name)
+        self.prompt_detector = ClaudePromptDetector()
+        self.current_prompt: Optional[PromptInfo] = None
+        self.waiting_for_input = False
         
         # Try to initialize session, but don't fail if session doesn't exist
         try:
@@ -294,82 +298,32 @@ class DashboardController:
             return True
         return False
     
-    def detect_prompt_type(self, content: str) -> Optional[Dict[str, Any]]:
-        """Detect type of prompt in content"""
-        # Check for numbered selections - multiple patterns
-        numbered_patterns = [
-            r'\[(\d+)\]\s+(.+?)(?=\n|\[|$)',  # [1] Yes format
-            r'❯?\s*(\d+)\.\s+(.+?)(?=\n|\d\.|$)',  # ❯ 1. Yes format or 1. Yes format
-            r'(\d+)\)\s+(.+?)(?=\n|\d\)|$)'   # 1) Yes format
-        ]
+    def check_for_prompt(self, content: str) -> Optional[PromptInfo]:
+        """Check if content contains a prompt waiting for input"""
+        prompt_info = self.prompt_detector.detect_prompt(content)
         
-        all_matches = []
-        for pattern in numbered_patterns:
-            matches = re.findall(pattern, content, re.MULTILINE)
-            all_matches.extend(matches)
+        if prompt_info:
+            self.current_prompt = prompt_info
+            self.waiting_for_input = True
+            self.logger.info(f"Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
+        else:
+            # Check if we're still waiting for input based on content patterns
+            self.waiting_for_input = self.prompt_detector.is_waiting_for_input(content)
         
-        if len(all_matches) >= 2:
-            return {
-                'type': 'numbered',
-                'options': all_matches,
-                'count': len(all_matches)
-            }
-        
-        # Check for yes/no prompts
-        yn_patterns = [
-            r'\(y/n\)',
-            r'\(yes/no\)',
-            r'\[Y/n\]',
-            r'\[y/N\]',
-            r'Continue\?',
-            r'Proceed\?',
-            r'Overwrite\?',
-            r'Replace\?',
-            r'Delete\?',
-            r'Remove\?',
-            r'Are you sure\?',
-            r'Do you want to'
-        ]
-        
-        for pattern in yn_patterns:
-            if re.search(pattern, content, re.IGNORECASE):
-                return {'type': 'yn'}
-        
-        # Check for directory creation prompts
-        if re.search(r"Would you like to create the missing directory", content, re.IGNORECASE):
-            return {'type': 'yn', 'context': 'create_directory'}
-        
-        # Check for file overwrite prompts
-        if re.search(r"already exists.*overwrite", content, re.IGNORECASE):
-            return {'type': 'yn', 'context': 'overwrite_file'}
-            
-        # Check for Claude-specific prompts
-        claude_specific_patterns = [
-            r"Would you like me to",
-            r"Do you want to make this edit",
-            r"Do you want to.*\?",
-            r"Should I.*\?",
-            r"Would you like to.*\?",
-            r"Shall I.*\?",
-            r"Apply this change\?",
-            r"Make this edit\?",
-            r"Continue with.*\?",
-            r"Proceed with.*\?"
-        ]
-        
-        for pattern in claude_specific_patterns:
-            if re.search(pattern, content, re.IGNORECASE):
-                return {'type': 'yn', 'context': 'claude_suggestion'}
-        
-        return None
+        return prompt_info
     
-    def auto_respond(self, prompt_info: Dict[str, Any]) -> Optional[str]:
-        """Generate auto response based on prompt type"""
-        if prompt_info['type'] == 'numbered':
-            return "1"  # Always select first option
-        elif prompt_info['type'] == 'yn':
-            return "yes"
-        return None
+    def is_waiting_for_input(self) -> bool:
+        """Check if Claude is currently waiting for user input"""
+        return self.waiting_for_input
+    
+    def get_current_prompt(self) -> Optional[PromptInfo]:
+        """Get the current prompt information"""
+        return self.current_prompt
+    
+    def clear_prompt_state(self) -> None:
+        """Clear the current prompt state"""
+        self.current_prompt = None
+        self.waiting_for_input = False
     
     def send_input(self, text: str):
         """Send input to Claude pane"""
@@ -456,34 +410,31 @@ class DashboardController:
                         self._record_response("trust_prompt", "1", content)
                         continue
                     
-                    # Detect and respond to selection prompts
-                    prompt_info = self.detect_prompt_type(content)
-                    response = None
+                    # Check for prompts (no auto-response)
+                    prompt_info = self.check_for_prompt(content)
                     
                     if prompt_info:
-                        self.logger.debug(f"Detected prompt type: {prompt_info}")
-                        response = self.auto_respond(prompt_info)
-                        if response:
-                            self.logger.info(f"Auto-responding '{response}' to {prompt_info['type']} prompt")
-                            self.send_input(response)
-                            context = prompt_info.get('context', prompt_info['type'])
-                            self._record_response(context, response, content)
-                            
-                            if prompt_info['type'] == 'numbered':
-                                self._update_activity(f"🔢 Auto-selected option {response}")
-                            elif prompt_info['type'] == 'yn':
-                                self._update_activity(f"✅ Auto-responded: {response}")
-                        else:
-                            self.logger.warning(f"No response generated for prompt type: {prompt_info}")
+                        self._update_activity(f"⏳ Waiting for input: {prompt_info.type.value}")
+                        self.logger.debug(f"Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
+                    elif self.waiting_for_input:
+                        self._update_activity("⏳ Waiting for user input...")
                     else:
-                        # Log content snippets for debugging when no prompt is detected
-                        if len(content.strip()) > 0 and any(indicator in content.lower() for indicator in ['?', 'yes', 'no', '[1]', '1.', '❯']):
-                            self.logger.debug(f"Content contains prompt indicators but no pattern matched: {content[-200:]}")
+                        # Clear prompt state if no longer waiting
+                        self.clear_prompt_state()
                     
                     # Collect content for pattern analysis
                     if content != last_content and len(content.strip()) > 0:
                         try:
-                            self.content_collector.collect_interaction(content, prompt_info, response)
+                            # Convert PromptInfo to dict for collection compatibility
+                            prompt_dict = None
+                            if prompt_info:
+                                prompt_dict = {
+                                    'type': prompt_info.type.value,
+                                    'question': prompt_info.question,
+                                    'options': prompt_info.options,
+                                    'confidence': prompt_info.confidence
+                                }
+                            self.content_collector.collect_interaction(content, prompt_dict, None)
                         except Exception as e:
                             self.logger.error(f"Failed to collect content: {e}")
                     
