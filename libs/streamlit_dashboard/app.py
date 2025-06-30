@@ -10,9 +10,9 @@ from typing import Optional
 # Add parent directories to path so we can import our modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from libs.dashboard.session_manager import SessionManager
-from libs.dashboard.claude_manager import ClaudeManager
-from libs.dashboard.models import SessionInfo, DashboardStats
+from libs.core.session_manager import SessionManager
+from libs.core.claude_manager import ClaudeManager
+from libs.core.models import SessionInfo, DashboardStats
 
 
 def setup_page_config():
