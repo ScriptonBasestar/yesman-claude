@@ -27,21 +27,21 @@ uv run ./yesman.py --help
 uv run ./yesman.py ls
 
 # Show running tmux sessions  
-./yesman.py show
+uv run ./yesman.py show
 
 # Create all tmux sessions from projects.yaml
-./yesman.py setup
+uv run ./yesman.py setup
 
 # Teardown all sessions from projects.yaml
-./yesman.py teardown
+uv run ./yesman.py teardown
 
 # Enter (attach to) a tmux session
-./yesman.py enter [session_name]
-./yesman.py enter  # Interactive selection
+uv run ./yesman.py enter [session_name]
+uv run ./yesman.py enter  # Interactive selection
 
 
-# Run Streamlit web dashboard to monitor all sessions
-./yesman.py dashboard
+# Run TUI dashboard to monitor all sessions
+uv run ./yesman.py dashboard
 ```
 
 ### Testing and Linting
