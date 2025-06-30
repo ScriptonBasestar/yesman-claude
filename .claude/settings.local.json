@@ -37,7 +37,12 @@
       "Bash(tmux new-window:*)",
       "Bash(touch:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(./yesman.py setup)",
+      "Bash(tmux send-keys:*)",
+      "Bash(./yesman.py dashboard)",
+      "Bash(tmux display-message:*)",
+      "Bash(kill:*)"
     ],
     "deny": []
   }
