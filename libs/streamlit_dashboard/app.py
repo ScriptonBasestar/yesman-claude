@@ -718,6 +718,45 @@ def render_settings_sidebar():
             add_activity_log("info", f"Refresh interval set to {refresh_interval}s")
     
     st.sidebar.divider()
+    
+    # Cache statistics
+    st.sidebar.subheader("📊 Cache Statistics")
+    try:
+        cache_stats = st.session_state.session_manager.get_cache_stats()
+        
+        st.sidebar.metric(
+            "Hit Rate",
+            f"{cache_stats['hit_rate']:.1f}%",
+            help="Percentage of requests served from cache"
+        )
+        
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            st.metric("Hits", cache_stats['hits'])
+            st.metric("Entries", cache_stats['total_entries'])
+        
+        with col2:
+            st.metric("Misses", cache_stats['misses'])
+            st.metric("Evictions", cache_stats['evictions'])
+        
+        # Memory usage in KB
+        memory_kb = cache_stats['memory_size_bytes'] / 1024
+        st.sidebar.metric(
+            "Memory",
+            f"{memory_kb:.1f} KB",
+            help="Estimated cache memory usage"
+        )
+        
+        # Cache controls
+        if st.sidebar.button("🗑️ Clear Cache", help="Clear all cached session data"):
+            st.session_state.session_manager.invalidate_cache()
+            add_activity_log("info", "Cache cleared manually")
+            st.rerun()
+            
+    except Exception as e:
+        st.sidebar.error(f"Cache stats error: {e}")
+    
+    st.sidebar.divider()
 
 
 def _set_action_message(session_name: str, msg_type: str, message: str):

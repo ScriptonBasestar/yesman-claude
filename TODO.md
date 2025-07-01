@@ -52,9 +52,9 @@
 - 관련 ISSUE: 대시보드 2초마다 전체 세션 조회로 인한 성능 저하
 - 위치: libs/dashboard/session_cache.py
 
-[ ] get_session_info() 캐시 갱신 로직 구현 및 테스트
+[x] get_session_info() 캐시 갱신 로직 구현 및 테스트
 - 관련 ISSUE: tmux 서버 부하 감소 필요
-- 위치: libs/dashboard/session_manager.py
+- 위치: libs/core/session_manager.py
 
 [ ] 대시보드 조회 API → 캐시 방식 연동 (cache hit/miss 로직)
 - 관련 ISSUE: 대시보드 반응성 40% 향상 목표
