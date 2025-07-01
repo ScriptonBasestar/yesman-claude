@@ -22,20 +22,27 @@ class DashboardController:
         self.pane_id = pane_id
         self.server = libtmux.Server()
         self.session = None
-        self.claude_pane = None
+        self.claude_pane: Any = None
         self.is_running = False
         self.is_auto_next_enabled = True  # Enable auto-response by default
         self.selected_model = "default"
         self.logger = self._setup_logger()
         self.status_callback: Optional[Callable] = None
         self.activity_callback: Optional[Callable] = None
-        self.response_history = []  # Track auto-response history
-        self._monitor_thread = None
-        self._loop = None
+        self.response_history: list[dict] = []  # Track auto-response history
+        self._monitor_thread: Any = None
+        self._loop: Any = None
         self.content_collector = ClaudeContentCollector(session_name)
         self.prompt_detector = ClaudePromptDetector()
         self.current_prompt: Optional[PromptInfo] = None
         self.waiting_for_input = False
+        # Manual override settings for prompt responses
+        self.yn_mode = "Auto"
+        self.yn_response = "y"
+        self.mode12 = "Auto"
+        self.mode12_response = "1"
+        self.mode123 = "Auto"
+        self.mode123_response = "1"
         
         # Try to initialize session, but don't fail if session doesn't exist
         try:
@@ -259,10 +266,25 @@ class DashboardController:
         self._update_status(f"[cyan]Model set to: {model}[/]")
     
     def set_auto_next(self, enabled: bool):
-        """Enable/disable auto next functionality"""
+        """Enable or disable auto-next responses"""
         self.is_auto_next_enabled = enabled
         status = "enabled" if enabled else "disabled"
         self._update_status(f"[cyan]Auto next {status}[/]")
+    
+    def set_mode_yn(self, mode: str, response: str):
+        """Set manual override for Y/N prompts"""
+        self.yn_mode = mode
+        self.yn_response = response
+    
+    def set_mode_12(self, mode: str, response: str):
+        """Set manual override for 1/2 prompts"""
+        self.mode12 = mode
+        self.mode12_response = response
+    
+    def set_mode_123(self, mode: str, response: str):
+        """Set manual override for 1/2/3 prompts"""
+        self.mode123 = mode
+        self.mode123_response = response
     
     def capture_pane_content(self, lines: int = 50) -> str:
         """Capture content from Claude pane"""
@@ -310,6 +332,20 @@ class DashboardController:
             from .prompt_detector import PromptType
             
             if prompt_info.type == PromptType.NUMBERED_SELECTION:
+                # Manual override for numbered selection: 2 or 3 options
+                opts_count = prompt_info.metadata.get('option_count', len(prompt_info.options))
+                if opts_count == 2 and self.mode12 == "Manual":
+                    response = self.mode12_response
+                    self.send_input(response)
+                    self._record_response(prompt_info.type.value, response, prompt_info.question)
+                    self.logger.info(f"Manual responding to 1/2 selection with: {response}")
+                    return True
+                if opts_count >= 3 and self.mode123 == "Manual":
+                    response = self.mode123_response
+                    self.send_input(response)
+                    self._record_response(prompt_info.type.value, response, prompt_info.question)
+                    self.logger.info(f"Manual responding to 1/2/3 selection with: {response}")
+                    return True
                 # 편집 확인 프롬프트들에 대한 자동 응답
                 question = prompt_info.question.lower()
                 
@@ -358,6 +394,13 @@ class DashboardController:
                 return True
             
             elif prompt_info.type == PromptType.BINARY_CHOICE:
+                # Manual override for binary prompts
+                if self.yn_mode == "Manual":
+                    response = self.yn_response.lower() if isinstance(self.yn_response, str) else str(self.yn_response)
+                    self.send_input(response)
+                    self._record_response(prompt_info.type.value, response, prompt_info.question)
+                    self.logger.info(f"Manual responding to binary choice with: {response}")
+                    return True
                 # y/n 형태의 프롬프트
                 question = prompt_info.question.lower()
                 
