@@ -6,12 +6,14 @@ import time
 import re
 from typing import Optional, Dict, Any, Callable
 from pathlib import Path
-import libtmux
+import libtmux  # type: ignore
 import subprocess
 import threading
 from ..utils import ensure_log_directory, get_default_log_path
 from .content_collector import ClaudeContentCollector
 from .prompt_detector import ClaudePromptDetector, PromptInfo
+import datetime
+from ..yesman_config import YesmanConfig
 
 
 class DashboardController:
@@ -294,7 +296,20 @@ class DashboardController:
         try:
             # Get the last N lines from the pane
             result = self.claude_pane.cmd("capture-pane", "-p", "-S", f"-{lines}")
-            return "\n".join(result.stdout) if result.stdout else ""
+            content = "\n".join(result.stdout) if result.stdout else ""
+            # Save capture to log path
+            config = YesmanConfig()
+            log_base = config.get("log_path", str(get_default_log_path()))
+            log_path = ensure_log_directory(Path(log_base))
+            capture_dir = ensure_log_directory(log_path / "captures")
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            pane_id = self.pane_id or "unknown"
+            filename = f"capture_{self.session_name}_{pane_id}_{ts}.txt"
+            file_path = capture_dir / filename
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            self.logger.info(f"Saved pane capture to {file_path}")
+            return content
         except Exception as e:
             self.logger.error(f"Error capturing pane content: {e}")
             return ""
@@ -466,7 +481,6 @@ class DashboardController:
     
     def _record_response(self, prompt_type: str, response: str, content: str):
         """Record auto-response in history"""
-        import datetime
         record = {
             'timestamp': datetime.datetime.now().isoformat(),
             'prompt_type': prompt_type,
