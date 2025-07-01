@@ -60,9 +60,9 @@
 - 관련 ISSUE: 대시보드 반응성 40% 향상 목표
 - 위치: libs/streamlit_dashboard/app.py
 
-[ ] CLI/Daemon 모드별 캐싱 예외 처리 로직 추가
+[x] CLI/Daemon 모드별 캐싱 예외 처리 로직 추가
 - 관련 ISSUE: 모드별 캐시 동작 차이 대응
-- 위치: libs/dashboard/session_manager.py
+- 위치: libs/core/session_manager.py
 
 [ ] 캐시 상태 시각화용 로그 출력 (last_update, hit/miss 카운트, 메모리 사용량)
 - 관련 ISSUE: 캐시 성능 모니터링 필요
