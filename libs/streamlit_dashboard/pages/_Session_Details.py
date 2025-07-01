@@ -47,7 +47,9 @@ def initialize_managers():
 def get_session_info(session_name: str) -> Optional[Dict]:
     """Get detailed session information"""
     try:
-        session = st.session_state.tmux_server.find_where({"session_name": session_name})
+        # Use the sessions attribute (instead of deprecated list_sessions)
+        sessions = st.session_state.tmux_server.sessions
+        session = next((s for s in sessions if s.session_name == session_name), None)
         if not session:
             return None
         
