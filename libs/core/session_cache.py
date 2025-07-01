@@ -2,15 +2,33 @@
 
 import time
 import threading
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List, Callable, Set
 from dataclasses import dataclass, field
 import logging
 from pathlib import Path
 import hashlib
 import json
+from enum import Enum
 
 from .models import SessionInfo
 from ..utils import ensure_log_directory, get_default_log_path
+
+
+class InvalidationStrategy(Enum):
+    """Cache invalidation strategies"""
+    TIME_BASED = "time_based"          # Standard TTL expiration
+    CONTENT_CHANGE = "content_change"  # Invalidate when content changes
+    DEPENDENCY = "dependency"          # Invalidate based on dependencies
+    MANUAL = "manual"                  # Manual invalidation only
+
+
+class CacheTag:
+    """Tags for cache entries to enable smart invalidation"""
+    SESSION_DATA = "session_data"
+    SESSION_STATUS = "session_status"
+    CONTROLLER_STATE = "controller_state"
+    WINDOW_INFO = "window_info"
+    GLOBAL_STATE = "global_state"
 
 
 @dataclass
@@ -21,15 +39,31 @@ class CacheEntry:
     access_count: int = 0
     last_access: float = field(default_factory=time.time)
     content_hash: str = ""
+    tags: Set[str] = field(default_factory=set)
+    custom_ttl: Optional[float] = None
+    invalidation_strategy: InvalidationStrategy = InvalidationStrategy.TIME_BASED
+    dependencies: Set[str] = field(default_factory=set)
     
-    def is_expired(self, ttl: float) -> bool:
-        """Check if entry has expired"""
-        return time.time() - self.timestamp > ttl
+    def is_expired(self, default_ttl: float) -> bool:
+        """Check if entry has expired based on strategy"""
+        if self.invalidation_strategy == InvalidationStrategy.MANUAL:
+            return False
+        
+        effective_ttl = self.custom_ttl or default_ttl
+        return time.time() - self.timestamp > effective_ttl
     
     def mark_access(self) -> None:
         """Mark cache entry as accessed"""
         self.access_count += 1
         self.last_access = time.time()
+    
+    def add_tag(self, tag: str) -> None:
+        """Add a tag to this cache entry"""
+        self.tags.add(tag)
+    
+    def add_dependency(self, dependency: str) -> None:
+        """Add a dependency to this cache entry"""
+        self.dependencies.add(dependency)
 
 
 @dataclass
@@ -78,6 +112,11 @@ class SessionCache:
         self._last_cleanup = time.time()
         
         self.logger.info(f"SessionCache initialized - TTL: {default_ttl}s, Max entries: {max_entries}")
+        
+        # Advanced TTL and invalidation features
+        self._tag_registry: Dict[str, Set[str]] = {}  # tag -> set of keys
+        self._dependency_graph: Dict[str, Set[str]] = {}  # key -> dependent keys
+        self._change_detectors: Dict[str, Callable[[Any, Any], bool]] = {}  # key -> change detector
     
     def _setup_logger(self) -> logging.Logger:
         """Setup cache-specific logger"""
@@ -228,6 +267,250 @@ class SessionCache:
             self.log_periodic_status()
             
             return True
+    
+    def put_with_strategy(self, key: str, value: Any, 
+                         ttl: Optional[float] = None,
+                         strategy: InvalidationStrategy = InvalidationStrategy.TIME_BASED,
+                         tags: Optional[Set[str]] = None,
+                         dependencies: Optional[Set[str]] = None,
+                         change_detector: Optional[Callable[[Any, Any], bool]] = None) -> bool:
+        """
+        Store value in cache with advanced TTL and invalidation strategy
+        
+        Args:
+            key: Cache key
+            value: Value to cache
+            ttl: Custom TTL for this entry
+            strategy: Invalidation strategy
+            tags: Tags for group invalidation
+            dependencies: Keys this entry depends on
+            change_detector: Function to detect if content has changed
+            
+        Returns:
+            True if stored successfully
+        """
+        with self._lock:
+            # Check for content changes if strategy requires it
+            if strategy == InvalidationStrategy.CONTENT_CHANGE:
+                old_entry = self._cache.get(key)
+                if old_entry and change_detector:
+                    if not change_detector(old_entry.data, value):
+                        # Content hasn't changed, just update timestamp
+                        old_entry.timestamp = time.time()
+                        self.logger.debug(f"Content unchanged, refreshed timestamp: {key}")
+                        return True
+            
+            # Check if we need to make space
+            while len(self._cache) >= self.max_entries:
+                if not self._evict_lru():
+                    break
+            
+            # Create new entry with advanced features
+            content_hash = self._generate_content_hash(value)
+            entry = CacheEntry(
+                data=value,
+                timestamp=time.time(),
+                content_hash=content_hash,
+                tags=tags or set(),
+                custom_ttl=ttl,
+                invalidation_strategy=strategy,
+                dependencies=dependencies or set()
+            )
+            
+            # Update registries
+            self._update_tag_registry(key, entry.tags)
+            self._update_dependency_graph(key, entry.dependencies)
+            
+            if change_detector:
+                self._change_detectors[key] = change_detector
+            
+            # Store entry
+            self._cache[key] = entry
+            self.stats.total_entries = len(self._cache)
+            
+            self.logger.debug(f"Advanced cache stored: {key} (strategy: {strategy.value}, "
+                            f"tags: {entry.tags}, deps: {entry.dependencies})")
+            
+            # Check for dependency invalidation
+            self._check_and_invalidate_dependents(key)
+            
+            return True
+    
+    def _update_tag_registry(self, key: str, tags: Set[str]) -> None:
+        """Update the tag registry"""
+        for tag in tags:
+            if tag not in self._tag_registry:
+                self._tag_registry[tag] = set()
+            self._tag_registry[tag].add(key)
+    
+    def _update_dependency_graph(self, key: str, dependencies: Set[str]) -> None:
+        """Update the dependency graph"""
+        for dep_key in dependencies:
+            if dep_key not in self._dependency_graph:
+                self._dependency_graph[dep_key] = set()
+            self._dependency_graph[dep_key].add(key)
+    
+    def _check_and_invalidate_dependents(self, changed_key: str) -> None:
+        """Check and invalidate entries that depend on the changed key"""
+        if changed_key in self._dependency_graph:
+            dependent_keys = self._dependency_graph[changed_key].copy()
+            for dependent_key in dependent_keys:
+                self.invalidate(dependent_key)
+                self.logger.debug(f"Invalidated dependent: {dependent_key} (changed: {changed_key})")
+    
+    def invalidate_by_tag(self, tag: str) -> int:
+        """
+        Invalidate all cache entries with the specified tag
+        
+        Args:
+            tag: Tag to invalidate
+            
+        Returns:
+            Number of entries invalidated
+        """
+        with self._lock:
+            if tag not in self._tag_registry:
+                return 0
+            
+            keys_to_invalidate = self._tag_registry[tag].copy()
+            invalidated_count = 0
+            
+            for key in keys_to_invalidate:
+                if self.invalidate(key):
+                    invalidated_count += 1
+            
+            # Clean up tag registry
+            if tag in self._tag_registry:
+                del self._tag_registry[tag]
+            
+            self.logger.info(f"Invalidated {invalidated_count} entries with tag: {tag}")
+            return invalidated_count
+    
+    def set_ttl_for_key(self, key: str, new_ttl: float) -> bool:
+        """
+        Update TTL for a specific cache entry
+        
+        Args:
+            key: Cache key
+            new_ttl: New TTL in seconds
+            
+        Returns:
+            True if TTL was updated
+        """
+        with self._lock:
+            if key in self._cache:
+                self._cache[key].custom_ttl = new_ttl
+                self.logger.debug(f"Updated TTL for {key}: {new_ttl}s")
+                return True
+            return False
+    
+    def extend_ttl(self, key: str, additional_time: float) -> bool:
+        """
+        Extend TTL for a cache entry by refreshing its timestamp
+        
+        Args:
+            key: Cache key
+            additional_time: Additional time in seconds
+            
+        Returns:
+            True if TTL was extended
+        """
+        with self._lock:
+            if key in self._cache:
+                entry = self._cache[key]
+                entry.timestamp = time.time() + additional_time
+                self.logger.debug(f"Extended TTL for {key} by {additional_time}s")
+                return True
+            return False
+    
+    def get_entry_info(self, key: str) -> Optional[Dict[str, Any]]:
+        """
+        Get detailed information about a cache entry
+        
+        Args:
+            key: Cache key
+            
+        Returns:
+            Entry information or None if not found
+        """
+        with self._lock:
+            if key not in self._cache:
+                return None
+            
+            entry = self._cache[key]
+            current_time = time.time()
+            age = current_time - entry.timestamp
+            effective_ttl = entry.custom_ttl or self.default_ttl
+            time_to_expire = max(0, effective_ttl - age)
+            
+            return {
+                'key': key,
+                'age_seconds': round(age, 2),
+                'time_to_expire': round(time_to_expire, 2),
+                'access_count': entry.access_count,
+                'last_access': entry.last_access,
+                'tags': list(entry.tags),
+                'dependencies': list(entry.dependencies),
+                'strategy': entry.invalidation_strategy.value,
+                'custom_ttl': entry.custom_ttl,
+                'content_hash': entry.content_hash,
+                'is_expired': entry.is_expired(self.default_ttl)
+            }
+    
+    def get_cache_health_report(self) -> Dict[str, Any]:
+        """
+        Generate comprehensive cache health report
+        
+        Returns:
+            Detailed health report
+        """
+        with self._lock:
+            stats = self.get_stats()
+            current_time = time.time()
+            
+            # Analyze entry distribution by strategy
+            strategy_distribution = {}
+            tag_distribution = {}
+            dependency_count = 0
+            expired_count = 0
+            
+            for entry in self._cache.values():
+                # Strategy distribution
+                strategy = entry.invalidation_strategy.value
+                strategy_distribution[strategy] = strategy_distribution.get(strategy, 0) + 1
+                
+                # Tag distribution
+                for tag in entry.tags:
+                    tag_distribution[tag] = tag_distribution.get(tag, 0) + 1
+                
+                # Count dependencies and expired entries
+                dependency_count += len(entry.dependencies)
+                if entry.is_expired(self.default_ttl):
+                    expired_count += 1
+            
+            return {
+                'basic_stats': {
+                    'total_entries': stats.total_entries,
+                    'hits': stats.hits,
+                    'misses': stats.misses,
+                    'hit_rate': stats.hit_rate,
+                    'memory_kb': round(stats.memory_size_bytes / 1024, 2)
+                },
+                'advanced_stats': {
+                    'strategy_distribution': strategy_distribution,
+                    'tag_distribution': tag_distribution,
+                    'total_dependencies': dependency_count,
+                    'expired_entries': expired_count,
+                    'active_tags': len(self._tag_registry),
+                    'dependency_chains': len(self._dependency_graph)
+                },
+                'health_indicators': {
+                    'cache_efficiency': 'good' if stats.hit_rate >= 70 else 'needs_improvement',
+                    'memory_usage': 'normal' if stats.memory_size_bytes < 1024*1024 else 'high',
+                    'expiration_health': 'good' if expired_count < stats.total_entries * 0.2 else 'cleanup_needed'
+                },
+                'timestamp': current_time
+            }
     
     def invalidate(self, key: str) -> bool:
         """
