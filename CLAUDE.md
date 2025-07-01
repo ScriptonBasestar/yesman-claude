@@ -44,10 +44,25 @@ uv run ./yesman.py enter  # Interactive selection
 uv run ./yesman.py dashboard
 ```
 
-### Testing and Linting
-Currently no test suite or linting is configured. Future plans include:
+### Testing and Development Commands
+```bash
+# Run specific test files
+python -m pytest tests/test_prompt_detector.py
+python -m pytest tests/test_content_collector.py
+
+# Run integration tests  
+python test_full_automation.py
+python test_controller.py
+
+# Debug specific components
+python debug_content.py      # Debug content collection
+python debug_controller.py   # Debug dashboard controller  
+python debug_tmux.py        # Debug tmux operations
+```
+
+Currently no formal linting is configured. Future plans include:
 - pytest for testing
-- ruff for linting/formatting
+- ruff for linting/formatting  
 - mypy for type checking
 
 ## Architecture
@@ -106,12 +121,13 @@ Configuration merge modes:
 
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
-3. **Claude Manager Operation**: The claude manager (`libs/core/claude_manager.py:155`) runs a monitoring loop that:
-   - Captures tmux pane content every second
-   - Detects Claude Code trust prompts and auto-responds with "1"
-   - Shows progress indicators for ongoing operations
-   - Automatically exits if the monitored pane is not running Claude
-   - Provides safe restart functionality that properly terminates existing Claude processes
+3. **Claude Manager Operation**: The claude manager implements a sophisticated monitoring system:
+   - **DashboardController** (`libs/core/claude_manager.py:17`): Main controller manageable from the dashboard
+   - **Content Collection** (`libs/core/content_collector.py`): Captures tmux pane content efficiently
+   - **Prompt Detection** (`libs/core/prompt_detector.py`): Advanced regex-based prompt recognition system
+   - **Auto-Response Patterns**: Pattern files in `patterns/` directory (123/, yn/, 12/) for different prompt types
+   - **Monitoring Loop**: Captures content every second and detects interactive prompts
+   - **Safe Restart**: Properly terminates existing Claude processes before restarting
 
 4. **Dashboard Architecture**: Uses Streamlit framework for web-based dashboard with reactive data updates. Dashboard displays project configurations from `projects.yaml` and real-time tmux session status.
 
@@ -138,17 +154,50 @@ Configuration merge modes:
 
 When working on this codebase:
 
-1. **Adding New Commands**: Create new command files in `commands/` directory and register them in `yesman.py`
-2. **Claude Manager Modifications**: The claude manager logic is in `libs/core/claude_manager.py`. Pattern detection happens in `detect_prompt_type()` and auto-response in `auto_respond()`
-3. **Dashboard Updates**: Web dashboard components are in `libs/streamlit_dashboard/` using Streamlit framework
-4. **Configuration Changes**: Global config structure is defined in `YesmanConfig` class
+1. **Adding New Commands**: Create new command files in `commands/` directory and register them in `yesman.py:17-22`
+2. **Claude Manager Modifications**: 
+   - Core logic in `libs/core/claude_manager.py` (DashboardController class)
+   - Pattern detection in `libs/core/prompt_detector.py` (ClaudePromptDetector class)
+   - Content collection in `libs/core/content_collector.py`
+   - Auto-response patterns stored in `patterns/` subdirectories
+3. **Dashboard Updates**: Web dashboard components in `libs/streamlit_dashboard/app.py` using Streamlit framework
+4. **Configuration Changes**: Global config structure defined in `YesmanConfig` class (`libs/yesman_config.py`)
+5. **Testing**: Use debug scripts (`debug_*.py`) and test files in `tests/` for component testing
+
+### Pattern-Based Auto-Response System
+The system uses pattern files to recognize and respond to different prompt types:
+- `patterns/123/`: For numbered selection prompts (1, 2, 3 options)
+- `patterns/yn/`: For yes/no binary choices  
+- `patterns/12/`: For simple binary selections (1/2 options)
+Each pattern file contains regex patterns to match specific prompt formats.
 
 ## Dependencies
 
 Core dependencies (from pyproject.toml):
 - click>=8.0 - CLI framework
-- pyyaml>=5.4 - YAML parsing
+- pyyaml>=5.4 - YAML parsing  
 - pexpect>=4.8 - Process automation
 - tmuxp>=1.55.0 - Tmux session management
 - libtmux>=0.46.2 - Python tmux bindings
 - streamlit>=1.28.0 - Web framework for dashboard
+- rich>=13.0.0 - Terminal formatting and UI components
+
+## Key Implementation Notes
+
+### Claude Code Integration
+- The tool specifically targets Claude Code (claude.ai/code) automation
+- Monitors tmux panes running Claude Code sessions
+- Detects interactive prompts using advanced pattern matching
+- Auto-responds to trust prompts, selections, and confirmations
+
+### Session Management
+- Uses tmuxp for declarative session configuration
+- Sessions defined in YAML templates with window/pane layouts
+- Supports both global (`~/.yesman/`) and local (`./.yesman/`) configurations
+- Templates can be overridden per-project in `projects.yaml`
+
+### Monitoring and Control
+- Real-time content collection from tmux panes
+- Sophisticated prompt detection with confidence scoring
+- Dashboard provides web-based session monitoring and control
+- Auto-response history tracking and management
