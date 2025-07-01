@@ -3,9 +3,20 @@
 import libtmux
 import logging
 import os
+import subprocess
+import re
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 from enum import Enum
+from datetime import datetime
+
+# Try to import psutil, fall back to basic functionality if not available
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
@@ -175,27 +186,190 @@ class SessionManager:
         return self.cache.get_or_compute(cache_key, compute_session_info)
     
     def _get_window_info(self, window) -> WindowInfo:
-        """Get information for a single window"""
+        """Get information for a single window with detailed pane metrics"""
         panes = []
         
         for pane in window.list_panes():
             try:
-                cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
-                pane_info = PaneInfo(
-                    id=pane.get('pane_id'),
-                    command=cmd,
-                    is_claude='claude' in cmd.lower(),
-                    is_controller='controller' in cmd.lower() or 'yesman' in cmd.lower()
-                )
+                pane_info = self._get_detailed_pane_info(pane)
                 panes.append(pane_info)
             except Exception as e:
                 self.logger.error(f"Error getting pane info: {e}")
+                # Fallback to basic pane info
+                try:
+                    cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+                    basic_pane = PaneInfo(
+                        id=pane.get('pane_id'),
+                        command=cmd,
+                        is_claude='claude' in cmd.lower(),
+                        is_controller='controller' in cmd.lower() or 'yesman' in cmd.lower()
+                    )
+                    panes.append(basic_pane)
+                except:
+                    pass
         
         return WindowInfo(
             name=window.get('window_name'),
             index=window.get('window_index'),
             panes=panes
         )
+    
+    def _get_detailed_pane_info(self, pane) -> PaneInfo:
+        """Get detailed information for a single pane including metrics"""
+        try:
+            # Get basic pane information
+            cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+            pane_id = pane.get('pane_id')
+            
+            # Get pane PID and process info
+            pid_info = pane.cmd("display-message", "-p", "#{pane_pid}").stdout[0]
+            pid = int(pid_info) if pid_info.isdigit() else None
+            
+            # Initialize detailed metrics
+            cpu_usage = 0.0
+            memory_usage = 0.0
+            running_time = 0.0
+            status = "unknown"
+            current_task = None
+            
+            # Get process metrics if PID is available and psutil is installed
+            if pid and PSUTIL_AVAILABLE:
+                try:
+                    process = psutil.Process(pid)
+                    cpu_usage = process.cpu_percent()
+                    memory_info = process.memory_info()
+                    memory_usage = memory_info.rss / 1024 / 1024  # Convert to MB
+                    
+                    # Calculate running time
+                    create_time = process.create_time()
+                    running_time = datetime.now().timestamp() - create_time
+                    
+                    # Determine process status
+                    status = process.status()
+                    
+                    # Try to determine current task from command line
+                    try:
+                        cmdline = process.cmdline()
+                        current_task = self._analyze_current_task(cmdline, cmd)
+                    except:
+                        current_task = cmd
+                        
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    # Process might have ended or we don't have permission
+                    pass
+            elif pid and not PSUTIL_AVAILABLE:
+                # Fallback: basic task analysis without psutil
+                current_task = self._analyze_current_task([cmd], cmd)
+            
+            # Get pane activity information
+            try:
+                # Get last pane activity time (approximation)
+                pane_activity = pane.cmd("display-message", "-p", "#{pane_activity}").stdout[0]
+                activity_timestamp = int(pane_activity) if pane_activity.isdigit() else 0
+                
+                # Calculate idle time and activity score
+                current_time = datetime.now().timestamp()
+                idle_time = current_time - activity_timestamp if activity_timestamp > 0 else 0
+                
+                # Activity score: higher for recent activity, lower for idle panes
+                activity_score = max(0, 100 - (idle_time / 60))  # Decreases over minutes
+                
+            except:
+                idle_time = 0.0
+                activity_score = 50.0  # Default moderate activity
+            
+            # Get recent pane output for analysis
+            last_output = None
+            output_lines = 0
+            try:
+                # Capture last few lines of pane content
+                pane_content = pane.cmd("capture-pane", "-p").stdout
+                if pane_content:
+                    lines = [line for line in pane_content if line.strip()]
+                    output_lines = len(lines)
+                    if lines:
+                        last_output = lines[-1][:100]  # Last line, truncated
+            except:
+                pass
+            
+            # Create enhanced PaneInfo
+            pane_info = PaneInfo(
+                id=pane_id,
+                command=cmd,
+                is_claude='claude' in cmd.lower(),
+                is_controller='controller' in cmd.lower() or 'yesman' in cmd.lower(),
+                current_task=current_task,
+                idle_time=idle_time,
+                last_activity=datetime.fromtimestamp(activity_timestamp) if activity_timestamp > 0 else datetime.now(),
+                cpu_usage=cpu_usage,
+                memory_usage=memory_usage,
+                pid=pid,
+                running_time=running_time,
+                status=status,
+                activity_score=activity_score,
+                last_output=last_output,
+                output_lines=output_lines
+            )
+            
+            return pane_info
+            
+        except Exception as e:
+            self.logger.error(f"Error getting detailed pane info: {e}")
+            # Return basic pane info as fallback
+            return PaneInfo(
+                id=pane.get('pane_id', 'unknown'),
+                command=cmd if 'cmd' in locals() else 'unknown',
+                is_claude=False,
+                is_controller=False
+            )
+    
+    def _analyze_current_task(self, cmdline: List[str], command: str) -> str:
+        """Analyze command line to determine current task"""
+        if not cmdline:
+            return command
+        
+        # Join command line for analysis
+        full_cmd = ' '.join(cmdline)
+        
+        # Claude-specific task detection
+        if 'claude' in full_cmd.lower():
+            if '--read' in full_cmd:
+                return "Reading files"
+            elif '--edit' in full_cmd or '--write' in full_cmd:
+                return "Editing code"
+            elif 'dashboard' in full_cmd:
+                return "Running dashboard"
+            else:
+                return "Claude interactive"
+        
+        # Controller-specific task detection
+        elif 'yesman' in full_cmd.lower() or 'controller' in full_cmd.lower():
+            if 'dashboard' in full_cmd:
+                return "Dashboard controller"
+            elif 'setup' in full_cmd:
+                return "Setting up sessions"
+            elif 'teardown' in full_cmd:
+                return "Tearing down sessions"
+            else:
+                return "Yesman controller"
+        
+        # Common development tasks
+        elif any(term in full_cmd.lower() for term in ['vim', 'nano', 'code', 'nvim']):
+            return "Editing files"
+        elif any(term in full_cmd.lower() for term in ['python', 'node', 'npm', 'pip']):
+            return "Running application"
+        elif any(term in full_cmd.lower() for term in ['git', 'commit', 'push', 'pull']):
+            return "Git operations"
+        elif any(term in full_cmd.lower() for term in ['test', 'pytest', 'jest']):
+            return "Running tests"
+        elif any(term in full_cmd.lower() for term in ['build', 'compile', 'make']):
+            return "Building project"
+        elif 'bash' in full_cmd.lower() or 'zsh' in full_cmd.lower():
+            return "Terminal session"
+        else:
+            # Extract the main command (first meaningful part)
+            main_cmd = cmdline[0].split('/')[-1] if cmdline else command
+            return f"Running {main_cmd}"
     
     def invalidate_cache(self, project_name: str = None) -> None:
         """

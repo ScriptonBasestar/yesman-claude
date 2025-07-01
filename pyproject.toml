@@ -25,6 +25,7 @@ dependencies = [
     "libtmux>=0.46.2",
     "rich>=13.0.0",
     "streamlit>=1.28.0",
+    "psutil>=5.9.0",
 ]
 
 [project.urls]
