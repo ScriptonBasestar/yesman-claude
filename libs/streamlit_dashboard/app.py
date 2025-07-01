@@ -239,86 +239,62 @@ def render_session_card(session: SessionInfo):
                     if controller.is_running:
                         if st.button(f"⏹️ Stop Controller", key=f"stop_{session.session_name}"):
                             if controller.stop():
-                                st.success("Controller stopped")
+                                _set_action_message(session.session_name, "success", "Controller stopped.")
                                 add_activity_log("success", f"Controller stopped for {session.session_name}")
-                                st.rerun()
                             else:
-                                st.error("Failed to stop controller")
+                                _set_action_message(session.session_name, "error", "Failed to stop controller.")
                                 add_activity_log("error", f"Failed to stop controller for {session.session_name}")
                     else:
                         if st.button(f"▶️ Start Controller", key=f"start_{session.session_name}"):
                             if controller.start():
-                                st.success("Controller started")
+                                _set_action_message(session.session_name, "success", "Controller started.")
                                 add_activity_log("success", f"Controller started for {session.session_name}")
-                                st.rerun()
                             else:
-                                st.error("Failed to start controller")
+                                _set_action_message(session.session_name, "error", "Failed to start controller.")
                                 add_activity_log("error", f"Failed to start controller for {session.session_name}")
                     
                     if st.button(f"🔄 Restart Claude", key=f"restart_{session.session_name}"):
                         if controller.restart_claude_pane():
-                            st.success("Claude pane restarted")
+                            _set_action_message(session.session_name, "success", "Claude pane restarted.")
                             add_activity_log("success", f"Claude pane restarted for {session.session_name}")
-                            st.rerun()
                         else:
-                            st.error("Failed to restart Claude pane")
+                            _set_action_message(session.session_name, "error", "Failed to restart Claude pane.")
                             add_activity_log("error", f"Failed to restart Claude pane for {session.session_name}")
                     
                     # Setup Tmux 버튼
                     if st.button(f"🚀 Setup Tmux", key=f"setup_{session.session_name}"):
                         with st.spinner("Setting up tmux sessions..."):
-                            if setup_tmux_sessions(session.session_name):
-                                # 메시지 상태 저장 (성공)
-                                st.session_state[f"setup_msg_{session.session_name}"] = {
-                                    "type": "success",
-                                    "msg": "Tmux setup completed successfully",
-                                    "timestamp": time.time()
-                                }
-                                st.rerun()
-                            else:
-                                st.session_state[f"setup_msg_{session.session_name}"] = {
-                                    "type": "error",
-                                    "msg": "Tmux setup failed or completed with errors",
-                                    "timestamp": time.time()
-                                }
-                                st.rerun()
+                            setup_tmux_sessions(session.session_name)
+                        # st.rerun() # Removed to prevent flickering
+
                     # Teardown Tmux 버튼
                     if st.button(f"🗑️ Teardown Tmux", key=f"teardown_{session.session_name}"):
                         with st.spinner("Tearing down tmux session(s)..."):
-                            if teardown_tmux_sessions(session.session_name):
-                                st.session_state[f"teardown_msg_{session.session_name}"] = {
-                                    "type": "success",
-                                    "msg": "Tmux teardown completed successfully",
-                                    "timestamp": time.time()
-                                }
-                                st.rerun()
-                            else:
-                                st.session_state[f"teardown_msg_{session.session_name}"] = {
-                                    "type": "error",
-                                    "msg": "Tmux teardown failed or completed with errors",
-                                    "timestamp": time.time()
-                                }
-                                st.rerun()
-                    # Setup/Teardown 메시지 표시 (3초 후 자동 사라짐)
-                    now = time.time()
-                    setup_key = f"setup_msg_{session.session_name}"
-                    teardown_key = f"teardown_msg_{session.session_name}"
-                    for msg_key in [setup_key, teardown_key]:
-                        msg_state = st.session_state.get(msg_key)
-                        if msg_state:
-                            elapsed = now - msg_state["timestamp"]
-                            if elapsed < 3:
-                                # 메시지 표시 (3초간)
-                                if msg_state["type"] == "success":
-                                    st.success(msg_state["msg"])
-                                else:
-                                    st.error(msg_state["msg"])
-                            else:
-                                st.session_state.pop(msg_key, None)
+                            teardown_tmux_sessions(session.session_name)
+                        # st.rerun() # Removed to prevent flickering
                 else:
-                    st.write("Controller not available")
+                    st.write("Controller not available for actions")
+
+                # 알림 메시지 표시 영역 (Actions 컬럼 맨 아래)
+                now = time.time()
+                msg_key = f"action_msg_{session.session_name}"
+                if msg_key in st.session_state:
+                    msg_state = st.session_state[msg_key]
+                    if now - msg_state["timestamp"] < 3:
+                        msg_type = msg_state["type"]
+                        if msg_type == "success":
+                            st.success(msg_state["msg"])
+                        elif msg_type == "error":
+                            st.error(msg_state["msg"])
+                        elif msg_type == "info":
+                            st.info(msg_state["msg"])
+                        elif msg_type == "warning":
+                            st.warning(msg_state["msg"])
+                    else:
+                        st.session_state.pop(msg_key, None)
+
             except Exception as e:
-                st.write(f"Error: {str(e)}")
+                st.write(f"Error in actions: {str(e)}")
         
         with col4:
             st.write("**Settings:**")
@@ -342,7 +318,6 @@ def render_session_card(session: SessionInfo):
                         controller.set_model(new_model)
                         st.success(f"Model set to {new_model}")
                         add_activity_log("info", f"Model set to {new_model} for {session.session_name}")
-                        st.rerun()
                     
                     # Auto next setting
                     new_auto_next = st.checkbox(
@@ -355,7 +330,6 @@ def render_session_card(session: SessionInfo):
                         controller.set_auto_next(new_auto_next)
                         st.success(f"Auto next {'enabled' if new_auto_next else 'disabled'}")
                         add_activity_log("info", f"Auto next {'enabled' if new_auto_next else 'disabled'} for {session.session_name}")
-                        st.rerun()
                 else:
                     st.write("Controller not available")
             except Exception as e:
@@ -738,6 +712,15 @@ def render_settings_sidebar():
     st.sidebar.divider()
 
 
+def _set_action_message(session_name: str, msg_type: str, message: str):
+    """Helper function to set action messages in session_state."""
+    st.session_state[f"action_msg_{session_name}"] = {
+        "type": msg_type,
+        "msg": message,
+        "timestamp": time.time()
+    }
+
+
 def setup_tmux_sessions(session_name=None):
     """Setup tmux sessions based on projects.yaml configuration"""
     try:
@@ -831,10 +814,10 @@ def setup_tmux_sessions(session_name=None):
 
                 # Create tmux session
                 if tmux_manager.create_session(sess_name, config_dict):
-                    st.success(f"Created session: {sess_name}")
+                    _set_action_message(sess_name, "success", f"Created session: {sess_name}")
                     success_count += 1
                 else:
-                    st.warning(f"Session {sess_name} already exists or failed to create")
+                    _set_action_message(sess_name, "warning", f"Session {sess_name} already exists or failed.")
                     error_count += 1
 
             except Exception as e:
@@ -864,12 +847,22 @@ def teardown_tmux_sessions(session_name=None):
         tmux_manager = TmuxManager(config)
         sessions = tmux_manager.load_projects().get("sessions", {})
         if not sessions:
-            st.error("No sessions defined in projects.yaml")
+            # session_state에 오류 메시지 저장
+            if session_name:
+                st.session_state[f"teardown_msg_{session_name}"] = {
+                    "type": "error",
+                    "msg": "No sessions defined in projects.yaml",
+                    "timestamp": time.time()
+                }
             return False
         # 특정 세션만 지정된 경우
         if session_name:
             if session_name not in sessions:
-                st.error(f"Session {session_name} not defined in projects.yaml")
+                st.session_state[f"teardown_msg_{session_name}"] = {
+                    "type": "error",
+                    "msg": f"Session {session_name} not defined in projects.yaml",
+                    "timestamp": time.time()
+                }
                 return False
             sessions = {session_name: sessions[session_name]}
         import libtmux
@@ -883,13 +876,13 @@ def teardown_tmux_sessions(session_name=None):
             if server.find_where({"session_name": actual_session_name}):
                 try:
                     subprocess.run(["tmux", "kill-session", "-t", actual_session_name], check=True)
-                    st.success(f"Killed session: {actual_session_name}")
+                    _set_action_message(sess_name, "success", f"Killed session: {actual_session_name}")
                     success_count += 1
                 except Exception as e:
-                    st.error(f"Failed to kill session {actual_session_name}: {e}")
+                    _set_action_message(sess_name, "error", f"Failed to kill session {actual_session_name}: {e}")
                     error_count += 1
             else:
-                st.info(f"Session {actual_session_name} not found")
+                _set_action_message(sess_name, "info", f"Session {actual_session_name} not found")
         if success_count > 0:
             add_activity_log("success", f"Teardown completed: {success_count} session(s) killed, {error_count} errors")
             return True
@@ -897,7 +890,13 @@ def teardown_tmux_sessions(session_name=None):
             add_activity_log("warning", f"Teardown completed with {error_count} errors")
             return False
     except Exception as e:
-        st.error(f"Teardown failed: {e}")
+        # session_state에 오류 메시지 저장
+        if session_name:
+            st.session_state[f"teardown_msg_{session_name}"] = {
+                "type": "error",
+                "msg": f"Teardown failed: {e}",
+                "timestamp": time.time()
+            }
         add_activity_log("error", f"Teardown failed: {e}")
         return False
 
