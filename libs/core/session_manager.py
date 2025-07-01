@@ -2,8 +2,10 @@
 
 import libtmux
 import logging
-from typing import List, Dict, Any
+import os
+from typing import List, Dict, Any, Optional
 from pathlib import Path
+from enum import Enum
 
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
@@ -12,17 +14,29 @@ from .session_cache import SessionCache
 from ..utils import ensure_log_directory
 
 
+class OperationMode(Enum):
+    """Operation modes for different cache behaviors"""
+    CLI = "cli"          # Command-line interface mode (no caching)
+    DAEMON = "daemon"    # Long-running daemon mode (aggressive caching)
+    WEB = "web"          # Web dashboard mode (moderate caching)
+
+
 class SessionManager:
     """Manages tmux session information for dashboard"""
     
-    def __init__(self):
+    def __init__(self, operation_mode: Optional[OperationMode] = None):
         self.config = YesmanConfig()
         self.tmux_manager = TmuxManager(self.config)
         self.server = libtmux.Server()
         self.logger = self._setup_logger()
         
-        # Initialize session cache with 3-second TTL for dashboard responsiveness
-        self.cache = SessionCache(default_ttl=3.0, max_entries=100)
+        # Detect operation mode if not specified
+        self.operation_mode = operation_mode or self._detect_operation_mode()
+        
+        # Initialize cache based on operation mode
+        self.cache = self._init_cache_for_mode()
+        
+        self.logger.info(f"SessionManager initialized in {self.operation_mode.value} mode")
         
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with file-only output"""
@@ -42,10 +56,40 @@ class SessionManager:
         
         return logger
     
-    def get_all_sessions(self) -> List[SessionInfo]:
-        """Get information about all yesman sessions with caching"""
-        cache_key = "all_sessions"
+    def _detect_operation_mode(self) -> OperationMode:
+        """Detect operation mode based on environment"""
+        # Check if running in Streamlit (web dashboard)
+        if 'streamlit' in os.environ.get('_', '').lower() or 'STREAMLIT_SERVER_PORT' in os.environ:
+            return OperationMode.WEB
         
+        # Check if running as daemon (has TMUX or SSH_TTY)
+        if os.environ.get('TMUX') or os.environ.get('SSH_TTY'):
+            return OperationMode.DAEMON
+        
+        # Default to CLI mode
+        return OperationMode.CLI
+    
+    def _init_cache_for_mode(self) -> Optional[SessionCache]:
+        """Initialize cache based on operation mode"""
+        if self.operation_mode == OperationMode.CLI:
+            # CLI mode: No caching for immediate, fresh data
+            self.logger.info("CLI mode: Caching disabled")
+            return None
+            
+        elif self.operation_mode == OperationMode.DAEMON:
+            # Daemon mode: Aggressive caching for long-running processes
+            cache = SessionCache(default_ttl=30.0, max_entries=500)
+            self.logger.info("Daemon mode: Aggressive caching (30s TTL, 500 entries)")
+            return cache
+            
+        else:  # WEB mode
+            # Web mode: Moderate caching for dashboard responsiveness
+            cache = SessionCache(default_ttl=3.0, max_entries=100)
+            self.logger.info("Web mode: Moderate caching (3s TTL, 100 entries)")
+            return cache
+    
+    def get_all_sessions(self) -> List[SessionInfo]:
+        """Get information about all yesman sessions with mode-aware caching"""
         def compute_sessions():
             sessions_info = []
             
@@ -64,13 +108,17 @@ class SessionManager:
                 self.logger.error(f"Error getting sessions: {e}", exc_info=True)
                 return []
         
-        # Use cache with compute function
+        # CLI mode: Always compute fresh data (no caching)
+        if self.operation_mode == OperationMode.CLI or self.cache is None:
+            self.logger.debug("CLI mode: Computing fresh session data")
+            return compute_sessions()
+        
+        # Other modes: Use cache with compute function
+        cache_key = "all_sessions"
         return self.cache.get_or_compute(cache_key, compute_sessions)
     
     def _get_session_info(self, project_name: str, project_conf: Dict[str, Any]) -> SessionInfo:
-        """Get information for a single session with caching"""
-        cache_key = f"session_{project_name}"
-        
+        """Get information for a single session with mode-aware caching"""
         def compute_session_info():
             override = project_conf.get("override", {})
             session_name = override.get("session_name", project_name)
@@ -118,7 +166,12 @@ class SessionManager:
                 controller_status=controller_status
             )
         
-        # Use cache with compute function
+        # CLI mode: Always compute fresh data (no caching)
+        if self.operation_mode == OperationMode.CLI or self.cache is None:
+            return compute_session_info()
+        
+        # Other modes: Use cache with compute function
+        cache_key = f"session_{project_name}"
         return self.cache.get_or_compute(cache_key, compute_session_info)
     
     def _get_window_info(self, window) -> WindowInfo:
@@ -146,11 +199,16 @@ class SessionManager:
     
     def invalidate_cache(self, project_name: str = None) -> None:
         """
-        Invalidate session cache entries
+        Invalidate session cache entries (mode-aware)
         
         Args:
             project_name: Specific project to invalidate, or None for all
         """
+        # CLI mode: No cache to invalidate
+        if self.operation_mode == OperationMode.CLI or self.cache is None:
+            self.logger.debug("CLI mode: No cache to invalidate")
+            return
+        
         if project_name:
             # Invalidate specific session
             session_key = f"session_{project_name}"
@@ -163,13 +221,31 @@ class SessionManager:
             self.logger.info(f"Cleared all session cache entries: {cleared}")
     
     def invalidate_all_sessions_cache(self) -> None:
-        """Invalidate the all_sessions cache specifically"""
+        """Invalidate the all_sessions cache specifically (mode-aware)"""
+        # CLI mode: No cache to invalidate
+        if self.operation_mode == OperationMode.CLI or self.cache is None:
+            self.logger.debug("CLI mode: No cache to invalidate")
+            return
+        
         invalidated = self.cache.invalidate("all_sessions")
         if invalidated:
             self.logger.debug("Invalidated all_sessions cache")
     
     def get_cache_stats(self) -> Dict[str, Any]:
-        """Get cache performance statistics"""
+        """Get cache performance statistics (mode-aware)"""
+        # CLI mode: Return empty stats
+        if self.operation_mode == OperationMode.CLI or self.cache is None:
+            return {
+                'hits': 0,
+                'misses': 0,
+                'hit_rate': 0.0,
+                'total_entries': 0,
+                'memory_size_bytes': 0,
+                'evictions': 0,
+                'mode': self.operation_mode.value,
+                'cache_enabled': False
+            }
+        
         stats = self.cache.get_stats()
         return {
             'hits': stats.hits,
@@ -177,5 +253,7 @@ class SessionManager:
             'hit_rate': round(stats.hit_rate, 2),
             'total_entries': stats.total_entries,
             'memory_size_bytes': stats.memory_size_bytes,
-            'evictions': stats.evictions
+            'evictions': stats.evictions,
+            'mode': self.operation_mode.value,
+            'cache_enabled': True
         }
