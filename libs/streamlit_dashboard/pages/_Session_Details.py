@@ -187,7 +187,9 @@ def render_pane_content(pane_info: Dict):
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        lines_to_show = st.slider("Lines to show:", 10, 200, 50, key="pane_lines")
+        # Use a unique session state key per pane to ensure slider updates correctly
+        lines_key = f"pane_lines_{pane_info['id']}"
+        lines_to_show = st.slider("Lines to show:", 10, 200, 50, key=lines_key)
     
     with col2:
         auto_refresh = st.checkbox("Auto Refresh", value=st.session_state.auto_refresh_pane)
@@ -243,6 +245,49 @@ def render_pane_input(pane_info: Dict):
         else:
             st.warning("Please enter text to send")
 
+    st.divider()
+
+
+def render_auto_actions(pane_info: Dict):
+    # ───── Auto Actions ─────
+    st.write("**Auto Actions:**")
+    # 1) Y/N 패턴
+    col0, col1, col2 = st.columns([1, 1, 2])
+    with col0:
+        st.write("Y/N 패턴")
+    with col1:
+        yn_mode_key = f"auto_yn_mode_{pane_info['id']}"
+        mode_yn = st.radio("모드:", ["Auto", "Manual"], key=yn_mode_key)
+    with col2:
+        manual_yn_key = f"manual_yn_choice_{pane_info['id']}"
+        mode_yn_response = st.radio("응답 선택:", ["Yes", "No"], key=manual_yn_key)
+
+
+    # 2) 1/2 패턴
+    col0, col1, col2 = st.columns([1, 1, 2])
+    with col0:
+        st.write("1/2 패턴")
+    with col1:
+        mode12_key = f"auto_12_mode_{pane_info['id']}"
+        mode_12 = st.radio("모드:", ["Auto", "Manual"], key=mode12_key)
+    with col2:
+        mode12_key = f"manual_12_choice_{pane_info['id']}"
+        mode_12_response = st.radio("1/2 패턴 모드:", ["Auto", "Manual"], key=mode12_key)
+
+    # 3) 1/2/3 패턴
+    col0, col1, col2 = st.columns([1, 1, 2])
+    with col0:
+        st.write("1/2/3 패턴")
+    with col1:
+        mode123_key = f"auto_123_mode_{pane_info['id']}"
+        mode_123 = st.radio("모드:", ["Auto", "Manual"], key=mode123_key)
+    with col2:
+        manual_123_key = f"manual_123_choice_{pane_info['id']}"
+        mode_123_response = st.radio("응답 선택:", ["1", "2", "3"], key=manual_123_key)
+
+    st.divider()
+
+def render_quick_actions(pane_info: Dict):
     # Quick Actions
     st.write("**Quick Actions:**")
     col1, col2, col3, col4 = st.columns(4)
@@ -296,6 +341,8 @@ def main(session_name: str):
                 if selected_pane:
                     render_pane_content(selected_pane)
                     render_pane_input(selected_pane)
+                    render_auto_actions(selected_pane)
+                    render_quick_actions(selected_pane)
                 else:
                     st.info("Select a pane to view its content and send commands.")
 
