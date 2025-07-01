@@ -64,9 +64,9 @@
 - 관련 ISSUE: 모드별 캐시 동작 차이 대응
 - 위치: libs/core/session_manager.py
 
-[ ] 캐시 상태 시각화용 로그 출력 (last_update, hit/miss 카운트, 메모리 사용량)
+[x] 캐시 상태 시각화용 로그 출력 (last_update, hit/miss 카운트, 메모리 사용량)
 - 관련 ISSUE: 캐시 성능 모니터링 필요
-- 위치: libs/dashboard/session_cache.py
+- 위치: libs/core/session_cache.py
 
 [ ] 캐시 TTL 설정 및 무효화 전략 구현 (세션 변경 감지시 즉시 무효화)
 - 관련 ISSUE: 실시간성과 성능의 균형
