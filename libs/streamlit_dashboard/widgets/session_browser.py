@@ -1,6 +1,7 @@
 """Interactive session browser widget with tree view"""
 
 import streamlit as st
+import time
 from typing import List, Dict, Any, Optional, Callable
 from dataclasses import dataclass
 from enum import Enum
@@ -15,6 +16,30 @@ class NodeType(Enum):
     SESSION = "session"
     WINDOW = "window"
     PANE = "pane"
+
+
+class SessionState(Enum):
+    """Session state types with icons"""
+    RUNNING = ("🟢", "#00ff00", "Running")
+    RUNNING_NO_CONTROLLER = ("🟡", "#ffff00", "Running (No Controller)")
+    STOPPED = ("⚫", "#666666", "Stopped")
+    ERROR = ("🔴", "#ff0000", "Error")
+    LOADING = ("🔄", "#0080ff", "Loading")
+    WARNING = ("⚠️", "#ffa500", "Warning")
+    UNKNOWN = ("❓", "#888888", "Unknown")
+
+
+class PaneState(Enum):
+    """Pane state types with icons"""
+    CLAUDE_ACTIVE = ("🔵", "#0080ff", "Claude (Active)")
+    CLAUDE_IDLE = ("💤", "#4080ff", "Claude (Idle)")
+    CONTROLLER_RUNNING = ("🟡", "#ffa500", "Controller (Running)")
+    CONTROLLER_STOPPED = ("⚫", "#666666", "Controller (Stopped)")
+    REGULAR_ACTIVE = ("⚪", "#cccccc", "Regular (Active)")
+    REGULAR_IDLE = ("⭕", "#999999", "Regular (Idle)")
+    TERMINAL = ("📺", "#00ff00", "Terminal")
+    EDITOR = ("📝", "#ff8000", "Editor")
+    UNKNOWN = ("❓", "#888888", "Unknown")
 
 
 @dataclass
@@ -38,9 +63,11 @@ class TreeNode:
 class SessionTreeBrowser:
     """File-browser style session tree widget"""
     
-    def __init__(self, session_key: str = "session_browser"):
+    def __init__(self, session_key: str = "session_browser", auto_refresh: bool = True):
         self.session_key = session_key
+        self.auto_refresh = auto_refresh
         self._init_session_state()
+        self._status_history: Dict[str, List[tuple[float, str]]] = {}  # Track status changes
     
     def _init_session_state(self):
         """Initialize session state for browser"""
@@ -49,26 +76,108 @@ class SessionTreeBrowser:
         if f"{self.session_key}_selected" not in st.session_state:
             st.session_state[f"{self.session_key}_selected"] = None
     
-    def _get_status_icon_and_color(self, session_info: SessionInfo) -> tuple[str, str]:
-        """Get status icon and color for session"""
+    def _detect_session_state(self, session_info: SessionInfo) -> SessionState:
+        """Detect current session state"""
         if not session_info.exists:
-            return "⚫", "#666666"  # Stopped
+            return SessionState.STOPPED
         
         if session_info.controller_status == 'running':
-            return "🟢", "#00ff00"  # Running with controller
+            return SessionState.RUNNING
         elif session_info.status == 'running':
-            return "🟡", "#ffff00"  # Running without controller
+            return SessionState.RUNNING_NO_CONTROLLER
+        elif session_info.status == 'error':
+            return SessionState.ERROR
         else:
-            return "🔴", "#ff0000"  # Error state
+            return SessionState.UNKNOWN
+    
+    def _detect_pane_state(self, pane_info: PaneInfo) -> PaneState:
+        """Detect current pane state with activity analysis"""
+        command = pane_info.command.lower()
+        
+        if pane_info.is_claude:
+            # Check if Claude is likely active or idle
+            if any(keyword in command for keyword in ['read', 'edit', 'processing']):
+                return PaneState.CLAUDE_ACTIVE
+            else:
+                return PaneState.CLAUDE_IDLE
+        
+        elif pane_info.is_controller:
+            # Check controller activity
+            if 'running' in command or 'active' in command:
+                return PaneState.CONTROLLER_RUNNING
+            else:
+                return PaneState.CONTROLLER_STOPPED
+        
+        else:
+            # Detect regular pane types
+            if any(term in command for term in ['vim', 'nano', 'code', 'editor']):
+                return PaneState.EDITOR
+            elif any(term in command for term in ['bash', 'zsh', 'sh', 'terminal']):
+                return PaneState.TERMINAL
+            elif 'sleep' in command or 'idle' in command:
+                return PaneState.REGULAR_IDLE
+            else:
+                return PaneState.REGULAR_ACTIVE
+    
+    def _get_status_icon_and_color(self, session_info: SessionInfo) -> tuple[str, str]:
+        """Get status icon and color for session"""
+        state = self._detect_session_state(session_info)
+        return state.value[0], state.value[1]
     
     def _get_pane_icon_and_color(self, pane_info: PaneInfo) -> tuple[str, str]:
-        """Get icon and color for pane"""
-        if pane_info.is_claude:
-            return "🔵", "#0080ff"  # Claude pane
-        elif pane_info.is_controller:
-            return "🟡", "#ffa500"  # Controller pane
+        """Get icon and color for pane with state detection"""
+        state = self._detect_pane_state(pane_info)
+        return state.value[0], state.value[1]
+    
+    def _track_status_change(self, entity_id: str, new_status: str):
+        """Track status changes for real-time monitoring"""
+        current_time = time.time()
+        
+        if entity_id not in self._status_history:
+            self._status_history[entity_id] = []
+        
+        history = self._status_history[entity_id]
+        
+        # Add new status if different from last
+        if not history or history[-1][1] != new_status:
+            history.append((current_time, new_status))
+            
+            # Keep only last 10 status changes
+            if len(history) > 10:
+                history.pop(0)
+    
+    def _get_status_indicator(self, entity_id: str, current_state: str) -> str:
+        """Get status indicator with change animation"""
+        self._track_status_change(entity_id, current_state)
+        
+        history = self._status_history.get(entity_id, [])
+        if len(history) < 2:
+            return current_state
+        
+        # Check if status changed recently (within 5 seconds)
+        current_time = time.time()
+        last_change_time = history[-1][0]
+        
+        if current_time - last_change_time < 5.0:
+            # Show change indicator
+            return f"🔄 {current_state}"
+        
+        return current_state
+    
+    def _get_session_health_indicator(self, session_info: SessionInfo) -> str:
+        """Get health indicator based on session state"""
+        state = self._detect_session_state(session_info)
+        
+        if state == SessionState.RUNNING:
+            return "🟢 Healthy"
+        elif state == SessionState.RUNNING_NO_CONTROLLER:
+            return "⚠️ No Controller"
+        elif state == SessionState.STOPPED:
+            return "⚫ Stopped"
+        elif state == SessionState.ERROR:
+            return "🔴 Error"
         else:
-            return "⚪", "#cccccc"  # Regular pane
+            return "❓ Unknown"
     
     def _build_tree_from_sessions(self, sessions: List[SessionInfo]) -> TreeNode:
         """Build tree structure from session data"""
@@ -81,15 +190,20 @@ class SessionTreeBrowser:
         )
         
         for session in sessions:
-            # Get session status
+            # Get session status with real-time tracking
             status_icon, status_color = self._get_status_icon_and_color(session)
+            state = self._detect_session_state(session)
+            
+            # Track status changes
+            entity_id = f"session_{session.session_name}"
+            status_indicator = self._get_status_indicator(entity_id, status_icon)
             
             session_node = TreeNode(
-                id=f"session_{session.session_name}",
+                id=entity_id,
                 name=f"{session.project_name} ({session.session_name})",
                 node_type=NodeType.SESSION,
                 data=session,
-                status_icon=status_icon,
+                status_icon=status_indicator,
                 status_color=status_color
             )
             
@@ -104,16 +218,24 @@ class SessionTreeBrowser:
                     status_color="#4a90e2"
                 )
                 
-                # Add panes
+                # Add panes with state tracking
                 for i, pane in enumerate(window.panes):
                     pane_icon, pane_color = self._get_pane_icon_and_color(pane)
                     
+                    # Track pane status changes
+                    pane_entity_id = f"pane_{session.session_name}_{window.index}_{i}"
+                    pane_status_indicator = self._get_status_indicator(pane_entity_id, pane_icon)
+                    
+                    # Enhanced pane name with type indicator
+                    pane_state = self._detect_pane_state(pane)
+                    pane_type = pane_state.value[2]  # Human readable description
+                    
                     pane_node = TreeNode(
-                        id=f"pane_{session.session_name}_{window.index}_{i}",
-                        name=f"Pane {i}: {pane.command}",
+                        id=pane_entity_id,
+                        name=f"Pane {i}: {pane.command} [{pane_type}]",
                         node_type=NodeType.PANE,
                         data=pane,
-                        status_icon=pane_icon,
+                        status_icon=pane_status_indicator,
                         status_color=pane_color
                     )
                     window_node.children.append(pane_node)
@@ -224,6 +346,10 @@ class SessionTreeBrowser:
             if st.button("🔄 Refresh", help="Refresh session data"):
                 st.rerun()
         
+        # Auto-refresh indicator
+        if self.auto_refresh:
+            st.caption("🔄 Auto-refresh enabled (real-time status updates)")
+        
         st.divider()
         
         # Render tree
@@ -256,9 +382,24 @@ class SessionTreeBrowser:
             with col2:
                 st.write(f"**Exists:** {'Yes' if session.exists else 'No'}")
                 st.write(f"**Controller:** {session.controller_status}")
+                
+                # Show health indicator
+                health = self._get_session_health_indicator(session)
+                st.write(f"**Health:** {health}")
+                
                 st.write(f"**Windows:** {len(session.windows)}")
                 total_panes = sum(len(w.panes) for w in session.windows)
                 st.write(f"**Total Panes:** {total_panes}")
+            
+            # Show status history if available
+            entity_id = f"session_{session.session_name}"
+            if entity_id in self._status_history:
+                history = self._status_history[entity_id]
+                if len(history) > 1:
+                    st.write("**Recent Status Changes:**")
+                    for timestamp, status in history[-3:]:  # Show last 3 changes
+                        time_str = time.strftime('%H:%M:%S', time.localtime(timestamp))
+                        st.write(f"  - {time_str}: {status}")
         
         elif node.node_type == NodeType.WINDOW:
             window = node.data
@@ -275,14 +416,38 @@ class SessionTreeBrowser:
         
         elif node.node_type == NodeType.PANE:
             pane = node.data
+            pane_state = self._detect_pane_state(pane)
+            
             st.write(f"**Pane ID:** {pane.id}")
             st.write(f"**Command:** {pane.command}")
-            st.write(f"**Type:** {'Claude' if pane.is_claude else 'Controller' if pane.is_controller else 'Regular'}")
+            st.write(f"**Type:** {pane_state.value[2]}")
+            st.write(f"**Status:** {pane_state.value[0]} {pane_state.name}")
+            
+            # Show specialized info based on pane type
+            if pane.is_claude:
+                st.write("**Claude Integration:** ✅ Active")
+                if pane_state == PaneState.CLAUDE_ACTIVE:
+                    st.info("Claude is currently processing")
+                else:
+                    st.info("Claude is idle and ready")
+            elif pane.is_controller:
+                st.write("**Controller Pane:** ✅ Detected")
+                if pane_state == PaneState.CONTROLLER_RUNNING:
+                    st.success("Controller is active")
+                else:
+                    st.warning("Controller appears stopped")
             
             # Action buttons for pane
-            if st.button("📱 Attach to Pane", key=f"attach_detail_{pane.id}"):
-                st.success(f"Attaching to pane: {pane.id}")
-                # TODO: Implement actual pane attachment
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📱 Attach", key=f"attach_detail_{pane.id}"):
+                    st.success(f"Attaching to pane: {pane.id}")
+                    # TODO: Implement actual pane attachment
+            
+            with col2:
+                if st.button("📊 Monitor", key=f"monitor_detail_{pane.id}"):
+                    st.info(f"Monitoring pane: {pane.id}")
+                    # TODO: Implement pane monitoring
 
 
 def render_session_tree_browser(sessions: List[SessionInfo]) -> Optional[TreeNode]:

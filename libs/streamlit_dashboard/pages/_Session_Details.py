@@ -324,11 +324,11 @@ def render_quick_actions(pane_info: Dict):
             content = capture_pane_content(pane_info['pane'], lines=200)
             # Determine data directory from config or default
             config = YesmanConfig()
-            data_dir = Path(config.get("data_path", "~/.yesman/data")).expanduser()
-            data_dir.mkdir(parents=True, exist_ok=True)
+            data_path = Path(config.get("data_path", "~/.yesman/data")).expanduser()
+            data_path.mkdir(parents=True, exist_ok=True)
             ts = time.strftime("%Y%m%d_%H%M%S")
             filename = f"capture_{pane_info['id']}_{ts}.txt"
-            file_path = data_dir / filename
+            file_path = data_path / filename
             with open(file_path, "w") as f:
                 f.write(content)
             st.success(f"Saved capture to {file_path}")
