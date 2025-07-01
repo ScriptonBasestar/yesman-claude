@@ -371,6 +371,145 @@ class SessionManager:
             main_cmd = cmdline[0].split('/')[-1] if cmdline else command
             return f"Running {main_cmd}"
     
+    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
+        """
+        Attach to a specific tmux pane
+        
+        Args:
+            session_name: Name of the tmux session
+            window_index: Index of the window containing the pane
+            pane_id: ID of the pane to attach to
+            
+        Returns:
+            Dictionary with result status and information
+        """
+        try:
+            # Find the session
+            session = self.server.find_where({"session_name": session_name})
+            if not session:
+                return {
+                    "success": False,
+                    "error": f"Session '{session_name}' not found",
+                    "action": "none"
+                }
+            
+            # Find the window
+            window = session.find_where({"window_index": window_index})
+            if not window:
+                return {
+                    "success": False,
+                    "error": f"Window {window_index} not found in session '{session_name}'",
+                    "action": "none"
+                }
+            
+            # Find the pane
+            pane = window.find_where({"pane_id": pane_id})
+            if not pane:
+                return {
+                    "success": False,
+                    "error": f"Pane {pane_id} not found in window {window_index}",
+                    "action": "none"
+                }
+            
+            # Generate attachment command
+            attach_cmd = f"tmux attach-session -t {session_name} \\; select-window -t {window_index} \\; select-pane -t {pane_id}"
+            
+            return {
+                "success": True,
+                "session_name": session_name,
+                "window_index": window_index,
+                "pane_id": pane_id,
+                "attach_command": attach_cmd,
+                "action": "attach",
+                "message": f"Ready to attach to pane {pane_id} in {session_name}:{window_index}"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error attaching to pane: {e}")
+            return {
+                "success": False,
+                "error": f"Attachment failed: {str(e)}",
+                "action": "error"
+            }
+    
+    def create_terminal_script(self, attach_command: str, script_path: str = None) -> str:
+        """
+        Create a terminal script for pane attachment
+        
+        Args:
+            attach_command: The tmux attach command
+            script_path: Optional path for the script file
+            
+        Returns:
+            Path to the created script file
+        """
+        if script_path is None:
+            script_path = f"/tmp/yesman_attach_{os.getpid()}.sh"
+        
+        script_content = f"""#!/bin/bash
+# Auto-generated tmux attachment script
+# Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+echo "Attaching to tmux pane..."
+{attach_command}
+"""
+        
+        try:
+            with open(script_path, 'w') as f:
+                f.write(script_content)
+            
+            # Make script executable
+            os.chmod(script_path, 0o755)
+            
+            self.logger.info(f"Created attachment script: {script_path}")
+            return script_path
+            
+        except Exception as e:
+            self.logger.error(f"Error creating attachment script: {e}")
+            raise
+    
+    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
+        """
+        Execute pane attachment with error handling
+        
+        Args:
+            session_name: Name of the tmux session
+            window_index: Index of the window containing the pane
+            pane_id: ID of the pane to attach to
+            
+        Returns:
+            Dictionary with execution result
+        """
+        try:
+            # First, validate the attachment
+            attach_info = self.attach_to_pane(session_name, window_index, pane_id)
+            
+            if not attach_info["success"]:
+                return attach_info
+            
+            # Create and execute the attachment script
+            script_path = self.create_terminal_script(attach_info["attach_command"])
+            
+            # Return information for client-side execution
+            return {
+                "success": True,
+                "script_path": script_path,
+                "attach_command": attach_info["attach_command"],
+                "session_name": session_name,
+                "window_index": window_index,
+                "pane_id": pane_id,
+                "action": "execute",
+                "message": f"Attachment script created: {script_path}"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error executing pane attachment: {e}")
+            return {
+                "success": False,
+                "error": f"Execution failed: {str(e)}",
+                "action": "error"
+            }
+    
     def invalidate_cache(self, project_name: str = None) -> None:
         """
         Invalidate session cache entries (mode-aware)

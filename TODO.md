@@ -87,9 +87,9 @@
 - 관련 ISSUE: Claude 작업 상태 및 프로세스 모니터링
 - 위치: libs/core/models.py
 
-[ ] 클릭으로 pane 접속 기능 구현 (tmux attach-session 자동화)
+[x] 클릭으로 pane 접속 기능 구현 (tmux attach-session 자동화)
 - 관련 ISSUE: 세션 탐색 후 즉시 접속 편의성
-- 위치: libs/dashboard/widgets/session_browser.py
+- 위치: libs/streamlit_dashboard/widgets/session_browser.py
 
 [ ] 세션 상태 히트맵 렌더링 (activity level 시각화)
 - 관련 ISSUE: 프로젝트별 활성도 한눈에 파악

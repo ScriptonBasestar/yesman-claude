@@ -63,11 +63,13 @@ class TreeNode:
 class SessionTreeBrowser:
     """File-browser style session tree widget"""
     
-    def __init__(self, session_key: str = "session_browser", auto_refresh: bool = True):
+    def __init__(self, session_key: str = "session_browser", auto_refresh: bool = True, session_manager=None):
         self.session_key = session_key
         self.auto_refresh = auto_refresh
+        self.session_manager = session_manager
         self._init_session_state()
         self._status_history: Dict[str, List[tuple[float, str]]] = {}  # Track status changes
+        self._current_session_context: Dict[str, str] = {}  # Track current session context
     
     def _init_session_state(self):
         """Initialize session state for browser"""
@@ -163,6 +165,49 @@ class SessionTreeBrowser:
             return f"🔄 {current_state}"
         
         return current_state
+    
+    def _execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
+        """Execute pane attachment using session manager"""
+        if not self.session_manager:
+            return {
+                "success": False,
+                "error": "Session manager not available",
+                "action": "error"
+            }
+        
+        try:
+            return self.session_manager.execute_pane_attachment(session_name, window_index, pane_id)
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Attachment execution failed: {str(e)}",
+                "action": "error"
+            }
+    
+    def _update_session_context(self, session_info: SessionInfo, window_info: WindowInfo = None):
+        """Update current session context for pane operations"""
+        self._current_session_context = {
+            "session_name": session_info.session_name,
+            "window_index": window_info.index if window_info else "0"
+        }
+    
+    def _extract_context_from_node_id(self, node_id: str) -> tuple[str, str]:
+        """Extract session name and window index from pane node ID"""
+        # Pane node IDs are formatted as: pane_{session_name}_{window_index}_{pane_index}
+        try:
+            parts = node_id.split('_')
+            if len(parts) >= 4 and parts[0] == 'pane':
+                session_name = parts[1]
+                window_index = parts[2]
+                return session_name, window_index
+        except:
+            pass
+        
+        # Fallback to current context if parsing fails
+        return (
+            self._current_session_context.get('session_name', 'unknown'),
+            self._current_session_context.get('window_index', '0')
+        )
     
     def _get_session_health_indicator(self, session_info: SessionInfo) -> str:
         """Get health indicator based on session state"""
@@ -290,6 +335,10 @@ class SessionTreeBrowser:
             # Action buttons based on node type
             if node.node_type == NodeType.SESSION and node.data:
                 if st.button("🔍", key=f"detail_{node.id}", help="View Details"):
+                    self._update_session_context(node.data)
+                    selected_node = node
+            elif node.node_type == NodeType.WINDOW and node.data:
+                if st.button("🪟", key=f"window_{node.id}", help="View Window"):
                     selected_node = node
             elif node.node_type == NodeType.PANE and node.data:
                 if st.button("📱", key=f"attach_{node.id}", help="Attach to Pane"):
@@ -418,6 +467,9 @@ class SessionTreeBrowser:
             pane = node.data
             pane_state = self._detect_pane_state(pane)
             
+            # Extract session and window context from node ID
+            session_name, window_index = self._extract_context_from_node_id(node.id)
+            
             # Basic pane information
             col1, col2 = st.columns(2)
             
@@ -500,8 +552,23 @@ class SessionTreeBrowser:
             col1, col2, col3 = st.columns(3)
             with col1:
                 if st.button("📱 Attach", key=f"attach_detail_{pane.id}"):
-                    st.success(f"Attaching to pane: {pane.id}")
-                    # TODO: Implement actual pane attachment
+                    # Use extracted context for attachment
+                    result = self._execute_pane_attachment(session_name, window_index, pane.id)
+                    if result["success"]:
+                        st.success(result["message"])
+                        st.code(f"Run: {result['attach_command']}", language="bash")
+                        
+                        # Also provide a download link for the script
+                        if "script_path" in result:
+                            st.download_button(
+                                label="📁 Download Script",
+                                data=f"#!/bin/bash\n{result['attach_command']}\n",
+                                file_name=f"attach_{pane.id}.sh",
+                                mime="text/plain",
+                                key=f"download_{pane.id}"
+                            )
+                    else:
+                        st.error(result["error"])
             
             with col2:
                 if st.button("📊 Monitor", key=f"monitor_detail_{pane.id}"):
@@ -513,17 +580,18 @@ class SessionTreeBrowser:
                     st.rerun()
 
 
-def render_session_tree_browser(sessions: List[SessionInfo]) -> Optional[TreeNode]:
+def render_session_tree_browser(sessions: List[SessionInfo], session_manager=None) -> Optional[TreeNode]:
     """
     Convenience function to render session tree browser
     
     Args:
         sessions: List of session information
+        session_manager: Optional session manager for pane operations
         
     Returns:
         Selected tree node if any
     """
-    browser = SessionTreeBrowser()
+    browser = SessionTreeBrowser(session_manager=session_manager)
     
     def on_node_select(node: TreeNode):
         """Handle node selection"""
