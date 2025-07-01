@@ -138,13 +138,65 @@ def add_activity_log(level: str, message: str):
         st.session_state.activity_logs = st.session_state.activity_logs[-50:]
 
 
+def invalidate_session_cache(session_name: str = None, reason: str = "manual"):
+    """
+    Smart cache invalidation with logging
+    
+    Args:
+        session_name: Specific session to invalidate, or None for all
+        reason: Reason for invalidation (for logging)
+    """
+    try:
+        if session_name:
+            # Invalidate specific session
+            st.session_state.session_manager.invalidate_cache(session_name)
+            add_activity_log("info", f"Cache invalidated for {session_name} ({reason})")
+        else:
+            # Invalidate all sessions
+            st.session_state.session_manager.invalidate_cache()
+            add_activity_log("info", f"All cache invalidated ({reason})")
+    except Exception as e:
+        add_activity_log("error", f"Cache invalidation failed: {e}")
+
+
+def get_sessions_with_cache_optimization():
+    """
+    Get sessions with optimized caching and preloading
+    
+    Returns:
+        List of SessionInfo objects
+    """
+    try:
+        # Check if we need to preload cache
+        cache_stats = st.session_state.session_manager.get_cache_stats()
+        
+        # If cache is empty or has low hit rate, we might want to preload
+        if cache_stats['total_entries'] == 0 or cache_stats['hit_rate'] < 50:
+            add_activity_log("info", "Preloading session cache...")
+        
+        # Get sessions with timing
+        start_time = time.time()
+        sessions = st.session_state.session_manager.get_all_sessions()
+        query_time = time.time() - start_time
+        
+        # Log performance if slow
+        if query_time > 1.0:
+            add_activity_log("warning", f"Slow session query: {query_time:.3f}s")
+        
+        return sessions
+        
+    except Exception as e:
+        add_activity_log("error", f"Failed to get sessions: {e}")
+        return []
+
+
 def render_header():
     """Render the dashboard header with metrics"""
     st.title("🚀 Yesman Claude Dashboard")
     
-    # Get session data
+    # Get session data with optimized caching
     try:
-        sessions = st.session_state.session_manager.get_all_sessions()
+        sessions = get_sessions_with_cache_optimization()
         stats = DashboardStats.from_sessions(sessions)
         
         # Metrics row
@@ -272,13 +324,17 @@ def render_session_card(session: SessionInfo):
                     # Setup Tmux 버튼
                     if st.button(f"🚀 Setup Tmux", key=f"setup_{session.session_name}"):
                         with st.spinner("Setting up tmux sessions..."):
-                            setup_tmux_sessions(session.session_name)
+                            if setup_tmux_sessions(session.session_name):
+                                # Invalidate cache after successful setup
+                                invalidate_session_cache(session.session_name, "tmux setup")
                         # st.rerun() # Removed to prevent flickering
 
                     # Teardown Tmux 버튼
                     if st.button(f"🗑️ Teardown Tmux", key=f"teardown_{session.session_name}"):
                         with st.spinner("Tearing down tmux session(s)..."):
-                            teardown_tmux_sessions(session.session_name)
+                            if teardown_tmux_sessions(session.session_name):
+                                # Invalidate cache after successful teardown
+                                invalidate_session_cache(session.session_name, "tmux teardown")
                         # st.rerun() # Removed to prevent flickering
                 else:
                     st.write("Controller not available for actions")
@@ -378,7 +434,8 @@ def render_main_content():
     
     with col1:
         if st.button("🔄 Refresh Sessions"):
-            add_activity_log("info", "Sessions refreshed")
+            # Smart cache invalidation for session refresh
+            invalidate_session_cache(reason="user refresh")
             st.rerun()
     
     with col2:
@@ -724,10 +781,19 @@ def render_settings_sidebar():
     try:
         cache_stats = st.session_state.session_manager.get_cache_stats()
         
+        # Performance indicator color
+        hit_rate = cache_stats['hit_rate']
+        if hit_rate >= 80:
+            hit_rate_color = "🟢"
+        elif hit_rate >= 60:
+            hit_rate_color = "🟡"
+        else:
+            hit_rate_color = "🔴"
+        
         st.sidebar.metric(
-            "Hit Rate",
-            f"{cache_stats['hit_rate']:.1f}%",
-            help="Percentage of requests served from cache"
+            f"{hit_rate_color} Hit Rate",
+            f"{hit_rate:.1f}%",
+            help="Percentage of requests served from cache (🟢>80%, 🟡>60%, 🔴<60%)"
         )
         
         col1, col2 = st.sidebar.columns(2)
@@ -747,10 +813,15 @@ def render_settings_sidebar():
             help="Estimated cache memory usage"
         )
         
+        # Cache efficiency info
+        total_requests = cache_stats['hits'] + cache_stats['misses']
+        if total_requests > 0:
+            efficiency = f"Efficiency: {cache_stats['hits']}/{total_requests} requests cached"
+            st.sidebar.caption(efficiency)
+        
         # Cache controls
         if st.sidebar.button("🗑️ Clear Cache", help="Clear all cached session data"):
-            st.session_state.session_manager.invalidate_cache()
-            add_activity_log("info", "Cache cleared manually")
+            invalidate_session_cache(reason="manual clear")
             st.rerun()
             
     except Exception as e:
