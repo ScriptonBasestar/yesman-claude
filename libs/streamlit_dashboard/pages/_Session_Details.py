@@ -292,7 +292,7 @@ def render_auto_actions(pane_info: Dict):
 def render_quick_actions(pane_info: Dict):
     # Quick Actions
     st.write("**Quick Actions:**")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         if st.button("⚡ Ctrl+C"):
@@ -318,6 +318,20 @@ def render_quick_actions(pane_info: Dict):
             send_keys_to_pane(pane_info['pane'], "Enter")
             st.success("Sent clear command")
             time.sleep(0.5)
+
+    with col5:
+        if st.button("📸 Capture"):
+            content = capture_pane_content(pane_info['pane'], lines=200)
+            # Determine data directory from config or default
+            config = YesmanConfig()
+            data_dir = Path(config.get("data_path", "~/.yesman/data")).expanduser()
+            data_dir.mkdir(parents=True, exist_ok=True)
+            ts = time.strftime("%Y%m%d_%H%M%S")
+            filename = f"capture_{pane_info['id']}_{ts}.txt"
+            file_path = data_dir / filename
+            with open(file_path, "w") as f:
+                f.write(content)
+            st.success(f"Saved capture to {file_path}")
 
 def main(session_name: str):
     """Main function for the session details page"""
