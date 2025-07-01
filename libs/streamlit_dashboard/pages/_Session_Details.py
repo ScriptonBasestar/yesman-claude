@@ -158,23 +158,20 @@ def render_pane_selection(window_info: Dict):
     
     st.write("**Select Pane:**")
     
-    cols = st.columns(min(len(window_info['panes']), 4))
-    
     for i, pane_info in enumerate(window_info['panes']):
-        with cols[i % 4]:
-            pane_type = ""
-            if pane_info['is_claude']:
-                pane_type = " 🔵"
-            elif pane_info['is_controller']:
-                pane_type = " 🟡"
-            
-            if st.button(
-                f"Pane {pane_info['index']}{pane_type}\n{pane_info['command'][:20]}...",
-                key=f"pane_select_{pane_info['id']}",
-                use_container_width=True
-            ):
-                st.session_state.selected_pane = pane_info['id']
-                st.rerun()
+        pane_type = ""
+        if pane_info['is_claude']:
+            pane_type = " 🔵"
+        elif pane_info['is_controller']:
+            pane_type = " 🟡"
+        
+        if st.button(
+            f"Pane {pane_info['index']}{pane_type} - {pane_info['command'][:30]}...",
+            key=f"pane_select_{pane_info['id']}",
+            use_container_width=True
+        ):
+            st.session_state.selected_pane = pane_info['id']
+            st.rerun()
     
     # Find selected pane
     if st.session_state.selected_pane:
@@ -187,7 +184,7 @@ def render_pane_content(pane_info: Dict):
     """Render pane content viewer"""
     st.subheader(f"📺 Pane Content - {pane_info['id']} ({pane_info['command']})")
     
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2 = st.columns([2, 1])
     
     with col1:
         lines_to_show = st.slider("Lines to show:", 10, 200, 50, key="pane_lines")
@@ -196,10 +193,6 @@ def render_pane_content(pane_info: Dict):
         auto_refresh = st.checkbox("Auto Refresh", value=st.session_state.auto_refresh_pane)
         if auto_refresh != st.session_state.auto_refresh_pane:
             st.session_state.auto_refresh_pane = auto_refresh
-    
-    with col3:
-        if st.button("🔄 Refresh Now"):
-            st.rerun()
     
     # Capture and display pane content
     content = capture_pane_content(pane_info['pane'], lines_to_show)
@@ -222,69 +215,35 @@ def render_pane_input(pane_info: Dict):
     """Render pane input interface"""
     st.subheader(f"⌨️ Send Input to Pane")
     
-    # Input methods
-    input_method = st.radio(
-        "Input Method:",
-        ["Send Command", "Send Keys", "Send Text"],
-        horizontal=True
-    )
+    # Prepare keys for textarea and clear flag
+    text_key = f"text_input_{pane_info['id']}"
+    clear_flag = f"clear_{text_key}"
+    # If clear_flag is set, reset the textarea value before widget renders
+    if st.session_state.pop(clear_flag, False):
+        st.session_state[text_key] = ""
     
-    if input_method == "Send Command":
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            command = st.text_input("Command to send:", key="command_input")
-        with col2:
-            st.write("")  # Spacing
-            if col2.button("📤 Send"):
-                if command.strip():
-                    if send_keys_to_pane(pane_info['pane'], command):
-                        st.success(f"Sent command: {command}")
-                        time.sleep(0.5)
-                        st.rerun()
-                    else:
-                        st.error("Failed to send command")
-                else:
-                    st.warning("Please enter a command")
-    
-    elif input_method == "Send Keys":
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            keys = st.text_input("Keys to send:", key="keys_input", placeholder="e.g. up, down, C-c")
-        with col2:
-            st.write("")  # Spacing
-            if col2.button("➡️ Send Keys"):
-                if keys.strip():
-                    if send_keys_to_pane(pane_info['pane'], keys):
-                        st.success(f"Sent keys: {keys}")
-                        time.sleep(0.5)
-                        st.rerun()
-                    else:
-                        st.error("Failed to send keys")
-                else:
-                    st.warning("Please enter keys")
-    
-    elif input_method == "Send Text":
-        text = st.text_area("Text to send:", key="text_input")
-        if st.button("📤 Send Text"):
-            if text.strip():
-                # Send text line by line
-                lines = text.split('\n')
-                success_count = 0
-                for line in lines:
-                    if send_keys_to_pane(pane_info['pane'], line):
-                        success_count += 1
-                    time.sleep(0.1)  # Small delay between lines
-                
-                if success_count == len(lines):
-                    st.success(f"Sent {success_count} lines of text")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.warning(f"Sent {success_count}/{len(lines)} lines")
-            else:
-                st.warning("Please enter text to send")
-    
-    # Quick actions
+    # Text send form: supports Ctrl+Enter to submit
+    form_key = f"text_send_form_{pane_info['id']}"
+    with st.form(form_key):
+        text = st.text_area("Text to send:", key=text_key)
+        submitted = st.form_submit_button("📤 Send Text")
+    # Handle submission after form
+    if submitted:
+        if text.strip():
+            # Send text line by line
+            lines = text.split("\n")
+            for line in lines:
+                send_keys_to_pane(pane_info['pane'], line)
+                time.sleep(0.1)
+            st.success(f"Sent {len(lines)} lines of text")
+            # Set clear flag for next run
+            st.session_state[clear_flag] = True
+            time.sleep(0.1)
+            st.rerun()
+        else:
+            st.warning("Please enter text to send")
+
+    # Quick Actions
     st.write("**Quick Actions:**")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -293,21 +252,18 @@ def render_pane_input(pane_info: Dict):
             send_keys_to_pane(pane_info['pane'], "C-c")
             st.success("Sent Ctrl+C")
             time.sleep(0.5)
-            st.rerun()
     
     with col2:
         if st.button("↩️ Enter"):
             send_keys_to_pane(pane_info['pane'], "Enter")
             st.success("Sent Enter")
             time.sleep(0.5)
-            st.rerun()
     
     with col3:
         if st.button("🔄 Ctrl+R"):
             send_keys_to_pane(pane_info['pane'], "C-r")
             st.success("Sent Ctrl+R")
             time.sleep(0.5)
-            st.rerun()
     
     with col4:
         if st.button("📋 Clear"):
@@ -315,7 +271,6 @@ def render_pane_input(pane_info: Dict):
             send_keys_to_pane(pane_info['pane'], "Enter")
             st.success("Sent clear command")
             time.sleep(0.5)
-            st.rerun()
 
 def main(session_name: str):
     """Main function for the session details page"""
@@ -333,7 +288,7 @@ def main(session_name: str):
         
         if selected_window:
             st.divider()
-            col1, col2 = st.columns([1, 1])
+            col1, col2 = st.columns([1, 4])
             with col1:
                 selected_pane = render_pane_selection(selected_window)
             
