@@ -68,9 +68,9 @@
 - 관련 ISSUE: 캐시 성능 모니터링 필요
 - 위치: libs/core/session_cache.py
 
-[ ] 캐시 TTL 설정 및 무효화 전략 구현 (세션 변경 감지시 즉시 무효화)
+[x] 캐시 TTL 설정 및 무효화 전략 구현 (세션 변경 감지시 즉시 무효화)
 - 관련 ISSUE: 실시간성과 성능의 균형
-- 위치: libs/dashboard/session_cache.py
+- 위치: libs/core/session_cache.py
 
 ## IMPROVE-003: 인터랙티브 세션 브라우저 (UX)
 **우선순위**: HIGH
