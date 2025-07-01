@@ -75,9 +75,9 @@
 ## IMPROVE-003: 인터랙티브 세션 브라우저 (UX)
 **우선순위**: HIGH
 
-[ ] 세션 트리뷰 UI 컴포넌트 설계 (파일 브라우저 스타일)
+[x] 세션 트리뷰 UI 컴포넌트 설계 (파일 브라우저 스타일)
 - 관련 ISSUE: 현재 단순한 텍스트 기반 세션 목록 개선
-- 위치: libs/dashboard/widgets/session_browser.py
+- 위치: libs/streamlit_dashboard/widgets/session_browser.py
 
 [ ] 실시간 세션 상태 아이콘 시스템 구현 (🟢 running, ⚠️ error, 🔄 loading)
 - 관련 ISSUE: 세션 내부 상태 파악 어려움
