@@ -264,13 +264,57 @@ def render_session_card(session: SessionInfo):
                             st.error("Failed to restart Claude pane")
                             add_activity_log("error", f"Failed to restart Claude pane for {session.session_name}")
                     
+                    # Setup Tmux 버튼
                     if st.button(f"🚀 Setup Tmux", key=f"setup_{session.session_name}"):
                         with st.spinner("Setting up tmux sessions..."):
                             if setup_tmux_sessions(session.session_name):
-                                st.success("Tmux setup completed successfully")
+                                # 메시지 상태 저장 (성공)
+                                st.session_state[f"setup_msg_{session.session_name}"] = {
+                                    "type": "success",
+                                    "msg": "Tmux setup completed successfully",
+                                    "timestamp": time.time()
+                                }
                                 st.rerun()
                             else:
-                                st.error("Tmux setup failed or completed with errors")
+                                st.session_state[f"setup_msg_{session.session_name}"] = {
+                                    "type": "error",
+                                    "msg": "Tmux setup failed or completed with errors",
+                                    "timestamp": time.time()
+                                }
+                                st.rerun()
+                    # Teardown Tmux 버튼
+                    if st.button(f"🗑️ Teardown Tmux", key=f"teardown_{session.session_name}"):
+                        with st.spinner("Tearing down tmux session(s)..."):
+                            if teardown_tmux_sessions(session.session_name):
+                                st.session_state[f"teardown_msg_{session.session_name}"] = {
+                                    "type": "success",
+                                    "msg": "Tmux teardown completed successfully",
+                                    "timestamp": time.time()
+                                }
+                                st.rerun()
+                            else:
+                                st.session_state[f"teardown_msg_{session.session_name}"] = {
+                                    "type": "error",
+                                    "msg": "Tmux teardown failed or completed with errors",
+                                    "timestamp": time.time()
+                                }
+                                st.rerun()
+                    # Setup/Teardown 메시지 표시 (3초 후 자동 사라짐)
+                    now = time.time()
+                    setup_key = f"setup_msg_{session.session_name}"
+                    teardown_key = f"teardown_msg_{session.session_name}"
+                    for msg_key in [setup_key, teardown_key]:
+                        msg_state = st.session_state.get(msg_key)
+                        if msg_state:
+                            elapsed = now - msg_state["timestamp"]
+                            if elapsed < 3:
+                                # 메시지 표시 (3초간)
+                                if msg_state["type"] == "success":
+                                    st.success(msg_state["msg"])
+                                else:
+                                    st.error(msg_state["msg"])
+                            else:
+                                st.session_state.pop(msg_key, None)
                 else:
                     st.write("Controller not available")
             except Exception as e:
@@ -810,6 +854,51 @@ def setup_tmux_sessions(session_name=None):
     except Exception as e:
         st.error(f"Setup failed: {e}")
         add_activity_log("error", f"Setup failed: {e}")
+        return False
+
+
+def teardown_tmux_sessions(session_name=None):
+    """Teardown (kill) tmux sessions based on projects.yaml configuration"""
+    try:
+        config = YesmanConfig()
+        tmux_manager = TmuxManager(config)
+        sessions = tmux_manager.load_projects().get("sessions", {})
+        if not sessions:
+            st.error("No sessions defined in projects.yaml")
+            return False
+        # 특정 세션만 지정된 경우
+        if session_name:
+            if session_name not in sessions:
+                st.error(f"Session {session_name} not defined in projects.yaml")
+                return False
+            sessions = {session_name: sessions[session_name]}
+        import libtmux
+        import subprocess
+        server = libtmux.Server()
+        success_count = 0
+        error_count = 0
+        for sess_name, sess_conf in sessions.items():
+            override_conf = sess_conf.get("override", {})
+            actual_session_name = override_conf.get("session_name", sess_name)
+            if server.find_where({"session_name": actual_session_name}):
+                try:
+                    subprocess.run(["tmux", "kill-session", "-t", actual_session_name], check=True)
+                    st.success(f"Killed session: {actual_session_name}")
+                    success_count += 1
+                except Exception as e:
+                    st.error(f"Failed to kill session {actual_session_name}: {e}")
+                    error_count += 1
+            else:
+                st.info(f"Session {actual_session_name} not found")
+        if success_count > 0:
+            add_activity_log("success", f"Teardown completed: {success_count} session(s) killed, {error_count} errors")
+            return True
+        else:
+            add_activity_log("warning", f"Teardown completed with {error_count} errors")
+            return False
+    except Exception as e:
+        st.error(f"Teardown failed: {e}")
+        add_activity_log("error", f"Teardown failed: {e}")
         return False
 
 
