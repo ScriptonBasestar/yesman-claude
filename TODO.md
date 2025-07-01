@@ -56,9 +56,9 @@
 - 관련 ISSUE: tmux 서버 부하 감소 필요
 - 위치: libs/core/session_manager.py
 
-[ ] 대시보드 조회 API → 캐시 방식 연동 (cache hit/miss 로직)
+[x] 대시보드 조회 API → 캐시 방식 연동 (cache hit/miss 로직)
 - 관련 ISSUE: 대시보드 반응성 40% 향상 목표
-- 위치: libs/dashboard/app.py
+- 위치: libs/streamlit_dashboard/app.py
 
 [ ] CLI/Daemon 모드별 캐싱 예외 처리 로직 추가
 - 관련 ISSUE: 모드별 캐시 동작 차이 대응
