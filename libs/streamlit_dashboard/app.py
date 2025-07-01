@@ -92,6 +92,11 @@ def setup_page_config():
         font-family: monospace;
         font-size: 0.8rem;
     }
+    
+    /* Hide the 'Session Details' page from the sidebar navigation */
+    section[data-testid="stSidebar"] li a[href*="_Session_Details"] {
+        display: none;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -223,6 +228,9 @@ def render_session_card(session: SessionInfo):
         with col1:
             st.write(f"**Template:** {session.template}")
             st.write(f"**Status:** {session.status}")
+            if st.button("🔍 세션 상세보기", key=f"details_{session.session_name}"):
+                st.session_state.selected_session_name = session.session_name
+                st.rerun()
         
         with col2:
             st.write(f"**Model:** {model}")
@@ -905,7 +913,14 @@ def main():
     """Main dashboard application"""
     setup_page_config()
     initialize_session_state()
-    
+
+    # Redirect to details page if a session was selected
+    if st.session_state.get("selected_session_name"):
+        st.switch_page("pages/_Session_Details.py")
+
+    # Get action message if any
+    action_message = st.session_state.get('action_message', {})
+
     # Add initial log
     if not st.session_state.activity_logs:
         add_activity_log("info", "Dashboard initialized")

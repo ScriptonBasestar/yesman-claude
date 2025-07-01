@@ -53,30 +53,30 @@ def get_session_info(session_name: str) -> Optional[Dict]:
         
         session_info = {
             'session': session,
-            'name': session.get('session_name'),
+            'name': session.session_name,
             'windows': []
         }
         
-        for window in session.list_windows():
+        for window in session.windows:
             window_info = {
                 'window': window,
-                'name': window.get('window_name'),
-                'index': window.get('window_index'),
-                'active': window.get('window_active') == '1',
+                'name': window.window_name,
+                'index': window.window_index,
+                'active': window.window_active == '1',
                 'panes': []
             }
             
-            for pane in window.list_panes():
+            for pane in window.panes:
                 try:
                     cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
                     pane_info = {
                         'pane': pane,
-                        'id': pane.get('pane_id'),
-                        'index': pane.get('pane_index'),
-                        'active': pane.get('pane_active') == '1',
+                        'id': pane.pane_id,
+                        'index': pane.pane_index,
+                        'active': pane.pane_active == '1',
                         'command': cmd,
-                        'width': int(pane.get('pane_width', 0)),
-                        'height': int(pane.get('pane_height', 0)),
+                        'width': int(pane.pane_width or 0),
+                        'height': int(pane.pane_height or 0),
                         'is_claude': 'claude' in cmd.lower(),
                         'is_controller': 'controller' in cmd.lower() or 'yesman' in cmd.lower()
                     }
@@ -107,32 +107,6 @@ def send_keys_to_pane(pane, keys: str):
     except Exception as e:
         st.error(f"Error sending keys: {e}")
         return False
-
-def render_session_selector():
-    """Render session selection dropdown"""
-    sessions = st.session_state.session_manager.get_all_sessions()
-    running_sessions = [s for s in sessions if s.status == 'running']
-    
-    if not running_sessions:
-        st.warning("No running sessions found")
-        return None
-    
-    session_names = [s.session_name for s in running_sessions]
-    
-    selected_session = st.selectbox(
-        "Select Session:",
-        session_names,
-        index=session_names.index(st.session_state.selected_session) if st.session_state.selected_session in session_names else 0,
-        key="session_detail_selector"
-    )
-    
-    if selected_session != st.session_state.selected_session:
-        st.session_state.selected_session = selected_session
-        st.session_state.selected_window = None
-        st.session_state.selected_pane = None
-        st.rerun()
-    
-    return selected_session
 
 def render_session_overview(session_info: Dict):
     """Render session overview information"""
@@ -261,7 +235,7 @@ def render_pane_input(pane_info: Dict):
             command = st.text_input("Command to send:", key="command_input")
         with col2:
             st.write("")  # Spacing
-            if st.button("📤 Send"):
+            if col2.button("📤 Send"):
                 if command.strip():
                     if send_keys_to_pane(pane_info['pane'], command):
                         st.success(f"Sent command: {command}")
@@ -275,10 +249,10 @@ def render_pane_input(pane_info: Dict):
     elif input_method == "Send Keys":
         col1, col2 = st.columns([4, 1])
         with col1:
-            keys = st.text_input("Keys to send (e.g., 'C-c', 'Enter'):", key="keys_input")
+            keys = st.text_input("Keys to send:", key="keys_input", placeholder="e.g. up, down, C-c")
         with col2:
             st.write("")  # Spacing
-            if st.button("📤 Send"):
+            if col2.button("➡️ Send Keys"):
                 if keys.strip():
                     if send_keys_to_pane(pane_info['pane'], keys):
                         st.success(f"Sent keys: {keys}")
@@ -343,61 +317,60 @@ def render_pane_input(pane_info: Dict):
             time.sleep(0.5)
             st.rerun()
 
-def main():
-    """Main session details page"""
+def main(session_name: str):
+    """Main function for the session details page"""
     initialize_managers()
+
+    st.title(f"🔍 Session Details: {session_name}")
+
+    session_info = get_session_info(session_name)
     
-    st.title("🔍 Session Details")
-    st.write("View detailed tmux session information and interact with panes")
-    
-    # Session selection
-    selected_session_name = render_session_selector()
-    
-    if not selected_session_name:
-        return
-    
-    # Get detailed session info
-    session_info = get_session_info(selected_session_name)
-    
-    if not session_info:
-        st.error(f"Session '{selected_session_name}' not found or error occurred")
-        return
-    
-    # Session overview
-    render_session_overview(session_info)
-    
-    st.divider()
-    
-    # Window selection
-    selected_window = render_window_tabs(session_info)
-    
-    if not selected_window:
-        return
-    
-    st.divider()
-    
-    # Pane selection
-    selected_pane = render_pane_selection(selected_window)
-    
-    if not selected_pane:
-        st.info("👆 Select a pane above to view its content and send input")
-        return
-    
-    st.divider()
-    
-    # Create two columns for content and input
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        render_pane_content(selected_pane)
-    
-    with col2:
-        render_pane_input(selected_pane)
-    
-    # Auto refresh
-    if st.session_state.auto_refresh_pane:
-        time.sleep(2)
-        st.rerun()
+    if session_info:
+        render_session_overview(session_info)
+        st.divider()
+        
+        selected_window = render_window_tabs(session_info)
+        
+        if selected_window:
+            st.divider()
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                selected_pane = render_pane_selection(selected_window)
+            
+            with col2:
+                if selected_pane:
+                    render_pane_content(selected_pane)
+                    render_pane_input(selected_pane)
+                else:
+                    st.info("Select a pane to view its content and send commands.")
+
+        # Auto-refresh logic
+        if st.session_state.get('auto_refresh_pane', False):
+            time.sleep(2)
+            st.rerun()
+    else:
+        st.error(f"Could not find session: {session_name}")
+        st.page_link("app.py", label="Go to Dashboard", icon="🏠")
+        st.stop()
+
 
 if __name__ == "__main__":
-    main() 
+    # Determine session_name from navigation state or URL query params
+    session_name_from_nav = st.session_state.get("selected_session_name")
+    session_name_from_url = st.query_params.get("session_name")
+    session_name = session_name_from_nav or session_name_from_url
+
+    # Clean up the one-time navigation state variable
+    if "selected_session_name" in st.session_state:
+        del st.session_state["selected_session_name"]
+
+    if not session_name:
+        st.warning("Please select a session from the main dashboard to view details.")
+        st.page_link("app.py", label="Go to Dashboard", icon="🏠")
+        st.stop()
+
+    # Ensure the URL reflects the current state for bookmarking/refreshing
+    if st.query_params.get("session_name") != session_name:
+        st.query_params['session_name'] = session_name
+    
+    main(session_name) 
