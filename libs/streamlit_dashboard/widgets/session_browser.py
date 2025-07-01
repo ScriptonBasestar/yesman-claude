@@ -418,10 +418,69 @@ class SessionTreeBrowser:
             pane = node.data
             pane_state = self._detect_pane_state(pane)
             
-            st.write(f"**Pane ID:** {pane.id}")
-            st.write(f"**Command:** {pane.command}")
-            st.write(f"**Type:** {pane_state.value[2]}")
-            st.write(f"**Status:** {pane_state.value[0]} {pane_state.name}")
+            # Basic pane information
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.write(f"**Pane ID:** {pane.id}")
+                st.write(f"**Command:** {pane.command}")
+                st.write(f"**Type:** {pane_state.value[2]}")
+                st.write(f"**Status:** {pane_state.value[0]} {pane_state.name}")
+                
+                # Current task and activity
+                if pane.current_task:
+                    st.write(f"**Current Task:** {pane.current_task}")
+                
+                # Activity information
+                if pane.idle_time > 0:
+                    idle_minutes = pane.idle_time / 60
+                    if idle_minutes < 1:
+                        st.write(f"**Idle Time:** {pane.idle_time:.1f} seconds")
+                    elif idle_minutes < 60:
+                        st.write(f"**Idle Time:** {idle_minutes:.1f} minutes")
+                    else:
+                        idle_hours = idle_minutes / 60
+                        st.write(f"**Idle Time:** {idle_hours:.1f} hours")
+                else:
+                    st.write("**Status:** Active")
+            
+            with col2:
+                # Resource usage information
+                if pane.pid:
+                    st.write(f"**Process ID:** {pane.pid}")
+                
+                if pane.cpu_usage > 0:
+                    st.write(f"**CPU Usage:** {pane.cpu_usage:.1f}%")
+                
+                if pane.memory_usage > 0:
+                    if pane.memory_usage < 1024:
+                        st.write(f"**Memory:** {pane.memory_usage:.1f} MB")
+                    else:
+                        st.write(f"**Memory:** {pane.memory_usage/1024:.1f} GB")
+                
+                if pane.running_time > 0:
+                    running_minutes = pane.running_time / 60
+                    if running_minutes < 60:
+                        st.write(f"**Running Time:** {running_minutes:.1f} minutes")
+                    else:
+                        running_hours = running_minutes / 60
+                        st.write(f"**Running Time:** {running_hours:.1f} hours")
+                
+                # Activity score
+                if pane.activity_score > 0:
+                    activity_color = "🟢" if pane.activity_score > 70 else "🟡" if pane.activity_score > 30 else "🔴"
+                    st.write(f"**Activity Score:** {activity_color} {pane.activity_score:.0f}/100")
+            
+            # Last activity and output
+            if pane.last_activity:
+                st.write(f"**Last Activity:** {pane.last_activity.strftime('%H:%M:%S')}")
+            
+            if pane.last_output:
+                st.write("**Last Output:**")
+                st.code(pane.last_output, language="text")
+            
+            if pane.output_lines > 0:
+                st.write(f"**Output Lines:** {pane.output_lines}")
             
             # Show specialized info based on pane type
             if pane.is_claude:
@@ -438,7 +497,7 @@ class SessionTreeBrowser:
                     st.warning("Controller appears stopped")
             
             # Action buttons for pane
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 if st.button("📱 Attach", key=f"attach_detail_{pane.id}"):
                     st.success(f"Attaching to pane: {pane.id}")
@@ -448,6 +507,10 @@ class SessionTreeBrowser:
                 if st.button("📊 Monitor", key=f"monitor_detail_{pane.id}"):
                     st.info(f"Monitoring pane: {pane.id}")
                     # TODO: Implement pane monitoring
+            
+            with col3:
+                if st.button("🔄 Refresh", key=f"refresh_detail_{pane.id}"):
+                    st.rerun()
 
 
 def render_session_tree_browser(sessions: List[SessionInfo]) -> Optional[TreeNode]:

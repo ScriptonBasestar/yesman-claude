@@ -42,7 +42,8 @@
       "Bash(tmux send-keys:*)",
       "Bash(./yesman.py dashboard)",
       "Bash(tmux display-message:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(pip install:*)"
     ],
     "deny": []
   }

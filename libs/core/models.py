@@ -1,16 +1,51 @@
 """Data models for dashboard"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
+from datetime import datetime
+import time
 
 
 @dataclass
 class PaneInfo:
-    """Information about a tmux pane"""
+    """Information about a tmux pane with detailed metrics"""
     id: str
     command: str
     is_claude: bool = False
     is_controller: bool = False
+    
+    # Extended pane information
+    current_task: Optional[str] = None
+    idle_time: float = 0.0  # seconds since last activity
+    last_activity: Optional[datetime] = None
+    cpu_usage: float = 0.0  # percentage
+    memory_usage: float = 0.0  # MB
+    pid: Optional[int] = None
+    running_time: float = 0.0  # seconds since pane started
+    status: str = "unknown"  # active, idle, sleeping, etc.
+    
+    # Activity tracking
+    activity_score: float = 0.0  # 0-100 based on recent activity
+    last_output: Optional[str] = None
+    output_lines: int = 0
+    
+    def __post_init__(self):
+        if self.last_activity is None:
+            self.last_activity = datetime.now()
+    
+    def update_activity(self, new_output: str = None):
+        """Update activity tracking"""
+        self.last_activity = datetime.now()
+        self.idle_time = 0.0
+        if new_output:
+            self.last_output = new_output
+            self.output_lines += 1
+    
+    def calculate_idle_time(self) -> float:
+        """Calculate current idle time in seconds"""
+        if self.last_activity:
+            self.idle_time = (datetime.now() - self.last_activity).total_seconds()
+        return self.idle_time
 
 
 @dataclass
@@ -49,7 +84,18 @@ class SessionInfo:
                             'id': p.id,
                             'command': p.command,
                             'is_claude': p.is_claude,
-                            'is_controller': p.is_controller
+                            'is_controller': p.is_controller,
+                            'current_task': p.current_task,
+                            'idle_time': p.idle_time,
+                            'last_activity': p.last_activity.isoformat() if p.last_activity else None,
+                            'cpu_usage': p.cpu_usage,
+                            'memory_usage': p.memory_usage,
+                            'pid': p.pid,
+                            'running_time': p.running_time,
+                            'status': p.status,
+                            'activity_score': p.activity_score,
+                            'last_output': p.last_output,
+                            'output_lines': p.output_lines
                         } for p in w.panes
                     ]
                 } for w in self.windows

@@ -83,9 +83,9 @@
 - 관련 ISSUE: 세션 내부 상태 파악 어려움
 - 위치: libs/dashboard/widgets/session_browser.py
 
-[ ] pane별 상세 정보 표시 (idle time, current task, 리소스 사용량)
+[x] pane별 상세 정보 표시 (idle time, current task, 리소스 사용량)
 - 관련 ISSUE: Claude 작업 상태 및 프로세스 모니터링
-- 위치: libs/dashboard/models.py
+- 위치: libs/core/models.py
 
 [ ] 클릭으로 pane 접속 기능 구현 (tmux attach-session 자동화)
 - 관련 ISSUE: 세션 탐색 후 즉시 접속 편의성
