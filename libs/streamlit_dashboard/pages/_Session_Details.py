@@ -1,9 +1,10 @@
 """Session Details page - View and interact with tmux sessions"""
 
-import streamlit as st
+import streamlit as st  # type: ignore
 import sys
 import time
-import libtmux
+import libtmux  # type: ignore
+import subprocess
 from pathlib import Path
 from typing import Optional, List, Dict
 
@@ -71,11 +72,17 @@ def get_session_info(session_name: str) -> Optional[Dict]:
             for pane in window.panes:
                 try:
                     cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+                    # Get pane current working directory
+                    try:
+                        cwd = pane.cmd("display-message", "-p", "#{pane_current_path}").stdout[0]
+                    except Exception:
+                        cwd = None
                     pane_info = {
                         'pane': pane,
                         'id': pane.pane_id,
                         'index': pane.pane_index,
                         'active': pane.pane_active == '1',
+                        'path': cwd,
                         'command': cmd,
                         'width': int(pane.pane_width or 0),
                         'height': int(pane.pane_height or 0),
@@ -333,6 +340,26 @@ def render_quick_actions(pane_info: Dict):
                 f.write(content)
             st.success(f"Saved capture to {file_path}")
 
+def render_open_actions(pane_info: Dict):
+    """Render buttons to open pane path in VSCode or Cursor CLI"""
+    st.divider()
+    st.write("**Open Actions:**")
+    col1, col2 = st.columns(2)
+    with col1:
+        if pane_info.get('path'):
+            if st.button("🖥️ Open in VSCode", key=f"open_vscode_{pane_info['id']}"):
+                subprocess.Popen(["code", pane_info['path']])
+                st.success(f"Opened {pane_info['path']} in VSCode")
+        else:
+            st.write("No path available")
+    with col2:
+        if pane_info.get('path'):
+            if st.button("🖥️ Open in Cursor", key=f"open_cursor_{pane_info['id']}"):
+                subprocess.Popen(["cursor"], cwd=pane_info['path'])
+                st.success(f"Opened {pane_info['path']} in Cursor")
+        else:
+            st.write("No path available")
+
 def main(session_name: str):
     """Main function for the session details page"""
     initialize_managers()
@@ -359,6 +386,7 @@ def main(session_name: str):
                     render_pane_input(selected_pane)
                     render_auto_actions(selected_pane)
                     render_quick_actions(selected_pane)
+                    render_open_actions(selected_pane)
                 else:
                     st.info("Select a pane to view its content and send commands.")
 
