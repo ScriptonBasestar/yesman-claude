@@ -1,95 +1,20 @@
 # TODO.md
 
-## 기타
+🛠 기술 스택 제안
+구성 요소	역할	예시 도구
+백엔드 언어	TUI 실행 + 자동 응답 로직	Python + pexpect
+웹 프레임워크	WebSocket 서버	FastAPI, Flask-SocketIO 등
+프론트엔드 구성	터미널 UI 화면 렌더링	xterm.js, webtty
 
+✅ 다음 단계 제안
+간단한 pexpect 테스트로 TUI 실행하고, 자동 응답 및 출력을 캡처하는지 확인
 
-[x] dashboard의 Controller Operations에서 restart claude버튼을 누르면 tmux에 claude라는 커맨드를 전달하는데 기존 claude code가 실행중인 경우 프롬프트로 claude가 입력된다. 해당 pane의 claude code를 먼저 종료 시킨 후에 claude를 다시 실행시켜야 한다.
+WebSocket → xterm.js 연결 데모 구현
 
-[x] 이 선택화면이 자동으로 넘어가지 않는다. 처리해줘.
-
-```
-⏺ Read(shared/src/main/kotlin/com/dripter/shared/service/VideoProcessingService.kt)
-  ⎿  Read 100 lines (ctrl+r to expand)
-
-⏺ Let me check the processVideo method to see the full processing pipeline:
-
-⏺ Read(shared/src/main/kotlin/com/dripter/shared/service/VideoProcessingService.kt)
-  ⎿  Read 150 lines (ctrl+r to expand)
-
-⏺ Now I need to add preview generation to the video processing pipeline. Let me add
-  it after the watermark step:
-
-⏺ Update(shared/src/main/kotlin/com/dripter/shared/service/VideoProcessingService.kt)
-
-╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ Edit file                                                                                                                                                                       │
-│ ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
-│ │ shared/src/main/kotlin/com/dripter/shared/service/VideoProcessingService.kt                                                                                                 │ │
-│ │                                                                                                                                                                             │ │
-│ │   26        private val dashStreamingService = DashStreamingService(ffmpegService)                                                                                          │ │
-│ │   27        private val watermarkService = VideoWatermarkService()                                                                                                          │ │
-│ │   28        private val subtitleService = SubtitleService()                                                                                                                 │ │
-│ │   29 +      private val videoPreviewService = VideoPreviewService()                                                                                                         │ │
-│ │   30                                                                                                                                                                        │ │
-│ │   31        // Processing queue                                                                                                                                             │ │
-│ │   32        private val processingQueue = Channel<VideoProcessingJob>(Channel.UNLI                                                                                          │ │
-│ │        MITED)                                                                                                                                                               │ │
-│ ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
-│ Do you want to make this edit to VideoProcessingService.kt?                                                                                                                     │
-│ ❯ 1. Yes                                                                                                                                                                        │
-│   2. Yes, and don't ask again this session (shift+tab)                                                                                                                          │
-│   3. No, and tell Claude what to do differently (esc)                                                                                                                           │
-│                                                                                                                                                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-```
-
-[x] dashboard에서 tmux에서 claude가 실행되는 내용을 모두 수집해서 나중에 패턴추출에 활용할 수 있도록 한다. 당장 처리는 하지 말고 일단 수집하는 기능을 추가.
-
-## IMPROVE-001: 스마트 세션 캐싱 (Performance)
-**우선순위**: HIGH
-
-[x] SessionCache 클래스 설계 및 구조 정의 (TTL, 캐시 키 전략, 메모리 관리)
-- 관련 ISSUE: 대시보드 2초마다 전체 세션 조회로 인한 성능 저하
-- 위치: libs/dashboard/session_cache.py
-
-[x] get_session_info() 캐시 갱신 로직 구현 및 테스트
-- 관련 ISSUE: tmux 서버 부하 감소 필요
-- 위치: libs/core/session_manager.py
-
-[x] 대시보드 조회 API → 캐시 방식 연동 (cache hit/miss 로직)
-- 관련 ISSUE: 대시보드 반응성 40% 향상 목표
-- 위치: libs/streamlit_dashboard/app.py
-
-[x] CLI/Daemon 모드별 캐싱 예외 처리 로직 추가
-- 관련 ISSUE: 모드별 캐시 동작 차이 대응
-- 위치: libs/core/session_manager.py
-
-[x] 캐시 상태 시각화용 로그 출력 (last_update, hit/miss 카운트, 메모리 사용량)
-- 관련 ISSUE: 캐시 성능 모니터링 필요
-- 위치: libs/core/session_cache.py
-
-[x] 캐시 TTL 설정 및 무효화 전략 구현 (세션 변경 감지시 즉시 무효화)
-- 관련 ISSUE: 실시간성과 성능의 균형
-- 위치: libs/core/session_cache.py
+yesman-claude 자동 응답 로직을 해당 구조에 통합
 
 ## IMPROVE-003: 인터랙티브 세션 브라우저 (UX)
 **우선순위**: HIGH
-
-[x] 세션 트리뷰 UI 컴포넌트 설계 (파일 브라우저 스타일)
-- 관련 ISSUE: 현재 단순한 텍스트 기반 세션 목록 개선
-- 위치: libs/streamlit_dashboard/widgets/session_browser.py
-
-[x] 실시간 세션 상태 아이콘 시스템 구현 (🟢 running, ⚠️ error, 🔄 loading)
-- 관련 ISSUE: 세션 내부 상태 파악 어려움
-- 위치: libs/dashboard/widgets/session_browser.py
-
-[x] pane별 상세 정보 표시 (idle time, current task, 리소스 사용량)
-- 관련 ISSUE: Claude 작업 상태 및 프로세스 모니터링
-- 위치: libs/core/models.py
-
-[x] 클릭으로 pane 접속 기능 구현 (tmux attach-session 자동화)
-- 관련 ISSUE: 세션 탐색 후 즉시 접속 편의성
-- 위치: libs/streamlit_dashboard/widgets/session_browser.py
 
 [ ] 세션 상태 히트맵 렌더링 (activity level 시각화)
 - 관련 ISSUE: 프로젝트별 활성도 한눈에 파악

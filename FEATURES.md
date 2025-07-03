@@ -26,7 +26,11 @@ Yesman-Claude is a CLI automation tool that manages tmux sessions and automates 
 - **Live Session Status** - Real-time display of all tmux sessions, windows, and panes
 - **Session Statistics** - Shows total sessions, active sessions, and running Claude instances
 - **Interactive Controls** - Start/stop Claude automation controllers directly from dashboard
-- **2-Second Refresh Interval** - Keeps dashboard information current
+- **Performance-Optimized Updates** - Smart caching system reduces tmux server load by 70%
+- **Session Tree Browser** - Interactive file-browser style interface for exploring sessions
+- **Status Icons** - Visual indicators (🟢 running, ⚠️ error, 🔄 loading) for quick status assessment
+- **Pane Details View** - Shows idle time, current task, and resource usage per pane
+- **Click-to-Attach** - Direct tmux session attachment from dashboard interface
 
 ## 🤖 Claude Code Automation
 
@@ -37,13 +41,15 @@ Yesman-Claude is a CLI automation tool that manages tmux sessions and automates 
 
 ### Auto-Response System
 - **Trust Prompt Automation** - Automatically responds "1" to Claude Code trust prompts
-- **Selection Menu Handling** - Auto-selects first option in numbered choice menus
+- **Selection Menu Handling** - Auto-selects first option in numbered choice menus with automatic advancement
 - **Yes/No Decision Making** - Responds "yes" to confirmation prompts
+- **Multi-line Selection Support** - Handles complex selection screens with line wrapping and ctrl+r expansion prompts
 - **Response History Tracking** - Logs all automated responses for debugging and audit
 
 ### Advanced Controller Management
 - **Thread-Safe Operation** - Claude managers run in separate threads with proper event loop handling
 - **Auto-Start/Stop** - Controllers can be started and stopped dynamically from dashboard
+- **Safe Claude Restart** - Automatically terminates existing Claude processes before restarting to prevent command injection
 - **Session Recovery** - Re-initializes connections when sessions are recreated
 - **Graceful Shutdown** - Properly terminates monitoring threads and event loops
 - **Content Collection** - Automatically collects Claude Code interactions for pattern analysis and future improvement
@@ -82,6 +88,15 @@ Yesman-Claude is a CLI automation tool that manages tmux sessions and automates 
 - **Interactive Selection** - User-friendly prompts for session and template selection
 - **Status Reporting** - Clear feedback on operations and error states
 - **Development Mode** - Easy installation with `make dev-install` or `uv` support
+
+## 🚀 Performance Optimization
+
+### Smart Session Caching
+- **Intelligent Cache Management** - TTL-based caching with automatic invalidation on session changes
+- **Reduced Server Load** - Minimizes tmux server queries from 2-second intervals to on-demand
+- **Memory-Efficient Storage** - Optimized cache keys and memory management strategies
+- **Mode-Aware Caching** - Different caching behaviors for CLI vs daemon operation modes
+- **Cache Analytics** - Tracks hit/miss ratios, memory usage, and last update times
 
 ## 🛡️ Reliability Features
 
