@@ -2,7 +2,7 @@
 """Test full automation workflow"""
 
 import time
-from libs.dashboard.claude_manager import ClaudeManager
+from libs.core.claude_manager import ClaudeManager
 
 def main():
     print("🚀 Testing full automation workflow...")

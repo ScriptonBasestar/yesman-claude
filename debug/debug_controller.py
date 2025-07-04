@@ -6,8 +6,8 @@ import os
 import time
 import argparse
 from pathlib import Path
-from libs.dashboard.claude_manager import ClaudeManager
-from libs.dashboard.session_manager import SessionManager
+from libs.core.claude_manager import ClaudeManager
+from libs.core.session_manager import SessionManager
 
 def print_header():
     """헤더 출력"""

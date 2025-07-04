@@ -2,7 +2,7 @@
 """Test controller for proxynd session"""
 
 import time
-from libs.dashboard.claude_manager import ClaudeManager
+from libs.core.claude_manager import ClaudeManager
 
 def main():
     print("🚀 Starting test controller for proxynd session...")

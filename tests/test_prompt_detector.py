@@ -1,7 +1,7 @@
 """Test prompt detection functionality"""
 
 import unittest
-from libs.dashboard.prompt_detector import ClaudePromptDetector, PromptType, PromptInfo
+from libs.core.prompt_detector import ClaudePromptDetector, PromptType, PromptInfo
 
 
 class TestClaudePromptDetector(unittest.TestCase):

@@ -3,13 +3,13 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from libs.dashboard.claude_manager import DashboardController
+from libs.core.claude_manager import DashboardController
 
 
 class TestAutoResponse(unittest.TestCase):
     
     def setUp(self):
-        with patch('libs.dashboard.claude_manager.libtmux.Server'):
+        with patch('libs.core.claude_manager.libtmux.Server'):
             self.controller = DashboardController("test_session")
     
     def test_detect_claude_edit_prompt(self):

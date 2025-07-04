@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 from unittest.mock import patch, Mock
 
-from libs.dashboard.session_cache import SessionCache, CacheEntry, CacheStats
+from libs.core.session_cache import SessionCache, CacheEntry, CacheStats
 
 
 class TestCacheEntry(unittest.TestCase):
@@ -51,7 +51,7 @@ class TestSessionCache(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         
         # Mock the log directory
-        with patch('libs.dashboard.session_cache.get_default_log_path') as mock_log_path:
+        with patch('libs.core.session_cache.get_default_log_path') as mock_log_path:
             mock_log_path.return_value = Path(self.temp_dir)
             self.cache = SessionCache(default_ttl=1.0, max_entries=3)
     
