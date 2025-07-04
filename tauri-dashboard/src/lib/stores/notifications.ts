@@ -342,6 +342,11 @@ export const notificationTemplates = {
  * 시스템 이벤트와 알림 연결
  */
 export function setupNotificationSystem(): void {
+  // 브라우저 환경 체크
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+
   // 백엔드 연결 상태 모니터링
   let connectionCheckInterval: number;
 
@@ -410,5 +415,7 @@ export function importNotifications(jsonData: string): boolean {
   }
 }
 
-// 알림 시스템 초기화
-setupNotificationSystem();
+// 알림 시스템 초기화 (브라우저 환경에서만)
+if (typeof window !== 'undefined') {
+  setupNotificationSystem();
+}

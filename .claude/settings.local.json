@@ -43,7 +43,9 @@
       "Bash(./yesman.py dashboard)",
       "Bash(tmux display-message:*)",
       "Bash(kill:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(pnpm tauri:dev:*)",
+      "Bash(pnpm install:*)"
     ],
     "deny": []
   }
