@@ -45,7 +45,8 @@
       "Bash(kill:*)",
       "Bash(pip install:*)",
       "Bash(pnpm tauri:dev:*)",
-      "Bash(pnpm install:*)"
+      "Bash(pnpm install:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
