@@ -1,4 +1,4 @@
-use tauri::{Manager, Window};
+use tauri::Window;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use serde::{Deserialize, Serialize};

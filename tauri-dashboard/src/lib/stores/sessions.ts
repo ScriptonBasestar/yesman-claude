@@ -363,9 +363,9 @@ export async function stopAllControllers(): Promise<void> {
  * 내부 유틸리티 함수들
  */
 function updateSessionControllerStatus(sessionName: string, status: string): void {
-  sessions.update(currentSessions => 
-    currentSessions.map(session => 
-      session.session_name === sessionName 
+  sessions.update(currentSessions =>
+    currentSessions.map(session =>
+      session.session_name === sessionName
         ? { ...session, controller_status: status }
         : session
     )
@@ -373,9 +373,26 @@ function updateSessionControllerStatus(sessionName: string, status: string): voi
 }
 
 /**
+ * 컨트롤러 상태 업데이트 (외부 사용용)
+ */
+export function updateControllerStatus(sessionName: string, status?: string): void {
+  if (status) {
+    updateSessionControllerStatus(sessionName, status);
+  } else {
+    // status가 없으면 해당 세션의 상태를 새로고침
+    refreshSessions();
+  }
+}
+
+/**
  * 이벤트 리스너 설정
  */
 export function setupEventListeners(): void {
+  // 브라우저 환경 체크
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   // 세션 상태 변경 이벤트
   eventListeners.onSessionStatusChanged((sessionName, status) => {
     sessions.update(currentSessions =>
@@ -420,5 +437,7 @@ export async function getSessionLogs(sessionName: string): Promise<string[]> {
   }
 }
 
-// 스토어 초기화 시 이벤트 리스너 설정
-setupEventListeners();
+// 스토어 초기화 시 이벤트 리스너 설정 (브라우저 환경에서만)
+if (typeof window !== 'undefined') {
+  setupEventListeners();
+}

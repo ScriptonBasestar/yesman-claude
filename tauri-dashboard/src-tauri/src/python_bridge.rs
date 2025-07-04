@@ -273,7 +273,7 @@ pub async fn get_session_logs(session_name: String, limit: Option<i32>) -> Resul
 }
 
 #[command]
-pub async fn get_metrics_data(time_range: String) -> Result<Vec<MetricData>, String> {
+pub async fn get_metrics_data(_time_range: String) -> Result<Vec<MetricData>, String> {
     // 더미 메트릭 데이터
     let mut metrics = Vec::new();
     let now = Utc::now();

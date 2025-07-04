@@ -97,6 +97,11 @@ export const hasUnsavedChanges = writable<boolean>(false);
  * 설정 로드
  */
 export async function loadConfig(): Promise<void> {
+  // 브라우저 환경 체크
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   isConfigLoading.set(true);
   configError.set(null);
 
@@ -310,6 +315,11 @@ export function validateConfig(configToValidate: Partial<AppConfig>): string[] {
  * 설정 변경 감지 및 자동 저장
  */
 export function setupAutoSave(enabled: boolean = true, delay: number = 30000): void {
+  // 브라우저 환경 체크
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   if (!enabled) return;
   
   let saveTimeout: number;
@@ -379,6 +389,11 @@ function mergeConfigs(base: AppConfig, override: Partial<AppConfig>): AppConfig 
  * 시스템 테마 변경 감지
  */
 export function setupThemeDetection(): void {
+  // 브라우저 환경 체크
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   
   const handleThemeChange = () => {
@@ -415,7 +430,9 @@ export function toggleDebugMode(): void {
   }));
 }
 
-// 초기화 시 설정 로드 및 테마 감지 설정
-loadConfig();
-setupThemeDetection();
-setupAutoSave();
+// 초기화 시 설정 로드 및 테마 감지 설정 (브라우저 환경에서만)
+if (typeof window !== 'undefined') {
+  loadConfig();
+  setupThemeDetection();
+  setupAutoSave();
+}
