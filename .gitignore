@@ -42,3 +42,7 @@ ehthumbs.db
 *.log
 *.logs
 logs/
+
+# Build artifacts
+yesman_claude.egg-info/
+*.egg-info/
