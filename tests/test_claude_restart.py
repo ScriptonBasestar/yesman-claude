@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 import time
 
-from libs.dashboard.claude_manager import DashboardController
+from libs.core.claude_manager import DashboardController
 
 
 class TestClaudeRestart(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestClaudeRestart(unittest.TestCase):
         self.mock_session = Mock()
         self.mock_pane = Mock()
         
-        with patch('libs.dashboard.claude_manager.libtmux.Server') as mock_server_class:
+        with patch('libs.core.claude_manager.libtmux.Server') as mock_server_class:
             mock_server_class.return_value = self.mock_server
             self.mock_server.find_where.return_value = self.mock_session
             

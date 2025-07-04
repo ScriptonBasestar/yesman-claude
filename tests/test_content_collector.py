@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch, Mock
 
-from libs.dashboard.content_collector import ClaudeContentCollector, ContentCollectionManager
+from libs.core.content_collector import ClaudeContentCollector, ContentCollectionManager
 
 
 class TestClaudeContentCollector(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         self.session_name = "test_session"
         
         # Mock the log directory to use temp directory
-        with patch('libs.dashboard.content_collector.get_default_log_path') as mock_log_path:
+        with patch('libs.core.content_collector.get_default_log_path') as mock_log_path:
             mock_log_path.return_value = Path(self.temp_dir)
             self.collector = ClaudeContentCollector(self.session_name)
     
@@ -135,7 +135,7 @@ class TestContentCollectionManager(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         
         # Mock the log directory
-        with patch('libs.dashboard.content_collector.get_default_log_path') as mock_log_path:
+        with patch('libs.core.content_collector.get_default_log_path') as mock_log_path:
             mock_log_path.return_value = Path(self.temp_dir)
             self.manager = ContentCollectionManager()
     

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Debug content capture and prompt detection"""
 
-from libs.dashboard.claude_manager import ClaudeManager
+from libs.core.claude_manager import ClaudeManager
 
 def main():
     print("🔍 Debugging content and prompt detection...")
