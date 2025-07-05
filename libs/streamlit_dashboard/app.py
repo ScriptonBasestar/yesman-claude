@@ -19,8 +19,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from .ui_components import setup_page_config, render_activity_logs
 from .dashboard_layout import (
-    initialize_session_state, add_activity_log, 
-    render_main_content, render_settings_sidebar
+    initialize_session_state,
+    add_activity_log,
+    render_main_content,
+    render_settings_sidebar,
 )
 
 
@@ -34,7 +36,7 @@ def main():
         st.switch_page("pages/_Session_Details.py")
 
     # Get action message if any
-    action_message = st.session_state.get('action_message', {})
+    action_message = st.session_state.get("action_message", {})
 
     # Add initial log
     if not st.session_state.activity_logs:
@@ -45,15 +47,15 @@ def main():
 
     # Render main content
     render_main_content()
-    
+
     st.divider()
-    
+
     # Render activity logs
     logs_cleared = render_activity_logs(st.session_state.activity_logs)
     if logs_cleared:
         add_activity_log("info", "Logs cleared")
         st.rerun()
-    
+
     # Auto refresh
     if st.session_state.auto_refresh:
         time.sleep(st.session_state.refresh_interval)
