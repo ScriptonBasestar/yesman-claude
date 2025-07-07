@@ -2,8 +2,8 @@
 
 A high-performance native desktop application for managing tmux sessions and Claude Code automation, built with **Tauri + SvelteKit + TypeScript**.
 
-> **🎯 Migration Status**: Complete migration from Streamlit to native desktop app  
-> **📊 Feature Parity**: 100% - All Streamlit functionality preserved and enhanced  
+> **🎯 Status**: Production-ready native desktop application  
+> **📊 Features**: Complete session monitoring, control, and automation  
 > **🏗️ Architecture**: Modern Rust + TypeScript stack with reactive UI
 
 ## ✨ Features
@@ -115,7 +115,7 @@ source venv/bin/activate  # or your venv path
 # The Tauri app will discover and connect to:
 # - libs/core/session_manager.py
 # - libs/core/claude_manager.py  
-# - libs/streamlit_dashboard/ (for migration reference)
+# - All legacy web dashboard components have been migrated to native Svelte components
 ```
 
 ## 📖 Usage Guide
@@ -329,7 +329,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Original Streamlit Implementation** - Foundation for requirements and feature set
+- **Modern Architecture** - Built from ground up with native desktop performance in mind
 - **Tauri Team** - Excellent framework for desktop app development  
 - **Svelte Team** - Revolutionary frontend framework
 - **DaisyUI** - Beautiful component library
@@ -337,6 +337,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**🚀 Ready to replace your Streamlit dashboard with a native desktop app?**
+**🚀 Experience the power of native desktop performance!**
 
-The Yesman Claude Dashboard delivers all the functionality you love from Streamlit, plus the performance and polish of a native application. Experience the difference that modern tooling makes! ⚡
+The Yesman Claude Dashboard delivers comprehensive session monitoring and control with the performance and polish of a native desktop application. Built with modern tools for maximum efficiency and user experience! ⚡
