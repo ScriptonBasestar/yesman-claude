@@ -1,0 +1,12 @@
+sessions:
+  test-project:
+    session_name: "{{SESSION_NAME}}"
+    template: "none"
+    override:
+      windows:
+        - window_name: "main"
+          panes:
+            - shell_command: ["cd {{PROJECT_PATH}}"]
+        - window_name: "claude"
+          panes:
+            - shell_command: ["cd {{PROJECT_PATH}}", "echo 'Simulating Claude prompt...'", "echo 'Do you trust this workspace? (y/n)'", "read response", "echo \"You selected: $response\""]

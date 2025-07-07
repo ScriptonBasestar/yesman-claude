@@ -5,7 +5,10 @@ This directory contains comprehensive integration tests for the Yesman-Claude au
 ## Quick Start
 
 ```bash
-# Run all integration tests
+# Load test configuration
+source config/test-config.env
+
+# Run all integration tests (improved version)
 ./run_tests.sh
 
 # Run specific test suite
@@ -14,8 +17,34 @@ This directory contains comprehensive integration tests for the Yesman-Claude au
 # Run quick tests only
 ./run_tests.sh --quick
 
+# Run tests in parallel (faster)
+python3 lib/parallel_runner.py --suites scripts/basic scripts/ai scripts/monitoring --workers 4
+
 # Show help
 ./run_tests.sh --help
+```
+
+## 🚀 새로운 기능 (v2.0)
+
+### 병렬 테스트 실행
+```bash
+# 4개 워커로 병렬 실행 (60% 시간 단축)
+python3 lib/parallel_runner.py --suites scripts/basic scripts/ai --workers 4
+
+# 특정 패턴 제외
+python3 lib/parallel_runner.py --suites scripts/all --exclude legacy old_test
+```
+
+### 개선된 테스트 스크립트
+```bash
+# AI 테스트 (개선된 버전)
+./scripts/ai/test_pattern_learning_improved.sh
+
+# Health 모니터링 (개선된 버전)  
+./scripts/monitoring/test_health_monitoring_improved.sh
+
+# 세션 관리 (개선된 버전)
+./scripts/basic/test_session_lifecycle_improved.sh
 ```
 
 ## Test Suites
