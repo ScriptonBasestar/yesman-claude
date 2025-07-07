@@ -6,6 +6,10 @@ import threading
 from typing import Optional, Any
 from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 from .content_collector import ClaudeContentCollector
+from ..ai.adaptive_response import AdaptiveResponse, AdaptiveConfig
+from ..automation.automation_manager import AutomationManager
+from ..dashboard.health_calculator import HealthCalculator
+from ..logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
 
 
 class ClaudeMonitor:
@@ -36,6 +40,29 @@ class ClaudeMonitor:
         self.content_collector = ClaudeContentCollector(session_manager.session_name)
         self.current_prompt: Optional[PromptInfo] = None
         self.waiting_for_input = False
+        
+        # AI-powered adaptive response system
+        self.adaptive_response = AdaptiveResponse(
+            config=AdaptiveConfig(
+                min_confidence_threshold=0.7,
+                learning_enabled=True,
+                auto_response_enabled=True,
+                response_delay_ms=1500  # Slightly longer delay for more natural interaction
+            )
+        )
+        
+        # Context-aware automation system
+        self.automation_manager = AutomationManager(
+            project_path=None  # Will use current working directory
+        )
+        
+        # Project health monitoring system
+        self.health_calculator = HealthCalculator(
+            project_path=None  # Will use current working directory
+        )
+        
+        # High-performance async logging system
+        self.async_logger: Optional[AsyncLogger] = None
         
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
     
@@ -155,11 +182,34 @@ class ClaudeMonitor:
                     prompt_info = self._check_for_prompt(content)
                     
                     if prompt_info:
-                        # Try auto-response first if auto_next is enabled
+                        # Try adaptive AI-powered response first if auto_next is enabled
                         if self.is_auto_next_enabled:
+                            context = f"session:{self.session_name}, type:{prompt_info.type.value}"
+                            should_respond, ai_response, confidence = await self.adaptive_response.should_auto_respond(
+                                prompt_info.question, context, self.session_name
+                            )
+                            
+                            if should_respond:
+                                # Send AI-predicted response
+                                success = await self.adaptive_response.send_adaptive_response(
+                                    prompt_info.question, ai_response, confidence, context, self.session_name
+                                )
+                                
+                                if success:
+                                    self.process_controller.send_input(ai_response)
+                                    self.status_manager.update_activity(f"🤖 AI auto-responded: '{ai_response}' (confidence: {confidence:.2f})")
+                                    self.status_manager.record_response(prompt_info.type.value, ai_response, content)
+                                    self.adaptive_response.confirm_response_success(prompt_info.question, ai_response, context, self.session_name, True)
+                                    self._clear_prompt_state()
+                                    continue
+                            
+                            # Fall back to legacy pattern-based auto-response if AI didn't handle it
                             if self._auto_respond_to_selection(prompt_info):
-                                self.status_manager.update_activity(f"✅ Auto-responded to {prompt_info.type.value}")
-                                self.status_manager.record_response(prompt_info.type.value, "auto", content)
+                                response = self._get_legacy_response(prompt_info)
+                                self.status_manager.update_activity(f"✅ Legacy auto-responded: '{response}' to {prompt_info.type.value}")
+                                self.status_manager.record_response(prompt_info.type.value, response, content)
+                                # Learn from legacy response for future AI improvements
+                                self.adaptive_response.learn_from_manual_response(prompt_info.question, response, context, self.session_name)
                                 self._clear_prompt_state()
                                 continue
                         
@@ -171,6 +221,23 @@ class ClaudeMonitor:
                     else:
                         # Clear prompt state if no longer waiting
                         self._clear_prompt_state()
+                        
+                    # Periodically update AI patterns
+                    await self.adaptive_response.update_patterns()
+                    
+                    # Analyze content for automation contexts
+                    if content != last_content and len(content.strip()) > 0:
+                        automation_contexts = self.automation_manager.analyze_content_for_context(content, self.session_name)
+                        for auto_context in automation_contexts:
+                            self.logger.info(f"Automation context detected: {auto_context.context_type.value} (confidence: {auto_context.confidence:.2f})")
+                    
+                    # Check for Claude idle automation opportunities  
+                    if hasattr(self.status_manager, 'last_activity_time'):
+                        idle_context = self.automation_manager.analyze_claude_idle(
+                            self.status_manager.last_activity_time, idle_threshold=60
+                        )
+                        if idle_context:
+                            self.logger.debug(f"Claude idle context: {idle_context.confidence:.2f}")
                     
                     # Collect content for pattern analysis
                     if content != last_content and len(content.strip()) > 0:
@@ -344,3 +411,196 @@ class ClaudeMonitor:
     def cleanup_old_collections(self, days_to_keep: int = 7) -> int:
         """Clean up old collection files"""
         return self.content_collector.cleanup_old_files(days_to_keep)
+        
+    def _get_legacy_response(self, prompt_info: PromptInfo) -> str:
+        """Get response that would be used by legacy auto-response system"""
+        try:
+            if prompt_info.type == PromptType.NUMBERED_SELECTION:
+                opts_count = prompt_info.metadata.get('option_count', len(prompt_info.options))
+                if opts_count == 2 and self.mode12 == "Manual":
+                    return self.mode12_response
+                elif opts_count >= 3 and self.mode123 == "Manual":
+                    return self.mode123_response
+                else:
+                    return getattr(prompt_info, 'recommended_response', None) or "1"
+                    
+            elif prompt_info.type == PromptType.BINARY_CHOICE:
+                if self.yn_mode == "Manual":
+                    return self.yn_response.lower() if isinstance(self.yn_response, str) else str(self.yn_response)
+                else:
+                    return getattr(prompt_info, 'recommended_response', None) or "y"
+                    
+            elif prompt_info.type == PromptType.BINARY_SELECTION:
+                if self.mode12 == "Manual":
+                    return self.mode12_response
+                else:
+                    return getattr(prompt_info, 'recommended_response', None) or "1"
+                    
+            elif prompt_info.type == PromptType.LOGIN_REDIRECT:
+                question = prompt_info.question.lower()
+                if "continue" in question or "press enter" in question:
+                    return ""  # Just press Enter
+                    
+        except Exception as e:
+            self.logger.error(f"Error getting legacy response: {e}")
+            
+        return "1"  # Safe fallback
+        
+    # Adaptive response management methods
+    def get_adaptive_statistics(self) -> dict:
+        """Get statistics from the adaptive response system"""
+        return self.adaptive_response.get_learning_statistics()
+        
+    def set_adaptive_confidence_threshold(self, threshold: float):
+        """Adjust the confidence threshold for adaptive responses"""
+        self.adaptive_response.adjust_confidence_threshold(threshold)
+        
+    def enable_adaptive_response(self, enabled: bool = True):
+        """Enable or disable adaptive response functionality"""
+        self.adaptive_response.enable_auto_response(enabled)
+        
+    def enable_adaptive_learning(self, enabled: bool = True):
+        """Enable or disable adaptive learning functionality"""
+        self.adaptive_response.enable_learning(enabled)
+        
+    def export_adaptive_data(self, output_path: str) -> bool:
+        """Export adaptive learning data for analysis"""
+        from pathlib import Path
+        return self.adaptive_response.export_learning_data(Path(output_path))
+        
+    def learn_from_user_input(self, prompt_text: str, user_response: str, context: str = ""):
+        """Learn from manual user input for future improvements"""
+        self.adaptive_response.learn_from_manual_response(
+            prompt_text, user_response, context, self.session_name
+        )
+        
+    # Context-aware automation methods
+    async def start_automation_monitoring(self, monitor_interval: int = 10) -> bool:
+        """Start context-aware automation monitoring"""
+        return await self.automation_manager.start_monitoring(monitor_interval)
+        
+    async def stop_automation_monitoring(self) -> bool:
+        """Stop context-aware automation monitoring"""
+        return await self.automation_manager.stop_monitoring()
+        
+    def get_automation_status(self) -> dict:
+        """Get automation system status"""
+        return self.automation_manager.get_automation_status()
+        
+    def register_automation_workflow(self, workflow):
+        """Register a custom automation workflow"""
+        self.automation_manager.register_custom_workflow(workflow)
+        
+    async def test_automation(self, context_type_name: str) -> dict:
+        """Test automation with simulated context"""
+        from ..automation.context_detector import ContextType
+        try:
+            context_type = ContextType(context_type_name)
+            return await self.automation_manager.test_automation_chain(context_type)
+        except ValueError:
+            return {'error': f'Invalid context type: {context_type_name}'}
+            
+    def get_automation_execution_history(self, limit: int = 10) -> list:
+        """Get recent automation execution history"""
+        return self.automation_manager.get_execution_history(limit)
+        
+    def save_automation_config(self) -> None:
+        """Save automation configuration"""
+        self.automation_manager.save_automation_config()
+        
+    def load_automation_config(self) -> None:
+        """Load automation configuration"""
+        self.automation_manager.load_automation_config()
+        
+    # Project health monitoring methods
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:
+        """Calculate comprehensive project health"""
+        health = await self.health_calculator.calculate_health(force_refresh)
+        return health.to_dict()
+        
+    def get_health_summary(self) -> dict:
+        """Get a quick health summary"""
+        # This would be cached from last calculation
+        try:
+            # For now, return a default summary - in real implementation this would use cached data
+            return {
+                'overall': {'score': 75, 'level': 'good', 'emoji': '🟡'},
+                'categories': {},
+                'metrics_count': 0,
+                'last_assessment': time.time(),
+                'project_path': str(self.health_calculator.project_path)
+            }
+        except Exception as e:
+            self.logger.error(f"Error getting health summary: {e}")
+            return {'error': str(e)}
+            
+    # Asynchronous logging methods
+    async def _start_async_logging(self):
+        """Start the async logging system"""
+        if self.async_logger:
+            return
+            
+        config = AsyncLoggerConfig(
+            name=f"yesman.claude_monitor.{self.session_name}",
+            level=LogLevel.INFO,
+            max_queue_size=5000,
+            batch_size=25,
+            flush_interval=3.0,
+            enable_console=False,  # Use standard logger for console
+            enable_file=True,
+            enable_batch_processor=True
+        )
+        
+        self.async_logger = AsyncLogger(config)
+        await self.async_logger.start()
+        self.logger.info("Async logging system started")
+        
+    async def _stop_async_logging(self):
+        """Stop the async logging system"""
+        if self.async_logger:
+            await self.async_logger.stop()
+            self.async_logger = None
+            self.logger.info("Async logging system stopped")
+            
+    def _async_log(self, level: LogLevel, message: str, **kwargs):
+        """Log message to async logger (safe for sync contexts)"""
+        if self.async_logger:
+            self.async_logger.log(level, message, **kwargs)
+        else:
+            # Fallback to standard logger
+            self.logger.log(level.level_value, message)
+            
+    async def start_async_monitoring(self) -> bool:
+        """Start monitoring with async logging enabled"""
+        try:
+            await self._start_async_logging()
+            result = self.start_monitoring()
+            if result:
+                self._async_log(LogLevel.INFO, "Claude monitor started with async logging", 
+                               session=self.session_name)
+            return result
+        except Exception as e:
+            self.logger.error(f"Failed to start async monitoring: {e}")
+            return False
+            
+    async def stop_async_monitoring(self) -> bool:
+        """Stop monitoring and async logging"""
+        try:
+            result = self.stop_monitoring()
+            await self._stop_async_logging()
+            return result
+        except Exception as e:
+            self.logger.error(f"Failed to stop async monitoring: {e}")
+            return False
+            
+    def get_async_logging_stats(self) -> dict:
+        """Get async logging statistics"""
+        if self.async_logger:
+            return self.async_logger.get_statistics()
+        else:
+            return {'error': 'Async logging not enabled'}
+            
+    async def flush_async_logs(self):
+        """Force flush all pending async logs"""
+        if self.async_logger:
+            await self.async_logger.flush()
