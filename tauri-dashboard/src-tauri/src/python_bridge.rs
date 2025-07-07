@@ -299,8 +299,9 @@ sys.path.append('.')
 sys.path.append('..')
 
 try:
-    from libs.streamlit_dashboard.session_actions import setup_tmux_sessions
-    result = setup_tmux_sessions('{}')
+    from libs.tmux_manager import TmuxManager
+    manager = TmuxManager()
+    result = manager.setup_project('{}')
     print(result)
 except Exception as e:
     print(False)
@@ -311,8 +312,9 @@ sys.path.append('.')
 sys.path.append('..')
 
 try:
-    from libs.streamlit_dashboard.session_actions import setup_tmux_sessions
-    result = setup_tmux_sessions()
+    from libs.tmux_manager import TmuxManager
+    manager = TmuxManager()
+    result = manager.setup_all_projects()
     print(result)
 except Exception as e:
     print(False)
@@ -332,8 +334,9 @@ sys.path.append('.')
 sys.path.append('..')
 
 try:
-    from libs.streamlit_dashboard.session_actions import teardown_tmux_sessions
-    result = teardown_tmux_sessions('{}')
+    from libs.tmux_manager import TmuxManager
+    manager = TmuxManager()
+    result = manager.teardown_project('{}')
     print(result)
 except Exception as e:
     print(False)
@@ -344,8 +347,9 @@ sys.path.append('.')
 sys.path.append('..')
 
 try:
-    from libs.streamlit_dashboard.session_actions import teardown_tmux_sessions
-    result = teardown_tmux_sessions()
+    from libs.tmux_manager import TmuxManager
+    manager = TmuxManager()
+    result = manager.teardown_all_projects()
     print(result)
 except Exception as e:
     print(False)

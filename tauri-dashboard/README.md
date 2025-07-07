@@ -284,7 +284,7 @@ ps aux | grep python | grep yesman
 
 # Verify Python dependencies
 cd /path/to/yesman-claude
-pip list | grep -E "(tmuxp|pexpect|streamlit)"
+pip list | grep -E "(tmuxp|pexpect|psutil)"
 
 # Check tmux availability
 tmux list-sessions

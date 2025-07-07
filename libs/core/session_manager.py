@@ -69,8 +69,8 @@ class SessionManager:
     
     def _detect_operation_mode(self) -> OperationMode:
         """Detect operation mode based on environment"""
-        # Check if running in Streamlit (web dashboard)
-        if 'streamlit' in os.environ.get('_', '').lower() or 'STREAMLIT_SERVER_PORT' in os.environ:
+        # Check if running in web environment (Tauri or web dashboard)
+        if 'tauri' in os.environ.get('_', '').lower() or os.environ.get('TAURI_ENV'):
             return OperationMode.WEB
         
         # Check if running as daemon (has TMUX or SSH_TTY)
