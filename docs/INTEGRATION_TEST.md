@@ -556,4 +556,769 @@ uv run ./yesman.py logs configure --max-size 100MB
 [전체적인 평가 및 추천 사항]
 ```
 
+### Phase 11: 보안 테스트
+
+#### 11.1 API 인증 및 권한 테스트
+```bash
+# 1. API 서버 시작
+cd api && python -m uvicorn main:app --reload --port 8001 &
+API_PID=$!
+
+# 2. 인증 없이 API 접근 시도
+curl -X GET http://localhost:8001/sessions
+curl -X POST http://localhost:8001/sessions/test-project/setup
+curl -X DELETE http://localhost:8001/sessions/teardown-all
+
+# 3. 잘못된 입력으로 API 공격 시도
+curl -X POST http://localhost:8001/sessions/../../etc/passwd/setup
+curl -X POST http://localhost:8001/sessions/test%00null/setup
+curl -X POST http://localhost:8001/sessions/$(echo -n "'; DROP TABLE sessions; --")/setup
+
+# 4. API 서버 종료
+kill $API_PID
+```
+
+**검증 포인트**:
+- [ ] 인증되지 않은 요청이 적절히 처리됨
+- [ ] 경로 탐색 공격이 차단됨
+- [ ] SQL 인젝션 시도가 무효화됨
+- [ ] 에러 메시지에 민감한 정보가 노출되지 않음
+
+#### 11.2 Tmux 세션 격리 테스트
+```bash
+# 1. 다중 사용자 시뮬레이션
+# 사용자 1 세션 생성
+YESMAN_USER=user1 uv run ./yesman.py setup
+
+# 사용자 2가 사용자 1의 세션에 접근 시도
+YESMAN_USER=user2 uv run ./yesman.py enter yesman-test
+
+# 2. 세션 이름 충돌 테스트
+uv run ./yesman.py setup
+uv run ./yesman.py setup  # 동일한 세션 이름으로 재생성 시도
+
+# 3. 권한 에스컬레이션 방지 테스트
+echo "sudo rm -rf /" > malicious.sh
+chmod +x malicious.sh
+# projects.yaml에 악의적인 명령 주입 시도
+cat > ~/.yesman/projects-test.yaml << 'EOF'
+sessions:
+  malicious:
+    override:
+      windows:
+        - window_name: "exploit"
+          panes:
+            - shell_command: ["./malicious.sh"]
+EOF
+```
+
+**검증 포인트**:
+- [ ] 다른 사용자의 세션에 접근할 수 없음
+- [ ] 세션 이름 충돌이 적절히 처리됨
+- [ ] 악의적인 명령이 실행되지 않음
+- [ ] 권한 상승이 발생하지 않음
+
+#### 11.3 민감 정보 보호 테스트
+```bash
+# 1. 환경 변수에 민감 정보 설정
+export SECRET_API_KEY="super-secret-key-12345"
+export DATABASE_PASSWORD="db-password-xyz"
+
+# 2. 로그에 민감 정보 노출 확인
+uv run ./yesman.py logs configure --output-dir ~/.yesman/logs --format json
+uv run ./yesman.py setup
+uv run ./yesman.py ai predict "Enter API key:" --context "api_context"
+
+# 3. 로그 파일에서 민감 정보 검색
+grep -r "SECRET_API_KEY\|DATABASE_PASSWORD\|super-secret\|db-password" ~/.yesman/logs/
+
+# 4. 캐시에 민감 정보 저장 확인
+find ~/.yesman -name "*.cache" -o -name "*.json" | xargs grep -l "password\|secret\|key"
+```
+
+**검증 포인트**:
+- [ ] 환경 변수가 로그에 노출되지 않음
+- [ ] 패스워드가 평문으로 저장되지 않음
+- [ ] 캐시 파일에 민감 정보가 없음
+- [ ] AI 학습 데이터에 민감 정보가 포함되지 않음
+
+### Phase 12: 카오스 엔지니어링 테스트
+
+#### 12.1 네트워크 장애 시뮬레이션
+```bash
+# 1. 네트워크 지연 시뮬레이션 (macOS)
+# sudo dnctl pipe 1 config delay 1000ms plr 0.1
+# sudo pfctl -f /etc/pf.conf
+
+# Linux에서는 tc 사용
+# sudo tc qdisc add dev lo root netem delay 1000ms loss 10%
+
+# 2. API 서버 연결 끊김 테스트
+cd api && python -m uvicorn main:app --port 8001 &
+API_PID=$!
+sleep 5
+
+# API 서버 강제 종료
+kill -9 $API_PID
+
+# 클라이언트 동작 확인
+uv run ./yesman.py show
+uv run ./yesman.py status
+
+# 3. 간헐적 연결 실패 시뮬레이션
+for i in {1..10}; do
+    if [ $((i % 3)) -eq 0 ]; then
+        # API 서버 재시작
+        cd api && python -m uvicorn main:app --port 8001 &
+        API_PID=$!
+    else
+        # API 서버 종료
+        kill -9 $API_PID 2>/dev/null
+    fi
+    
+    uv run ./yesman.py show
+    sleep 2
+done
+```
+
+**검증 포인트**:
+- [ ] 네트워크 장애 시 graceful degradation
+- [ ] 재시도 메커니즘이 작동함
+- [ ] 오프라인 모드로 전환됨
+- [ ] 연결 복구 시 자동 재연결됨
+
+#### 12.2 프로세스 강제 종료 복구 테스트
+```bash
+# 1. Claude 프로세스 강제 종료
+uv run ./yesman.py setup
+tmux send-keys -t yesman-test:claude "claude" Enter
+sleep 5
+
+# Claude 프로세스 찾아서 강제 종료
+CLAUDE_PID=$(pgrep -f "claude")
+kill -9 $CLAUDE_PID
+
+# 자동 복구 확인
+uv run ./yesman.py status
+sleep 10
+uv run ./yesman.py status
+
+# 2. 모니터링 프로세스 강제 종료
+uv run ./yesman.py automate monitor --interval 5 &
+MONITOR_PID=$!
+sleep 10
+kill -9 $MONITOR_PID
+
+# 상태 확인
+uv run ./yesman.py automate status
+```
+
+**검증 포인트**:
+- [ ] Claude 프로세스가 자동으로 재시작됨
+- [ ] 세션 상태가 올바르게 복구됨
+- [ ] 모니터링이 중단되어도 시스템이 안정적임
+- [ ] 복구 과정이 로그에 기록됨
+
+#### 12.3 리소스 부족 상황 테스트
+```bash
+# 1. 디스크 공간 부족 시뮬레이션
+# 대용량 더미 파일 생성
+dd if=/dev/zero of=~/.yesman/logs/dummy_large.log bs=1M count=1000
+
+# 로그 생성 시도
+uv run ./yesman.py logs configure --output-dir ~/.yesman/logs
+for i in {1..100}; do
+    uv run ./yesman.py show
+done
+
+# 2. 메모리 부족 시뮬레이션
+# 많은 수의 세션 동시 생성
+for i in {1..20}; do
+    cat > ~/.yesman/projects-stress-$i.yaml << EOF
+sessions:
+  stress-test-$i:
+    override:
+      windows:
+        - window_name: "main"
+          panes:
+            - shell_command: ["yes"]
+EOF
+    uv run ./yesman.py setup -f ~/.yesman/projects-stress-$i.yaml &
+done
+
+# 메모리 사용량 모니터링
+ps aux | grep yesman
+top -l 1 | grep yesman
+
+# 3. CPU 과부하 테스트
+for i in {1..10}; do
+    uv run ./yesman.py browse --update-interval 0.1 &
+done
+
+# CPU 사용률 확인
+top -l 1 | head -20
+```
+
+**검증 포인트**:
+- [ ] 디스크 공간 부족 시 적절한 에러 메시지
+- [ ] 로그 로테이션이 작동함
+- [ ] 메모리 부족 시 graceful degradation
+- [ ] CPU 과부하 시에도 응답성 유지
+
+### Phase 13: 실시간 통신 테스트
+
+#### 13.1 WebSocket 연결 안정성 테스트
+```bash
+# 1. WebSocket 테스트 클라이언트 작성
+cat > test_websocket.py << 'EOF'
+import asyncio
+import websockets
+import json
+import time
+
+async def test_websocket_stability():
+    uri = "ws://localhost:8001/ws"
+    connection_count = 0
+    error_count = 0
+    
+    while connection_count < 100:
+        try:
+            async with websockets.connect(uri) as websocket:
+                connection_count += 1
+                print(f"Connection {connection_count} established")
+                
+                # 메시지 송수신 테스트
+                await websocket.send(json.dumps({"type": "ping"}))
+                response = await websocket.recv()
+                
+                # 의도적으로 연결 유지
+                await asyncio.sleep(10)
+                
+        except Exception as e:
+            error_count += 1
+            print(f"Error: {e}")
+            
+    print(f"Total connections: {connection_count}, Errors: {error_count}")
+
+asyncio.run(test_websocket_stability())
+EOF
+
+python test_websocket.py
+```
+
+**검증 포인트**:
+- [ ] 장시간 WebSocket 연결이 유지됨
+- [ ] 연결 끊김 후 자동 재연결됨
+- [ ] 메모리 누수가 없음
+- [ ] 동시 연결 수 제한이 적절함
+
+#### 13.2 메시지 순서 보장 테스트
+```bash
+# 1. 다중 메시지 전송 테스트
+cat > test_message_order.py << 'EOF'
+import asyncio
+import aiohttp
+import json
+
+async def send_rapid_messages():
+    async with aiohttp.ClientSession() as session:
+        messages = []
+        for i in range(100):
+            data = {"id": i, "timestamp": time.time()}
+            async with session.post('http://localhost:8001/api/message', json=data) as resp:
+                result = await resp.json()
+                messages.append(result)
+        
+        # 순서 검증
+        for i in range(1, len(messages)):
+            if messages[i]["id"] != messages[i-1]["id"] + 1:
+                print(f"Order violation at index {i}")
+                
+asyncio.run(send_rapid_messages())
+EOF
+
+python test_message_order.py
+```
+
+**검증 포인트**:
+- [ ] 메시지 순서가 보장됨
+- [ ] 동시 요청에서도 순서 유지
+- [ ] 메시지 누락이 없음
+- [ ] 중복 메시지가 없음
+
+### Phase 14: AI/ML 시스템 고급 테스트
+
+#### 14.1 패턴 분류 정확도 테스트
+```bash
+# 1. 테스트 데이터셋 생성
+cat > test_prompts.json << 'EOF'
+{
+  "test_cases": [
+    {
+      "prompt": "Do you want to overwrite the file? (y/n)",
+      "expected_type": "yes_no",
+      "expected_response": "y"
+    },
+    {
+      "prompt": "Select an option:\n1) Create new\n2) Update existing\n3) Delete",
+      "expected_type": "numbered_selection",
+      "expected_response": "1"
+    },
+    {
+      "prompt": "Trust this workspace? (yes/no)",
+      "expected_type": "trust_confirmation",
+      "expected_response": "yes"
+    }
+  ]
+}
+EOF
+
+# 2. 정확도 측정 스크립트
+cat > test_ai_accuracy.py << 'EOF'
+import json
+import subprocess
+
+def test_ai_predictions():
+    with open('test_prompts.json') as f:
+        test_data = json.load(f)
+    
+    correct = 0
+    total = 0
+    
+    for case in test_data['test_cases']:
+        # AI 예측 실행
+        result = subprocess.run([
+            'uv', 'run', './yesman.py', 'ai', 'predict', 
+            case['prompt']
+        ], capture_output=True, text=True)
+        
+        # 결과 파싱 및 비교
+        # ... 정확도 계산 로직
+        
+    print(f"Accuracy: {correct/total*100:.2f}%")
+
+test_ai_predictions()
+EOF
+
+python test_ai_accuracy.py
+```
+
+**검증 포인트**:
+- [ ] 분류 정확도 > 90%
+- [ ] 각 프롬프트 타입별 정확도 측정
+- [ ] False positive/negative 비율
+- [ ] 신뢰도 점수의 신뢰성
+
+#### 14.2 모델 드리프트 감지 테스트
+```bash
+# 1. 시간 경과 시뮬레이션
+# 과거 데이터로 학습
+uv run ./yesman.py ai config --threshold 0.7
+
+# 다양한 패턴으로 학습 데이터 생성
+for i in {1..100}; do
+    if [ $((i % 2)) -eq 0 ]; then
+        # 일반적인 패턴
+        echo "y" | uv run ./yesman.py ai predict "Continue? (y/n)"
+    else
+        # 비정상적인 패턴
+        echo "n" | uv run ./yesman.py ai predict "Continue? (y/n)"
+    fi
+done
+
+# 2. 성능 변화 측정
+uv run ./yesman.py ai status
+uv run ./yesman.py ai export --output ai_metrics_before.json
+
+# 시간 경과 후 (새로운 패턴 도입)
+sleep 3600  # 또는 시뮬레이션
+
+uv run ./yesman.py ai export --output ai_metrics_after.json
+
+# 드리프트 분석
+python -c "
+import json
+with open('ai_metrics_before.json') as f1, open('ai_metrics_after.json') as f2:
+    before = json.load(f1)
+    after = json.load(f2)
+    # 드리프트 계산 로직
+"
+```
+
+**검증 포인트**:
+- [ ] 성능 저하가 감지됨
+- [ ] 드리프트 알림이 발생함
+- [ ] 재학습 권장사항이 제시됨
+- [ ] 성능 지표가 추적됨
+
+#### 14.3 개인정보 보호 테스트
+```bash
+# 1. 민감한 정보가 포함된 프롬프트 테스트
+SENSITIVE_PROMPTS=(
+    "Enter password for user john.doe@example.com:"
+    "API key (sk-1234567890abcdef):"
+    "Credit card number (4111-1111-1111-1111):"
+)
+
+for prompt in "${SENSITIVE_PROMPTS[@]}"; do
+    uv run ./yesman.py ai predict "$prompt"
+done
+
+# 2. 학습 데이터에서 민감 정보 확인
+find ~/.yesman/ai_data -type f -name "*.json" | xargs grep -E "(password|api[_-]key|credit[_-]card|ssn|email)"
+
+# 3. 익명화 확인
+uv run ./yesman.py ai export --output ai_export.json
+python -c "
+import json
+with open('ai_export.json') as f:
+    data = json.load(f)
+    # PII 검사 로직
+"
+```
+
+**검증 포인트**:
+- [ ] 민감 정보가 마스킹됨
+- [ ] 학습 데이터에 PII가 없음
+- [ ] 익명화가 적절히 수행됨
+- [ ] GDPR 준수 확인
+
+### Phase 15: 관찰성(Observability) 테스트
+
+#### 15.1 분산 추적 테스트
+```bash
+# 1. 추적 ID 전파 확인
+# 요청에 추적 ID 추가
+curl -H "X-Trace-ID: test-trace-123" http://localhost:8001/sessions
+
+# 로그에서 추적 ID 확인
+grep "test-trace-123" ~/.yesman/logs/*.log
+
+# 2. 요청 경로 추적
+cat > trace_request.py << 'EOF'
+import time
+import requests
+
+trace_id = f"trace-{int(time.time())}"
+headers = {"X-Trace-ID": trace_id}
+
+# API → SessionManager → TmuxManager → Cache
+response = requests.get("http://localhost:8001/sessions", headers=headers)
+
+# 각 컴포넌트 로그에서 추적
+components = ["api", "session_manager", "tmux_manager", "cache"]
+for comp in components:
+    log_file = f"~/.yesman/logs/{comp}.log"
+    # grep trace_id log_file
+EOF
+
+python trace_request.py
+```
+
+**검증 포인트**:
+- [ ] 추적 ID가 모든 컴포넌트에 전파됨
+- [ ] 요청 경로를 재구성할 수 있음
+- [ ] 지연 시간이 각 단계별로 측정됨
+- [ ] 오류 발생 지점을 정확히 파악 가능
+
+#### 15.2 메트릭 수집 정확성 테스트
+```bash
+# 1. 메트릭 엔드포인트 확인
+curl http://localhost:8001/metrics
+
+# 2. 부하 생성 및 메트릭 변화 관찰
+# 초기 메트릭 저장
+curl -s http://localhost:8001/metrics > metrics_before.txt
+
+# 부하 생성
+for i in {1..100}; do
+    uv run ./yesman.py show &
+done
+wait
+
+# 변경된 메트릭 확인
+curl -s http://localhost:8001/metrics > metrics_after.txt
+
+# 메트릭 비교
+diff metrics_before.txt metrics_after.txt
+```
+
+**검증 포인트**:
+- [ ] 요청 수가 정확히 카운트됨
+- [ ] 응답 시간 분포가 올바름
+- [ ] 에러율이 정확히 계산됨
+- [ ] 리소스 사용량이 실제와 일치함
+
+#### 15.3 알람 시스템 테스트
+```bash
+# 1. 임계값 설정
+cat > alert_config.yaml << 'EOF'
+alerts:
+  - name: high_error_rate
+    condition: error_rate > 0.1
+    action: notify
+  - name: slow_response
+    condition: p95_latency > 2000
+    action: log
+  - name: memory_usage
+    condition: memory_mb > 500
+    action: alert
+EOF
+
+# 2. 알람 트리거 시뮬레이션
+# 높은 에러율 생성
+for i in {1..20}; do
+    curl -X POST http://localhost:8001/invalid-endpoint
+done
+
+# 느린 응답 시뮬레이션
+curl -X POST http://localhost:8001/sessions/slow-test/setup
+
+# 3. 알람 발생 확인
+grep "ALERT" ~/.yesman/logs/alerts.log
+```
+
+**검증 포인트**:
+- [ ] 임계값 초과 시 알람 발생
+- [ ] 알람이 중복되지 않음
+- [ ] 복구 시 알람 해제됨
+- [ ] 알람 히스토리가 기록됨
+
+### Phase 16: 테스트 자동화 인프라
+
+#### 16.1 CI/CD 파이프라인 구성
+```yaml
+# .github/workflows/integration-test.yml
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # 매일 새벽 2시
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10, 3.11]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        pip install -e .
+        pip install pytest pytest-cov pytest-asyncio
+    
+    - name: Install tmux
+      run: sudo apt-get install -y tmux
+    
+    - name: Run integration tests
+      run: |
+        # 전체 통합 테스트 실행
+        ./scripts/run-integration-tests.sh
+      
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: test-results/
+    
+    - name: Generate coverage report
+      run: |
+        pytest --cov=. --cov-report=xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+```
+
+#### 16.2 테스트 데이터 관리
+```bash
+# 테스트 데이터 구조 생성
+mkdir -p test-data/{fixtures,generators,snapshots}
+
+# 고정 테스트 데이터
+cat > test-data/fixtures/test_sessions.yaml << 'EOF'
+test_sessions:
+  - name: basic_session
+    windows: 2
+    panes_per_window: 2
+  - name: complex_session
+    windows: 5
+    panes_per_window: 4
+EOF
+
+# 동적 데이터 생성기
+cat > test-data/generators/generate_prompts.py << 'EOF'
+import random
+import json
+
+def generate_test_prompts(count=100):
+    prompt_templates = [
+        "Do you want to {action}? (y/n)",
+        "Select an option: 1) {opt1} 2) {opt2} 3) {opt3}",
+        "Continue with {operation}? (yes/no)"
+    ]
+    
+    prompts = []
+    for _ in range(count):
+        template = random.choice(prompt_templates)
+        # ... 동적 생성 로직
+        
+    return prompts
+EOF
+
+# UI 스냅샷 저장
+mkdir -p test-data/snapshots/ui
+# 각 명령어 실행 결과를 스냅샷으로 저장
+```
+
+#### 16.3 테스트 환경 격리
+```bash
+# Docker 기반 테스트 환경
+cat > Dockerfile.test << 'EOF'
+FROM python:3.10-slim
+
+# tmux 및 의존성 설치
+RUN apt-get update && apt-get install -y \
+    tmux \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 테스트 사용자 생성
+RUN useradd -m -s /bin/bash testuser
+
+# 애플리케이션 복사
+COPY . /app
+WORKDIR /app
+
+# 의존성 설치
+RUN pip install -e .
+RUN pip install pytest pytest-asyncio pytest-cov
+
+# 테스트 스크립트
+COPY scripts/run-tests.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/run-tests.sh
+
+USER testuser
+CMD ["/usr/local/bin/run-tests.sh"]
+EOF
+
+# Docker Compose 구성
+cat > docker-compose.test.yml << 'EOF'
+version: '3.8'
+
+services:
+  yesman-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ./test-results:/app/test-results
+    environment:
+      - PYTHONPATH=/app
+      - TEST_ENV=docker
+    networks:
+      - test-network
+
+  api-test:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
+EOF
+
+# 테스트 실행 스크립트
+cat > scripts/run-integration-tests.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "Starting integration tests..."
+
+# Docker 환경 시작
+docker-compose -f docker-compose.test.yml up -d
+
+# 테스트 실행
+docker-compose -f docker-compose.test.yml exec yesman-test pytest tests/integration/
+
+# 결과 수집
+docker-compose -f docker-compose.test.yml logs > test-results/docker-logs.txt
+
+# 정리
+docker-compose -f docker-compose.test.yml down
+
+echo "Integration tests completed!"
+EOF
+
+chmod +x scripts/run-integration-tests.sh
+```
+
+## 🎯 향상된 테스트 전략
+
+### 테스트 우선순위 매트릭스
+| 테스트 영역 | 중요도 | 자동화 가능성 | 실행 빈도 |
+|-----------|--------|-------------|---------|
+| 보안 테스트 | 🔴 높음 | ✅ 가능 | 매 커밋 |
+| 카오스 엔지니어링 | 🟡 중간 | ⚠️ 부분적 | 주간 |
+| 성능 회귀 | 🟡 중간 | ✅ 가능 | 매일 |
+| AI/ML 정확도 | 🔴 높음 | ✅ 가능 | 매 릴리즈 |
+| 관찰성 | 🟡 중간 | ✅ 가능 | 매일 |
+
+### 테스트 실행 체크리스트
+- [ ] 단위 테스트 통과
+- [ ] 통합 테스트 Phase 1-10 완료
+- [ ] 보안 취약점 스캔 통과
+- [ ] 성능 벤치마크 기준 충족
+- [ ] AI 모델 정확도 > 90%
+- [ ] 카오스 테스트 통과
+- [ ] 메모리 누수 없음
+- [ ] 문서 업데이트 완료
+
+## 📊 테스트 메트릭 대시보드
+
+```bash
+# 테스트 결과 집계 스크립트
+cat > scripts/test-metrics.py << 'EOF'
+import json
+import glob
+from datetime import datetime
+
+def generate_test_report():
+    metrics = {
+        "timestamp": datetime.now().isoformat(),
+        "test_coverage": calculate_coverage(),
+        "security_score": calculate_security_score(),
+        "performance_metrics": get_performance_metrics(),
+        "ai_accuracy": get_ai_accuracy(),
+        "chaos_test_results": get_chaos_results()
+    }
+    
+    # HTML 리포트 생성
+    generate_html_report(metrics)
+    
+    # Slack 알림
+    if metrics["test_coverage"] < 80:
+        send_slack_alert("Test coverage below threshold!")
+
+generate_test_report()
+EOF
+```
+
 이 가이드를 통해 실제 프로젝트 환경에서 yesman-claude의 모든 기능을 체계적으로 검증할 수 있습니다. 각 단계를 순서대로 진행하면서 문제점을 발견하고 개선점을 식별하세요.
