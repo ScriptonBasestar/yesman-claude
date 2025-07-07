@@ -47,7 +47,8 @@
       "Bash(pnpm tauri:dev:*)",
       "Bash(pnpm install:*)",
       "Bash(cat:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }
