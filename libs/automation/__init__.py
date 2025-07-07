@@ -1,0 +1,1 @@
+"""Automation modules for context-aware workflow management."""
