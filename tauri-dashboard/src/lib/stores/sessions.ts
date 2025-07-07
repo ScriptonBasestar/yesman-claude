@@ -1,9 +1,9 @@
 /**
- * 세션 상태 관리 스토어 (Tauri 연동)
+ * 세션 상태 관리 스토어 (FastAPI 연동)
  */
 
 import { writable, derived, get } from 'svelte/store';
-import { pythonBridge, eventListeners, tauriUtils } from '$lib/utils/tauri';
+import { pythonBridge } from '$lib/utils/tauri';
 import { showNotification } from './notifications';
 import type { Session, SessionFilters } from '$lib/types/session';
 
@@ -17,7 +17,7 @@ export const sessionFilters = writable<SessionFilters>({
   search: '',
   status: '',
   controllerStatus: '',
-  sortBy: 'name',
+  sortBy: 'session_name', // Fix: 'name' -> 'session_name'
   sortOrder: 'asc',
   showOnlyErrors: false
 });
@@ -58,8 +58,7 @@ export const filteredSessions = derived(
     // 에러만 표시
     if ($filters.showOnlyErrors) {
       filtered = filtered.filter(session => 
-        session.controller_status === 'error' || 
-        session.controller_error !== null
+        !!session.controller_error // Fix: check controller_error existence
       );
     }
 
@@ -68,7 +67,7 @@ export const filteredSessions = derived(
       let aValue: any, bValue: any;
 
       switch ($filters.sortBy) {
-        case 'name':
+        case 'session_name': // Fix: 'name' -> 'session_name'
           aValue = a.session_name;
           bValue = b.session_name;
           break;
@@ -105,11 +104,11 @@ export const filteredSessions = derived(
 // 세션 통계 (파생 스토어)
 export const sessionStats = derived(sessions, ($sessions) => ({
   total: $sessions.length,
-  active: $sessions.filter(s => s.status === 'active').length,
-  inactive: $sessions.filter(s => s.status === 'inactive').length,
+  active: $sessions.filter(s => s.status === 'running').length, // Fix: 'active' -> 'running'
+  inactive: $sessions.filter(s => s.status === 'stopped').length, // Fix: 'inactive' -> 'stopped'
   runningControllers: $sessions.filter(s => s.controller_status === 'running').length,
-  stoppedControllers: $sessions.filter(s => s.controller_status === 'stopped').length,
-  errorControllers: $sessions.filter(s => s.controller_status === 'error').length,
+  stoppedControllers: $sessions.filter(s => s.controller_status === 'not running').length, // Fix: 'stopped' -> 'not running'
+  errorControllers: $sessions.filter(s => !!s.controller_error).length, // Fix: check controller_error existence
   totalWindows: $sessions.reduce((sum, s) => sum + (s.windows?.length || 0), 0),
   totalPanes: $sessions.reduce((sum, s) => sum + (s.total_panes || 0), 0)
 }));
@@ -125,17 +124,28 @@ export async function refreshSessions(): Promise<void> {
   error.set(null);
 
   try {
-    const sessionData = await pythonBridge.getAllSessions();
-    sessions.set(sessionData);
+    // 1. API 함수 이름 변경
+    const sessionData = await pythonBridge.get_sessions();
     
-    // 성공 알림 (선택적)
+    // 데이터 가공 (필요 시)
+    const processedData = sessionData.map((s: Session) => ({
+      ...s,
+      // 2. 누락된 필드 임시 처리
+      total_panes: s.windows?.reduce((acc, w) => acc + w.panes.length, 0) || 0,
+      description: s.template, // template을 임시로 description으로 사용
+    }));
+
+    sessions.set(processedData);
+    
     if (get(sessions).length === 0) {
-      showNotification('No Sessions', 'No tmux sessions found. Run setup to create sessions.', 'warning');
+      // Fix: Correct argument order for showNotification
+      showNotification('warning', 'No Sessions', 'No tmux sessions found.');
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
     error.set(errorMessage);
-    showNotification('Error', `Failed to refresh sessions: ${errorMessage}`, 'error');
+    // Fix: Correct argument order
+    showNotification('error', 'Error', `Failed to refresh sessions: ${errorMessage}`);
     console.error('Failed to refresh sessions:', err);
   } finally {
     isLoading.set(false);
@@ -197,7 +207,7 @@ export function resetFilters(): void {
     search: '',
     status: '',
     controllerStatus: '',
-    sortBy: 'name',
+    sortBy: 'session_name', // Fix: 'name' -> 'session_name'
     sortOrder: 'asc',
     showOnlyErrors: false
   });
@@ -230,144 +240,147 @@ export function clearSessionSelection(): void {
  */
 export async function startController(sessionName: string): Promise<void> {
   try {
-    await pythonBridge.startController(sessionName);
-    showNotification('Controller Started', `Controller started for ${sessionName}`, 'success');
+    // 3. API 함수 변경 및 파라미터 유지 (session_name이 ID로 사용됨)
+    await pythonBridge.start_claude(sessionName);
+    // Fix: Correct argument order
+    showNotification('success', 'Controller Started', `Controller started for ${sessionName}`);
     
-    // 세션 상태 업데이트
     updateSessionControllerStatus(sessionName, 'running');
-    
-    // 데이터 새로고침
-    setTimeout(refreshSessions, 1000);
+    setTimeout(refreshSessions, 1000); // 상태 반영을 위해 새로고침
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    showNotification('Error', `Failed to start controller: ${errorMessage}`, 'error');
+    // Fix: Correct argument order
+    showNotification('error', 'Error', `Failed to start controller: ${errorMessage}`);
     throw err;
   }
 }
 
 export async function stopController(sessionName: string): Promise<void> {
   try {
-    await pythonBridge.stopController(sessionName);
-    showNotification('Controller Stopped', `Controller stopped for ${sessionName}`, 'success');
-    
-    // 세션 상태 업데이트
-    updateSessionControllerStatus(sessionName, 'stopped');
-    
-    // 데이터 새로고침
+    // 4. API 함수 변경
+    await pythonBridge.stop_claude(sessionName);
+    // Fix: Correct argument order
+    showNotification('success', 'Controller Stopped', `Controller stopped for ${sessionName}`);
+    // Fix: Use a valid status type
+    updateSessionControllerStatus(sessionName, 'not running');
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    showNotification('Error', `Failed to stop controller: ${errorMessage}`, 'error');
+    // Fix: Correct argument order
+    showNotification('error', 'Error', `Failed to stop controller: ${errorMessage}`);
     throw err;
   }
 }
 
 export async function restartController(sessionName: string): Promise<void> {
   try {
-    await stopController(sessionName);
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
-    await startController(sessionName);
-  } catch (err) {
-    showNotification('Error', 'Failed to restart controller', 'error');
-    throw err;
-  }
-}
-
-/**
- * 세션 액션들
- */
-export async function setupTmuxSession(sessionName: string): Promise<void> {
-  try {
-    await pythonBridge.setupTmuxSession(sessionName);
-    showNotification('Session Created', `Tmux session ${sessionName} created`, 'success');
+    showNotification('info', 'Restarting', `Restarting controller for ${sessionName}...`);
+    await pythonBridge.stop_claude(sessionName);
+    // 상태 업데이트를 위해 잠시 대기
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    await pythonBridge.start_claude(sessionName);
+    showNotification('success', 'Controller Restarted', `Controller for ${sessionName} has been restarted.`);
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    showNotification('Error', `Failed to setup session: ${errorMessage}`, 'error');
+    showNotification('error', 'Error', `Failed to restart controller: ${errorMessage}`);
     throw err;
   }
 }
 
-export async function setupAllSessions(): Promise<void> {
+// 5. setup* 함수들은 UI 수정이 필요하므로 주석 처리
+/*
+export async function setupTmuxSession(sessionName: string): Promise<void> {
+  // TODO: UI에서 session config를 받아 create_session을 호출하도록 변경 필요
   try {
-    await pythonBridge.setupAllSessions();
-    showNotification('All Sessions Created', 'All tmux sessions have been created', 'success');
-    setTimeout(refreshSessions, 2000);
+    // await pythonBridge.create_session({ session_name: sessionName, ... });
+    showNotification('success', 'Session Created', `Session ${sessionName} created.`);
+    setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    showNotification('Error', `Failed to setup all sessions: ${errorMessage}`, 'error');
+    showNotification('error', 'Error', `Failed to create session: ${errorMessage}`);
     throw err;
   }
 }
+*/
+
+// 6. setupAllSessions 함수는 제거
 
 export async function teardownAllSessions(): Promise<void> {
-  try {
-    await pythonBridge.teardownAllSessions();
-    showNotification('All Sessions Destroyed', 'All tmux sessions have been destroyed', 'success');
-    setTimeout(refreshSessions, 1000);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    showNotification('Error', `Failed to teardown all sessions: ${errorMessage}`, 'error');
-    throw err;
-  }
-}
-
-/**
- * 배치 작업들
- */
-export async function startAllControllers(): Promise<void> {
-  const stoppedSessions = get(sessions).filter(s => s.controller_status === 'stopped');
-  
-  if (stoppedSessions.length === 0) {
-    showNotification('Info', 'No stopped controllers to start', 'info');
+  const sessionsToTeardown = get(sessions);
+  if (sessionsToTeardown.length === 0) {
+    showNotification('info', 'Info', 'No sessions to teardown.');
     return;
   }
 
-  const results = await Promise.allSettled(
-    stoppedSessions.map(session => startController(session.session_name))
-  );
+  showNotification('info', 'Teardown', `Tearing down ${sessionsToTeardown.length} sessions...`);
+  try {
+    // 7. 새로운 로직으로 구현
+    await Promise.all(sessionsToTeardown.map(s => pythonBridge.delete_session(s.session_name)));
+    showNotification('success', 'Success', 'All sessions have been torn down.');
+    clearSessionSelection();
+    setTimeout(refreshSessions, 1000);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    showNotification('error', 'Error', `Failed to teardown all sessions: ${errorMessage}`);
+    throw err;
+  }
+}
 
-  const successful = results.filter(r => r.status === 'fulfilled').length;
-  const failed = results.filter(r => r.status === 'rejected').length;
+// 8. start/stopAllControllers 구현
+export async function startAllControllers(): Promise<void> {
+  const selected = get(selectedSessions);
+  const sessionsToStart = selected.length > 0 ? get(sessions).filter(s => selected.includes(s.session_name)) : get(sessions);
 
-  if (failed === 0) {
-    showNotification('Success', `Started ${successful} controllers`, 'success');
-  } else {
-    showNotification('Partial Success', `Started ${successful} controllers, ${failed} failed`, 'warning');
+  if (sessionsToStart.length === 0) {
+    showNotification('info', 'Info', 'No sessions selected to start controllers.');
+    return;
+  }
+
+  showNotification('info', 'Starting All', `Starting controllers for ${sessionsToStart.length} sessions...`);
+  try {
+    await Promise.all(sessionsToStart.map(s => pythonBridge.start_claude(s.session_name)));
+    showNotification('success', 'Success', 'All selected controllers started.');
+    setTimeout(refreshSessions, 1000);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    showNotification('error', 'Error', `Failed to start all controllers: ${errorMessage}`);
+    throw err;
   }
 }
 
 export async function stopAllControllers(): Promise<void> {
-  const runningSessions = get(sessions).filter(s => s.controller_status === 'running');
+    const selected = get(selectedSessions);
+    const sessionsToStop = selected.length > 0 ? get(sessions).filter(s => selected.includes(s.session_name)) : get(sessions);
   
-  if (runningSessions.length === 0) {
-    showNotification('Info', 'No running controllers to stop', 'info');
-    return;
-  }
-
-  const results = await Promise.allSettled(
-    runningSessions.map(session => stopController(session.session_name))
-  );
-
-  const successful = results.filter(r => r.status === 'fulfilled').length;
-  const failed = results.filter(r => r.status === 'rejected').length;
-
-  if (failed === 0) {
-    showNotification('Success', `Stopped ${successful} controllers`, 'success');
-  } else {
-    showNotification('Partial Success', `Stopped ${successful} controllers, ${failed} failed`, 'warning');
-  }
+    if (sessionsToStop.length === 0) {
+      showNotification('info', 'Info', 'No sessions selected to stop controllers.');
+      return;
+    }
+  
+    showNotification('info', 'Stopping All', `Stopping controllers for ${sessionsToStop.length} sessions...`);
+    try {
+      await Promise.all(sessionsToStop.map(s => pythonBridge.stop_claude(s.session_name)));
+      showNotification('success', 'Success', 'All selected controllers stopped.');
+      setTimeout(refreshSessions, 1000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      showNotification('error', 'Error', `Failed to stop all controllers: ${errorMessage}`);
+      throw err;
+    }
 }
 
 /**
- * 내부 유틸리티 함수들
+ * 내부적으로 세션의 컨트롤러 상태를 업데이트합니다.
+ * @param sessionName - 세션 이름
+ * @param status - 새로운 컨트롤러 상태
  */
-function updateSessionControllerStatus(sessionName: string, status: string): void {
-  sessions.update(currentSessions =>
-    currentSessions.map(session =>
-      session.session_name === sessionName
-        ? { ...session, controller_status: status }
-        : session
+function updateSessionControllerStatus(sessionName: string, status: 'running' | 'not running' | 'unknown'): void {
+  sessions.update(current => 
+    current.map(s => 
+      s.session_name === sessionName 
+        ? { ...s, controller_status: status } 
+        : s
     )
   );
 }
@@ -377,67 +390,43 @@ function updateSessionControllerStatus(sessionName: string, status: string): voi
  */
 export function updateControllerStatus(sessionName: string, status?: string): void {
   if (status) {
-    updateSessionControllerStatus(sessionName, status);
+    updateSessionControllerStatus(sessionName, status as 'running' | 'not running' | 'unknown');
   } else {
     // status가 없으면 해당 세션의 상태를 새로고침
     refreshSessions();
   }
 }
 
-/**
- * 이벤트 리스너 설정
- */
+// 9. 이벤트 리스너는 현재 아키텍처에서 불필요하므로 주석 처리
+/*
 export function setupEventListeners(): void {
-  // 브라우저 환경 체크
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  // 세션 상태 변경 이벤트
-  eventListeners.onSessionStatusChanged((sessionName, status) => {
-    sessions.update(currentSessions =>
-      currentSessions.map(session =>
-        session.session_name === sessionName
-          ? { ...session, status }
-          : session
-      )
-    );
-  });
-
-  // 컨트롤러 상태 변경 이벤트
-  eventListeners.onControllerStatusChanged((sessionName, status) => {
-    updateSessionControllerStatus(sessionName, status);
-  });
-
-  // 에러 이벤트
-  eventListeners.onError((errorMessage) => {
-    error.set(errorMessage);
-    showNotification('System Error', errorMessage, 'error');
-  });
+    // ...
 }
+*/
 
-/**
- * 로그 관련 함수들
- */
+// 10. 로그 관련 함수 수정
 export async function viewSessionLogs(sessionName: string): Promise<void> {
-  try {
-    await tauriUtils.openLogFile(sessionName);
-  } catch (err) {
-    showNotification('Error', 'Failed to open log file', 'error');
-    throw err;
-  }
+    try {
+        const logs = await pythonBridge.get_logs(sessionName, false, 200);
+        // TODO: 받은 로그를 보여주는 UI 로직 필요 (예: 모달)
+        console.log(`Logs for ${sessionName}:`, logs);
+        showNotification('info', 'Logs Fetched', `Check console for logs of ${sessionName}.`);
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        showNotification('error', 'Error', `Failed to get logs: ${errorMessage}`);
+    }
 }
 
 export async function getSessionLogs(sessionName: string): Promise<string[]> {
   try {
-    return await pythonBridge.getSessionLogs(sessionName);
+    return await pythonBridge.get_logs(sessionName, false, 500);
   } catch (err) {
-    showNotification('Error', 'Failed to get session logs', 'error');
-    throw err;
+    console.error(`Failed to get logs for ${sessionName}:`, err);
+    return [];
   }
 }
 
 // 스토어 초기화 시 이벤트 리스너 설정 (브라우저 환경에서만)
 if (typeof window !== 'undefined') {
-  setupEventListeners();
+  // setupEventListeners(); // 이벤트 리스너는 현재 아키텍처에서 불필요하므로 주석 처리
 }

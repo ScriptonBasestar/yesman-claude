@@ -4,14 +4,15 @@
   import SessionFilters from '$lib/components/session/SessionFilters.svelte';
   import { 
     filteredSessions, 
+    sessionStats, // 1. Import sessionStats
     isLoading, 
     error, 
     refreshSessions,
     startController,
     stopController,
     restartController,
-    viewSessionLogs,
-    setupTmuxSession
+    viewSessionLogs
+    // 2. Remove setupTmuxSession
   } from '$lib/stores/sessions';
   import { showNotification } from '$lib/stores/notifications';
 
@@ -170,27 +171,27 @@
         <div class="stats stats-horizontal shadow">
           <div class="stat">
             <div class="stat-title">Total Sessions</div>
-            <div class="stat-value text-primary">{$filteredSessions.length}</div>
+            <div class="stat-value text-primary">{$sessionStats.total}</div>
           </div>
           
           <div class="stat">
             <div class="stat-title">Active</div>
             <div class="stat-value text-success">
-              {$filteredSessions.filter(s => s.status === 'active').length}
+              {$sessionStats.active}
             </div>
           </div>
           
           <div class="stat">
             <div class="stat-title">Running Controllers</div>
             <div class="stat-value text-info">
-              {$filteredSessions.filter(s => s.controller_status === 'running').length}
+              {$sessionStats.runningControllers}
             </div>
           </div>
           
           <div class="stat">
             <div class="stat-title">Errors</div>
             <div class="stat-value text-error">
-              {$filteredSessions.filter(s => s.controller_status === 'error').length}
+              {$sessionStats.errorControllers}
             </div>
           </div>
         </div>
