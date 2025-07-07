@@ -1,70 +1,51 @@
-- Add Validation for Template References
-  - 관련 ISSUE: Add Validation for Template References (Issue #4)
-  - 보류 사유: 현재 대부분의 프로젝트가 "template: none"을 사용하고 있어 우선순위가 낮음. 기존 validation이 충분함.
+# Project Backlog
 
-- Verify and Update Project Path Configuration
-  - 관련 ISSUE: Project Path Inconsistency (Issue #8)
-  - 보류 사유: 사용자와 정확한 프로젝트 구조 확인 필요. 실제 디렉토리 구조가 문서와 불일치할 수 있음.
+백로그는 장기적인 계획과 보류된 작업들을 관리하는 공간입니다.
 
-## 조금 나중에 할 작업
+> **📋 알림**: 상세한 백로그 항목들은 `/results/remains/future-roadmap.md`로 이동되었습니다.
 
-- [ ] 브랜치 자동분할 멀티 agent 구동기능
-  - 여러 브랜치로 자동 분할하여 멀티 에이전트를 구동할 수 있는 기능을 구현합니다. 이 기능은 병렬 처리를 통해 작업 효율성을 높이는 데 기여할 것입니다.
-  - git remote 에서 branch를 나눠서 작업개시
-  - develop에서 작업중이었다면 develop에서 feat/issuename으로 작업처리
-  - 완료확인을 하면 rebase, merge. 충돌발생시 바로 합쳐서 처리하지 않고 각 feat/issuename에서 처리 후 다시 합치기. 여러개 브랜치가 있기 때문에 충돌발생시 각각의 브랜치에서 수정후 합쳐야 예상못했던 오류가 발생하지 않는다.(사람이 협업할 때 처럼)
+## 현재 보류된 검증 작업
 
-- [ ] LLM으로 출력 판단하여 선택 자동 결정
-  - LLM(대형 언어 모델)을 사용하여 출력 내용을 분석하고, 자동으로 적절한 선택을 결정하는 기능을 추가합니다. 이 기능은 자동화된 의사결정을 통해 사용자 개입을 최소화하는 데 도움을 줄 것입니다.
+### Template Validation (Issue #4)
+- **상태**: 보류됨
+- **사유**: 현재 대부분의 프로젝트가 "template: none"을 사용하고 있어 우선순위가 낮음
+- **조치**: 기존 validation이 충분함
 
-- [ ] 묻지마 1찍기능 데모크라쉬
+### Project Path Configuration (Issue #8)
+- **상태**: 보류됨  
+- **사유**: 사용자와 정확한 프로젝트 구조 확인 필요
+- **조치**: 실제 디렉토리 구조 검증 후 진행
 
-- [ ] TUI말고 GUI를 선택할 수 있으면 좋을래나
 
-## Phase 2-3 장기 개선 아이디어 (요구사항 정의 필요)
+## 단기 실험 기능들 (검토 필요)
 
-### IMPROVE-007: 멀티 프로젝트 오케스트레이션
-- 프로젝트 간 의존성 관리 및 변경사항 자동 전파
-- 보류 사유: 복잡한 의존성 그래프 설계 및 실제 사용 사례 검증 필요
+### 자동화 기능
+- [ ] **LLM 기반 자동 선택**: 출력 분석하여 최적 선택 자동 결정
+- [ ] **원클릭 자동 진행**: 묻지마 1찍 기능 데모
 
-### IMPROVE-009: 실시간 협업 기능  
-- 여러 개발자가 동시에 yesman 세션 공유 및 페어 프로그래밍
-- 보류 사유: 네트워크 아키텍처, 동시성 제어, 보안 등 복합적 설계 필요
+### UI/UX 개선
+- [ ] **GUI 옵션**: TUI 대신 GUI 선택 가능한 모드
 
-### IMPROVE-011: 예측적 문제 방지
-- AI 기반 시스템 상태 모니터링 및 미래 문제 예측
-- 보류 사유: 머신러닝 모델 설계, 대량의 학습 데이터 필요
+### Git 워크플로우
+- [ ] **멀티 브랜치 자동화**: 브랜치 자동분할 멀티 agent 구동
+  - git remote에서 branch 자동 분할
+  - develop → feat/issuename 자동 처리
+  - 충돌 시 각 브랜치별 개별 처리
 
-### IMPROVE-012: 외부 도구 통합 생태계
-- GitHub Actions, Slack, JIRA 등 개발 도구 플러그인 시스템
-- 보류 사유: 플러그인 아키텍처 설계, API 연동 방식 결정 필요
+## 백로그 관리 방식 변경
 
-### IMPROVE-013: 개발 생산성 분석
-- 코딩 패턴 분석 및 생산성 향상 제안 시스템
-- 보류 사유: 개인정보 보호, 메트릭 정의, 분석 알고리즘 연구 필요
+📋 **새로운 백로그 구조**:
+- **활성 작업**: `results/todos/active-development-tasks.md`
+- **장기 로드맵**: `results/remains/future-roadmap.md`
+- **보류/완료**: `results/remains/documentation-fixes.md`
 
-## Revolutionary Ideas (Phase 3)
+### 🔗 참고 링크
+- [장기 개선 아이디어 (Phase 2-3)](../../results/remains/future-roadmap.md)
+- [혁신적 기능들 (Revolutionary Ideas)](../../results/remains/future-roadmap.md#revolutionary-ideas-phase-3)
+- [활성 개발 작업](../../results/todos/active-development-tasks.md)
 
-### IMPROVE-014: AI 쌍 프로그래밍 모드
-- Claude가 실시간 코드 리뷰, 예측적 완성, 자동 리팩토링 제안
-- 보류 사유: 고도의 AI 기능, 실시간 코드 분석 엔진 구현 복잡도 높음
+---
 
-### IMPROVE-015: 자율 학습 프로젝트 관리  
-- AI가 TODO 생성, 우선순위 결정, 작업 배분을 자동화
-- 보류 사유: AGI 수준의 프로젝트 이해, 복잡한 의사결정 로직 필요
-
-### 수동 코드수정 순서
-1. 공용 프롬프트 저장 및 관리 재사용
-2. 코드수정 계획 - 수정코드를 파일로 삽입
-3. 수정 실행
-수동으로 개발하기. 자동실행만 처리
-
-### 프롬프트 자동실행
-1. 선택이 나오면 자동으로 넘어가고 히스토리 audit?기록
-2. devbox에서 app을 subproject로
-3. gitflow방식으로 브랜치 관리
-
-### 한개 프로젝트를 여러 브랜치로 나눠서 여러개 작업하는 경우
-
-- clone을 tmp디렉토리로 . http, file, ssh clone
-- 각 clone한 프로젝트마다 다른 격리된 디렉토리 지정. 코드수정이 겹치지 않도록.
+**마지막 업데이트**: 2025-07-07  
+**관리자**: Project Manager  
+**상태**: Reorganized

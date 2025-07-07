@@ -51,13 +51,19 @@ python -m pytest tests/test_prompt_detector.py
 python -m pytest tests/test_content_collector.py
 
 # Run integration tests  
-python test_full_automation.py
-python test_controller.py
+python -m pytest tests/test_full_automation.py
+python -m pytest tests/test_session_manager_cache.py
 
-# Debug specific components
-python debug_content.py      # Debug content collection
-python debug_controller.py   # Debug dashboard controller  
-python debug_tmux.py        # Debug tmux operations
+# Debug specific components (located in debug/ directory)
+python debug/debug_content.py      # Debug content collection
+python debug/debug_controller.py   # Debug dashboard controller  
+python debug/debug_tmux.py        # Debug tmux operations
+
+# FastAPI server for REST API
+cd api && python -m uvicorn main:app --reload
+
+# Tauri desktop app development
+cd tauri-dashboard && npm run tauri dev
 ```
 
 Currently no formal linting is configured. Future plans include:
@@ -69,12 +75,16 @@ Currently no formal linting is configured. Future plans include:
 
 ### Directory Structure
 - `yesman.py` - Main CLI entry point using Click
-- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard)
-- `libs/core/` - Core functionality (SessionManager, ClaudeManager, models)
+- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter)
+- `libs/core/` - Core functionality (SessionManager, ClaudeManager, models, caching)
 - `libs/streamlit_dashboard/` - Streamlit web dashboard application
 - `libs/` - Additional functionality (YesmanConfig, TmuxManager)
 - `patterns/` - Auto-response patterns for selection prompts
 - `examples/global-yesman/` - Example configuration files
+- `api/` - FastAPI server for REST API endpoints
+- `tauri-dashboard/` - Native desktop app (Tauri + Svelte)
+- `debug/` - Debug utilities and standalone test scripts
+- `test-integration/` - Integration testing utilities
 
 ### Configuration Hierarchy
 1. Global config: `~/.yesman/yesman.yaml` (logging, default choices)
@@ -110,6 +120,17 @@ Configuration merge modes:
 - Real-time updates with auto-refresh capability
 - Interactive controller management and session monitoring
 
+**FastAPI Server** (`api/main.py`):
+- REST API endpoints for session and controller management
+- Provides backend services for external integrations
+- Includes routers for sessions and controllers
+
+**Tauri Desktop App** (`tauri-dashboard/`):
+- Native desktop application using Tauri + Svelte
+- Rust backend with TypeScript frontend
+- High-performance alternative to Streamlit dashboard
+- System tray integration and native notifications
+
 **Session Templates**:
 - Support Jinja2-style variable substitution (removed in latest version)
 - Can be overridden per-project in projects.yaml
@@ -122,14 +143,19 @@ Configuration merge modes:
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
 3. **Claude Manager Operation**: The claude manager implements a sophisticated monitoring system:
-   - **DashboardController** (`libs/core/claude_manager.py:17`): Main controller manageable from the dashboard
+   - **DashboardController** (`libs/core/claude_manager.py`): Main controller manageable from the dashboard
    - **Content Collection** (`libs/core/content_collector.py`): Captures tmux pane content efficiently
    - **Prompt Detection** (`libs/core/prompt_detector.py`): Advanced regex-based prompt recognition system
    - **Auto-Response Patterns**: Pattern files in `patterns/` directory (123/, yn/, 12/) for different prompt types
    - **Monitoring Loop**: Captures content every second and detects interactive prompts
    - **Safe Restart**: Properly terminates existing Claude processes before restarting
+   - **Caching System**: Advanced caching with analytics (`libs/core/cache_*.py` modules)
 
-4. **Dashboard Architecture**: Uses Streamlit framework for web-based dashboard with reactive data updates. Dashboard displays project configurations from `projects.yaml` and real-time tmux session status.
+4. **Multi-Interface Architecture**: 
+   - **Streamlit Dashboard**: Web-based interface for session monitoring
+   - **FastAPI Server**: REST API for programmatic access
+   - **Tauri Desktop App**: Native desktop application with enhanced performance
+   - **CLI Interface**: Command-line tool for direct automation
 
 5. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
 
@@ -160,9 +186,13 @@ When working on this codebase:
    - Pattern detection in `libs/core/prompt_detector.py` (ClaudePromptDetector class)
    - Content collection in `libs/core/content_collector.py`
    - Auto-response patterns stored in `patterns/` subdirectories
-3. **Dashboard Updates**: Web dashboard components in `libs/streamlit_dashboard/app.py` using Streamlit framework
+   - Caching system components in `libs/core/cache_*.py` modules
+3. **Dashboard Updates**: 
+   - Streamlit: Web dashboard components in `libs/streamlit_dashboard/app.py`
+   - Tauri: Native desktop app in `tauri-dashboard/src/`
+   - FastAPI: REST API endpoints in `api/routers/`
 4. **Configuration Changes**: Global config structure defined in `YesmanConfig` class (`libs/yesman_config.py`)
-5. **Testing**: Use debug scripts (`debug_*.py`) and test files in `tests/` for component testing
+5. **Testing**: Use debug scripts in `debug/` directory and test files in `tests/` for component testing
 
 ### Pattern-Based Auto-Response System
 The system uses pattern files to recognize and respond to different prompt types:
@@ -181,6 +211,14 @@ Core dependencies (from pyproject.toml):
 - libtmux>=0.46.2 - Python tmux bindings
 - streamlit>=1.28.0 - Web framework for dashboard
 - rich>=13.0.0 - Terminal formatting and UI components
+- psutil>=5.9.0 - System and process utilities
+
+Additional development dependencies:
+- fastapi - REST API framework (api/ directory)
+- uvicorn - ASGI server for FastAPI
+- tauri - Desktop app framework (tauri-dashboard/ directory)
+- svelte - Frontend framework for Tauri app
+- typescript - Type safety for frontend development
 
 ## Key Implementation Notes
 
