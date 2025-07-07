@@ -39,10 +39,36 @@ uv run ./yesman.py teardown
 uv run ./yesman.py enter [session_name]
 uv run ./yesman.py enter  # Interactive selection
 
-
 # Run Tauri desktop dashboard to monitor all sessions
 uv run ./yesman.py dashboard --dev  # Development mode
 uv run ./yesman.py dashboard        # Production mode
+
+# NEW: Interactive session browser with activity monitoring
+uv run ./yesman.py browse           # Interactive session browser
+uv run ./yesman.py browse -i 1.0    # Custom update interval
+
+# NEW: Comprehensive project status dashboard
+uv run ./yesman.py status           # Quick status overview
+uv run ./yesman.py status -i        # Interactive live dashboard
+uv run ./yesman.py status -d        # Detailed view
+
+# NEW: AI learning system management
+uv run ./yesman.py ai status        # Show AI learning status
+uv run ./yesman.py ai config -t 0.8 # Adjust confidence threshold
+uv run ./yesman.py ai history       # Show response history
+uv run ./yesman.py ai export        # Export learning data
+
+# NEW: Log management and analysis
+uv run ./yesman.py logs configure   # Configure async logging
+uv run ./yesman.py logs analyze     # Analyze log patterns
+uv run ./yesman.py logs tail -f     # Follow logs in real-time
+uv run ./yesman.py logs cleanup     # Clean up old logs
+
+# NEW: Context-aware automation
+uv run ./yesman.py automate status  # Show automation status
+uv run ./yesman.py automate monitor # Start context monitoring
+uv run ./yesman.py automate detect  # Run context detection
+uv run ./yesman.py automate config  # Generate workflow config
 ```
 
 ### Testing and Development Commands
@@ -76,8 +102,12 @@ Currently no formal linting is configured. Future plans include:
 
 ### Directory Structure
 - `yesman.py` - Main CLI entry point using Click
-- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter)
+- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter, browse, status, ai, logs, automate)
 - `libs/core/` - Core functionality (SessionManager, ClaudeManager, models, caching)
+- `libs/ai/` - AI learning and adaptive response system
+- `libs/automation/` - Context-aware automation and workflow engine
+- `libs/dashboard/` - Dashboard components and health monitoring
+- `libs/logging/` - Asynchronous logging system
 - `libs/` - Additional functionality (YesmanConfig, TmuxManager)
 - `patterns/` - Auto-response patterns for selection prompts
 - `examples/global-yesman/` - Example configuration files
@@ -193,20 +223,51 @@ Configuration merge modes:
 
 6. **Logging**: Configured via `yesman.yaml` with configurable log levels and paths. Claude manager and dashboard use separate log files.
 
-## Current Limitations
+## ✅ Recently Implemented Features (2025-07-07)
 
-- No Jinja2 template rendering (code was removed)
-- No automated response system implemented yet
-- No LLM integration for continuous workflow
-- Limited error recovery mechanisms
+### 🚀 Performance Improvements
+- **Smart Session Caching**: TTL-based caching system with 5-second default cache
+- **Async Logging**: High-performance queue-based logging with compression support
+- **Optimized Dashboard**: Reduced tmux server load with intelligent caching
 
-## Future Features (from TODO.md)
+### 🎨 Enhanced User Experience  
+- **Interactive Session Browser**: File-browser-like navigation with tree/list/grid views
+- **Activity Heatmap**: Visual session activity tracking over time
+- **Comprehensive Status Dashboard**: Real-time project health monitoring
+- **Rich Terminal UI**: Enhanced visualization with progress bars, charts, and color coding
 
-- Pattern-based automatic response to selection prompts
-- LLM integration for decision making
-- Session monitoring and status display
-- Performance improvements with caching
-- Multi-engine support (GPT, Claude-3, etc.)
+### 🤖 AI-Powered Features
+- **Adaptive Response System**: Machine learning-based auto-response with confidence scoring
+- **Pattern Learning**: System learns from user behavior and improves accuracy over time
+- **Response Analytics**: Detailed statistics and trend analysis for AI responses
+- **Confidence Thresholds**: Adjustable confidence levels for different prompt types
+
+### 🔧 Advanced Automation
+- **Context-Aware Workflows**: Detects git commits, test failures, build events automatically
+- **Workflow Chains**: Configurable automation sequences (test → build → deploy)
+- **Smart Triggers**: 8 different context types for comprehensive project monitoring
+- **Real-time Detection**: Continuous monitoring with customizable intervals
+
+### 📊 Monitoring & Analytics
+- **Project Health Calculator**: 8-category health assessment (build, tests, dependencies, etc.)
+- **Git Activity Tracking**: Commit history, contributor analysis, file change metrics
+- **TODO Progress Tracking**: Visual progress bars and completion statistics
+- **Log Analysis**: Pattern detection, error tracking, and performance metrics
+
+### 🛠️ Developer Tools
+- **Extended CLI Commands**: 11 command groups (browse, status, ai, logs, automate, etc.)
+- **REST API Integration**: FastAPI endpoints for external tool integration
+- **Configuration Management**: Advanced config merging and validation
+- **Debug Utilities**: Comprehensive debugging and diagnostic tools
+
+## Current Capabilities
+
+✅ **Automated Response System**: Fully implemented with AI learning
+✅ **Session Monitoring**: Real-time activity tracking and visualization  
+✅ **Performance Optimization**: Smart caching and async processing
+✅ **Multi-Interface Support**: CLI, REST API, and native desktop app
+✅ **Pattern-Based Recognition**: Advanced prompt detection and auto-response
+✅ **Context-Aware Automation**: Workflow chains triggered by project events
 
 ## Development Workflow
 
