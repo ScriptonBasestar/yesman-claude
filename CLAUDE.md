@@ -40,8 +40,9 @@ uv run ./yesman.py enter [session_name]
 uv run ./yesman.py enter  # Interactive selection
 
 
-# Run TUI dashboard to monitor all sessions
-uv run ./yesman.py dashboard
+# Run Tauri desktop dashboard to monitor all sessions
+uv run ./yesman.py dashboard --dev  # Development mode
+uv run ./yesman.py dashboard        # Production mode
 ```
 
 ### Testing and Development Commands
@@ -77,7 +78,6 @@ Currently no formal linting is configured. Future plans include:
 - `yesman.py` - Main CLI entry point using Click
 - `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter)
 - `libs/core/` - Core functionality (SessionManager, ClaudeManager, models, caching)
-- `libs/streamlit_dashboard/` - Streamlit web dashboard application
 - `libs/` - Additional functionality (YesmanConfig, TmuxManager)
 - `patterns/` - Auto-response patterns for selection prompts
 - `examples/global-yesman/` - Example configuration files
@@ -114,11 +114,12 @@ Configuration merge modes:
 - Detects idle states and input states in Claude Code
 - Provides real-time feedback with progress indicators
 
-**Streamlit Dashboard** (`libs/streamlit_dashboard/app.py`):
-- Web application built with Streamlit for monitoring sessions
+**Tauri Desktop Dashboard** (`tauri-dashboard/`):
+- Native desktop application built with Tauri + SvelteKit for monitoring sessions
 - Shows project status, session state, and claude manager activity
 - Real-time updates with auto-refresh capability
 - Interactive controller management and session monitoring
+- High-performance native UI with system integration
 
 **FastAPI Server** (`api/main.py`):
 - REST API endpoints for session and controller management
@@ -126,9 +127,9 @@ Configuration merge modes:
 - Includes routers for sessions and controllers
 
 **Tauri Desktop App** (`tauri-dashboard/`):
-- Native desktop application using Tauri + Svelte
+- Native desktop application using Tauri + SvelteKit
 - Rust backend with TypeScript frontend
-- High-performance alternative to Streamlit dashboard
+- Primary dashboard interface for monitoring and control
 - System tray integration and native notifications
 
 **Session Templates**:
@@ -152,10 +153,9 @@ Configuration merge modes:
    - **Caching System**: Advanced caching with analytics (`libs/core/cache_*.py` modules)
 
 4. **Multi-Interface Architecture**: 
-   - **Streamlit Dashboard**: Web-based interface for session monitoring
-   - **FastAPI Server**: REST API for programmatic access
-   - **Tauri Desktop App**: Native desktop application with enhanced performance
-   - **CLI Interface**: Command-line tool for direct automation
+   - **Tauri Desktop App**: Primary native desktop interface for session monitoring
+   - **FastAPI Server**: REST API for programmatic access and integration
+   - **CLI Interface**: Command-line tool for direct automation and scripting
 
 5. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
 
@@ -188,9 +188,9 @@ When working on this codebase:
    - Auto-response patterns stored in `patterns/` subdirectories
    - Caching system components in `libs/core/cache_*.py` modules
 3. **Dashboard Updates**: 
-   - Streamlit: Web dashboard components in `libs/streamlit_dashboard/app.py`
-   - Tauri: Native desktop app in `tauri-dashboard/src/`
+   - Tauri: Native desktop app components in `tauri-dashboard/src/`
    - FastAPI: REST API endpoints in `api/routers/`
+   - Web Interface: Browser-based components via Tauri's embedded WebView
 4. **Configuration Changes**: Global config structure defined in `YesmanConfig` class (`libs/yesman_config.py`)
 5. **Testing**: Use debug scripts in `debug/` directory and test files in `tests/` for component testing
 
@@ -209,16 +209,18 @@ Core dependencies (from pyproject.toml):
 - pexpect>=4.8 - Process automation
 - tmuxp>=1.55.0 - Tmux session management
 - libtmux>=0.46.2 - Python tmux bindings
-- streamlit>=1.28.0 - Web framework for dashboard
 - rich>=13.0.0 - Terminal formatting and UI components
 - psutil>=5.9.0 - System and process utilities
 
 Additional development dependencies:
 - fastapi - REST API framework (api/ directory)
 - uvicorn - ASGI server for FastAPI
-- tauri - Desktop app framework (tauri-dashboard/ directory)
-- svelte - Frontend framework for Tauri app
+
+Tauri Desktop App Stack (tauri-dashboard/ directory):
+- tauri - Desktop app framework with Rust backend
+- sveltekit - Frontend framework for reactive UI
 - typescript - Type safety for frontend development
+- tailwindcss + daisyui - CSS framework and component library
 
 ## Key Implementation Notes
 
@@ -237,5 +239,6 @@ Additional development dependencies:
 ### Monitoring and Control
 - Real-time content collection from tmux panes
 - Sophisticated prompt detection with confidence scoring
-- Dashboard provides web-based session monitoring and control
+- Tauri desktop dashboard provides native session monitoring and control
 - Auto-response history tracking and management
+- Cross-platform native performance with web-based flexibility
