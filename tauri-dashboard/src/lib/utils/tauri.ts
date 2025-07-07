@@ -4,120 +4,127 @@
  */
 
 import { invoke } from '@tauri-apps/api/tauri';
-import { listen, emit } from '@tauri-apps/api/event';
-import type { Session, SessionFilters } from '$lib/types/session';
-import type { Notification } from '$lib/stores/notifications';
+import { open } from '@tauri-apps/api/dialog';
+import { sendNotification } from '@tauri-apps/api/notification';
 
-// Python 브리지 함수들
+// Tauri 환경인지 확인하기 위한 변수입니다.
+// 웹 브라우저 환경에서는 window.__TAURI__가 undefined입니다.
+// @ts-ignore
+const isTauri = typeof window !== 'undefined' && window.__TAURI__ !== undefined;
+
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+/**
+ * FastAPI 서버에 API 요청을 보내는 헬퍼 함수
+ * @param endpoint API 엔드포인트 경로 (e.g., '/sessions')
+ * @param options fetch 함수의 옵션 객체
+ * @returns API 응답을 JSON 형태로 파싱한 결과
+ */
+async function fetchApi(endpoint: string, options: RequestInit = {}) {
+	try {
+		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+			...options,
+			headers: {
+				'Content-Type': 'application/json',
+				...options.headers
+			}
+		});
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+			throw new Error(`API Error: ${errorData.detail || 'Unknown error'}`);
+		}
+		if (response.status === 204) {
+			return null;
+		}
+		return await response.json();
+	} catch (e) {
+		console.error(`Failed to fetch API endpoint ${endpoint}:`, e);
+		throw e;
+	}
+}
+
 export const pythonBridge = {
-  /**
-   * 모든 세션 정보 가져오기
-   */
-  async getAllSessions(): Promise<Session[]> {
-    try {
-      const result = await invoke('get_all_sessions');
-      return JSON.parse(result as string);
-    } catch (error) {
-      console.error('Failed to get sessions:', error);
-      throw new Error(`Failed to get sessions: ${error}`);
-    }
-  },
+	// Session Management
+	get_sessions: () => fetchApi('/sessions'),
+	get_session_details: (sessionId: string) => fetchApi(`/sessions/${sessionId}`),
+	create_session: (config: any) =>
+		fetchApi('/sessions', {
+			method: 'POST',
+			body: JSON.stringify(config)
+		}),
+	delete_session: (sessionId: string) => fetchApi(`/sessions/${sessionId}`, { method: 'DELETE' }),
 
-  /**
-   * Claude 컨트롤러 시작
-   */
-  async startController(sessionName: string): Promise<void> {
-    try {
-      await invoke('start_controller', { sessionName });
-      await emit('controller-started', { sessionName });
-    } catch (error) {
-      console.error('Failed to start controller:', error);
-      throw new Error(`Failed to start controller: ${error}`);
-    }
-  },
+	// Controller Management
+	start_claude: (sessionId: string) =>
+		fetchApi('/controllers/claude/start', {
+			method: 'POST',
+			body: JSON.stringify({ session_id: sessionId })
+		}),
+	stop_claude: (sessionId: string) =>
+		fetchApi('/controllers/claude/stop', {
+			method: 'POST',
+			body: JSON.stringify({ session_id: sessionId })
+		}),
+	get_claude_status: (sessionId: string) =>
+		fetchApi(`/controllers/claude/status?session_id=${sessionId}`),
 
-  /**
-   * Claude 컨트롤러 중지
-   */
-  async stopController(sessionName: string): Promise<void> {
-    try {
-      await invoke('stop_controller', { sessionName });
-      await emit('controller-stopped', { sessionName });
-    } catch (error) {
-      console.error('Failed to stop controller:', error);
-      throw new Error(`Failed to stop controller: ${error}`);
-    }
-  },
+	start_dashboard: (sessionId: string) =>
+		fetchApi('/controllers/dashboard/start', {
+			method: 'POST',
+			body: JSON.stringify({ session_id: sessionId })
+		}),
+	stop_dashboard: (sessionId: string) =>
+		fetchApi('/controllers/dashboard/stop', {
+			method: 'POST',
+			body: JSON.stringify({ session_id: sessionId })
+		}),
+	get_dashboard_status: (sessionId: string) =>
+		fetchApi(`/controllers/dashboard/status?session_id=${sessionId}`),
 
-  /**
-   * Tmux 세션 설정
-   */
-  async setupTmuxSession(sessionName: string): Promise<void> {
-    try {
-      await invoke('setup_tmux_session', { sessionName });
-      await emit('session-created', { sessionName });
-    } catch (error) {
-      console.error('Failed to setup session:', error);
-      throw new Error(`Failed to setup session: ${error}`);
-    }
-  },
+	// Config Management
+	get_app_config: () => fetchApi('/config'),
+	save_app_config: (config: any) =>
+		fetchApi('/config', {
+			method: 'POST',
+			body: JSON.stringify(config)
+		}),
 
-  /**
-   * 모든 세션 설정
-   */
-  async setupAllSessions(): Promise<void> {
-    try {
-      await invoke('setup_all_sessions');
-      await emit('all-sessions-created');
-    } catch (error) {
-      console.error('Failed to setup all sessions:', error);
-      throw new Error(`Failed to setup all sessions: ${error}`);
-    }
-  },
+	// Logs
+	get_logs: (sessionId: string, follow = false, lines = 50) =>
+		fetchApi(`/logs/${sessionId}?follow=${follow}&lines=${lines}`),
 
-  /**
-   * 모든 세션 정리
-   */
-  async teardownAllSessions(): Promise<void> {
-    try {
-      await invoke('teardown_all_sessions');
-      await emit('all-sessions-destroyed');
-    } catch (error) {
-      console.error('Failed to teardown all sessions:', error);
-      throw new Error(`Failed to teardown all sessions: ${error}`);
-    }
-  },
+	// Tauri-specific functions
+	send_notification: async (message: string) => {
+		if (isTauri) {
+			return sendNotification({ title: 'Yesman', body: message });
+		}
+		console.log(`Notification (web): ${message}`);
+		return Promise.resolve();
+	},
 
-  /**
-   * 세션 로그 가져오기
-   */
-  async getSessionLogs(sessionName: string): Promise<string[]> {
-    try {
-      const result = await invoke('get_session_logs', { sessionName });
-      return JSON.parse(result as string);
-    } catch (error) {
-      console.error('Failed to get session logs:', error);
-      throw new Error(`Failed to get session logs: ${error}`);
-    }
-  },
+	select_directory: async () => {
+		if (isTauri) {
+			const result = await open({ directory: true });
+			return Array.isArray(result) ? result[0] : result;
+		}
+		alert('폴더 선택 기능은 데스크톱 앱에서만 사용할 수 있습니다.');
+		return Promise.resolve(null);
+	},
 
-  /**
-   * 시스템 메트릭 가져오기
-   */
-  async getSystemMetrics(): Promise<any> {
-    try {
-      const result = await invoke('get_system_metrics');
-      return JSON.parse(result as string);
-    } catch (error) {
-      console.error('Failed to get system metrics:', error);
-      return {
-        memoryUsage: 0,
-        cpuUsage: 0,
-        responseTime: 0,
-        uptime: '0h 0m'
-      };
-    }
-  }
+	// Deprecated functions
+	get_session_info: () => {
+		console.warn('get_session_info is deprecated. Use get_sessions instead.');
+		return fetchApi('/sessions');
+	},
+	get_project_name: async () => {
+		console.warn('get_project_name is deprecated. Use get_app_config instead.');
+		try {
+			const config = await fetchApi('/config');
+			return config?.project_name || 'Unknown Project';
+		} catch (error) {
+			return 'Unknown Project';
+		}
+	}
 };
 
 // 이벤트 리스너 설정
