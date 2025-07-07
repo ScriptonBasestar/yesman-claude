@@ -113,6 +113,7 @@ Configuration merge modes:
 - Auto-responds to trust prompts and selection menus
 - Detects idle states and input states in Claude Code
 - Provides real-time feedback with progress indicators
+- **NEW**: AI-powered adaptive response system with machine learning capabilities
 
 **Tauri Desktop Dashboard** (`tauri-dashboard/`):
 - Native desktop application built with Tauri + SvelteKit for monitoring sessions
@@ -120,6 +121,8 @@ Configuration merge modes:
 - Real-time updates with auto-refresh capability
 - Interactive controller management and session monitoring
 - High-performance native UI with system integration
+- **NEW**: Interactive session browser with grid, list, and heatmap views
+- **NEW**: Activity level visualization and session statistics
 
 **FastAPI Server** (`api/main.py`):
 - REST API endpoints for session and controller management
@@ -131,6 +134,35 @@ Configuration merge modes:
 - Rust backend with TypeScript frontend
 - Primary dashboard interface for monitoring and control
 - System tray integration and native notifications
+
+**AI Learning System** (`libs/ai/`):
+- **ResponseAnalyzer** (`libs/ai/response_analyzer.py`): Pattern analysis and learning engine
+- **AdaptiveResponse** (`libs/ai/adaptive_response.py`): AI-powered auto-response system
+- Learns from user behavior and improves response accuracy over time
+- Pattern classification for different prompt types (yes/no, numbered selections, etc.)
+- Confidence scoring and prediction algorithms
+- JSON-based persistence for learned patterns and responses
+
+**Context-Aware Automation** (`libs/automation/`):
+- **ContextDetector** (`libs/automation/context_detector.py`): Workflow context detection system
+- **WorkflowEngine** (`libs/automation/workflow_engine.py`): Automation chain execution engine
+- **AutomationManager** (`libs/automation/automation_manager.py`): Integrated automation orchestrator
+- Detects git commits, test failures, build events, and other development contexts
+- Executes automated workflow chains based on detected contexts
+- Real-time monitoring and execution history tracking
+
+**Project Health Monitoring** (`libs/dashboard/`):
+- **HealthCalculator** (`libs/dashboard/health_calculator.py`): Comprehensive project health assessment
+- Evaluates 8 categories: build, tests, dependencies, security, performance, code quality, git, documentation
+- Real-time health scoring and visualization
+- Integration with Tauri dashboard for live monitoring
+
+**High-Performance Logging** (`libs/logging/`):
+- **AsyncLogger** (`libs/logging/async_logger.py`): Queue-based asynchronous logging system
+- **BatchProcessor** (`libs/logging/batch_processor.py`): Optimized batch log processing
+- Non-blocking log queues with compression support
+- JSON Lines format with Gzip compression for efficiency
+- Performance monitoring and statistics tracking
 
 **Session Templates**:
 - Support Jinja2-style variable substitution (removed in latest version)
