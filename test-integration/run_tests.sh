@@ -137,7 +137,15 @@ run_test_suite() {
 setup_test_environment() {
     print_header "Setting up test environment"
     
-    # Check dependencies
+    # Load test configuration
+    local config_file="$TEST_DIR/config/test-config.env"
+    if [ -f "$config_file" ]; then
+        print_info "Loading test configuration from $config_file"
+        source "$config_file"
+    fi
+    
+    # Check dependencies using utility function
+    print_info "Checking dependencies..."
     local missing_deps=()
     
     if ! command -v uv &> /dev/null; then
@@ -163,22 +171,30 @@ setup_test_environment() {
     
     # Check yesman installation
     cd "$TEST_DIR/.."
-    if ! uv run ./yesman.py --help > /dev/null 2>&1; then
+    if ! timeout 30 uv run ./yesman.py --help > /dev/null 2>&1; then
         print_warning "Yesman not properly installed, attempting dev install..."
-        if ! make dev-install > /dev/null 2>&1; then
+        if ! timeout 60 make dev-install > /dev/null 2>&1; then
             print_failure "Failed to install yesman"
             exit 1
         fi
     fi
     
-    # Create backup of existing config
+    # Create backup of existing config using utility
     if [ -d ~/.yesman ]; then
         print_info "Backing up existing yesman config..."
-        cp -r ~/.yesman ~/.yesman.backup.$(date +%s) 2>/dev/null || true
+        BACKUP_DIR="~/.yesman.backup.$(date +%s)"
+        cp -r ~/.yesman "$BACKUP_DIR" 2>/dev/null || true
+        export TEST_BACKUP_DIR="$BACKUP_DIR"
     fi
+    
+    # Create temporary directories
+    mkdir -p "${TEST_TEMP_DIR:-/tmp/yesman-test}"
     
     # Make all test scripts executable
     find "$TEST_DIR/scripts" -name "*.sh" -exec chmod +x {} \;
+    
+    # Set up Python path for test utilities
+    export PYTHONPATH="$TEST_DIR/lib:$TEST_DIR/..:$PYTHONPATH"
     
     print_success "Test environment setup complete"
     echo ""
