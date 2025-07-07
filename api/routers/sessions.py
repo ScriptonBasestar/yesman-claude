@@ -45,10 +45,26 @@ def convert_session_to_pydantic(session_data) -> models.SessionInfo:
 
 @router.get("/sessions", response_model=List[models.SessionInfo])
 def get_all_sessions():
-    """모든 tmux 세션의 상세 정보를 조회합니다."""
+    """모든 tmux 세션의 상세 정보를 조회합니다. (캐시 적용)"""
     try:
         sessions_data = sm.get_all_sessions()
         return [convert_session_to_pydantic(s) for s in sessions_data]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/sessions/cached", response_model=List[dict])
+def get_cached_sessions():
+    """캐시된 세션 정보를 조회합니다."""
+    try:
+        return tm.get_cached_sessions_list()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/sessions/{session_name}/info")
+def get_session_info(session_name: str):
+    """세션의 상세 정보를 조회합니다. (캐시 적용)"""
+    try:
+        return tm.get_session_info(session_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -64,6 +80,8 @@ def setup_tmux_session(project_name: str):
         
         # create_session의 두 번째 인자는 config 딕셔너리입니다.
         tm.create_session(project_name, project_config)
+        # 세션 생성 후 캐시 무효화
+        tm.invalidate_session_cache()
         return
     except Exception as e:
         # libtmux가 세션을 생성할 때 발생하는 예외를 그대로 전달
@@ -83,6 +101,26 @@ def teardown_all_sessions():
         for session in server.sessions:
             if session.name in managed_session_names:
                 session.kill_session()
+        
+        # 모든 세션 종료 후 캐시 무효화
+        tm.invalidate_session_cache()
         return
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/sessions/cache/stats")
+def get_cache_stats():
+    """캐시 통계 정보를 조회합니다."""
+    try:
+        return tm.get_cache_stats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/sessions/cache/invalidate", status_code=204)
+def invalidate_cache(session_name: str = None):
+    """캐시를 무효화합니다."""
+    try:
+        tm.invalidate_session_cache(session_name)
+        return
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
