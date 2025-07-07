@@ -29,8 +29,14 @@ def get_app_config():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get config: {str(e)}")
 
-# TODO: YesmanConfig에 설정 저장 기능이 구현된 후, 아래 엔드포인트의 주석을 해제하고 구현해야 함.
-#
-# @router.post("/config", status_code=204)
-# def save_app_config(config: AppConfig):
-#     ... 
+# TODO: POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
+#       YesmanConfig에 save 메서드를 추가해야 합니다.
+@router.post("/config", status_code=204)
+def save_app_config(config: AppConfig):
+    """애플리케이션 설정을 저장합니다."""
+    try:
+        config_data = config.dict(exclude_unset=True)
+        config_manager.save(config_data)
+        return
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}") 
