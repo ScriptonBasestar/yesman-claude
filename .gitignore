@@ -485,3 +485,6 @@ nohup.out
 *.swo
 *.swn
 *.bak
+
+## custom
+results/
