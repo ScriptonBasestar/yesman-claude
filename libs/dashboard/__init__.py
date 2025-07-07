@@ -1,0 +1,1 @@
+"""Dashboard modules for project status visualization."""
