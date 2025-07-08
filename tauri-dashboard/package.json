@@ -4,8 +4,8 @@
   "description": "Native desktop dashboard for Yesman Claude automation",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite dev\" \"pnpm run dev:api\"",
-    "dev:api": "cd ../ && api/venv/bin/python -m uvicorn api.main:app --host 127.0.0.1 --port 8000",
+    "dev": "vite dev",
+    "dev:api": "cd .. && source api/venv/bin/activate && python -m uvicorn api.main:app --host 127.0.0.1 --port 8000",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
