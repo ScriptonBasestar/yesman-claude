@@ -47,8 +47,12 @@
       "Bash(pnpm tauri:dev:*)",
       "Bash(pnpm install:*)",
       "Bash(cat:*)",
-      "Bash(mv:*)",
-      "Bash(git reset:*)"
+      "Bash(strace:*)",
+      "Bash(pnpm run:*)",
+      "Bash(wmctrl:*)",
+      "Bash(xwininfo:*)",
+      "Bash(DISPLAY=:0 pnpm tauri dev)",
+      "Bash(echo $DISPLAY)"
     ],
     "deny": []
   }
