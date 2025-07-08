@@ -122,7 +122,7 @@
 
 <!-- 전체 알림 패널 (옵션) -->
 <div class="notification-panel-overlay fixed inset-0 z-40 hidden">
-  <div class="absolute inset-0 bg-black/20" on:click={() => dispatch('closePanel')}></div>
+  <div class="absolute inset-0 bg-black/20" role="button" tabindex="0" on:click={() => dispatch('closePanel')} on:keydown={(e) => e.key === 'Enter' && dispatch('closePanel')}></div>
   
   <div class="notification-panel absolute top-4 right-4 bottom-4 w-96 bg-base-100 rounded-lg shadow-xl border border-base-content/10">
     <div class="panel-header p-4 border-b border-base-content/10">

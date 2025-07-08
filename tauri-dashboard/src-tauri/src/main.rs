@@ -28,6 +28,13 @@ fn main() {
         ])
         .setup(|_app| {
             // 초기 설정
+            // WebKit deprecation warning 억제를 위한 환경 변수 설정
+            #[cfg(target_os = "linux")]
+            {
+                // WebKit GTK 경고 메시지 억제
+                std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+            }
+            
             Ok(())
         })
         .run(tauri::generate_context!())

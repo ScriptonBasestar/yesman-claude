@@ -228,14 +228,15 @@ def cleanup(days):
 @click.option('--project', '-p', help='Project name')
 def predict(prompt_text, context, project):
     """Predict response for a given prompt"""
+    import asyncio
     console = Console()
     
     try:
         adaptive = AdaptiveResponse()
         
-        # Get prediction
-        should_respond, predicted_response, confidence = await adaptive.should_auto_respond(
-            prompt_text, context, project
+        # Get prediction (run async function synchronously)
+        should_respond, predicted_response, confidence = asyncio.run(
+            adaptive.should_auto_respond(prompt_text, context, project)
         )
         
         # Create prediction panel

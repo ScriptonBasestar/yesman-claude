@@ -27,6 +27,7 @@ pub struct MetricUpdatePayload {
 }
 
 pub struct EventManager {
+    #[allow(dead_code)]
     window: Arc<RwLock<Option<Window>>>,
 }
 
@@ -37,10 +38,12 @@ impl EventManager {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn set_window(&self, window: Window) {
         *self.window.write().await = Some(window);
     }
     
+    #[allow(dead_code)]
     pub async fn emit_session_update(&self, session_name: &str, status: &str, controller_status: &str) {
         if let Some(window) = self.window.read().await.as_ref() {
             let payload = SessionUpdatePayload {
@@ -53,6 +56,7 @@ impl EventManager {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn emit_log_update(&self, session_name: &str, log: &str) {
         if let Some(window) = self.window.read().await.as_ref() {
             let payload = LogUpdatePayload {
@@ -65,6 +69,7 @@ impl EventManager {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn emit_metric_update(&self, session_name: &str, response_time: f64, prompts_per_minute: f64) {
         if let Some(window) = self.window.read().await.as_ref() {
             let payload = MetricUpdatePayload {
@@ -78,6 +83,7 @@ impl EventManager {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn emit_notification(&self, title: &str, message: &str, level: &str) {
         if let Some(window) = self.window.read().await.as_ref() {
             let payload = serde_json::json!({

@@ -15,6 +15,7 @@ pub async fn show_notification(
         .map_err(|e| e.to_string())
 }
 
+#[allow(dead_code)]
 pub fn notify_controller_status_change(
     app: &AppHandle,
     session_name: &str,
@@ -30,6 +31,7 @@ pub fn notify_controller_status_change(
         .map_err(|e| e.to_string())
 }
 
+#[allow(dead_code)]
 pub fn notify_session_event(
     app: &AppHandle,
     session_name: &str,

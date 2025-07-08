@@ -97,11 +97,12 @@
   <div class="filters-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
     <!-- 검색 필터 -->
     <div class="filter-item">
-      <label class="label">
+      <label class="label" for="search-input">
         <span class="label-text text-xs font-medium">Search</span>
       </label>
       <div class="input-group">
         <input 
+          id="search-input"
           type="text" 
           placeholder="Session name..."
           class="input input-sm input-bordered w-full"
@@ -114,10 +115,11 @@
     
     <!-- 세션 상태 필터 -->
     <div class="filter-item">
-      <label class="label">
+      <label class="label" for="status-select">
         <span class="label-text text-xs font-medium">Status</span>
       </label>
       <select 
+        id="status-select"
         class="select select-sm select-bordered w-full"
         value={$sessionFilters.status}
         on:change={handleStatusChange}
@@ -130,10 +132,11 @@
     
     <!-- 컨트롤러 상태 필터 -->
     <div class="filter-item">
-      <label class="label">
+      <label class="label" for="controller-select">
         <span class="label-text text-xs font-medium">Controller</span>
       </label>
       <select 
+        id="controller-select"
         class="select select-sm select-bordered w-full"
         value={$sessionFilters.controllerStatus}
         on:change={handleControllerStatusChange}
@@ -146,10 +149,11 @@
     
     <!-- 정렬 기준 -->
     <div class="filter-item">
-      <label class="label">
+      <label class="label" for="sort-select">
         <span class="label-text text-xs font-medium">Sort by</span>
       </label>
       <select 
+        id="sort-select"
         class="select select-sm select-bordered w-full"
         value={$sessionFilters.sortBy}
         on:change={handleSortChange}
@@ -162,9 +166,9 @@
     
     <!-- 정렬 순서 -->
     <div class="filter-item">
-      <label class="label">
+      <div class="mb-2">
         <span class="label-text text-xs font-medium">Order</span>
-      </label>
+      </div>
       <button 
         class="btn btn-sm btn-outline w-full"
         on:click={handleSortOrderToggle}
@@ -180,13 +184,14 @@
     
     <!-- 토글 옵션들 -->
     <div class="filter-item">
-      <label class="label">
+      <div class="mb-2">
         <span class="label-text text-xs font-medium">Options</span>
-      </label>
+      </div>
       <div class="form-control">
-        <label class="label cursor-pointer">
+        <label class="label cursor-pointer" for="errors-only-toggle">
           <span class="label-text text-xs">Errors only</span>
           <input 
+            id="errors-only-toggle"
             type="checkbox" 
             class="toggle toggle-sm toggle-error"
             checked={$sessionFilters.showOnlyErrors}

@@ -19,7 +19,6 @@ except ImportError:
     psutil = None
 
 from libs.yesman_config import YesmanConfig
-from libs.tmux_manager import TmuxManager
 from .models import SessionInfo, WindowInfo, PaneInfo
 from .session_cache import SessionCache
 from ..utils import ensure_log_directory
@@ -37,6 +36,8 @@ class SessionManager:
     
     def __init__(self, operation_mode: Optional[OperationMode] = None):
         self.config = YesmanConfig()
+        # Lazy import to avoid circular dependency
+        from libs.tmux_manager import TmuxManager
         self.tmux_manager = TmuxManager(self.config)
         self.server = libtmux.Server()
         self.logger = self._setup_logger()
