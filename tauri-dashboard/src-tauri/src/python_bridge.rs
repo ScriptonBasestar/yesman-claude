@@ -360,6 +360,7 @@ except Exception as e:
     Ok(result.trim() == "True")
 }
 
+#[allow(dead_code)]
 pub async fn start_all_controllers() -> Result<i32, String> {
     let sessions = get_all_sessions().await?;
     let mut success_count = 0;
@@ -373,6 +374,7 @@ pub async fn start_all_controllers() -> Result<i32, String> {
     Ok(success_count)
 }
 
+#[allow(dead_code)]
 pub async fn stop_all_controllers() -> Result<i32, String> {
     let sessions = get_all_sessions().await?;
     let mut success_count = 0;

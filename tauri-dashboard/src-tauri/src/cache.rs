@@ -22,11 +22,17 @@ pub struct CacheStats {
 }
 
 pub struct Cache<T> {
+    #[allow(dead_code)]
     data: Arc<RwLock<HashMap<String, CacheEntry<T>>>>,
+    #[allow(dead_code)]
     hits: Arc<RwLock<u64>>,
+    #[allow(dead_code)]
     misses: Arc<RwLock<u64>>,
+    #[allow(dead_code)]
     evictions: Arc<RwLock<u64>>,
+    #[allow(dead_code)]
     max_entries: usize,
+    #[allow(dead_code)]
     default_ttl_seconds: u64,
 }
 
@@ -42,6 +48,7 @@ impl<T: Clone + Send + Sync + 'static> Cache<T> {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn get(&self, key: &str) -> Option<T> {
         let data = self.data.read().await;
         
@@ -64,10 +71,12 @@ impl<T: Clone + Send + Sync + 'static> Cache<T> {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn set(&self, key: String, value: T) {
         self.set_with_ttl(key, value, None).await;
     }
     
+    #[allow(dead_code)]
     pub async fn set_with_ttl(&self, key: String, value: T, ttl_seconds: Option<u64>) {
         let mut data = self.data.write().await;
         
@@ -98,16 +107,19 @@ impl<T: Clone + Send + Sync + 'static> Cache<T> {
         data.insert(key, entry);
     }
     
+    #[allow(dead_code)]
     pub async fn remove(&self, key: &str) -> Option<T> {
         let mut data = self.data.write().await;
         data.remove(key).map(|entry| entry.data)
     }
     
+    #[allow(dead_code)]
     pub async fn clear(&self) {
         let mut data = self.data.write().await;
         data.clear();
     }
     
+    #[allow(dead_code)]
     pub async fn cleanup_expired(&self) {
         let mut data = self.data.write().await;
         let now = Utc::now();
@@ -127,6 +139,7 @@ impl<T: Clone + Send + Sync + 'static> Cache<T> {
         }
     }
     
+    #[allow(dead_code)]
     pub async fn get_stats(&self) -> CacheStats {
         let data = self.data.read().await;
         let hits = *self.hits.read().await;

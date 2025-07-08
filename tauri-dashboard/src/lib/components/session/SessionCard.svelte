@@ -140,8 +140,8 @@
         </button>
         
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-sm">⋮</label>
-          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+          <button class="btn btn-ghost btn-sm">⋮</button>
+          <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             <li><button on:click={handleAttachSession}>🔗 Attach to Session</button></li>
             <li><button on:click={handleViewLogs}>📋 View Logs</button></li>
             <li><hr></li>

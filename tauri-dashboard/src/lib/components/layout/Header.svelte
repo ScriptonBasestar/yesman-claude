@@ -143,14 +143,14 @@
       
       <!-- 사용자 프로필 -->
       <div class="dropdown dropdown-end">
-        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+        <button class="btn btn-ghost btn-circle avatar">
           <div class="avatar placeholder">
             <div class="bg-neutral-focus text-neutral-content rounded-full w-8">
               <span class="text-xs">👤</span>
             </div>
           </div>
-        </label>
-        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+        </button>
+        <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
           <li><a href="/profile">👤 Profile</a></li>
           <li><a href="/settings">⚙️ Settings</a></li>
           <li><hr class="my-1"></li>

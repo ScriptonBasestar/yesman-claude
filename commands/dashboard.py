@@ -22,6 +22,14 @@ def dashboard(port, dev):
     original_cwd = os.getcwd()
     os.chdir(dashboard_path)
     
+    # Set environment variables to suppress WebKit warnings
+    env = os.environ.copy()
+    env['G_MESSAGES_DEBUG'] = ''  # Suppress GLib debug messages
+    env['WEBKIT_DISABLE_COMPOSITING_MODE'] = '1'  # Suppress WebKit warnings
+    env['GST_DEBUG'] = '0'  # Suppress GStreamer debug output
+    # Redirect stderr to suppress deprecation warnings
+    env['PYTHONWARNINGS'] = 'ignore'
+    
     try:
         if dev:
             click.echo(f"Starting yesman Tauri dashboard in development mode...")
@@ -36,9 +44,11 @@ def dashboard(port, dev):
             
             # Run the built executable
             build_dir = dashboard_path / "src-tauri" / "target" / "release"
-            executable = None
             
             # Find the executable (platform dependent)
+            app_bundle = None
+            executable = None
+            
             if sys.platform == "darwin":  # macOS
                 app_bundle = build_dir / "bundle" / "macos" / "yesman-claude.app"
                 if app_bundle.exists():
@@ -50,13 +60,18 @@ def dashboard(port, dev):
             else:  # Linux
                 executable = build_dir / "yesman-claude"
             
+            # Check if we have a valid executable or app bundle
             if executable and executable.exists():
                 cmd = [str(executable)]
-            elif not app_bundle.exists():
+            elif app_bundle and app_bundle.exists():
+                cmd = ["open", str(app_bundle)]
+            else:
                 click.echo("Built executable not found. Running in dev mode instead...")
                 cmd = ["npm", "run", "tauri", "dev"]
         
-        subprocess.run(cmd, check=True)
+        # Run the command and suppress WebKit warnings
+        with open(os.devnull, 'w') as devnull:
+            subprocess.run(cmd, env=env, stderr=subprocess.PIPE, check=True)
         
     except subprocess.CalledProcessError as e:
         click.echo(f"Tauri dashboard error: {e}", err=True)
