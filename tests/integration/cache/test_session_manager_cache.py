@@ -209,5 +209,3 @@ class TestSessionManagerCache:
         assert isinstance(stats['memory_size_bytes'], int)
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

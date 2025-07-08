@@ -111,5 +111,3 @@ Do you want to make this edit to VideoProcessingService.kt?
         self.assertIsNone(prompt_info)
 
 
-if __name__ == '__main__':
-    unittest.main()

@@ -79,6 +79,3 @@ class TestClaudeRestart(unittest.TestCase):
             result = self.controller.restart_claude_pane()
             self.assertFalse(result)
 
-
-if __name__ == '__main__':
-    unittest.main()

@@ -48,5 +48,3 @@ def main():
     else:
         print("❌ Failed to start controller")
 
-if __name__ == "__main__":
-    main()

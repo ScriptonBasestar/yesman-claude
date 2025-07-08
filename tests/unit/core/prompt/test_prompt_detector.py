@@ -167,5 +167,3 @@ Do you want to continue with this operation?
             self.assertLessEqual(prompt_info.confidence, 0.6)
 
 
-if __name__ == '__main__':
-    unittest.main()

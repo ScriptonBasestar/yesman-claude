@@ -8,7 +8,8 @@ import shutil
 from pathlib import Path
 from unittest.mock import patch, Mock
 
-from libs.core.session_cache import SessionCache, CacheEntry, CacheStats
+from libs.core.session_cache import SessionCache
+from libs.core.cache_core import CacheEntry, CacheStats
 
 
 class TestCacheEntry(unittest.TestCase):
@@ -306,5 +307,3 @@ class TestSessionCache(unittest.TestCase):
         self.assertIn('key2', stats_data['cache_keys'])
 
 
-if __name__ == '__main__':
-    unittest.main()

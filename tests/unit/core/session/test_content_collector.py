@@ -184,5 +184,3 @@ class TestContentCollectionManager(unittest.TestCase):
             self.assertIn('session_name', session_stats)
 
 
-if __name__ == '__main__':
-    unittest.main()
