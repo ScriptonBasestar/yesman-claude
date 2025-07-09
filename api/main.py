@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import sessions, controllers, config, logs, dashboard
+from api.routers import sessions, controllers, config, logs, dashboard, websocket
 
 app = FastAPI()
 
@@ -22,6 +22,9 @@ app.include_router(logs.router, prefix="/api", tags=["logs"])
 
 # Include web dashboard router
 app.include_router(dashboard.router, tags=["web-dashboard"])
+
+# Include WebSocket router
+app.include_router(websocket.router, tags=["websocket"])
 
 # Mount static files for web dashboard
 app.mount("/static", StaticFiles(directory="web-dashboard/static"), name="static")
