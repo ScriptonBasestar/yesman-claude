@@ -51,11 +51,11 @@ customElements.define('session-browser', SessionBrowser);
 - `renderTreeView()`
 
 ## 완료 기준
-- [ ] SessionBrowser 클래스 구현
-- [ ] 3가지 뷰 모드 모두 작동
-- [ ] 세션 데이터 표시 확인
-- [ ] 뷰 모드 전환 작동
-- [ ] 액션 버튼 이벤트 바인딩
+- [x] SessionBrowser 클래스 구현
+- [x] 3가지 뷰 모드 모두 작동
+- [x] 세션 데이터 표시 확인
+- [x] 뷰 모드 전환 작동
+- [x] 액션 버튼 이벤트 바인딩
 
 ## 테스트
 ```javascript
