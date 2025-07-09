@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, List
 from libs.yesman_config import YesmanConfig
-from libs.core.session_cache import SessionCache
 from tmuxp.workspace.builder import WorkspaceBuilder  # type: ignore
 from tmuxp.workspace.loader import expand  # type: ignore
 import libtmux  # type: ignore
@@ -18,8 +17,6 @@ class TmuxManager:
         self.templates_path = Path.home() / ".yesman" / "templates"
         self.templates_path.mkdir(parents=True, exist_ok=True)
         
-        # Initialize session cache for performance optimization
-        self.session_cache = SessionCache(default_ttl=5.0, max_entries=100)
 
     def create_session(self, session_name: str, config_dict: Dict) -> bool:
         """Create tmux session from a YAML config file in templates directory"""
@@ -43,8 +40,6 @@ class TmuxManager:
             builder.build()
             self.logger.info(f"Session {session_name_from_config} created successfully.")
             
-            # Invalidate cache since new session was created
-            self.invalidate_session_cache(session_name_from_config)
             return True
         except Exception as e:
             # print e
@@ -85,9 +80,7 @@ class TmuxManager:
             click.echo(f"  - {name}")
     
     def get_session_info(self, session_name: str) -> Dict[str, Any]:
-        """Get session information with caching"""
-        cache_key = f"session_info:{session_name}"
-        
+        """Get session information directly from tmux"""
         def fetch_session_info():
             """Fetch session information from tmux"""
             try:
@@ -127,40 +120,23 @@ class TmuxManager:
                 self.logger.error(f"Failed to get session info for {session_name}: {e}")
                 return {"exists": False, "session_name": session_name, "error": str(e)}
         
-        return self.session_cache.get_or_compute(cache_key, fetch_session_info)
+        return fetch_session_info()
     
     def get_cached_sessions_list(self) -> List[Dict[str, Any]]:
-        """Get list of all sessions with caching"""
-        cache_key = "sessions_list"
-        
-        def fetch_sessions_list():
-            """Fetch all sessions from tmux"""
-            try:
-                server = libtmux.Server()
-                sessions = server.list_sessions()
-                return [
-                    {
-                        "session_name": sess.get("session_name"),
-                        "session_id": sess.get("session_id"),
-                        "session_created": sess.get("session_created"),
-                        "session_windows": sess.get("session_windows", 0)
-                    }
-                    for sess in sessions
-                ]
-            except Exception as e:
-                self.logger.error(f"Failed to get sessions list: {e}")
-                return []
-        
-        return self.session_cache.get_or_compute(cache_key, fetch_sessions_list)
+        """Get list of all sessions directly from tmux"""
+        try:
+            server = libtmux.Server()
+            sessions = server.list_sessions()
+            return [
+                {
+                    "session_name": sess.get("session_name"),
+                    "session_id": sess.get("session_id"),
+                    "session_created": sess.get("session_created"),
+                    "session_windows": sess.get("session_windows", 0)
+                }
+                for sess in sessions
+            ]
+        except Exception as e:
+            self.logger.error(f"Failed to get sessions list: {e}")
+            return []
     
-    def invalidate_session_cache(self, session_name: str = None):
-        """Invalidate cache entries for a session or all sessions"""
-        if session_name:
-            self.session_cache.invalidate(f"session_info:{session_name}")
-        else:
-            self.session_cache.invalidate_pattern("session_*")
-            self.session_cache.invalidate("sessions_list")
-    
-    def get_cache_stats(self) -> Dict[str, Any]:
-        """Get cache statistics for monitoring"""
-        return self.session_cache.get_stats()

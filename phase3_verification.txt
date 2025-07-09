@@ -1,0 +1,53 @@
+=== Final Cache Dependencies Check ===
+Date: 2025. 07. 09. (수) 15:11:49 KST
+
+Checking dependencies for: libs/core/cache_analytics.py
+Files importing cache_analytics:
+./libs/core/cache_manager.py:from .cache_analytics import CacheAnalytics
+
+Checking dependencies for: libs/core/cache_core.py
+Files importing cache_core:
+./tests/unit/core/cache/test_session_cache.py:from libs.core.cache_core import CacheEntry, CacheStats
+./libs/core/session_cache.py:from .cache_core import InvalidationStrategy, CacheTag
+./libs/core/cache_analytics.py:from .cache_core import CacheStats
+./libs/core/cache_manager.py:from .cache_core import InvalidationStrategy
+./libs/core/cache_storage.py:from .cache_core import CacheEntry, CacheStats, InvalidationStrategy, generate_content_hash
+
+Checking dependencies for: libs/core/cache_manager.py
+Files importing cache_manager:
+./tests/unit/core/test_error_handling.py:        from libs.core.cache_manager import CacheManager
+./tests/unit/core/test_error_handling.py:        from libs.core.cache_manager import CacheManager
+./tests/unit/core/test_error_handling.py:        from libs.core.cache_manager import CacheManager
+./tests/unit/core/test_error_handling.py:        from libs.core.cache_manager import CacheManager
+./libs/core/session_cache.py:from .cache_manager import SessionCache
+
+Checking dependencies for: libs/core/cache_storage.py
+Files importing cache_storage:
+./libs/core/cache_manager.py:from .cache_storage import CacheStorage
+
+Checking dependencies for: libs/core/session_cache.py
+Files importing session_cache:
+./tests/unit/core/cache/test_cache_invalidation_strategies.py:from libs.core.session_cache import SessionCache, InvalidationStrategy, CacheTag
+./tests/unit/core/cache/test_cache_ttl_management.py:from libs.core.session_cache import SessionCache, InvalidationStrategy, CacheTag
+./tests/unit/core/cache/test_session_cache.py:from libs.core.session_cache import SessionCache
+./tests/unit/core/cache/test_cache_change_detection.py:from libs.core.session_cache import SessionCache, InvalidationStrategy, CacheTag
+./tests/integration/cache/test_cache_visualization.py:from libs.core.session_cache import SessionCache
+./tests/integration/cache/test_session_cache_integration.py:from libs.core.session_cache import SessionCache
+./tests/integration/cache/test_dashboard_cache_integration.py:from libs.core.session_cache import SessionCache
+./libs/core/__init__.py:from .session_cache import SessionCache
+./libs/tmux_manager.py:from libs.core.session_cache import SessionCache
+
+=== Remaining Phase 2 Dependencies ===
+Found dependencies in:
+- libs/core/__init__.py (SessionCache import)
+- libs/tmux_manager.py (SessionCache import and usage)
+- Various test files (cache imports)
+
+=== Final Dependencies Check After Step 0 ===
+./libs/core/session_cache.py:from .cache_manager import SessionCache
+./libs/core/session_cache.py:from .cache_core import InvalidationStrategy, CacheTag
+./libs/core/cache_analytics.py:from .cache_core import CacheStats
+./libs/core/cache_manager.py:from .cache_storage import CacheStorage
+./libs/core/cache_manager.py:from .cache_analytics import CacheAnalytics
+./libs/core/cache_manager.py:from .cache_core import InvalidationStrategy
+./libs/core/cache_storage.py:from .cache_core import CacheEntry, CacheStats, InvalidationStrategy, generate_content_hash

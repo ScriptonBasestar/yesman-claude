@@ -86,6 +86,7 @@ class TestErrorHandling(unittest.TestCase):
         # Cleanup
         os.chmod(readonly_file, 0o644)
     
+    @unittest.skip("Cache system removed - test will be deleted in Phase 4")
     def test_disk_full_simulation(self):
         """Test handling of disk full errors"""
         from libs.core.cache_manager import CacheManager
@@ -160,6 +161,7 @@ class TestErrorHandling(unittest.TestCase):
     
     # --- Race Condition Tests ---
     
+    @unittest.skip("Cache system removed - test will be deleted in Phase 4")
     def test_concurrent_cache_access(self):
         """Test handling of concurrent cache access"""
         from libs.core.cache_manager import CacheManager
@@ -189,6 +191,7 @@ class TestErrorHandling(unittest.TestCase):
     
     # --- Resource Limit Tests ---
     
+    @unittest.skip("Cache system removed - test will be deleted in Phase 4")
     def test_memory_limit_handling(self):
         """Test handling of memory limits"""
         from libs.core.cache_manager import CacheManager
@@ -224,6 +227,7 @@ class TestErrorHandling(unittest.TestCase):
     
     # --- Data Corruption Tests ---
     
+    @unittest.skip("Cache system removed - test will be deleted in Phase 4")
     def test_corrupted_cache_file(self):
         """Test handling of corrupted cache files"""
         from libs.core.cache_manager import CacheManager
