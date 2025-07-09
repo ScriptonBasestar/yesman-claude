@@ -14,8 +14,9 @@ from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 from libs.dashboard.widgets import (
     SessionBrowser, ActivityHeatmap, ProjectHealthWidget,
-    GitActivityWidget, ProgressTracker
+    GitActivityWidget, ProgressTracker, SessionProgressWidget
 )
+from libs.core.session_manager import SessionManager
 
 
 class StatusDashboard:
@@ -37,9 +38,14 @@ class StatusDashboard:
         self.project_health = ProjectHealthWidget(self.console)
         self.git_activity = GitActivityWidget(self.console, str(self.project_path))
         self.progress_tracker = ProgressTracker(self.console)
+        self.session_progress = SessionProgressWidget(self.console)
+        
+        # Initialize session manager
+        self.session_manager = SessionManager()
         
         # Load initial data
         self._load_todo_data()
+        self.progress_data = None
     
     def _load_todo_data(self):
         """Load TODO data from various sources"""
@@ -77,6 +83,9 @@ class StatusDashboard:
             
             # Update project health
             self.project_health.update_project_health(str(self.project_path), self.project_name)
+            
+            # Update session progress
+            self.progress_data = self.session_manager.get_progress_overview()
             
             # Git and progress data updates happen automatically in their respective widgets
             
@@ -132,7 +141,8 @@ class StatusDashboard:
         # Split right column
         layout["right"].split_column(
             Layout(name="activity", ratio=2),
-            Layout(name="progress", ratio=3)
+            Layout(name="progress", ratio=2),
+            Layout(name="session_progress", ratio=2)
         )
         
         return layout
@@ -162,6 +172,13 @@ class StatusDashboard:
         # Progress tracking
         progress_content = self.progress_tracker.render_progress_overview()
         layout["progress"].update(progress_content)
+        
+        # Session progress
+        if self.progress_data:
+            session_progress_content = self.session_progress.render_progress_overview(self.progress_data)
+            layout["session_progress"].update(session_progress_content)
+        else:
+            layout["session_progress"].update(Panel("[dim]Loading session progress...[/dim]", title="📊 Session Progress"))
         
         # Footer with compact status
         footer_parts = []
