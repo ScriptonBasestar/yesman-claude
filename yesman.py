@@ -20,6 +20,7 @@ from commands.ai import ai
 from commands.status import status
 from commands.logs import logs
 from commands.automate import automate
+from commands.cleanup import cleanup
 
 cli.add_command(ls)
 cli.add_command(show)
@@ -34,6 +35,7 @@ cli.add_command(ai)
 cli.add_command(status)
 cli.add_command(logs)
 cli.add_command(automate)
+cli.add_command(cleanup)
 
 if __name__ == "__main__":
     cli()

@@ -14,7 +14,7 @@ from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 from libs.dashboard.widgets import (
     SessionBrowser, ActivityHeatmap, ProjectHealthWidget,
-    GitActivityWidget, ProgressTracker, SessionProgressWidget
+    GitActivityWidget, ProgressTracker
 )
 from libs.core.session_manager import SessionManager
 
