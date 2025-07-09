@@ -55,24 +55,6 @@ class MockClaudeProcess:
     def is_running(self):
         return self.status == "running"
 
-# 캐시 관련 Mock
-class MockCache:
-    """캐시 Mock 객체"""
-    def __init__(self):
-        self._cache = {}
-        
-    def get(self, key):
-        return self._cache.get(key)
-        
-    def set(self, key, value, ttl=None):
-        self._cache[key] = value
-        
-    def delete(self, key):
-        if key in self._cache:
-            del self._cache[key]
-            
-    def clear(self):
-        self._cache.clear()
 
 # 세션 관련 Mock 데이터
 MOCK_SESSION_DATA = {

@@ -225,10 +225,10 @@ fi
 ## ✅ 완료 기준
 
 ### 필수 제거 사항
-- [ ] 캐시 전용 테스트 디렉토리 제거 (tests/unit/core/cache/, tests/integration/cache/)
-- [ ] 개별 캐시 테스트 파일 6개 제거
-- [ ] 혼합 테스트 파일에서 캐시 관련 코드 정리
-- [ ] conftest.py 및 fixtures에서 캐시 코드 제거
+- [x] 캐시 전용 테스트 디렉토리 제거 (tests/unit/core/cache/, tests/integration/cache/)
+- [x] 개별 캐시 테스트 파일 6개 제거
+- [x] 혼합 테스트 파일에서 캐시 관련 코드 정리
+- [x] conftest.py 및 fixtures에서 캐시 코드 제거
 
 ### 백업 및 검증
 ```bash
