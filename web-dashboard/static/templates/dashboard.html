@@ -3,7 +3,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div x-data="dashboard()" x-init="init()" class="space-y-6">
+<div x-data="window.dashboard.components.dashboard()" x-init="init()" class="space-y-6">
     <!-- Status summary cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Active Sessions Card -->
@@ -116,37 +116,7 @@
 </div>
 
 <script>
-function dashboard() {
-    return {
-        loading: false,
-        stats: {
-            active_sessions: 0,
-            health_score: 0,
-            total_projects: 0,
-            activity_streak: 0
-        },
-        
-        async init() {
-            this.loading = true;
-            try {
-                await this.loadStats();
-            } catch (error) {
-                console.error('Failed to load dashboard data:', error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        
-        async loadStats() {
-            try {
-                const response = await axios.get('/web/api/stats');
-                this.stats = response.data;
-            } catch (error) {
-                console.error('Failed to load stats:', error);
-            }
-        }
-    }
-}
+// Dashboard components are now loaded from main.js
 
 // Define placeholder components
 document.addEventListener('DOMContentLoaded', function() {

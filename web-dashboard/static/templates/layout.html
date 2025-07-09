@@ -19,6 +19,9 @@
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     
+    <!-- Main JavaScript -->
+    <script src="/static/js/main.js"></script>
+    
     <!-- Theme initialization -->
     <script>
         // Initialize theme before page loads to prevent flash
@@ -69,9 +72,14 @@
                         <button
                             x-data="{ dark: localStorage.theme === 'dark' }"
                             x-on:click="
-                                dark = !dark;
-                                localStorage.theme = dark ? 'dark' : 'light';
-                                document.documentElement.classList.toggle('dark', dark);
+                                if (window.dashboard && window.dashboard.utils) {
+                                    window.dashboard.utils.toggleTheme();
+                                    dark = !dark;
+                                } else {
+                                    dark = !dark;
+                                    localStorage.theme = dark ? 'dark' : 'light';
+                                    document.documentElement.classList.toggle('dark', dark);
+                                }
                             "
                             class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                             aria-label="Toggle theme"
