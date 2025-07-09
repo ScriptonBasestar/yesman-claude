@@ -1,117 +1,132 @@
-# Features
+# 📘 기능 개요 - Yesman-Claude
 
-Yesman-Claude is a CLI automation tool that manages tmux sessions and automates interactions with Claude Code. This document outlines all implemented features and capabilities.
+**Yesman-Claude**는 tmux 세션을 관리하고 Claude Code와의 상호작용을 자동화하는 CLI 도구입니다.  
+본 문서는 현재 구현된 모든 기능을 항목별로 정리합니다.
 
-## 🖥️ CLI Commands
+---
 
-### Session Management
-- **`./yesman.py ls`** - List available templates and projects
-- **`./yesman.py show`** - Show running tmux sessions status
-- **`./yesman.py setup`** - Create all tmux sessions from projects.yaml configuration
-- **`./yesman.py teardown`** - Stop and remove all sessions defined in projects.yaml
-- **`./yesman.py enter [session_name]`** - Attach to a tmux session (interactive selection if no name provided)
+## 🖥️ CLI 명령어
 
-### Dashboard & Monitoring
-- **`./yesman.py dashboard`** - Launch TUI dashboard for real-time session monitoring
+### 세션 관리
+- `./yesman.py ls` - 사용 가능한 템플릿과 프로젝트 목록 표시
+- `./yesman.py show` - 실행 중인 tmux 세션 상태 확인
+- `./yesman.py setup` - `projects.yaml`에 정의된 모든 세션 생성
+- `./yesman.py teardown` - 정의된 세션 종료 및 제거
+- `./yesman.py enter [세션명]` - tmux 세션에 진입 (세션명 미입력 시 인터랙티브 선택)
 
-## 📊 Dashboard & Monitoring
+### 대시보드 및 모니터링
+- `./yesman.py dashboard` - 실시간 세션 모니터링을 위한 TUI 대시보드 실행
 
-### Terminal Compatibility
-- **Smart Terminal Detection** - Automatically detects terminal capabilities and sets appropriate environment variables
-- **Universal Compatibility** - Works across different terminal types (xterm, tmux, screen, etc.)
-- **Fallback Safe Mode** - Provides simple text-based interface when TUI mode is incompatible
-- **Environment Auto-Fix** - Automatically configures TERM and FORCE_COLOR variables for optimal display
+---
 
-### Real-Time Session Monitoring
-- **Live Session Status** - Real-time display of all tmux sessions, windows, and panes
-- **Session Statistics** - Shows total sessions, active sessions, and running Claude instances
-- **Interactive Controls** - Start/stop Claude automation controllers directly from dashboard
-- **Performance-Optimized Updates** - Smart caching system reduces tmux server load by 70%
-- **Session Tree Browser** - Interactive file-browser style interface for exploring sessions
-- **Status Icons** - Visual indicators (🟢 running, ⚠️ error, 🔄 loading) for quick status assessment
-- **Pane Details View** - Shows idle time, current task, and resource usage per pane
-- **Click-to-Attach** - Direct tmux session attachment from dashboard interface
+## 📊 대시보드 및 모니터링
 
-## 🤖 Claude Code Automation
+### 터미널 호환성
+- **스마트 터미널 감지**: 자동으로 터미널 기능을 감지하고 환경 변수 설정
+- **광범위 호환성**: xterm, tmux, screen 등 다양한 터미널 환경에서 동작
+- **안전 모드(Fallback)**: TUI 사용 불가 시 텍스트 기반 인터페이스 제공
+- **환경 자동 수정**: `TERM`, `FORCE_COLOR` 변수 자동 설정
 
-### Intelligent Claude Detection
-- **Multi-Pattern Recognition** - Detects Claude Code using command names, content patterns, and process information
-- **Enhanced Detection Patterns** - Recognizes "Welcome to Claude Code", "? for shortcuts", and other Claude-specific indicators
-- **Reliable Process Monitoring** - Continuously monitors pane content to maintain automation state
+### 실시간 세션 모니터링
+- **세션 상태 표시**: tmux 세션/윈도우/팬 상태 실시간 표시
+- **세션 통계**: 전체 세션 수, 활성 세션, 실행 중인 Claude 인스턴스 수 등
+- **인터랙티브 제어**: 대시보드에서 Claude 컨트롤러 직접 시작/중지
+- **고성능 업데이트**: tmux 서버 부하 70% 감소 스마트 캐시 적용
+- **세션 트리 브라우저**: 탐색기 스타일의 세션 구조 뷰 제공
+- **상태 아이콘**: 🟢 실행 중 / ⚠️ 오류 / 🔄 로딩 등의 시각적 상태 표현
+- **팬 상세 보기**: 각 팬의 유휴 시간, 현재 작업, 리소스 사용량 표시
+- **클릭 연결**: 대시보드에서 바로 tmux 세션에 접속 가능
 
-### Auto-Response System
-- **Trust Prompt Automation** - Automatically responds "1" to Claude Code trust prompts
-- **Selection Menu Handling** - Auto-selects first option in numbered choice menus with automatic advancement
-- **Yes/No Decision Making** - Responds "yes" to confirmation prompts
-- **Multi-line Selection Support** - Handles complex selection screens with line wrapping and ctrl+r expansion prompts
-- **Response History Tracking** - Logs all automated responses for debugging and audit
+---
 
-### Advanced Controller Management
-- **Thread-Safe Operation** - Claude managers run in separate threads with proper event loop handling
-- **Auto-Start/Stop** - Controllers can be started and stopped dynamically from dashboard
-- **Safe Claude Restart** - Automatically terminates existing Claude processes before restarting to prevent command injection
-- **Session Recovery** - Re-initializes connections when sessions are recreated
-- **Graceful Shutdown** - Properly terminates monitoring threads and event loops
-- **Content Collection** - Automatically collects Claude Code interactions for pattern analysis and future improvement
+## 🤖 Claude Code 자동화
 
-## ⚙️ Configuration System
+### 지능형 Claude 감지
+- **다중 패턴 인식**: 명령어, 콘솔 내용, 프로세스 정보로 Claude 인식
+- **고급 패턴**: "Welcome to Claude Code", "? for shortcuts" 등 키워드 감지
+- **프로세스 모니터링**: Claude 상태를 지속적으로 추적
 
-### Hierarchical Configuration
-- **Global Settings** - `~/.yesman/yesman.yaml` for logging and default choices
-- **Project Definitions** - `~/.yesman/projects.yaml` for session configurations
-- **Template System** - `~/.yesman/templates/*.yaml` for reusable session templates
-- **Local Overrides** - `./.yesman/*` for project-specific customizations
+### 자동 응답 시스템
+- **신뢰 프롬프트 응답**: 신뢰 요청 시 자동으로 `1` 입력
+- **선택 메뉴 처리**: 숫자 선택지 등장 시 자동으로 1번 선택
+- **예/아니오 응답 처리**: 자동으로 `yes` 입력
+- **멀티라인 선택 지원**: 줄바꿈/ctrl+r 포함된 복잡한 선택지 대응
+- **응답 히스토리 기록**: 모든 자동 응답을 로깅하여 디버깅 지원
 
-### Configuration Modes
-- **Merge Mode** (default) - Local configs override global settings
-- **Local Mode** - Use only local configurations, ignore global
+### 고급 컨트롤러 관리
+- **스레드 안전 처리**: Claude 컨트롤러는 별도 스레드에서 실행
+- **자동 시작/종료**: 대시보드에서 컨트롤러 동적 관리 가능
+- **안전한 재시작**: 기존 Claude 프로세스를 종료 후 재시작
+- **세션 복구**: 세션 재생성 시 자동 연결 재설정
+- **정상 종료 처리**: 스레드, 이벤트 루프 등 안전하게 종료
+- **콘텐츠 수집**: Claude 사용 로그 수집 및 패턴 분석에 활용
 
-### Smart Template Features
-- **Dependency Optimization** - Smart pnpm/npm install that only runs when dependencies are outdated
-- **Conditional Commands** - Templates can include shell logic for intelligent setup
-- **Variable Substitution** - Dynamic configuration based on project context
+---
 
-## 🔧 System Management
+## ⚙️ 설정 시스템
 
-### Logging & Debugging
-- **Centralized Logging** - All components log to `~/tmp/logs/yesman/` with proper permissions
-- **Component-Specific Logs** - Separate log files for dashboard, claude manager, and session management
-- **Configurable Log Levels** - Control verbosity through configuration files
-- **Auto-Directory Creation** - Log directories created automatically with correct permissions (755)
+### 계층형 구성
+- **전역 설정**: `~/.yesman/yesman.yaml` → 로깅 및 기본 동작 설정
+- **프로젝트 정의**: `~/.yesman/projects.yaml` → 세션 구성 정의
+- **템플릿 시스템**: `~/.yesman/templates/*.yaml` → 재사용 가능한 설정
+- **로컬 오버라이드**: `./.yesman/*` → 프로젝트 전용 설정
 
-### Process Management
-- **Session Lifecycle** - Complete tmux session creation, monitoring, and cleanup
-- **Resource Cleanup** - Proper cleanup of threads, event loops, and file handles
-- **Error Recovery** - Graceful handling of missing directories, failed sessions, and connection issues
+### 설정 모드
+- **Merge 모드 (기본값)**: 로컬 설정이 전역 설정을 덮어씀
+- **Local 모드**: 전역 설정을 무시하고 로컬 설정만 사용
 
-### Development Tools
-- **Interactive Selection** - User-friendly prompts for session and template selection
-- **Status Reporting** - Clear feedback on operations and error states
-- **Development Mode** - Easy installation with `make dev-install` or `uv` support
+### 스마트 템플릿 기능
+- **의존성 최적화**: `pnpm/npm install`은 변경사항 있을 때만 실행
+- **조건부 명령어**: 셸 조건문을 통해 유연한 설정 가능
+- **변수 치환**: 프로젝트 맥락에 따라 템플릿 내 변수 동적 치환
 
-## 🚀 Performance Optimization
+---
 
-### Smart Session Caching
-- **Intelligent Cache Management** - TTL-based caching with automatic invalidation on session changes
-- **Reduced Server Load** - Minimizes tmux server queries from 2-second intervals to on-demand
-- **Memory-Efficient Storage** - Optimized cache keys and memory management strategies
-- **Mode-Aware Caching** - Different caching behaviors for CLI vs daemon operation modes
-- **Cache Analytics** - Tracks hit/miss ratios, memory usage, and last update times
+## 🔧 시스템 관리 기능
 
-## 🛡️ Reliability Features
+### 로깅 및 디버깅
+- **중앙 집중 로깅**: `~/tmp/logs/yesman/` 경로에 모든 로그 기록
+- **모듈별 로그 파일**: 대시보드, Claude 매니저, 세션관리 각각 로그 분리
+- **로깅 레벨 조정**: 설정파일을 통한 로그 상세도 조절 가능
+- **디렉토리 자동 생성**: 필요한 디렉토리는 자동으로 755 권한으로 생성
 
-### Error Handling
-- **Graceful Degradation** - Falls back to simple mode when TUI features fail
-- **Connection Recovery** - Automatically reconnects to tmux sessions when possible
-- **Input Validation** - Validates templates and configurations before execution
-- **Safe Defaults** - Sensible fallback behavior when configurations are missing
+### 프로세스 및 리소스 관리
+- **세션 생명주기 관리**: 생성 → 감시 → 종료까지 전체 관리
+- **리소스 정리**: 스레드, 파일핸들, 이벤트루프 등 적절히 해제
+- **에러 복구**: 누락된 디렉토리, 세션 실패, 연결 문제 등 처리
 
-### Cross-Platform Support
-- **Terminal Independence** - Works across different terminal emulators and environments
-- **Path Handling** - Proper handling of user paths and directory expansion
-- **Permission Management** - Automatic setup of required file and directory permissions
+### 개발 편의 기능
+- **인터랙티브 선택기**: 사용자 친화적인 템플릿/세션 선택 인터페이스
+- **상태 보고**: 명확한 피드백 및 오류 메시지 제공
+- **개발 모드 지원**: `make dev-install` 또는 `uv`로 빠른 설치
 
-### Debugging Support
-- **Verbose Logging** - Detailed operation logs for troubleshooting
-- **Status Indicators** - Clear visual feedback in dashboard and CLI
-- **History Tracking** - Maintains history of automated actions for analysis
+---
+
+## 🚀 성능 최적화
+
+### 스마트 캐시 시스템
+- **TTL 기반 캐시**: 세션 변경 시 자동 무효화되는 캐시 구조
+- **서버 부하 감소**: tmux 질의 주기를 실시간에서 on-demand로 변경
+- **메모리 최적화**: 키 기반 저장 및 캐시 관리 전략 적용
+- **모드 기반 캐싱**: CLI 모드 vs 데몬 모드 별로 다른 캐싱 전략 적용
+- **캐시 분석**: 히트율, 메모리 사용량, 마지막 업데이트 시간 표시
+
+---
+
+## 🛡️ 안정성 기능
+
+### 오류 복원력
+- **기능 강등 지원**: TUI가 실패해도 텍스트 모드로 대체
+- **자동 재연결**: tmux 세션 재연결 시도
+- **입력 검증**: 실행 전 설정파일 및 템플릿 유효성 검사
+- **안전 기본값**: 설정 누락 시에도 합리적 동작 보장
+
+### 크로스 플랫폼 지원
+- **터미널 독립성**: 다양한 터미널 환경에서 정상 동작
+- **경로 처리**: 사용자 홈 디렉토리 등 경로 자동 처리
+- **권한 관리**: 필요한 디렉토리 및 파일 권한 자동 설정
+
+### 디버깅 지원
+- **상세 로깅**: 동작 내역을 자세히 기록
+- **상태 표시**: CLI 및 대시보드에서 상태 시각화
+- **행동 이력 추적**: 자동화 작업의 이력을 유지하여 문제 추적 가능

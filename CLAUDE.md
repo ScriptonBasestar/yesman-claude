@@ -30,10 +30,10 @@ uv run ./yesman.py ls
 uv run ./yesman.py show
 
 # Create all tmux sessions from projects.yaml
-uv run ./yesman.py setup
+uv run ./yesman.py up  # (formerly setup)
 
 # Teardown all sessions from projects.yaml
-uv run ./yesman.py teardown
+uv run ./yesman.py down  # (formerly teardown)
 
 # Enter (attach to) a tmux session
 uv run ./yesman.py enter [session_name]
@@ -102,7 +102,7 @@ Currently no formal linting is configured. Future plans include:
 
 ### Directory Structure
 - `yesman.py` - Main CLI entry point using Click
-- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter, browse, status, ai, logs, automate)
+- `commands/` - CLI command implementations (ls, show, up (formerly setup), down (formerly teardown), dashboard, enter, browse, status, ai, logs, automate)
 - `libs/core/` - Core functionality (SessionManager, ClaudeManager, models, caching)
 - `libs/ai/` - AI learning and adaptive response system
 - `libs/automation/` - Context-aware automation and workflow engine
@@ -201,7 +201,7 @@ Configuration merge modes:
 
 ### Important Implementation Details
 
-1. **Template Processing**: The `setup` command reads templates from `~/.yesman/templates/`, applies overrides from `projects.yaml`, and creates tmux sessions.
+1. **Template Processing**: The `up` (formerly `setup`) command reads templates from `~/.yesman/templates/`, applies overrides from `projects.yaml`, and creates tmux sessions.
 
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 

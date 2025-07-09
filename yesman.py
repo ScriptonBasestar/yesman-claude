@@ -9,8 +9,10 @@ def cli():
 
 from commands.ls import ls
 from commands.show import show
-from commands.setup import setup
-from commands.teardown import teardown
+from commands.up import up
+from commands.down import down
+from commands.setup import setup  # Keep for backward compatibility
+from commands.teardown import teardown  # Keep for backward compatibility
 from commands.dashboard import dashboard
 from commands.enter import enter
 from commands.browse import browse
@@ -21,8 +23,10 @@ from commands.automate import automate
 
 cli.add_command(ls)
 cli.add_command(show)
-cli.add_command(setup)
-cli.add_command(teardown)
+cli.add_command(up)
+cli.add_command(down)
+cli.add_command(setup)  # Keep for backward compatibility
+cli.add_command(teardown)  # Keep for backward compatibility
 cli.add_command(dashboard)
 cli.add_command(enter)
 cli.add_command(browse)

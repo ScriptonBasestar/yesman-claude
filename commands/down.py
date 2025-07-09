@@ -5,9 +5,8 @@ from libs.tmux_manager import TmuxManager
 import libtmux
 
 @click.command()
-def teardown():
+def down():
     """Kill all tmux sessions defined in projects.yaml"""
-    click.echo("⚠️  Warning: 'teardown' command is deprecated. Please use 'down' instead.")
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
     sessions = tmux_manager.load_projects().get("sessions", {})
