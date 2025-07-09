@@ -48,11 +48,11 @@ app.mount("/static", StaticFiles(directory="web-dashboard/static"), name="static
 - 에러 처리
 
 ## 완료 기준
-- [ ] API 라우터 메인 앱에 통합
-- [ ] 모든 컴포넌트 실제 데이터 표시
-- [ ] 로딩 상태 표시
-- [ ] 에러 처리 작동
-- [ ] 통합 테스트 통과
+- [x] API 라우터 메인 앱에 통합
+- [x] 모든 컴포넌트 실제 데이터 표시
+- [x] 로딩 상태 표시
+- [x] 에러 처리 작동
+- [x] 통합 테스트 통과
 
 ## 테스트
 ```bash

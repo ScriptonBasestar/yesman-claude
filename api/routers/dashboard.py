@@ -36,25 +36,33 @@ async def get_sessions():
         # Get session information from SessionManager
         sessions = session_manager.get_cached_sessions_list()
         
+        # Get project sessions from config
+        from libs.yesman_config import YesmanConfig
+        config = YesmanConfig()
+        project_sessions = config.get_projects()
+        
         # Convert to web-friendly format
         web_sessions = []
-        for session in sessions:
-            session_detail = session_manager.get_session_info(session['session_name'])
+        for project_name, project_config in project_sessions.items():
+            session_name = project_config.get('override', {}).get('session_name', project_name)
+            
+            # Check if session exists
+            session_exists = any(s['session_name'] == session_name for s in sessions)
+            session_detail = session_manager.get_session_info(session_name) if session_exists else None
+            
             web_sessions.append({
-                'name': session['session_name'],
-                'id': session.get('session_id', ''),
-                'active': True,  # Since these are from active session list
-                'created': session.get('session_created'),
+                'session_name': session_name,
+                'project_name': project_name,
+                'template': project_config.get('template_name', 'default'),
+                'status': 'active' if session_exists else 'stopped',
+                'exists': session_exists,
                 'windows': session_detail.get('windows', []) if session_detail else [],
                 'panes': sum(len(w.get('panes', [])) for w in session_detail.get('windows', [])) if session_detail else 0,
-                'claude_active': any(p.get('has_claude', False) for w in session_detail.get('windows', []) for p in w.get('panes', [])) if session_detail else False
+                'claude_active': any(p.get('has_claude', False) for w in session_detail.get('windows', []) for p in w.get('panes', [])) if session_detail else False,
+                'start_directory': project_config.get('override', {}).get('start_directory', '')
             })
         
-        return {
-            "sessions": web_sessions,
-            "total": len(web_sessions),
-            "active": len(web_sessions)
-        }
+        return web_sessions
     except Exception as e:
         logger.error(f"Failed to get sessions: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get sessions: {str(e)}")
@@ -116,27 +124,46 @@ async def get_project_health():
 async def get_activity_data():
     """Get activity heatmap data"""
     try:
-        # Try to use ActivityHeatmap widget if available
+        # Try to get real git activity data
+        import subprocess
+        from datetime import timedelta
+        from collections import defaultdict
+        
         try:
-            activity_widget = ActivityHeatmap()
-            activity_data = activity_widget.get_activity_data()
+            # Get git log for last 365 days
+            cmd = ['git', 'log', '--since=365 days ago', '--pretty=format:%ad', '--date=short']
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             
-            # Format for web
+            # Count activities per day
+            activity_counts = defaultdict(int)
+            for date_str in result.stdout.strip().split('\n'):
+                if date_str:
+                    activity_counts[date_str] += 1
+            
+            # Generate complete date range
+            end_date = datetime.now().date()
+            start_date = end_date - timedelta(days=364)
+            
             activities = []
-            for day_data in activity_data:
+            current_date = start_date
+            while current_date <= end_date:
+                date_str = current_date.isoformat()
                 activities.append({
-                    "date": day_data.get("date"),
-                    "activity_count": day_data.get("count", 0)
+                    "date": date_str,
+                    "activity_count": activity_counts.get(date_str, 0)
                 })
-                
+                current_date += timedelta(days=1)
+            
+            active_days = sum(1 for a in activities if a['activity_count'] > 0)
+            
             return {
                 "activities": activities,
                 "total_days": len(activities),
-                "active_days": sum(1 for a in activities if a["activity_count"] > 0),
-                "max_activity": max((a["activity_count"] for a in activities), default=0),
-                "avg_activity": sum(a["activity_count"] for a in activities) / len(activities) if activities else 0
+                "active_days": active_days,
+                "max_activity": max((a['activity_count'] for a in activities), default=0),
+                "avg_activity": sum(a['activity_count'] for a in activities) / len(activities) if activities else 0
             }
-        except (ImportError, AttributeError):
+        except (subprocess.CalledProcessError, ImportError, AttributeError):
             # Fallback with mock data for last 90 days
             from datetime import timedelta
             

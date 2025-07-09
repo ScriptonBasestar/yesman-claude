@@ -34,7 +34,8 @@ window.dashboard = {
                     'Accept': 'application/json'
                 },
                 retries: 3,
-                retryDelay: 1000
+                retryDelay: 1000,
+                timeout: 10000
             };
 
             const config = { ...defaultOptions, ...options };
@@ -42,11 +43,18 @@ window.dashboard = {
 
             for (let attempt = 0; attempt <= config.retries; attempt++) {
                 try {
+                    // Create AbortController for timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+
                     const response = await fetch(`${this.baseURL}${endpoint}`, {
                         method: config.method,
                         headers: config.headers,
-                        body: config.body ? JSON.stringify(config.body) : undefined
+                        body: config.body ? JSON.stringify(config.body) : undefined,
+                        signal: controller.signal
                     });
+
+                    clearTimeout(timeoutId);
 
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -58,18 +66,26 @@ window.dashboard = {
                 } catch (error) {
                     lastError = error;
                     
+                    // Handle different error types
+                    if (error.name === 'AbortError') {
+                        lastError = new Error('Request timeout');
+                    }
+                    
                     // Don't retry on client errors (4xx)
                     if (error.message.includes('HTTP 4')) {
                         break;
                     }
 
-                    // Wait before retrying
+                    // Log retry attempts
                     if (attempt < config.retries) {
-                        await new Promise(resolve => setTimeout(resolve, config.retryDelay));
+                        console.warn(`Retrying ${endpoint} (attempt ${attempt + 1}/${config.retries})...`);
+                        await new Promise(resolve => setTimeout(resolve, config.retryDelay * (attempt + 1)));
                     }
                 }
             }
 
+            // Add endpoint to error for better debugging
+            lastError.endpoint = endpoint;
             throw lastError;
         },
 
