@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>Yesman Claude Dashboard</h1>
+            <p>Web interface for monitoring sessions and project health</p>
+        </div>
+        
+        <div class="status">
+            <h2>System Status</h2>
+            <p>Dashboard is running. API endpoints are available at:</p>
+            <ul>
+                <li><a href="/web/api/sessions">/web/api/sessions</a> - Session information</li>
+                <li><a href="/web/api/health">/web/api/health</a> - Project health metrics</li>
+                <li><a href="/web/api/activity">/web/api/activity</a> - Activity data</li>
+                <li><a href="/web/api/stats">/web/api/stats</a> - Dashboard statistics</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
