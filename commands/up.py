@@ -6,9 +6,8 @@ import os
 
 @click.command()
 @click.argument('session_name', required=False)
-def setup(session_name):
+def up(session_name):
     """Create all tmux sessions defined in projects.yaml; or only a specified session if provided."""
-    click.echo("⚠️  Warning: 'setup' command is deprecated. Please use 'up' instead.")
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
     sessions = tmux_manager.load_projects().get("sessions", {})
