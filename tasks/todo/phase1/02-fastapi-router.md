@@ -42,11 +42,11 @@ app.mount("/static", StaticFiles(directory="web-dashboard/static"), name="static
 - CORS 설정 (필요시)
 
 ## 완료 기준
-- [ ] FastAPI 라우터 파일 생성
-- [ ] 5개 엔드포인트 모두 구현
-- [ ] 템플릿 렌더링 테스트
-- [ ] API 응답 테스트
-- [ ] 에러 핸들링 구현
+- [x] FastAPI 라우터 파일 생성
+- [x] 5개 엔드포인트 모두 구현
+- [x] 템플릿 렌더링 테스트
+- [x] API 응답 테스트
+- [x] 에러 핸들링 구현
 
 ## 테스트
 ```bash

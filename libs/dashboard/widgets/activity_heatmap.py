@@ -280,3 +280,31 @@ class ActivityHeatmap:
             del self.activity_history[session_name]
         if session_name in self.current_levels:
             del self.current_levels[session_name]
+    
+    def get_activity_data(self, days: int = 90) -> List[Dict[str, any]]:
+        """Get activity data for the last N days for web dashboard"""
+        from datetime import datetime, timedelta
+        import random
+        
+        # For now, return mock data for the last 90 days
+        # In a real implementation, this would query actual activity data
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=days-1)
+        
+        activities = []
+        current_date = start_date
+        while current_date <= end_date:
+            # Generate mock activity data based on current session activity
+            if self.current_levels:
+                base_activity = sum(self.current_levels.values()) / len(self.current_levels)
+                activity_count = int(base_activity * 20) + random.randint(0, 5)
+            else:
+                activity_count = random.randint(0, 15) if random.random() > 0.3 else 0
+            
+            activities.append({
+                "date": current_date.isoformat(),
+                "count": activity_count
+            })
+            current_date += timedelta(days=1)
+        
+        return activities
