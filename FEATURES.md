@@ -73,12 +73,18 @@
 
 ### 설정 모드
 - **Merge 모드 (기본값)**: 로컬 설정이 전역 설정을 덮어씀
-- **Local 모드**: 전역 설정을 무시하고 로컬 설정만 사용
+- **Isolated 모드**: 전역 설정을 무시하고 로컬 설정만 사용 (이전 Local 모드)
 
 ### 스마트 템플릿 기능
-- **의존성 최적화**: `pnpm/npm install`은 변경사항 있을 때만 실행
-- **조건부 명령어**: 셸 조건문을 통해 유연한 설정 가능
-- **변수 치환**: 프로젝트 맥락에 따라 템플릿 내 변수 동적 치환
+- **변수 치환**: `{{ session_name }}`, `{{ start_directory }}` 등 동적 치환
+- **조건부 명령어**: 셸 스크립트로 복잡한 로직 구현 가능
+- **의존성 최적화**: 조건부 실행으로 불필요한 설치 방지
+  ```yaml
+  # 예시: node_modules가 없거나 package.json이 더 최신일 때만 설치
+  if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules/.package-lock.json" ]; then
+    pnpm install
+  fi
+  ```
 
 ---
 
