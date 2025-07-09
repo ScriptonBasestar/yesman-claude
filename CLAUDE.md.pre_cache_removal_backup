@@ -79,6 +79,7 @@ python -m pytest tests/test_content_collector.py
 
 # Run integration tests  
 python -m pytest tests/test_full_automation.py
+python -m pytest tests/test_session_manager_cache.py
 
 # Debug specific components (located in debug/ directory)
 python debug/debug_content.py      # Debug content collection
@@ -237,6 +238,7 @@ Configuration merge modes:
    - **Auto-Response Patterns**: Pattern files in `patterns/` directory (123/, yn/, 12/) for different prompt types
    - **Monitoring Loop**: Captures content every second and detects interactive prompts
    - **Safe Restart**: Properly terminates existing Claude processes before restarting
+   - **Caching System**: Advanced caching with analytics (`libs/core/cache_*.py` modules)
 
 4. **Multi-Interface Architecture**: 
    - **Tauri Desktop App**: Primary native desktop interface for session monitoring
@@ -250,6 +252,7 @@ Configuration merge modes:
 ## ✅ Recently Implemented Features (2025-07-07)
 
 ### 🚀 Performance Improvements
+- **Smart Session Caching**: TTL-based caching system with 5-second default cache
 - **Async Logging**: High-performance queue-based logging with compression support
 - **Optimized Dashboard**: Reduced tmux server load with intelligent caching
 
@@ -302,6 +305,7 @@ When working on this codebase:
    - Pattern detection in `libs/core/prompt_detector.py` (ClaudePromptDetector class)
    - Content collection in `libs/core/content_collector.py`
    - Auto-response patterns stored in `patterns/` subdirectories
+   - Caching system components in `libs/core/cache_*.py` modules
 3. **Dashboard Updates**: 
    - Tauri: Native desktop app components in `tauri-dashboard/src/`
    - FastAPI: REST API endpoints in `api/routers/`
