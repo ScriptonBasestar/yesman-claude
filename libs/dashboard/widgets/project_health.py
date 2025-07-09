@@ -34,7 +34,6 @@ class ProjectHealthWidget:
     def __init__(self, console: Optional[Console] = None):
         self.console = console or Console()
         self.health_calculator = HealthCalculator()
-        self.project_cache: Dict[str, ProjectStatus] = {}
         
     def update_project_health(self, project_path: str, project_name: str = None) -> ProjectStatus:
         """Update health information for a project"""

@@ -197,9 +197,9 @@ echo "CLI commands basic test completed"
 
 ### 필수 수정 사항
 - [x] SessionManager에서 캐시 의존성 완전 제거
-- [ ] Dashboard 위젯 3개 이상에서 캐시 제거
-- [ ] API 엔드포인트 캐시 의존성 제거
-- [ ] CLI 명령어 캐시 참조 제거
+- [x] Dashboard 위젯 3개 이상에서 캐시 제거
+- [x] API 엔드포인트 캐시 의존성 제거
+- [x] CLI 명령어 캐시 참조 제거
 
 ### 동작 검증
 ```bash

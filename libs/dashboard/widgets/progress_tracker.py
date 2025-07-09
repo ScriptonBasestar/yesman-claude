@@ -55,9 +55,6 @@ class ProgressTracker:
     def __init__(self, console: Optional[Console] = None):
         self.console = console or Console()
         self.todos: List[TodoItem] = []
-        self.stats_cache: Optional[ProgressStats] = None
-        self.cache_timeout = 60  # 1 minute
-        self.last_update = 0
         
     def load_todos_from_file(self, file_path: str) -> bool:
         """Load TODO items from markdown file"""
@@ -68,7 +65,6 @@ class ProgressTracker:
             
             content = path.read_text(encoding='utf-8')
             self.todos = self._parse_markdown_todos(content)
-            self._invalidate_cache()
             return True
             
         except Exception:
@@ -79,7 +75,6 @@ class ProgressTracker:
         # This would integrate with the yesman todo system when available
         # For now, return empty list
         self.todos = []
-        self._invalidate_cache()
         return True
     
     def _parse_markdown_todos(self, content: str) -> List[TodoItem]:
@@ -175,19 +170,9 @@ class ProgressTracker:
         
         return 'general'
     
-    def _invalidate_cache(self):
-        """Invalidate cached statistics"""
-        self.stats_cache = None
-        self.last_update = 0
     
     def calculate_progress_stats(self) -> ProgressStats:
         """Calculate progress statistics"""
-        current_time = time.time()
-        
-        # Use cache if valid
-        if (self.stats_cache and 
-            current_time - self.last_update < self.cache_timeout):
-            return self.stats_cache
         
         total = len(self.todos)
         if total == 0:
@@ -218,7 +203,7 @@ class ProgressTracker:
             days_remaining = pending / velocity
             estimated_completion = current_time + (days_remaining * 86400)
         
-        self.stats_cache = ProgressStats(
+        return ProgressStats(
             total_items=total,
             completed_items=completed,
             in_progress_items=in_progress,
@@ -227,9 +212,6 @@ class ProgressTracker:
             velocity=velocity,
             estimated_completion=estimated_completion
         )
-        
-        self.last_update = current_time
-        return self.stats_cache
     
     def render_progress_overview(self) -> Panel:
         """Render progress overview panel"""

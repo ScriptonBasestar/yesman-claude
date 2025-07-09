@@ -44,18 +44,9 @@ class GitActivityWidget:
     def __init__(self, console: Optional[Console] = None, repo_path: str = "."):
         self.console = console or Console()
         self.repo_path = repo_path
-        self.stats_cache: Optional[GitStats] = None
-        self.cache_timeout = 300  # 5 minutes
-        self.last_update = 0
         
     def update_git_stats(self) -> GitStats:
         """Update git statistics from repository"""
-        current_time = time.time()
-        
-        # Use cache if still valid
-        if (self.stats_cache and 
-            current_time - self.last_update < self.cache_timeout):
-            return self.stats_cache
         
         try:
             # Get basic repo info
@@ -66,7 +57,7 @@ class GitActivityWidget:
             file_changes = self._get_file_change_stats()
             branch_info = self._get_branch_info()
             
-            self.stats_cache = GitStats(
+            return GitStats(
                 total_commits=total_commits,
                 active_contributors=len(contributors),
                 recent_commits=recent_commits,
@@ -75,12 +66,9 @@ class GitActivityWidget:
                 branch_info=branch_info
             )
             
-            self.last_update = current_time
-            return self.stats_cache
-            
         except Exception as e:
             # Return empty stats on error
-            self.stats_cache = GitStats(
+            return GitStats(
                 total_commits=0,
                 active_contributors=0,
                 recent_commits=[],
@@ -88,7 +76,6 @@ class GitActivityWidget:
                 file_changes={},
                 branch_info={}
             )
-            return self.stats_cache
     
     def _run_git_command(self, command: List[str]) -> str:
         """Run a git command and return output"""
