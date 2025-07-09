@@ -172,11 +172,6 @@ class ClaudeMonitor:
                             self.status_manager.update_status("[yellow]Claude not running. Auto-restart disabled.[/]")
                             continue
                     
-                    # Auto-respond to trust prompts
-                    if self._auto_trust_if_needed():
-                        self.status_manager.update_activity("✅ Auto-responded to trust prompt")
-                        self.status_manager.record_response("trust_prompt", "1", content)
-                        continue
                     
                     # Check for prompts and auto-respond if enabled
                     prompt_info = self._check_for_prompt(content)
@@ -291,27 +286,6 @@ class ClaudeMonitor:
         self.current_prompt = None
         self.waiting_for_input = False
     
-    def _auto_trust_if_needed(self) -> bool:
-        """Auto-respond to trust prompts if detected"""
-        content = self.session_manager.capture_pane_content()
-        if self._detect_trust_prompt(content):
-            self.process_controller.send_input("1")
-            return True
-        return False
-    
-    def _detect_trust_prompt(self, content: str) -> bool:
-        """Detect trust prompt in content"""
-        import re
-        trust_patterns = [
-            r"Do you trust the files in this folder",
-            r"\[1\] Yes, proceed",
-            r"\[2\] No, cancel"
-        ]
-        
-        for pattern in trust_patterns:
-            if re.search(pattern, content, re.IGNORECASE):
-                return True
-        return False
     
     def _auto_respond_to_selection(self, prompt_info: PromptInfo) -> bool:
         """Auto-respond to selection prompts based on patterns and manual overrides"""
