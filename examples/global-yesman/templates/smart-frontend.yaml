@@ -5,7 +5,7 @@ windows:
   - window_name: main
     layout: even-horizontal
     panes:
-      - claude
+      - claude --dangerously-skip-permissions
       - shell_command: |
           # Smart dependency check - only install if needed
           if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules/.package-lock.json" ]; then
