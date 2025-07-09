@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Yesman Claude Dashboard - Web interface for monitoring sessions and project health">
+    <meta name="author" content="Yesman Claude">
+    <title>{% block title %}Yesman Claude Dashboard{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link href="/static/css/main.css" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- Theme initialization -->
+    <script>
+        // Initialize theme before page loads to prevent flash
+        if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="min-h-full">
+        <!-- Navigation -->
+        <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo and title -->
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+                                🤖 Yesman Claude
+                            </h1>
+                        </div>
+                        <div class="hidden md:block ml-4">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                Web Dashboard
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation links -->
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="/web/" class="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
+                                Dashboard
+                            </a>
+                            <a href="/web/api/sessions" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                Sessions
+                            </a>
+                            <a href="/web/api/health" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                Health
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Theme toggle -->
+                    <div class="flex items-center">
+                        <button
+                            x-data="{ dark: localStorage.theme === 'dark' }"
+                            x-on:click="
+                                dark = !dark;
+                                localStorage.theme = dark ? 'dark' : 'light';
+                                document.documentElement.classList.toggle('dark', dark);
+                            "
+                            class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            aria-label="Toggle theme"
+                        >
+                            <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                            </svg>
+                            <svg x-show="dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div class="md:hidden" x-data="{ open: false }">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="/web/" class="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 rounded-md text-base font-medium">
+                        Dashboard
+                    </a>
+                    <a href="/web/api/sessions" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                        Sessions
+                    </a>
+                    <a href="/web/api/health" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                        Health
+                    </a>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main content -->
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        © 2025 Yesman Claude. All rights reserved.
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">
+                            Documentation
+                        </a>
+                        <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">
+                            Support
+                        </a>
+                        <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

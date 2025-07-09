@@ -47,11 +47,11 @@
 - 테마 전환 스크립트
 
 ## 완료 기준
-- [ ] layout.html 템플릿 완성
-- [ ] dashboard.html 템플릿 완성
-- [ ] 반응형 디자인 확인
-- [ ] 다크모드 토글 작동
-- [ ] FastAPI에서 템플릿 렌더링 확인
+- [x] layout.html 템플릿 완성
+- [x] dashboard.html 템플릿 완성
+- [x] 반응형 디자인 확인
+- [x] 다크모드 토글 작동
+- [x] FastAPI에서 템플릿 렌더링 확인
 
 ## 테스트
 ```bash
