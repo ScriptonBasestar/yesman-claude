@@ -1,0 +1,27 @@
+{
+  "name": "yesman-claude-web-dashboard",
+  "version": "1.0.0",
+  "description": "Web dashboard for yesman-claude",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node build.js --watch",
+    "build": "node build.js --production",
+    "test": "jest"
+  },
+  "keywords": ["dashboard", "yesman", "claude"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.19.11",
+    "tailwindcss": "^3.4.0",
+    "@tailwindcss/forms": "^0.5.7",
+    "prettier": "^3.1.1",
+    "eslint": "^8.56.0"
+  },
+  "dependencies": {
+    "alpinejs": "^3.13.3",
+    "axios": "^1.6.5",
+    "socket.io-client": "^4.7.4",
+    "chart.js": "^4.4.1"
+  }
+}
