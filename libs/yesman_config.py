@@ -27,9 +27,9 @@ class YesmanConfig:
         
         mode = local_cfg.get("mode", "merge")
         
-        if mode == "local":
-            if not local_cfg:
-                raise RuntimeError(f"mode: local but {self.local_path} doesn't exist or is empty")
+        if mode == "isolated" or mode == "local":  # Support both for backward compatibility
+            if not local_cfg or (len(local_cfg) == 1 and "mode" in local_cfg):
+                raise RuntimeError(f"mode: {mode} but {self.local_path} doesn't exist or is empty")
             return local_cfg
         elif mode == "merge":
             merged = {**global_cfg, **local_cfg}
