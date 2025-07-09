@@ -13,7 +13,7 @@ sys.path.insert(0, str(project_root))
 
 # Fixture imports
 from tests.fixtures.mock_data import (
-    MockTmuxSession, MockClaudeProcess, MockCache,
+    MockTmuxSession, MockClaudeProcess,
     MOCK_SESSION_DATA, MOCK_PROMPTS
 )
 from tests.fixtures.test_helpers import (
@@ -31,10 +31,6 @@ def mock_claude_process():
     """Mock Claude 프로세스 fixture"""
     return MockClaudeProcess()
 
-@pytest.fixture
-def mock_cache():
-    """Mock 캐시 fixture"""
-    return MockCache()
 
 @pytest.fixture
 def temp_dir():
