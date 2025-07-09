@@ -1,52 +1,212 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <style>
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .dashboard {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .status {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard">
-        <div class="header">
-            <h1>Yesman Claude Dashboard</h1>
-            <p>Web interface for monitoring sessions and project health</p>
+{% extends "layout.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div x-data="dashboard()" x-init="init()" class="space-y-6">
+    <!-- Status summary cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Active Sessions Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Sessions</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="stats.active_sessions">-</p>
+                </div>
+                <div class="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-full">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
         
-        <div class="status">
-            <h2>System Status</h2>
-            <p>Dashboard is running. API endpoints are available at:</p>
-            <ul>
-                <li><a href="/web/api/sessions">/web/api/sessions</a> - Session information</li>
-                <li><a href="/web/api/health">/web/api/health</a> - Project health metrics</li>
-                <li><a href="/web/api/activity">/web/api/activity</a> - Activity data</li>
-                <li><a href="/web/api/stats">/web/api/stats</a> - Dashboard statistics</li>
-            </ul>
+        <!-- Health Score Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Health Score</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="Math.round(stats.health_score)">-</p>
+                </div>
+                <div class="p-3 bg-green-100 dark:bg-green-900/20 rounded-full">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Projects Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Projects</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="stats.total_projects">-</p>
+                </div>
+                <div class="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-full">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Streak Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Activity Streak</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="stats.activity_streak">-</p>
+                </div>
+                <div class="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-full">
+                    <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-</html>
+    
+    <!-- Main dashboard grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left column - Session Browser -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sessions</h2>
+                </div>
+                <div class="p-6">
+                    <session-browser></session-browser>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right column - Health Widget -->
+        <div class="space-y-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Project Health</h2>
+                </div>
+                <div class="p-6">
+                    <health-widget></health-widget>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom row - Activity Heatmap -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Activity Overview</h2>
+        </div>
+        <div class="p-6">
+            <activity-heatmap></activity-heatmap>
+        </div>
+    </div>
+    
+    <!-- Loading state -->
+    <div x-show="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4">
+            <div class="flex items-center space-x-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div class="text-gray-900 dark:text-white">Loading dashboard...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function dashboard() {
+    return {
+        loading: false,
+        stats: {
+            active_sessions: 0,
+            health_score: 0,
+            total_projects: 0,
+            activity_streak: 0
+        },
+        
+        async init() {
+            this.loading = true;
+            try {
+                await this.loadStats();
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async loadStats() {
+            try {
+                const response = await axios.get('/web/api/stats');
+                this.stats = response.data;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+    }
+}
+
+// Define placeholder components
+document.addEventListener('DOMContentLoaded', function() {
+    // Session Browser Component
+    const sessionBrowser = {
+        template: `
+            <div class="text-center py-8">
+                <div class="text-gray-500 dark:text-gray-400 mb-4">
+                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Session Browser</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Component will be implemented in next task</p>
+            </div>
+        `
+    };
+    
+    // Health Widget Component
+    const healthWidget = {
+        template: `
+            <div class="text-center py-8">
+                <div class="text-gray-500 dark:text-gray-400 mb-4">
+                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Health Widget</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Component will be implemented in next task</p>
+            </div>
+        `
+    };
+    
+    // Activity Heatmap Component
+    const activityHeatmap = {
+        template: `
+            <div class="text-center py-8">
+                <div class="text-gray-500 dark:text-gray-400 mb-4">
+                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Activity Heatmap</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Component will be implemented in next task</p>
+            </div>
+        `
+    };
+    
+    // Replace placeholder components with actual content
+    document.querySelectorAll('session-browser').forEach(el => {
+        el.innerHTML = sessionBrowser.template;
+    });
+    
+    document.querySelectorAll('health-widget').forEach(el => {
+        el.innerHTML = healthWidget.template;
+    });
+    
+    document.querySelectorAll('activity-heatmap').forEach(el => {
+        el.innerHTML = activityHeatmap.template;
+    });
+});
+</script>
+{% endblock %}
