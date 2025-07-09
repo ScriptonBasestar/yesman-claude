@@ -1,0 +1,107 @@
+"""
+Test for session selector UI
+"""
+
+import unittest
+from unittest.mock import patch, MagicMock
+from libs.ui.session_selector import SessionSelector, show_session_selector
+
+
+class TestSessionSelector(unittest.TestCase):
+    
+    def setUp(self):
+        self.test_sessions = [
+            {'project': 'project1', 'session': 'session1'},
+            {'project': 'project2', 'session': 'session2'},
+            {'project': 'myapp', 'session': 'myapp-dev'}
+        ]
+    
+    @patch('libs.ui.session_selector.libtmux.Server')
+    def test_get_session_details(self, mock_server_class):
+        """Test getting session details from tmux"""
+        # Mock tmux session
+        mock_session = MagicMock()
+        mock_session.windows = [MagicMock(name='window1'), MagicMock(name='window2')]
+        mock_session.attached = 1
+        
+        mock_server = MagicMock()
+        mock_server.find_where.return_value = mock_session
+        mock_server_class.return_value = mock_server
+        
+        selector = SessionSelector(self.test_sessions)
+        details = selector._get_session_details('session1')
+        
+        self.assertEqual(details['windows'], 2)
+        self.assertTrue(details['attached'])
+        self.assertEqual(details['clients'], 1)
+    
+    def test_create_display_no_filter(self):
+        """Test creating display without filter"""
+        selector = SessionSelector(self.test_sessions)
+        
+        with patch.object(selector, '_get_session_details') as mock_get_details:
+            mock_get_details.return_value = {
+                'windows': 3,
+                'window_names': 'win1, win2, win3',
+                'attached': False,
+                'clients': 0
+            }
+            
+            table, filtered = selector._create_display()
+            
+            # Should return all sessions
+            self.assertEqual(len(filtered), 3)
+            self.assertEqual(filtered, self.test_sessions)
+    
+    def test_create_display_with_filter(self):
+        """Test creating display with search filter"""
+        selector = SessionSelector(self.test_sessions)
+        
+        with patch.object(selector, '_get_session_details') as mock_get_details:
+            mock_get_details.return_value = {
+                'windows': 1,
+                'window_names': 'dev',
+                'attached': True,
+                'clients': 1
+            }
+            
+            # Filter for 'app'
+            table, filtered = selector._create_display('app')
+            
+            # Should only return myapp session
+            self.assertEqual(len(filtered), 1)
+            self.assertEqual(filtered[0]['project'], 'myapp')
+    
+    @patch('libs.ui.session_selector.Prompt.ask')
+    @patch('libs.ui.session_selector.Console')
+    def test_select_session_quit(self, mock_console_class, mock_prompt):
+        """Test quitting the selector"""
+        mock_prompt.return_value = 'q'
+        
+        selector = SessionSelector(self.test_sessions)
+        result = selector.select_session()
+        
+        self.assertIsNone(result)
+    
+    @patch('libs.ui.session_selector.Prompt.ask')
+    @patch('libs.ui.session_selector.Console')
+    def test_select_session_valid_choice(self, mock_console_class, mock_prompt):
+        """Test selecting a valid session"""
+        mock_prompt.return_value = '2'  # Select second session
+        
+        selector = SessionSelector(self.test_sessions)
+        with patch.object(selector, '_get_session_details') as mock_get_details:
+            mock_get_details.return_value = {
+                'windows': 1,
+                'window_names': '',
+                'attached': False,
+                'clients': 0
+            }
+            
+            result = selector.select_session()
+            
+            self.assertEqual(result, 'session2')
+
+
+if __name__ == '__main__':
+    unittest.main()
