@@ -124,7 +124,8 @@ Currently no formal linting is configured. Future plans include:
 
 Configuration merge modes:
 - `merge` (default): Local configs override global
-- `local`: Use only local configs
+- `isolated`: Use only local configs (formerly `local`)
+- `local`: Deprecated, use `isolated` instead
 
 ### Key Components
 
