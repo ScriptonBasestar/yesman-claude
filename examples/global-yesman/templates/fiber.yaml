@@ -8,11 +8,11 @@ windows:
     layout: even-horizontal
     start_directory: ./backend
     panes:
-      - claude
+      - claude --dangerously-skip-permissions
       - make run
   - window_name: frontend
     layout: even-horizontal
     start_directory: ./frontend
     panes:
-      - claude
+      - claude --dangerously-skip-permissions
       - pnpm dev
