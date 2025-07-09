@@ -19,8 +19,9 @@ except ImportError:
     psutil = None
 
 from libs.yesman_config import YesmanConfig
-from .models import SessionInfo, WindowInfo, PaneInfo
+from .models import SessionInfo, WindowInfo, PaneInfo, TaskPhase
 from .session_cache import SessionCache
+from .progress_tracker import ProgressAnalyzer
 from ..utils import ensure_log_directory
 
 
@@ -47,6 +48,9 @@ class SessionManager:
         
         # Initialize cache based on operation mode
         self.cache = self._init_cache_for_mode()
+        
+        # Initialize progress analyzer
+        self.progress_analyzer = ProgressAnalyzer()
         
         self.logger.info(f"SessionManager initialized in {self.operation_mode.value} mode")
         
@@ -168,6 +172,27 @@ class SessionManager:
                 else:
                     template_display = "N/A"  # Template defined but file missing
             
+            # Analyze progress if session is running
+            progress = None
+            if session:
+                # Collect output from all Claude panes
+                claude_output = []
+                for window in windows:
+                    for pane in window.panes:
+                        if pane.is_claude and pane.last_output:
+                            # Get full pane content for better analysis
+                            try:
+                                tmux_pane = session.find_where({"pane_id": pane.id})
+                                if tmux_pane:
+                                    pane_content = tmux_pane.cmd("capture-pane", "-p").stdout
+                                    claude_output.extend(pane_content)
+                            except:
+                                pass
+                
+                # Analyze progress
+                if claude_output:
+                    progress = self.progress_analyzer.analyze_pane_output(session_name, claude_output)
+            
             return SessionInfo(
                 project_name=project_name,
                 session_name=session_name,
@@ -175,7 +200,8 @@ class SessionManager:
                 exists=session is not None,
                 status='running' if session else 'stopped',
                 windows=windows,
-                controller_status=controller_status
+                controller_status=controller_status,
+                progress=progress
             )
         
         # CLI mode: Always compute fresh data (no caching)
@@ -432,6 +458,63 @@ class SessionManager:
                 "error": f"Attachment failed: {str(e)}",
                 "action": "error"
             }
+    
+    def get_progress_overview(self) -> Dict[str, Any]:
+        """Get progress overview for all sessions"""
+        sessions = self.get_all_sessions()
+        
+        # Collect progress data
+        total_sessions = len(sessions)
+        sessions_with_progress = 0
+        overall_progress = 0.0
+        active_tasks = 0
+        completed_tasks = 0
+        total_files_changed = 0
+        total_commands = 0
+        
+        session_progress_list = []
+        
+        for session in sessions:
+            if session.progress:
+                sessions_with_progress += 1
+                progress = session.progress
+                
+                # Count tasks
+                for task in progress.tasks:
+                    if task.phase == TaskPhase.COMPLETED:
+                        completed_tasks += 1
+                    elif task.phase != TaskPhase.IDLE:
+                        active_tasks += 1
+                
+                # Aggregate metrics
+                overall_progress += progress.calculate_overall_progress()
+                total_files_changed += progress.total_files_changed
+                total_commands += progress.total_commands
+                
+                # Add to session list
+                session_progress_list.append({
+                    'session_name': session.session_name,
+                    'project_name': session.project_name,
+                    'overall_progress': progress.calculate_overall_progress(),
+                    'current_phase': progress.get_current_task().phase.value if progress.get_current_task() else 'idle',
+                    'tasks_count': len(progress.tasks),
+                    'files_changed': progress.total_files_changed,
+                    'commands_executed': progress.total_commands
+                })
+        
+        # Calculate averages
+        avg_progress = overall_progress / sessions_with_progress if sessions_with_progress > 0 else 0.0
+        
+        return {
+            'total_sessions': total_sessions,
+            'sessions_with_progress': sessions_with_progress,
+            'average_progress': avg_progress,
+            'active_tasks': active_tasks,
+            'completed_tasks': completed_tasks,
+            'total_files_changed': total_files_changed,
+            'total_commands_executed': total_commands,
+            'sessions': session_progress_list
+        }
     
     def create_terminal_script(self, attach_command: str, script_path: str = None) -> str:
         """

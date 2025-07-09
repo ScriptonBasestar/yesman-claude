@@ -10,6 +10,8 @@ from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmap
+from libs.dashboard.widgets.session_progress import SessionProgressWidget
+from libs.core.session_manager import SessionManager
 
 from rich.console import Console
 from rich.live import Live
@@ -27,10 +29,15 @@ class InteractiveBrowser:
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
         self.activity_heatmap = ActivityHeatmap(self.console)
+        self.progress_widget = SessionProgressWidget(self.console)
+        
+        # Initialize session manager for progress tracking
+        self.session_manager = SessionManager()
         
         self.update_interval = update_interval
         self.running = False
         self.update_thread: Optional[threading.Thread] = None
+        self.progress_data = None
         
     def update_data(self):
         """Update session data and activity metrics"""
@@ -50,6 +57,9 @@ class InteractiveBrowser:
             
             # Update browser with new data
             self.session_browser.update_sessions(detailed_sessions)
+            
+            # Update progress data
+            self.progress_data = self.session_manager.get_progress_overview()
             
         except Exception as e:
             self.console.print(f"[red]Error updating session data: {e}[/]")
@@ -91,9 +101,18 @@ class InteractiveBrowser:
         )
         
         layout["main"].split_row(
-            Layout(name="sessions", ratio=2),
-            Layout(name="activity", ratio=1)
+            Layout(name="left", ratio=2),
+            Layout(name="right", ratio=1)
         )
+        
+        # Split left panel for sessions and progress
+        layout["left"].split_column(
+            Layout(name="sessions", ratio=3),
+            Layout(name="progress", size=10)
+        )
+        
+        # Right panel is for activity heatmap
+        layout["right"].update(Layout(name="activity"))
         
         return layout
     
@@ -108,6 +127,13 @@ class InteractiveBrowser:
         # Main session browser
         browser_content, status_bar = self.session_browser.render()
         layout["sessions"].update(browser_content)
+        
+        # Progress overview
+        if self.progress_data:
+            progress_panel = self.progress_widget.render_progress_overview(self.progress_data)
+            layout["progress"].update(progress_panel)
+        else:
+            layout["progress"].update("[dim]Loading progress data...[/dim]")
         
         # Activity heatmap
         heatmap_content = self.activity_heatmap.render_combined_heatmap()
