@@ -46,11 +46,11 @@ FastAPI WebSocket 서버를 구현하고 연결 관리 시스템을 구축한다
 - `broadcast_to_channel()`
 
 ## 완료 기준
-- [ ] WebSocket 라우터 파일 생성
-- [ ] ConnectionManager 클래스 구현
-- [ ] 4개 WebSocket 엔드포인트 구현
-- [ ] 메시지 송수신 테스트
-- [ ] 다중 클라이언트 연결 테스트
+- [x] WebSocket 라우터 파일 생성
+- [x] ConnectionManager 클래스 구현
+- [x] 4개 WebSocket 엔드포인트 구현
+- [x] 메시지 송수신 테스트
+- [x] 다중 클라이언트 연결 테스트
 
 ## 테스트
 ```bash
