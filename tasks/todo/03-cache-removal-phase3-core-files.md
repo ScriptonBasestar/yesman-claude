@@ -10,6 +10,30 @@
 
 ## 📋 실행 단계
 
+### Step 0: 남은 Phase 2 의존성 완료 (20분)
+
+#### 0.1 남은 cache 의존성 제거
+```bash
+# 현재 상태 확인 - 아직 남은 의존성들이 있음
+echo "=== Remaining Phase 2 Dependencies ===" >> phase3_verification.txt
+echo "Found dependencies in:" >> phase3_verification.txt
+echo "- libs/core/__init__.py (SessionCache import)" >> phase3_verification.txt
+echo "- libs/tmux_manager.py (SessionCache import and usage)" >> phase3_verification.txt
+echo "- Various test files (cache imports)" >> phase3_verification.txt
+echo "" >> phase3_verification.txt
+```
+
+#### 0.2 TmuxManager 캐시 제거
+- [x] `libs/tmux_manager.py`에서 SessionCache import 제거
+- [x] TmuxManager.__init__에서 session_cache 초기화 제거  
+- [x] 캐시 메서드 호출들을 직접 libtmux 호출로 교체
+
+#### 0.3 __init__.py 정리
+- [x] `libs/core/__init__.py`에서 SessionCache import 및 export 제거
+
+#### 0.4 테스트 파일 수정
+- [x] 캐시 관련 테스트 import 제거 (일시적으로 skip 처리)
+
 ### Step 1: 제거 전 최종 의존성 확인 (10분)
 
 #### 1.1 현재 상태 백업
