@@ -54,7 +54,8 @@
       "Bash(DISPLAY=:0 pnpm tauri dev)",
       "Bash(echo $DISPLAY)",
       "Bash(git checkout:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
