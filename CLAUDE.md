@@ -196,13 +196,38 @@ Configuration merge modes:
 - Performance monitoring and statistics tracking
 
 **Session Templates**:
-- Support Jinja2-style variable substitution (removed in latest version)
+- Support variable substitution using `{{ variable_name }}` syntax
 - Can be overridden per-project in projects.yaml
 - Define windows, panes, layouts, and startup commands
+- Smart templates support conditional command execution
 
 ### Important Implementation Details
 
 1. **Template Processing**: The `up` (formerly `setup`) command reads templates from `~/.yesman/templates/`, applies overrides from `projects.yaml`, and creates tmux sessions.
+   
+   Example template (`django.yaml`):
+   ```yaml
+   session_name: "{{ session_name }}"
+   start_directory: "{{ start_directory }}"
+   before_script: uv sync
+   windows:
+     - window_name: django server
+       layout: even-horizontal
+       panes:
+         - claude --dangerously-skip-permissions
+         - uv run ./manage.py runserver
+         - htop
+   ```
+   
+   Example project configuration:
+   ```yaml
+   sessions:
+     my_django_app:
+       template_name: django
+       override:
+         session_name: django-dev
+         start_directory: ~/projects/my-django-app
+   ```
 
 2. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
