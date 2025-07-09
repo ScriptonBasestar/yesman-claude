@@ -4,6 +4,7 @@ import libtmux
 import sys
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
+from libs.ui.session_selector import show_session_selector
 
 @click.command()
 @click.argument('session_name', required=False)
@@ -38,21 +39,31 @@ def enter(session_name, list_sessions):
         
         if not running_sessions:
             click.echo("No running yesman sessions found.")
-            click.echo("Run 'yesman setup' to create sessions.")
+            click.echo("Run 'yesman up' to create sessions.")
             return
         
-        # Display available sessions
-        click.echo("Available sessions:")
-        for i, sess in enumerate(running_sessions, 1):
-            click.echo(f"  [{i}] {sess['project']} (session: {sess['session']})")
-        
-        # Prompt for selection
-        choice = click.prompt("Select session number", type=int)
-        if 1 <= choice <= len(running_sessions):
-            session_name = running_sessions[choice - 1]['session']
-        else:
-            click.echo("Invalid selection")
-            return
+        # Try to use TUI selector first
+        try:
+            selected = show_session_selector(running_sessions)
+            if selected:
+                session_name = selected
+            else:
+                click.echo("Selection cancelled")
+                return
+        except Exception as e:
+            # Fallback to text-based selection
+            click.echo("TUI unavailable, falling back to text selection...")
+            click.echo("Available sessions:")
+            for i, sess in enumerate(running_sessions, 1):
+                click.echo(f"  [{i}] {sess['project']} (session: {sess['session']})")
+            
+            # Prompt for selection
+            choice = click.prompt("Select session number", type=int)
+            if 1 <= choice <= len(running_sessions):
+                session_name = running_sessions[choice - 1]['session']
+            else:
+                click.echo("Invalid selection")
+                return
     
     # Check if the session exists
     if not server.find_where({"session_name": session_name}):
