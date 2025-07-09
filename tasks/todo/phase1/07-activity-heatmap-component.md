@@ -57,11 +57,11 @@ customElements.define('activity-heatmap', ActivityHeatmap);
 - 활동률 퍼센트
 
 ## 완료 기준
-- [ ] ActivityHeatmap 클래스 구현
-- [ ] 52×7 그리드 렌더링
-- [ ] 색상 단계 적용
-- [ ] 요일/월 라벨 표시
-- [ ] 툴팁 기능 작동
+- [x] ActivityHeatmap 클래스 구현
+- [x] 52×7 그리드 렌더링
+- [x] 색상 단계 적용
+- [x] 요일/월 라벨 표시
+- [x] 툴팁 기능 작동
 
 ## 테스트
 ```javascript
