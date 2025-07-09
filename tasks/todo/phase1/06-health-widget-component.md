@@ -52,11 +52,11 @@ customElements.define('health-widget', HealthWidget);
 - 숫자 카운트업 효과 (선택사항)
 
 ## 완료 기준
-- [ ] HealthWidget 클래스 구현
-- [ ] 전체 점수 표시
-- [ ] 카테고리별 점수 표시
-- [ ] 제안사항 표시
-- [ ] 색상 코딩 적용
+- [x] HealthWidget 클래스 구현
+- [x] 전체 점수 표시
+- [x] 카테고리별 점수 표시
+- [x] 제안사항 표시
+- [x] 색상 코딩 적용
 
 ## 테스트
 ```javascript

@@ -122,20 +122,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Session Browser Component - now implemented as proper web component
     
-    // Health Widget Component
-    const healthWidget = {
-        template: `
-            <div class="text-center py-8">
-                <div class="text-gray-500 dark:text-gray-400 mb-4">
-                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Health Widget</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Component will be implemented in next task</p>
-            </div>
-        `
-    };
+    // Health Widget Component - now implemented as proper web component
     
     // Activity Heatmap Component
     const activityHeatmap = {
@@ -153,11 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // Replace placeholder components with actual content
-    // Note: session-browser is now a proper web component, no need for placeholder replacement
-    
-    document.querySelectorAll('health-widget').forEach(el => {
-        el.innerHTML = healthWidget.template;
-    });
+    // Note: session-browser and health-widget are now proper web components, no need for placeholder replacement
     
     document.querySelectorAll('activity-heatmap').forEach(el => {
         el.innerHTML = activityHeatmap.template;
