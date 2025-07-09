@@ -51,3 +51,31 @@ Found dependencies in:
 ./libs/core/cache_manager.py:from .cache_analytics import CacheAnalytics
 ./libs/core/cache_manager.py:from .cache_core import InvalidationStrategy
 ./libs/core/cache_storage.py:from .cache_core import CacheEntry, CacheStats, InvalidationStrategy, generate_content_hash
+=== Final cache dependencies check before removal ===
+Checking dependencies for: libs/core/cache_analytics.py
+Non-test files importing cache_analytics:
+./libs/core/cache_manager.py:from .cache_analytics import CacheAnalytics
+
+Checking dependencies for: libs/core/cache_core.py
+Non-test files importing cache_core:
+./libs/core/session_cache.py:from .cache_core import InvalidationStrategy, CacheTag
+./libs/core/cache_analytics.py:from .cache_core import CacheStats
+./libs/core/cache_manager.py:from .cache_core import InvalidationStrategy
+./libs/core/cache_storage.py:from .cache_core import CacheEntry, CacheStats, InvalidationStrategy, generate_content_hash
+
+Checking dependencies for: libs/core/cache_manager.py
+Non-test files importing cache_manager:
+./libs/core/session_cache.py:from .cache_manager import SessionCache
+
+Checking dependencies for: libs/core/cache_storage.py
+Non-test files importing cache_storage:
+./libs/core/cache_manager.py:from .cache_storage import CacheStorage
+
+Checking dependencies for: libs/core/session_cache.py
+Non-test files importing session_cache:
+No imports found
+
+Phase 3 completed: 2025. 07. 09. (수) 15:17:47 KST
+Files removed: 5 cache files
+Backup location: .backup/cache_files_20250709_151639
+✅ All verification tests passed
