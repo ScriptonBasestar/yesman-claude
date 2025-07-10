@@ -48,11 +48,11 @@ wsManager.on('health_update', callback)
 - 응답 없으면 재연결
 
 ## 완료 기준
-- [ ] WebSocketManager 클래스 구현
-- [ ] 연결/해제 기능 작동
-- [ ] 자동 재연결 테스트
-- [ ] 이벤트 시스템 작동
-- [ ] 메시지 송수신 확인
+- [x] WebSocketManager 클래스 구현
+- [x] 연결/해제 기능 작동
+- [x] 자동 재연결 테스트
+- [x] 이벤트 시스템 작동
+- [x] 메시지 송수신 확인
 
 ## 테스트
 ```javascript
