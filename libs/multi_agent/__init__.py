@@ -7,6 +7,14 @@ from .work_environment import WorkEnvironmentManager, WorkEnvironment
 from .types import Agent, Task, AgentState, TaskStatus
 from .agent_pool import AgentPool
 from .task_scheduler import TaskScheduler, AgentCapability
+from .conflict_resolution import (
+    ConflictResolutionEngine, 
+    ConflictInfo, 
+    ConflictType, 
+    ConflictSeverity, 
+    ResolutionStrategy,
+    ResolutionResult
+)
 
 __all__ = [
     "BranchManager",
@@ -23,4 +31,10 @@ __all__ = [
     "TaskStatus",
     "TaskScheduler",
     "AgentCapability",
+    "ConflictResolutionEngine",
+    "ConflictInfo",
+    "ConflictType",
+    "ConflictSeverity",
+    "ResolutionStrategy",
+    "ResolutionResult",
 ]
