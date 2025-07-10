@@ -3,12 +3,38 @@ Dashboard Renderers Package
 Multi-format rendering system for Yesman Claude dashboard
 """
 
-from .base_renderer import BaseRenderer, RenderFormat, WidgetType
+from .base_renderer import BaseRenderer, RenderFormat, WidgetType, ThemeColor
 from .registry import RendererRegistry
+from .widget_models import (
+    SessionData, SessionStatus, WindowData,
+    HealthData, HealthCategoryData, HealthLevel,
+    ActivityData, ActivityEntry, ActivityType,
+    ProgressData, ProgressPhase,
+    MetricCardData, StatusIndicatorData,
+    ChartData, ChartDataPoint
+)
+from .widget_adapter import WidgetDataAdapter
 
 __all__ = [
     'BaseRenderer',
     'RenderFormat', 
     'WidgetType',
-    'RendererRegistry'
+    'ThemeColor',
+    'RendererRegistry',
+    'SessionData',
+    'SessionStatus',
+    'WindowData', 
+    'HealthData',
+    'HealthCategoryData',
+    'HealthLevel',
+    'ActivityData',
+    'ActivityEntry',
+    'ActivityType',
+    'ProgressData', 
+    'ProgressPhase',
+    'MetricCardData',
+    'StatusIndicatorData',
+    'ChartData',
+    'ChartDataPoint',
+    'WidgetDataAdapter'
 ]
