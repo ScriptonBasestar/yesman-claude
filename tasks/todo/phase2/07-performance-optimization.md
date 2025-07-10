@@ -42,11 +42,11 @@ WebSocket과 실시간 업데이트의 성능을 최적화한다.
 - 델타 업데이트
 
 ## 완료 기준
-- [ ] 연결 풀링 구현
-- [ ] 배치 처리 시스템 구현
-- [ ] 디바운싱/쓰로틀링 적용
-- [ ] 메모리 사용량 감소
-- [ ] 네트워크 트래픽 감소
+- [>] ] 연결 풀링 구현
+- [ ] ] 배치 처리 시스템 구현
+- [ ] ] 디바운싱/쓰로틀링 적용
+- [ ] ] 메모리 사용량 감소
+- [ ] ] 네트워크 트래픽 감소
 
 ## 테스트
 ```javascript
@@ -72,3 +72,5 @@ console.timeEnd('update');
 - 과도한 최적화 주의
 - 코드 가독성 유지
 - 프로파일링 기반 최적화
+**Task skipped**: 연결 풀링 구현
+**Reason**: Requires manual implementation - automated execution not yet supported

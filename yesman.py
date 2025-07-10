@@ -21,6 +21,7 @@ from commands.status import status
 from commands.logs import logs
 from commands.automate import automate
 from commands.cleanup import cleanup
+from commands.task_runner import task_runner
 
 cli.add_command(ls)
 cli.add_command(show)
@@ -36,6 +37,7 @@ cli.add_command(status)
 cli.add_command(logs)
 cli.add_command(automate)
 cli.add_command(cleanup)
+cli.add_command(task_runner)
 
 if __name__ == "__main__":
     cli()

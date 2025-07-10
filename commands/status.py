@@ -13,9 +13,10 @@ from rich.columns import Columns
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 from libs.dashboard.widgets import (
-    SessionBrowser, ActivityHeatmap, ProjectHealthWidget,
+    SessionBrowser, ActivityHeatmap, ProjectHealth,
     GitActivityWidget, ProgressTracker
 )
+from libs.dashboard.widgets.session_progress import SessionProgressWidget
 from libs.core.session_manager import SessionManager
 
 
@@ -35,7 +36,7 @@ class StatusDashboard:
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
         self.activity_heatmap = ActivityHeatmap(self.console)
-        self.project_health = ProjectHealthWidget(self.console)
+        self.project_health = ProjectHealth(self.console)
         self.git_activity = GitActivityWidget(self.console, str(self.project_path))
         self.progress_tracker = ProgressTracker(self.console)
         self.session_progress = SessionProgressWidget(self.console)
