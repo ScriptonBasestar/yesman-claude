@@ -7,6 +7,7 @@ from .base_renderer import BaseRenderer, RenderFormat, WidgetType, ThemeColor
 from .registry import RendererRegistry
 from .tui_renderer import TUIRenderer
 from .web_renderer import WebRenderer
+from .tauri_renderer import TauriRenderer
 from .widget_models import (
     SessionData, SessionStatus, WindowData,
     HealthData, HealthCategoryData, HealthLevel,
@@ -25,6 +26,7 @@ __all__ = [
     'RendererRegistry',
     'TUIRenderer',
     'WebRenderer',
+    'TauriRenderer',
     'SessionData',
     'SessionStatus',
     'WindowData', 
