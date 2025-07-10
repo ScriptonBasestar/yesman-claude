@@ -25,9 +25,11 @@ priority: low
 ## 작업 내용
 
 ### 1. 즉시 대응 (Immediate Mitigation)
-- [ ] Mock 사용 현황 전체 분석 및 문서화
+- [>] Mock 사용 현황 전체 분석 및 문서화
 - [ ] 기존 `fixtures/mock_data.py` 검토 및 확장 계획 수립
 - [ ] 가장 중복이 많은 mock 패턴 우선 식별
+
+> **[INFO]** 2025-07-10: `TASK_RUNNER`가 작업을 연기합니다. 현재 테스트 성공률이 낮아 mock 중앙화 작업은 프로젝트 안정화 이후에 진행하는 것이 권장됩니다.
 
 ### 2. 근본 원인 해결 (Root Cause Fix)
 - [ ] `fixtures/mock_data.py` 확장 및 표준 mock 팩토리 구현

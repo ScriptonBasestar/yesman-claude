@@ -66,6 +66,56 @@ def test_config_file(temp_dir):
         yaml.dump(config, f)
     return config_path
 
+@pytest.fixture
+def temp_project_root():
+    """Create temporary project directory"""
+    import tempfile
+    from pathlib import Path
+    with tempfile.TemporaryDirectory() as temp_dir:
+        project_root = Path(temp_dir)
+        
+        # Create tauri-dashboard directory with package.json
+        tauri_dir = project_root / "tauri-dashboard"
+        tauri_dir.mkdir()
+        (tauri_dir / "package.json").write_text('{"name": "test-dashboard"}')
+        
+        yield project_root
+
+@pytest.fixture
+def launcher(temp_project_root):
+    """Create DashboardLauncher with temp project root"""
+    from libs.dashboard import DashboardLauncher
+    return DashboardLauncher(project_root=temp_project_root)
+
+@pytest.fixture
+def theme_manager():
+    """Create ThemeManager instance"""
+    import tempfile
+    from pathlib import Path
+    from libs.dashboard import ThemeManager
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield ThemeManager(config_dir=Path(temp_dir))
+
+@pytest.fixture
+def keyboard_manager():
+    """Create KeyboardNavigationManager instance"""
+    from libs.dashboard import KeyboardNavigationManager
+    manager = KeyboardNavigationManager()
+    yield manager
+    # Cleanup
+    manager.actions.clear()
+    manager.bindings.clear()
+
+@pytest.fixture
+def performance_optimizer():
+    """Create PerformanceOptimizer instance"""
+    from libs.dashboard import PerformanceOptimizer
+    optimizer = PerformanceOptimizer()
+    yield optimizer
+    # Cleanup
+    if optimizer.monitoring:
+        optimizer.stop_monitoring()
+
 # pytest 설정
 def pytest_configure(config):
     """pytest 설정 커스터마이징"""

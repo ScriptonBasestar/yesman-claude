@@ -25,9 +25,11 @@ priority: low
 
 ### 1. 현황 조사 및 분석 (Phase 1)
 - [x] 중복 테스트 함수 매핑 및 분석
-- [ ] 의존성 체인 분석 (SessionCache → SessionManager → Dashboard)
+- [>] 의존성 체인 분석 (SessionCache → SessionManager → Dashboard)
 - [ ] Mock 사용 패턴 및 공통 코드 식별
 - [ ] 현재 실패하는 테스트 케이스 파악
+
+> **[INFO]** 2025-07-10: `TASK_RUNNER`가 작업을 연기합니다. 파일 자체의 권고에 따라, 캐시 테스트 안정화 및 선행 조건 완료 후 진행해야 합니다. 위험도가 높아 현시점에서는 실행하지 않습니다.
 
 ### 2. 통합 전략 수립 (Phase 2)
 - [ ] 최적 파일 구조 설계 (unit/integration 분리)
