@@ -78,5 +78,10 @@ async def get_session_heatmap(session_name: str, days: int = 7):
 - 모바일 환경에서도 터치 인터랙션 지원
 - 다크모드/라이트모드 테마 대응
 
+**처리 상태**: ✅ **converted**  
+**새 파일**: `/tasks/todo/interactive-session-heatmap.md`  
+**전환 일시**: 2025-07-10  
+**우선순위 재평가**: HIGH → MEDIUM (기본 기능 완성 후 진행)
+
 ---
 *이 작업은 사용자 경험 개선의 핵심 기능으로 높은 우선순위를 가집니다.*

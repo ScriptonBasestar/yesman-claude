@@ -150,3 +150,8 @@ test_session_cache.py (309줄)
 - 선행 조건: 실패 테스트 수정 완료
 - 기능별 3개 파일로 분할
 - 점진적 접근
+
+**처리 상태**: ✅ **converted**  
+**새 파일**: `/tasks/todo/large-test-files-refactoring.md`  
+**전환 일시**: 2025-07-10  
+**우선순위 재평가**: 중간 유지 (점진적 개선 가능)

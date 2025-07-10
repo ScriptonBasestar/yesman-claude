@@ -159,8 +159,12 @@ SessionCache ← SessionManager ← Dashboard ← Visualization
 ## 🏷️ 태스크 재분류
 
 **현재**: results/refactoring.tests/issues/  
-**권장**: tasks/alert/ → tasks/backlog/  
+**권장**: tasks/alert/ → tasks/todo/  
 **우선순위**: P2 (중간) → P3 (낮음)
+
+**처리 상태**: ✅ **converted**  
+**새 파일**: `/tasks/todo/cache-test-consolidation.md`  
+**전환 일시**: 2025-07-10
 
 **재분류 이유**: 
 - 현재 시점에서는 위험도가 높고 복잡함
