@@ -7,6 +7,7 @@ import json
 import logging
 from datetime import datetime
 from collections import defaultdict
+from api.utils import WebSocketBatchProcessor, BatchConfig
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +30,80 @@ class ConnectionManager:
         # Ping interval in seconds
         self.ping_interval = 30
         
+        # Batch processor configuration
+        batch_config = BatchConfig(
+            max_batch_size=10,      # Batch up to 10 messages
+            max_batch_time=0.1,     # Wait max 100ms
+            compression_threshold=5  # Start optimizing after 5 messages
+        )
+        self.batch_processor = WebSocketBatchProcessor(batch_config)
+        
+        # Register message handlers for each channel
+        self._register_batch_handlers()
+        
         # Start background tasks
         self.start_background_tasks()
+    
+    def _register_batch_handlers(self):
+        """Register message handlers for batch processing"""
+        self.batch_processor.register_message_handler("dashboard", self._send_to_dashboard)
+        self.batch_processor.register_message_handler("sessions", self._send_to_sessions)
+        self.batch_processor.register_message_handler("health", self._send_to_health)
+        self.batch_processor.register_message_handler("activity", self._send_to_activity)
+        self.batch_processor.register_message_handler("logs", self._send_to_logs)
+    
+    async def _send_to_dashboard(self, messages: List[Dict]):
+        """Send batched messages to dashboard channel"""
+        await self._broadcast_messages_to_channel("dashboard", messages)
+    
+    async def _send_to_sessions(self, messages: List[Dict]):
+        """Send batched messages to sessions channel"""
+        await self._broadcast_messages_to_channel("sessions", messages)
+    
+    async def _send_to_health(self, messages: List[Dict]):
+        """Send batched messages to health channel"""
+        await self._broadcast_messages_to_channel("health", messages)
+    
+    async def _send_to_activity(self, messages: List[Dict]):
+        """Send batched messages to activity channel"""
+        await self._broadcast_messages_to_channel("activity", messages)
+    
+    async def _send_to_logs(self, messages: List[Dict]):
+        """Send batched messages to logs channel"""
+        await self._broadcast_messages_to_channel("logs", messages)
+    
+    async def _broadcast_messages_to_channel(self, channel: str, messages: List[Dict]):
+        """Broadcast multiple messages to a specific channel"""
+        connections = self.channel_connections.get(channel, set())
+        disconnected = []
+        
+        for connection in connections:
+            try:
+                # Send batch as a single WebSocket message or multiple messages
+                if len(messages) == 1:
+                    await connection.send_json(messages[0])
+                else:
+                    # Send as message batch
+                    batch_message = {
+                        "type": "message_batch",
+                        "timestamp": datetime.now().isoformat(),
+                        "channel": channel,
+                        "messages": messages,
+                        "count": len(messages)
+                    }
+                    await connection.send_json(batch_message)
+            except Exception as e:
+                logger.error(f"Error broadcasting batch to {channel}: {e}")
+                disconnected.append(connection)
+        
+        # Clean up disconnected clients
+        for conn in disconnected:
+            self.disconnect(conn)
     
     def start_background_tasks(self):
         """Start background tasks for connection management"""
         asyncio.create_task(self.ping_connections())
+        asyncio.create_task(self.batch_processor.start())
     
     async def connect(self, websocket: WebSocket, channel: str = "dashboard"):
         """Accept a new WebSocket connection"""
@@ -130,20 +199,13 @@ class ConnectionManager:
             self.disconnect(conn)
     
     async def broadcast_to_channel(self, channel: str, message: dict):
-        """Broadcast message to specific channel"""
-        disconnected = []
-        connections = self.channel_connections.get(channel, set())
-        
-        for connection in connections:
-            try:
-                await connection.send_json(message)
-            except Exception as e:
-                logger.error(f"Error broadcasting to channel {channel}: {str(e)}")
-                disconnected.append(connection)
-        
-        # Clean up disconnected clients
-        for conn in disconnected:
-            self.disconnect(conn)
+        """Broadcast message to specific channel (using batch processor)"""
+        # Queue message for batch processing
+        self.batch_processor.queue_message(channel, message)
+    
+    async def broadcast_to_channel_immediate(self, channel: str, message: dict):
+        """Broadcast message immediately without batching (for urgent messages)"""
+        await self.batch_processor.send_immediate(channel, message)
     
     async def broadcast_session_update(self, session_data: dict):
         """Broadcast session update to relevant channels"""
@@ -225,6 +287,30 @@ class ConnectionManager:
             stats["channels"][channel] = len(connections)
         
         return stats
+    
+    async def shutdown(self):
+        """Shutdown the connection manager and batch processor"""
+        logger.info("Shutting down WebSocket connection manager...")
+        
+        # Stop batch processor
+        await self.batch_processor.stop()
+        
+        # Disconnect all active connections
+        for connection in self.active_connections.copy():
+            try:
+                await connection.close()
+            except Exception as e:
+                logger.error(f"Error closing connection: {e}")
+        
+        self.active_connections.clear()
+        self.channel_connections.clear()
+        self.connection_metadata.clear()
+        
+        logger.info("WebSocket connection manager shutdown complete")
+    
+    def get_batch_statistics(self):
+        """Get batch processing statistics"""
+        return self.batch_processor.get_statistics()
 
 
 # Create global connection manager instance
