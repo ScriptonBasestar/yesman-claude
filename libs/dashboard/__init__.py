@@ -6,6 +6,10 @@ from .keyboard_navigation import (
     KeyboardNavigationManager, KeyBinding, KeyModifier, NavigationContext,
     FocusableElement, get_keyboard_manager, reset_keyboard_manager
 )
+from .theme_system import (
+    ThemeManager, Theme, ThemeMode, ColorPalette, Typography, Spacing,
+    SystemThemeDetector, get_theme_manager, reset_theme_manager
+)
 
 __all__ = [
     'DashboardLauncher',
@@ -19,5 +23,14 @@ __all__ = [
     'NavigationContext',
     'FocusableElement',
     'get_keyboard_manager',
-    'reset_keyboard_manager'
+    'reset_keyboard_manager',
+    'ThemeManager',
+    'Theme',
+    'ThemeMode',
+    'ColorPalette',
+    'Typography',
+    'Spacing',
+    'SystemThemeDetector',
+    'get_theme_manager',
+    'reset_theme_manager'
 ]

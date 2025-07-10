@@ -51,11 +51,11 @@ def export_rich_theme(self, theme: Theme) -> Dict:
 - Linux: 환경 변수
 
 ## 완료 기준
-- [ ] Theme 데이터 모델 구현
-- [ ] ThemeManager 구현
-- [ ] 3개 기본 테마 정의
-- [ ] 테마 저장/로드 기능
-- [ ] 플랫폼별 테마 감지
+- [x] Theme 데이터 모델 구현
+- [x] ThemeManager 구현
+- [x] 3개 기본 테마 정의
+- [x] 테마 저장/로드 기능
+- [x] 플랫폼별 테마 감지
 
 ## 테스트
 ```python
