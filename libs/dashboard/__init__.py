@@ -10,6 +10,11 @@ from .theme_system import (
     ThemeManager, Theme, ThemeMode, ColorPalette, Typography, Spacing,
     SystemThemeDetector, get_theme_manager, reset_theme_manager
 )
+from .performance_optimizer import (
+    PerformanceOptimizer, AsyncPerformanceOptimizer, PerformanceMetrics,
+    OptimizationLevel, PerformanceThreshold, PerformanceProfiler,
+    get_performance_optimizer, reset_performance_optimizer
+)
 
 __all__ = [
     'DashboardLauncher',
@@ -32,5 +37,13 @@ __all__ = [
     'Spacing',
     'SystemThemeDetector',
     'get_theme_manager',
-    'reset_theme_manager'
+    'reset_theme_manager',
+    'PerformanceOptimizer',
+    'AsyncPerformanceOptimizer',
+    'PerformanceMetrics',
+    'OptimizationLevel',
+    'PerformanceThreshold',
+    'PerformanceProfiler',
+    'get_performance_optimizer',
+    'reset_performance_optimizer'
 ]
