@@ -56,11 +56,11 @@ class SessionStatus(Enum):
 ```
 
 ## 완료 기준
-- [ ] 4개 데이터 모델 구현
-- [ ] 변환 메서드 구현
-- [ ] WidgetDataAdapter 구현
-- [ ] 타입 안정성 확보
-- [ ] 단위 테스트 작성
+- [x] 4개 데이터 모델 구현
+- [x] 변환 메서드 구현
+- [x] WidgetDataAdapter 구현
+- [x] 타입 안정성 확보
+- [x] 단위 테스트 작성
 
 ## 테스트
 ```python

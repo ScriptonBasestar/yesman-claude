@@ -48,11 +48,11 @@ class WidgetType(Enum):
 - 전역 레지스트리 인스턴스
 
 ## 완료 기준
-- [ ] BaseRenderer 클래스 구현
-- [ ] Enum 타입 정의
-- [ ] 추상 메서드 정의
-- [ ] 유틸리티 메서드 구현
-- [ ] RendererRegistry 구현
+- [x] BaseRenderer 클래스 구현
+- [x] Enum 타입 정의
+- [x] 추상 메서드 정의
+- [x] 유틸리티 메서드 구현
+- [x] RendererRegistry 구현
 
 ## 테스트
 ```python
