@@ -1,0 +1,148 @@
+/* TUI Dashboard CSS Styles */
+
+/* Widget title styling */
+.widget-title {
+    background: $primary 20%;
+    color: $text;
+    text-style: bold;
+    padding: 1;
+    margin-bottom: 1;
+    border: round $primary;
+}
+
+/* Settings container */
+.settings-container {
+    padding: 1;
+    margin: 1;
+}
+
+.setting-row {
+    height: auto;
+    margin-bottom: 1;
+    align: left middle;
+}
+
+.setting-row Label {
+    width: 20;
+    text-align: right;
+    margin-right: 2;
+}
+
+/* Widget content containers */
+#widget-content {
+    padding: 1;
+    border: round $primary-lighten-2;
+    background: $panel;
+}
+
+/* Tab specific styling */
+#sessions-content,
+#health-content, 
+#activity-content,
+#logs-content,
+#settings-content {
+    padding: 1;
+    height: 100%;
+}
+
+/* Logs styling */
+#logs-content {
+    background: $surface;
+    border: round $primary;
+    scrollbar-background: $surface;
+    scrollbar-color: $primary;
+}
+
+/* Layout containers */
+TabbedContent {
+    height: 100%;
+}
+
+TabPane {
+    padding: 0;
+}
+
+/* Button styling */
+Button {
+    margin: 1;
+    background: $primary;
+    color: $text;
+}
+
+Button:hover {
+    background: $primary-lighten-1;
+}
+
+Button:focus {
+    background: $primary-lighten-2;
+    border: thick $accent;
+}
+
+/* Switch styling */
+Switch {
+    background: $surface;
+}
+
+Switch:focus {
+    border: thick $accent;
+}
+
+/* Progress bar styling */
+ProgressBar {
+    background: $surface;
+    bar-color: $success;
+    bar-complete-color: $success;
+    bar-pulse-color: $success-lighten-1;
+}
+
+/* Data table styling */
+DataTable {
+    background: $panel;
+    color: $text;
+}
+
+DataTable > .datatable--header {
+    background: $primary;
+    color: $text;
+    text-style: bold;
+}
+
+DataTable > .datatable--odd-row {
+    background: $surface;
+}
+
+DataTable > .datatable--even-row {
+    background: $panel;
+}
+
+DataTable > .datatable--cursor {
+    background: $primary 50%;
+}
+
+/* Tree styling */
+Tree {
+    background: $panel;
+    scrollbar-background: $surface;
+    scrollbar-color: $primary;
+}
+
+/* Container styling */
+Container {
+    background: $background;
+}
+
+Vertical {
+    background: $background;
+}
+
+Horizontal {
+    background: $background;
+}
+
+/* Placeholder styling */
+Placeholder {
+    background: $surface;
+    color: $text-muted;
+    text-align: center;
+    text-style: italic;
+}
