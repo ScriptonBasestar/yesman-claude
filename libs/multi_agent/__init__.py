@@ -3,6 +3,7 @@
 from .branch_manager import BranchManager
 from .task_analyzer import TaskAnalyzer, TaskDefinition, CodeDependency
 from .graph import DirectedGraph
+from .work_environment import WorkEnvironmentManager, WorkEnvironment
 
 __all__ = [
     "BranchManager",
@@ -10,4 +11,6 @@ __all__ = [
     "TaskDefinition",
     "CodeDependency",
     "DirectedGraph",
+    "WorkEnvironmentManager",
+    "WorkEnvironment",
 ]
