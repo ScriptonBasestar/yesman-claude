@@ -111,6 +111,78 @@
     .hover-glow {
         @apply transition-shadow duration-200 hover:shadow-lg hover:shadow-blue-500/20 dark:hover:shadow-blue-400/20;
     }
+    
+    /* Toast Notifications */
+    .toast-container {
+        @apply fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none;
+    }
+    
+    .toast {
+        @apply relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 
+               flex items-center gap-3 min-w-[300px] max-w-md
+               transform transition-all duration-300 pointer-events-auto;
+    }
+    
+    .toast.toast-success {
+        @apply border-l-4 border-green-500;
+    }
+    
+    .toast.toast-error {
+        @apply border-l-4 border-red-500;
+    }
+    
+    .toast.toast-warning {
+        @apply border-l-4 border-yellow-500;
+    }
+    
+    .toast.toast-info {
+        @apply border-l-4 border-blue-500;
+    }
+    
+    .toast-icon {
+        @apply flex-shrink-0 w-5 h-5;
+    }
+    
+    .toast-message {
+        @apply flex-1 text-sm text-gray-700 dark:text-gray-300;
+    }
+    
+    .toast-close {
+        @apply flex-shrink-0 ml-2 cursor-pointer;
+    }
+    
+    /* Connection Status Indicator */
+    .connection-status {
+        @apply flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium;
+    }
+    
+    .connection-status.connected {
+        @apply bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400;
+    }
+    
+    .connection-status.disconnected {
+        @apply bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400;
+    }
+    
+    .connection-status.reconnecting {
+        @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400;
+    }
+    
+    .connection-dot {
+        @apply w-2 h-2 rounded-full animate-pulse;
+    }
+    
+    .connection-dot.connected {
+        @apply bg-green-500;
+    }
+    
+    .connection-dot.disconnected {
+        @apply bg-red-500;
+    }
+    
+    .connection-dot.reconnecting {
+        @apply bg-yellow-500;
+    }
 }
 
 /* Custom utilities */

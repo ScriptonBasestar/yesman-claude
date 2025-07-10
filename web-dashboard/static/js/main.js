@@ -342,24 +342,112 @@ window.dashboard = {
          * Show toast notification
          */
         showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container') || this.createToastContainer();
+            const toastId = this.generateId();
+            
             const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-                type === 'error' ? 'bg-red-500 text-white' :
-                type === 'success' ? 'bg-green-500 text-white' :
-                type === 'warning' ? 'bg-yellow-500 text-black' :
-                'bg-blue-500 text-white'
-            }`;
-            toast.textContent = message;
+            toast.id = toastId;
+            toast.className = `toast toast-${type} opacity-0 translate-x-full`;
             
-            document.body.appendChild(toast);
+            // Icon
+            const iconSvg = {
+                success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>',
+                error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>',
+                warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+            };
             
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
+            toast.innerHTML = `
+                <svg class="toast-icon ${
+                    type === 'success' ? 'text-green-500' :
+                    type === 'error' ? 'text-red-500' :
+                    type === 'warning' ? 'text-yellow-500' :
+                    'text-blue-500'
+                }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${iconSvg[type] || iconSvg.info}
+                </svg>
+                <div class="toast-message">${message}</div>
+                <button class="toast-close" onclick="window.dashboard.utils.removeToast('${toastId}')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            requestAnimationFrame(() => {
+                toast.classList.remove('opacity-0', 'translate-x-full');
+                toast.classList.add('opacity-100', 'translate-x-0');
+            });
+            
+            // Auto remove
+            if (duration > 0) {
                 setTimeout(() => {
-                    document.body.removeChild(toast);
+                    this.removeToast(toastId);
+                }, duration);
+            }
+            
+            return toastId;
+        },
+        
+        /**
+         * Remove toast notification
+         */
+        removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => {
+                    toast.remove();
                 }, 300);
-            }, duration);
+            }
+        },
+        
+        /**
+         * Create toast container if it doesn't exist
+         */
+        createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
+        },
+        
+        /**
+         * Update connection status indicator
+         */
+        updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connection-status');
+            const dotElement = statusElement?.querySelector('.connection-dot');
+            const textElement = statusElement?.querySelector('.connection-text');
+            
+            if (!statusElement) return;
+            
+            // Remove all status classes
+            statusElement.classList.remove('connected', 'disconnected', 'reconnecting');
+            dotElement?.classList.remove('connected', 'disconnected', 'reconnecting');
+            
+            // Add new status
+            statusElement.classList.add(status);
+            dotElement?.classList.add(status);
+            
+            // Update text
+            if (textElement) {
+                switch (status) {
+                    case 'connected':
+                        textElement.textContent = 'Connected';
+                        break;
+                    case 'reconnecting':
+                        textElement.textContent = 'Reconnecting...';
+                        break;
+                    case 'disconnected':
+                        textElement.textContent = 'Disconnected';
+                        break;
+                }
+            }
         }
     },
 
@@ -556,18 +644,25 @@ window.dashboard = {
         wsManager.on('connected', (data) => {
             console.log('WebSocket connected:', data);
             window.dashboard.state.wsConnected = true;
-            window.dashboard.utils.showToast('Real-time updates connected', 'success');
+            window.dashboard.utils.updateConnectionStatus('connected');
+            window.dashboard.utils.showToast('Real-time updates connected', 'success', 2000);
         });
         
         wsManager.on('disconnected', (data) => {
             console.log('WebSocket disconnected:', data);
             window.dashboard.state.wsConnected = false;
-            window.dashboard.utils.showToast('Real-time updates disconnected', 'warning');
+            window.dashboard.utils.updateConnectionStatus('disconnected');
+            if (data.code !== 1000) { // Not a normal closure
+                window.dashboard.utils.showToast('Real-time updates disconnected', 'warning');
+            }
         });
         
         wsManager.on('reconnecting', (data) => {
             console.log('WebSocket reconnecting:', data);
-            window.dashboard.utils.showToast(`Reconnecting... (attempt ${data.attempt})`, 'info');
+            window.dashboard.utils.updateConnectionStatus('reconnecting');
+            if (data.attempt === 1) {
+                window.dashboard.utils.showToast('Reconnecting to server...', 'info', 2000);
+            }
         });
         
         wsManager.on('session_update', (data) => {

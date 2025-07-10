@@ -75,8 +75,13 @@
                         </div>
                     </div>
                     
-                    <!-- Theme toggle -->
-                    <div class="flex items-center">
+                    <!-- Connection status and Theme toggle -->
+                    <div class="flex items-center gap-4">
+                        <!-- Connection Status -->
+                        <div id="connection-status" class="connection-status disconnected">
+                            <span class="connection-dot disconnected"></span>
+                            <span class="connection-text">Disconnected</span>
+                        </div>
                         <button
                             x-data="{ dark: localStorage.theme === 'dark' }"
                             x-on:click="
@@ -146,5 +151,8 @@
             </div>
         </footer>
     </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
