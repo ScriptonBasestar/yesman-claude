@@ -5,6 +5,9 @@ alert_id: test-naming-standardization-analysis
 tags: [testing, standardization, code-quality, migration, pytest]
 created: 2025-07-10
 priority: low
+status: converted
+new_file: /tasks/todo/test-naming-standardization.md
+converted_date: 2025-01-10
 ---
 
 # 테스트 명명 규칙 표준화 및 pytest 마이그레이션

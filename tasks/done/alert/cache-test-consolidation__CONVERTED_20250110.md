@@ -5,6 +5,9 @@ alert_id: cache-test-consolidation-analysis
 tags: [testing, refactoring, cache, maintenance]
 created: 2025-07-10
 priority: low
+status: converted
+new_file: /tasks/todo/test-cache-consolidation.md
+converted_date: 2025-01-10
 ---
 
 # 캐시 테스트 통합 및 최적화

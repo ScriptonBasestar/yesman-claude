@@ -5,6 +5,9 @@ alert_id: test-mock-centralization-analysis
 tags: [testing, mock, refactoring, code-quality, maintenance]
 created: 2025-07-10
 priority: low
+status: converted
+new_file: /tasks/todo/test-mock-centralization.md
+converted_date: 2025-01-10
 ---
 
 # 테스트 Mock 중앙화 및 표준화
