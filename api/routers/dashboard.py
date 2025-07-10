@@ -1,6 +1,7 @@
+
 """Web dashboard router for FastAPI"""
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from typing import List, Dict, Any, Optional
@@ -11,7 +12,8 @@ import logging
 
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.project_health import ProjectHealth
-from libs.dashboard.widgets.activity_heatmap import ActivityHeatmap
+from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
+from libs.yesman_config import YesmanConfig
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,8 @@ templates = Jinja2Templates(directory="web-dashboard/static/templates")
 
 # Initialize managers
 session_manager = SessionManager()
+config = YesmanConfig()
+heatmap_generator = ActivityHeatmapGenerator(config)
 
 @router.get("/", response_class=HTMLResponse)
 async def dashboard_home(request: Request):
@@ -37,8 +41,6 @@ async def get_sessions():
         sessions = session_manager.get_cached_sessions_list()
         
         # Get project sessions from config
-        from libs.yesman_config import YesmanConfig
-        config = YesmanConfig()
         project_sessions = config.get_projects()
         
         # Convert to web-friendly format
@@ -193,6 +195,16 @@ async def get_activity_data():
     except Exception as e:
         logger.error(f"Failed to get activity data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get activity data: {str(e)}")
+
+@router.get("/api/heatmap/{session_name}")
+async def get_session_heatmap(session_name: str, days: int = Query(7, ge=1, le=30)):
+    """세션별 히트맵 데이터 반환"""
+    try:
+        heatmap_data = heatmap_generator.generate_heatmap_data([session_name], days=days)
+        return heatmap_data
+    except Exception as e:
+        logger.error(f"Failed to get heatmap data for {session_name}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {str(e)}")
 
 @router.get("/api/stats")
 async def get_dashboard_stats():
