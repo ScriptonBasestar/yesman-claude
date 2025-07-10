@@ -53,11 +53,11 @@ async def start():
 - 앱 종료 시 태스크 정리
 
 ## 완료 기준
-- [ ] BackgroundTaskRunner 클래스 구현
-- [ ] 3개 모니터링 태스크 구현
-- [ ] 태스크 시작/중지 메커니즘
-- [ ] WebSocket 브로드캐스트 연동
-- [ ] 에러 처리 및 로깅
+- [x] BackgroundTaskRunner 클래스 구현
+- [x] 3개 모니터링 태스크 구현
+- [x] 태스크 시작/중지 메커니즘
+- [x] WebSocket 브로드캐스트 연동
+- [x] 에러 처리 및 로깅
 
 ## 테스트
 ```python
