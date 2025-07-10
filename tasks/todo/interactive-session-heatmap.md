@@ -24,7 +24,7 @@ priority: medium
 ## 작업 내용
 
 ### 1. 즉시 대응 (Immediate Mitigation)
-- [ ] 히트맵 컴포넌트 기본 구조 생성 및 placeholder 구현
+- [x] 히트맵 컴포넌트 기본 구조 생성 및 placeholder 구현
 - [ ] 기존 활동 데이터 수집 시스템과 연동점 확인
 - [ ] 최소 기능 프로토타입으로 사용자 피드백 수집
 
