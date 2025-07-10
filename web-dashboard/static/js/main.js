@@ -5,6 +5,9 @@
  * including global state management, API communication, and utility functions.
  */
 
+// Import WebSocket manager
+const wsManager = window.wsManager || new WebSocketManager();
+
 // Global dashboard object
 window.dashboard = {
     // Application state
@@ -16,8 +19,12 @@ window.dashboard = {
         theme: localStorage.getItem('theme') || 'light',
         loading: false,
         error: null,
-        initialized: false
+        initialized: false,
+        wsConnected: false
     },
+    
+    // WebSocket manager reference
+    ws: wsManager,
 
     // API client methods
     api: {
@@ -507,18 +514,24 @@ window.dashboard = {
         try {
             // Initialize theme
             window.dashboard.utils.initializeTheme();
+            
+            // Initialize WebSocket connection
+            window.dashboard.initWebSocket();
 
             // Load initial data
             await window.dashboard.api.loadAll();
 
-            // Set up periodic refresh
+            // Set up periodic refresh (reduced frequency due to WebSocket)
             setInterval(async () => {
                 try {
-                    await window.dashboard.api.loadAll();
+                    // Only refresh if WebSocket is not connected
+                    if (!window.dashboard.state.wsConnected) {
+                        await window.dashboard.api.loadAll();
+                    }
                 } catch (error) {
                     console.error('Failed to refresh dashboard data:', error);
                 }
-            }, 30000); // Refresh every 30 seconds
+            }, 60000); // Refresh every 60 seconds as fallback
 
             window.dashboard.state.initialized = true;
             console.log('Dashboard initialized successfully');
@@ -527,6 +540,79 @@ window.dashboard = {
             console.error('Failed to initialize dashboard:', error);
             window.dashboard.state.error = error.message;
         }
+    },
+    
+    // Initialize WebSocket connections
+    initWebSocket() {
+        // Enable debug mode in development
+        if (window.location.hostname === 'localhost') {
+            wsManager.setDebug(true);
+        }
+        
+        // Connect to dashboard channel
+        wsManager.connect('dashboard');
+        
+        // Set up event handlers
+        wsManager.on('connected', (data) => {
+            console.log('WebSocket connected:', data);
+            window.dashboard.state.wsConnected = true;
+            window.dashboard.utils.showToast('Real-time updates connected', 'success');
+        });
+        
+        wsManager.on('disconnected', (data) => {
+            console.log('WebSocket disconnected:', data);
+            window.dashboard.state.wsConnected = false;
+            window.dashboard.utils.showToast('Real-time updates disconnected', 'warning');
+        });
+        
+        wsManager.on('reconnecting', (data) => {
+            console.log('WebSocket reconnecting:', data);
+            window.dashboard.utils.showToast(`Reconnecting... (attempt ${data.attempt})`, 'info');
+        });
+        
+        wsManager.on('session_update', (data) => {
+            console.log('Session update received:', data);
+            window.dashboard.state.sessions = data.data || [];
+            // Dispatch custom event for components
+            window.dispatchEvent(new CustomEvent('sessions-updated', { detail: data }));
+        });
+        
+        wsManager.on('health_update', (data) => {
+            console.log('Health update received:', data);
+            window.dashboard.state.health = data.data || {};
+            // Dispatch custom event for components
+            window.dispatchEvent(new CustomEvent('health-updated', { detail: data }));
+        });
+        
+        wsManager.on('activity_update', (data) => {
+            console.log('Activity update received:', data);
+            window.dashboard.state.activity = data.data || {};
+            // Dispatch custom event for components
+            window.dispatchEvent(new CustomEvent('activity-updated', { detail: data }));
+        });
+        
+        wsManager.on('initial_data', (data) => {
+            console.log('Initial data received:', data);
+            const initialData = data.data || {};
+            
+            if (initialData.sessions) {
+                window.dashboard.state.sessions = initialData.sessions;
+            }
+            if (initialData.health) {
+                window.dashboard.state.health = initialData.health;
+            }
+            if (initialData.activity) {
+                window.dashboard.state.activity = initialData.activity;
+            }
+            if (initialData.stats) {
+                window.dashboard.state.stats = initialData.stats;
+            }
+        });
+        
+        wsManager.on('error', (data) => {
+            console.error('WebSocket error:', data);
+            window.dashboard.utils.showToast('Connection error', 'error');
+        });
     }
 };
 
