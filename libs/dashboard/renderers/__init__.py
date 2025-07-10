@@ -13,6 +13,12 @@ from .renderer_factory import (
     RendererInitializationError, render_widget, render_all_formats,
     render_formats, create_renderer, get_renderer
 )
+from .optimizations import (
+    RenderCache, CacheStats, cached_render, cached_layout,
+    LazyRenderer, BatchRenderer, PerformanceProfiler, TimingContext,
+    profile_render, get_cache_stats, clear_all_caches,
+    get_performance_stats, clear_performance_stats
+)
 from .widget_models import (
     SessionData, SessionStatus, WindowData,
     HealthData, HealthCategoryData, HealthLevel,
@@ -41,6 +47,19 @@ __all__ = [
     'render_formats',
     'create_renderer',
     'get_renderer',
+    'RenderCache',
+    'CacheStats',
+    'cached_render',
+    'cached_layout',
+    'LazyRenderer',
+    'BatchRenderer',
+    'PerformanceProfiler',
+    'TimingContext',
+    'profile_render',
+    'get_cache_stats',
+    'clear_all_caches',
+    'get_performance_stats',
+    'clear_performance_stats',
     'SessionData',
     'SessionStatus',
     'WindowData', 
