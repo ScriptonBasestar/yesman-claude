@@ -44,11 +44,11 @@ disconnectedCallback() {
 ```
 
 ## 완료 기준
-- [ ] SessionBrowser 실시간 업데이트
-- [ ] HealthWidget 실시간 업데이트
-- [ ] ActivityHeatmap 실시간 업데이트
-- [ ] 애니메이션 효과 적용
-- [ ] 메모리 누수 없음
+- [x] SessionBrowser 실시간 업데이트
+- [x] HealthWidget 실시간 업데이트
+- [x] ActivityHeatmap 실시간 업데이트
+- [x] 애니메이션 효과 적용
+- [x] 메모리 누수 없음
 
 ## 테스트
 ```javascript

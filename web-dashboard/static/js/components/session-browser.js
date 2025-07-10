@@ -14,14 +14,126 @@ class SessionBrowser extends HTMLElement {
         this.render();
         this.bindEvents();
         this.loadSessions();
+        this.setupRealtimeUpdates();
         
-        // Auto-refresh every 5 seconds
-        this.refreshInterval = setInterval(() => this.loadSessions(), 5000);
+        // Auto-refresh every 30 seconds as fallback
+        this.refreshInterval = setInterval(() => {
+            if (!window.dashboard?.state?.wsConnected) {
+                this.loadSessions();
+            }
+        }, 30000);
     }
 
     disconnectedCallback() {
         if (this.refreshInterval) {
             clearInterval(this.refreshInterval);
+        }
+        this.cleanup();
+    }
+    
+    setupRealtimeUpdates() {
+        // Listen for WebSocket updates
+        this.sessionUpdateHandler = (event) => {
+            const data = event.detail?.data || [];
+            this.updateSessions(data);
+        };
+        
+        window.addEventListener('sessions-updated', this.sessionUpdateHandler);
+    }
+    
+    cleanup() {
+        if (this.sessionUpdateHandler) {
+            window.removeEventListener('sessions-updated', this.sessionUpdateHandler);
+        }
+    }
+    
+    updateSessions(newSessions) {
+        const oldSessionMap = new Map(
+            this.sessions.map(s => [s.session_name, s])
+        );
+        
+        // Track changes for animations
+        const added = [];
+        const updated = [];
+        const removed = new Set(oldSessionMap.keys());
+        
+        // Process new sessions
+        newSessions.forEach(session => {
+            const oldSession = oldSessionMap.get(session.session_name);
+            removed.delete(session.session_name);
+            
+            if (!oldSession) {
+                added.push(session);
+            } else if (JSON.stringify(oldSession) !== JSON.stringify(session)) {
+                updated.push(session);
+            }
+        });
+        
+        // Update internal state
+        this.sessions = newSessions;
+        
+        // Apply updates with animations
+        if (added.length > 0 || updated.length > 0 || removed.size > 0) {
+            this.applyUpdatesWithAnimation(added, updated, Array.from(removed));
+        }
+    }
+    
+    applyUpdatesWithAnimation(added, updated, removed) {
+        // Handle removals first
+        removed.forEach(sessionName => {
+            const element = this.querySelector(`[data-session-name="${sessionName}"]`);
+            if (element) {
+                element.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => element.remove(), 300);
+            }
+        });
+        
+        // Handle updates
+        updated.forEach(session => {
+            const element = this.querySelector(`[data-session-name="${session.session_name}"]`);
+            if (element) {
+                element.style.animation = 'pulse 0.5s ease-out';
+                // Update content after animation starts
+                setTimeout(() => {
+                    this.updateSessionElement(element, session);
+                }, 100);
+            }
+        });
+        
+        // Handle additions
+        if (added.length > 0) {
+            // Re-render sessions to include new ones
+            setTimeout(() => {
+                this.renderSessions();
+                // Animate new sessions
+                added.forEach(session => {
+                    const element = this.querySelector(`[data-session-name="${session.session_name}"]`);
+                    if (element) {
+                        element.style.opacity = '0';
+                        element.style.animation = 'slideInRight 0.3s ease-out forwards';
+                    }
+                });
+            }, removed.length > 0 ? 350 : 0);
+        }
+    }
+    
+    updateSessionElement(element, session) {
+        // Update status indicator
+        const statusDot = element.querySelector('.status-dot');
+        if (statusDot) {
+            statusDot.className = `w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}`;
+        }
+        
+        // Update status text
+        const statusText = element.querySelector('.status-text');
+        if (statusText) {
+            statusText.textContent = session.status;
+        }
+        
+        // Update Claude active indicator
+        const claudeIndicator = element.querySelector('.claude-indicator');
+        if (claudeIndicator) {
+            claudeIndicator.style.display = session.claude_active ? 'block' : 'none';
         }
     }
 
@@ -234,18 +346,20 @@ class SessionBrowser extends HTMLElement {
         return `
             <div class="list-view space-y-2">
                 ${this.sessions.map(session => `
-                    <div class="session-item p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                    <div class="session-item p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors" 
+                         data-session-name="${session.session_name}">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0">
-                                    <div class="w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}"></div>
+                                    <div class="status-dot w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}"></div>
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-medium text-gray-900">${session.session_name}</h3>
                                     <p class="text-sm text-gray-500">
                                         Project: ${session.project_name} | 
                                         Template: ${session.template} | 
-                                        Status: ${session.status}
+                                        Status: <span class="status-text">${session.status}</span>
+                                        ${session.claude_active ? '<span class="claude-indicator ml-2 text-blue-500">● Claude Active</span>' : ''}
                                     </p>
                                 </div>
                             </div>
@@ -263,11 +377,12 @@ class SessionBrowser extends HTMLElement {
         return `
             <div class="grid-view grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 ${this.sessions.map(session => `
-                    <div class="session-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                    <div class="session-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                         data-session-name="${session.session_name}">
                         <div class="flex items-center justify-between mb-3">
-                            <div class="w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}"></div>
+                            <div class="status-dot w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}"></div>
                             <span class="text-xs px-2 py-1 rounded-full ${session.exists ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
-                                ${session.status}
+                                <span class="status-text">${session.status}</span>
                             </span>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900 mb-2">${session.session_name}</h3>
@@ -275,6 +390,7 @@ class SessionBrowser extends HTMLElement {
                             <div>Project: ${session.project_name}</div>
                             <div>Template: ${session.template}</div>
                             <div>Windows: ${session.windows ? session.windows.length : 0}</div>
+                            ${session.claude_active ? '<div class="claude-indicator text-blue-500">● Claude Active</div>' : ''}
                         </div>
                         <div class="flex space-x-2">
                             ${this.renderActionButtons(session)}
@@ -289,13 +405,17 @@ class SessionBrowser extends HTMLElement {
         return `
             <div class="tree-view space-y-4">
                 ${this.sessions.map(session => `
-                    <div class="session-tree border border-gray-200 rounded-lg">
+                    <div class="session-tree border border-gray-200 rounded-lg" data-session-name="${session.session_name}">
                         <div class="session-header p-4 bg-gray-50 border-b border-gray-200">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}"></div>
+                                    <div class="status-dot w-3 h-3 rounded-full ${session.exists ? 'bg-green-500' : 'bg-gray-400'}"></div>
                                     <h3 class="text-lg font-medium text-gray-900">${session.session_name}</h3>
                                     <span class="text-sm text-gray-500">(${session.project_name})</span>
+                                    <span class="text-xs px-2 py-1 rounded-full ${session.exists ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                        <span class="status-text">${session.status}</span>
+                                    </span>
+                                    ${session.claude_active ? '<span class="claude-indicator text-blue-500">● Claude Active</span>' : ''}
                                 </div>
                                 <div class="flex space-x-2">
                                     ${this.renderActionButtons(session)}
