@@ -9,6 +9,7 @@ class WebSocketManager {
         this.eventHandlers = new Map(); // event -> Set of handlers
         this.reconnectAttempts = new Map(); // channel -> attempt count
         this.reconnectTimeouts = new Map(); // channel -> timeout ID
+        this.managedListenerIds = new Map(); // Track memory-managed listeners
         
         // Configuration
         this.config = {
@@ -295,7 +296,7 @@ class WebSocketManager {
     /**
      * Send data to a channel
      */
-    send(channel, data) {
+    async send(channel, data) {
         const ws = this.connections.get(channel);
         
         if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -304,7 +305,24 @@ class WebSocketManager {
         }
         
         try {
-            ws.send(JSON.stringify(data));
+            let messageToSend;
+            
+            // Use network optimization if available
+            if (window.networkOptimizer) {
+                const optimized = await window.networkOptimizer.compressMessage(data);
+                
+                if (optimized.compressed) {
+                    // Send compressed binary data
+                    ws.send(optimized.data);
+                } else {
+                    // Send optimized JSON
+                    ws.send(optimized.data);
+                }
+            } else {
+                // Fallback to standard JSON
+                ws.send(JSON.stringify(data));
+            }
+            
             return true;
         } catch (error) {
             this.log(`Failed to send to ${channel}:`, error);
