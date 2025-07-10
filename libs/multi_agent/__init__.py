@@ -15,6 +15,13 @@ from .conflict_resolution import (
     ResolutionStrategy,
     ResolutionResult
 )
+from .conflict_prediction import (
+    ConflictPredictor,
+    PredictionResult,
+    PredictionConfidence,
+    ConflictPattern,
+    ConflictVector
+)
 
 __all__ = [
     "BranchManager",
@@ -37,4 +44,9 @@ __all__ = [
     "ConflictSeverity",
     "ResolutionStrategy",
     "ResolutionResult",
+    "ConflictPredictor",
+    "PredictionResult",
+    "PredictionConfidence",
+    "ConflictPattern",
+    "ConflictVector",
 ]

@@ -10,6 +10,7 @@ from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.types import Task, Agent
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
+from libs.multi_agent.conflict_prediction import ConflictPredictor
 from libs.multi_agent.branch_manager import BranchManager
 
 
@@ -448,6 +449,292 @@ def conflict_summary(repo_path: Optional[str]):
 
     except Exception as e:
         click.echo(f"❌ Error getting conflict summary: {e}", err=True)
+
+
+@multi_agent_cli.command("predict-conflicts")
+@click.argument("branches", nargs=-1, required=True)
+@click.option("--repo-path", "-r", help="Path to git repository")
+@click.option(
+    "--time-horizon", "-t", type=int, default=7, help="Prediction time horizon in days"
+)
+@click.option(
+    "--min-confidence",
+    "-c",
+    type=float,
+    default=0.3,
+    help="Minimum confidence threshold",
+)
+@click.option(
+    "--limit", "-l", type=int, default=10, help="Maximum number of predictions to show"
+)
+def predict_conflicts(
+    branches: tuple,
+    repo_path: Optional[str],
+    time_horizon: int,
+    min_confidence: float,
+    limit: int,
+):
+    """Predict potential conflicts between branches"""
+    try:
+        click.echo(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
+        click.echo(f"   Time horizon: {time_horizon} days")
+        click.echo(f"   Confidence threshold: {min_confidence}")
+
+        # Create prediction system
+        branch_manager = BranchManager(repo_path=repo_path)
+        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+        predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
+
+        # Set prediction parameters
+        predictor.min_confidence_threshold = min_confidence
+        predictor.max_predictions_per_run = limit * 2  # Get more, filter later
+
+        async def run_prediction():
+            from datetime import timedelta
+
+            horizon = timedelta(days=time_horizon)
+            predictions = await predictor.predict_conflicts(list(branches), horizon)
+
+            if not predictions:
+                click.echo("✅ No potential conflicts predicted")
+                return
+
+            # Filter and limit results
+            filtered_predictions = [
+                p for p in predictions if p.likelihood_score >= min_confidence
+            ]
+            filtered_predictions = filtered_predictions[:limit]
+
+            click.echo(f"⚠️  Found {len(filtered_predictions)} potential conflicts:")
+            click.echo("=" * 80)
+
+            for i, prediction in enumerate(filtered_predictions, 1):
+                confidence_icon = {
+                    "low": "🟢",
+                    "medium": "🟡",
+                    "high": "🔴",
+                    "critical": "💀",
+                }.get(prediction.confidence.value, "❓")
+
+                pattern_icon = {
+                    "overlapping_imports": "📦",
+                    "function_signature_drift": "🔧",
+                    "variable_naming_collision": "🏷️",
+                    "class_hierarchy_change": "🏗️",
+                    "dependency_version_mismatch": "📋",
+                    "api_breaking_change": "💥",
+                    "resource_contention": "⚡",
+                    "merge_context_loss": "🔀",
+                }.get(prediction.pattern.value, "❓")
+
+                click.echo(
+                    f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}"
+                )
+                click.echo(
+                    f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}"
+                )
+                click.echo(
+                    f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})"
+                )
+                click.echo(f"   Branches: {', '.join(prediction.affected_branches)}")
+                if prediction.affected_files:
+                    files_str = ", ".join(prediction.affected_files[:3])
+                    if len(prediction.affected_files) > 3:
+                        files_str += f" (and {len(prediction.affected_files) - 3} more)"
+                    click.echo(f"   Files: {files_str}")
+                click.echo(f"   Description: {prediction.description}")
+
+                if prediction.timeline_prediction:
+                    click.echo(
+                        f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}"
+                    )
+
+                if prediction.prevention_suggestions:
+                    click.echo("   Prevention:")
+                    for suggestion in prediction.prevention_suggestions[:2]:
+                        click.echo(f"     • {suggestion}")
+                click.echo()
+
+        asyncio.run(run_prediction())
+
+    except Exception as e:
+        click.echo(f"❌ Error predicting conflicts: {e}", err=True)
+
+
+@multi_agent_cli.command("prediction-summary")
+@click.option("--repo-path", "-r", help="Path to git repository")
+def prediction_summary(repo_path: Optional[str]):
+    """Show conflict prediction summary and statistics"""
+    try:
+        click.echo("🔮 Conflict Prediction Summary")
+        click.echo("=" * 40)
+
+        # Create prediction system
+        branch_manager = BranchManager(repo_path=repo_path)
+        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+        predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
+
+        summary = predictor.get_prediction_summary()
+
+        # Overall statistics
+        click.echo(f"Total Predictions: {summary['total_predictions']}")
+        click.echo(f"Active Predictions: {summary.get('active_predictions', 0)}")
+
+        # Confidence breakdown
+        if summary["by_confidence"]:
+            click.echo("\n🎯 Confidence Breakdown:")
+            for confidence, count in summary["by_confidence"].items():
+                if count > 0:
+                    confidence_icon = {
+                        "low": "🟢",
+                        "medium": "🟡",
+                        "high": "🔴",
+                        "critical": "💀",
+                    }.get(confidence, "❓")
+                    click.echo(
+                        f"  {confidence_icon} {confidence.capitalize()}: {count}"
+                    )
+
+        # Pattern breakdown
+        if summary["by_pattern"]:
+            click.echo("\n🏷️  Pattern Breakdown:")
+            for pattern, count in summary["by_pattern"].items():
+                if count > 0:
+                    pattern_icon = {
+                        "overlapping_imports": "📦",
+                        "function_signature_drift": "🔧",
+                        "variable_naming_collision": "🏷️",
+                        "class_hierarchy_change": "🏗️",
+                        "dependency_version_mismatch": "📋",
+                        "api_breaking_change": "💥",
+                        "resource_contention": "⚡",
+                        "merge_context_loss": "🔀",
+                    }.get(pattern, "❓")
+                    click.echo(
+                        f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}"
+                    )
+
+        # Accuracy metrics
+        accuracy = summary["accuracy_metrics"]
+        if accuracy["total_predictions"] > 0:
+            click.echo("\n📊 Accuracy Metrics:")
+            click.echo(f"  Accuracy Rate: {accuracy['accuracy_rate']:.1%}")
+            click.echo(f"  Prevented Conflicts: {accuracy['prevented_conflicts']}")
+            click.echo(f"  False Positives: {accuracy['false_positives']}")
+
+        # Most likely conflicts
+        if summary.get("most_likely_conflicts"):
+            click.echo("\n🚨 Most Likely Conflicts:")
+            for conflict in summary["most_likely_conflicts"]:
+                click.echo(
+                    f"  • {conflict['description']} ({conflict['likelihood']:.1%})"
+                )
+
+    except Exception as e:
+        click.echo(f"❌ Error getting prediction summary: {e}", err=True)
+
+
+@multi_agent_cli.command("analyze-conflict-patterns")
+@click.argument("branches", nargs=-1, required=True)
+@click.option("--repo-path", "-r", help="Path to git repository")
+@click.option("--pattern", "-p", help="Focus on specific pattern type")
+@click.option("--export", "-e", help="Export analysis to JSON file")
+def analyze_conflict_patterns(
+    branches: tuple,
+    repo_path: Optional[str],
+    pattern: Optional[str],
+    export: Optional[str],
+):
+    """Analyze detailed conflict patterns between branches"""
+    try:
+        click.echo(f"🔍 Analyzing conflict patterns for: {', '.join(branches)}")
+
+        # Create prediction system
+        branch_manager = BranchManager(repo_path=repo_path)
+        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+        predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
+
+        async def run_analysis():
+            analysis_results = {}
+
+            # Calculate conflict vectors for all pairs
+            click.echo("\n📊 Conflict Vector Analysis:")
+            click.echo("-" * 40)
+
+            for i, branch1 in enumerate(branches):
+                for branch2 in branches[i + 1 :]:
+                    click.echo(f"\n🔗 {branch1} ↔ {branch2}")
+
+                    vector = await predictor._calculate_conflict_vector(
+                        branch1, branch2
+                    )
+                    analysis_results[f"{branch1}:{branch2}"] = {
+                        "vector": vector._asdict(),
+                        "patterns": {},
+                    }
+
+                    # Display vector components
+                    click.echo(f"   File Overlap: {vector.file_overlap_score:.2f}")
+                    click.echo(
+                        f"   Change Frequency: {vector.change_frequency_score:.2f}"
+                    )
+                    click.echo(f"   Complexity: {vector.complexity_score:.2f}")
+                    click.echo(
+                        f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}"
+                    )
+                    click.echo(
+                        f"   Semantic Distance: {vector.semantic_distance_score:.2f}"
+                    )
+                    click.echo(
+                        f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}"
+                    )
+
+                    # Overall risk score
+                    risk_score = sum(vector) / len(vector)
+                    risk_level = (
+                        "🔴 HIGH"
+                        if risk_score > 0.7
+                        else "🟡 MEDIUM"
+                        if risk_score > 0.4
+                        else "🟢 LOW"
+                    )
+                    click.echo(f"   Overall Risk: {risk_level} ({risk_score:.2f})")
+
+                    # Pattern-specific analysis
+                    if pattern:
+                        from libs.multi_agent.conflict_prediction import ConflictPattern
+
+                        try:
+                            target_pattern = ConflictPattern(pattern)
+                            detector = predictor.pattern_detectors.get(target_pattern)
+                            if detector:
+                                result = await detector(branch1, branch2, vector)
+                                if result:
+                                    analysis_results[f"{branch1}:{branch2}"][
+                                        "patterns"
+                                    ][pattern] = {
+                                        "likelihood": result.likelihood_score,
+                                        "confidence": result.confidence.value,
+                                        "description": result.description,
+                                    }
+                                    click.echo(
+                                        f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence"
+                                    )
+                        except ValueError:
+                            click.echo(f"   ❌ Unknown pattern: {pattern}")
+
+            # Export results if requested
+            if export:
+                import json
+
+                with open(export, "w") as f:
+                    json.dump(analysis_results, f, indent=2, default=str)
+                click.echo(f"\n💾 Analysis exported to: {export}")
+
+        asyncio.run(run_analysis())
+
+    except Exception as e:
+        click.echo(f"❌ Error analyzing patterns: {e}", err=True)
 
 
 # Register the command group
