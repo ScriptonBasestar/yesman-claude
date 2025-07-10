@@ -15,6 +15,7 @@ window.dashboard = {
         sessions: [],
         health: {},
         activity: {},
+        logs: [],
         stats: {},
         theme: localStorage.getItem('theme') || 'light',
         loading: false,
@@ -152,6 +153,52 @@ window.dashboard = {
             } catch (error) {
                 console.error('Failed to fetch stats:', error);
                 window.dashboard.state.error = error.message;
+                throw error;
+            }
+        },
+
+        /**
+         * Get system logs
+         */
+        async getLogs(params = {}) {
+            try {
+                const queryParams = new URLSearchParams(params);
+                const endpoint = `/logs${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+                const data = await this.request(endpoint);
+                window.dashboard.state.logs = data;
+                return data;
+            } catch (error) {
+                console.error('Failed to fetch logs:', error);
+                window.dashboard.state.error = error.message;
+                throw error;
+            }
+        },
+
+        /**
+         * Get available log sources
+         */
+        async getLogSources() {
+            try {
+                const data = await this.request('/logs/sources');
+                return data;
+            } catch (error) {
+                console.error('Failed to fetch log sources:', error);
+                throw error;
+            }
+        },
+
+        /**
+         * Add a test log entry
+         */
+        async addTestLog(level = 'info', source = 'test', message = 'Test log message') {
+            try {
+                const data = await this.request('/logs/test', {
+                    method: 'POST',
+                    body: { level, source, message }
+                });
+                return data;
+            } catch (error) {
+                console.error('Failed to add test log:', error);
                 throw error;
             }
         },
@@ -684,6 +731,20 @@ window.dashboard = {
             window.dashboard.state.activity = data.data || {};
             // Dispatch custom event for components
             window.dispatchEvent(new CustomEvent('activity-updated', { detail: data }));
+        });
+        
+        wsManager.on('log_update', (data) => {
+            console.log('Log update received:', data);
+            // Add new log to state (keeping only last 500 logs)
+            if (!window.dashboard.state.logs) {
+                window.dashboard.state.logs = [];
+            }
+            window.dashboard.state.logs.push(data.data);
+            if (window.dashboard.state.logs.length > 500) {
+                window.dashboard.state.logs.shift();
+            }
+            // Dispatch custom event for components
+            window.dispatchEvent(new CustomEvent('log-updated', { detail: data }));
         });
         
         wsManager.on('initial_data', (data) => {

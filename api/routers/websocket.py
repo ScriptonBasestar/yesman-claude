@@ -178,6 +178,17 @@ class ConnectionManager:
         await self.broadcast_to_channel("activity", message)
         await self.broadcast_to_channel("dashboard", message)
     
+    async def broadcast_log_update(self, log_entry: dict):
+        """Broadcast log update to relevant channels"""
+        message = {
+            "type": "log_update",
+            "timestamp": datetime.now().isoformat(),
+            "data": log_entry
+        }
+        
+        await self.broadcast_to_channel("logs", message)
+        await self.broadcast_to_channel("dashboard", message)
+    
     async def ping_connections(self):
         """Send periodic ping messages to keep connections alive"""
         while True:
@@ -335,6 +346,51 @@ async def websocket_activity(websocket: WebSocket):
         logger.info("Activity WebSocket disconnected")
     except Exception as e:
         logger.error(f"Activity WebSocket error: {str(e)}")
+        manager.disconnect(websocket)
+
+
+@router.websocket("/logs")
+async def websocket_logs(websocket: WebSocket):
+    """Logs WebSocket endpoint"""
+    await manager.connect(websocket, "logs")
+    
+    try:
+        while True:
+            data = await websocket.receive_json()
+            
+            if data.get("type") == "pong":
+                logger.debug("Received pong from logs client")
+            
+            elif data.get("type") == "refresh":
+                # Client requests fresh log data
+                try:
+                    from api.routers.logs import get_logs
+                    logs = get_logs(limit=100)
+                    initial_data = {
+                        "type": "initial_logs",
+                        "timestamp": datetime.now().isoformat(),
+                        "data": [log.dict() for log in logs]
+                    }
+                    await manager.send_personal_message(initial_data, websocket)
+                except Exception as e:
+                    logger.error(f"Error sending initial logs: {str(e)}")
+            
+            elif data.get("type") == "test_log":
+                # For testing - client can trigger test logs
+                test_log = {
+                    "level": data.get("level", "info"),
+                    "timestamp": datetime.now().isoformat(),
+                    "source": data.get("source", "test"),
+                    "message": data.get("message", "Test log message"),
+                    "raw": f"[{datetime.now().isoformat()}] [TEST] Test log message"
+                }
+                await manager.broadcast_log_update(test_log)
+                
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        logger.info("Logs WebSocket disconnected")
+    except Exception as e:
+        logger.error(f"Logs WebSocket error: {str(e)}")
         manager.disconnect(websocket)
 
 

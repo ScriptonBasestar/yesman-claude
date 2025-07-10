@@ -45,7 +45,7 @@ class WebSocketManager {
         const eventTypes = [
             'connected', 'disconnected', 'error', 'reconnecting',
             'session_update', 'health_update', 'activity_update',
-            'initial_data', 'ping', 'pong'
+            'log_update', 'initial_data', 'ping', 'pong'
         ];
         
         eventTypes.forEach(event => {
