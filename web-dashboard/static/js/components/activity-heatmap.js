@@ -8,9 +8,17 @@ class ActivityHeatmap extends HTMLElement {
         this.activityData = null;
         this.refreshInterval = null;
         this.tooltip = null;
+        this.componentId = null;
+        this.eventListenerIds = [];
+        this.cachedElements = new Map();
     }
 
     connectedCallback() {
+        // Register component for memory management
+        if (window.memoryOptimizer) {
+            this.componentId = window.memoryOptimizer.registerComponent(this);
+        }
+        
         this.render();
         this.createTooltip();
         this.loadActivityData();
@@ -32,20 +40,44 @@ class ActivityHeatmap extends HTMLElement {
             this.tooltip.remove();
         }
         this.cleanup();
+        
+        // Memory cleanup
+        if (window.memoryOptimizer && this.componentId) {
+            window.memoryOptimizer.cleanupComponent(this.componentId);
+        }
+        
+        // Clean up cached elements
+        this.cachedElements.clear();
     }
     
     setupRealtimeUpdates() {
-        // Listen for WebSocket updates
+        // Listen for WebSocket updates with memory management
         this.activityUpdateHandler = (event) => {
             const data = event.detail?.data || {};
             this.updateActivity(data);
         };
         
-        window.addEventListener('activity-updated', this.activityUpdateHandler);
+        // Use memory optimizer for managed event listeners
+        if (window.memoryOptimizer) {
+            const listenerId = window.memoryOptimizer.addManagedListener(
+                window, 
+                'activity-updated', 
+                this.activityUpdateHandler
+            );
+            this.eventListenerIds.push(listenerId);
+        } else {
+            window.addEventListener('activity-updated', this.activityUpdateHandler);
+        }
     }
     
     cleanup() {
-        if (this.activityUpdateHandler) {
+        // Clean up managed event listeners
+        if (window.memoryOptimizer) {
+            this.eventListenerIds.forEach(id => {
+                window.memoryOptimizer.removeManagedListener(id);
+            });
+            this.eventListenerIds = [];
+        } else if (this.activityUpdateHandler) {
             window.removeEventListener('activity-updated', this.activityUpdateHandler);
         }
     }
@@ -80,9 +112,20 @@ class ActivityHeatmap extends HTMLElement {
             return;
         }
         
-        const oldActivitiesMap = new Map(
-            oldData.activities.map(a => [a.date, a.activity_count])
-        );
+        // Use WeakMap caching for performance
+        const cacheKey = 'oldActivitiesMap';
+        let oldActivitiesMap = window.memoryOptimizer ? 
+            window.memoryOptimizer.getCache(oldData, cacheKey) : null;
+            
+        if (!oldActivitiesMap) {
+            oldActivitiesMap = new Map(
+                oldData.activities.map(a => [a.date, a.activity_count])
+            );
+            
+            if (window.memoryOptimizer) {
+                window.memoryOptimizer.cache(oldData, cacheKey, oldActivitiesMap);
+            }
+        }
         
         // Find changed dates
         const changedDates = [];
@@ -97,22 +140,41 @@ class ActivityHeatmap extends HTMLElement {
             }
         });
         
-        // Update individual cells with animation
-        changedDates.forEach(({ date, oldCount, newCount }) => {
-            const cell = this.querySelector(`[data-date="${date}"]`);
-            if (cell) {
-                // Add pulse animation
-                cell.style.animation = 'pulse 0.5s ease-out';
-                
-                setTimeout(() => {
-                    // Update cell appearance
-                    cell.className = cell.className.replace(/bg-\w+-\d+/g, '');
-                    cell.className += ` ${this.getActivityColor(newCount)}`;
-                    cell.dataset.count = newCount;
-                    cell.dataset.level = this.getActivityLevel(newCount);
-                }, 100);
-            }
-        });
+        // Update individual cells with animation using RAF for better performance
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(() => {
+                changedDates.forEach(({ date, oldCount, newCount }) => {
+                    const cell = this.querySelector(`[data-date="${date}"]`);
+                    if (cell) {
+                        // Add pulse animation
+                        cell.style.animation = 'pulse 0.5s ease-out';
+                        
+                        // Batch DOM updates
+                        window.requestAnimationFrame(() => {
+                            // Update cell appearance
+                            cell.className = cell.className.replace(/bg-\w+-\d+/g, '');
+                            cell.className += ` ${this.getActivityColor(newCount)}`;
+                            cell.dataset.count = newCount;
+                            cell.dataset.level = this.getActivityLevel(newCount);
+                        });
+                    }
+                });
+            });
+        } else {
+            // Fallback for browsers without RAF
+            changedDates.forEach(({ date, oldCount, newCount }) => {
+                const cell = this.querySelector(`[data-date="${date}"]`);
+                if (cell) {
+                    cell.style.animation = 'pulse 0.5s ease-out';
+                    setTimeout(() => {
+                        cell.className = cell.className.replace(/bg-\w+-\d+/g, '');
+                        cell.className += ` ${this.getActivityColor(newCount)}`;
+                        cell.dataset.count = newCount;
+                        cell.dataset.level = this.getActivityLevel(newCount);
+                    }, 100);
+                }
+            });
+        }
         
         // Update stats section
         setTimeout(() => {
