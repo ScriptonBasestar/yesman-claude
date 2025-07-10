@@ -1,9 +1,130 @@
 # Yesman Claude
 
-`Claude code` 자동진행 도구
+Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions and automates interactions with Claude Code. It provides multiple dashboard interfaces for monitoring and controlling your development environment.
 
-선택프롬프트: regex 또는 외부 LLM을 이용해 자동 처리
-완료후 진행: 외부 LLM으로 다음작업 연속진행
+## 🚀 Key Features
+
+- **Session Management**: Create and manage tmux sessions using YAML templates
+- **Claude Code Automation**: Automatic response to Claude Code prompts and selections
+- **Multiple Dashboard Interfaces**: Choose from TUI, Web, or native desktop interfaces
+- **Real-time Monitoring**: Live session activity tracking and health monitoring
+- **AI-Powered Learning**: Adaptive response system that learns from user behavior
+- **Performance Optimization**: Built-in performance monitoring and optimization strategies
+
+## 📊 Dashboard Interfaces
+
+Yesman-Claude offers three distinct dashboard interfaces to suit different environments and preferences:
+
+### 🖥️ Terminal User Interface (TUI)
+Rich-based terminal dashboard with live updates and keyboard navigation.
+```bash
+uv run ./yesman.py dash tui
+```
+
+### 🌐 Web Interface  
+Browser-based dashboard with REST API backend.
+```bash
+uv run ./yesman.py dash web --port 8000
+```
+
+### 🖱️ Desktop Application
+Native desktop app built with Tauri and Svelte.
+```bash
+uv run ./yesman.py dash tauri --dev
+```
+
+## 🔧 Quick Start
+
+### Installation
+```bash
+# Development installation (recommended)
+make dev-install
+# or directly:
+pip install -e . --config-settings editable_mode=compat
+
+# Alternative using uv (recommended for development)
+uv run ./yesman.py --help
+```
+
+### Basic Commands
+```bash
+# List available templates and projects
+./yesman.py ls
+
+# Create all tmux sessions from projects.yaml
+uv run ./yesman.py up
+
+# Monitor sessions with dashboard
+uv run ./yesman.py dash
+
+# Interactive session browser
+uv run ./yesman.py browse
+
+# AI learning system management
+uv run ./yesman.py ai status
+
+# Comprehensive project status dashboard
+uv run ./yesman.py status -i
+
+# Context-aware automation
+uv run ./yesman.py automate monitor
+```
+
+## 📋 Interface Comparison
+
+| Feature | TUI | Web | Tauri |
+|---------|-----|-----|-------|
+| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **Resource Usage** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **Cross-platform** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **Remote Access** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ |
+| **User Experience** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Customization** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **System Integration** | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+
+### When to Use Each Interface
+
+- **TUI**: SSH sessions, minimal resource usage, terminal-only environments
+- **Web**: Remote monitoring, team collaboration, browser-based workflows  
+- **Tauri**: Daily development, best user experience, desktop integration
+
+## 🎯 Advanced Features
+
+### AI Learning System
+```bash
+# Configure adaptive responses
+uv run ./yesman.py ai config -t 0.8
+
+# View learning analytics
+uv run ./yesman.py ai history
+
+# Export learning data
+uv run ./yesman.py ai export
+```
+
+### Context-Aware Automation
+```bash
+# Monitor development context
+uv run ./yesman.py automate monitor
+
+# Detect workflow patterns
+uv run ./yesman.py automate detect
+
+# Configure automation rules
+uv run ./yesman.py automate config
+```
+
+### Performance Monitoring
+```bash
+# Live performance dashboard
+uv run ./yesman.py status -i
+
+# Analyze log patterns
+uv run ./yesman.py logs analyze
+
+# Cleanup old logs
+uv run ./yesman.py logs cleanup
+```
 
 ## 설정 파일
 
