@@ -313,7 +313,9 @@ class DashboardLauncher:
         elif requirement == "rich":
             try:
                 import rich
-                return True, f"Rich {rich.__version__}"
+                # Rich might not have __version__ in older versions
+                version = getattr(rich, '__version__', 'unknown')
+                return True, f"Rich {version}"
             except ImportError:
                 return False, "Rich not installed"
         
