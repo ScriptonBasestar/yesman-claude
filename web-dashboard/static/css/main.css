@@ -5,6 +5,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import performance optimizations */
+@import './components/performance-optimizations.css';
+
 /* Custom component styles */
 @layer components {
     .dashboard-card {

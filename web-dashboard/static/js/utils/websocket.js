@@ -152,11 +152,70 @@ class WebSocketManager {
             return;
         }
         
-        // Emit message to handlers
-        this.emit(messageType, data);
+        // Handle message batches
+        if (messageType === 'message_batch') {
+            this.handleMessageBatch(channel, data);
+            return;
+        }
+        
+        // Emit message to handlers (with optimization)
+        this.emitOptimized(messageType, data);
         
         // Also emit a generic message event
         this.emit('message', { channel, data });
+    }
+    
+    /**
+     * Handle batched messages from server
+     */
+    handleMessageBatch(channel, batchData) {
+        const messages = batchData.messages || [];
+        const batchInfo = {
+            channel,
+            count: batchData.count,
+            timestamp: batchData.timestamp
+        };
+        
+        // Process each message in the batch
+        messages.forEach(message => {
+            this.emitOptimized(message.type, message);
+        });
+        
+        // Emit batch completion event
+        this.emit('batch_processed', batchInfo);
+    }
+    
+    /**
+     * Emit events with performance optimization
+     */
+    emitOptimized(event, data) {
+        // Use optimized handlers if available
+        if (window.performanceOptimizer) {
+            const optimizedEmit = this.getOptimizedEmitter(event);
+            optimizedEmit(data);
+        } else {
+            this.emit(event, data);
+        }
+    }
+    
+    /**
+     * Get or create optimized emitter for event type
+     */
+    getOptimizedEmitter(event) {
+        if (!this._optimizedEmitters) {
+            this._optimizedEmitters = new Map();
+        }
+        
+        if (!this._optimizedEmitters.has(event)) {
+            const baseEmitter = (data) => this.emit(event, data);
+            const optimizedEmitter = window.performanceOptimizer.optimizeWebSocketHandler(
+                baseEmitter, 
+                event
+            );
+            this._optimizedEmitters.set(event, optimizedEmitter);
+        }
+        
+        return this._optimizedEmitters.get(event);
     }
     
     /**

@@ -712,39 +712,77 @@ window.dashboard = {
             }
         });
         
-        wsManager.on('session_update', (data) => {
+        // Optimized WebSocket event handlers with debouncing/throttling
+        const optimizedSessionUpdate = window.dashboard.utils.debounce((data) => {
             console.log('Session update received:', data);
             window.dashboard.state.sessions = data.data || [];
             // Dispatch custom event for components
             window.dispatchEvent(new CustomEvent('sessions-updated', { detail: data }));
-        });
+        }, 200, { maxWait: 1000 });
         
-        wsManager.on('health_update', (data) => {
+        const optimizedHealthUpdate = window.dashboard.utils.debounce((data) => {
             console.log('Health update received:', data);
             window.dashboard.state.health = data.data || {};
             // Dispatch custom event for components
             window.dispatchEvent(new CustomEvent('health-updated', { detail: data }));
-        });
+        }, 500, { maxWait: 2000 });
         
-        wsManager.on('activity_update', (data) => {
+        const optimizedActivityUpdate = window.dashboard.utils.throttle((data) => {
             console.log('Activity update received:', data);
             window.dashboard.state.activity = data.data || {};
             // Dispatch custom event for components
             window.dispatchEvent(new CustomEvent('activity-updated', { detail: data }));
-        });
+        }, 1000);
         
-        wsManager.on('log_update', (data) => {
-            console.log('Log update received:', data);
-            // Add new log to state (keeping only last 500 logs)
+        // Batch log updates for better performance
+        const batchedLogProcessor = window.dashboard.utils.batchEvents('logs', (logBatch) => {
+            console.log(`Processing ${logBatch.length} log updates`);
+            
             if (!window.dashboard.state.logs) {
                 window.dashboard.state.logs = [];
             }
-            window.dashboard.state.logs.push(data.data);
+            
+            // Process all logs in batch
+            logBatch.forEach(logItem => {
+                const data = logItem.data;
+                if (data.type === 'log_batch') {
+                    // Handle batched logs from server
+                    data.data.entries.forEach(entry => {
+                        window.dashboard.state.logs.push(entry);
+                    });
+                } else {
+                    // Handle single log
+                    window.dashboard.state.logs.push(data.data);
+                }
+            });
+            
+            // Keep only last 500 logs
             if (window.dashboard.state.logs.length > 500) {
-                window.dashboard.state.logs.shift();
+                window.dashboard.state.logs = window.dashboard.state.logs.slice(-500);
             }
-            // Dispatch custom event for components
-            window.dispatchEvent(new CustomEvent('log-updated', { detail: data }));
+            
+            // Dispatch single combined event
+            window.dispatchEvent(new CustomEvent('logs-batch-updated', { 
+                detail: { 
+                    count: logBatch.length,
+                    totalLogs: window.dashboard.state.logs.length
+                } 
+            }));
+        }, 100);
+        
+        const optimizedLogUpdate = (data) => {
+            batchedLogProcessor(data);
+        };
+        
+        // Register optimized handlers
+        wsManager.on('session_update', optimizedSessionUpdate);
+        wsManager.on('health_update', optimizedHealthUpdate);
+        wsManager.on('activity_update', optimizedActivityUpdate);
+        wsManager.on('log_update', optimizedLogUpdate);
+        
+        // Handle batch processing completion
+        wsManager.on('batch_processed', (batchInfo) => {
+            console.log(`Processed message batch: ${batchInfo.count} messages from ${batchInfo.channel}`);
         });
         
         wsManager.on('initial_data', (data) => {
