@@ -8,6 +8,11 @@ from .registry import RendererRegistry
 from .tui_renderer import TUIRenderer
 from .web_renderer import WebRenderer
 from .tauri_renderer import TauriRenderer
+from .renderer_factory import (
+    RendererFactory, RendererFactoryError, UnsupportedFormatError,
+    RendererInitializationError, render_widget, render_all_formats,
+    render_formats, create_renderer, get_renderer
+)
 from .widget_models import (
     SessionData, SessionStatus, WindowData,
     HealthData, HealthCategoryData, HealthLevel,
@@ -27,6 +32,15 @@ __all__ = [
     'TUIRenderer',
     'WebRenderer',
     'TauriRenderer',
+    'RendererFactory',
+    'RendererFactoryError',
+    'UnsupportedFormatError', 
+    'RendererInitializationError',
+    'render_widget',
+    'render_all_formats',
+    'render_formats',
+    'create_renderer',
+    'get_renderer',
     'SessionData',
     'SessionStatus',
     'WindowData', 
