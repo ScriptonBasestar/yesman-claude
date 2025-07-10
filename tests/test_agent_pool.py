@@ -8,7 +8,8 @@ from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from datetime import datetime
 
-from libs.multi_agent.agent_pool import AgentPool, Agent, Task, AgentState, TaskStatus
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.types import Agent, Task, AgentState, TaskStatus
 
 
 class TestAgentPool:

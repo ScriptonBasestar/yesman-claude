@@ -4,132 +4,23 @@ import asyncio
 import uuid
 import time
 import logging
-from typing import Dict, List, Optional, Any, Callable, Awaitable, Set
-from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Optional, Any, Callable, Awaitable, Set, Tuple
 from datetime import datetime
-from enum import Enum
 import json
 from pathlib import Path
 import subprocess
 import os
 import signal
 
+from .types import Agent, Task, AgentState, TaskStatus
+
+# Import scheduler types after main types to avoid circular imports
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .task_scheduler import TaskScheduler, AgentCapability
 
 logger = logging.getLogger(__name__)
-
-
-class AgentState(Enum):
-    """Agent states"""
-
-    IDLE = "idle"
-    WORKING = "working"
-    SUSPENDED = "suspended"
-    TERMINATED = "terminated"
-    ERROR = "error"
-
-
-class TaskStatus(Enum):
-    """Task execution status"""
-
-    PENDING = "pending"
-    ASSIGNED = "assigned"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-@dataclass
-class Task:
-    """Represents a task to be executed by an agent"""
-
-    task_id: str
-    title: str
-    description: str
-    command: List[str]
-    working_directory: str
-    environment: Dict[str, str] = field(default_factory=dict)
-    timeout: int = 300  # 5 minutes default
-    priority: int = 5  # 1-10, higher is more priority
-    complexity: int = 5  # 1-10, estimate of task complexity
-    dependencies: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-    # Execution tracking
-    status: TaskStatus = TaskStatus.PENDING
-    assigned_agent: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    output: str = ""
-    error: str = ""
-    exit_code: Optional[int] = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
-        data = asdict(self)
-        # Convert enums to strings
-        data["status"] = self.status.value
-        # Convert datetime to ISO format
-        if self.start_time:
-            data["start_time"] = self.start_time.isoformat()
-        if self.end_time:
-            data["end_time"] = self.end_time.isoformat()
-        return data
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Task":
-        """Create from dictionary"""
-        # Convert status back to enum
-        if "status" in data:
-            data["status"] = TaskStatus(data["status"])
-        # Convert datetime strings back
-        if "start_time" in data and data["start_time"]:
-            data["start_time"] = datetime.fromisoformat(data["start_time"])
-        if "end_time" in data and data["end_time"]:
-            data["end_time"] = datetime.fromisoformat(data["end_time"])
-        return cls(**data)
-
-
-@dataclass
-class Agent:
-    """Represents an agent that can execute tasks"""
-
-    agent_id: str
-    state: AgentState = AgentState.IDLE
-    current_task: Optional[str] = None
-    branch_name: Optional[str] = None
-    work_environment: Optional[str] = None
-    process: Optional[subprocess.Popen] = None
-    created_at: datetime = field(default_factory=datetime.now)
-    last_heartbeat: datetime = field(default_factory=datetime.now)
-    completed_tasks: int = 0
-    failed_tasks: int = 0
-    total_execution_time: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary (excluding process)"""
-        data = asdict(self)
-        # Remove non-serializable fields
-        data.pop("process", None)
-        # Convert enums and datetime
-        data["state"] = self.state.value
-        data["created_at"] = self.created_at.isoformat()
-        data["last_heartbeat"] = self.last_heartbeat.isoformat()
-        return data
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Agent":
-        """Create from dictionary"""
-        # Convert state back to enum
-        if "state" in data:
-            data["state"] = AgentState(data["state"])
-        # Convert datetime strings
-        if "created_at" in data:
-            data["created_at"] = datetime.fromisoformat(data["created_at"])
-        if "last_heartbeat" in data:
-            data["last_heartbeat"] = datetime.fromisoformat(data["last_heartbeat"])
-        return cls(**data)
 
 
 class AgentPool:
@@ -152,6 +43,12 @@ class AgentPool:
         self.tasks: Dict[str, Task] = {}
         self.task_queue = asyncio.Queue()
         self.completed_tasks: List[str] = []
+
+        # Intelligent task scheduling - import here to avoid circular import
+        from .task_scheduler import TaskScheduler
+
+        self.scheduler = TaskScheduler()
+        self.intelligent_scheduling = True
 
         # Event callbacks
         self.task_started_callbacks: List[Callable[[Task], Awaitable[None]]] = []
@@ -265,12 +162,16 @@ class AgentPool:
         """Add a task to the queue"""
         self.tasks[task.task_id] = task
 
-        # Add to queue (non-blocking)
-        try:
-            self.task_queue.put_nowait(task)
-            logger.info(f"Added task {task.task_id} to queue")
-        except asyncio.QueueFull:
-            logger.error(f"Task queue is full, cannot add task {task.task_id}")
+        if self.intelligent_scheduling:
+            # Add to intelligent scheduler
+            self.scheduler.add_task(task)
+        else:
+            # Add to simple queue (non-blocking)
+            try:
+                self.task_queue.put_nowait(task)
+                logger.info(f"Added task {task.task_id} to queue")
+            except asyncio.QueueFull:
+                logger.error(f"Task queue is full, cannot add task {task.task_id}")
 
     def create_task(
         self,
@@ -297,26 +198,60 @@ class AgentPool:
         """Dispatch tasks to available agents"""
         while self._running:
             try:
-                # Wait for task or shutdown
-                task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
-
-                # Find available agent or create new one
-                agent = await self._get_available_agent()
-
-                if agent:
-                    await self._assign_task_to_agent(agent, task)
+                if self.intelligent_scheduling:
+                    await self._intelligent_dispatch()
                 else:
-                    # Put task back in queue
-                    await self.task_queue.put(task)
-                    # Wait a bit before retrying
-                    await asyncio.sleep(1)
+                    await self._simple_dispatch()
 
-            except asyncio.TimeoutError:
-                # No task in queue, continue
-                continue
+                await asyncio.sleep(1)  # Brief pause between dispatch cycles
+
             except Exception as e:
                 logger.error(f"Error in task dispatcher: {e}")
                 await asyncio.sleep(1)
+
+    async def _intelligent_dispatch(self) -> None:
+        """Intelligent task dispatching using the scheduler"""
+        # Get all available agents
+        available_agents = [
+            agent for agent in self.agents.values() if agent.state == AgentState.IDLE
+        ]
+
+        # Create new agents if needed and under limit
+        while (
+            len(available_agents) < self.max_agents
+            and len(self.agents) < self.max_agents
+        ):
+            new_agent = await self._create_agent()
+            available_agents.append(new_agent)
+
+        if not available_agents:
+            return
+
+        # Get optimal task assignments
+        assignments = self.scheduler.get_optimal_task_assignment(available_agents)
+
+        # Execute assignments
+        for agent, task in assignments:
+            await self._assign_task_to_agent(agent, task)
+
+    async def _simple_dispatch(self) -> None:
+        """Simple task dispatching (original logic)"""
+        try:
+            # Wait for task or shutdown
+            task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
+
+            # Find available agent or create new one
+            agent = await self._get_available_agent()
+
+            if agent:
+                await self._assign_task_to_agent(agent, task)
+            else:
+                # Put task back in queue
+                await self.task_queue.put(task)
+
+        except asyncio.TimeoutError:
+            # No task in queue, continue
+            pass
 
     async def _get_available_agent(self) -> Optional[Agent]:
         """Get an available agent or create a new one"""
@@ -337,6 +272,10 @@ class AgentPool:
 
         agent = Agent(agent_id=agent_id)
         self.agents[agent_id] = agent
+
+        # Register with intelligent scheduler
+        if self.intelligent_scheduling:
+            self.scheduler.register_agent(agent)
 
         logger.info(f"Created agent {agent_id}")
         return agent
@@ -456,6 +395,13 @@ class AgentPool:
             if task.start_time and task.end_time:
                 execution_time = (task.end_time - task.start_time).total_seconds()
                 agent.total_execution_time += execution_time
+
+                # Update scheduler with performance data
+                if self.intelligent_scheduling:
+                    success = task.status == TaskStatus.COMPLETED
+                    self.scheduler.update_agent_performance(
+                        agent.agent_id, task, success, execution_time
+                    )
 
         except Exception as e:
             logger.error(f"Error executing task {task.task_id}: {e}")
@@ -615,3 +561,38 @@ class AgentPool:
     ) -> None:
         """Register callback for agent error events"""
         self.agent_error_callbacks.append(callback)
+
+    def get_scheduling_metrics(self) -> Dict[str, Any]:
+        """Get intelligent scheduling metrics"""
+        if self.intelligent_scheduling:
+            return self.scheduler.get_scheduling_metrics()
+        else:
+            return {
+                "intelligent_scheduling": False,
+                "queue_size": self.task_queue.qsize(),
+            }
+
+    def set_intelligent_scheduling(self, enabled: bool) -> None:
+        """Enable or disable intelligent scheduling"""
+        self.intelligent_scheduling = enabled
+
+        if enabled:
+            # Register existing agents with scheduler
+            for agent in self.agents.values():
+                self.scheduler.register_agent(agent)
+
+        logger.info(f"Intelligent scheduling {'enabled' if enabled else 'disabled'}")
+
+    def update_agent_capability(
+        self, agent_id: str, capability: "AgentCapability"
+    ) -> None:
+        """Update an agent's capability profile"""
+        if self.intelligent_scheduling and agent_id in self.agents:
+            self.scheduler.agent_capabilities[agent_id] = capability
+            logger.info(f"Updated capability for agent {agent_id}")
+
+    def rebalance_workload(self) -> List[Tuple[str, str]]:
+        """Trigger workload rebalancing"""
+        if self.intelligent_scheduling:
+            return self.scheduler.rebalance_tasks()
+        return []
