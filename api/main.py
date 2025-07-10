@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routers import sessions, controllers, config, logs, dashboard, websocket
 from api.background_tasks import task_runner
 import asyncio
+from datetime import datetime
 
 app = FastAPI()
 
@@ -46,6 +47,10 @@ async def startup_event():
 async def shutdown_event():
     """Stop background tasks on application shutdown"""
     await task_runner.stop()
+    
+    # Shutdown WebSocket manager and batch processor
+    from api.routers.websocket import manager
+    await manager.shutdown()
 
 # Add endpoint to check task status
 @app.get("/api/tasks/status")
@@ -54,4 +59,19 @@ async def get_task_status():
     return {
         "is_running": task_runner.is_running,
         "tasks": task_runner.get_task_states()
+    }
+
+# Add endpoint to check WebSocket batch processing stats
+@app.get("/api/websocket/stats")
+async def get_websocket_stats():
+    """Get WebSocket connection and batch processing statistics"""
+    from api.routers.websocket import manager
+    
+    connection_stats = manager.get_connection_stats()
+    batch_stats = manager.get_batch_statistics()
+    
+    return {
+        "connections": connection_stats,
+        "batch_processing": batch_stats,
+        "timestamp": datetime.now().isoformat()
     } 
