@@ -54,11 +54,11 @@ class KeyboardNavigationManager {
 ```
 
 ## 완료 기준
-- [ ] Python 키보드 매니저 구현
-- [ ] JavaScript 키보드 핸들러
-- [ ] 기본 바인딩 등록
-- [ ] 포커스 관리 시스템
-- [ ] Vim 모드 지원
+- [x] Python 키보드 매니저 구현
+- [x] JavaScript 키보드 핸들러
+- [x] 기본 바인딩 등록
+- [x] 포커스 관리 시스템
+- [x] Vim 모드 지원
 
 ## 테스트
 ```python
