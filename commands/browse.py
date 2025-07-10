@@ -9,7 +9,7 @@ from typing import Optional
 from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 from libs.dashboard.widgets.session_browser import SessionBrowser
-from libs.dashboard.widgets.activity_heatmap import ActivityHeatmap
+from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 from libs.core.session_manager import SessionManager
 
@@ -28,7 +28,7 @@ class InteractiveBrowser:
         
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
-        self.activity_heatmap = ActivityHeatmap(self.console)
+        self.activity_heatmap = ActivityHeatmapGenerator(self.config)
         self.progress_widget = SessionProgressWidget(self.console)
         
         # Initialize session manager for progress tracking
