@@ -4,7 +4,9 @@ from .branch_manager import BranchManager
 from .task_analyzer import TaskAnalyzer, TaskDefinition, CodeDependency
 from .graph import DirectedGraph
 from .work_environment import WorkEnvironmentManager, WorkEnvironment
-from .agent_pool import AgentPool, Agent, Task, AgentState, TaskStatus
+from .types import Agent, Task, AgentState, TaskStatus
+from .agent_pool import AgentPool
+from .task_scheduler import TaskScheduler, AgentCapability
 
 __all__ = [
     "BranchManager",
@@ -19,4 +21,6 @@ __all__ = [
     "Task",
     "AgentState",
     "TaskStatus",
+    "TaskScheduler",
+    "AgentCapability",
 ]
