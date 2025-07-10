@@ -5,6 +5,8 @@ Multi-format rendering system for Yesman Claude dashboard
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType, ThemeColor
 from .registry import RendererRegistry
+from .tui_renderer import TUIRenderer
+from .web_renderer import WebRenderer
 from .widget_models import (
     SessionData, SessionStatus, WindowData,
     HealthData, HealthCategoryData, HealthLevel,
@@ -21,6 +23,8 @@ __all__ = [
     'WidgetType',
     'ThemeColor',
     'RendererRegistry',
+    'TUIRenderer',
+    'WebRenderer',
     'SessionData',
     'SessionStatus',
     'WindowData', 
