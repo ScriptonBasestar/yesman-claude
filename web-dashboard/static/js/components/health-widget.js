@@ -12,14 +12,36 @@ class HealthWidget extends HTMLElement {
     connectedCallback() {
         this.render();
         this.loadHealth();
+        this.setupRealtimeUpdates();
         
-        // Auto-refresh every 30 seconds
-        this.refreshInterval = setInterval(() => this.loadHealth(), 30000);
+        // Auto-refresh every 60 seconds as fallback
+        this.refreshInterval = setInterval(() => {
+            if (!window.dashboard?.state?.wsConnected) {
+                this.loadHealth();
+            }
+        }, 60000);
     }
 
     disconnectedCallback() {
         if (this.refreshInterval) {
             clearInterval(this.refreshInterval);
+        }
+        this.cleanup();
+    }
+    
+    setupRealtimeUpdates() {
+        // Listen for WebSocket updates
+        this.healthUpdateHandler = (event) => {
+            const data = event.detail?.data || {};
+            this.updateHealth(data);
+        };
+        
+        window.addEventListener('health-updated', this.healthUpdateHandler);
+    }
+    
+    cleanup() {
+        if (this.healthUpdateHandler) {
+            window.removeEventListener('health-updated', this.healthUpdateHandler);
         }
     }
 
@@ -35,8 +57,53 @@ class HealthWidget extends HTMLElement {
     }
 
     updateHealth(healthData) {
+        if (!healthData || JSON.stringify(this.health) === JSON.stringify(healthData)) {
+            return; // No change needed
+        }
+        
+        const oldHealth = this.health;
         this.health = healthData;
-        this.renderHealth();
+        
+        // Apply incremental updates with animation
+        this.applyHealthUpdatesWithAnimation(oldHealth, healthData);
+    }
+    
+    applyHealthUpdatesWithAnimation(oldHealth, newHealth) {
+        // Update overall score with animation
+        const scoreElement = this.querySelector('.score-number');
+        if (scoreElement && oldHealth?.overall_score !== newHealth?.overall_score) {
+            scoreElement.style.animation = 'pulse 0.5s ease-out';
+            setTimeout(() => {
+                scoreElement.dataset.score = newHealth.overall_score || 0;
+                this.animateScoreNumber();
+            }, 100);
+        }
+        
+        // Update category progress bars
+        const oldCategories = oldHealth?.categories || {};
+        const newCategories = newHealth?.categories || {};
+        
+        Object.keys(newCategories).forEach(category => {
+            if (oldCategories[category] !== newCategories[category]) {
+                const categoryElement = this.querySelector(`[data-category="${category}"]`);
+                if (categoryElement) {
+                    const progressBar = categoryElement.querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.animation = 'pulse 0.3s ease-out';
+                        setTimeout(() => {
+                            progressBar.dataset.width = newCategories[category];
+                            progressBar.style.width = `${newCategories[category]}%`;
+                        }, 150);
+                    }
+                }
+            }
+        });
+        
+        // If significant changes, do a full re-render
+        if (!oldHealth || 
+            Math.abs((oldHealth.overall_score || 0) - (newHealth.overall_score || 0)) > 10) {
+            setTimeout(() => this.renderHealth(), 500);
+        }
     }
 
     getScoreColor(score) {
@@ -173,7 +240,7 @@ class HealthWidget extends HTMLElement {
             const normalizedScore = Math.max(0, Math.min(100, score || 0));
             
             return `
-                <div class="category-item">
+                <div class="category-item" data-category="${key}">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${name}</span>
                         <span class="text-sm font-semibold ${this.getScoreColor(normalizedScore)}">${Math.round(normalizedScore)}</span>

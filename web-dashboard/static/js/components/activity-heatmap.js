@@ -14,9 +14,14 @@ class ActivityHeatmap extends HTMLElement {
         this.render();
         this.createTooltip();
         this.loadActivityData();
+        this.setupRealtimeUpdates();
         
-        // Auto-refresh every 5 minutes
-        this.refreshInterval = setInterval(() => this.loadActivityData(), 300000);
+        // Auto-refresh every 10 minutes as fallback
+        this.refreshInterval = setInterval(() => {
+            if (!window.dashboard?.state?.wsConnected) {
+                this.loadActivityData();
+            }
+        }, 600000);
     }
 
     disconnectedCallback() {
@@ -25,6 +30,23 @@ class ActivityHeatmap extends HTMLElement {
         }
         if (this.tooltip) {
             this.tooltip.remove();
+        }
+        this.cleanup();
+    }
+    
+    setupRealtimeUpdates() {
+        // Listen for WebSocket updates
+        this.activityUpdateHandler = (event) => {
+            const data = event.detail?.data || {};
+            this.updateActivity(data);
+        };
+        
+        window.addEventListener('activity-updated', this.activityUpdateHandler);
+    }
+    
+    cleanup() {
+        if (this.activityUpdateHandler) {
+            window.removeEventListener('activity-updated', this.activityUpdateHandler);
         }
     }
 
@@ -40,8 +62,106 @@ class ActivityHeatmap extends HTMLElement {
     }
 
     updateActivity(activityData) {
+        if (!activityData || JSON.stringify(this.activityData) === JSON.stringify(activityData)) {
+            return; // No change needed
+        }
+        
+        const oldData = this.activityData;
         this.activityData = activityData;
-        this.renderHeatmap();
+        
+        // Apply incremental updates with animation
+        this.applyActivityUpdatesWithAnimation(oldData, activityData);
+    }
+    
+    applyActivityUpdatesWithAnimation(oldData, newData) {
+        if (!oldData || !oldData.activities || !newData || !newData.activities) {
+            // No old data or major structure change - do full re-render
+            this.renderHeatmap();
+            return;
+        }
+        
+        const oldActivitiesMap = new Map(
+            oldData.activities.map(a => [a.date, a.activity_count])
+        );
+        
+        // Find changed dates
+        const changedDates = [];
+        newData.activities.forEach(activity => {
+            const oldCount = oldActivitiesMap.get(activity.date) || 0;
+            if (oldCount !== activity.activity_count) {
+                changedDates.push({
+                    date: activity.date,
+                    oldCount,
+                    newCount: activity.activity_count
+                });
+            }
+        });
+        
+        // Update individual cells with animation
+        changedDates.forEach(({ date, oldCount, newCount }) => {
+            const cell = this.querySelector(`[data-date="${date}"]`);
+            if (cell) {
+                // Add pulse animation
+                cell.style.animation = 'pulse 0.5s ease-out';
+                
+                setTimeout(() => {
+                    // Update cell appearance
+                    cell.className = cell.className.replace(/bg-\w+-\d+/g, '');
+                    cell.className += ` ${this.getActivityColor(newCount)}`;
+                    cell.dataset.count = newCount;
+                    cell.dataset.level = this.getActivityLevel(newCount);
+                }, 100);
+            }
+        });
+        
+        // Update stats section
+        setTimeout(() => {
+            const dates = this.generateDateRange();
+            const newStats = this.calculateStats(dates);
+            this.updateStatsSection(newStats);
+        }, 300);
+        
+        // If more than 10 changes, do full re-render for performance
+        if (changedDates.length > 10) {
+            setTimeout(() => this.renderHeatmap(), 500);
+        }
+    }
+    
+    updateStatsSection(stats) {
+        // Update active days
+        const activeDaysElement = this.querySelector('.stats-grid .stat-item:nth-child(1) .text-lg');
+        if (activeDaysElement) {
+            activeDaysElement.textContent = stats.activeDays;
+        }
+        
+        // Update current streak
+        const currentStreakElement = this.querySelector('.stats-grid .stat-item:nth-child(2) .text-lg');
+        if (currentStreakElement) {
+            currentStreakElement.textContent = stats.currentStreak;
+        }
+        
+        // Update longest streak
+        const longestStreakElement = this.querySelector('.stats-grid .stat-item:nth-child(3) .text-lg');
+        if (longestStreakElement) {
+            longestStreakElement.textContent = stats.longestStreak;
+        }
+        
+        // Update average per day
+        const avgElement = this.querySelector('.stats-grid .stat-item:nth-child(4) .text-lg');
+        if (avgElement) {
+            avgElement.textContent = stats.avgPerDay.toFixed(1);
+        }
+        
+        // Update header stats
+        const headerStats = this.querySelector('.heatmap-footer .stats');
+        if (headerStats) {
+            headerStats.textContent = `Total: ${stats.totalActivities} activities`;
+        }
+        
+        const activityRateElement = this.querySelector('.heatmap-container + * .text-xs');
+        if (activityRateElement) {
+            activityRateElement.textContent = `${stats.activeDays} active days (${stats.activityRate}%)`;
+        }
     }
 
     createTooltip() {
