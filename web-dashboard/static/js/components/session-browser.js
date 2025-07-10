@@ -32,12 +32,19 @@ class SessionBrowser extends HTMLElement {
     }
     
     setupRealtimeUpdates() {
-        // Listen for WebSocket updates
-        this.sessionUpdateHandler = (event) => {
-            const data = event.detail?.data || [];
-            this.updateSessions(data);
-        };
+        // Create optimized update handler with throttled rendering
+        const optimizedUpdateHandler = window.dashboard?.utils?.throttleRender ? 
+            window.dashboard.utils.throttleRender((event) => {
+                const data = event.detail?.data || [];
+                this.updateSessions(data);
+            }) : 
+            (event) => {
+                const data = event.detail?.data || [];
+                this.updateSessions(data);
+            };
         
+        // Listen for WebSocket updates with optimized handler
+        this.sessionUpdateHandler = optimizedUpdateHandler;
         window.addEventListener('sessions-updated', this.sessionUpdateHandler);
     }
     
@@ -79,42 +86,60 @@ class SessionBrowser extends HTMLElement {
     }
     
     applyUpdatesWithAnimation(added, updated, removed) {
-        // Handle removals first
-        removed.forEach(sessionName => {
-            const element = this.querySelector(`[data-session-name="${sessionName}"]`);
-            if (element) {
-                element.style.animation = 'fadeOut 0.3s ease-out forwards';
-                setTimeout(() => element.remove(), 300);
-            }
-        });
-        
-        // Handle updates
-        updated.forEach(session => {
-            const element = this.querySelector(`[data-session-name="${session.session_name}"]`);
-            if (element) {
-                element.style.animation = 'pulse 0.5s ease-out';
+        // Use RAF for smooth animations and batch DOM operations
+        const performAnimations = () => {
+            // Handle removals first
+            removed.forEach(sessionName => {
+                const element = this.querySelector(`[data-session-name="${sessionName}"]`);
+                if (element) {
+                    element.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(() => element.remove(), 300);
+                }
+            });
+            
+            // Handle updates in batch
+            if (updated.length > 0) {
+                // Batch DOM reads
+                const elementsToUpdate = updated.map(session => ({
+                    session,
+                    element: this.querySelector(`[data-session-name="${session.session_name}"]`)
+                })).filter(item => item.element);
+                
+                // Batch DOM writes
+                elementsToUpdate.forEach(({ element, session }) => {
+                    element.style.animation = 'pulse 0.5s ease-out';
+                });
+                
                 // Update content after animation starts
                 setTimeout(() => {
-                    this.updateSessionElement(element, session);
+                    elementsToUpdate.forEach(({ element, session }) => {
+                        this.updateSessionElement(element, session);
+                    });
                 }, 100);
             }
-        });
+            
+            // Handle additions
+            if (added.length > 0) {
+                const delay = removed.length > 0 ? 350 : 0;
+                setTimeout(() => {
+                    this.renderSessions();
+                    
+                    // Animate new sessions in next frame
+                    requestAnimationFrame(() => {
+                        added.forEach(session => {
+                            const element = this.querySelector(`[data-session-name="${session.session_name}"]`);
+                            if (element) {
+                                element.style.opacity = '0';
+                                element.style.animation = 'slideInRight 0.3s ease-out forwards';
+                            }
+                        });
+                    });
+                }, delay);
+            }
+        };
         
-        // Handle additions
-        if (added.length > 0) {
-            // Re-render sessions to include new ones
-            setTimeout(() => {
-                this.renderSessions();
-                // Animate new sessions
-                added.forEach(session => {
-                    const element = this.querySelector(`[data-session-name="${session.session_name}"]`);
-                    if (element) {
-                        element.style.opacity = '0';
-                        element.style.animation = 'slideInRight 0.3s ease-out forwards';
-                    }
-                });
-            }, removed.length > 0 ? 350 : 0);
-        }
+        // Use RAF for smooth animation timing
+        requestAnimationFrame(performAnimations);
     }
     
     updateSessionElement(element, session) {
