@@ -8,6 +8,11 @@
 // Import WebSocket manager
 const wsManager = window.wsManager || new WebSocketManager();
 
+// Initialize memory optimizer if available
+if (window.memoryOptimizer) {
+    console.log('Memory optimizer initialized');
+}
+
 // Global dashboard object
 window.dashboard = {
     // Application state
