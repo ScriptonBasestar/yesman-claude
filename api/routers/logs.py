@@ -1,14 +1,24 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 from pathlib import Path
+from datetime import datetime
 import sys
 import os
+import json
+import re
 
 # 프로젝트 루트를 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from libs.yesman_config import YesmanConfig
+
+class LogEntry(BaseModel):
+    level: str
+    timestamp: str
+    source: str
+    message: str
+    raw: str
 
 router = APIRouter()
 config = YesmanConfig()
@@ -35,4 +45,151 @@ def get_session_logs(session_name: str, limit: int = 100):
             return lines[-limit:]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}")
+
+
+def parse_log_line(line: str) -> Optional[LogEntry]:
+    """Parse a log line into a structured LogEntry"""
+    line = line.strip()
+    if not line:
+        return None
+    
+    # Try to parse structured log format: [timestamp] [level] [source] message
+    log_pattern = r'^\[([^\]]+)\]\s*\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.+)$'
+    match = re.match(log_pattern, line)
+    
+    if match:
+        timestamp_str, level, source, message = match.groups()
+        return LogEntry(
+            level=level.lower(),
+            timestamp=timestamp_str,
+            source=source,
+            message=message,
+            raw=line
+        )
+    
+    # Try simplified format: [timestamp] [level] message
+    simple_pattern = r'^\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.+)$'
+    match = re.match(simple_pattern, line)
+    
+    if match:
+        timestamp_str, level, message = match.groups()
+        return LogEntry(
+            level=level.lower(),
+            timestamp=timestamp_str,
+            source='yesman',
+            message=message,
+            raw=line
+        )
+    
+    # Fallback: treat as unstructured log
+    return LogEntry(
+        level='info',
+        timestamp=datetime.now().isoformat(),
+        source='unknown',
+        message=line,
+        raw=line
+    )
+
+
+@router.get("/logs", response_model=List[LogEntry])
+def get_logs(
+    limit: int = Query(default=100, ge=1, le=1000),
+    level: Optional[str] = Query(default=None),
+    source: Optional[str] = Query(default=None),
+    search: Optional[str] = Query(default=None)
+):
+    """Get parsed log entries with optional filtering"""
+    try:
+        log_path_str = config.get("log_path", "~/tmp/logs/yesman/")
+        log_files = [
+            Path(log_path_str).expanduser() / "yesman.log",
+            Path(log_path_str).expanduser() / "claude_manager.log",
+            Path(log_path_str).expanduser() / "dashboard.log"
+        ]
+        
+        all_logs = []
+        
+        for log_file in log_files:
+            if log_file.exists():
+                try:
+                    with open(log_file, "r", encoding="utf-8") as f:
+                        lines = f.readlines()
+                        for line in lines[-limit:]:  # Take last N lines from each file
+                            log_entry = parse_log_line(line)
+                            if log_entry:
+                                all_logs.append(log_entry)
+                except Exception as e:
+                    print(f"Error reading {log_file}: {e}")
+                    continue
+        
+        # Sort by timestamp (newest first)
+        all_logs.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        # Apply filters
+        filtered_logs = all_logs
+        
+        if level:
+            filtered_logs = [log for log in filtered_logs if log.level == level.lower()]
+        
+        if source:
+            filtered_logs = [log for log in filtered_logs if log.source == source]
+        
+        if search:
+            search_lower = search.lower()
+            filtered_logs = [log for log in filtered_logs if search_lower in log.message.lower()]
+        
+        return filtered_logs[:limit]
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read logs: {str(e)}")
+
+
+@router.get("/logs/sources")
+def get_log_sources():
+    """Get available log sources"""
+    try:
+        log_path_str = config.get("log_path", "~/tmp/logs/yesman/")
+        log_files = [
+            Path(log_path_str).expanduser() / "yesman.log",
+            Path(log_path_str).expanduser() / "claude_manager.log", 
+            Path(log_path_str).expanduser() / "dashboard.log"
+        ]
+        
+        sources = set()
+        
+        for log_file in log_files:
+            if log_file.exists():
+                try:
+                    with open(log_file, "r", encoding="utf-8") as f:
+                        # Sample first 50 lines to get sources
+                        for i, line in enumerate(f):
+                            if i >= 50:
+                                break
+                            log_entry = parse_log_line(line)
+                            if log_entry:
+                                sources.add(log_entry.source)
+                except Exception:
+                    continue
+        
+        return {"sources": sorted(list(sources))}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get log sources: {str(e)}")
+
+
+@router.post("/logs/test")
+def add_test_log(level: str = "info", source: str = "test", message: str = "Test log message"):
+    """Add a test log entry (for development/testing)"""
+    # This is a simple test endpoint that could write to a test log file
+    # or in a real implementation, emit through the logging system
+    
+    test_log_entry = LogEntry(
+        level=level.lower(),
+        timestamp=datetime.now().isoformat(),
+        source=source,
+        message=message,
+        raw=f"[{datetime.now().isoformat()}] [{level.upper()}] [{source}] {message}"
+    )
+    
+    return {"status": "success", "log_entry": test_log_entry}
