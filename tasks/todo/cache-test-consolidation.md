@@ -24,7 +24,7 @@ priority: low
 ## 작업 내용
 
 ### 1. 현황 조사 및 분석 (Phase 1)
-- [ ] 중복 테스트 함수 매핑 및 분석
+- [x] 중복 테스트 함수 매핑 및 분석
 - [ ] 의존성 체인 분석 (SessionCache → SessionManager → Dashboard)
 - [ ] Mock 사용 패턴 및 공통 코드 식별
 - [ ] 현재 실패하는 테스트 케이스 파악
