@@ -178,7 +178,7 @@ class BackgroundTaskRunner:
         async def check_health():
             try:
                 # Calculate health metrics
-                health_data = self.health_calculator.calculate_health()
+                health_data = await self.health_calculator.calculate_health()
                 
                 # Format health data
                 formatted_health = {
