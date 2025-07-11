@@ -6,13 +6,14 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/dialog';
 import { sendNotification } from '@tauri-apps/api/notification';
+import { listen } from '@tauri-apps/api/event';
 
 // Tauri 환경인지 확인하기 위한 변수입니다.
 // 웹 브라우저 환경에서는 window.__TAURI__가 undefined입니다.
 // @ts-ignore
 const isTauri = typeof window !== 'undefined' && window.__TAURI__ !== undefined;
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 /**
  * FastAPI 서버에 API 요청을 보내는 헬퍼 함수
@@ -44,42 +45,32 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
 }
 
 export const pythonBridge = {
-	// Session Management
-	get_sessions: () => fetchApi('/sessions'),
+	// Session Management - 올바른 API 엔드포인트로 수정
+	get_sessions: () => fetchApi('/dashboard/sessions'),
 	get_session_details: (sessionId: string) => fetchApi(`/sessions/${sessionId}`),
 	create_session: (config: any) =>
-		fetchApi('/sessions', {
+		fetchApi(`/sessions/${config.project_name}/setup`, {
 			method: 'POST',
 			body: JSON.stringify(config)
 		}),
 	delete_session: (sessionId: string) => fetchApi(`/sessions/${sessionId}`, { method: 'DELETE' }),
 
-	// Controller Management
+	// Controller Management - 올바른 API 엔드포인트로 수정
 	start_claude: (sessionId: string) =>
-		fetchApi('/controllers/claude/start', {
-			method: 'POST',
-			body: JSON.stringify({ session_id: sessionId })
+		fetchApi(`/sessions/${sessionId}/controller/start`, {
+			method: 'POST'
 		}),
 	stop_claude: (sessionId: string) =>
-		fetchApi('/controllers/claude/stop', {
-			method: 'POST',
-			body: JSON.stringify({ session_id: sessionId })
+		fetchApi(`/sessions/${sessionId}/controller/stop`, {
+			method: 'POST'
 		}),
 	get_claude_status: (sessionId: string) =>
-		fetchApi(`/controllers/claude/status?session_id=${sessionId}`),
+		fetchApi(`/sessions/${sessionId}/controller/status`),
 
-	start_dashboard: (sessionId: string) =>
-		fetchApi('/controllers/dashboard/start', {
-			method: 'POST',
-			body: JSON.stringify({ session_id: sessionId })
+	restart_claude: (sessionId: string) =>
+		fetchApi(`/sessions/${sessionId}/controller/restart`, {
+			method: 'POST'
 		}),
-	stop_dashboard: (sessionId: string) =>
-		fetchApi('/controllers/dashboard/stop', {
-			method: 'POST',
-			body: JSON.stringify({ session_id: sessionId })
-		}),
-	get_dashboard_status: (sessionId: string) =>
-		fetchApi(`/controllers/dashboard/status?session_id=${sessionId}`),
 
 	// Config Management
 	get_app_config: () => fetchApi('/config'),
@@ -89,9 +80,9 @@ export const pythonBridge = {
 			body: JSON.stringify(config)
 		}),
 
-	// Logs
+	// Logs - 올바른 API 엔드포인트로 수정
 	get_logs: (sessionId: string, follow = false, lines = 50) =>
-		fetchApi(`/logs/${sessionId}?follow=${follow}&lines=${lines}`),
+		fetchApi(`/sessions/${sessionId}/logs?follow=${follow}&lines=${lines}`),
 
 	// Tauri-specific functions
 	send_notification: async (message: string) => {
@@ -245,6 +236,41 @@ export const tauriUtils = {
       await invoke('open_config_file');
     } catch (error) {
       console.error('Failed to open config file:', error);
+    }
+  },
+
+  /**
+   * 설정 로드
+   */
+  async loadConfig() {
+    try {
+      if (isTauri) {
+        return await invoke('load_config');
+      } else {
+        // 웹 환경에서는 localStorage에서 로드
+        const saved = localStorage.getItem('yesman-config');
+        return saved ? JSON.parse(saved) : null;
+      }
+    } catch (error) {
+      console.error('Failed to load config:', error);
+      return null;
+    }
+  },
+
+  /**
+   * 설정 저장
+   */
+  async saveConfig(config: any) {
+    try {
+      if (isTauri) {
+        await invoke('save_config', { config });
+      } else {
+        // 웹 환경에서는 localStorage에 저장
+        localStorage.setItem('yesman-config', JSON.stringify(config));
+      }
+    } catch (error) {
+      console.error('Failed to save config:', error);
+      throw error;
     }
   }
 };

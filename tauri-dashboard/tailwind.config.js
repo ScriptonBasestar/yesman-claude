@@ -6,6 +6,9 @@ export default {
       colors: {
         primary: '#00d4aa',
         secondary: '#6b7280',
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       }
     },
   },
