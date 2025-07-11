@@ -80,6 +80,13 @@ from .code_review_engine import (
     CodeReview,
     ReviewSummary,
 )
+from .conflict_prevention import (
+    ConflictPreventionSystem,
+    PreventionStrategy,
+    PreventionAction,
+    PreventionMeasure,
+    PreventionResult,
+)
 
 __all__ = [
     "BranchManager",
@@ -151,4 +158,9 @@ __all__ = [
     "QualityMetrics",
     "CodeReview",
     "ReviewSummary",
+    "ConflictPreventionSystem",
+    "PreventionStrategy",
+    "PreventionAction",
+    "PreventionMeasure",
+    "PreventionResult",
 ]
