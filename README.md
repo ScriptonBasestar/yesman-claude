@@ -142,6 +142,21 @@ uv run ./yesman.py logs analyze
 uv run ./yesman.py logs cleanup
 ```
 
+### Chrome DevTools Integration (Development Only)
+The Tauri dashboard includes optional Chrome DevTools Workspace integration for enhanced development experience. This feature allows direct file editing from Chrome DevTools with automatic hot-reload.
+
+**⚠️ Security Note**: This feature is automatically disabled in production builds.
+
+```bash
+# DevTools integration is enabled automatically in development
+cd tauri-dashboard && npm run dev
+
+# Access DevTools endpoint (development only)
+# http://localhost:5173/.well-known/appspecific/com.chrome.devtools.json
+```
+
+For detailed setup and usage instructions, see [Chrome DevTools Integration Guide](docs/development/chrome-devtools-integration.md).
+
 ## 설정 파일
 
 ### 글로벌 설정
