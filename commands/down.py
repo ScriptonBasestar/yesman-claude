@@ -4,8 +4,9 @@ from libs.yesman_config import YesmanConfig
 from libs.tmux_manager import TmuxManager
 import libtmux
 
+# Main command
 @click.command()
-def down():
+def teardown():
     """Kill all tmux sessions defined in projects.yaml"""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
@@ -26,4 +27,17 @@ def down():
             click.echo(f"Killed session: {actual_session_name}")
         else:
             click.echo(f"Session {actual_session_name} not found")
-    click.echo("All sessions torn down.") 
+    click.echo("All sessions torn down.")
+
+
+# Alias command
+@click.command()
+def down():
+    """Alias for 'teardown' command"""
+    # Call the main teardown function
+    ctx = click.get_current_context()
+    ctx.invoke(teardown)
+
+
+# Export both commands
+__all__ = ['teardown', 'down'] 

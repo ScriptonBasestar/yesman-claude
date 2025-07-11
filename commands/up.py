@@ -4,9 +4,10 @@ from libs.tmux_manager import TmuxManager
 import yaml
 import os
 
+# Main command
 @click.command()
 @click.argument('session_name', required=False)
-def up(session_name):
+def setup(session_name):
     """Create all tmux sessions defined in projects.yaml; or only a specified session if provided."""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
@@ -127,4 +128,18 @@ def up(session_name):
 
     tmux_manager.list_running_sessions()
 
-    click.echo("All sessions setup completed.") 
+    click.echo("All sessions setup completed.")
+
+
+# Alias command
+@click.command()
+@click.argument('session_name', required=False)
+def up(session_name):
+    """Alias for 'setup' command"""
+    # Call the main setup function with the same arguments
+    ctx = click.get_current_context()
+    ctx.invoke(setup, session_name=session_name)
+
+
+# Export both commands
+__all__ = ['setup', 'up'] 
