@@ -60,6 +60,15 @@ from .branch_info_protocol import (
     SyncStrategy,
     BranchSyncEvent,
 )
+from .dependency_propagation import (
+    DependencyPropagationSystem,
+    DependencyType,
+    ChangeImpact,
+    PropagationStrategy,
+    DependencyNode,
+    DependencyChange,
+    PropagationResult,
+)
 
 __all__ = [
     "BranchManager",
@@ -115,4 +124,11 @@ __all__ = [
     "BranchInfoType",
     "SyncStrategy",
     "BranchSyncEvent",
+    "DependencyPropagationSystem",
+    "DependencyType",
+    "ChangeImpact",
+    "PropagationStrategy",
+    "DependencyNode",
+    "DependencyChange",
+    "PropagationResult",
 ]
