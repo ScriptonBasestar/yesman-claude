@@ -132,6 +132,10 @@ export const eventListeners = {
    * 세션 상태 변경 이벤트 리스너
    */
   onSessionStatusChanged(callback: (sessionName: string, status: string) => void) {
+    if (!isTauri) {
+      console.warn('Event listeners are only available in Tauri environment');
+      return () => {}; // 웹 환경에서는 빈 함수 반환
+    }
     return listen('session-status-changed', (event) => {
       const { sessionName, status } = event.payload as any;
       callback(sessionName, status);
@@ -142,6 +146,10 @@ export const eventListeners = {
    * 컨트롤러 상태 변경 이벤트 리스너  
    */
   onControllerStatusChanged(callback: (sessionName: string, status: string) => void) {
+    if (!isTauri) {
+      console.warn('Event listeners are only available in Tauri environment');
+      return () => {};
+    }
     return listen('controller-status-changed', (event) => {
       const { sessionName, status } = event.payload as any;
       callback(sessionName, status);
@@ -152,6 +160,10 @@ export const eventListeners = {
    * 알림 이벤트 리스너
    */
   onNotification(callback: (notification: Notification) => void) {
+    if (!isTauri) {
+      console.warn('Event listeners are only available in Tauri environment');
+      return () => {};
+    }
     return listen('notification', (event) => {
       const notification = event.payload as Notification;
       callback(notification);
@@ -162,6 +174,10 @@ export const eventListeners = {
    * 에러 이벤트 리스너
    */
   onError(callback: (error: string) => void) {
+    if (!isTauri) {
+      console.warn('Event listeners are only available in Tauri environment');
+      return () => {};
+    }
     return listen('error', (event) => {
       const { message } = event.payload as any;
       callback(message);
@@ -172,6 +188,10 @@ export const eventListeners = {
    * 메트릭 업데이트 이벤트 리스너
    */
   onMetricsUpdate(callback: (metrics: any) => void) {
+    if (!isTauri) {
+      console.warn('Event listeners are only available in Tauri environment');
+      return () => {};
+    }
     return listen('metrics-update', (event) => {
       const metrics = event.payload as any;
       callback(metrics);
@@ -185,6 +205,10 @@ export const tauriUtils = {
    * 알림 발송
    */
   async sendNotification(title: string, body: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') {
+    if (!isTauri) {
+      console.log(`[Web Notification] ${title}: ${body} (${type})`);
+      return;
+    }
     try {
       await invoke('send_notification', { title, body, type });
     } catch (error) {
@@ -196,6 +220,10 @@ export const tauriUtils = {
    * 애플리케이션 최소화
    */
   async minimizeWindow() {
+    if (!isTauri) {
+      console.warn('Window controls are only available in Tauri environment');
+      return;
+    }
     try {
       await invoke('minimize_window');
     } catch (error) {
@@ -207,6 +235,10 @@ export const tauriUtils = {
    * 애플리케이션 최대화
    */
   async maximizeWindow() {
+    if (!isTauri) {
+      console.warn('Window controls are only available in Tauri environment');
+      return;
+    }
     try {
       await invoke('maximize_window');
     } catch (error) {
@@ -218,6 +250,10 @@ export const tauriUtils = {
    * 시스템 트레이 표시/숨김
    */
   async toggleSystemTray() {
+    if (!isTauri) {
+      console.warn('System tray is only available in Tauri environment');
+      return;
+    }
     try {
       await invoke('toggle_system_tray');
     } catch (error) {
@@ -229,6 +265,10 @@ export const tauriUtils = {
    * 로그 파일 열기
    */
   async openLogFile(sessionName?: string) {
+    if (!isTauri) {
+      console.warn('File operations are only available in Tauri environment');
+      return;
+    }
     try {
       await invoke('open_log_file', { sessionName });
     } catch (error) {
@@ -240,6 +280,10 @@ export const tauriUtils = {
    * 설정 파일 열기
    */
   async openConfigFile() {
+    if (!isTauri) {
+      console.warn('File operations are only available in Tauri environment');
+      return;
+    }
     try {
       await invoke('open_config_file');
     } catch (error) {
@@ -302,6 +346,14 @@ export async function safeTauriInvoke<T>(
   command: string,
   args?: Record<string, any>
 ): Promise<T> {
+  if (!isTauri) {
+    console.warn(`Tauri command '${command}' is only available in Tauri environment`);
+    throw new TauriError(
+      `Command '${command}' is not available in web environment`,
+      'NOT_TAURI_ENVIRONMENT',
+      { command, args }
+    );
+  }
   try {
     const result = await invoke(command, args);
     return result as T;
@@ -321,6 +373,11 @@ export async function safeTauriInvoke<T>(
 export async function executeBatchCommands(
   commands: Array<{ command: string; args?: Record<string, any> }>
 ): Promise<any[]> {
+  if (!isTauri) {
+    console.warn('Batch commands are only available in Tauri environment');
+    return commands.map(() => ({ success: false, error: 'Not available in web environment' }));
+  }
+  
   const results = [];
   
   for (const { command, args } of commands) {
@@ -342,6 +399,14 @@ export async function retryTauriCommand<T>(
   maxRetries: number = 3,
   delayMs: number = 1000
 ): Promise<T> {
+  if (!isTauri) {
+    throw new TauriError(
+      `Retry command '${command}' is not available in web environment`,
+      'NOT_TAURI_ENVIRONMENT',
+      { command, args }
+    );
+  }
+  
   let lastError: Error;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {

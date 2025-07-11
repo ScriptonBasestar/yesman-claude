@@ -8,6 +8,7 @@
   import { 
     filteredSessions, 
     isLoading, 
+    isBackgroundLoading,
     error, 
     refreshSessions,
     updateControllerStatus 
@@ -65,11 +66,15 @@
       <div class="flex gap-2">
         <button 
           class="btn btn-primary btn-sm"
-          class:loading={$isLoading}
-          on:click={() => refreshSessions()}
+          class:loading={$isLoading || $isBackgroundLoading}
+          on:click={() => refreshSessions(false)}
           disabled={$isLoading}
         >
-          🔄 Refresh
+          {#if $isBackgroundLoading}
+            ⏳ Updating...
+          {:else}
+            🔄 Refresh
+          {/if}
         </button>
       </div>
     </div>
