@@ -69,6 +69,17 @@ from .dependency_propagation import (
     DependencyChange,
     PropagationResult,
 )
+from .code_review_engine import (
+    CodeReviewEngine,
+    ReviewType,
+    ReviewSeverity,
+    ReviewStatus,
+    QualityMetric,
+    ReviewFinding,
+    QualityMetrics,
+    CodeReview,
+    ReviewSummary,
+)
 
 __all__ = [
     "BranchManager",
@@ -131,4 +142,13 @@ __all__ = [
     "DependencyNode",
     "DependencyChange",
     "PropagationResult",
+    "CodeReviewEngine",
+    "ReviewType",
+    "ReviewSeverity",
+    "ReviewStatus",
+    "QualityMetric",
+    "ReviewFinding",
+    "QualityMetrics",
+    "CodeReview",
+    "ReviewSummary",
 ]
