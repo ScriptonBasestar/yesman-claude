@@ -274,15 +274,16 @@
             <h3 class="text-lg font-medium mb-3">Appearance</h3>
             
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="theme-selection">
                 <span class="label-text">Theme</span>
               </label>
-              <div class="join">
+              <div class="join" id="theme-selection" role="radiogroup">
                 {#each themeOptions as option}
                   <input 
                     class="join-item btn"
                     type="radio"
                     name="theme"
+                    id="theme-{option.value}"
                     aria-label="{option.icon} {option.label}"
                     value={option.value}
                     checked={$config.theme === option.value}
@@ -293,10 +294,11 @@
             </div>
 
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="language-select">
                 <span class="label-text">Language</span>
               </label>
               <select 
+                id="language-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.language}
                 on:change={(e) => updateConfig({ language: e.currentTarget.value })}
@@ -328,10 +330,11 @@
 
             {#if $config.autoRefresh.enabled}
               <div class="form-control">
-                <label class="label">
+                <label class="label" for="refresh-interval">
                   <span class="label-text">Refresh interval (seconds)</span>
                 </label>
                 <input 
+                  id="refresh-interval"
                   type="range"
                   min="5"
                   max="60"
@@ -413,10 +416,11 @@
 
             {#if $config.notifications.autoHide}
               <div class="form-control">
-                <label class="label">
+                <label class="label" for="hide-delay">
                   <span class="label-text">Auto-hide delay (seconds)</span>
                 </label>
                 <input 
+                  id="hide-delay"
                   type="range"
                   min="2"
                   max="10"
@@ -486,15 +490,16 @@
             </div>
 
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="default-view-selection">
                 <span class="label-text">Default view</span>
               </label>
-              <div class="join">
+              <div class="join" id="default-view-selection" role="radiogroup">
                 {#each defaultViewOptions as option}
                   <input 
                     class="join-item btn"
                     type="radio"
                     name="defaultView"
+                    id="view-{option.value}"
                     aria-label="{option.icon} {option.label}"
                     value={option.value}
                     checked={$config.dashboard.defaultView === option.value}
@@ -505,10 +510,11 @@
             </div>
 
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="sessions-per-page">
                 <span class="label-text">Sessions per page</span>
               </label>
               <input 
+                id="sessions-per-page"
                 type="range"
                 min="10"
                 max="50"
@@ -547,10 +553,11 @@
             </div>
 
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="log-level-select">
                 <span class="label-text">Log level</span>
               </label>
               <select 
+                id="log-level-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.advanced.logLevel}
                 on:change={(e) => updateAdvancedConfig({ logLevel: e.currentTarget.value })}
@@ -562,10 +569,11 @@
             </div>
 
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="max-log-size">
                 <span class="label-text">Max log size (MB)</span>
               </label>
               <input 
+                id="max-log-size"
                 type="number"
                 min="1"
                 max="100"
@@ -611,10 +619,11 @@
             <h3 class="text-lg font-medium mb-3">Python Configuration</h3>
             
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="python-executable">
                 <span class="label-text">Python executable</span>
               </label>
               <input 
+                id="python-executable"
                 type="text"
                 class="input input-bordered w-full"
                 bind:value={$config.python.executable}
@@ -626,10 +635,11 @@
             </div>
 
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="python-venv">
                 <span class="label-text">Virtual environment (optional)</span>
               </label>
               <input 
+                id="python-venv"
                 type="text"
                 class="input input-bordered w-full"
                 bind:value={$config.python.virtualEnv}
@@ -645,10 +655,11 @@
             <h3 class="text-lg font-medium mb-3">Tmux Configuration</h3>
             
             <div class="form-control">
-              <label class="label">
+              <label class="label" for="tmux-executable">
                 <span class="label-text">Tmux executable</span>
               </label>
               <input 
+                id="tmux-executable"
                 type="text"
                 class="input input-bordered w-full"
                 bind:value={$config.tmux.executable}
