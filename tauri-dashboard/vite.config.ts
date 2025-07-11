@@ -2,8 +2,12 @@ import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
-	plugins: [sveltekit(), devtoolsJson()],
+export default defineConfig(({ mode }) => ({
+	plugins: [
+		sveltekit(),
+		// DevTools integration only in development
+		mode === 'development' && devtoolsJson()
+	].filter(Boolean),
 	// Tauri expects a fixed port
 	server: {
 		port: 5173,
@@ -22,4 +26,4 @@ export default defineConfig({
 		// produce sourcemaps for debug builds
 		sourcemap: !!process.env.TAURI_DEBUG
 	}
-});
+}));
