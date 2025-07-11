@@ -273,17 +273,34 @@ def launch_web_dashboard(host: str = "localhost", port: int = 8080,
                     click.echo("\nShutting down web dashboard...")
         else:
             # Use FastAPI server
-            original_cwd = os.getcwd()
-            os.chdir(api_path)
-            
             try:
                 import uvicorn
-                uvicorn.run("main:app", host=host, port=port, reload=dev)
+                import threading
+                import time
+                
+                # Show the URL before starting
+                dashboard_url = f"http://{host}:{port}"
+                click.echo(f"🌐 FastAPI server starting at {dashboard_url}")
+                click.echo("📊 Dashboard will be available at the URL above")
+                
+                if not detach:
+                    # Open browser after a short delay in a separate thread
+                    def open_browser():
+                        time.sleep(2)  # Wait for server to start
+                        try:
+                            webbrowser.open(dashboard_url)
+                            click.echo(f"🔗 Opening browser to {dashboard_url}")
+                        except Exception as e:
+                            click.echo(f"Could not open browser automatically: {e}")
+                            click.echo(f"Please open {dashboard_url} manually in your browser")
+                    
+                    threading.Thread(target=open_browser, daemon=True).start()
+                
+                uvicorn.run("api.main:app", host=host, port=port, reload=dev)
+                
             except ImportError:
-                click.echo("FastAPI/uvicorn not available. Install with: pip install fastapi uvicorn", err=True)
+                click.echo("FastAPI/uvicorn not available. Install with: uv add fastapi uvicorn", err=True)
                 sys.exit(1)
-            finally:
-                os.chdir(original_cwd)
                 
     except Exception as e:
         click.echo(f"Web dashboard error: {e}", err=True)
@@ -326,24 +343,24 @@ def launch_tauri_dashboard(theme: Optional[str] = None, dev: bool = False,
         else:
             click.echo("Starting Tauri dashboard...")
             # Check if built app exists
-            if not (dashboard_path / "src-tauri" / "target" / "release").exists():
-                click.echo("Building Tauri app for first run...")
-                subprocess.run(["npm", "run", "tauri", "build"], check=True)
-            
-            # Run the built executable
             build_dir = dashboard_path / "src-tauri" / "target" / "release"
             
-            # Find the executable (platform dependent)
-            if sys.platform == "darwin":  # macOS
-                app_bundle = build_dir / "bundle" / "macos" / "yesman-claude.app"
-                if app_bundle.exists():
-                    cmd = ["open", str(app_bundle)]
-                else:
+            if not build_dir.exists():
+                click.echo("⚠️  Release build not found. Switching to development mode...")
+                click.echo("Starting Tauri dashboard in development mode...")
+                cmd = ["npm", "run", "tauri", "dev"]
+            else:
+                # Find the executable (platform dependent)
+                if sys.platform == "darwin":  # macOS
+                    app_bundle = build_dir / "bundle" / "macos" / "yesman-claude.app"
+                    if app_bundle.exists():
+                        cmd = ["open", str(app_bundle)]
+                    else:
+                        cmd = [str(build_dir / "yesman-claude")]
+                elif sys.platform == "win32":  # Windows
+                    cmd = [str(build_dir / "yesman-claude.exe")]
+                else:  # Linux
                     cmd = [str(build_dir / "yesman-claude")]
-            elif sys.platform == "win32":  # Windows
-                cmd = [str(build_dir / "yesman-claude.exe")]
-            else:  # Linux
-                cmd = [str(build_dir / "yesman-claude")]
         
         # Run the command
         if detach:
@@ -367,7 +384,7 @@ def launch_tauri_dashboard(theme: Optional[str] = None, dev: bool = False,
         os.chdir(original_cwd)
 
 
-@click.group(name="dash")
+@click.group(name="dashboard")
 def dashboard_group():
     """Dashboard interface management commands"""
     pass
@@ -446,6 +463,14 @@ def list_interfaces():
     click.echo(f"  GUI Available:     {'Yes' if DashboardEnvironment.is_gui_available() else 'No'}")
     click.echo(f"  SSH Session:       {'Yes' if DashboardEnvironment.is_ssh_session() else 'No'}")
     click.echo(f"  Terminal Capable:  {'Yes' if DashboardEnvironment.is_terminal_capable() else 'No'}")
+
+
+# Add ls as an alias for list-interfaces
+@dashboard_group.command()
+def ls():
+    """Alias for 'list-interfaces' command"""
+    ctx = click.get_current_context()
+    ctx.invoke(list_interfaces)
 
 
 @dashboard_group.command()
