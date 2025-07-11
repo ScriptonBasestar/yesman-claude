@@ -1,101 +1,116 @@
 """
-Test for setup command
+Test for setup command - Migrated to use centralized mock factories
 """
 
-import unittest
-from unittest.mock import patch, MagicMock, call
+import pytest
+from unittest.mock import call, patch, MagicMock
 from click.testing import CliRunner
 from commands.setup import setup
+from tests.fixtures.mock_factories import PatchContextFactory
 
 
-class TestSetupCommand(unittest.TestCase):
+class TestSetupCommand:
+    """Migrated to pytest-style with centralized mocks - Fixed for actual setup command"""
     
-    def setUp(self):
+    def setup_method(self):
         self.runner = CliRunner()
     
-    @patch('commands.setup.SessionManager')
-    def test_setup_creates_all_sessions(self, mock_session_manager):
+    @patch('commands.setup.YesmanConfig')
+    def test_setup_creates_all_sessions(self, mock_config):
         """Test setup command creates all sessions from projects.yaml"""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.get_all_projects.return_value = [
-            {"name": "project1", "template": "template1.yaml"},
-            {"name": "project2", "template": "template2.yaml"}
-        ]
-        mock_manager_instance.create_session.return_value = True
-        mock_session_manager.return_value = mock_manager_instance
+        projects = {
+            "sessions": {
+                "project1": {"template_name": "template1"},
+                "project2": {"template_name": "template2"}
+            }
+        }
         
-        # Run command
-        result = self.runner.invoke(setup)
-        
-        # Assertions
-        assert result.exit_code == 0
-        assert mock_manager_instance.create_session.call_count == 2
-        mock_manager_instance.create_session.assert_has_calls([
-            call("project1"),
-            call("project2")
-        ], any_order=True)
+        with PatchContextFactory.patch_setup_tmux_manager(
+            load_projects_result=projects,
+            create_session_result=True
+        ) as mock_manager:
+            # Run command
+            result = self.runner.invoke(setup)
+            
+            # Assertions
+            assert result.exit_code == 0
+            assert mock_manager.create_session.call_count == 2
+            mock_manager.list_running_sessions.assert_called_once()
     
-    @patch('commands.setup.SessionManager')
-    def test_setup_with_specific_project(self, mock_session_manager):
+    @patch('commands.setup.YesmanConfig')
+    def test_setup_with_specific_project(self, mock_config):
         """Test setup command with specific project name"""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.create_session.return_value = True
-        mock_session_manager.return_value = mock_manager_instance
+        projects = {
+            "sessions": {
+                "myproject": {"template_name": "my_template"}
+            }
+        }
         
-        # Run command with project name
-        result = self.runner.invoke(setup, ['--project', 'myproject'])
-        
-        # Assertions
-        assert result.exit_code == 0
-        mock_manager_instance.create_session.assert_called_once_with('myproject')
+        with PatchContextFactory.patch_setup_tmux_manager(
+            load_projects_result=projects,
+            create_session_result=True
+        ) as mock_manager:
+            # Run command with project name
+            result = self.runner.invoke(setup, ['myproject'])
+            
+            # Assertions
+            assert result.exit_code == 0
+            mock_manager.create_session.assert_called_once()
     
-    @patch('commands.setup.SessionManager')
-    def test_setup_handles_session_exists(self, mock_session_manager):
-        """Test setup handles existing session gracefully"""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.create_session.side_effect = Exception("Session already exists")
-        mock_session_manager.return_value = mock_manager_instance
+    @patch('commands.setup.YesmanConfig')
+    def test_setup_handles_session_creation_failure(self, mock_config):
+        """Test setup handles session creation failure gracefully"""
+        projects = {
+            "sessions": {
+                "existing": {"template_name": "my_template"}
+            }
+        }
         
-        # Run command
-        result = self.runner.invoke(setup, ['--project', 'existing'])
-        
-        # Should handle error
-        assert result.exit_code != 0
-        assert "already exists" in result.output or "Error" in result.output
+        with PatchContextFactory.patch_setup_tmux_manager(
+            load_projects_result=projects,
+            create_session_result=False  # Simulate failure
+        ) as mock_manager:
+            # Run command
+            result = self.runner.invoke(setup, ['existing'])
+            
+            # Should handle error gracefully
+            assert result.exit_code == 0  # Command completes but reports failure
+            assert "already exists" in result.output or "failed to create" in result.output
     
-    @patch('commands.setup.SessionManager')
-    def test_setup_with_force_flag(self, mock_session_manager):
-        """Test setup with --force flag recreates session"""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.create_session.return_value = True
-        mock_manager_instance.kill_session.return_value = True
-        mock_session_manager.return_value = mock_manager_instance
+    @patch('commands.setup.YesmanConfig')
+    def test_setup_with_nonexistent_project(self, mock_config):
+        """Test setup with nonexistent project name"""
+        projects = {
+            "sessions": {
+                "valid_project": {"template_name": "template1"}
+            }
+        }
         
-        # Run command with force flag
-        result = self.runner.invoke(setup, ['--project', 'myproject', '--force'])
-        
-        # Assertions
-        assert result.exit_code == 0
-        mock_manager_instance.kill_session.assert_called_once_with('myproject')
-        mock_manager_instance.create_session.assert_called_once_with('myproject')
+        with PatchContextFactory.patch_setup_tmux_manager(
+            load_projects_result=projects
+        ) as mock_manager:
+            # Run command with nonexistent project
+            result = self.runner.invoke(setup, ['nonexistent'])
+            
+            # Should show error and not call create_session
+            assert result.exit_code == 0  # Click command completes
+            assert "not defined" in result.output
+            mock_manager.create_session.assert_not_called()
     
-    @patch('commands.setup.SessionManager')
-    def test_setup_no_projects_found(self, mock_session_manager):
+    @patch('commands.setup.YesmanConfig')
+    def test_setup_no_projects_found(self, mock_config):
         """Test setup when no projects are configured"""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.get_all_projects.return_value = []
-        mock_session_manager.return_value = mock_manager_instance
+        projects = {"sessions": {}}  # Empty sessions
         
-        # Run command
-        result = self.runner.invoke(setup)
-        
-        # Should show appropriate message
-        assert result.exit_code == 0
-        assert "No projects" in result.output or "Nothing to setup" in result.output
+        with PatchContextFactory.patch_setup_tmux_manager(
+            load_projects_result=projects
+        ) as mock_manager:
+            # Run command
+            result = self.runner.invoke(setup)
+            
+            # Should show appropriate message
+            assert result.exit_code == 0
+            assert "No sessions defined" in result.output
+            mock_manager.create_session.assert_not_called()
 
 

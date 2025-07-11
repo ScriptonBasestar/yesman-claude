@@ -233,7 +233,7 @@ def cached_render(cache: Optional[RenderCache] = None):
             if cached_result is not None:
                 return cached_result
             
-            # Render and cache
+            # Render and cache - call with explicit arguments
             result = func(self, widget_type, data, options)
             cache.set(cache_key, result)
             return result

@@ -1,0 +1,93 @@
+# Pre-commit configuration for Yesman-Claude project
+# Run with: pre-commit run --all-files
+
+repos:
+  # Python code formatting and linting
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        args: [--line-length=88]
+        exclude: ^(migrations/|node_modules/)
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: [--max-line-length=88, --extend-ignore=E203,W503]
+        exclude: ^(migrations/|node_modules/)
+
+  # Test naming validation (custom hooks)
+  - repo: local
+    hooks:
+      - id: test-naming-validation
+        name: Test Naming Standards Check
+        entry: python scripts/test_naming_validator.py
+        language: python
+        files: ^tests/.*\.py$
+        args: [--min-score=70]
+        pass_filenames: true
+        
+      - id: unittest-detection
+        name: Detect unittest Usage in New Tests
+        entry: python scripts/detect_unittest_usage.py
+        language: python
+        files: ^tests/.*\.py$
+        pass_filenames: true
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(.*\.md|.*\.txt)$
+      - id: end-of-file-fixer
+        exclude: ^(.*\.md|.*\.txt)$
+      - id: check-yaml
+        exclude: ^(.github/|node_modules/)
+      - id: check-json
+        exclude: ^(node_modules/|package-lock\.json)
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: debug-statements
+        exclude: ^(debug/|scripts/debug_)
+
+  # Python-specific checks
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.7
+    hooks:
+      - id: bandit
+        args: [-r, ., -x, tests/, --skip, B101]
+        exclude: ^(tests/|scripts/|debug/)
+
+  # Documentation checks
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: [--convention=google]
+        exclude: ^(tests/|migrations/|scripts/|debug/)
+
+# Global configuration
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [commit]
+
+# CI configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
