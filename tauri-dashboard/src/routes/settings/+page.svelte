@@ -547,9 +547,9 @@
                   on:change={toggleDebugMode}
                 />
               </label>
-              <label class="label">
+              <div class="label">
                 <span class="label-text-alt">Enable detailed logging and debug information</span>
-              </label>
+              </div>
             </div>
 
             <div class="form-control">
@@ -595,9 +595,9 @@
                   on:change={(e) => updateAdvancedConfig({ enableTelemetry: e.currentTarget.checked })}
                 />
               </label>
-              <label class="label">
+              <div class="label">
                 <span class="label-text-alt">Help improve the app by sending usage data</span>
-              </label>
+              </div>
             </div>
 
             <div class="mt-4">

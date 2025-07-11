@@ -172,7 +172,7 @@ class SessionBrowser extends HTMLElement {
 
     async loadSessions() {
         try {
-            const response = await axios.get('/web/api/sessions');
+            const response = await axios.get('/api/dashboard/sessions');
             this.sessions = response.data;
             this.renderSessions();
         } catch (error) {
@@ -229,7 +229,7 @@ class SessionBrowser extends HTMLElement {
 
     async enterSession(sessionName) {
         try {
-            const response = await axios.post(`/web/api/sessions/${sessionName}/enter`);
+            const response = await axios.post(`/api/dashboard/sessions/${sessionName}/enter`);
             if (response.data.success) {
                 // Show success notification
                 this.showNotification(`Entered session: ${sessionName}`, 'success');
@@ -242,7 +242,7 @@ class SessionBrowser extends HTMLElement {
     async stopSession(sessionName) {
         if (confirm(`Are you sure you want to stop session "${sessionName}"?`)) {
             try {
-                const response = await axios.post(`/web/api/sessions/${sessionName}/stop`);
+                const response = await axios.post(`/api/dashboard/sessions/${sessionName}/stop`);
                 if (response.data.success) {
                     this.showNotification(`Stopped session: ${sessionName}`, 'success');
                     await this.loadSessions();

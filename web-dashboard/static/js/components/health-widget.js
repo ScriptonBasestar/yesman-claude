@@ -47,7 +47,7 @@ class HealthWidget extends HTMLElement {
 
     async loadHealth() {
         try {
-            const response = await axios.get('/web/api/health');
+            const response = await axios.get('/api/dashboard/health');
             this.health = response.data;
             this.renderHealth();
         } catch (error) {

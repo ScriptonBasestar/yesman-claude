@@ -18,19 +18,28 @@ Yesman-Claude offers three distinct dashboard interfaces to suit different envir
 ### 🖥️ Terminal User Interface (TUI)
 Rich-based terminal dashboard with live updates and keyboard navigation.
 ```bash
-uv run ./yesman.py dash tui
+uv run ./yesman.py dash run --interface tui
 ```
 
-### 🌐 Web Interface  
-Browser-based dashboard with REST API backend.
+### 🌐 Web Interface (SvelteKit)
+Modern web dashboard built with SvelteKit, served via FastAPI.
 ```bash
-uv run ./yesman.py dash web --port 8000
+# Build SvelteKit first (required for web interface)
+cd tauri-dashboard && npm run build
+
+# Start web dashboard
+uv run ./yesman.py dash run --interface web --port 8080
+# Access at: http://localhost:8080
+
+# Background mode
+uv run ./yesman.py dash run --interface web --detach
 ```
 
-### 🖱️ Desktop Application
-Native desktop app built with Tauri and Svelte.
+### 🖱️ Desktop Application (Tauri + SvelteKit)
+Native desktop app with the same SvelteKit codebase as web interface.
 ```bash
-uv run ./yesman.py dash tauri --dev
+uv run ./yesman.py dash run --interface tauri
+uv run ./yesman.py dash run --interface tauri --dev  # Development mode
 ```
 
 ## 🔧 Quick Start
@@ -54,8 +63,15 @@ uv run ./yesman.py --help
 # Create all tmux sessions from projects.yaml
 uv run ./yesman.py up
 
-# Monitor sessions with dashboard
-uv run ./yesman.py dash
+# Build SvelteKit for web interface (one-time setup)
+cd tauri-dashboard && npm run build && cd ..
+
+# Launch unified SvelteKit dashboard
+uv run ./yesman.py dash run -i web --port 8080
+# Access at: http://localhost:8080
+
+# Auto-detect best interface
+uv run ./yesman.py dash run
 
 # Interactive session browser
 uv run ./yesman.py browse

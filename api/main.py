@@ -23,18 +23,71 @@ app.include_router(controllers.router, prefix="/api", tags=["controllers"])
 app.include_router(config.router, prefix="/api", tags=["configuration"])
 app.include_router(logs.router, prefix="/api", tags=["logs"])
 
-# Include web dashboard router
-app.include_router(dashboard.router, tags=["web-dashboard"])
+# Include dashboard API router (for SvelteKit)
+app.include_router(dashboard.router, tags=["dashboard-api"])
 
 # Include WebSocket router
 app.include_router(websocket.router, tags=["websocket"])
 
-# Mount static files for web dashboard
-app.mount("/static", StaticFiles(directory="web-dashboard/static"), name="static")
+# Mount SvelteKit static files
+app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="fonts")
 
-@app.get("/")
-def read_root():
-    return {"message": "Yesman Claude API Server is running!"}
+# Mount SvelteKit assets
+import os
+sveltekit_build_path = "tauri-dashboard/build"
+if os.path.exists(sveltekit_build_path):
+    # Mount SvelteKit static assets
+    app.mount("/_app", StaticFiles(directory="tauri-dashboard/build/_app"), name="app-assets")
+
+# Health check endpoint
+@app.get("/healthz")
+async def health_check():
+    """Health check endpoint for monitoring and load balancer"""
+    return {
+        "status": "healthy",
+        "service": "yesman-claude-api",
+        "timestamp": datetime.now().isoformat(),
+        "version": "0.1.0"
+    }
+
+# API info endpoint
+@app.get("/api")
+async def api_info():
+    """API information and available endpoints"""
+    return {
+        "service": "Yesman Claude API",
+        "version": "0.1.0",
+        "endpoints": {
+            "sessions": "/api/sessions",
+            "controllers": "/api/controllers", 
+            "config": "/api/config",
+            "logs": "/api/logs",
+            "dashboard": "/api/dashboard",
+            "websocket": "/ws",
+            "health": "/healthz"
+        },
+        "ui": {
+            "dashboard": "/" if os.path.exists(sveltekit_build_path) else None
+        },
+        "docs": "/docs",
+        "openapi": "/openapi.json"
+    }
+
+# SvelteKit dashboard route (serves at root)
+if os.path.exists(sveltekit_build_path):
+    from fastapi.responses import FileResponse
+    
+    @app.get("/")
+    @app.get("/{path:path}")
+    async def serve_dashboard(path: str = ""):
+        """Serve SvelteKit dashboard at root"""
+        # Skip API routes and specific endpoints
+        if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not found")
+        
+        # For SPA, always serve index.html
+        return FileResponse("tauri-dashboard/build/index.html")
 
 # Startup event
 @app.on_event("startup")
