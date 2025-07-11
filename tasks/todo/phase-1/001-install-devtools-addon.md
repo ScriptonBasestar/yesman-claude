@@ -35,9 +35,9 @@ High
 - Development server should be ready for the next configuration step
 
 ## Verification Steps
-- [ ] Plugin appears in `package.json` dependencies
-- [ ] Plugin is configured in `vite.config.js`
-- [ ] No installation errors occurred
+- [x] Plugin appears in `package.json` dependencies
+- [x] Plugin is configured in `vite.config.js`
+- [x] No installation errors occurred
 
 ## Related Files
 - `tauri-dashboard/package.json`
