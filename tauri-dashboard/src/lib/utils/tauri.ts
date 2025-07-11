@@ -11,7 +11,9 @@ import { listen } from '@tauri-apps/api/event';
 // Tauri 환경인지 확인하기 위한 변수입니다.
 // 웹 브라우저 환경에서는 window.__TAURI__가 undefined입니다.
 // @ts-ignore
-const isTauri = typeof window !== 'undefined' && window.__TAURI__ !== undefined;
+const isTauri = typeof window !== 'undefined' && 
+  window.__TAURI__ !== undefined && 
+  window.__TAURI_IPC__ !== undefined;
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -87,9 +89,15 @@ export const pythonBridge = {
 	// Tauri-specific functions
 	send_notification: async (message: string) => {
 		if (isTauri) {
-			return sendNotification({ title: 'Yesman', body: message });
+			try {
+				return await sendNotification({ title: 'Yesman', body: message });
+			} catch (error) {
+				console.warn('Failed to send Tauri notification, falling back to console:', error);
+				console.log(`Notification (fallback): ${message}`);
+			}
+		} else {
+			console.log(`Notification (web): ${message}`);
 		}
-		console.log(`Notification (web): ${message}`);
 		return Promise.resolve();
 	},
 
