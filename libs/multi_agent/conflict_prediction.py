@@ -22,6 +22,7 @@ from .conflict_resolution import (
 )
 from .branch_manager import BranchManager
 from .types import Agent, Task
+from .semantic_analyzer import SemanticAnalyzer, SemanticConflictType
 
 
 logger = logging.getLogger(__name__)
@@ -100,6 +101,9 @@ class ConflictPredictor:
         self.conflict_engine = conflict_engine
         self.branch_manager = branch_manager
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
+
+        # Initialize semantic analyzer for deep code analysis
+        self.semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
 
         # Prediction storage
         self.predictions: Dict[str, PredictionResult] = {}
