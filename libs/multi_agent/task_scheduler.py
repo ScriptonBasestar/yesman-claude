@@ -410,7 +410,7 @@ class TaskScheduler:
         return self.scheduling_metrics.copy()
 
     def rebalance_tasks(self) -> List[Tuple[str, str]]:
-        """Rebalance tasks between agents if needed"""
+        """Rebalance workload between agents by adjusting task assignment preferences"""
         rebalancing_actions = []
 
         # Find overloaded and underloaded agents
@@ -423,15 +423,77 @@ class TaskScheduler:
             elif capability.current_load < 0.3:
                 underloaded.append((agent_id, capability))
 
-        # For now, just log the need for rebalancing
-        # In a full implementation, this would trigger task migration
+        # Perform load balancing adjustments
         if overloaded and underloaded:
             logger.info(
-                f"Rebalancing needed: {len(overloaded)} overloaded, {len(underloaded)} underloaded agents"
+                f"Rebalancing workload: {len(overloaded)} overloaded, {len(underloaded)} underloaded agents"
             )
 
-            for overloaded_agent, _ in overloaded:
-                for underloaded_agent, _ in underloaded:
-                    rebalancing_actions.append((overloaded_agent, underloaded_agent))
+            # Sort by load difference to prioritize most urgent rebalancing
+            overloaded.sort(key=lambda x: x[1].current_load, reverse=True)
+            underloaded.sort(key=lambda x: x[1].current_load)
+
+            for overloaded_agent_id, overloaded_cap in overloaded:
+                for underloaded_agent_id, underloaded_cap in underloaded:
+                    # Calculate load difference
+                    load_diff = overloaded_cap.current_load - underloaded_cap.current_load
+                    
+                    # Only rebalance if significant difference (>0.4)
+                    if load_diff > 0.4:
+                        # Apply workload redistribution
+                        load_transfer = min(0.15, load_diff * 0.3)  # Transfer up to 15% or 30% of difference
+                        
+                        # Adjust agent loads
+                        overloaded_cap.current_load = max(0.0, overloaded_cap.current_load - load_transfer)
+                        underloaded_cap.current_load = min(1.0, underloaded_cap.current_load + load_transfer)
+                        
+                        # Boost underloaded agent's assignment preference temporarily
+                        underloaded_cap.processing_power *= 1.2  # 20% boost for next assignments
+                        
+                        rebalancing_actions.append((overloaded_agent_id, underloaded_agent_id))
+                        logger.info(
+                            f"Redistributed {load_transfer:.2f} load from {overloaded_agent_id} "
+                            f"({overloaded_cap.current_load:.2f}) to {underloaded_agent_id} "
+                            f"({underloaded_cap.current_load:.2f})"
+                        )
+                        
+                        # Apply scheduling preference adjustment
+                        self._adjust_assignment_preferences(overloaded_agent_id, underloaded_agent_id)
 
         return rebalancing_actions
+
+    def _adjust_assignment_preferences(self, overloaded_agent_id: str, underloaded_agent_id: str) -> None:
+        """Adjust task assignment preferences to favor underloaded agents"""
+        overloaded_cap = self.agent_capabilities.get(overloaded_agent_id)
+        underloaded_cap = self.agent_capabilities.get(underloaded_agent_id)
+        
+        if not overloaded_cap or not underloaded_cap:
+            return
+            
+        # Temporarily reduce overloaded agent's processing power score
+        overloaded_cap.processing_power *= 0.8  # 20% penalty
+        
+        # The boost to underloaded agent was already applied in rebalance_tasks
+        logger.debug(f"Adjusted assignment preferences: {overloaded_agent_id} penalty, {underloaded_agent_id} boost")
+
+    def reset_assignment_preferences(self, agent_id: str) -> None:
+        """Reset assignment preferences for an agent to baseline values"""
+        capability = self.agent_capabilities.get(agent_id)
+        if not capability:
+            return
+            
+        # Reset processing power to a baseline (assume 1.0 is baseline)
+        if hasattr(capability, '_baseline_processing_power'):
+            capability.processing_power = capability._baseline_processing_power
+        else:
+            # Store baseline and reset to 1.0
+            capability._baseline_processing_power = 1.0
+            capability.processing_power = 1.0
+            
+        logger.debug(f"Reset assignment preferences for agent {agent_id}")
+
+    def _estimate_task_load(self, task: Task, agent_capability: AgentCapability) -> float:
+        """Estimate the load a task represents for an agent"""
+        estimated_time = self._estimate_task_time(task, agent_capability)
+        # Convert to load factor (assuming 8-hour workday)
+        return estimated_time / (8 * 3600.0)
