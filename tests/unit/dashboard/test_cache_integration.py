@@ -25,5 +25,5 @@ class TestCacheIntegration:
         
         # Test cache stats
         stats = cache.get_stats()
-        assert stats['hits'] == 1
-        assert stats['misses'] == 1
+        assert stats.hits == 1
+        assert stats.misses == 1
