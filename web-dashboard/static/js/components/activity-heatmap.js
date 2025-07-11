@@ -84,7 +84,7 @@ class ActivityHeatmap extends HTMLElement {
 
     async loadActivityData() {
         try {
-            const response = await axios.get('/web/api/activity');
+            const response = await axios.get('/api/dashboard/activity');
             this.activityData = response.data;
             this.renderHeatmap();
         } catch (error) {

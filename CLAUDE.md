@@ -6,6 +6,52 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Yesman-Claude is a CLI automation tool that manages tmux sessions and automates interactions with Claude Code. It uses YAML configuration files with template support to create reproducible development environments.
 
+## API Endpoints Structure
+
+### Web Dashboard Server
+```bash
+# Start unified web dashboard (SvelteKit via FastAPI)
+uv run ./yesman.py dash run -i web --port 8080
+
+# Access URLs:
+http://localhost:8080/              # SvelteKit Dashboard (root)
+http://localhost:8080/api/          # API endpoint discovery
+http://localhost:8080/healthz       # Health check
+http://localhost:8080/docs          # FastAPI auto-documentation
+```
+
+### API Endpoints
+```
+📍 Base URL: http://localhost:8080
+
+┌─── 🌐 Dashboard (SvelteKit) ───┐
+│ /                              │ SvelteKit Web App
+│ /_app/*                        │ SvelteKit Assets
+│ /fonts/*                       │ Font Files
+└────────────────────────────────┘
+
+┌─── 🔌 REST API (/api) ─────────┐
+│ /api/                          │ API Info & Discovery
+│ /api/sessions                  │ Session Management
+│ /api/controllers               │ Controller Management
+│ /api/config                    │ Configuration
+│ /api/logs                      │ Log Management
+│ /api/dashboard/sessions        │ Dashboard Session Data
+│ /api/dashboard/health          │ Project Health Metrics
+│ /api/dashboard/activity        │ Activity Heatmap Data
+│ /api/dashboard/stats           │ Dashboard Statistics
+│ /api/tasks/status              │ Background Task Status
+│ /api/websocket/stats           │ WebSocket Statistics
+└────────────────────────────────┘
+
+┌─── ⚡ Utilities ──────────────┐
+│ /healthz                       │ Health Check (Monitoring)
+│ /docs                          │ FastAPI Documentation
+│ /openapi.json                  │ OpenAPI Schema
+│ /ws                            │ WebSocket Connection
+└────────────────────────────────┘
+```
+
 ## Development Commands
 
 ### Installation
@@ -39,9 +85,40 @@ uv run ./yesman.py down  # (formerly teardown)
 uv run ./yesman.py enter [session_name]
 uv run ./yesman.py enter  # Interactive selection
 
-# Run Tauri desktop dashboard to monitor all sessions
-uv run ./yesman.py dashboard --dev  # Development mode
-uv run ./yesman.py dashboard        # Production mode
+# Dashboard interfaces - Multiple options available
+# TUI Dashboard (Terminal UI)
+uv run ./yesman.py dash run --interface tui
+
+# Web Dashboard (Browser-based)
+uv run ./yesman.py dash run --interface web
+uv run ./yesman.py dash run --interface web --host 0.0.0.0 --port 3000
+uv run ./yesman.py dash run --interface web --detach  # Run in background
+
+# Tauri Dashboard (Native desktop app)
+uv run ./yesman.py dash run --interface tauri
+uv run ./yesman.py dash run --interface tauri --dev  # Development mode
+
+# Dashboard Interface Commands (Unified SvelteKit)
+uv run ./yesman.py dash run --interface web    # Web dashboard (SvelteKit via FastAPI)
+uv run ./yesman.py dash run --interface tauri  # Native desktop app (SvelteKit via Tauri)
+uv run ./yesman.py dash run --interface tui    # Terminal interface (Python + Rich)
+
+# Short aliases for convenience
+uv run ./yesman.py dash run -i web    # Web SvelteKit dashboard
+uv run ./yesman.py dash run -i tauri  # Native SvelteKit app
+uv run ./yesman.py dash run -i tui    # Terminal UI
+uv run ./yesman.py dash ls            # List interfaces
+
+# Auto-detect best interface based on environment
+uv run ./yesman.py dash run  # Automatically selects best interface
+
+# Build SvelteKit for production (required for web interface)
+cd tauri-dashboard && npm run build  # Build SvelteKit static files
+uv run ./yesman.py dash build --interface tauri  # Build native app
+
+# Legacy commands (for backward compatibility)
+uv run ./yesman.py dashboard        # Production mode (tauri)
+uv run ./yesman.py dashboard --dev  # Development mode (tauri)
 
 # NEW: Interactive session browser with activity monitoring
 uv run ./yesman.py browse           # Interactive session browser
@@ -238,9 +315,10 @@ Configuration merge modes:
    - **Monitoring Loop**: Captures content every second and detects interactive prompts
    - **Safe Restart**: Properly terminates existing Claude processes before restarting
 
-4. **Multi-Interface Architecture**: 
-   - **Tauri Desktop App**: Primary native desktop interface for session monitoring
-   - **FastAPI Server**: REST API for programmatic access and integration
+4. **Multi-Interface Architecture**:
+   - **TUI Dashboard**: Terminal-based interface using Rich library, ideal for SSH sessions
+   - **Web Dashboard**: Browser-based interface with FastAPI/HTTP server
+   - **Tauri Desktop App**: Native desktop interface for session monitoring
    - **CLI Interface**: Command-line tool for direct automation and scripting
 
 5. **Error Handling**: Commands check for existing sessions before creation and validate template existence.
@@ -288,7 +366,7 @@ Configuration merge modes:
 ✅ **Automated Response System**: Fully implemented with AI learning
 ✅ **Session Monitoring**: Real-time activity tracking and visualization  
 ✅ **Performance Optimization**: Smart caching and async processing
-✅ **Multi-Interface Support**: CLI, REST API, and native desktop app
+✅ **Multi-Interface Support**: CLI, TUI, Web, REST API, and native desktop app
 ✅ **Pattern-Based Recognition**: Advanced prompt detection and auto-response
 ✅ **Context-Aware Automation**: Workflow chains triggered by project events
 

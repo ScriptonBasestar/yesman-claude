@@ -17,7 +17,7 @@ from libs.yesman_config import YesmanConfig
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/web", tags=["web-dashboard"])
+router = APIRouter(tags=["web-dashboard"])
 templates = Jinja2Templates(directory="web-dashboard/static/templates")
 
 # Initialize managers
@@ -25,15 +25,9 @@ session_manager = SessionManager()
 config = YesmanConfig()
 heatmap_generator = ActivityHeatmapGenerator(config)
 
-@router.get("/", response_class=HTMLResponse)
-async def dashboard_home(request: Request):
-    """Web dashboard main page"""
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
-        "title": "Yesman Claude Dashboard"
-    })
+# Legacy HTML dashboard route removed - now using SvelteKit at root
 
-@router.get("/api/sessions")
+@router.get("/api/dashboard/sessions")
 async def get_sessions():
     """Get session list"""
     try:
@@ -69,7 +63,7 @@ async def get_sessions():
         logger.error(f"Failed to get sessions: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get sessions: {str(e)}")
 
-@router.get("/api/health")
+@router.get("/api/dashboard/health")
 async def get_project_health():
     """Get project health metrics"""
     try:
@@ -122,7 +116,7 @@ async def get_project_health():
         logger.error(f"Failed to get health data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get health data: {str(e)}")
 
-@router.get("/api/activity")
+@router.get("/api/dashboard/activity")
 async def get_activity_data():
     """Get activity heatmap data"""
     try:
@@ -196,7 +190,7 @@ async def get_activity_data():
         logger.error(f"Failed to get activity data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get activity data: {str(e)}")
 
-@router.get("/api/heatmap/{session_name}")
+@router.get("/api/dashboard/heatmap/{session_name}")
 async def get_session_heatmap(session_name: str, days: int = Query(7, ge=1, le=30)):
     """세션별 히트맵 데이터 반환"""
     try:
@@ -206,7 +200,7 @@ async def get_session_heatmap(session_name: str, days: int = Query(7, ge=1, le=3
         logger.error(f"Failed to get heatmap data for {session_name}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {str(e)}")
 
-@router.get("/api/stats")
+@router.get("/api/dashboard/stats")
 async def get_dashboard_stats():
     """Get dashboard statistics summary"""
     try:

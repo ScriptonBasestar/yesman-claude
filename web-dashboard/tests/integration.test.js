@@ -32,8 +32,8 @@ async function apiRequest(endpoint, options = {}) {
 // Test suites
 describe('Web Dashboard API Integration Tests', () => {
     describe('Sessions API', () => {
-        test('GET /web/api/sessions should return session list', async () => {
-            const data = await apiRequest('/web/api/sessions');
+        test('GET /api/dashboard/sessions should return session list', async () => {
+            const data = await apiRequest('/api/dashboard/sessions');
             
             expect(data).toBeDefined();
             expect(Array.isArray(data)).toBe(true);
@@ -51,7 +51,7 @@ describe('Web Dashboard API Integration Tests', () => {
         test('Sessions API should handle errors gracefully', async () => {
             // Test with invalid endpoint
             try {
-                await apiRequest('/web/api/sessions/invalid');
+                await apiRequest('/api/dashboard/sessions/invalid');
             } catch (error) {
                 expect(error.response.status).toBe(404);
             }
@@ -59,8 +59,8 @@ describe('Web Dashboard API Integration Tests', () => {
     });
 
     describe('Health API', () => {
-        test('GET /web/api/health should return health metrics', async () => {
-            const data = await apiRequest('/web/api/health');
+        test('GET /api/dashboard/health should return health metrics', async () => {
+            const data = await apiRequest('/api/dashboard/health');
             
             expect(data).toBeDefined();
             expect(data).toHaveProperty('overall_score');
@@ -84,8 +84,8 @@ describe('Web Dashboard API Integration Tests', () => {
     });
 
     describe('Activity API', () => {
-        test('GET /web/api/activity should return activity data', async () => {
-            const data = await apiRequest('/web/api/activity');
+        test('GET /api/dashboard/activity should return activity data', async () => {
+            const data = await apiRequest('/api/dashboard/activity');
             
             expect(data).toBeDefined();
             expect(data).toHaveProperty('activities');
@@ -108,8 +108,8 @@ describe('Web Dashboard API Integration Tests', () => {
     });
 
     describe('Stats API', () => {
-        test('GET /web/api/stats should return dashboard statistics', async () => {
-            const data = await apiRequest('/web/api/stats');
+        test('GET /api/dashboard/stats should return dashboard statistics', async () => {
+            const data = await apiRequest('/api/dashboard/stats');
             
             expect(data).toBeDefined();
             expect(data).toHaveProperty('active_sessions');
@@ -129,13 +129,13 @@ describe('Web Dashboard API Integration Tests', () => {
     describe('Web Components Integration', () => {
         test('Components should load data successfully', async () => {
             // Simulate component data loading
-            const sessionData = await apiRequest('/web/api/sessions');
+            const sessionData = await apiRequest('/api/dashboard/sessions');
             expect(sessionData).toBeDefined();
             
-            const healthData = await apiRequest('/web/api/health');
+            const healthData = await apiRequest('/api/dashboard/health');
             expect(healthData).toBeDefined();
             
-            const activityData = await apiRequest('/web/api/activity');
+            const activityData = await apiRequest('/api/dashboard/activity');
             expect(activityData).toBeDefined();
         });
 
@@ -147,7 +147,7 @@ describe('Web Dashboard API Integration Tests', () => {
             
             try {
                 await Promise.race([
-                    apiRequest('/web/api/sessions'),
+                    apiRequest('/api/dashboard/sessions'),
                     timeoutPromise
                 ]);
             } catch (error) {
@@ -170,7 +170,7 @@ describe('Web Dashboard API Integration Tests', () => {
 // Performance tests
 describe('Performance Tests', () => {
     test('API responses should be fast', async () => {
-        const endpoints = ['/web/api/sessions', '/web/api/health', '/web/api/activity', '/web/api/stats'];
+        const endpoints = ['/api/dashboard/sessions', '/api/dashboard/health', '/api/dashboard/activity', '/api/dashboard/stats'];
         
         for (const endpoint of endpoints) {
             const startTime = Date.now();
@@ -189,7 +189,7 @@ describe('Performance Tests', () => {
         const concurrentRequests = 10;
         
         for (let i = 0; i < concurrentRequests; i++) {
-            promises.push(apiRequest('/web/api/sessions'));
+            promises.push(apiRequest('/api/dashboard/sessions'));
         }
         
         const results = await Promise.all(promises);

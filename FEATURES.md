@@ -15,7 +15,12 @@
 - `./yesman.py enter [세션명]` - tmux 세션에 진입 (세션명 미입력 시 인터랙티브 선택)
 
 ### 대시보드 및 모니터링
-- `./yesman.py dashboard` - 실시간 세션 모니터링을 위한 TUI 대시보드 실행
+- `./yesman.py dash run` - 환경에 따라 최적의 대시보드 인터페이스 자동 선택
+- `./yesman.py dash run --interface tui` - 터미널 UI 대시보드 실행
+- `./yesman.py dash run --interface web` - 웹 브라우저 대시보드 실행
+- `./yesman.py dash run --interface tauri` - 네이티브 데스크톱 앱 대시보드 실행
+- `./yesman.py dashboard` - 레거시 Tauri 대시보드 명령 (하위 호환성)
+- `./yesman.py dash list-interfaces` - 사용 가능한 대시보드 인터페이스 목록 표시
 
 ---
 

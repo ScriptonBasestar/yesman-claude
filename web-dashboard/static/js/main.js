@@ -38,7 +38,7 @@ window.dashboard = {
 
     // API client methods
     api: {
-        baseURL: '/web/api',
+        baseURL: '/api/dashboard',
         
         /**
          * Generic API request handler with error handling and retry logic
