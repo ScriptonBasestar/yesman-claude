@@ -69,6 +69,10 @@ class AgentPool:
         # Branch testing integration
         self.branch_test_manager = None
         self._test_integration_enabled = False
+        
+        # Recovery and rollback system
+        self.recovery_engine = None
+        self._recovery_enabled = False
 
         # Load persistent state
         self._load_state()
@@ -846,3 +850,298 @@ class AgentPool:
         except Exception as e:
             logger.error(f"Error getting all branch test status: {e}")
             return {"error": str(e)}
+
+    def enable_recovery_system(self, work_dir: str = None, max_snapshots: int = 50) -> None:
+        """Enable automatic rollback and error recovery system"""
+        try:
+            from .recovery_engine import RecoveryEngine, OperationType
+            
+            work_dir = work_dir or ".yesman"
+            
+            self.recovery_engine = RecoveryEngine(
+                work_dir=work_dir,
+                max_snapshots=max_snapshots
+            )
+            
+            self._recovery_enabled = True
+            
+            # Register recovery callbacks
+            self._setup_recovery_callbacks()
+            
+            logger.info("Recovery and rollback system enabled")
+            
+        except Exception as e:
+            logger.error(f"Failed to enable recovery system: {e}")
+            self._recovery_enabled = False
+
+    def _setup_recovery_callbacks(self) -> None:
+        """Setup callbacks for automatic recovery"""
+        if not self.recovery_engine:
+            return
+        
+        # Register task failure callback
+        async def handle_task_failure(task: Task) -> None:
+            if self._recovery_enabled and self.recovery_engine:
+                operation_id = f"task-{task.task_id}"
+                context = {
+                    "operation_type": "task_execution",
+                    "task_id": task.task_id,
+                    "agent_id": task.assigned_agent,
+                }
+                
+                # Create exception from task error
+                exception = Exception(task.error or f"Task failed with exit code {task.exit_code}")
+                
+                await self.recovery_engine.handle_operation_failure(
+                    operation_id=operation_id,
+                    exception=exception,
+                    context=context,
+                    agent_pool=self
+                )
+        
+        # Register agent error callback
+        async def handle_agent_error(agent: Agent, exception: Exception) -> None:
+            if self._recovery_enabled and self.recovery_engine:
+                operation_id = f"agent-{agent.agent_id}-{int(time.time())}"
+                context = {
+                    "operation_type": "agent_operation",
+                    "agent_id": agent.agent_id,
+                    "task_id": agent.current_task,
+                }
+                
+                await self.recovery_engine.handle_operation_failure(
+                    operation_id=operation_id,
+                    exception=exception,
+                    context=context,
+                    agent_pool=self
+                )
+        
+        # Add callbacks
+        self.on_task_failed(handle_task_failure)
+        self.on_agent_error(handle_agent_error)
+
+    async def create_operation_snapshot(
+        self, 
+        operation_type: str,
+        description: str,
+        files_to_backup: List[str] = None,
+        context: Dict[str, Any] = None
+    ) -> Optional[str]:
+        """
+        Create a snapshot before a critical operation
+        
+        Args:
+            operation_type: Type of operation (for recovery strategy selection)
+            description: Human-readable description of the operation
+            files_to_backup: List of files to backup before the operation
+            context: Additional context for the operation
+            
+        Returns:
+            Snapshot ID if successful, None otherwise
+        """
+        if not self._recovery_enabled or not self.recovery_engine:
+            logger.warning("Recovery system not enabled, cannot create snapshot")
+            return None
+        
+        try:
+            from .recovery_engine import OperationType
+            
+            # Map string to enum
+            op_type_map = {
+                "task_execution": OperationType.TASK_EXECUTION,
+                "branch_operation": OperationType.BRANCH_OPERATION,
+                "agent_assignment": OperationType.AGENT_ASSIGNMENT,
+                "file_modification": OperationType.FILE_MODIFICATION,
+                "system_config": OperationType.SYSTEM_CONFIG,
+                "test_execution": OperationType.TEST_EXECUTION,
+            }
+            
+            op_type = op_type_map.get(operation_type, OperationType.TASK_EXECUTION)
+            
+            snapshot_id = await self.recovery_engine.create_snapshot(
+                operation_type=op_type,
+                description=description,
+                agent_pool=self,
+                branch_manager=getattr(self, 'branch_manager', None),
+                files_to_backup=files_to_backup,
+                operation_context=context
+            )
+            
+            return snapshot_id
+            
+        except Exception as e:
+            logger.error(f"Failed to create operation snapshot: {e}")
+            return None
+
+    async def rollback_to_snapshot(self, snapshot_id: str) -> bool:
+        """
+        Manually rollback to a specific snapshot
+        
+        Args:
+            snapshot_id: ID of the snapshot to rollback to
+            
+        Returns:
+            True if rollback successful, False otherwise
+        """
+        if not self._recovery_enabled or not self.recovery_engine:
+            logger.error("Recovery system not enabled")
+            return False
+        
+        try:
+            success = await self.recovery_engine.manual_rollback(
+                snapshot_id=snapshot_id,
+                agent_pool=self,
+                branch_manager=getattr(self, 'branch_manager', None)
+            )
+            
+            if success:
+                logger.info(f"Successfully rolled back to snapshot {snapshot_id}")
+            else:
+                logger.error(f"Failed to rollback to snapshot {snapshot_id}")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Error during rollback to snapshot {snapshot_id}: {e}")
+            return False
+
+    def get_recovery_status(self) -> Dict[str, Any]:
+        """Get status and metrics of the recovery system"""
+        if not self._recovery_enabled or not self.recovery_engine:
+            return {"recovery_enabled": False}
+        
+        try:
+            metrics = self.recovery_engine.get_recovery_metrics()
+            recent_operations = self.recovery_engine.get_recent_operations(10)
+            
+            return {
+                "recovery_enabled": True,
+                "metrics": metrics,
+                "recent_operations": recent_operations,
+                "active_operations": len(self.recovery_engine.active_operations),
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting recovery status: {e}")
+            return {"recovery_enabled": True, "error": str(e)}
+
+    def list_recovery_snapshots(self) -> List[Dict[str, Any]]:
+        """List available recovery snapshots"""
+        if not self._recovery_enabled or not self.recovery_engine:
+            return []
+        
+        try:
+            snapshots = []
+            for snapshot_id, snapshot in self.recovery_engine.snapshots.items():
+                snapshots.append({
+                    "snapshot_id": snapshot_id,
+                    "operation_type": snapshot.operation_type.value,
+                    "description": snapshot.description,
+                    "timestamp": snapshot.timestamp.isoformat(),
+                    "agent_count": len(snapshot.agent_states),
+                    "task_count": len(snapshot.task_states),
+                    "file_count": len(snapshot.file_states),
+                })
+            
+            # Sort by timestamp (newest first)
+            snapshots.sort(key=lambda x: x["timestamp"], reverse=True)
+            return snapshots
+            
+        except Exception as e:
+            logger.error(f"Error listing recovery snapshots: {e}")
+            return []
+
+    async def execute_with_recovery(
+        self,
+        operation_func: Callable[[], Awaitable[Any]],
+        operation_type: str,
+        description: str,
+        files_to_backup: List[str] = None,
+        max_retries: int = 3,
+        context: Dict[str, Any] = None
+    ) -> Tuple[bool, Any]:
+        """
+        Execute an operation with automatic snapshot and recovery
+        
+        Args:
+            operation_func: Async function to execute
+            operation_type: Type of operation for recovery strategy
+            description: Description of the operation
+            files_to_backup: Files to backup before operation
+            max_retries: Maximum number of retry attempts
+            context: Additional context for recovery
+            
+        Returns:
+            Tuple of (success, result)
+        """
+        if not self._recovery_enabled or not self.recovery_engine:
+            logger.warning("Recovery system not enabled, executing without protection")
+            try:
+                result = await operation_func()
+                return True, result
+            except Exception as e:
+                logger.error(f"Operation failed without recovery: {e}")
+                return False, str(e)
+        
+        # Create snapshot before operation
+        snapshot_id = await self.create_operation_snapshot(
+            operation_type=operation_type,
+            description=description,
+            files_to_backup=files_to_backup,
+            context=context
+        )
+        
+        if not snapshot_id:
+            logger.warning("Failed to create snapshot, proceeding without recovery protection")
+        
+        operation_id = f"op-{int(time.time())}-{str(uuid.uuid4())[:8]}"
+        
+        if snapshot_id:
+            self.recovery_engine.start_operation(operation_id, snapshot_id)
+        
+        retry_count = 0
+        while retry_count <= max_retries:
+            try:
+                # Execute the operation
+                result = await operation_func()
+                
+                # Mark operation as successful
+                if self.recovery_engine:
+                    self.recovery_engine.complete_operation(operation_id)
+                
+                logger.info(f"Operation completed successfully: {description}")
+                return True, result
+                
+            except Exception as e:
+                logger.error(f"Operation failed (attempt {retry_count + 1}): {e}")
+                
+                if retry_count < max_retries:
+                    # Attempt recovery
+                    if self.recovery_engine:
+                        recovery_success = await self.recovery_engine.handle_operation_failure(
+                            operation_id=operation_id,
+                            exception=e,
+                            context={
+                                **(context or {}),
+                                "operation_type": operation_type,
+                                "retry_count": retry_count,
+                            },
+                            agent_pool=self,
+                            branch_manager=getattr(self, 'branch_manager', None)
+                        )
+                        
+                        if recovery_success:
+                            logger.info(f"Recovery successful, retrying operation")
+                            retry_count += 1
+                            continue
+                    
+                    # Simple retry without recovery
+                    logger.info(f"Retrying operation without recovery (attempt {retry_count + 2})")
+                    retry_count += 1
+                    await asyncio.sleep(2 ** retry_count)  # Exponential backoff
+                else:
+                    # Max retries exceeded
+                    logger.error(f"Operation failed after {max_retries + 1} attempts: {description}")
+                    return False, str(e)
+        
+        return False, "Max retries exceeded"
