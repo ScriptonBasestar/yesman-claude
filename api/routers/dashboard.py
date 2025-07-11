@@ -32,30 +32,36 @@ async def get_sessions():
     """Get session list"""
     try:
         # Get session information from SessionManager
-        sessions = session_manager.get_cached_sessions_list()
+        sessions = session_manager.get_all_sessions()
         
-        # Get project sessions from config
-        project_sessions = config.get_projects()
-        
-        # Convert to web-friendly format
+        # Convert SessionInfo objects to web-friendly format
         web_sessions = []
-        for project_name, project_config in project_sessions.items():
-            session_name = project_config.get('override', {}).get('session_name', project_name)
-            
-            # Check if session exists
-            session_exists = any(s['session_name'] == session_name for s in sessions)
-            session_detail = session_manager.get_session_info(session_name) if session_exists else None
-            
+        for session in sessions:
             web_sessions.append({
-                'session_name': session_name,
-                'project_name': project_name,
-                'template': project_config.get('template_name', 'default'),
-                'status': 'active' if session_exists else 'stopped',
-                'exists': session_exists,
-                'windows': session_detail.get('windows', []) if session_detail else [],
-                'panes': sum(len(w.get('panes', [])) for w in session_detail.get('windows', [])) if session_detail else 0,
-                'claude_active': any(p.get('has_claude', False) for w in session_detail.get('windows', []) for p in w.get('panes', [])) if session_detail else False,
-                'start_directory': project_config.get('override', {}).get('start_directory', '')
+                'session_name': session.session_name,
+                'project_name': session.project_name,
+                'template': session.template,
+                'status': session.status,
+                'exists': session.exists,
+                'controller_status': session.controller_status,
+                'windows': [
+                    {
+                        'name': w.name,
+                        'index': w.index,
+                        'panes': [
+                            {
+                                'id': p.id,
+                                'command': p.command,
+                                'is_claude': p.is_claude,
+                                'is_controller': p.is_controller,
+                                'current_task': getattr(p, 'current_task', None),
+                                'activity_score': getattr(p, 'activity_score', 0)
+                            } for p in w.panes
+                        ]
+                    } for w in session.windows
+                ],
+                'panes': sum(len(w.panes) for w in session.windows),
+                'claude_active': any(p.is_claude for w in session.windows for p in w.panes)
             })
         
         return web_sessions
