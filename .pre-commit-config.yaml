@@ -33,7 +33,7 @@ repos:
         files: ^tests/.*\.py$
         args: [--min-score=70]
         pass_filenames: true
-        
+
       - id: unittest-detection
         name: Detect unittest Usage in New Tests
         entry: python scripts/detect_unittest_usage.py
@@ -77,7 +77,7 @@ repos:
 
 # Global configuration
 default_install_hook_types: [pre-commit, pre-push]
-default_stages: [commit]
+default_stages: [pre-commit]
 
 # CI configuration
 ci:
