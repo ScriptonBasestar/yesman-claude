@@ -65,6 +65,10 @@ class AgentPool:
         # Auto-rebalancing
         self._auto_rebalancing_enabled = False
         self._auto_rebalancing_interval = 300
+        
+        # Branch testing integration
+        self.branch_test_manager = None
+        self._test_integration_enabled = False
 
         # Load persistent state
         self._load_state()
@@ -678,3 +682,167 @@ class AgentPool:
             except Exception as e:
                 logger.error(f"Error in auto-rebalancing loop: {e}")
                 await asyncio.sleep(60)  # Wait before retrying
+
+    def enable_branch_testing(self, repo_path: str = None, results_dir: str = None) -> None:
+        """Enable automatic branch testing integration"""
+        try:
+            from .branch_test_manager import BranchTestManager
+            
+            repo_path = repo_path or "."
+            results_dir = results_dir or ".yesman/test_results"
+            
+            self.branch_test_manager = BranchTestManager(
+                repo_path=repo_path,
+                results_dir=results_dir,
+                agent_pool=self
+            )
+            
+            self._test_integration_enabled = True
+            logger.info("Branch testing integration enabled")
+            
+        except Exception as e:
+            logger.error(f"Failed to enable branch testing: {e}")
+            self._test_integration_enabled = False
+
+    def create_test_task(
+        self, 
+        branch_name: str, 
+        test_suite_name: str = None,
+        priority: int = 7,
+        timeout: int = 600
+    ) -> Task:
+        """
+        Create a test task for a specific branch
+        
+        Args:
+            branch_name: Name of the branch to test
+            test_suite_name: Specific test suite to run (None for all tests)
+            priority: Task priority (1-10)
+            timeout: Test timeout in seconds
+            
+        Returns:
+            Task object for test execution
+        """
+        if not self._test_integration_enabled or not self.branch_test_manager:
+            raise RuntimeError("Branch testing is not enabled")
+        
+        task_id = f"test-{branch_name}-{test_suite_name or 'all'}-{int(time.time())}"
+        
+        # Prepare test command
+        if test_suite_name:
+            # Run specific test suite
+            test_command = [
+                "python", "-c",
+                f"import asyncio; "
+                f"from libs.multi_agent.branch_test_manager import BranchTestManager; "
+                f"btm = BranchTestManager(); "
+                f"result = asyncio.run(btm.run_test_suite('{branch_name}', '{test_suite_name}')); "
+                f"print(f'Test {{result.status.value}}: {{result.test_id}}')"
+            ]
+        else:
+            # Run all tests
+            test_command = [
+                "python", "-c",
+                f"import asyncio; "
+                f"from libs.multi_agent.branch_test_manager import BranchTestManager; "
+                f"btm = BranchTestManager(); "
+                f"results = asyncio.run(btm.run_all_tests('{branch_name}')); "
+                f"print(f'Completed {{len(results)}} tests on {branch_name}')"
+            ]
+        
+        task = Task(
+            task_id=task_id,
+            title=f"Test {test_suite_name or 'All'} on {branch_name}",
+            description=f"Execute {'specific' if test_suite_name else 'all'} tests on branch {branch_name}",
+            command=test_command,
+            working_directory=".",
+            timeout=timeout,
+            priority=priority,
+            complexity=6,  # Medium complexity
+            metadata={
+                "type": "test",
+                "branch": branch_name,
+                "test_suite": test_suite_name,
+                "auto_generated": True,
+            }
+        )
+        
+        return task
+
+    async def auto_test_branch(self, branch_name: str) -> List[str]:
+        """
+        Automatically create and schedule test tasks for a branch
+        
+        Args:
+            branch_name: Name of the branch to test
+            
+        Returns:
+            List of created task IDs
+        """
+        if not self._test_integration_enabled or not self.branch_test_manager:
+            logger.warning("Branch testing is not enabled")
+            return []
+        
+        task_ids = []
+        
+        try:
+            # Get critical test suites first
+            critical_suites = [
+                name for name, suite in self.branch_test_manager.test_suites.items() 
+                if suite.critical
+            ]
+            
+            # Create tasks for critical tests (higher priority)
+            for suite_name in critical_suites:
+                task = self.create_test_task(
+                    branch_name=branch_name,
+                    test_suite_name=suite_name,
+                    priority=8,  # High priority for critical tests
+                )
+                self.add_task(task)
+                task_ids.append(task.task_id)
+            
+            # Create task for non-critical tests (combined)
+            non_critical_suites = [
+                name for name, suite in self.branch_test_manager.test_suites.items() 
+                if not suite.critical
+            ]
+            
+            if non_critical_suites:
+                # Create a single task for all non-critical tests
+                task = self.create_test_task(
+                    branch_name=branch_name,
+                    test_suite_name=None,  # All remaining tests
+                    priority=6,  # Medium priority
+                )
+                self.add_task(task)
+                task_ids.append(task.task_id)
+            
+            logger.info(f"Created {len(task_ids)} test tasks for branch {branch_name}")
+            
+        except Exception as e:
+            logger.error(f"Error creating test tasks for {branch_name}: {e}")
+        
+        return task_ids
+
+    def get_branch_test_status(self, branch_name: str) -> Dict[str, Any]:
+        """Get test status summary for a branch"""
+        if not self._test_integration_enabled or not self.branch_test_manager:
+            return {"error": "Branch testing not enabled"}
+        
+        try:
+            return self.branch_test_manager.get_branch_test_summary(branch_name)
+        except Exception as e:
+            logger.error(f"Error getting test status for {branch_name}: {e}")
+            return {"error": str(e)}
+
+    def get_all_branch_test_status(self) -> Dict[str, Dict[str, Any]]:
+        """Get test status for all active branches"""
+        if not self._test_integration_enabled or not self.branch_test_manager:
+            return {"error": "Branch testing not enabled"}
+        
+        try:
+            return self.branch_test_manager.get_all_branch_summaries()
+        except Exception as e:
+            logger.error(f"Error getting all branch test status: {e}")
+            return {"error": str(e)}
