@@ -518,33 +518,30 @@ class TestOptimizationIntegration:
         """Test that caching improves performance"""
         metric = MetricCardData(title="Performance Test", value=75.5, suffix="%")
         
-        # Add artificial delay to renderer
-        original_render = self.renderer.render_widget
-        def slow_render(*args, **kwargs):
-            time.sleep(0.05)  # 50ms delay
-            return original_render(*args, **kwargs)
+        # Use a mock renderer with built-in delay tracking
+        mock_renderer = MockRenderer(delay=0.05)  # 50ms delay
         
-        self.renderer.render_widget = slow_render
-        
-        # Apply caching decorator
-        cached_method = cached_render()(self.renderer.render_widget)
-        self.renderer.render_widget = cached_method.__get__(self.renderer, TUIRenderer)
+        # Apply caching directly to the class method (not instance method)
+        MockRenderer.render_widget = cached_render()(MockRenderer.render_widget)
         
         # First render (cache miss)
         start1 = time.time()
-        result1 = self.renderer.render_widget(WidgetType.METRIC_CARD, metric)
+        result1 = mock_renderer.render_widget(WidgetType.METRIC_CARD, metric)
         time1 = time.time() - start1
         
         # Second render (cache hit)
         start2 = time.time()
-        result2 = self.renderer.render_widget(WidgetType.METRIC_CARD, metric)
+        result2 = mock_renderer.render_widget(WidgetType.METRIC_CARD, metric)
         time2 = time.time() - start2
         
-        # Results should be identical
+        # Verify results are identical
         assert result1 == result2
         
-        # Second render should be significantly faster
+        # Cache hit should be much faster than cache miss
         assert time2 < time1 * 0.5  # At least 50% faster
+        
+        # Verify the underlying method was called only once (second call was cached)
+        assert mock_renderer.render_count == 1
     
     def test_lazy_vs_eager_rendering(self):
         """Test performance difference between lazy and eager rendering"""
@@ -605,14 +602,16 @@ class TestOptimizationIntegration:
         assert 'widget_cache' in stats
         assert 'layout_cache' in stats
         
-        # Create some cache activity
+        # Create some cache activity using MockRenderer to avoid decorator issues
         metric = MetricCardData(title="Cache Test", value=100)
-        cached_method = cached_render()(self.renderer.render_widget)
-        self.renderer.render_widget = cached_method.__get__(self.renderer, TUIRenderer)
+        mock_renderer = MockRenderer()
+        
+        # Apply caching to the MockRenderer class
+        MockRenderer.render_widget = cached_render()(MockRenderer.render_widget)
         
         # Generate cache activity
-        self.renderer.render_widget(WidgetType.METRIC_CARD, metric)
-        self.renderer.render_widget(WidgetType.METRIC_CARD, metric)  # Cache hit
+        mock_renderer.render_widget(WidgetType.METRIC_CARD, metric)
+        mock_renderer.render_widget(WidgetType.METRIC_CARD, metric)  # Cache hit
         
         # Check stats
         updated_stats = get_cache_stats()

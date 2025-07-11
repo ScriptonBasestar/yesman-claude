@@ -19,6 +19,9 @@ from tests.fixtures.mock_data import (
 from tests.fixtures.test_helpers import (
     temp_directory, temp_file, create_test_config
 )
+from tests.fixtures.mock_factories import (
+    ManagerMockFactory, ComponentMockFactory, PatchContextFactory
+)
 
 # 공통 Fixtures
 @pytest.fixture
@@ -30,6 +33,32 @@ def mock_tmux_session():
 def mock_claude_process():
     """Mock Claude 프로세스 fixture"""
     return MockClaudeProcess()
+
+# New Factory-based Fixtures
+@pytest.fixture
+def mock_session_manager():
+    """Centralized SessionManager mock fixture"""
+    return ManagerMockFactory.create_session_manager_mock()
+
+@pytest.fixture
+def mock_claude_manager():
+    """Centralized ClaudeManager mock fixture"""
+    return ManagerMockFactory.create_claude_manager_mock()
+
+@pytest.fixture
+def mock_tmux_manager():
+    """Centralized TmuxManager mock fixture"""
+    return ManagerMockFactory.create_tmux_manager_mock()
+
+@pytest.fixture
+def mock_subprocess_result():
+    """Standard subprocess.run result mock"""
+    return ComponentMockFactory.create_subprocess_mock()
+
+@pytest.fixture
+def mock_api_response():
+    """Standard API response mock"""
+    return ComponentMockFactory.create_api_response_mock()
 
 
 @pytest.fixture
