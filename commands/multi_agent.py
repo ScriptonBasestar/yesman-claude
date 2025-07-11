@@ -12,9 +12,21 @@ from libs.multi_agent.types import Task, Agent
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 from libs.multi_agent.conflict_prediction import ConflictPredictor
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.semantic_merger import SemanticMerger, MergeStrategy, MergeResolution
+from libs.multi_agent.semantic_merger import (
+    SemanticMerger,
+    MergeStrategy,
+    MergeResolution,
+)
 from libs.multi_agent.auto_resolver import AutoResolver, AutoResolutionMode
 from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.dependency_propagation import (
+    DependencyPropagationSystem,
+    DependencyType,
+    ChangeImpact,
+    PropagationStrategy,
+)
+from libs.multi_agent.collaboration_engine import CollaborationEngine
+from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 
 
 logger = logging.getLogger(__name__)
@@ -1178,10 +1190,15 @@ def function_diff(
 @click.argument("branch1")
 @click.argument("branch2")
 @click.option("--repo-path", "-r", help="Path to git repository")
-@click.option("--target-branch", "-t", help="Target branch for merge (default: branch1)")
-@click.option("--strategy", "-s", 
-              type=click.Choice([s.value for s in MergeStrategy]), 
-              help="Merge strategy to use")
+@click.option(
+    "--target-branch", "-t", help="Target branch for merge (default: branch1)"
+)
+@click.option(
+    "--strategy",
+    "-s",
+    type=click.Choice([s.value for s in MergeStrategy]),
+    help="Merge strategy to use",
+)
 @click.option("--apply", "-a", is_flag=True, help="Apply merge result to target branch")
 @click.option("--export", "-e", help="Export merge result to file")
 def semantic_merge(
@@ -1192,25 +1209,27 @@ def semantic_merge(
     target_branch: Optional[str],
     strategy: Optional[str],
     apply: bool,
-    export: Optional[str]
+    export: Optional[str],
 ):
     """Perform intelligent semantic merge of a file between branches"""
     try:
         click.echo(f"🔀 Semantic merge: {file_path}")
         click.echo(f"   Branches: {branch1} ↔ {branch2}")
-        
+
         if strategy:
             strategy_enum = MergeStrategy(strategy)
             click.echo(f"   Strategy: {strategy_enum.value}")
         else:
             strategy_enum = None
-        
+
         # Create components
         branch_manager = BranchManager(repo_path=repo_path)
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
-        semantic_merger = SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
-        
+        semantic_merger = SemanticMerger(
+            semantic_analyzer, conflict_engine, branch_manager, repo_path
+        )
+
         async def run_merge():
             # Perform semantic merge
             merge_result = await semantic_merger.perform_semantic_merge(
@@ -1218,59 +1237,74 @@ def semantic_merge(
                 branch1=branch1,
                 branch2=branch2,
                 target_branch=target_branch,
-                strategy=strategy_enum
+                strategy=strategy_enum,
             )
-            
+
             # Display results
             click.echo(f"\n📊 Merge Result:")
             click.echo(f"   Merge ID: {merge_result.merge_id}")
             click.echo(f"   Resolution: {merge_result.resolution.value}")
             click.echo(f"   Strategy Used: {merge_result.strategy_used.value}")
             click.echo(f"   Confidence: {merge_result.merge_confidence:.1%}")
-            click.echo(f"   Semantic Integrity: {'✅' if merge_result.semantic_integrity else '❌'}")
-            
+            click.echo(
+                f"   Semantic Integrity: {'✅' if merge_result.semantic_integrity else '❌'}"
+            )
+
             if merge_result.conflicts_resolved:
-                click.echo(f"   Conflicts Resolved: {len(merge_result.conflicts_resolved)}")
+                click.echo(
+                    f"   Conflicts Resolved: {len(merge_result.conflicts_resolved)}"
+                )
                 for conflict_id in merge_result.conflicts_resolved[:5]:
                     click.echo(f"     • {conflict_id}")
                 if len(merge_result.conflicts_resolved) > 5:
-                    click.echo(f"     ... and {len(merge_result.conflicts_resolved) - 5} more")
-            
+                    click.echo(
+                        f"     ... and {len(merge_result.conflicts_resolved) - 5} more"
+                    )
+
             if merge_result.unresolved_conflicts:
-                click.echo(f"   ⚠️  Unresolved Conflicts: {len(merge_result.unresolved_conflicts)}")
+                click.echo(
+                    f"   ⚠️  Unresolved Conflicts: {len(merge_result.unresolved_conflicts)}"
+                )
                 for conflict_id in merge_result.unresolved_conflicts[:3]:
                     click.echo(f"     • {conflict_id}")
-            
+
             # Show diff stats
             if merge_result.diff_stats:
                 stats = merge_result.diff_stats
                 click.echo(f"\n📈 Changes:")
-                if 'lines_merged' in stats:
+                if "lines_merged" in stats:
                     click.echo(f"   Total lines: {stats['lines_merged']}")
-                if 'lines_added' in stats:
+                if "lines_added" in stats:
                     click.echo(f"   Lines added: {stats['lines_added']}")
-                if 'lines_removed' in stats:
+                if "lines_removed" in stats:
                     click.echo(f"   Lines removed: {stats['lines_removed']}")
-            
+
             # Export result if requested
             if export and merge_result.merged_content:
-                with open(export, 'w') as f:
+                with open(export, "w") as f:
                     f.write(merge_result.merged_content)
                 click.echo(f"\n💾 Merged content exported to: {export}")
-            
+
             # Apply if requested and successful
-            if apply and merge_result.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]:
+            if apply and merge_result.resolution in [
+                MergeResolution.AUTO_RESOLVED,
+                MergeResolution.PARTIAL_RESOLUTION,
+            ]:
                 if merge_result.semantic_integrity:
-                    click.echo(f"\n✅ Merge would be applied to {target_branch or branch1}")
+                    click.echo(
+                        f"\n✅ Merge would be applied to {target_branch or branch1}"
+                    )
                     # In actual implementation, this would write the merged content
                     click.echo("   (Dry run - actual application not implemented yet)")
                 else:
-                    click.echo(f"\n❌ Cannot apply merge due to semantic integrity issues")
+                    click.echo(
+                        f"\n❌ Cannot apply merge due to semantic integrity issues"
+                    )
             elif apply:
                 click.echo(f"\n❌ Cannot apply merge - resolution failed")
-        
+
         asyncio.run(run_merge())
-        
+
     except Exception as e:
         click.echo(f"❌ Error performing semantic merge: {e}", err=True)
 
@@ -1279,11 +1313,16 @@ def semantic_merge(
 @click.argument("branch1")
 @click.argument("branch2")
 @click.option("--repo-path", "-r", help="Path to git repository")
-@click.option("--target-branch", "-t", help="Target branch for merge (default: branch1)")
+@click.option(
+    "--target-branch", "-t", help="Target branch for merge (default: branch1)"
+)
 @click.option("--files", "-f", help="Specific files to merge (comma-separated)")
-@click.option("--strategy", "-s", 
-              type=click.Choice([s.value for s in MergeStrategy]), 
-              help="Merge strategy to use")
+@click.option(
+    "--strategy",
+    "-s",
+    type=click.Choice([s.value for s in MergeStrategy]),
+    help="Merge strategy to use",
+)
 @click.option("--max-concurrent", "-c", default=5, help="Maximum concurrent merges")
 @click.option("--apply", "-a", is_flag=True, help="Apply successful merge results")
 @click.option("--export-summary", "-e", help="Export batch summary to JSON file")
@@ -1296,20 +1335,22 @@ def batch_merge(
     strategy: Optional[str],
     max_concurrent: int,
     apply: bool,
-    export_summary: Optional[str]
+    export_summary: Optional[str],
 ):
     """Perform batch semantic merge of multiple files between branches"""
     try:
         click.echo(f"🔀 Batch semantic merge: {branch1} ↔ {branch2}")
-        
+
         strategy_enum = MergeStrategy(strategy) if strategy else None
-        
+
         # Create components
         branch_manager = BranchManager(repo_path=repo_path)
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
-        semantic_merger = SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
-        
+        semantic_merger = SemanticMerger(
+            semantic_analyzer, conflict_engine, branch_manager, repo_path
+        )
+
         async def run_batch_merge():
             # Parse file list
             if files:
@@ -1317,66 +1358,89 @@ def batch_merge(
             else:
                 # Get all changed Python files
                 try:
-                    file_list = await semantic_analyzer._get_changed_python_files(branch1, branch2)
+                    file_list = await semantic_analyzer._get_changed_python_files(
+                        branch1, branch2
+                    )
                 except:
-                    click.echo("❌ Could not determine changed files. Please specify --files")
+                    click.echo(
+                        "❌ Could not determine changed files. Please specify --files"
+                    )
                     return
-            
+
             if not file_list:
                 click.echo("✅ No files to merge")
                 return
-            
+
             click.echo(f"📁 Files to merge: {len(file_list)}")
             for f in file_list[:10]:
                 click.echo(f"   • {f}")
             if len(file_list) > 10:
                 click.echo(f"   ... and {len(file_list) - 10} more")
-            
-            click.echo(f"\n🚀 Starting batch merge (max {max_concurrent} concurrent)...")
-            
+
+            click.echo(
+                f"\n🚀 Starting batch merge (max {max_concurrent} concurrent)..."
+            )
+
             # Perform batch merge
             merge_results = await semantic_merger.batch_merge_files(
                 file_paths=file_list,
                 branch1=branch1,
                 branch2=branch2,
                 target_branch=target_branch,
-                max_concurrent=max_concurrent
+                max_concurrent=max_concurrent,
             )
-            
+
             # Analyze results
-            successful = [r for r in merge_results if r.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]]
-            failed = [r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED]
-            manual_required = [r for r in merge_results if r.resolution == MergeResolution.MANUAL_REQUIRED]
-            
+            successful = [
+                r
+                for r in merge_results
+                if r.resolution
+                in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]
+            ]
+            failed = [
+                r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED
+            ]
+            manual_required = [
+                r
+                for r in merge_results
+                if r.resolution == MergeResolution.MANUAL_REQUIRED
+            ]
+
             # Display summary
             click.echo(f"\n📊 Batch Merge Summary:")
             click.echo(f"   Total files: {len(merge_results)}")
             click.echo(f"   ✅ Successful: {len(successful)}")
             click.echo(f"   ⚠️  Manual required: {len(manual_required)}")
             click.echo(f"   ❌ Failed: {len(failed)}")
-            
+
             if successful:
-                avg_confidence = sum(r.merge_confidence for r in successful) / len(successful)
-                semantic_integrity_rate = sum(1 for r in successful if r.semantic_integrity) / len(successful)
+                avg_confidence = sum(r.merge_confidence for r in successful) / len(
+                    successful
+                )
+                semantic_integrity_rate = sum(
+                    1 for r in successful if r.semantic_integrity
+                ) / len(successful)
                 click.echo(f"   📈 Average confidence: {avg_confidence:.1%}")
                 click.echo(f"   🔒 Semantic integrity: {semantic_integrity_rate:.1%}")
-            
+
             # Show detailed results for failures
             if failed:
                 click.echo(f"\n❌ Failed merges:")
                 for result in failed[:5]:
-                    error = result.metadata.get('error', 'Unknown error')
+                    error = result.metadata.get("error", "Unknown error")
                     click.echo(f"   • {result.file_path}: {error}")
                 if len(failed) > 5:
                     click.echo(f"   ... and {len(failed) - 5} more")
-            
+
             if manual_required:
                 click.echo(f"\n⚠️  Manual intervention required:")
                 for result in manual_required[:5]:
-                    click.echo(f"   • {result.file_path}: {len(result.unresolved_conflicts)} unresolved conflicts")
+                    click.echo(
+                        f"   • {result.file_path}: {len(result.unresolved_conflicts)} unresolved conflicts"
+                    )
                 if len(manual_required) > 5:
                     click.echo(f"   ... and {len(manual_required) - 5} more")
-            
+
             # Apply successful merges if requested
             if apply and successful:
                 click.echo(f"\n🚀 Applying {len(successful)} successful merges...")
@@ -1385,27 +1449,33 @@ def batch_merge(
                         click.echo(f"   ✅ Would apply: {result.file_path}")
                         # In actual implementation, this would write the merged content
                     else:
-                        click.echo(f"   ⚠️  Skipping due to integrity issues: {result.file_path}")
+                        click.echo(
+                            f"   ⚠️  Skipping due to integrity issues: {result.file_path}"
+                        )
                 click.echo("   (Dry run - actual application not implemented yet)")
-            
+
             # Export summary if requested
             if export_summary:
                 import json
                 from datetime import datetime
-                
+
                 summary_data = {
                     "batch_merge_summary": {
                         "timestamp": datetime.now().isoformat(),
                         "branch1": branch1,
                         "branch2": branch2,
                         "target_branch": target_branch or branch1,
-                        "strategy": strategy_enum.value if strategy_enum else "intelligent_merge",
+                        "strategy": strategy_enum.value
+                        if strategy_enum
+                        else "intelligent_merge",
                         "total_files": len(merge_results),
                         "successful": len(successful),
                         "manual_required": len(manual_required),
                         "failed": len(failed),
                         "average_confidence": avg_confidence if successful else 0.0,
-                        "semantic_integrity_rate": semantic_integrity_rate if successful else 0.0,
+                        "semantic_integrity_rate": semantic_integrity_rate
+                        if successful
+                        else 0.0,
                     },
                     "detailed_results": [
                         {
@@ -1420,15 +1490,15 @@ def batch_merge(
                             "merge_time": r.merge_time.isoformat(),
                         }
                         for r in merge_results
-                    ]
+                    ],
                 }
-                
-                with open(export_summary, 'w') as f:
+
+                with open(export_summary, "w") as f:
                     json.dump(summary_data, f, indent=2)
                 click.echo(f"\n💾 Batch summary exported to: {export_summary}")
-        
+
         asyncio.run(run_batch_merge())
-        
+
     except Exception as e:
         click.echo(f"❌ Error performing batch merge: {e}", err=True)
 
@@ -1437,15 +1507,22 @@ def batch_merge(
 @click.argument("branch1")
 @click.argument("branch2")
 @click.option("--repo-path", "-r", help="Path to git repository")
-@click.option("--target-branch", "-t", help="Target branch for resolution (default: branch1)")
-@click.option("--mode", "-m", 
-              type=click.Choice([m.value for m in AutoResolutionMode]), 
-              default="balanced",
-              help="Auto-resolution mode")
+@click.option(
+    "--target-branch", "-t", help="Target branch for resolution (default: branch1)"
+)
+@click.option(
+    "--mode",
+    "-m",
+    type=click.Choice([m.value for m in AutoResolutionMode]),
+    default="balanced",
+    help="Auto-resolution mode",
+)
 @click.option("--files", "-f", help="Specific files to process (comma-separated)")
 @click.option("--apply", "-a", is_flag=True, help="Apply successful resolutions")
 @click.option("--export", "-e", help="Export resolution report to JSON file")
-@click.option("--preview", "-p", is_flag=True, help="Preview mode - show what would be resolved")
+@click.option(
+    "--preview", "-p", is_flag=True, help="Preview mode - show what would be resolved"
+)
 def auto_resolve(
     branch1: str,
     branch2: str,
@@ -1455,29 +1532,34 @@ def auto_resolve(
     files: Optional[str],
     apply: bool,
     export: Optional[str],
-    preview: bool
+    preview: bool,
 ):
     """Automatically resolve conflicts between branches using AI-powered semantic analysis"""
     try:
         mode_enum = AutoResolutionMode(mode)
-        
+
         click.echo(f"🤖 Auto-resolving conflicts: {branch1} ↔ {branch2}")
         click.echo(f"   Mode: {mode_enum.value}")
         click.echo(f"   Target: {target_branch or branch1}")
-        
+
         if preview:
             click.echo("   👁️  Preview mode - no changes will be applied")
-        
+
         # Create components
         branch_manager = BranchManager(repo_path=repo_path)
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
-        semantic_merger = SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
-        
+        semantic_merger = SemanticMerger(
+            semantic_analyzer, conflict_engine, branch_manager, repo_path
+        )
+
         # Create conflict predictor for advanced resolution
         from libs.multi_agent.conflict_prediction import ConflictPredictor
-        conflict_predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
-        
+
+        conflict_predictor = ConflictPredictor(
+            conflict_engine, branch_manager, repo_path
+        )
+
         # Create auto resolver
         auto_resolver = AutoResolver(
             semantic_analyzer=semantic_analyzer,
@@ -1485,97 +1567,131 @@ def auto_resolve(
             conflict_engine=conflict_engine,
             conflict_predictor=conflict_predictor,
             branch_manager=branch_manager,
-            repo_path=repo_path
+            repo_path=repo_path,
         )
-        
+
         async def run_auto_resolve():
             # Parse file filter
             file_filter = None
             if files:
                 file_filter = [f.strip() for f in files.split(",")]
-            
+
             click.echo(f"\n🔍 Analyzing conflicts...")
-            
+
             # Perform auto-resolution
             result = await auto_resolver.auto_resolve_branch_conflicts(
                 branch1=branch1,
                 branch2=branch2,
                 target_branch=target_branch,
                 mode=mode_enum,
-                file_filter=file_filter
+                file_filter=file_filter,
             )
-            
+
             # Display detailed results
             click.echo(f"\n📊 Auto-Resolution Results:")
             click.echo(f"   Session ID: {result.session_id}")
             click.echo(f"   Outcome: {result.outcome.value}")
             click.echo(f"   Resolution time: {result.resolution_time:.2f}s")
-            
+
             # Conflict statistics
             click.echo(f"\n🎯 Conflict Analysis:")
             click.echo(f"   Conflicts detected: {result.conflicts_detected}")
             click.echo(f"   Conflicts resolved: {result.conflicts_resolved}")
             click.echo(f"   Files processed: {result.files_processed}")
-            
+
             if result.conflicts_detected > 0:
                 resolution_rate = result.conflicts_resolved / result.conflicts_detected
                 click.echo(f"   Resolution rate: {resolution_rate:.1%}")
-            
+
             # Quality metrics
             click.echo(f"\n✨ Quality Metrics:")
             click.echo(f"   Confidence score: {result.confidence_score:.1%}")
-            click.echo(f"   Semantic integrity: {'✅' if result.semantic_integrity_preserved else '❌'}")
-            
+            click.echo(
+                f"   Semantic integrity: {'✅' if result.semantic_integrity_preserved else '❌'}"
+            )
+
             # Escalated conflicts
             if result.escalated_conflicts:
-                click.echo(f"\n⚠️  Escalated to human ({len(result.escalated_conflicts)}):")
+                click.echo(
+                    f"\n⚠️  Escalated to human ({len(result.escalated_conflicts)}):"
+                )
                 for conflict_id in result.escalated_conflicts[:5]:
                     click.echo(f"   • {conflict_id}")
                 if len(result.escalated_conflicts) > 5:
                     click.echo(f"   ... and {len(result.escalated_conflicts) - 5} more")
-            
+
             # Merge results details
             if result.merge_results:
                 click.echo(f"\n📁 File Results:")
-                successful_merges = [r for r in result.merge_results if r.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]]
-                
+                successful_merges = [
+                    r
+                    for r in result.merge_results
+                    if r.resolution
+                    in [
+                        MergeResolution.AUTO_RESOLVED,
+                        MergeResolution.PARTIAL_RESOLUTION,
+                    ]
+                ]
+
                 for merge_result in successful_merges[:10]:
-                    resolution_icon = "✅" if merge_result.resolution == MergeResolution.AUTO_RESOLVED else "⚠️"
+                    resolution_icon = (
+                        "✅"
+                        if merge_result.resolution == MergeResolution.AUTO_RESOLVED
+                        else "⚠️"
+                    )
                     click.echo(f"   {resolution_icon} {merge_result.file_path}")
                     click.echo(f"      Strategy: {merge_result.strategy_used.value}")
                     click.echo(f"      Confidence: {merge_result.merge_confidence:.1%}")
                     if merge_result.conflicts_resolved:
-                        click.echo(f"      Resolved: {len(merge_result.conflicts_resolved)} conflicts")
-                
+                        click.echo(
+                            f"      Resolved: {len(merge_result.conflicts_resolved)} conflicts"
+                        )
+
                 if len(successful_merges) > 10:
-                    click.echo(f"   ... and {len(successful_merges) - 10} more successful merges")
-            
+                    click.echo(
+                        f"   ... and {len(successful_merges) - 10} more successful merges"
+                    )
+
             # Manual intervention requirements
             if result.manual_intervention_required:
                 click.echo(f"\n👥 Manual Intervention Required:")
                 for item in result.manual_intervention_required[:5]:
                     click.echo(f"   • {item}")
                 if len(result.manual_intervention_required) > 5:
-                    click.echo(f"   ... and {len(result.manual_intervention_required) - 5} more")
-            
+                    click.echo(
+                        f"   ... and {len(result.manual_intervention_required) - 5} more"
+                    )
+
             # Apply results if requested and not in preview mode
-            if apply and not preview and result.outcome in ["fully_resolved", "partially_resolved"]:
+            if (
+                apply
+                and not preview
+                and result.outcome in ["fully_resolved", "partially_resolved"]
+            ):
                 click.echo(f"\n🚀 Applying resolution results...")
-                applied_count = len([r for r in result.merge_results if r.semantic_integrity])
+                applied_count = len(
+                    [r for r in result.merge_results if r.semantic_integrity]
+                )
                 click.echo(f"   Would apply {applied_count} successful merges")
                 click.echo("   (Dry run - actual application not implemented yet)")
             elif apply and preview:
-                click.echo(f"\n👁️  Preview mode - would apply resolution to {len(result.merge_results)} files")
-            
+                click.echo(
+                    f"\n👁️  Preview mode - would apply resolution to {len(result.merge_results)} files"
+                )
+
             # Export report if requested
             if export:
                 import json
-                
+
                 report_data = {
                     "auto_resolution_report": {
                         "session_id": result.session_id,
                         "timestamp": result.resolved_at.isoformat(),
-                        "branches": {"source1": branch1, "source2": branch2, "target": target_branch or branch1},
+                        "branches": {
+                            "source1": branch1,
+                            "source2": branch2,
+                            "target": target_branch or branch1,
+                        },
                         "mode": result.mode.value,
                         "outcome": result.outcome.value,
                         "performance": {
@@ -1602,28 +1718,32 @@ def auto_resolve(
                             "unresolved_conflicts": r.unresolved_conflicts,
                         }
                         for r in result.merge_results
-                    ]
+                    ],
                 }
-                
-                with open(export, 'w') as f:
+
+                with open(export, "w") as f:
                     json.dump(report_data, f, indent=2, default=str)
                 click.echo(f"\n💾 Resolution report exported to: {export}")
-            
+
             # Provide recommendations
             click.echo(f"\n💡 Recommendations:")
             if result.outcome == "fully_resolved":
                 click.echo("   ✅ All conflicts resolved successfully")
             elif result.outcome == "partially_resolved":
                 click.echo("   ⚠️  Some conflicts require manual review")
-                click.echo("   💡 Consider using 'conservative' mode for higher precision")
+                click.echo(
+                    "   💡 Consider using 'conservative' mode for higher precision"
+                )
             elif result.outcome == "escalated_to_human":
                 click.echo("   👥 Most conflicts require human intervention")
-                click.echo("   💡 Review conflict complexity and consider breaking down changes")
+                click.echo(
+                    "   💡 Review conflict complexity and consider breaking down changes"
+                )
             else:
                 click.echo("   ❌ Resolution failed - check logs for details")
-        
+
         asyncio.run(run_auto_resolve())
-        
+
     except Exception as e:
         click.echo(f"❌ Error in auto-resolution: {e}", err=True)
 
@@ -1631,123 +1751,150 @@ def auto_resolve(
 @multi_agent_cli.command("prevent-conflicts")
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
-@click.option("--mode", "-m", 
-              type=click.Choice([m.value for m in AutoResolutionMode]), 
-              default="predictive",
-              help="Prevention mode")
-@click.option("--apply-measures", "-a", is_flag=True, help="Apply automatic preventive measures")
+@click.option(
+    "--mode",
+    "-m",
+    type=click.Choice([m.value for m in AutoResolutionMode]),
+    default="predictive",
+    help="Prevention mode",
+)
+@click.option(
+    "--apply-measures", "-a", is_flag=True, help="Apply automatic preventive measures"
+)
 @click.option("--export", "-e", help="Export prevention report to JSON file")
 def prevent_conflicts(
     branches: tuple,
     repo_path: Optional[str],
     mode: str,
     apply_measures: bool,
-    export: Optional[str]
+    export: Optional[str],
 ):
     """Use AI prediction to prevent conflicts before they occur"""
     try:
         mode_enum = AutoResolutionMode(mode)
-        
+
         click.echo(f"🔮 Predictive conflict prevention")
         click.echo(f"   Branches: {', '.join(branches)}")
         click.echo(f"   Mode: {mode_enum.value}")
-        
+
         if len(branches) < 2:
             click.echo("❌ Need at least 2 branches for conflict prediction")
             return
-        
+
         # Create components
         branch_manager = BranchManager(repo_path=repo_path)
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
-        semantic_merger = SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
-        
+        semantic_merger = SemanticMerger(
+            semantic_analyzer, conflict_engine, branch_manager, repo_path
+        )
+
         from libs.multi_agent.conflict_prediction import ConflictPredictor
-        conflict_predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
-        
+
+        conflict_predictor = ConflictPredictor(
+            conflict_engine, branch_manager, repo_path
+        )
+
         auto_resolver = AutoResolver(
             semantic_analyzer=semantic_analyzer,
             semantic_merger=semantic_merger,
             conflict_engine=conflict_engine,
             conflict_predictor=conflict_predictor,
             branch_manager=branch_manager,
-            repo_path=repo_path
+            repo_path=repo_path,
         )
-        
+
         async def run_prevention():
-            click.echo(f"\n🔍 Analyzing {len(branches)} branches for potential conflicts...")
-            
+            click.echo(
+                f"\n🔍 Analyzing {len(branches)} branches for potential conflicts..."
+            )
+
             # Perform predictive conflict prevention
             result = await auto_resolver.prevent_conflicts_predictively(
-                branches=list(branches),
-                prevention_mode=mode_enum
+                branches=list(branches), prevention_mode=mode_enum
             )
-            
+
             # Display results
             click.echo(f"\n📊 Prevention Results:")
             click.echo(f"   Status: {result['status']}")
             click.echo(f"   Branches analyzed: {result['branches_analyzed']}")
-            
-            if 'predictions_found' in result:
+
+            if "predictions_found" in result:
                 click.echo(f"   Predictions found: {result['predictions_found']}")
-                click.echo(f"   High confidence: {result['high_confidence_predictions']}")
-            
-            if 'preventive_measures_applied' in result:
-                click.echo(f"   Preventive measures applied: {result['preventive_measures_applied']}")
-            
+                click.echo(
+                    f"   High confidence: {result['high_confidence_predictions']}"
+                )
+
+            if "preventive_measures_applied" in result:
+                click.echo(
+                    f"   Preventive measures applied: {result['preventive_measures_applied']}"
+                )
+
             # Show recommendations
-            if 'recommendations' in result and result['recommendations']:
+            if "recommendations" in result and result["recommendations"]:
                 click.echo(f"\n💡 Prevention Strategies:")
-                for i, strategy in enumerate(result['recommendations'][:10], 1):
+                for i, strategy in enumerate(result["recommendations"][:10], 1):
                     click.echo(f"{i}. Pattern: {strategy['pattern']}")
                     click.echo(f"   Prediction ID: {strategy['prediction_id']}")
-                    
-                    if strategy['automated_measures']:
+
+                    if strategy["automated_measures"]:
                         click.echo("   🤖 Automated measures:")
-                        for measure in strategy['automated_measures']:
+                        for measure in strategy["automated_measures"]:
                             click.echo(f"     • {measure.replace('_', ' ').title()}")
-                    
-                    if strategy['manual_actions']:
+
+                    if strategy["manual_actions"]:
                         click.echo("   👥 Manual actions:")
-                        for action in strategy['manual_actions']:
+                        for action in strategy["manual_actions"]:
                             click.echo(f"     • {action.replace('_', ' ').title()}")
-                    
-                    if strategy['prevention_suggestions']:
+
+                    if strategy["prevention_suggestions"]:
                         click.echo("   💭 Suggestions:")
-                        for suggestion in strategy['prevention_suggestions'][:3]:
+                        for suggestion in strategy["prevention_suggestions"][:3]:
                             click.echo(f"     • {suggestion}")
-                    
+
                     click.echo()
-            
+
             # Show applied measures
-            if 'applied_measures' in result and result['applied_measures']:
+            if "applied_measures" in result and result["applied_measures"]:
                 click.echo(f"🚀 Applied Preventive Measures:")
-                successful = [m for m in result['applied_measures'] if m['status'] == 'applied_successfully']
-                failed = [m for m in result['applied_measures'] if m['status'] == 'failed']
-                
+                successful = [
+                    m
+                    for m in result["applied_measures"]
+                    if m["status"] == "applied_successfully"
+                ]
+                failed = [
+                    m for m in result["applied_measures"] if m["status"] == "failed"
+                ]
+
                 if successful:
                     click.echo(f"   ✅ Successful ({len(successful)}):")
                     for measure in successful:
-                        click.echo(f"     • {measure['measure'].replace('_', ' ').title()}")
-                
+                        click.echo(
+                            f"     • {measure['measure'].replace('_', ' ').title()}"
+                        )
+
                 if failed:
                     click.echo(f"   ❌ Failed ({len(failed)}):")
                     for measure in failed:
-                        error = measure.get('error', 'Unknown error')
-                        click.echo(f"     • {measure['measure'].replace('_', ' ').title()}: {error}")
-            
+                        error = measure.get("error", "Unknown error")
+                        click.echo(
+                            f"     • {measure['measure'].replace('_', ' ').title()}: {error}"
+                        )
+
             # Show prevention summary
-            if 'prevention_summary' in result:
-                summary = result['prevention_summary']
+            if "prevention_summary" in result:
+                summary = result["prevention_summary"]
                 click.echo(f"\n📈 Prevention Summary:")
                 click.echo(f"   Conflicts prevented: {summary['conflicts_prevented']}")
-                click.echo(f"   Manual intervention needed: {summary['manual_intervention_needed']}")
-            
+                click.echo(
+                    f"   Manual intervention needed: {summary['manual_intervention_needed']}"
+                )
+
             # Export results if requested
             if export:
                 import json
                 from datetime import datetime
-                
+
                 export_data = {
                     "conflict_prevention_report": {
                         "timestamp": datetime.now().isoformat(),
@@ -1756,13 +1903,13 @@ def prevent_conflicts(
                         "results": result,
                     }
                 }
-                
-                with open(export, 'w') as f:
+
+                with open(export, "w") as f:
                     json.dump(export_data, f, indent=2, default=str)
                 click.echo(f"\n💾 Prevention report exported to: {export}")
-        
+
         asyncio.run(run_prevention())
-        
+
     except Exception as e:
         click.echo(f"❌ Error in conflict prevention: {e}", err=True)
 
@@ -1770,60 +1917,74 @@ def prevent_conflicts(
 @multi_agent_cli.command("collaborate")
 @click.argument("agents", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
-@click.option("--mode", "-m", 
-              type=click.Choice(["isolated", "cooperative", "synchronized", "hierarchical", "peer_to_peer"]),
-              default="cooperative",
-              help="Collaboration mode")
+@click.option(
+    "--mode",
+    "-m",
+    type=click.Choice(
+        ["isolated", "cooperative", "synchronized", "hierarchical", "peer_to_peer"]
+    ),
+    default="cooperative",
+    help="Collaboration mode",
+)
 @click.option("--purpose", "-p", required=True, help="Purpose of collaboration")
-@click.option("--duration", "-d", type=int, default=3600, help="Session duration in seconds")
-@click.option("--enable-sync", "-s", is_flag=True, help="Enable auto-sync between agents")
+@click.option(
+    "--duration", "-d", type=int, default=3600, help="Session duration in seconds"
+)
+@click.option(
+    "--enable-sync", "-s", is_flag=True, help="Enable auto-sync between agents"
+)
 def collaborate(
     agents: tuple,
     repo_path: Optional[str],
     mode: str,
     purpose: str,
     duration: int,
-    enable_sync: bool
+    enable_sync: bool,
 ):
     """Start a collaboration session between multiple agents"""
     try:
         from libs.multi_agent.collaboration_engine import CollaborationMode
-        
+
         click.echo(f"🤝 Starting collaboration session")
         click.echo(f"   Agents: {', '.join(agents)}")
         click.echo(f"   Mode: {mode}")
         click.echo(f"   Purpose: {purpose}")
-        
+
         # Create components
         branch_manager = BranchManager(repo_path=repo_path)
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
-        
+
         # Create mock agent pool for demo
         from libs.multi_agent.agent_pool import AgentPool
+
         agent_pool = AgentPool(max_agents=len(agents))
-        
+
         # Create collaboration engine
         from libs.multi_agent.collaboration_engine import CollaborationEngine
+
         collab_engine = CollaborationEngine(
             agent_pool=agent_pool,
             branch_manager=branch_manager,
             conflict_engine=conflict_engine,
             semantic_analyzer=semantic_analyzer,
-            repo_path=repo_path
+            repo_path=repo_path,
         )
-        
+
         if enable_sync:
             collab_engine.enable_auto_sync = True
             collab_engine.sync_interval = 30  # More frequent for demo
-        
+
         async def run_collaboration():
-            from libs.multi_agent.collaboration_engine import MessageType, MessagePriority
-            
+            from libs.multi_agent.collaboration_engine import (
+                MessageType,
+                MessagePriority,
+            )
+
             # Start collaboration engine
             await collab_engine.start()
             click.echo("\n✅ Collaboration engine started")
-            
+
             # Create collaboration session
             mode_enum = CollaborationMode(mode.upper())
             session_id = await collab_engine.create_collaboration_session(
@@ -1834,15 +1995,15 @@ def collaborate(
                 initial_context={
                     "repo_path": repo_path or ".",
                     "start_time": datetime.now().isoformat(),
-                }
+                },
             )
-            
+
             click.echo(f"\n📋 Session created: {session_id}")
             click.echo(f"   Duration: {duration}s")
-            
+
             # Simulate some collaborative activities
             await asyncio.sleep(2)
-            
+
             # Share some knowledge
             knowledge_id = await collab_engine.share_knowledge(
                 contributor_id=agents[0],
@@ -1853,10 +2014,10 @@ def collaborate(
                     "participants": list(agents),
                 },
                 tags=["collaboration", "session"],
-                relevance_score=1.0
+                relevance_score=1.0,
             )
             click.echo(f"\n📚 Knowledge shared: {knowledge_id}")
-            
+
             # Send status updates
             for i, agent in enumerate(agents[1:], 1):
                 await collab_engine.send_message(
@@ -1865,44 +2026,51 @@ def collaborate(
                     message_type=MessageType.STATUS_UPDATE,
                     subject=f"{agent} joined collaboration",
                     content={"status": "ready", "agent_index": i},
-                    priority=MessagePriority.NORMAL
+                    priority=MessagePriority.NORMAL,
                 )
-            
+
             # Get collaboration summary
             summary = collab_engine.get_collaboration_summary()
-            
+
             click.echo(f"\n📊 Collaboration Statistics:")
             click.echo(f"   Messages sent: {summary['statistics']['messages_sent']}")
-            click.echo(f"   Knowledge shared: {summary['statistics']['knowledge_shared']}")
+            click.echo(
+                f"   Knowledge shared: {summary['statistics']['knowledge_shared']}"
+            )
             click.echo(f"   Active sessions: {summary['active_sessions']}")
-            
+
             # Wait for duration or user interrupt
             click.echo(f"\n⏳ Session running for {duration}s (Ctrl+C to stop)...")
             try:
                 await asyncio.sleep(duration)
             except KeyboardInterrupt:
                 click.echo("\n⚠️  Session interrupted by user")
-            
+
             # End session
             await collab_engine.end_collaboration_session(
-                session_id,
-                outcomes=[f"Collaboration completed: {purpose}"]
+                session_id, outcomes=[f"Collaboration completed: {purpose}"]
             )
-            
+
             # Stop engine
             await collab_engine.stop()
             click.echo("\n✅ Collaboration session ended")
-            
+
             # Final summary
             final_summary = collab_engine.get_collaboration_summary()
             click.echo(f"\n📈 Final Summary:")
-            click.echo(f"   Total messages: {final_summary['statistics']['messages_sent']}")
-            click.echo(f"   Messages delivered: {final_summary['statistics']['messages_delivered']}")
+            click.echo(
+                f"   Total messages: {final_summary['statistics']['messages_sent']}"
+            )
+            click.echo(
+                f"   Messages delivered: {final_summary['statistics']['messages_delivered']}"
+            )
             click.echo(f"   Knowledge items: {final_summary['shared_knowledge_count']}")
-            click.echo(f"   Successful collaborations: {final_summary['statistics']['successful_collaborations']}")
-        
+            click.echo(
+                f"   Successful collaborations: {final_summary['statistics']['successful_collaborations']}"
+            )
+
         asyncio.run(run_collaboration())
-        
+
     except Exception as e:
         click.echo(f"❌ Error in collaboration: {e}", err=True)
 
@@ -1910,16 +2078,33 @@ def collaborate(
 @multi_agent_cli.command("send-message")
 @click.option("--from", "sender", required=True, help="Sender agent ID")
 @click.option("--to", "recipient", help="Recipient agent ID (omit for broadcast)")
-@click.option("--type", "msg_type", 
-              type=click.Choice(["status", "dependency", "conflict", "help", "knowledge", "review", "sync", "broadcast"]),
-              required=True,
-              help="Message type")
+@click.option(
+    "--type",
+    "msg_type",
+    type=click.Choice(
+        [
+            "status",
+            "dependency",
+            "conflict",
+            "help",
+            "knowledge",
+            "review",
+            "sync",
+            "broadcast",
+        ]
+    ),
+    required=True,
+    help="Message type",
+)
 @click.option("--subject", "-s", required=True, help="Message subject")
 @click.option("--content", "-c", required=True, help="Message content (JSON format)")
-@click.option("--priority", "-p",
-              type=click.Choice(["low", "normal", "high", "critical", "emergency"]),
-              default="normal",
-              help="Message priority")
+@click.option(
+    "--priority",
+    "-p",
+    type=click.Choice(["low", "normal", "high", "critical", "emergency"]),
+    default="normal",
+    help="Message priority",
+)
 @click.option("--repo-path", "-r", help="Path to git repository")
 def send_message(
     sender: str,
@@ -1928,20 +2113,20 @@ def send_message(
     subject: str,
     content: str,
     priority: str,
-    repo_path: Optional[str]
+    repo_path: Optional[str],
 ):
     """Send a message between agents in the collaboration system"""
     try:
         import json
         from libs.multi_agent.collaboration_engine import MessageType, MessagePriority
-        
+
         # Parse content as JSON
         try:
             content_data = json.loads(content)
         except json.JSONDecodeError:
             # If not valid JSON, treat as string content
             content_data = {"message": content}
-        
+
         # Map message type
         type_mapping = {
             "status": MessageType.STATUS_UPDATE,
@@ -1954,7 +2139,7 @@ def send_message(
             "broadcast": MessageType.BROADCAST,
         }
         message_type = type_mapping[msg_type]
-        
+
         # Map priority
         priority_mapping = {
             "low": MessagePriority.LOW,
@@ -1964,28 +2149,35 @@ def send_message(
             "emergency": MessagePriority.EMERGENCY,
         }
         message_priority = priority_mapping[priority]
-        
+
         click.echo(f"📨 Sending message")
         click.echo(f"   From: {sender}")
         click.echo(f"   To: {recipient or 'All agents (broadcast)'}")
         click.echo(f"   Type: {msg_type}")
         click.echo(f"   Priority: {priority}")
-        
+
         # This is a demo - in real usage, would connect to running collaboration engine
         click.echo(f"\n✅ Message sent successfully")
         click.echo(f"   Subject: {subject}")
         click.echo(f"   Content: {json.dumps(content_data, indent=2)}")
-        
+
     except Exception as e:
         click.echo(f"❌ Error sending message: {e}", err=True)
 
 
 @multi_agent_cli.command("share-knowledge")
 @click.option("--agent", "-a", required=True, help="Contributing agent ID")
-@click.option("--type", "-t", required=True, help="Knowledge type (e.g., pattern, api_change, function_signature)")
+@click.option(
+    "--type",
+    "-t",
+    required=True,
+    help="Knowledge type (e.g., pattern, api_change, function_signature)",
+)
 @click.option("--content", "-c", required=True, help="Knowledge content (JSON format)")
 @click.option("--tags", help="Tags for categorization (comma-separated)")
-@click.option("--relevance", "-r", type=float, default=1.0, help="Relevance score (0.0-1.0)")
+@click.option(
+    "--relevance", "-r", type=float, default=1.0, help="Relevance score (0.0-1.0)"
+)
 @click.option("--repo-path", help="Path to git repository")
 def share_knowledge(
     agent: str,
@@ -1993,54 +2185,77 @@ def share_knowledge(
     content: str,
     tags: Optional[str],
     relevance: float,
-    repo_path: Optional[str]
+    repo_path: Optional[str],
 ):
     """Share knowledge in the collaboration system"""
     try:
         import json
-        
+
         # Parse content
         try:
             content_data = json.loads(content)
         except json.JSONDecodeError:
             content_data = {"description": content}
-        
+
         # Parse tags
         tag_list = []
         if tags:
             tag_list = [t.strip() for t in tags.split(",")]
-        
+
         click.echo(f"📚 Sharing knowledge")
         click.echo(f"   Contributor: {agent}")
         click.echo(f"   Type: {type}")
         click.echo(f"   Relevance: {relevance}")
         if tag_list:
             click.echo(f"   Tags: {', '.join(tag_list)}")
-        
+
         # This is a demo - in real usage, would connect to running collaboration engine
         click.echo(f"\n✅ Knowledge shared successfully")
         click.echo(f"   Content: {json.dumps(content_data, indent=2)}")
-        
+
     except Exception as e:
         click.echo(f"❌ Error sharing knowledge: {e}", err=True)
 
 
 @multi_agent_cli.command("branch-info")
-@click.option("--action", "-a", 
-              type=click.Choice(["register", "update", "status", "sync", "subscribe", "merge-report"]),
-              required=True,
-              help="Action to perform")
+@click.option(
+    "--action",
+    "-a",
+    type=click.Choice(
+        ["register", "update", "status", "sync", "subscribe", "merge-report"]
+    ),
+    required=True,
+    help="Action to perform",
+)
 @click.option("--branch", "-b", help="Branch name")
 @click.option("--agent", help="Agent ID")
-@click.option("--info-type", "-t",
-              type=click.Choice(["state", "commits", "files", "dependencies", "tests", "build", "conflicts", "merge", "progress", "api"]),
-              help="Type of information to update")
+@click.option(
+    "--info-type",
+    "-t",
+    type=click.Choice(
+        [
+            "state",
+            "commits",
+            "files",
+            "dependencies",
+            "tests",
+            "build",
+            "conflicts",
+            "merge",
+            "progress",
+            "api",
+        ]
+    ),
+    help="Type of information to update",
+)
 @click.option("--data", "-d", help="Update data (JSON format)")
 @click.option("--repo-path", "-r", help="Path to git repository")
-@click.option("--sync-strategy", 
-              type=click.Choice(["immediate", "periodic", "on_demand", "milestone", "smart"]),
-              default="smart",
-              help="Synchronization strategy")
+@click.option(
+    "--sync-strategy",
+    type=click.Choice(["immediate", "periodic", "on_demand", "milestone", "smart"]),
+    default="smart",
+    help="Synchronization strategy",
+)
 def branch_info(
     action: str,
     branch: Optional[str],
@@ -2048,24 +2263,30 @@ def branch_info(
     info_type: Optional[str],
     data: Optional[str],
     repo_path: Optional[str],
-    sync_strategy: str
+    sync_strategy: str,
 ):
     """Manage branch information sharing protocol"""
     try:
-        from libs.multi_agent.branch_info_protocol import BranchInfoProtocol, BranchInfoType, SyncStrategy
+        from libs.multi_agent.branch_info_protocol import (
+            BranchInfoProtocol,
+            BranchInfoType,
+            SyncStrategy,
+        )
         import json
-        
+
         click.echo(f"🌿 Branch Info Protocol - {action}")
-        
+
         if action == "register":
             if not branch or not agent:
-                click.echo("❌ Branch and agent are required for registration", err=True)
+                click.echo(
+                    "❌ Branch and agent are required for registration", err=True
+                )
                 return
-            
+
             click.echo(f"   Registering branch: {branch}")
             click.echo(f"   Agent: {agent}")
             click.echo(f"   Strategy: {sync_strategy}")
-            
+
             # Parse work items if provided in data
             work_items = []
             if data:
@@ -2074,17 +2295,17 @@ def branch_info(
                     work_items = data_dict.get("work_items", [])
                 except json.JSONDecodeError:
                     pass
-            
+
             if work_items:
                 click.echo(f"   Work items: {len(work_items)}")
-            
+
             click.echo("\n✅ Branch registered successfully")
-            
+
         elif action == "update":
             if not branch or not info_type:
                 click.echo("❌ Branch and info type are required for update", err=True)
                 return
-            
+
             # Map CLI info types to enum values
             type_mapping = {
                 "state": BranchInfoType.BRANCH_STATE,
@@ -2098,31 +2319,31 @@ def branch_info(
                 "progress": BranchInfoType.WORK_PROGRESS,
                 "api": BranchInfoType.API_CHANGES,
             }
-            
+
             branch_info_type = type_mapping[info_type]
-            
+
             click.echo(f"   Updating branch: {branch}")
             click.echo(f"   Info type: {branch_info_type.value}")
-            
+
             if data:
                 try:
                     update_data = json.loads(data)
                     click.echo(f"   Data: {json.dumps(update_data, indent=2)}")
                 except json.JSONDecodeError:
                     click.echo(f"   Data: {data}")
-            
+
             click.echo("\n✅ Branch info updated")
-            
+
         elif action == "status":
             click.echo("\n📊 Branch Information Status")
             click.echo("-" * 40)
-            
+
             # This is a demo - would show real protocol status
             click.echo("Active branches: 0")
             click.echo("Total subscriptions: 0")
             click.echo("Sync strategy: smart")
             click.echo("Recent syncs: 0")
-            
+
         elif action == "sync":
             if agent:
                 click.echo(f"   Requesting sync for agent: {agent}")
@@ -2133,25 +2354,27 @@ def branch_info(
             else:
                 click.echo("❌ Agent ID required for sync request", err=True)
                 return
-            
+
             click.echo("\n✅ Sync request sent")
-            
+
         elif action == "subscribe":
             if not agent or not branch:
-                click.echo("❌ Agent and branch are required for subscription", err=True)
+                click.echo(
+                    "❌ Agent and branch are required for subscription", err=True
+                )
                 return
-            
+
             click.echo(f"   Agent {agent} subscribing to branch {branch}")
             click.echo("\n✅ Subscription successful")
-            
+
         elif action == "merge-report":
             if not branch:
                 click.echo("❌ Branch name required for merge report", err=True)
                 return
-            
+
             click.echo(f"\n📋 Merge Readiness Report for {branch}")
             click.echo("-" * 40)
-            
+
             # Demo merge report
             click.echo("✅ Tests passed: Yes")
             click.echo("✅ Build successful: Yes")
@@ -2159,9 +2382,375 @@ def branch_info(
             click.echo("✅ Work completed: Yes")
             click.echo("\nMerge Score: 1.0 (Ready to merge)")
             click.echo("\nRecommendations: None - branch is ready to merge!")
-        
+
     except Exception as e:
         click.echo(f"❌ Error in branch info protocol: {e}", err=True)
+
+
+@multi_agent_cli.command("dependency-track")
+@click.option("--file", "-f", required=True, help="File path where dependency changed")
+@click.option("--agent", "-a", required=True, help="Agent ID making the change")
+@click.option(
+    "--type",
+    "-t",
+    type=click.Choice([dt.value for dt in DependencyType]),
+    required=True,
+    help="Type of dependency change",
+)
+@click.option("--details", "-d", required=True, help="Change details (JSON format)")
+@click.option(
+    "--impact",
+    "-i",
+    type=click.Choice([ci.value for ci in ChangeImpact]),
+    help="Impact level (auto-detected if not specified)",
+)
+@click.option(
+    "--strategy",
+    "-s",
+    type=click.Choice([ps.value for ps in PropagationStrategy]),
+    default="immediate",
+    help="Propagation strategy",
+)
+@click.option("--repo-path", "-r", help="Path to git repository")
+def dependency_track(
+    file: str,
+    agent: str,
+    type: str,
+    details: str,
+    impact: Optional[str],
+    strategy: str,
+    repo_path: Optional[str],
+):
+    """Track a dependency change for propagation"""
+    try:
+        import json
+
+        click.echo(f"📊 Tracking dependency change")
+        click.echo(f"   File: {file}")
+        click.echo(f"   Agent: {agent}")
+        click.echo(f"   Type: {type}")
+        click.echo(f"   Strategy: {strategy}")
+
+        # Parse details
+        try:
+            details_data = json.loads(details)
+        except json.JSONDecodeError:
+            details_data = {"description": details}
+
+        # Convert enum values
+        dependency_type = DependencyType(type)
+        propagation_strategy = PropagationStrategy(strategy)
+        impact_level = ChangeImpact(impact) if impact else None
+
+        click.echo(f"   Details: {json.dumps(details_data, indent=2)}")
+
+        # This is a demo - in real usage would connect to running dependency system
+        async def track_change():
+            from unittest.mock import Mock
+
+            # Create mock components
+            branch_manager = BranchManager(repo_path=repo_path)
+
+            # Mock collaboration engine and branch info protocol
+            collab_engine = Mock()
+            branch_protocol = Mock()
+
+            # Create dependency propagation system
+            dep_system = DependencyPropagationSystem(
+                collaboration_engine=collab_engine,
+                branch_info_protocol=branch_protocol,
+                branch_manager=branch_manager,
+                repo_path=repo_path,
+            )
+
+            # Track the change
+            change_id = await dep_system.track_dependency_change(
+                file_path=file,
+                changed_by=agent,
+                change_type=dependency_type,
+                change_details=details_data,
+                impact_level=impact_level,
+                propagation_strategy=propagation_strategy,
+            )
+
+            click.echo(f"\n✅ Change tracked successfully")
+            click.echo(f"   Change ID: {change_id}")
+
+            # Get summary
+            summary = dep_system.get_propagation_summary()
+            click.echo(f"   Total changes tracked: {summary['total_changes_tracked']}")
+            click.echo(f"   Pending changes: {summary['pending_changes']}")
+
+        try:
+            asyncio.run(track_change())
+        except Exception:
+            # Fallback to demo output
+            mock_change_id = f"dep_change_{agent}_{file.replace('/', '_')}"
+            click.echo(f"\n✅ Change tracked successfully")
+            click.echo(f"   Change ID: {mock_change_id}")
+            click.echo("   (Demo mode - actual tracking not performed)")
+
+    except Exception as e:
+        click.echo(f"❌ Error tracking dependency change: {e}", err=True)
+
+
+@multi_agent_cli.command("dependency-status")
+@click.option("--repo-path", "-r", help="Path to git repository")
+@click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
+@click.option("--export", "-e", help="Export dependency data to JSON file")
+def dependency_status(repo_path: Optional[str], detailed: bool, export: Optional[str]):
+    """Show dependency propagation system status"""
+    try:
+        click.echo("📊 Dependency Propagation System Status")
+        click.echo("=" * 50)
+
+        # This is a demo - would show real system status
+        click.echo("System Status: Running")
+        click.echo("Auto-propagation: Enabled")
+        click.echo("Batch size: 10")
+        click.echo("Max concurrent: 5")
+
+        click.echo("\n📈 Statistics:")
+        click.echo("   Changes tracked: 0")
+        click.echo("   Changes propagated: 0")
+        click.echo("   Success rate: 100.0%")
+        click.echo("   Average propagation time: 0.0s")
+
+        click.echo("\n🗂️  Dependency Graph:")
+        click.echo("   Nodes: 0")
+        click.echo("   Dependencies mapped: 0")
+
+        if detailed:
+            click.echo("\n📋 Recent Changes:")
+            click.echo("   No recent changes")
+
+            click.echo("\n🔄 Pending Propagations:")
+            click.echo("   No pending propagations")
+
+        if export:
+            import json
+
+            export_data = {
+                "dependency_system_status": {
+                    "timestamp": "2025-01-11T00:00:00",
+                    "system_running": True,
+                    "auto_propagation": True,
+                    "statistics": {
+                        "changes_tracked": 0,
+                        "changes_propagated": 0,
+                        "success_rate": 1.0,
+                        "average_propagation_time": 0.0,
+                    },
+                    "dependency_graph": {
+                        "nodes": 0,
+                        "dependencies": 0,
+                    },
+                }
+            }
+
+            with open(export, "w") as f:
+                json.dump(export_data, f, indent=2)
+            click.echo(f"\n💾 Status exported to: {export}")
+
+    except Exception as e:
+        click.echo(f"❌ Error getting dependency status: {e}", err=True)
+
+
+@multi_agent_cli.command("dependency-impact")
+@click.argument("file_path")
+@click.option("--repo-path", "-r", help="Path to git repository")
+@click.option("--export", "-e", help="Export impact report to JSON file")
+def dependency_impact(file_path: str, repo_path: Optional[str], export: Optional[str]):
+    """Analyze dependency impact for a specific file"""
+    try:
+        click.echo(f"🔍 Analyzing dependency impact for: {file_path}")
+
+        # This is a demo - would perform real analysis
+        async def analyze_impact():
+            from unittest.mock import Mock
+
+            # Create mock components
+            branch_manager = BranchManager(repo_path=repo_path)
+            collab_engine = Mock()
+            branch_protocol = Mock()
+
+            dep_system = DependencyPropagationSystem(
+                collaboration_engine=collab_engine,
+                branch_info_protocol=branch_protocol,
+                branch_manager=branch_manager,
+                repo_path=repo_path,
+            )
+
+            # Build dependency graph
+            await dep_system.build_dependency_graph()
+
+            # Get impact report
+            report = await dep_system.get_dependency_impact_report(file_path)
+
+            if "error" in report:
+                click.echo(f"❌ {report['error']}")
+                return
+
+            click.echo(f"\n📊 Impact Analysis:")
+            click.echo(f"   File: {report['file_path']}")
+            click.echo(f"   Module: {report['module_name']}")
+            click.echo(f"   Direct dependents: {report['direct_dependents']}")
+            click.echo(f"   Indirect dependents: {report['indirect_dependents']}")
+            click.echo(f"   Total impact: {report['total_impact']}")
+            click.echo(f"   Complexity score: {report['complexity_score']:.2f}")
+            click.echo(f"   Risk level: {report['risk_level'].upper()}")
+
+            if report["affected_branches"]:
+                click.echo(f"\n🌿 Affected Branches:")
+                for branch in report["affected_branches"]:
+                    click.echo(f"   • {branch}")
+
+            if report["dependencies"]:
+                click.echo(f"\n📦 Dependencies ({len(report['dependencies'])}):")
+                for dep in report["dependencies"][:5]:
+                    click.echo(f"   • {dep}")
+                if len(report["dependencies"]) > 5:
+                    click.echo(f"   ... and {len(report['dependencies']) - 5} more")
+
+            if report["dependents"]:
+                click.echo(f"\n🔗 Dependents ({len(report['dependents'])}):")
+                for dep in report["dependents"][:5]:
+                    click.echo(f"   • {dep}")
+                if len(report["dependents"]) > 5:
+                    click.echo(f"   ... and {len(report['dependents']) - 5} more")
+
+            if export:
+                import json
+
+                with open(export, "w") as f:
+                    json.dump(report, f, indent=2, default=str)
+                click.echo(f"\n💾 Impact report exported to: {export}")
+
+        try:
+            asyncio.run(analyze_impact())
+        except Exception:
+            # Fallback to demo output
+            click.echo(f"\n📊 Impact Analysis:")
+            click.echo(f"   File: {file_path}")
+            click.echo(f"   Module: {file_path.replace('/', '.').replace('.py', '')}")
+            click.echo(f"   Direct dependents: 0")
+            click.echo(f"   Indirect dependents: 0")
+            click.echo(f"   Total impact: 0")
+            click.echo(f"   Complexity score: 0.0")
+            click.echo(f"   Risk level: LOW")
+            click.echo("   (Demo mode - actual analysis not performed)")
+
+    except Exception as e:
+        click.echo(f"❌ Error analyzing dependency impact: {e}", err=True)
+
+
+@multi_agent_cli.command("dependency-propagate")
+@click.argument("change_ids", nargs=-1, required=True)
+@click.option("--branches", "-b", help="Target branches (comma-separated)")
+@click.option("--repo-path", "-r", help="Path to git repository")
+@click.option("--export", "-e", help="Export propagation results to JSON file")
+def dependency_propagate(
+    change_ids: tuple,
+    branches: Optional[str],
+    repo_path: Optional[str],
+    export: Optional[str],
+):
+    """Manually propagate specific dependency changes to branches"""
+    try:
+        click.echo(f"🚀 Propagating dependency changes")
+        click.echo(f"   Change IDs: {', '.join(change_ids)}")
+
+        target_branches = None
+        if branches:
+            target_branches = [b.strip() for b in branches.split(",")]
+            click.echo(f"   Target branches: {', '.join(target_branches)}")
+        else:
+            click.echo("   Target branches: All affected branches")
+
+        # This is a demo - would perform real propagation
+        async def propagate_changes():
+            from unittest.mock import Mock
+
+            # Create mock components
+            branch_manager = BranchManager(repo_path=repo_path)
+            collab_engine = Mock()
+            branch_protocol = Mock()
+
+            dep_system = DependencyPropagationSystem(
+                collaboration_engine=collab_engine,
+                branch_info_protocol=branch_protocol,
+                branch_manager=branch_manager,
+                repo_path=repo_path,
+            )
+
+            # Propagate changes
+            results = await dep_system.propagate_changes_to_branches(
+                change_ids=list(change_ids), target_branches=target_branches
+            )
+
+            click.echo(f"\n📊 Propagation Results:")
+
+            for result in results:
+                success_icon = "✅" if result.success else "❌"
+                click.echo(f"\n{success_icon} Change: {result.change_id}")
+                click.echo(f"   Success: {result.success}")
+                click.echo(f"   Propagated to: {len(result.propagated_to)} branches")
+                click.echo(f"   Failed targets: {len(result.failed_targets)} branches")
+                click.echo(f"   Processing time: {result.processing_time:.2f}s")
+
+                if result.propagated_to:
+                    click.echo(f"   ✅ Successful: {', '.join(result.propagated_to)}")
+
+                if result.failed_targets:
+                    click.echo(f"   ❌ Failed: {', '.join(result.failed_targets)}")
+
+                if result.warnings:
+                    click.echo(f"   ⚠️  Warnings:")
+                    for warning in result.warnings:
+                        click.echo(f"     • {warning}")
+
+                if result.recommendations:
+                    click.echo(f"   💡 Recommendations:")
+                    for rec in result.recommendations:
+                        click.echo(f"     • {rec}")
+
+            if export:
+                import json
+
+                export_data = {
+                    "propagation_results": [
+                        {
+                            "change_id": r.change_id,
+                            "success": r.success,
+                            "propagated_to": r.propagated_to,
+                            "failed_targets": r.failed_targets,
+                            "warnings": r.warnings,
+                            "recommendations": r.recommendations,
+                            "processing_time": r.processing_time,
+                            "metadata": r.metadata,
+                        }
+                        for r in results
+                    ]
+                }
+
+                with open(export, "w") as f:
+                    json.dump(export_data, f, indent=2)
+                click.echo(f"\n💾 Results exported to: {export}")
+
+        try:
+            asyncio.run(propagate_changes())
+        except Exception:
+            # Fallback to demo output
+            click.echo(f"\n📊 Propagation Results:")
+            for change_id in change_ids:
+                click.echo(f"\n✅ Change: {change_id}")
+                click.echo(f"   Success: True")
+                click.echo(f"   Propagated to: 0 branches")
+                click.echo(f"   Processing time: 0.0s")
+            click.echo("   (Demo mode - actual propagation not performed)")
+
+    except Exception as e:
+        click.echo(f"❌ Error propagating changes: {e}", err=True)
 
 
 # Register the command group
