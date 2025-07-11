@@ -10,6 +10,7 @@ import type { Session, SessionFilters } from '$lib/types/session';
 // 세션 데이터 스토어
 export const sessions = writable<Session[]>([]);
 export const isLoading = writable<boolean>(false);
+export const isBackgroundLoading = writable<boolean>(false); // 백그라운드 로딩 상태
 export const error = writable<string | null>(null);
 
 // 필터 상태
@@ -24,7 +25,7 @@ export const sessionFilters = writable<SessionFilters>({
 
 // 자동 새로고침 설정
 export const autoRefreshEnabled = writable<boolean>(true);
-export const autoRefreshInterval = writable<number>(10000); // 10초
+export const autoRefreshInterval = writable<number>(30000); // 30초로 증가
 
 // 선택된 세션들
 export const selectedSessions = writable<string[]>([]);
@@ -119,8 +120,13 @@ let refreshIntervalId: number | null = null;
 /**
  * 세션 데이터 새로고침
  */
-export async function refreshSessions(): Promise<void> {
-  isLoading.set(true);
+export async function refreshSessions(isInitial: boolean = false): Promise<void> {
+  // 초기 로딩인지 백그라운드 로딩인지 구분
+  if (isInitial) {
+    isLoading.set(true);
+  } else {
+    isBackgroundLoading.set(true);
+  }
   error.set(null);
 
   try {
@@ -135,9 +141,23 @@ export async function refreshSessions(): Promise<void> {
       description: s.template, // template을 임시로 description으로 사용
     }));
 
-    sessions.set(processedData);
+    // 스마트 업데이트: 기존 데이터와 비교하여 변경된 경우만 업데이트
+    const currentSessions = get(sessions);
+    const hasChanged = isInitial || !currentSessions || currentSessions.length !== processedData.length ||
+      currentSessions.some((current, index) => {
+        const newSession = processedData[index];
+        return !newSession || 
+               current.session_name !== newSession.session_name ||
+               current.status !== newSession.status ||
+               current.controller_status !== newSession.controller_status ||
+               current.windows?.length !== newSession.windows?.length;
+      });
     
-    if (get(sessions).length === 0) {
+    if (hasChanged) {
+      sessions.set(processedData);
+    }
+    
+    if (isInitial && processedData.length === 0) {
       // Fix: Correct argument order for showNotification
       showNotification('warning', 'No Sessions', 'No tmux sessions found.');
     }
@@ -148,7 +168,11 @@ export async function refreshSessions(): Promise<void> {
     showNotification('error', 'Error', `Failed to refresh sessions: ${errorMessage}`);
     console.error('Failed to refresh sessions:', err);
   } finally {
-    isLoading.set(false);
+    if (isInitial) {
+      isLoading.set(false);
+    } else {
+      isBackgroundLoading.set(false);
+    }
   }
 }
 

@@ -18,13 +18,24 @@
   
   body {
     @apply bg-base-100 text-base-content;
+    /* GPU 가속을 위한 최적화 */
+    will-change: auto;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
 @layer components {
   /* 세션 카드 스타일 */
   .session-card {
-    @apply bg-base-100 border border-base-300 rounded-lg shadow-sm hover:shadow-md transition-shadow;
+    @apply bg-base-100 border border-base-300 rounded-lg shadow-sm;
+    /* GPU 가속 transition 최적화 */
+    will-change: transform, box-shadow;
+    transition: box-shadow 0.2s ease-out;
+  }
+  
+  .session-card:hover {
+    @apply shadow-md;
   }
   
   .session-card-header {
@@ -42,6 +53,9 @@
   /* 메트릭 카드 */
   .metric-card {
     @apply bg-base-100 border border-base-300 rounded-lg p-4 shadow-sm;
+    /* GPU 가속 최적화 */
+    will-change: transform;
+    transform: translateZ(0);
   }
   
   /* 로그 뷰어 */

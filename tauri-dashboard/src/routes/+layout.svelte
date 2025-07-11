@@ -15,35 +15,44 @@
   onMount(async () => {
     // 초기 데이터 로드
     await loadConfig();
-    await refreshSessions();
+    await refreshSessions(true); // 초기 로딩임을 명시
     
     // 자동 새로고침 시작
     startAutoRefresh();
     
-    // 실시간 이벤트 리스너 설정
-    const unlistenSessionUpdate = await listen('session-update', (event) => {
-      const { session, status, controller_status } = event.payload as any;
-      // 세션 상태 업데이트 처리
-      refreshSessions();
-    });
+    // 실시간 이벤트 리스너 설정 (Tauri 환경에서만)
+    let unlistenSessionUpdate: (() => void) | undefined;
+    let unlistenLogUpdate: (() => void) | undefined;
+    let unlistenNotification: (() => void) | undefined;
     
-    const unlistenLogUpdate = await listen('log-update', (event) => {
-      const { session, log, timestamp } = event.payload as any;
-      // 로그 업데이트 처리 (필요시)
-      console.log(`[${session}] ${log}`);
-    });
-    
-    const unlistenNotification = await listen('notification', (event) => {
-      const { title, message, level } = event.payload as any;
-      showNotification(level, title, message, false); // 시스템 알림은 이미 표시됨
-    });
+    try {
+      unlistenSessionUpdate = await listen('session-update', (event) => {
+        const { session, status, controller_status } = event.payload as any;
+        // 세션 상태 업데이트 처리
+        refreshSessions();
+      });
+      
+      unlistenLogUpdate = await listen('log-update', (event) => {
+        const { session, log, timestamp } = event.payload as any;
+        // 로그 업데이트 처리 (필요시)
+        console.log(`[${session}] ${log}`);
+      });
+      
+      unlistenNotification = await listen('notification', (event) => {
+        const { title, message, level } = event.payload as any;
+        showNotification(level, title, message, false); // 시스템 알림은 이미 표시됨
+      });
+    } catch (error) {
+      // 웹 환경에서는 이벤트 리스너가 작동하지 않으므로 무시
+      console.warn('Event listeners are not available in web environment');
+    }
     
     // 컴포넌트 언마운트 시 정리
     return () => {
       stopAutoRefresh();
-      unlistenSessionUpdate();
-      unlistenLogUpdate();
-      unlistenNotification();
+      if (unlistenSessionUpdate) unlistenSessionUpdate();
+      if (unlistenLogUpdate) unlistenLogUpdate();
+      if (unlistenNotification) unlistenNotification();
     };
   });
   

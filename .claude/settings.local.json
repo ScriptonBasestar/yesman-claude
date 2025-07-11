@@ -55,7 +55,9 @@
       "Bash(echo $DISPLAY)",
       "Bash(git checkout:*)",
       "Bash(git push:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(npm run build:*)",
+      "WebFetch(domain:svelte.dev)"
     ],
     "deny": []
   }
