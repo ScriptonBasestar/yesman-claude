@@ -61,6 +61,10 @@ class AgentPool:
         # Control
         self._running = False
         self._shutdown_event = asyncio.Event()
+        
+        # Auto-rebalancing
+        self._auto_rebalancing_enabled = False
+        self._auto_rebalancing_interval = 300
 
         # Load persistent state
         self._load_state()
@@ -136,6 +140,10 @@ class AgentPool:
         # Start agent monitor
         asyncio.create_task(self._agent_monitor())
 
+        # Enable auto-rebalancing by default for pools with multiple agents
+        if self.max_agents > 1:
+            self.enable_auto_rebalancing()
+
         logger.info("Agent pool started")
 
     async def stop(self) -> None:
@@ -145,6 +153,9 @@ class AgentPool:
 
         logger.info("Stopping agent pool...")
         self._running = False
+
+        # Disable auto-rebalancing
+        self._auto_rebalancing_enabled = False
 
         # Terminate all agents
         for agent in self.agents.values():
@@ -594,5 +605,76 @@ class AgentPool:
     def rebalance_workload(self) -> List[Tuple[str, str]]:
         """Trigger workload rebalancing"""
         if self.intelligent_scheduling:
-            return self.scheduler.rebalance_tasks()
+            rebalancing_actions = self.scheduler.rebalance_tasks()
+            
+            # Execute rebalancing actions
+            for overloaded_agent_id, underloaded_agent_id in rebalancing_actions:
+                self._execute_rebalancing(overloaded_agent_id, underloaded_agent_id)
+                
+            return rebalancing_actions
         return []
+
+    def _execute_rebalancing(self, from_agent_id: str, to_agent_id: str) -> None:
+        """Execute task rebalancing between two agents"""
+        try:
+            # Update agent loads immediately to prevent over-rebalancing
+            from_agent = self.agents.get(from_agent_id)
+            to_agent = self.agents.get(to_agent_id)
+            
+            if not from_agent or not to_agent:
+                logger.warning(f"Cannot rebalance: agent not found")
+                return
+                
+            # Update scheduler agent loads
+            if self.intelligent_scheduling:
+                from_cap = self.scheduler.agent_capabilities.get(from_agent_id)
+                to_cap = self.scheduler.agent_capabilities.get(to_agent_id)
+                
+                if from_cap and to_cap:
+                    # Redistribute load (move 10% from overloaded to underloaded)
+                    load_transfer = min(0.1, from_cap.current_load * 0.2)
+                    from_cap.current_load = max(0.0, from_cap.current_load - load_transfer)
+                    to_cap.current_load = min(1.0, to_cap.current_load + load_transfer)
+                    
+                    logger.info(
+                        f"Rebalanced load: {from_agent_id} ({from_cap.current_load:.2f}) -> "
+                        f"{to_agent_id} ({to_cap.current_load:.2f})"
+                    )
+                    
+        except Exception as e:
+            logger.error(f"Error executing rebalancing: {e}")
+
+    def enable_auto_rebalancing(self, interval_seconds: int = 300) -> None:
+        """Enable automatic workload rebalancing"""
+        if not self.intelligent_scheduling:
+            logger.warning("Cannot enable auto-rebalancing without intelligent scheduling")
+            return
+            
+        self._auto_rebalancing_enabled = True
+        self._auto_rebalancing_interval = interval_seconds
+        
+        # Start auto-rebalancing task
+        asyncio.create_task(self._auto_rebalancing_loop())
+        logger.info(f"Auto-rebalancing enabled with {interval_seconds}s interval")
+
+    async def _auto_rebalancing_loop(self) -> None:
+        """Automatic rebalancing loop"""
+        while self._running and getattr(self, '_auto_rebalancing_enabled', False):
+            try:
+                # Check if rebalancing is needed
+                metrics = self.scheduler.get_scheduling_metrics()
+                load_balancing_score = metrics.get('load_balancing_score', 1.0)
+                
+                # Trigger rebalancing if score is below threshold (0.7)
+                if load_balancing_score < 0.7:
+                    logger.info(f"Load balancing score low ({load_balancing_score:.3f}), triggering rebalancing")
+                    rebalancing_actions = self.rebalance_workload()
+                    
+                    if rebalancing_actions:
+                        logger.info(f"Executed {len(rebalancing_actions)} rebalancing actions")
+                
+                await asyncio.sleep(getattr(self, '_auto_rebalancing_interval', 300))
+                
+            except Exception as e:
+                logger.error(f"Error in auto-rebalancing loop: {e}")
+                await asyncio.sleep(60)  # Wait before retrying
