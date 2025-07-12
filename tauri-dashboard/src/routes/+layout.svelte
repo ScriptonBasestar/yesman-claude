@@ -44,7 +44,7 @@
       });
     } catch (error) {
       // 웹 환경에서는 이벤트 리스너가 작동하지 않으므로 무시
-      console.warn('Event listeners are not available in web environment');
+      // console.warn('Event listeners are not available in web environment');
     }
     
     // 컴포넌트 언마운트 시 정리
