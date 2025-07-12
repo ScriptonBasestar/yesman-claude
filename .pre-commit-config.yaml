@@ -31,8 +31,8 @@ repos:
         entry: python scripts/test_naming_validator.py
         language: python
         files: ^tests/.*\.py$
-        args: [--min-score=70]
-        pass_filenames: true
+        args: [tests/, --min-score=70]
+        pass_filenames: false
 
       - id: unittest-detection
         name: Detect unittest Usage in New Tests
