@@ -352,15 +352,15 @@ def launch_tauri_dashboard(theme: Optional[str] = None, dev: bool = False,
             else:
                 # Find the executable (platform dependent)
                 if sys.platform == "darwin":  # macOS
-                    app_bundle = build_dir / "bundle" / "macos" / "yesman-claude.app"
+                    app_bundle = build_dir / "bundle" / "macos" / "Yesman Dashboard.app"
                     if app_bundle.exists():
                         cmd = ["open", str(app_bundle)]
                     else:
-                        cmd = [str(build_dir / "yesman-claude")]
+                        cmd = [str(build_dir / "Yesman Dashboard")]
                 elif sys.platform == "win32":  # Windows
-                    cmd = [str(build_dir / "yesman-claude.exe")]
+                    cmd = [str(build_dir / "Yesman Dashboard.exe")]
                 else:  # Linux
-                    cmd = [str(build_dir / "yesman-claude")]
+                    cmd = [str(build_dir / "yesman-tauri-dashboard")]
         
         # Run the command
         if detach:
