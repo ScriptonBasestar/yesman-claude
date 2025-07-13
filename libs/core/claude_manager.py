@@ -1,4 +1,4 @@
-"""Claude manager for dashboard integration - Refactored."""""
+"""Claude manager for dashboard integration - Refactored.""" ""
 
 import logging
 from typing import Callable, Dict, Optional
@@ -14,7 +14,7 @@ class DashboardController:
     """Main controller that orchestrates Claude session management, process control, and monitoring."""
 
     def __init__(self, session_name: str, pane_id: Optional[str] = None):
-        """Initialize the dashboard controller."""""
+        """Initialize the dashboard controller.""" ""
 
     def __init__(self, session_name: str, pane_id: Optional[str] = None):
         self.session_name = session_name
@@ -255,7 +255,7 @@ class ClaudeManager:
     """Manages multiple dashboard controllers."""
 
     def __init__(self):
-        """Initialize the Claude manager."""""
+        """Initialize the Claude manager.""" ""
 
     def __init__(self):
         self.controllers: Dict[str, DashboardController] = {}
@@ -264,7 +264,7 @@ class ClaudeManager:
     def get_controller(
         self, session_name: str, pane_id: Optional[str] = None
     ) -> DashboardController:
-        """Get or create controller for session."""""
+        """Get or create controller for session.""" ""
         if session_name not in self.controllers:
             self.controllers[session_name] = DashboardController(session_name, pane_id)
         return self.controllers[session_name]
@@ -281,4 +281,3 @@ class ClaudeManager:
         for controller in self.controllers.values():
             controller.stop()
         self.controllers.clear()
-

@@ -105,4 +105,3 @@ def restart_claude_pane(session_name: str):
         raise HTTPException(
             status_code=500, detail=f"Failed to restart Claude pane: {str(e)}"
         )
-

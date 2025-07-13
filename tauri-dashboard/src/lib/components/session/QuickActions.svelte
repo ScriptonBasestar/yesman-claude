@@ -42,7 +42,7 @@
     {
       id: 'teardown',
       icon: '🛑',
-      label: 'Teardown All',
+      label: 'Teardown Sessions',
       description: 'Stop and remove all sessions',
       variant: 'btn-error btn-outline',
       hotkey: 'Ctrl+D',

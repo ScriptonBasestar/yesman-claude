@@ -55,7 +55,7 @@
     {
       action: 'teardown',
       icon: '🛑',
-      label: 'Teardown All',
+      label: 'Teardown Sessions',
       variant: 'btn-error'
     }
   ];

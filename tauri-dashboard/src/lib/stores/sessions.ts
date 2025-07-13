@@ -312,13 +312,14 @@ export async function restartController(sessionName: string): Promise<void> {
   }
 }
 
-// 5. setup* 함수들은 UI 수정이 필요하므로 주석 처리
-/*
-export async function setupTmuxSession(sessionName: string): Promise<void> {
-  // TODO: UI에서 session config를 받아 create_session을 호출하도록 변경 필요
+/**
+ * 프로젝트 기반으로 tmux 세션을 생성합니다.
+ */
+export async function createTmuxSession(projectName: string): Promise<void> {
   try {
-    // await pythonBridge.create_session({ session_name: sessionName, ... });
-    showNotification('success', 'Session Created', `Session ${sessionName} created.`);
+    showNotification('info', 'Creating Session', `Creating session for project: ${projectName}`);
+    await pythonBridge.create_session({ project_name: projectName });
+    showNotification('success', 'Session Created', `Session for ${projectName} created successfully`);
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -326,9 +327,58 @@ export async function setupTmuxSession(sessionName: string): Promise<void> {
     throw err;
   }
 }
-*/
 
-// 6. setupAllSessions 함수는 제거
+/**
+ * 사용 가능한 프로젝트 목록을 가져옵니다.
+ */
+export async function getAvailableProjects(): Promise<string[]> {
+  try {
+    const config = await pythonBridge.get_app_config();
+    return Object.keys(config?.sessions || {});
+  } catch (err) {
+    console.error('Failed to get available projects:', err);
+    return [];
+  }
+}
+
+// 6. setupAllSessions 함수 구현
+export async function setupAllSessions(): Promise<void> {
+  try {
+    showNotification('info', 'Setup Sessions', 'Setting up all sessions from configuration...');
+    
+    // projects.yaml에서 모든 프로젝트 가져오기
+    const availableProjects = await getAvailableProjects();
+    
+    if (availableProjects.length === 0) {
+      showNotification('warning', 'No Projects', 'No projects found in configuration.');
+      return;
+    }
+    
+    // 모든 프로젝트에 대해 세션 생성
+    const results = await Promise.allSettled(
+      availableProjects.map(project => pythonBridge.create_session({ project_name: project }))
+    );
+    
+    // 성공/실패 카운트
+    const succeeded = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+    
+    if (failed === 0) {
+      showNotification('success', 'Setup Complete', `Successfully created ${succeeded} sessions.`);
+    } else if (succeeded === 0) {
+      showNotification('error', 'Setup Failed', `Failed to create all sessions.`);
+    } else {
+      showNotification('warning', 'Partial Success', `Created ${succeeded} sessions, ${failed} failed.`);
+    }
+    
+    // 세션 목록 새로고침
+    setTimeout(refreshSessions, 1000);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    showNotification('error', 'Setup Error', `Failed to setup sessions: ${errorMessage}`);
+    throw err;
+  }
+}
 
 export async function teardownAllSessions(): Promise<void> {
   const sessionsToTeardown = get(sessions);

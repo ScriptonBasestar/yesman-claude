@@ -52,6 +52,10 @@
   $: sessionStyle = statusStyles[session.status as keyof typeof statusStyles] || statusStyles.unknown;
   $: controllerStyle = controllerStyles[session.controller_status as keyof typeof controllerStyles] || controllerStyles.unknown;
   
+  // 세션이 실행 중인지 확인
+  $: isSessionRunning = session.status === 'active';
+  $: canStartController = isSessionRunning && session.controller_status !== 'running';
+  
   // 시간 포맷팅
   function formatUptime(uptime: string | null): string {
     if (!uptime) return 'N/A';
@@ -210,6 +214,21 @@
         {/if}
       </div>
       
+      <!-- 세션 상태 경고 -->
+      {#if !isSessionRunning}
+        <div class="session-warning bg-warning/10 border border-warning/20 p-3 rounded-lg mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-warning">⚠️</span>
+            <div>
+              <div class="text-sm font-medium text-warning">Session Not Running</div>
+              <div class="text-xs text-base-content/60">
+                Start the tmux session first before managing the controller
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
+      
       <!-- 컨트롤러 액션 버튼 -->
       <div class="controller-actions flex gap-2">
         {#if session.controller_status === 'running'}
@@ -222,7 +241,10 @@
         {:else}
           <button 
             class="btn btn-success btn-sm flex-1"
+            class:btn-disabled={!canStartController}
             on:click={handleStartController}
+            disabled={!canStartController}
+            title={!isSessionRunning ? 'Session must be running to start controller' : 'Start Claude controller'}
           >
             ▶️ Start Controller
           </button>
@@ -231,7 +253,8 @@
         <button 
           class="btn btn-outline btn-sm"
           on:click={handleRestartController}
-          disabled={session.controller_status === 'unknown'}
+          disabled={!isSessionRunning || session.controller_status === 'unknown'}
+          title={!isSessionRunning ? 'Session must be running to restart controller' : 'Restart Claude controller'}
         >
           🔄 Restart
         </button>

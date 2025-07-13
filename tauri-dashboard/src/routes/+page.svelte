@@ -30,7 +30,7 @@
   }
   
   // 빠른 액션 핸들러
-  function handleQuickAction(event: CustomEvent) {
+  async function handleQuickAction(event: CustomEvent) {
     const { action } = event.detail;
     
     switch (action) {
@@ -38,14 +38,44 @@
         refreshSessions();
         notifySuccess('Refreshed', 'Session data refreshed');
         break;
+      case 'setup':
+        try {
+          const { setupAllSessions } = await import('$lib/stores/sessions');
+          await setupAllSessions();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Setup Failed', `Failed to setup sessions: ${errorMessage}`);
+        }
+        break;
+      case 'teardown':
+        try {
+          const { teardownAllSessions } = await import('$lib/stores/sessions');
+          await teardownAllSessions();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Teardown Failed', `Failed to teardown sessions: ${errorMessage}`);
+        }
+        break;
       case 'start_all':
-        // 구현 예정
-        notifySuccess('Started', 'All controllers started');
+        try {
+          const { startAllControllers } = await import('$lib/stores/sessions');
+          await startAllControllers();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Start Failed', `Failed to start controllers: ${errorMessage}`);
+        }
         break;
       case 'stop_all':
-        // 구현 예정
-        notifySuccess('Stopped', 'All controllers stopped');
+        try {
+          const { stopAllControllers } = await import('$lib/stores/sessions');
+          await stopAllControllers();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Stop Failed', `Failed to stop controllers: ${errorMessage}`);
+        }
         break;
+      default:
+        console.warn('Unknown action:', action);
     }
   }
 </script>
