@@ -1,9 +1,9 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { createEventDispatcher } from 'svelte';
-  
+
   const dispatch = createEventDispatcher();
-  
+
   // 네비게이션 메뉴 아이템
   const navItems = [
     {
@@ -37,7 +37,7 @@
       description: 'Configuration'
     }
   ];
-  
+
   // 빠른 액션 버튼들
   const quickActions = [
     {
@@ -49,21 +49,33 @@
     {
       action: 'setup',
       icon: '⚡',
-      label: 'Setup Sessions',
+      label: 'Setup All Sessions',
       variant: 'btn-primary'
+    },
+    {
+      action: 'start_all',
+      icon: '▶️',
+      label: 'Start All Controllers',
+      variant: 'btn-success'
+    },
+    {
+      action: 'stop_all',
+      icon: '⏹️',
+      label: 'Stop All Controllers',
+      variant: 'btn-error'
     },
     {
       action: 'teardown',
       icon: '🛑',
-      label: 'Teardown Sessions',
-      variant: 'btn-error'
+      label: 'Teardown All Sessions',
+      variant: 'btn-error btn-outline'
     }
   ];
-  
+
   function handleQuickAction(action: string) {
     dispatch('quickAction', { action });
   }
-  
+
   // 현재 경로 확인
   $: currentPath = $page.url.pathname;
 </script>
@@ -83,17 +95,17 @@
       </div>
     </div>
   </div>
-  
+
   <!-- 네비게이션 메뉴 -->
   <nav class="navigation">
     <h2 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-3">
       Navigation
     </h2>
-    
+
     <ul class="menu menu-vertical space-y-1">
       {#each navItems as item}
         <li>
-          <a 
+          <a
             href={item.path}
             class="menu-item flex items-center gap-3 p-3 rounded-lg transition-colors"
             class:active={currentPath === item.path}
@@ -108,16 +120,16 @@
       {/each}
     </ul>
   </nav>
-  
+
   <!-- 빠른 액션 -->
   <div class="quick-actions">
     <h2 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-3">
       Quick Actions
     </h2>
-    
+
     <div class="space-y-2">
       {#each quickActions as action}
-        <button 
+        <button
           class="btn {action.variant} btn-sm w-full justify-start gap-2"
           on:click={() => handleQuickAction(action.action)}
         >
@@ -127,13 +139,13 @@
       {/each}
     </div>
   </div>
-  
+
   <!-- 상태 정보 -->
   <div class="status-info">
     <h2 class="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-3">
       System Status
     </h2>
-    
+
     <div class="space-y-2">
       <div class="stat-item bg-base-100 p-2 rounded-lg">
         <div class="flex justify-between items-center">
@@ -141,14 +153,14 @@
           <span class="text-xs font-mono text-base-content">2h 34m</span>
         </div>
       </div>
-      
+
       <div class="stat-item bg-base-100 p-2 rounded-lg">
         <div class="flex justify-between items-center">
           <span class="text-xs text-base-content/70">Memory</span>
           <span class="text-xs font-mono text-base-content">142MB</span>
         </div>
       </div>
-      
+
       <div class="stat-item bg-base-100 p-2 rounded-lg">
         <div class="flex justify-between items-center">
           <span class="text-xs text-base-content/70">Sessions</span>
@@ -157,7 +169,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- 하단 정보 -->
   <div class="sidebar-footer mt-auto pt-4 border-t border-base-content/10">
     <div class="text-center">
@@ -175,23 +187,23 @@
   .sidebar {
     @apply flex flex-col;
   }
-  
+
   .menu-item {
     @apply hover:bg-base-300;
   }
-  
+
   .menu-item.active {
     @apply bg-primary text-primary-content;
   }
-  
+
   .menu-item.active .text-base-content\/60 {
     @apply text-primary-content/70;
   }
-  
+
   .stat-item {
     @apply border border-base-content/5;
   }
-  
+
   .sidebar-footer {
     @apply mt-auto;
   }

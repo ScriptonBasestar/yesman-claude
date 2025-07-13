@@ -8,7 +8,7 @@
   import NotificationContainer from '$lib/components/common/NotificationContainer.svelte';
   import { loadConfig } from '$lib/stores/config';
   import { refreshSessions, startAutoRefresh, stopAutoRefresh } from '$lib/stores/sessions';
-  import { showNotification } from '$lib/stores/notifications';
+  import { showNotification, notifySuccess, notifyError } from '$lib/stores/notifications';
 
   let isMinimized = false;
 
@@ -58,12 +58,62 @@
 
   // 페이지 변경 감지
   $: currentRoute = $page.route.id;
+
+  // 빠른 액션 핸들러
+  async function handleQuickAction(event: CustomEvent) {
+    const { action } = event.detail;
+
+    switch (action) {
+      case 'refresh':
+        refreshSessions();
+        notifySuccess('Refreshed', 'Session data refreshed');
+        break;
+      case 'setup':
+        try {
+          const { setupAllSessions } = await import('$lib/stores/sessions');
+          await setupAllSessions();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Setup Failed', `Failed to setup sessions: ${errorMessage}`);
+        }
+        break;
+      case 'teardown':
+        try {
+          const { teardownAllSessions } = await import('$lib/stores/sessions');
+          await teardownAllSessions();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Teardown Failed', `Failed to teardown sessions: ${errorMessage}`);
+        }
+        break;
+      case 'start_all':
+        try {
+          const { startAllControllers } = await import('$lib/stores/sessions');
+          await startAllControllers();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Start Failed', `Failed to start controllers: ${errorMessage}`);
+        }
+        break;
+      case 'stop_all':
+        try {
+          const { stopAllControllers } = await import('$lib/stores/sessions');
+          await stopAllControllers();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          notifyError('Stop Failed', `Failed to stop controllers: ${errorMessage}`);
+        }
+        break;
+      default:
+        console.warn('Unknown action:', action);
+    }
+  }
 </script>
 
 <div class="app-layout h-screen flex">
   <!-- 사이드바 -->
   <div class="sidebar-container" class:minimized={isMinimized}>
-    <Sidebar {currentRoute} bind:isMinimized />
+    <Sidebar {currentRoute} bind:isMinimized on:quickAction={handleQuickAction} />
   </div>
 
   <!-- 메인 컨텐츠 영역 -->

@@ -2,22 +2,35 @@
   import { onMount } from 'svelte';
   import SessionCard from '$lib/components/session/SessionCard.svelte';
   import SessionFilters from '$lib/components/session/SessionFilters.svelte';
-  import { 
-    filteredSessions, 
-    sessionStats, // 1. Import sessionStats
-    isLoading, 
-    error, 
+  import {
+    filteredSessions,
+    sessionStats,
+    isLoading,
+    error,
     refreshSessions,
     startController,
     stopController,
     restartController,
-    viewSessionLogs
-    // 2. Remove setupTmuxSession
+    viewSessionLogs,
+    createTmuxSession,
+    getAvailableProjects
   } from '$lib/stores/sessions';
   import { showNotification } from '$lib/stores/notifications';
 
-  onMount(() => {
+  // 세션 생성 모달 상태
+  let showCreateModal = false;
+  let availableProjects: string[] = [];
+  let selectedProject = '';
+  let isCreatingSession = false;
+
+  onMount(async () => {
     refreshSessions();
+    // 사용 가능한 프로젝트 목록 로드
+    try {
+      availableProjects = await getAvailableProjects();
+    } catch (error) {
+      console.error('Failed to load available projects:', error);
+    }
   });
 
   // 세션 카드 이벤트 핸들러
@@ -70,9 +83,59 @@
     window.location.href = `/sessions/${session}`;
   }
 
+  async function handleStartSession(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      // 세션 시작 API 호출
+      const response = await fetch(`/api/sessions/${session}/start`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        showNotification('success', 'Session Started', `Session "${session}" has been started successfully.`);
+        // 세션 목록 새로고침
+        refreshSessions();
+      } else {
+        const errorText = await response.text();
+        showNotification('error', 'Start Failed', `Failed to start session: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Failed to start session:', error);
+      showNotification('error', 'Start Failed', `Failed to start session: ${error}`);
+    }
+  }
+
   function handleCreateSession() {
-    showNotification('info', 'Create Session', 'Opening session creation dialog...');
-    // 세션 생성 모달 또는 페이지로 이동
+    if (availableProjects.length === 0) {
+      showNotification('warning', 'No Projects', 'No projects found in configuration. Please check your projects.yaml file.');
+      return;
+    }
+    selectedProject = availableProjects[0]; // 첫 번째 프로젝트를 기본 선택
+    showCreateModal = true;
+  }
+
+  async function createSession() {
+    if (!selectedProject) {
+      showNotification('warning', 'No Project Selected', 'Please select a project to create a session.');
+      return;
+    }
+
+    isCreatingSession = true;
+    try {
+      await createTmuxSession(selectedProject);
+      showCreateModal = false;
+      selectedProject = '';
+    } catch (error) {
+      console.error('Failed to create session:', error);
+    } finally {
+      isCreatingSession = false;
+    }
+  }
+
+  function cancelCreateSession() {
+    showCreateModal = false;
+    selectedProject = '';
+    isCreatingSession = false;
   }
 </script>
 
@@ -92,9 +155,9 @@
           Manage your tmux sessions and Claude controllers
         </p>
       </div>
-      
+
       <div class="header-actions flex gap-3">
-        <button 
+        <button
           class="btn btn-outline btn-sm"
           class:loading={$isLoading}
           on:click={() => refreshSessions()}
@@ -102,8 +165,8 @@
         >
           🔄 Refresh
         </button>
-        
-        <button 
+
+        <button
           class="btn btn-primary btn-sm"
           on:click={handleCreateSession}
         >
@@ -148,16 +211,16 @@
             You don't have any tmux sessions yet. Create your first session to get started.
           {/if}
         </p>
-        
+
         <div class="flex justify-center gap-4">
-          <button 
+          <button
             class="btn btn-primary"
             on:click={handleCreateSession}
           >
             ➕ Create First Session
           </button>
-          
-          <button 
+
+          <button
             class="btn btn-outline"
             on:click={() => refreshSessions()}
           >
@@ -173,21 +236,21 @@
             <div class="stat-title">Total Sessions</div>
             <div class="stat-value text-primary">{$sessionStats.total}</div>
           </div>
-          
+
           <div class="stat">
             <div class="stat-title">Active</div>
             <div class="stat-value text-success">
               {$sessionStats.active}
             </div>
           </div>
-          
+
           <div class="stat">
             <div class="stat-title">Running Controllers</div>
             <div class="stat-value text-info">
               {$sessionStats.runningControllers}
             </div>
           </div>
-          
+
           <div class="stat">
             <div class="stat-title">Errors</div>
             <div class="stat-value text-error">
@@ -200,7 +263,7 @@
       <!-- 세션 그리드 -->
       <div class="sessions-grid space-y-6">
         {#each $filteredSessions as session (session.session_name)}
-          <SessionCard 
+          <SessionCard
             {session}
             on:startController={handleStartController}
             on:stopController={handleStopController}
@@ -208,6 +271,7 @@
             on:viewLogs={handleViewLogs}
             on:attachSession={handleAttachSession}
             on:viewDetails={handleViewDetails}
+            on:startSession={handleStartSession}
           />
         {/each}
       </div>
@@ -215,27 +279,72 @@
   </div>
 </div>
 
+<!-- 세션 생성 모달 -->
+{#if showCreateModal}
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-4">Create New Session</h3>
+
+      <div class="form-control mb-4">
+        <label class="label">
+          <span class="label-text">Select Project</span>
+        </label>
+        <select
+          class="select select-bordered w-full"
+          bind:value={selectedProject}
+          disabled={isCreatingSession}
+        >
+          {#each availableProjects as project}
+            <option value={project}>{project}</option>
+          {/each}
+        </select>
+        <label class="label">
+          <span class="label-text-alt">Choose from projects.yaml configuration</span>
+        </label>
+      </div>
+
+      <div class="modal-action">
+        <button
+          class="btn btn-primary"
+          class:loading={isCreatingSession}
+          disabled={isCreatingSession || !selectedProject}
+          on:click={createSession}
+        >
+          {isCreatingSession ? 'Creating...' : 'Create Session'}
+        </button>
+        <button
+          class="btn btn-ghost"
+          disabled={isCreatingSession}
+          on:click={cancelCreateSession}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
 <style>
   .sessions-page {
     @apply max-w-7xl mx-auto;
   }
-  
+
   .sessions-grid {
     @apply grid grid-cols-1 gap-6;
   }
-  
+
   .loading-container {
     @apply min-h-[400px];
   }
-  
+
   .no-sessions {
     @apply min-h-[500px];
   }
-  
+
   .sessions-stats {
     @apply mb-6;
   }
-  
+
   @media (min-width: 768px) {
     .sessions-grid {
       @apply grid-cols-1;
