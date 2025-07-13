@@ -34,35 +34,63 @@ def start_controller(session_name: str):
     """지정된 세션의 컨트롤러를 시작합니다."""
     try:
         controller = cm.get_controller(session_name)
-        success = controller.start()
-        if not success:
-            # Check if session exists first
-            import os
-            import sys
-
-            sys.path.append(
-                os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        
+        # First check if session exists
+        import os
+        import sys
+        sys.path.append(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        )
+        from libs.core.session_manager import SessionManager
+        
+        session_manager = SessionManager()
+        sessions = session_manager.list_running_sessions()
+        
+        session_exists = any(s["session_name"] == session_name for s in sessions)
+        
+        if not session_exists:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Session '{session_name}' is not running. "
+                    "Please start the session first using 'yesman up' or the dashboard."
+                ),
             )
-            from libs.core.session_manager import SessionManager
-
-            session_manager = SessionManager()
-            sessions = session_manager.list_running_sessions()
-
-            if not any(s["session_name"] == session_name for s in sessions):
+        
+        # Try to start the controller
+        success = controller.start()
+        
+        if not success:
+            # Get more detailed error information
+            if not controller.claude_pane:
+                # List all panes in the session for debugging
+                pane_info = []
+                if controller.session_manager.session:
+                    for window in controller.session_manager.session.list_windows():
+                        for pane in window.list_panes():
+                            try:
+                                cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
+                                pane_info.append(f"Window '{window.name}', Pane {pane.index}: {cmd}")
+                            except:
+                                pane_info.append(f"Window '{window.name}', Pane {pane.index}: <unknown>")
+                
+                detail_msg = (
+                    f"Controller failed to start. The session or pane may not be ready. "
+                    f"No Claude pane found in session '{session_name}'. "
+                    "Make sure Claude Code (claude) is running in one of the panes. "
+                )
+                
+                if pane_info:
+                    detail_msg += f"Current panes: {'; '.join(pane_info)}"
+                
                 raise HTTPException(
-                    status_code=400,
-                    detail=(
-                        f"Session '{session_name}' is not running. "
-                        "Please start the session first using 'yesman up' or the dashboard."
-                    ),
+                    status_code=500,
+                    detail=detail_msg
                 )
             else:
                 raise HTTPException(
                     status_code=500,
-                    detail=(
-                        f"No Claude pane found in session '{session_name}'. "
-                        "Make sure Claude Code is running in the session."
-                    ),
+                    detail="Controller failed to start for unknown reason."
                 )
         return
     except HTTPException:
