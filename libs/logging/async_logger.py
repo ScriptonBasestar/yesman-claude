@@ -26,6 +26,7 @@ class LogLevel(Enum):
     CRITICAL = (50, "CRITICAL")
 
     def __init__(self, value: int, name: str):
+        """Initialize LogLevel enum members."""
         self.level_value = value
         self.level_name = name
 
@@ -80,6 +81,7 @@ class AsyncLoggerConfig:
         log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
         output_dir: Optional[Path] = None,
     ):
+        """Initialize the async logger configuration."""
         self.name = name
         self.level = level
         self.max_queue_size = max_queue_size
@@ -115,8 +117,8 @@ class AsyncLogger:
             await cls._instance.stop()
         cls._instance = None
 
-
     def __init__(self, config: AsyncLoggerConfig = None):
+        """Initialize the async logger singleton instance."""
         if AsyncLogger._instance is not None:
             raise RuntimeError("AsyncLogger is a singleton. Use get_instance().")
 

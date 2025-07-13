@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Main entry point for the Yesman Claude application."""
 import click
 
 from commands.ai import ai
@@ -19,8 +20,9 @@ from commands.up import setup, up  # setup is main, up is alias
 
 @click.group()
 def cli():
-    """Yesman - Claude automation tool"""
+    """Yesman - Claude automation tool."""
     pass
+
 
 cli.add_command(ls)
 cli.add_command(show)
