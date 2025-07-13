@@ -1,5 +1,5 @@
-import pytest
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
+
 
 class TestErrorHandlingIntegration:
     """Tests for error handling across components"""
@@ -7,10 +7,10 @@ class TestErrorHandlingIntegration:
     def test_error_handling_integration(self):
         """Test 13: Error handling across components"""
         factory = RendererFactory()
-        
+
         # Test invalid widget type
         renderer = factory.create_renderer(RenderFormat.TUI)
-        
+
         # This should handle gracefully
         try:
             result = renderer.render_widget(WidgetType.SESSION_BROWSER, None)

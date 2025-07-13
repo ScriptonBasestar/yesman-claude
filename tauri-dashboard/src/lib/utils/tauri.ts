@@ -11,8 +11,8 @@ import { listen } from '@tauri-apps/api/event';
 // Tauri 환경인지 확인하기 위한 변수입니다.
 // 웹 브라우저 환경에서는 window.__TAURI__가 undefined입니다.
 // @ts-ignore
-const isTauri = typeof window !== 'undefined' && 
-  window.__TAURI__ !== undefined && 
+const isTauri = typeof window !== 'undefined' &&
+  window.__TAURI__ !== undefined &&
   window.__TAURI_IPC__ !== undefined;
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -143,7 +143,7 @@ export const eventListeners = {
   },
 
   /**
-   * 컨트롤러 상태 변경 이벤트 리스너  
+   * 컨트롤러 상태 변경 이벤트 리스너
    */
   onControllerStatusChanged(callback: (sessionName: string, status: string) => void) {
     if (!isTauri) {
@@ -377,9 +377,9 @@ export async function executeBatchCommands(
     console.warn('Batch commands are only available in Tauri environment');
     return commands.map(() => ({ success: false, error: 'Not available in web environment' }));
   }
-  
+
   const results = [];
-  
+
   for (const { command, args } of commands) {
     try {
       const result = await safeTauriInvoke(command, args);
@@ -388,7 +388,7 @@ export async function executeBatchCommands(
       results.push({ success: false, error: error.message });
     }
   }
-  
+
   return results;
 }
 
@@ -406,15 +406,15 @@ export async function retryTauriCommand<T>(
       { command, args }
     );
   }
-  
+
   let lastError: Error;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await safeTauriInvoke<T>(command, args);
     } catch (error) {
       lastError = error as Error;
-      
+
       if (attempt < maxRetries) {
         console.warn(`Command '${command}' failed (attempt ${attempt}/${maxRetries}), retrying in ${delayMs}ms...`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -422,6 +422,6 @@ export async function retryTauriCommand<T>(
       }
     }
   }
-  
+
   throw lastError!;
 }

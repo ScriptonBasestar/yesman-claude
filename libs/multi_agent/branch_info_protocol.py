@@ -1,25 +1,21 @@
 """Branch information sharing protocol for multi-agent collaboration"""
 
 import asyncio
+import contextlib
 import logging
-import json
-from typing import Dict, List, Optional, Any, Set, Tuple
+from collections import defaultdict
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
-from collections import defaultdict
-import hashlib
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 from .branch_manager import BranchManager
 from .collaboration_engine import (
     CollaborationEngine,
-    MessageType,
     MessagePriority,
-    SharedKnowledge,
+    MessageType,
 )
-from .types import Agent, AgentState
-
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +109,7 @@ class BranchInfoProtocol:
         self.branch_info: Dict[str, BranchInfo] = {}
         self.sync_history: List[BranchSyncEvent] = []
         self.branch_subscriptions: Dict[str, Set[str]] = defaultdict(
-            set
+            set,
         )  # branch -> interested agents
 
         # Sync configuration
@@ -154,10 +150,8 @@ class BranchInfoProtocol:
 
         if self._sync_task:
             self._sync_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._sync_task
-            except asyncio.CancelledError:
-                pass
 
     async def register_branch(
         self,
@@ -231,7 +225,7 @@ class BranchInfoProtocol:
             branch_info.files_modified = update_data.get("files", [])
 
         elif info_type == BranchInfoType.TEST_STATUS:
-            branch_info.tests_passed = update_data.get("passed", None)
+            branch_info.tests_passed = update_data.get("passed")
 
         elif info_type == BranchInfoType.BUILD_STATUS:
             branch_info.build_status = update_data.get("status", "unknown")
@@ -239,7 +233,7 @@ class BranchInfoProtocol:
         elif info_type == BranchInfoType.CONFLICT_INFO:
             branch_info.conflicts_detected = update_data.get("conflicts", [])
             self.protocol_stats["conflicts_detected"] += len(
-                branch_info.conflicts_detected
+                branch_info.conflicts_detected,
             )
 
         elif info_type == BranchInfoType.API_CHANGES:
@@ -261,11 +255,7 @@ class BranchInfoProtocol:
             branch_info.metadata["completed_items"] = completed_items
 
         # Determine if sync is needed
-        should_sync = (
-            requires_immediate_sync
-            or info_type in self.immediate_sync_types
-            or self.sync_strategy == SyncStrategy.IMMEDIATE
-        )
+        should_sync = requires_immediate_sync or info_type in self.immediate_sync_types or self.sync_strategy == SyncStrategy.IMMEDIATE
 
         if should_sync:
             await self._share_branch_info(branch_info, info_type, update_data)
@@ -302,7 +292,9 @@ class BranchInfoProtocol:
             logger.info(f"Agent {agent_id} unsubscribed from branch {branch_name}")
 
     async def request_branch_sync(
-        self, requester_id: str, branch_names: Optional[List[str]] = None
+        self,
+        requester_id: str,
+        branch_names: Optional[List[str]] = None,
     ):
         """
         Request synchronization of branch information
@@ -349,15 +341,14 @@ class BranchInfoProtocol:
 
         # Check API changes
         for api_name in info1.api_signatures:
-            if api_name in info2.api_signatures:
-                if info1.api_signatures[api_name] != info2.api_signatures[api_name]:
-                    conflicts.append(f"Conflicting API change: {api_name}")
+            if api_name in info2.api_signatures and info1.api_signatures[api_name] != info2.api_signatures[api_name]:
+                conflicts.append(f"Conflicting API change: {api_name}")
 
         # Check dependency conflicts
         for dep_file in info1.dependencies:
             if dep_file in info2.files_modified:
                 conflicts.append(
-                    f"Branch {branch2} modifies dependency of {branch1}: {dep_file}"
+                    f"Branch {branch2} modifies dependency of {branch1}: {dep_file}",
                 )
 
         return conflicts
@@ -396,11 +387,11 @@ class BranchInfoProtocol:
             recommendations.append("Ensure build passes")
         if not merge_criteria["no_conflicts"]:
             recommendations.append(
-                f"Resolve {len(branch_info.conflicts_detected)} conflicts"
+                f"Resolve {len(branch_info.conflicts_detected)} conflicts",
             )
         if not merge_criteria["work_completed"]:
             recommendations.append(
-                f"Complete {len(branch_info.work_items)} remaining work items"
+                f"Complete {len(branch_info.work_items)} remaining work items",
             )
 
         # Check for potential conflicts with other branches
@@ -408,7 +399,8 @@ class BranchInfoProtocol:
         for other_branch in self.branch_info:
             if other_branch != branch_name:
                 conflicts = await self.detect_branch_conflicts(
-                    branch_name, other_branch
+                    branch_name,
+                    other_branch,
                 )
                 if conflicts:
                     potential_conflicts[other_branch] = conflicts
@@ -478,7 +470,10 @@ class BranchInfoProtocol:
         for subscriber_id in self.branch_subscriptions[branch_info.branch_name]:
             if subscriber_id != branch_info.agent_id:  # Don't send to self
                 await self._send_branch_update_to_agent(
-                    subscriber_id, branch_info, info_type, event_data
+                    subscriber_id,
+                    branch_info,
+                    info_type,
+                    event_data,
                 )
 
         logger.info(f"Shared {info_type.value} for branch {branch_info.branch_name}")
@@ -612,9 +607,7 @@ class BranchInfoProtocol:
         return {
             "statistics": self.protocol_stats.copy(),
             "active_branches": len(self.branch_info),
-            "total_subscriptions": sum(
-                len(subs) for subs in self.branch_subscriptions.values()
-            ),
+            "total_subscriptions": sum(len(subs) for subs in self.branch_subscriptions.values()),
             "sync_strategy": self.sync_strategy.value,
             "branches": active_branches,
             "recent_syncs": recent_syncs,

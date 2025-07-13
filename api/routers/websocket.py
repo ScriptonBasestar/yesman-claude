@@ -1,13 +1,14 @@
 """WebSocket router for real-time updates"""
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from typing import Dict, Set, List
 import asyncio
-import json
 import logging
-from datetime import datetime
 from collections import defaultdict
-from api.utils import WebSocketBatchProcessor, BatchConfig
+from datetime import datetime
+from typing import Dict, List, Set
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+from api.utils import BatchConfig, WebSocketBatchProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -16,34 +17,34 @@ router = APIRouter(prefix="/ws", tags=["websocket"])
 
 class ConnectionManager:
     """Manages WebSocket connections and broadcasting"""
-    
+
     def __init__(self):
         # All active connections
         self.active_connections: List[WebSocket] = []
-        
+
         # Channel-based connections
         self.channel_connections: Dict[str, Set[WebSocket]] = defaultdict(set)
-        
+
         # Connection metadata
         self.connection_metadata: Dict[WebSocket, Dict] = {}
-        
+
         # Ping interval in seconds
         self.ping_interval = 30
-        
+
         # Batch processor configuration
         batch_config = BatchConfig(
-            max_batch_size=10,      # Batch up to 10 messages
-            max_batch_time=0.1,     # Wait max 100ms
-            compression_threshold=5  # Start optimizing after 5 messages
+            max_batch_size=10,  # Batch up to 10 messages
+            max_batch_time=0.1,  # Wait max 100ms
+            compression_threshold=5,  # Start optimizing after 5 messages
         )
         self.batch_processor = WebSocketBatchProcessor(batch_config)
-        
+
         # Register message handlers for each channel
         self._register_batch_handlers()
-        
+
         # Start background tasks
         self.start_background_tasks()
-    
+
     def _register_batch_handlers(self):
         """Register message handlers for batch processing"""
         self.batch_processor.register_message_handler("dashboard", self._send_to_dashboard)
@@ -51,32 +52,32 @@ class ConnectionManager:
         self.batch_processor.register_message_handler("health", self._send_to_health)
         self.batch_processor.register_message_handler("activity", self._send_to_activity)
         self.batch_processor.register_message_handler("logs", self._send_to_logs)
-    
+
     async def _send_to_dashboard(self, messages: List[Dict]):
         """Send batched messages to dashboard channel"""
         await self._broadcast_messages_to_channel("dashboard", messages)
-    
+
     async def _send_to_sessions(self, messages: List[Dict]):
         """Send batched messages to sessions channel"""
         await self._broadcast_messages_to_channel("sessions", messages)
-    
+
     async def _send_to_health(self, messages: List[Dict]):
         """Send batched messages to health channel"""
         await self._broadcast_messages_to_channel("health", messages)
-    
+
     async def _send_to_activity(self, messages: List[Dict]):
         """Send batched messages to activity channel"""
         await self._broadcast_messages_to_channel("activity", messages)
-    
+
     async def _send_to_logs(self, messages: List[Dict]):
         """Send batched messages to logs channel"""
         await self._broadcast_messages_to_channel("logs", messages)
-    
+
     async def _broadcast_messages_to_channel(self, channel: str, messages: List[Dict]):
         """Broadcast multiple messages to a specific channel"""
         connections = self.channel_connections.get(channel, set())
         disconnected = []
-        
+
         for connection in connections:
             try:
                 # Send batch as a single WebSocket message or multiple messages
@@ -89,92 +90,97 @@ class ConnectionManager:
                         "timestamp": datetime.now().isoformat(),
                         "channel": channel,
                         "messages": messages,
-                        "count": len(messages)
+                        "count": len(messages),
                     }
                     await connection.send_json(batch_message)
             except Exception as e:
                 logger.error(f"Error broadcasting batch to {channel}: {e}")
                 disconnected.append(connection)
-        
+
         # Clean up disconnected clients
         for conn in disconnected:
             self.disconnect(conn)
-    
+
     def start_background_tasks(self):
         """Start background tasks for connection management"""
         asyncio.create_task(self.ping_connections())
         asyncio.create_task(self.batch_processor.start())
-    
+
     async def connect(self, websocket: WebSocket, channel: str = "dashboard"):
         """Accept a new WebSocket connection"""
         await websocket.accept()
         self.active_connections.append(websocket)
         self.channel_connections[channel].add(websocket)
-        
+
         # Store metadata
         self.connection_metadata[websocket] = {
             "channel": channel,
             "connected_at": datetime.now(),
-            "last_ping": datetime.now()
+            "last_ping": datetime.now(),
         }
-        
+
         logger.info(f"WebSocket connected to channel: {channel}")
-        
+
         # Send initial data
         await self.send_initial_data(websocket, channel)
-    
+
     def disconnect(self, websocket: WebSocket):
         """Remove a WebSocket connection"""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-        
+
         # Remove from all channels
-        for channel, connections in self.channel_connections.items():
+        for _channel, connections in self.channel_connections.items():
             if websocket in connections:
                 connections.remove(websocket)
-        
+
         # Clean up metadata
         if websocket in self.connection_metadata:
             del self.connection_metadata[websocket]
-        
+
         logger.info("WebSocket disconnected")
-    
+
     async def send_initial_data(self, websocket: WebSocket, channel: str):
         """Send initial data when a client connects"""
         try:
             # Import here to avoid circular imports
-            from api.routers.dashboard import get_sessions, get_project_health, get_activity_data, get_dashboard_stats
-            
+            from api.routers.dashboard import (
+                get_activity_data,
+                get_dashboard_stats,
+                get_project_health,
+                get_sessions,
+            )
+
             initial_data = {}
-            
+
             if channel in ["dashboard", "sessions"]:
                 sessions = await get_sessions()
                 initial_data["sessions"] = sessions
-            
+
             if channel in ["dashboard", "health"]:
                 health = await get_project_health()
                 initial_data["health"] = health
-            
+
             if channel in ["dashboard", "activity"]:
                 activity = await get_activity_data()
                 initial_data["activity"] = activity
-            
+
             if channel == "dashboard":
                 stats = await get_dashboard_stats()
                 initial_data["stats"] = stats
-            
+
             message = {
                 "type": "initial_data",
                 "timestamp": datetime.now().isoformat(),
                 "channel": channel,
-                "data": initial_data
+                "data": initial_data,
             }
-            
+
             await websocket.send_json(message)
-            
+
         except Exception as e:
             logger.error(f"Error sending initial data: {str(e)}")
-    
+
     async def send_personal_message(self, message: dict, websocket: WebSocket):
         """Send message to specific connection"""
         try:
@@ -182,132 +188,134 @@ class ConnectionManager:
         except Exception as e:
             logger.error(f"Error sending personal message: {str(e)}")
             self.disconnect(websocket)
-    
+
     async def broadcast(self, message: dict):
         """Broadcast message to all connected clients"""
         disconnected = []
-        
+
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
             except Exception as e:
                 logger.error(f"Error broadcasting message: {str(e)}")
                 disconnected.append(connection)
-        
+
         # Clean up disconnected clients
         for conn in disconnected:
             self.disconnect(conn)
-    
+
     async def broadcast_to_channel(self, channel: str, message: dict):
         """Broadcast message to specific channel (using batch processor)"""
         # Queue message for batch processing
         self.batch_processor.queue_message(channel, message)
-    
+
     async def broadcast_to_channel_immediate(self, channel: str, message: dict):
         """Broadcast message immediately without batching (for urgent messages)"""
         await self.batch_processor.send_immediate(channel, message)
-    
+
     async def broadcast_session_update(self, session_data: dict):
         """Broadcast session update to relevant channels"""
         message = {
             "type": "session_update",
             "timestamp": datetime.now().isoformat(),
-            "data": session_data
+            "data": session_data,
         }
-        
+
         await self.broadcast_to_channel("sessions", message)
         await self.broadcast_to_channel("dashboard", message)
-    
+
     async def broadcast_health_update(self, health_data: dict):
         """Broadcast health update to relevant channels"""
         message = {
             "type": "health_update",
             "timestamp": datetime.now().isoformat(),
-            "data": health_data
+            "data": health_data,
         }
-        
+
         await self.broadcast_to_channel("health", message)
         await self.broadcast_to_channel("dashboard", message)
-    
+
     async def broadcast_activity_update(self, activity_data: dict):
         """Broadcast activity update to relevant channels"""
         message = {
             "type": "activity_update",
             "timestamp": datetime.now().isoformat(),
-            "data": activity_data
+            "data": activity_data,
         }
-        
+
         await self.broadcast_to_channel("activity", message)
         await self.broadcast_to_channel("dashboard", message)
-    
+
     async def broadcast_log_update(self, log_entry: dict):
         """Broadcast log update to relevant channels"""
         message = {
             "type": "log_update",
             "timestamp": datetime.now().isoformat(),
-            "data": log_entry
+            "data": log_entry,
         }
-        
+
         await self.broadcast_to_channel("logs", message)
         await self.broadcast_to_channel("dashboard", message)
-    
+
     async def ping_connections(self):
         """Send periodic ping messages to keep connections alive"""
         while True:
             await asyncio.sleep(self.ping_interval)
-            
+
             disconnected = []
             for connection in self.active_connections:
                 try:
-                    await connection.send_json({
-                        "type": "ping",
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    
+                    await connection.send_json(
+                        {
+                            "type": "ping",
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
+
                     # Update last ping time
                     if connection in self.connection_metadata:
                         self.connection_metadata[connection]["last_ping"] = datetime.now()
-                        
+
                 except Exception as e:
                     logger.error(f"Error pinging connection: {str(e)}")
                     disconnected.append(connection)
-            
+
             # Clean up disconnected clients
             for conn in disconnected:
                 self.disconnect(conn)
-    
+
     def get_connection_stats(self):
         """Get statistics about active connections"""
         stats = {
             "total_connections": len(self.active_connections),
-            "channels": {}
+            "channels": {},
         }
-        
+
         for channel, connections in self.channel_connections.items():
             stats["channels"][channel] = len(connections)
-        
+
         return stats
-    
+
     async def shutdown(self):
         """Shutdown the connection manager and batch processor"""
         logger.info("Shutting down WebSocket connection manager...")
-        
+
         # Stop batch processor
         await self.batch_processor.stop()
-        
+
         # Disconnect all active connections
         for connection in self.active_connections.copy():
             try:
                 await connection.close()
             except Exception as e:
                 logger.error(f"Error closing connection: {e}")
-        
+
         self.active_connections.clear()
         self.channel_connections.clear()
         self.connection_metadata.clear()
-        
+
         logger.info("WebSocket connection manager shutdown complete")
-    
+
     def get_batch_statistics(self):
         """Get batch processing statistics"""
         return self.batch_processor.get_statistics()
@@ -321,24 +329,24 @@ manager = ConnectionManager()
 async def websocket_dashboard(websocket: WebSocket):
     """Main dashboard WebSocket endpoint"""
     await manager.connect(websocket, "dashboard")
-    
+
     try:
         while True:
             # Receive and process messages
             data = await websocket.receive_json()
-            
+
             # Handle different message types
             if data.get("type") == "pong":
                 # Client responded to ping
                 logger.debug("Received pong from dashboard client")
-            
+
             elif data.get("type") == "subscribe":
                 # Client wants to subscribe to specific updates
                 channels = data.get("channels", [])
                 for channel in channels:
                     manager.channel_connections[channel].add(websocket)
                     logger.info(f"Dashboard client subscribed to channel: {channel}")
-            
+
             elif data.get("type") == "unsubscribe":
                 # Client wants to unsubscribe from specific updates
                 channels = data.get("channels", [])
@@ -346,15 +354,18 @@ async def websocket_dashboard(websocket: WebSocket):
                     if websocket in manager.channel_connections[channel]:
                         manager.channel_connections[channel].remove(websocket)
                         logger.info(f"Dashboard client unsubscribed from channel: {channel}")
-            
+
             else:
                 # Echo back unknown messages for debugging
-                await manager.send_personal_message({
-                    "type": "echo",
-                    "original": data,
-                    "timestamp": datetime.now().isoformat()
-                }, websocket)
-                
+                await manager.send_personal_message(
+                    {
+                        "type": "echo",
+                        "original": data,
+                        "timestamp": datetime.now().isoformat(),
+                    },
+                    websocket,
+                )
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info("Dashboard WebSocket disconnected")
@@ -367,18 +378,18 @@ async def websocket_dashboard(websocket: WebSocket):
 async def websocket_sessions(websocket: WebSocket):
     """Sessions-specific WebSocket endpoint"""
     await manager.connect(websocket, "sessions")
-    
+
     try:
         while True:
             data = await websocket.receive_json()
-            
+
             if data.get("type") == "pong":
                 logger.debug("Received pong from sessions client")
-            
+
             elif data.get("type") == "refresh":
                 # Client requests fresh session data
                 await manager.send_initial_data(websocket, "sessions")
-                
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info("Sessions WebSocket disconnected")
@@ -391,18 +402,18 @@ async def websocket_sessions(websocket: WebSocket):
 async def websocket_health(websocket: WebSocket):
     """Health metrics WebSocket endpoint"""
     await manager.connect(websocket, "health")
-    
+
     try:
         while True:
             data = await websocket.receive_json()
-            
+
             if data.get("type") == "pong":
                 logger.debug("Received pong from health client")
-            
+
             elif data.get("type") == "refresh":
                 # Client requests fresh health data
                 await manager.send_initial_data(websocket, "health")
-                
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info("Health WebSocket disconnected")
@@ -415,18 +426,18 @@ async def websocket_health(websocket: WebSocket):
 async def websocket_activity(websocket: WebSocket):
     """Activity data WebSocket endpoint"""
     await manager.connect(websocket, "activity")
-    
+
     try:
         while True:
             data = await websocket.receive_json()
-            
+
             if data.get("type") == "pong":
                 logger.debug("Received pong from activity client")
-            
+
             elif data.get("type") == "refresh":
                 # Client requests fresh activity data
                 await manager.send_initial_data(websocket, "activity")
-                
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info("Activity WebSocket disconnected")
@@ -439,28 +450,29 @@ async def websocket_activity(websocket: WebSocket):
 async def websocket_logs(websocket: WebSocket):
     """Logs WebSocket endpoint"""
     await manager.connect(websocket, "logs")
-    
+
     try:
         while True:
             data = await websocket.receive_json()
-            
+
             if data.get("type") == "pong":
                 logger.debug("Received pong from logs client")
-            
+
             elif data.get("type") == "refresh":
                 # Client requests fresh log data
                 try:
                     from api.routers.logs import get_logs
+
                     logs = get_logs(limit=100)
                     initial_data = {
                         "type": "initial_logs",
                         "timestamp": datetime.now().isoformat(),
-                        "data": [log.dict() for log in logs]
+                        "data": [log.dict() for log in logs],
                     }
                     await manager.send_personal_message(initial_data, websocket)
                 except Exception as e:
                     logger.error(f"Error sending initial logs: {str(e)}")
-            
+
             elif data.get("type") == "test_log":
                 # For testing - client can trigger test logs
                 test_log = {
@@ -468,10 +480,10 @@ async def websocket_logs(websocket: WebSocket):
                     "timestamp": datetime.now().isoformat(),
                     "source": data.get("source", "test"),
                     "message": data.get("message", "Test log message"),
-                    "raw": f"[{datetime.now().isoformat()}] [TEST] Test log message"
+                    "raw": f"[{datetime.now().isoformat()}] [TEST] Test log message",
                 }
                 await manager.broadcast_log_update(test_log)
-                
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info("Logs WebSocket disconnected")

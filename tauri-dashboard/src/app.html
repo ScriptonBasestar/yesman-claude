@@ -5,24 +5,24 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		<title>Yesman Claude Dashboard</title>
-		
+
 		<!-- Preload critical resources -->
 		<link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
-		
+
 		<!-- Theme detection script (prevents flash) -->
 		<script>
 			// Detect system theme preference immediately
-			if (localStorage.getItem('theme') === 'dark' || 
+			if (localStorage.getItem('theme') === 'dark' ||
 				(!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
 				document.documentElement.setAttribute('data-theme', 'dark');
 			}
 		</script>
-		
+
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover" class="min-h-screen bg-base-100">
 		<div style="display: contents">%sveltekit.body%</div>
-		
+
 		<!-- Loading overlay for initial app startup -->
 		<div id="app-loading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-100">
 			<div class="text-center">
@@ -31,7 +31,7 @@
 				<p class="text-base-content/70">Initializing application...</p>
 			</div>
 		</div>
-		
+
 		<script>
 			// Remove loading overlay when app is ready
 			window.addEventListener('DOMContentLoaded', () => {

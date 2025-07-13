@@ -1,22 +1,20 @@
 """Tests for BranchInfoProtocol branch information sharing system"""
 
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-import asyncio
-from typing import Dict, List, Optional, Any
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta
 
 from libs.multi_agent.branch_info_protocol import (
-    BranchInfoProtocol,
     BranchInfo,
+    BranchInfoProtocol,
     BranchInfoType,
-    SyncStrategy,
     BranchSyncEvent,
+    SyncStrategy,
 )
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import (
     CollaborationEngine,
-    MessageType,
     MessagePriority,
 )
 
@@ -202,9 +200,7 @@ class TestBranchInfoProtocol:
         assert branch_info.build_status == "success"
 
         # Check that immediate sync was triggered
-        assert (
-            protocol.collaboration_engine.share_knowledge.call_count >= 2
-        )  # Initial + update
+        assert protocol.collaboration_engine.share_knowledge.call_count >= 2  # Initial + update
 
     @pytest.mark.asyncio
     async def test_update_branch_info_conflicts(self, protocol):
@@ -399,8 +395,8 @@ class TestBranchInfoProtocol:
             BranchInfoType.API_CHANGES,
             {
                 "signatures": {
-                    "process": {"args": ["data", "options"], "return": "Result"}
-                }
+                    "process": {"args": ["data", "options"], "return": "Result"},
+                },
             },
         )
 
@@ -479,22 +475,10 @@ class TestBranchInfoProtocol:
 
     def test_determine_priority(self, protocol):
         """Test priority determination for different info types"""
-        assert (
-            protocol._determine_priority(BranchInfoType.CONFLICT_INFO)
-            == MessagePriority.HIGH
-        )
-        assert (
-            protocol._determine_priority(BranchInfoType.API_CHANGES)
-            == MessagePriority.HIGH
-        )
-        assert (
-            protocol._determine_priority(BranchInfoType.BUILD_STATUS)
-            == MessagePriority.NORMAL
-        )
-        assert (
-            protocol._determine_priority(BranchInfoType.FILE_CHANGES)
-            == MessagePriority.LOW
-        )
+        assert protocol._determine_priority(BranchInfoType.CONFLICT_INFO) == MessagePriority.HIGH
+        assert protocol._determine_priority(BranchInfoType.API_CHANGES) == MessagePriority.HIGH
+        assert protocol._determine_priority(BranchInfoType.BUILD_STATUS) == MessagePriority.NORMAL
+        assert protocol._determine_priority(BranchInfoType.FILE_CHANGES) == MessagePriority.LOW
 
     def test_calculate_relevance(self, protocol):
         """Test relevance score calculation"""
@@ -538,7 +522,7 @@ class TestBranchInfoProtocol:
 
         # Should have triggered sync for each immediate type
         assert protocol.collaboration_engine.share_knowledge.call_count == len(
-            immediate_types
+            immediate_types,
         )
 
     @pytest.mark.asyncio

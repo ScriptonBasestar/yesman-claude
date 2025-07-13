@@ -5,13 +5,13 @@
   import SessionFilters from '$lib/components/session/SessionFilters.svelte';
   import QuickActions from '$lib/components/session/QuickActions.svelte';
   import DashboardStats from '$lib/components/dashboard/DashboardStats.svelte';
-  import { 
-    filteredSessions, 
-    isLoading, 
+  import {
+    filteredSessions,
+    isLoading,
     isBackgroundLoading,
-    error, 
+    error,
     refreshSessions,
-    updateControllerStatus 
+    updateControllerStatus
   } from '$lib/stores/sessions';
   import { notifySuccess, notifyError } from '$lib/stores/notifications';
 
@@ -21,18 +21,18 @@
     updateControllerStatus(session);
     notifySuccess('Status Updated', `Controller status updated for ${session}`);
   }
-  
+
   // 세션 상세보기 핸들러
   function handleViewDetails(event: CustomEvent) {
     const { session } = event.detail;
     // 상세 페이지로 이동 (추후 구현)
     console.log('View details for:', session);
   }
-  
+
   // 빠른 액션 핸들러
   async function handleQuickAction(event: CustomEvent) {
     const { action } = event.detail;
-    
+
     switch (action) {
       case 'refresh':
         refreshSessions();
@@ -92,9 +92,9 @@
         <h1 class="text-3xl font-bold text-base-content">🚀 Yesman Claude Dashboard</h1>
         <p class="text-base-content/70 mt-1">Monitor and control your tmux sessions and Claude controllers</p>
       </div>
-      
+
       <div class="flex gap-2">
-        <button 
+        <button
           class="btn btn-primary btn-sm"
           class:loading={$isLoading || $isBackgroundLoading}
           on:click={() => refreshSessions(false)}
@@ -108,11 +108,11 @@
         </button>
       </div>
     </div>
-    
+
     <!-- 대시보드 통계 -->
     <DashboardStats />
   </div>
-  
+
   <!-- 에러 표시 -->
   {#if $error}
     <div class="alert alert-error">
@@ -122,18 +122,18 @@
       </div>
     </div>
   {/if}
-  
+
   <!-- 메트릭 대시보드 -->
   <div class="metrics-section">
     <h2 class="text-xl font-semibold mb-4">📊 Performance Metrics</h2>
     <MetricsDashboard />
   </div>
-  
+
   <!-- 빠른 액션 -->
   <div class="quick-actions-section">
     <QuickActions on:action={handleQuickAction} />
   </div>
-  
+
   <!-- 세션 관리 -->
   <div class="sessions-section">
     <div class="flex justify-between items-center mb-4">
@@ -146,12 +146,12 @@
         {/if}
       </div>
     </div>
-    
+
     <!-- 필터 -->
     <div class="mb-6">
       <SessionFilters />
     </div>
-    
+
     <!-- 세션 목록 -->
     <div class="sessions-grid space-y-4">
       {#if $isLoading}
@@ -170,7 +170,7 @@
               Run <code class="bg-base-200 px-2 py-1 rounded">./yesman.py setup</code> to create sessions.
             {/if}
           </p>
-          <button 
+          <button
             class="btn btn-primary"
             on:click={() => refreshSessions()}
           >
@@ -179,8 +179,8 @@
         </div>
       {:else}
         {#each $filteredSessions as session (session.session_name)}
-          <SessionCard 
-            {session} 
+          <SessionCard
+            {session}
             on:statusChanged={handleSessionStatusChanged}
             on:viewDetails={handleViewDetails}
           />
@@ -194,19 +194,19 @@
   .dashboard-page {
     @apply max-w-7xl mx-auto;
   }
-  
+
   .sessions-grid {
     @apply max-w-none;
   }
-  
+
   .loading-container {
     @apply text-base-content/70;
   }
-  
+
   .no-sessions {
     @apply text-base-content;
   }
-  
+
   .no-sessions code {
     @apply text-sm;
   }

@@ -25,7 +25,8 @@ def get_controller_status(session_name: str):
         return "running" if controller.is_running else "stopped"
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to get controller status: {str(e)}"
+            status_code=500,
+            detail=f"Failed to get controller status: {str(e)}",
         )
 
 
@@ -41,17 +42,12 @@ def start_controller(session_name: str):
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
 
-        session_exists = any(
-            s.session_name == session_name and s.status == "running" for s in sessions
-        )
+        session_exists = any(s.session_name == session_name and s.status == "running" for s in sessions)
 
         if not session_exists:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"Session '{session_name}' is not running. "
-                    "Please start the session first using 'yesman up' or the dashboard."
-                ),
+                detail=(f"Session '{session_name}' is not running. Please start the session first using 'yesman up' or the dashboard."),
             )
 
         # Try to start the controller
@@ -67,15 +63,16 @@ def start_controller(session_name: str):
                         for pane in window.list_panes():
                             try:
                                 cmd = pane.cmd(
-                                    "display-message", "-p", "#{pane_current_command}"
+                                    "display-message",
+                                    "-p",
+                                    "#{pane_current_command}",
                                 ).stdout[0]
                                 pane_info.append(
-                                    f"Window '{window.name}', Pane {pane.index}: {cmd}"
+                                    f"Window '{window.name}', Pane {pane.index}: {cmd}",
                                 )
                             except Exception:
                                 pane_info.append(
-                                    f"Window '{window.name}', "
-                                    f"Pane {pane.index}: <unknown>"
+                                    f"Window '{window.name}', Pane {pane.index}: <unknown>",
                                 )
 
                 detail_msg = (
@@ -99,7 +96,8 @@ def start_controller(session_name: str):
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to start controller: {str(e)}"
+            status_code=500,
+            detail=f"Failed to start controller: {str(e)}",
         )
 
 
@@ -111,12 +109,14 @@ def stop_controller(session_name: str):
         success = controller.stop()
         if not success:
             raise HTTPException(
-                status_code=500, detail="Controller failed to stop gracefully."
+                status_code=500,
+                detail="Controller failed to stop gracefully.",
             )
         return
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to stop controller: {str(e)}"
+            status_code=500,
+            detail=f"Failed to stop controller: {str(e)}",
         )
 
 
@@ -128,10 +128,12 @@ def restart_claude_pane(session_name: str):
         success = controller.restart_claude_pane()
         if not success:
             raise HTTPException(
-                status_code=500, detail="Failed to restart Claude pane."
+                status_code=500,
+                detail="Failed to restart Claude pane.",
             )
         return
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to restart Claude pane: {str(e)}"
+            status_code=500,
+            detail=f"Failed to restart Claude pane: {str(e)}",
         )

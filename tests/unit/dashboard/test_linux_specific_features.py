@@ -1,6 +1,9 @@
-import pytest
 import os
+
+import pytest
+
 from libs.dashboard.theme_system import SystemThemeDetector
+
 
 class TestLinuxSpecificFeatures:
     """Tests for Linux-specific functionality"""

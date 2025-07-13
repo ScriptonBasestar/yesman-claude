@@ -34,7 +34,7 @@ class OperationMode(Enum):
 
 class SessionManager:
     """Manages tmux session information for dashboard"""
-    
+
     def __init__(self, operation_mode: Optional[OperationMode] = None):
         self.config = YesmanConfig()
         # Lazy import to avoid circular dependency
@@ -42,124 +42,124 @@ class SessionManager:
         self.tmux_manager = TmuxManager(self.config)
         self.server = libtmux.Server()
         self.logger = self._setup_logger()
-        
+
         # Detect operation mode if not specified
         self.operation_mode = operation_mode or self._detect_operation_mode()
-        
+
         # Initialize cache based on operation mode
         self.cache = self._init_cache_for_mode()
-        
+
         # Initialize progress analyzer
         self.progress_analyzer = ProgressAnalyzer()
-        
+
         self.logger.info(f"SessionManager initialized in {self.operation_mode.value} mode")
-        
+
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with file-only output"""
         logger = logging.getLogger("yesman.dashboard.session_manager")
         logger.setLevel(logging.INFO)
         logger.propagate = False
-        
+
         log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
         log_path = ensure_log_directory(Path(log_path_str))
-        
+
         log_file = log_path / "session_manager.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-        
+
         return logger
-    
+
     def _detect_operation_mode(self) -> OperationMode:
         """Detect operation mode based on environment"""
         # Check if running in web environment (Tauri or web dashboard)
         if 'tauri' in os.environ.get('_', '').lower() or os.environ.get('TAURI_ENV'):
             return OperationMode.WEB
-        
+
         # Check if running as daemon (has TMUX or SSH_TTY)
         if os.environ.get('TMUX') or os.environ.get('SSH_TTY'):
             return OperationMode.DAEMON
-        
+
         # Default to CLI mode
         return OperationMode.CLI
-    
+
     def _init_cache_for_mode(self) -> Optional[SessionCache]:
         """Initialize cache based on operation mode"""
         if self.operation_mode == OperationMode.CLI:
             # CLI mode: No caching for immediate, fresh data
             self.logger.info("CLI mode: Caching disabled")
             return None
-            
+
         elif self.operation_mode == OperationMode.DAEMON:
             # Daemon mode: Aggressive caching for long-running processes
             cache = SessionCache(default_ttl=30.0, max_entries=500)
             self.logger.info("Daemon mode: Aggressive caching (30s TTL, 500 entries)")
             return cache
-            
+
         else:  # WEB mode
             # Web mode: Moderate caching for dashboard responsiveness
             cache = SessionCache(default_ttl=3.0, max_entries=100)
             self.logger.info("Web mode: Moderate caching (3s TTL, 100 entries)")
             return cache
-    
+
     def get_all_sessions(self) -> List[SessionInfo]:
         """Get information about all yesman sessions with mode-aware caching"""
         def compute_sessions():
             sessions_info = []
-            
+
             try:
                 # Load project configurations
                 projects = self.tmux_manager.load_projects().get("sessions", {})
                 self.logger.info(f"Loaded {len(projects)} projects")
-                
+
                 for project_name, project_conf in projects.items():
                     session_info = self._get_session_info(project_name, project_conf)
                     sessions_info.append(session_info)
-                
+
                 return sessions_info
-                
+
             except Exception as e:
                 self.logger.error(f"Error getting sessions: {e}", exc_info=True)
                 return []
-        
+
         # CLI mode: Always compute fresh data (no caching)
         if self.operation_mode == OperationMode.CLI or self.cache is None:
             self.logger.debug("CLI mode: Computing fresh session data")
             return compute_sessions()
-        
+
         # Other modes: Use cache with compute function
         cache_key = "all_sessions"
         return self.cache.get_or_compute(cache_key, compute_sessions)
-    
+
     def _get_session_info(self, project_name: str, project_conf: Dict[str, Any]) -> SessionInfo:
         """Get information for a single session with mode-aware caching"""
         def compute_session_info():
             override = project_conf.get("override", {})
             session_name = override.get("session_name", project_name)
-            
+
             # Check if session exists
             session = self.server.find_where({"session_name": session_name})
-            
+
             windows = []
             controller_status = 'unknown'
-            
+
             if session:
                 # Get window information
                 for window in session.list_windows():
                     window_info = self._get_window_info(window)
                     windows.append(window_info)
-                    
+
                     # Update controller status based on panes
                     for pane in window_info.panes:
                         if pane.is_controller:
                             controller_status = 'running'
-                
+
                 # If no controller found, mark as not running
                 if controller_status == 'unknown':
                     controller_status = 'not running'
-            
+
             # Get template name with proper fallback
             template_name = project_conf.get("template_name")
             if template_name is None:
@@ -171,7 +171,7 @@ class SessionManager:
                     template_display = template_name
                 else:
                     template_display = "N/A"  # Template defined but file missing
-            
+
             # Analyze progress if session is running
             progress = None
             if session:
@@ -188,11 +188,11 @@ class SessionManager:
                                     claude_output.extend(pane_content)
                             except:
                                 pass
-                
+
                 # Analyze progress
                 if claude_output:
                     progress = self.progress_analyzer.analyze_pane_output(session_name, claude_output)
-            
+
             return SessionInfo(
                 project_name=project_name,
                 session_name=session_name,
@@ -203,19 +203,19 @@ class SessionManager:
                 controller_status=controller_status,
                 progress=progress
             )
-        
+
         # CLI mode: Always compute fresh data (no caching)
         if self.operation_mode == OperationMode.CLI or self.cache is None:
             return compute_session_info()
-        
+
         # Other modes: Use cache with compute function
         cache_key = f"session_{project_name}"
         return self.cache.get_or_compute(cache_key, compute_session_info)
-    
+
     def _get_window_info(self, window) -> WindowInfo:
         """Get information for a single window with detailed pane metrics"""
         panes = []
-        
+
         for pane in window.list_panes():
             try:
                 pane_info = self._get_detailed_pane_info(pane)
@@ -234,31 +234,31 @@ class SessionManager:
                     panes.append(basic_pane)
                 except:
                     pass
-        
+
         return WindowInfo(
             name=window.get('window_name'),
             index=window.get('window_index'),
             panes=panes
         )
-    
+
     def _get_detailed_pane_info(self, pane) -> PaneInfo:
         """Get detailed information for a single pane including metrics"""
         try:
             # Get basic pane information
             cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
             pane_id = pane.get('pane_id')
-            
+
             # Get pane PID and process info
             pid_info = pane.cmd("display-message", "-p", "#{pane_pid}").stdout[0]
             pid = int(pid_info) if pid_info.isdigit() else None
-            
+
             # Initialize detailed metrics
             cpu_usage = 0.0
             memory_usage = 0.0
             running_time = 0.0
             status = "unknown"
             current_task = None
-            
+
             # Get process metrics if PID is available and psutil is installed
             if pid and PSUTIL_AVAILABLE:
                 try:
@@ -266,45 +266,45 @@ class SessionManager:
                     cpu_usage = process.cpu_percent()
                     memory_info = process.memory_info()
                     memory_usage = memory_info.rss / 1024 / 1024  # Convert to MB
-                    
+
                     # Calculate running time
                     create_time = process.create_time()
                     running_time = datetime.now().timestamp() - create_time
-                    
+
                     # Determine process status
                     status = process.status()
-                    
+
                     # Try to determine current task from command line
                     try:
                         cmdline = process.cmdline()
                         current_task = self._analyze_current_task(cmdline, cmd)
                     except:
                         current_task = cmd
-                        
+
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     # Process might have ended or we don't have permission
                     pass
             elif pid and not PSUTIL_AVAILABLE:
                 # Fallback: basic task analysis without psutil
                 current_task = self._analyze_current_task([cmd], cmd)
-            
+
             # Get pane activity information
             try:
                 # Get last pane activity time (approximation)
                 pane_activity = pane.cmd("display-message", "-p", "#{pane_activity}").stdout[0]
                 activity_timestamp = int(pane_activity) if pane_activity.isdigit() else 0
-                
+
                 # Calculate idle time and activity score
                 current_time = datetime.now().timestamp()
                 idle_time = current_time - activity_timestamp if activity_timestamp > 0 else 0
-                
+
                 # Activity score: higher for recent activity, lower for idle panes
                 activity_score = max(0, 100 - (idle_time / 60))  # Decreases over minutes
-                
+
             except:
                 idle_time = 0.0
                 activity_score = 50.0  # Default moderate activity
-            
+
             # Get recent pane output for analysis
             last_output = None
             output_lines = 0
@@ -318,7 +318,7 @@ class SessionManager:
                         last_output = lines[-1][:100]  # Last line, truncated
             except:
                 pass
-            
+
             # Create enhanced PaneInfo
             pane_info = PaneInfo(
                 id=pane_id,
@@ -337,9 +337,9 @@ class SessionManager:
                 last_output=last_output,
                 output_lines=output_lines
             )
-            
+
             return pane_info
-            
+
         except Exception as e:
             self.logger.error(f"Error getting detailed pane info: {e}")
             # Return basic pane info as fallback
@@ -349,15 +349,15 @@ class SessionManager:
                 is_claude=False,
                 is_controller=False
             )
-    
+
     def _analyze_current_task(self, cmdline: List[str], command: str) -> str:
         """Analyze command line to determine current task"""
         if not cmdline:
             return command
-        
+
         # Join command line for analysis
         full_cmd = ' '.join(cmdline)
-        
+
         # Claude-specific task detection
         if 'claude' in full_cmd.lower():
             if '--read' in full_cmd:
@@ -368,7 +368,7 @@ class SessionManager:
                 return "Running dashboard"
             else:
                 return "Claude interactive"
-        
+
         # Controller-specific task detection
         elif 'yesman' in full_cmd.lower() or 'controller' in full_cmd.lower():
             if 'dashboard' in full_cmd:
@@ -379,7 +379,7 @@ class SessionManager:
                 return "Tearing down sessions"
             else:
                 return "Yesman controller"
-        
+
         # Common development tasks
         elif any(term in full_cmd.lower() for term in ['vim', 'nano', 'code', 'nvim']):
             return "Editing files"
@@ -397,16 +397,16 @@ class SessionManager:
             # Extract the main command (first meaningful part)
             main_cmd = cmdline[0].split('/')[-1] if cmdline else command
             return f"Running {main_cmd}"
-    
+
     def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
         """
         Attach to a specific tmux pane
-        
+
         Args:
             session_name: Name of the tmux session
             window_index: Index of the window containing the pane
             pane_id: ID of the pane to attach to
-            
+
         Returns:
             Dictionary with result status and information
         """
@@ -419,7 +419,7 @@ class SessionManager:
                     "error": f"Session '{session_name}' not found",
                     "action": "none"
                 }
-            
+
             # Find the window
             window = session.find_where({"window_index": window_index})
             if not window:
@@ -428,7 +428,7 @@ class SessionManager:
                     "error": f"Window {window_index} not found in session '{session_name}'",
                     "action": "none"
                 }
-            
+
             # Find the pane
             pane = window.find_where({"pane_id": pane_id})
             if not pane:
@@ -437,10 +437,10 @@ class SessionManager:
                     "error": f"Pane {pane_id} not found in window {window_index}",
                     "action": "none"
                 }
-            
+
             # Generate attachment command
             attach_cmd = f"tmux attach-session -t {session_name} \\; select-window -t {window_index} \\; select-pane -t {pane_id}"
-            
+
             return {
                 "success": True,
                 "session_name": session_name,
@@ -450,7 +450,7 @@ class SessionManager:
                 "action": "attach",
                 "message": f"Ready to attach to pane {pane_id} in {session_name}:{window_index}"
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error attaching to pane: {e}")
             return {
@@ -458,11 +458,11 @@ class SessionManager:
                 "error": f"Attachment failed: {str(e)}",
                 "action": "error"
             }
-    
+
     def get_progress_overview(self) -> Dict[str, Any]:
         """Get progress overview for all sessions"""
         sessions = self.get_all_sessions()
-        
+
         # Collect progress data
         total_sessions = len(sessions)
         sessions_with_progress = 0
@@ -471,26 +471,26 @@ class SessionManager:
         completed_tasks = 0
         total_files_changed = 0
         total_commands = 0
-        
+
         session_progress_list = []
-        
+
         for session in sessions:
             if session.progress:
                 sessions_with_progress += 1
                 progress = session.progress
-                
+
                 # Count tasks
                 for task in progress.tasks:
                     if task.phase == TaskPhase.COMPLETED:
                         completed_tasks += 1
                     elif task.phase != TaskPhase.IDLE:
                         active_tasks += 1
-                
+
                 # Aggregate metrics
                 overall_progress += progress.calculate_overall_progress()
                 total_files_changed += progress.total_files_changed
                 total_commands += progress.total_commands
-                
+
                 # Add to session list
                 session_progress_list.append({
                     'session_name': session.session_name,
@@ -501,10 +501,10 @@ class SessionManager:
                     'files_changed': progress.total_files_changed,
                     'commands_executed': progress.total_commands
                 })
-        
+
         # Calculate averages
         avg_progress = overall_progress / sessions_with_progress if sessions_with_progress > 0 else 0.0
-        
+
         return {
             'total_sessions': total_sessions,
             'sessions_with_progress': sessions_with_progress,
@@ -515,21 +515,21 @@ class SessionManager:
             'total_commands_executed': total_commands,
             'sessions': session_progress_list
         }
-    
+
     def create_terminal_script(self, attach_command: str, script_path: str = None) -> str:
         """
         Create a terminal script for pane attachment
-        
+
         Args:
             attach_command: The tmux attach command
             script_path: Optional path for the script file
-            
+
         Returns:
             Path to the created script file
         """
         if script_path is None:
             script_path = f"/tmp/yesman_attach_{os.getpid()}.sh"
-        
+
         script_content = f"""#!/bin/bash
 # Auto-generated tmux attachment script
 # Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -537,43 +537,43 @@ class SessionManager:
 echo "Attaching to tmux pane..."
 {attach_command}
 """
-        
+
         try:
             with open(script_path, 'w') as f:
                 f.write(script_content)
-            
+
             # Make script executable
             os.chmod(script_path, 0o755)
-            
+
             self.logger.info(f"Created attachment script: {script_path}")
             return script_path
-            
+
         except Exception as e:
             self.logger.error(f"Error creating attachment script: {e}")
             raise
-    
+
     def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
         """
         Execute pane attachment with error handling
-        
+
         Args:
             session_name: Name of the tmux session
             window_index: Index of the window containing the pane
             pane_id: ID of the pane to attach to
-            
+
         Returns:
             Dictionary with execution result
         """
         try:
             # First, validate the attachment
             attach_info = self.attach_to_pane(session_name, window_index, pane_id)
-            
+
             if not attach_info["success"]:
                 return attach_info
-            
+
             # Create and execute the attachment script
             script_path = self.create_terminal_script(attach_info["attach_command"])
-            
+
             # Return information for client-side execution
             return {
                 "success": True,
@@ -585,7 +585,7 @@ echo "Attaching to tmux pane..."
                 "action": "execute",
                 "message": f"Attachment script created: {script_path}"
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error executing pane attachment: {e}")
             return {
@@ -593,11 +593,11 @@ echo "Attaching to tmux pane..."
                 "error": f"Execution failed: {str(e)}",
                 "action": "error"
             }
-    
+
     def invalidate_cache(self, project_name: str = None) -> None:
         """
         Invalidate session cache entries (mode-aware)
-        
+
         Args:
             project_name: Specific project to invalidate, or None for all
         """
@@ -605,7 +605,7 @@ echo "Attaching to tmux pane..."
         if self.operation_mode == OperationMode.CLI or self.cache is None:
             self.logger.debug("CLI mode: No cache to invalidate")
             return
-        
+
         if project_name:
             # Invalidate specific session
             session_key = f"session_{project_name}"
@@ -616,18 +616,18 @@ echo "Attaching to tmux pane..."
             # Invalidate all sessions
             cleared = self.cache.clear()
             self.logger.info(f"Cleared all session cache entries: {cleared}")
-    
+
     def invalidate_all_sessions_cache(self) -> None:
         """Invalidate the all_sessions cache specifically (mode-aware)"""
         # CLI mode: No cache to invalidate
         if self.operation_mode == OperationMode.CLI or self.cache is None:
             self.logger.debug("CLI mode: No cache to invalidate")
             return
-        
+
         invalidated = self.cache.invalidate("all_sessions")
         if invalidated:
             self.logger.debug("Invalidated all_sessions cache")
-    
+
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache performance statistics (mode-aware)"""
         # CLI mode: Return empty stats
@@ -642,7 +642,7 @@ echo "Attaching to tmux pane..."
                 'mode': self.operation_mode.value,
                 'cache_enabled': False
             }
-        
+
         stats = self.cache.get_stats()
         return {
             'hits': stats.hits,

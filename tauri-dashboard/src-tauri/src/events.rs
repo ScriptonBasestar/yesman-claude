@@ -37,12 +37,12 @@ impl EventManager {
             window: Arc::new(RwLock::new(None)),
         }
     }
-    
+
     #[allow(dead_code)]
     pub async fn set_window(&self, window: Window) {
         *self.window.write().await = Some(window);
     }
-    
+
     #[allow(dead_code)]
     pub async fn emit_session_update(&self, session_name: &str, status: &str, controller_status: &str) {
         if let Some(window) = self.window.read().await.as_ref() {
@@ -51,11 +51,11 @@ impl EventManager {
                 status: status.to_string(),
                 controller_status: controller_status.to_string(),
             };
-            
+
             let _ = window.emit("session-update", payload);
         }
     }
-    
+
     #[allow(dead_code)]
     pub async fn emit_log_update(&self, session_name: &str, log: &str) {
         if let Some(window) = self.window.read().await.as_ref() {
@@ -64,11 +64,11 @@ impl EventManager {
                 log: log.to_string(),
                 timestamp: Utc::now(),
             };
-            
+
             let _ = window.emit("log-update", payload);
         }
     }
-    
+
     #[allow(dead_code)]
     pub async fn emit_metric_update(&self, session_name: &str, response_time: f64, prompts_per_minute: f64) {
         if let Some(window) = self.window.read().await.as_ref() {
@@ -78,11 +78,11 @@ impl EventManager {
                 prompts_per_minute,
                 timestamp: Utc::now(),
             };
-            
+
             let _ = window.emit("metric-update", payload);
         }
     }
-    
+
     #[allow(dead_code)]
     pub async fn emit_notification(&self, title: &str, message: &str, level: &str) {
         if let Some(window) = self.window.read().await.as_ref() {
@@ -92,7 +92,7 @@ impl EventManager {
                 "level": level,
                 "timestamp": Utc::now()
             });
-            
+
             let _ = window.emit("notification", payload);
         }
     }

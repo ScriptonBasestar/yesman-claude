@@ -1,17 +1,15 @@
 """Isolated work environment management for multi-agent development"""
 
-import os
-import subprocess
-import shutil
 import json
-import venv
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
 import logging
-import tempfile
+import os
+import shutil
+import subprocess
+import venv
 from contextlib import contextmanager
-
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +52,7 @@ class WorkEnvironmentManager:
             work_dir: Directory for worktrees and environments
         """
         self.repo_path = Path(repo_path).resolve()
-        self.work_dir = (
-            Path(work_dir) if work_dir else self.repo_path.parent / ".yesman-work"
-        )
+        self.work_dir = Path(work_dir) if work_dir else self.repo_path.parent / ".yesman-work"
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
         self.environments: Dict[str, WorkEnvironment] = {}
@@ -74,6 +70,7 @@ class WorkEnvironmentManager:
         try:
             result = subprocess.run(
                 cmd,
+                check=False,
                 cwd=cwd or self.repo_path,
                 capture_output=True,
                 text=True,
@@ -100,12 +97,9 @@ class WorkEnvironmentManager:
 
         if metadata_file.exists():
             try:
-                with open(metadata_file, "r") as f:
+                with open(metadata_file) as f:
                     data = json.load(f)
-                    self.environments = {
-                        name: WorkEnvironment.from_dict(info)
-                        for name, info in data.items()
-                    }
+                    self.environments = {name: WorkEnvironment.from_dict(info) for name, info in data.items()}
                 logger.info(f"Loaded {len(self.environments)} work environments")
             except Exception as e:
                 logger.error(f"Failed to load environments: {e}")
@@ -126,7 +120,9 @@ class WorkEnvironmentManager:
             logger.error(f"Failed to save environments: {e}")
 
     def create_work_environment(
-        self, branch_name: str, config: Optional[Dict[str, Any]] = None
+        self,
+        branch_name: str,
+        config: Optional[Dict[str, Any]] = None,
     ) -> WorkEnvironment:
         """
         Create an isolated work environment for a branch
@@ -191,7 +187,7 @@ class WorkEnvironmentManager:
         worktree_path.parent.mkdir(parents=True, exist_ok=True)
 
         result = self._run_command(
-            ["git", "worktree", "add", str(worktree_path), branch_name]
+            ["git", "worktree", "add", str(worktree_path), branch_name],
         )
 
         if result.returncode != 0:
@@ -201,7 +197,10 @@ class WorkEnvironmentManager:
         return worktree_path
 
     def _create_venv(
-        self, branch_name: str, worktree_path: Path, config: Dict[str, Any]
+        self,
+        branch_name: str,
+        worktree_path: Path,
+        config: Dict[str, Any],
     ) -> Path:
         """Create a virtual environment for the branch"""
         safe_name = branch_name.replace("/", "_")
@@ -245,7 +244,7 @@ class WorkEnvironmentManager:
             if req_path.exists():
                 logger.info(f"Installing dependencies from {req_file}")
                 result = self._run_command(
-                    [str(pip_path), "install", "-r", str(req_path)]
+                    [str(pip_path), "install", "-r", str(req_path)],
                 )
 
                 if result.returncode != 0:
@@ -314,8 +313,8 @@ class WorkEnvironmentManager:
             f.write("\n# Change to worktree directory\n")
             f.write(f"cd {env.worktree_path}\n")
 
-        # Make executable
-        os.chmod(custom_activate, 0o755)
+        # Make executable with restricted permissions
+        os.chmod(custom_activate, 0o700)
 
     def _run_project_setup(self, env: WorkEnvironment) -> None:
         """Run any project-specific setup commands"""
@@ -351,7 +350,7 @@ class WorkEnvironmentManager:
                 "PATH": f"{env.venv_path}/bin:{env_vars['PATH']}",
                 "YESMAN_BRANCH": branch_name,
                 "YESMAN_WORKTREE": str(env.worktree_path),
-            }
+            },
         )
 
         # Add custom env vars
@@ -396,7 +395,9 @@ class WorkEnvironmentManager:
             logger.info(f"Suspended environment for branch: {branch_name}")
 
     def terminate_environment(
-        self, branch_name: str, remove_files: bool = False
+        self,
+        branch_name: str,
+        remove_files: bool = False,
     ) -> None:
         """Terminate a work environment"""
         env = self.get_environment(branch_name)

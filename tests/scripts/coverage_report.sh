@@ -77,7 +77,7 @@ fi
 # Open HTML report
 if [ -d "$COVERAGE_DIR" ]; then
     echo -e "${GREEN}✅ HTML coverage report generated: $COVERAGE_DIR/index.html${NC}"
-    
+
     # Ask if user wants to open in browser
     read -p "Open coverage report in browser? (y/n) " -n 1 -r
     echo

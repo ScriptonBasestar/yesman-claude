@@ -19,9 +19,7 @@ class DashboardEnvironment:
     @staticmethod
     def is_gui_available() -> bool:
         """Check if GUI environment is available.""" ""
-        if platform.system() == "Darwin":  # macOS
-            return True
-        elif platform.system() == "Windows":
+        if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
         else:  # Linux/Unix
             return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
@@ -59,11 +57,7 @@ def check_dependencies(interface: str) -> Dict[str, bool]:
 
     if interface == "tauri":
         dashboard_path = Path(__file__).parent.parent / "tauri-dashboard"
-        deps["tauri"] = (
-            dashboard_path.exists()
-            and (dashboard_path / "package.json").exists()
-            and shutil.which("npm") is not None
-        )
+        deps["tauri"] = dashboard_path.exists() and (dashboard_path / "package.json").exists() and shutil.which("npm") is not None
 
     return deps
 
@@ -88,8 +82,7 @@ def launch_tui_dashboard(theme: Optional[str] = None, dev: bool = False) -> None
 
             # Create header
             header = Panel(
-                "[bold blue]Yesman Claude TUI Dashboard[/bold blue]\n"
-                "[dim]Real-time session monitoring and management[/dim]",
+                "[bold blue]Yesman Claude TUI Dashboard[/bold blue]\n[dim]Real-time session monitoring and management[/dim]",
                 title="Dashboard",
                 border_style="blue",
             )
@@ -247,8 +240,8 @@ def launch_web_dashboard(
             <h3>📊 Dashboard Status</h3>
             <p><strong>Interface:</strong> Web Dashboard</p>
             <p><strong>Host:</strong> {host}:{port}</p>
-            <p><strong>Theme:</strong> {theme or 'default'}</p>
-            <p><strong>Mode:</strong> {'Development' if dev else 'Production'}</p>
+            <p><strong>Theme:</strong> {theme or "default"}</p>
+            <p><strong>Mode:</strong> {"Development" if dev else "Production"}</p>
         </div>
     </div>
 
@@ -264,6 +257,7 @@ def launch_web_dashboard(
             import http.server
             import socketserver
             import threading
+            import time as time_module
 
             class DashboardHandler(http.server.SimpleHTTPRequestHandler):
                 def do_GET(self):
@@ -281,7 +275,7 @@ def launch_web_dashboard(
                 server_thread = threading.Thread(target=run_server, daemon=True)
                 server_thread.start()
                 click.echo(
-                    f"Web dashboard started in background at http://{host}:{port}"
+                    f"Web dashboard started in background at http://{host}:{port}",
                 )
 
                 # Open browser
@@ -290,7 +284,7 @@ def launch_web_dashboard(
                 # Keep main thread alive
                 try:
                     while True:
-                        time.sleep(1)
+                        time_module.sleep(1)
                 except KeyboardInterrupt:
                     click.echo("Shutting down web dashboard...")
             else:
@@ -327,7 +321,7 @@ def launch_web_dashboard(
                         except Exception as e:
                             click.echo(f"Could not open browser automatically: {e}")
                             click.echo(
-                                f"Please open {dashboard_url} manually in your browser"
+                                f"Please open {dashboard_url} manually in your browser",
                             )
 
                     threading.Thread(target=open_browser, daemon=True).start()
@@ -336,8 +330,7 @@ def launch_web_dashboard(
 
             except ImportError:
                 click.echo(
-                    "FastAPI/uvicorn not available. "
-                    "Install with: uv add fastapi uvicorn",
+                    "FastAPI/uvicorn not available. Install with: uv add fastapi uvicorn",
                     err=True,
                 )
                 sys.exit(1)
@@ -348,7 +341,9 @@ def launch_web_dashboard(
 
 
 def launch_tauri_dashboard(
-    theme: Optional[str] = None, dev: bool = False, detach: bool = False
+    theme: Optional[str] = None,
+    dev: bool = False,
+    detach: bool = False,
 ) -> None:
     """Launch Tauri-based desktop dashboard interface.""" ""
     click.echo("🖥️  Starting Tauri Desktop Dashboard...")
@@ -359,7 +354,7 @@ def launch_tauri_dashboard(
     if not dashboard_path.exists():
         click.echo(f"Tauri dashboard not found at: {dashboard_path}", err=True)
         click.echo(
-            "Make sure the tauri-dashboard directory exists and is properly set up."
+            "Make sure the tauri-dashboard directory exists and is properly set up.",
         )
         sys.exit(1)
 
@@ -390,35 +385,37 @@ def launch_tauri_dashboard(
 
             if not build_dir.exists():
                 click.echo(
-                    "⚠️  Release build not found. Switching to development mode..."
+                    "⚠️  Release build not found. Switching to development mode...",
                 )
                 click.echo("Starting Tauri dashboard in development mode...")
                 cmd = ["npm", "run", "tauri", "dev"]
-            else:
-                # Find the executable (platform dependent)
-                if sys.platform == "darwin":  # macOS
-                    app_bundle = build_dir / "bundle" / "macos" / "Yesman Dashboard.app"
-                    if app_bundle.exists():
-                        cmd = ["open", str(app_bundle)]
-                    else:
-                        cmd = [str(build_dir / "Yesman Dashboard")]
-                elif sys.platform == "win32":  # Windows
-                    cmd = [str(build_dir / "Yesman Dashboard.exe")]
-                else:  # Linux
-                    cmd = [str(build_dir / "yesman-tauri-dashboard")]
+            # Find the executable (platform dependent)
+            elif sys.platform == "darwin":  # macOS
+                app_bundle = build_dir / "bundle" / "macos" / "Yesman Dashboard.app"
+                cmd = ["open", str(app_bundle)] if app_bundle.exists() else [str(build_dir / "Yesman Dashboard")]
+            elif sys.platform == "win32":  # Windows
+                cmd = [str(build_dir / "Yesman Dashboard.exe")]
+            else:  # Linux
+                cmd = [str(build_dir / "yesman-tauri-dashboard")]
 
         # Run the command
         if detach:
             # Run in background
             process = subprocess.Popen(  # nosec
-                cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                cmd,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
             click.echo(f"Tauri dashboard started in background (PID: {process.pid})")
             return
         else:
             with open(os.devnull, "w"):
                 subprocess.run(  # nosec
-                    cmd, env=env, stderr=subprocess.PIPE, check=True
+                    cmd,
+                    env=env,
+                    stderr=subprocess.PIPE,
+                    check=True,
                 )
 
     except subprocess.CalledProcessError as e:
@@ -449,7 +446,11 @@ def dashboard_group():
 )
 @click.option("--host", "-h", default="localhost", help="Web dashboard host (web only)")
 @click.option(
-    "--port", "-p", default=8080, type=int, help="Web dashboard port (web only)"
+    "--port",
+    "-p",
+    default=8080,
+    type=int,
+    help="Web dashboard port (web only)",
 )
 @click.option("--theme", "-t", help="Dashboard theme")
 @click.option("--dev", is_flag=True, default=False, help="Run in development mode")
@@ -483,7 +484,11 @@ def run(interface, host, port, theme, dev, detach):
             launch_tui_dashboard(theme=theme, dev=dev)
         elif interface == "web":
             launch_web_dashboard(
-                host=host, port=port, theme=theme, dev=dev, detach=detach
+                host=host,
+                port=port,
+                theme=theme,
+                dev=dev,
+                detach=detach,
             )
         elif interface == "tauri":
             launch_tauri_dashboard(theme=theme, dev=dev, detach=detach)
@@ -516,27 +521,23 @@ def list_interfaces():
     for iface, name, description, available in interfaces:
         status = "✅ Available" if available else "❌ Not Available"
         click.echo(
-            f"  {iface.upper():<6} | {name:<20} | " f"{description:<40} | {status}"
+            f"  {iface.upper():<6} | {name:<20} | {description:<40} | {status}",
         )
 
     click.echo(
-        "\n🔍 Recommended interface: "
-        f"{DashboardEnvironment.get_recommended_interface()}"
+        f"\n🔍 Recommended interface: {DashboardEnvironment.get_recommended_interface()}",
     )
 
     # Environment info
     click.echo("\n🖥️  Environment Detection:")
     click.echo(
-        "  GUI Available:     "
-        f"{'Yes' if DashboardEnvironment.is_gui_available() else 'No'}"
+        f"  GUI Available:     {'Yes' if DashboardEnvironment.is_gui_available() else 'No'}",
     )
     click.echo(
-        "  SSH Session:       "
-        f"{'Yes' if DashboardEnvironment.is_ssh_session() else 'No'}"
+        f"  SSH Session:       {'Yes' if DashboardEnvironment.is_ssh_session() else 'No'}",
     )
     click.echo(
-        "  Terminal Capable:  "
-        f"{'Yes' if DashboardEnvironment.is_terminal_capable() else 'No'}"
+        f"  Terminal Capable:  {'Yes' if DashboardEnvironment.is_terminal_capable() else 'No'}",
     )
 
 
@@ -602,8 +603,7 @@ def build(interface):
 def dashboard(port, dev):
     """Legacy dashboard command (launches Tauri interface).""" ""
     click.echo(
-        "⚠️  Using legacy dashboard command. "
-        "Consider using 'yesman dashboard run' for more options."
+        "⚠️  Using legacy dashboard command. Consider using 'yesman dashboard run' for more options.",
     )
     launch_tauri_dashboard(dev=dev)
 

@@ -1,30 +1,27 @@
 """Real-time multi-agent monitoring dashboard widget"""
 
 import asyncio
-import time
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.text import Text
-from rich.live import Live
-from rich.progress import Progress, TaskID, BarColumn, TextColumn, TimeElapsedColumn
-from rich.layout import Layout
-from rich.tree import Tree
 from rich.align import Align
+from rich.console import Console
+from rich.layout import Layout
+from rich.live import Live
+from rich.panel import Panel
+from rich.progress import Progress, TaskID
+from rich.table import Table
+from rich.text import Text
 
 try:
-    from libs.multi_agent.types import Agent, Task, AgentState, TaskStatus
     from libs.multi_agent.agent_pool import AgentPool
+    from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 except ImportError:
     # For development/testing when multi_agent is not available
-    from typing import NamedTuple
-
     class AgentState(Enum):
         IDLE = "idle"
         WORKING = "working"
@@ -40,8 +37,17 @@ except ImportError:
         FAILED = "failed"
         CANCELLED = "cancelled"
 
-    Agent = NamedTuple("Agent", [("agent_id", str), ("state", str)])
-    Task = NamedTuple("Task", [("task_id", str), ("title", str), ("status", str)])
+    @dataclass
+    class Agent:
+        agent_id: str
+        state: str
+
+    @dataclass
+    class Task:
+        task_id: str
+        title: str
+        status: str
+
     AgentPool = None
 
 
@@ -73,11 +79,7 @@ class AgentMetrics:
         """Calculate overall efficiency score"""
         if self.tasks_completed == 0:
             return 0.5
-        return (
-            self.success_rate * 0.6
-            + (1.0 - self.current_load) * 0.3
-            + min(1.0, self.tasks_completed / 10.0) * 0.1
-        )
+        return self.success_rate * 0.6 + (1.0 - self.current_load) * 0.3 + min(1.0, self.tasks_completed / 10.0) * 0.1
 
 
 @dataclass
@@ -97,7 +99,9 @@ class AgentMonitor:
     """Real-time multi-agent monitoring dashboard"""
 
     def __init__(
-        self, agent_pool: Optional[AgentPool] = None, console: Optional[Console] = None
+        self,
+        agent_pool: Optional[AgentPool] = None,
+        console: Optional[Console] = None,
     ):
         self.console = console or Console()
         self.logger = logging.getLogger("yesman.dashboard.agent_monitor")
@@ -150,16 +154,13 @@ class AgentMonitor:
                 metrics.tasks_completed = agent_data.get("completed_tasks", 0)
                 metrics.tasks_failed = agent_data.get("failed_tasks", 0)
                 metrics.total_execution_time = agent_data.get(
-                    "total_execution_time", 0.0
+                    "total_execution_time",
+                    0.0,
                 )
 
                 if metrics.tasks_completed > 0:
-                    metrics.average_execution_time = (
-                        metrics.total_execution_time / metrics.tasks_completed
-                    )
-                    metrics.success_rate = metrics.tasks_completed / (
-                        metrics.tasks_completed + metrics.tasks_failed
-                    )
+                    metrics.average_execution_time = metrics.total_execution_time / metrics.tasks_completed
+                    metrics.success_rate = metrics.tasks_completed / (metrics.tasks_completed + metrics.tasks_failed)
 
                 # Update performance history
                 now = datetime.now()
@@ -167,13 +168,11 @@ class AgentMonitor:
                     self.performance_history[agent_id] = []
 
                 self.performance_history[agent_id].append(
-                    (now, metrics.efficiency_score)
+                    (now, metrics.efficiency_score),
                 )
                 # Keep only last 100 data points
                 if len(self.performance_history[agent_id]) > 100:
-                    self.performance_history[agent_id] = self.performance_history[
-                        agent_id
-                    ][-100:]
+                    self.performance_history[agent_id] = self.performance_history[agent_id][-100:]
 
             # Update task metrics
             tasks = self.agent_pool.list_tasks()
@@ -185,9 +184,7 @@ class AgentMonitor:
                     title=task_data["title"],
                     status=TaskStatus(task_data["status"]),
                     assigned_agent=task_data.get("assigned_agent"),
-                    start_time=datetime.fromisoformat(task_data["start_time"])
-                    if task_data.get("start_time")
-                    else None,
+                    start_time=datetime.fromisoformat(task_data["start_time"]) if task_data.get("start_time") else None,
                     progress=self._calculate_task_progress(task_data),
                 )
 
@@ -202,11 +199,8 @@ class AgentMonitor:
                     "completed_tasks": stats.get("completed_tasks", 0),
                     "failed_tasks": stats.get("failed_tasks", 0),
                     "queue_size": stats.get("queue_size", 0),
-                    "average_efficiency": sum(
-                        m.efficiency_score for m in self.agent_metrics.values()
-                    )
-                    / max(len(self.agent_metrics), 1),
-                }
+                    "average_efficiency": sum(m.efficiency_score for m in self.agent_metrics.values()) / max(len(self.agent_metrics), 1),
+                },
             )
 
         except Exception as e:
@@ -219,7 +213,7 @@ class AgentMonitor:
 
         if status == "completed":
             return 1.0
-        elif status == "failed" or status == "cancelled":
+        elif status in {"failed", "cancelled"}:
             return 0.0
         elif status == "running" and start_time:
             # Estimate progress based on elapsed time and timeout
@@ -238,7 +232,9 @@ class AgentMonitor:
 
         # System stats table
         stats_table = Table(
-            title="System Overview", show_header=True, header_style="bold magenta"
+            title="System Overview",
+            show_header=True,
+            header_style="bold magenta",
         )
         stats_table.add_column("Metric", style="cyan")
         stats_table.add_column("Value", style="green")
@@ -248,16 +244,20 @@ class AgentMonitor:
         stats_table.add_row("Idle Agents", str(self.system_metrics["idle_agents"]))
         stats_table.add_row("Queue Size", str(self.system_metrics["queue_size"]))
         stats_table.add_row(
-            "Completed Tasks", str(self.system_metrics["completed_tasks"])
+            "Completed Tasks",
+            str(self.system_metrics["completed_tasks"]),
         )
         stats_table.add_row("Failed Tasks", str(self.system_metrics["failed_tasks"]))
         stats_table.add_row(
-            "Average Efficiency", f"{self.system_metrics['average_efficiency']:.2%}"
+            "Average Efficiency",
+            f"{self.system_metrics['average_efficiency']:.2%}",
         )
 
         # Agent status table
         agent_table = Table(
-            title="Agent Status", show_header=True, header_style="bold blue"
+            title="Agent Status",
+            show_header=True,
+            header_style="bold blue",
         )
         agent_table.add_column("Agent ID", style="cyan")
         agent_table.add_column("State", style="magenta")
@@ -289,7 +289,9 @@ class AgentMonitor:
         )
 
         return Panel(
-            layout, title="Multi-Agent Monitor - Overview", border_style="bright_blue"
+            layout,
+            title="Multi-Agent Monitor - Overview",
+            border_style="bright_blue",
         )
 
     def render_detailed(self) -> Panel:
@@ -310,22 +312,22 @@ class AgentMonitor:
         details_table.add_row("Tasks Failed", str(metrics.tasks_failed))
         details_table.add_row("Success Rate", f"{metrics.success_rate:.2%}")
         details_table.add_row(
-            "Average Execution Time", f"{metrics.average_execution_time:.1f}s"
+            "Average Execution Time",
+            f"{metrics.average_execution_time:.1f}s",
         )
         details_table.add_row("Current Load", f"{metrics.current_load:.1%}")
         details_table.add_row("Efficiency Score", f"{metrics.efficiency_score:.2%}")
         details_table.add_row(
-            "Last Heartbeat", metrics.last_heartbeat.strftime("%H:%M:%S")
+            "Last Heartbeat",
+            metrics.last_heartbeat.strftime("%H:%M:%S"),
         )
 
         # Performance history (simple text representation)
         history = self.performance_history.get(self.selected_agent, [])
         if history:
-            recent_performance = [
-                score for _, score in history[-20:]
-            ]  # Last 20 data points
+            recent_performance = [score for _, score in history[-20:]]  # Last 20 data points
             perf_text = "█" * int(
-                sum(recent_performance) / len(recent_performance) * 20
+                sum(recent_performance) / len(recent_performance) * 20,
             )
             details_table.add_row("Performance Trend", perf_text)
 
@@ -338,7 +340,9 @@ class AgentMonitor:
     def render_tasks(self) -> Panel:
         """Render task status view"""
         tasks_table = Table(
-            title="Task Status", show_header=True, header_style="bold green"
+            title="Task Status",
+            show_header=True,
+            header_style="bold green",
         )
         tasks_table.add_column("Task ID", style="cyan")
         tasks_table.add_column("Title", style="white")
@@ -362,15 +366,11 @@ class AgentMonitor:
                 elapsed = datetime.now() - metrics.start_time
                 duration = f"{elapsed.total_seconds():.0f}s"
 
-            progress_bar = "█" * int(metrics.progress * 10) + "░" * (
-                10 - int(metrics.progress * 10)
-            )
+            progress_bar = "█" * int(metrics.progress * 10) + "░" * (10 - int(metrics.progress * 10))
 
             tasks_table.add_row(
                 task_id[:8] + "...",  # Truncate long IDs
-                metrics.title[:30] + "..."
-                if len(metrics.title) > 30
-                else metrics.title,
+                metrics.title[:30] + "..." if len(metrics.title) > 30 else metrics.title,
                 Text(metrics.status.value.upper(), style=status_color),
                 metrics.assigned_agent or "-",
                 f"{progress_bar} {metrics.progress:.0%}",
@@ -382,7 +382,9 @@ class AgentMonitor:
     def render_performance(self) -> Panel:
         """Render performance analytics view"""
         perf_table = Table(
-            title="Performance Analytics", show_header=True, header_style="bold red"
+            title="Performance Analytics",
+            show_header=True,
+            header_style="bold red",
         )
         perf_table.add_column("Agent", style="cyan")
         perf_table.add_column("Efficiency Trend", style="green")
@@ -395,28 +397,19 @@ class AgentMonitor:
             history = self.performance_history.get(agent_id, [])
             if len(history) >= 2:
                 recent_avg = sum(score for _, score in history[-5:]) / min(
-                    5, len(history)
+                    5,
+                    len(history),
                 )
                 older_avg = sum(score for _, score in history[-10:-5]) / min(
-                    5, len(history[-10:-5]) if len(history) >= 10 else history[:-5]
+                    5,
+                    len(history[-10:-5]) if len(history) >= 10 else history[:-5],
                 )
-                trend = (
-                    "↗"
-                    if recent_avg > older_avg
-                    else "↘"
-                    if recent_avg < older_avg
-                    else "→"
-                )
+                trend = "↗" if recent_avg > older_avg else "↘" if recent_avg < older_avg else "→"
             else:
                 trend = "→"
 
             # Throughput (tasks per hour)
-            if metrics.total_execution_time > 0:
-                throughput = metrics.tasks_completed / (
-                    metrics.total_execution_time / 3600.0
-                )
-            else:
-                throughput = 0.0
+            throughput = metrics.tasks_completed / (metrics.total_execution_time / 3600.0) if metrics.total_execution_time > 0 else 0.0
 
             perf_table.add_row(
                 agent_id,
@@ -427,7 +420,9 @@ class AgentMonitor:
             )
 
         return Panel(
-            perf_table, title="Performance Analytics", border_style="bright_red"
+            perf_table,
+            title="Performance Analytics",
+            border_style="bright_red",
         )
 
     def render(self) -> Panel:
@@ -458,7 +453,7 @@ class AgentMonitor:
         """Get keyboard shortcuts help text"""
         return """
 Keyboard Shortcuts:
-  1,2,3,4 - Switch view modes (Overview/Detailed/Tasks/Performance)  
+  1,2,3,4 - Switch view modes (Overview/Detailed/Tasks/Performance)
   ↑↓      - Navigate agents (in detailed mode)
   Enter   - Select agent for detailed view
   r       - Refresh data
@@ -495,7 +490,8 @@ def create_agent_monitor(agent_pool: Optional[AgentPool] = None) -> AgentMonitor
 
 # CLI integration function
 async def run_agent_monitor(
-    agent_pool: Optional[AgentPool] = None, duration: Optional[float] = None
+    agent_pool: Optional[AgentPool] = None,
+    duration: Optional[float] = None,
 ) -> None:
     """Run the agent monitor as a standalone application"""
     monitor = create_agent_monitor(agent_pool)

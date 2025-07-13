@@ -40,16 +40,16 @@ log_warning() {
 # Cleanup function
 cleanup() {
     log_info "Cleaning up test environment..."
-    
+
     # Remove test sessions
     for session in $(tmux list-sessions 2>/dev/null | grep -E "test-lifecycle-|perf-test-" | cut -d: -f1); do
         log_info "Removing test session: $session"
         tmux kill-session -t "$session" 2>/dev/null || true
     done
-    
+
     # Remove temporary files
     rm -f /tmp/template_list.txt /tmp/test-project.yaml
-    
+
     log_success "Cleanup completed"
 }
 

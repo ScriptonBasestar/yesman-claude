@@ -14,9 +14,7 @@ class DashboardController:
     """Main controller that orchestrates Claude session management, process control, and monitoring."""
 
     def __init__(self, session_name: str, pane_id: Optional[str] = None):
-        """Initialize the dashboard controller.""" ""
-
-    def __init__(self, session_name: str, pane_id: Optional[str] = None):
+        """Initialize the dashboard controller."""
         self.session_name = session_name
         self.pane_id = pane_id
 
@@ -24,10 +22,13 @@ class DashboardController:
         self.session_manager = ClaudeSessionManager(session_name, pane_id)
         self.status_manager = ClaudeStatusManager(session_name)
         self.process_controller = ClaudeProcessController(
-            self.session_manager, self.status_manager
+            self.session_manager,
+            self.status_manager,
         )
         self.monitor = ClaudeMonitor(
-            self.session_manager, self.process_controller, self.status_manager
+            self.session_manager,
+            self.process_controller,
+            self.status_manager,
         )
 
         self.logger = logging.getLogger(f"yesman.dashboard.controller.{session_name}")
@@ -35,7 +36,7 @@ class DashboardController:
         # Try to initialize session, but don't fail if session doesn't exist
         if not self.session_manager.initialize_session():
             self.status_manager.update_status(
-                f"[yellow]Session '{session_name}' not found[/]"
+                f"[yellow]Session '{session_name}' not found[/]",
             )
 
     @property
@@ -69,15 +70,13 @@ class DashboardController:
     def start(self) -> bool:
         """Start the controller"""
         # Re-initialize in case session was created after initialization
-        if not self.claude_pane:
-            if not self.session_manager.initialize_session():
-                self.logger.error(f"Failed to initialize session '{self.session_name}'")
-                return False
+        if not self.claude_pane and not self.session_manager.initialize_session():
+            self.logger.error(f"Failed to initialize session '{self.session_name}'")
+            return False
 
         if not self.claude_pane:
             self.logger.error(
-                f"No Claude pane found in session '{self.session_name}'. "
-                "Make sure the session is running and Claude Code is started."
+                f"No Claude pane found in session '{self.session_name}'. Make sure the session is running and Claude Code is started.",
             )
             return False
 
@@ -165,7 +164,10 @@ class DashboardController:
         return self.monitor.export_adaptive_data(output_path)
 
     def learn_from_user_input(
-        self, prompt_text: str, user_response: str, context: str = ""
+        self,
+        prompt_text: str,
+        user_response: str,
+        context: str = "",
     ):
         """Learn from manual user input for future improvements"""
         self.monitor.learn_from_user_input(prompt_text, user_response, context)
@@ -247,22 +249,22 @@ class DashboardController:
         return self.monitor._check_for_prompt(content)
 
     def clear_prompt_state(self) -> None:
-        """Clear the current prompt state (deprecated - use monitor methods)"""
-        self.monitor._clear_prompt_state()
+        """Clear prompt state (deprecated - use monitor methods)"""
+        self.monitor.clear_prompt_state()
 
 
 class ClaudeManager:
-    """Manages multiple dashboard controllers."""
+    """Manages multiple DashboardController instances, one for each session."""
 
     def __init__(self):
-        """Initialize the Claude manager.""" ""
-
-    def __init__(self):
+        """Initialize the Claude manager."""
         self.controllers: Dict[str, DashboardController] = {}
         self.logger = logging.getLogger("yesman.dashboard.claude_manager")
 
     def get_controller(
-        self, session_name: str, pane_id: Optional[str] = None
+        self,
+        session_name: str,
+        pane_id: Optional[str] = None,
     ) -> DashboardController:
         """Get or create controller for session.""" ""
         if session_name not in self.controllers:

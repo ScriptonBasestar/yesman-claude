@@ -41,14 +41,14 @@ print("Testing pattern recognition...")
 for prompt, expected_type, expected_response in test_patterns:
     # Test pattern classification
     detected_type = analyzer.classify_pattern(prompt)
-    
+
     # Test response prediction
     predicted_response = adaptive.predict_response(prompt)
-    
+
     print(f"Prompt: {prompt[:50]}...")
     print(f"  Expected type: {expected_type}, Detected: {detected_type}")
     print(f"  Expected response: '{expected_response}', Predicted: '{predicted_response}'")
-    
+
     if detected_type == expected_type:
         correct_predictions += 1
         print("  ✅ Pattern correctly classified")
@@ -81,7 +81,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
     # Initialize with temporary data directory
     analyzer = ResponseAnalyzer(data_dir=temp_dir)
     adaptive = AdaptiveResponse(data_dir=temp_dir)
-    
+
     # Simulate learning process
     learning_data = [
         ("Do you want to continue? (y/n)", "y", True),
@@ -90,44 +90,44 @@ with tempfile.TemporaryDirectory() as temp_dir:
         ("Continue with installation? (y/n)", "y", True),
         ("Start the process? (y/n)", "y", True),
     ]
-    
+
     print("Training AI with sample data...")
     for prompt, response, success in learning_data:
         analyzer.record_interaction(prompt, response, success)
         adaptive.learn_from_feedback(prompt, response, success)
-    
+
     # Test prediction after learning
     test_prompt = "Do you want to save changes? (y/n)"
     confidence_before = adaptive.get_confidence(test_prompt)
-    
+
     # Add more training data
     for i in range(10):
         analyzer.record_interaction(f"Save file {i}? (y/n)", "y", True)
         adaptive.learn_from_feedback(f"Save file {i}? (y/n)", "y", True)
-    
+
     confidence_after = adaptive.get_confidence(test_prompt)
-    
+
     print(f"Confidence before training: {confidence_before:.2f}")
     print(f"Confidence after training: {confidence_after:.2f}")
-    
+
     if confidence_after > confidence_before:
         print("✅ AI learning is working - confidence improved")
     else:
         print("❌ AI learning may not be working properly")
-    
+
     # Test pattern generalization
     similar_prompts = [
         "Would you like to save? (y/n)",
         "Save changes? (y/n)",
         "Keep modifications? (y/n)",
     ]
-    
+
     print("\nTesting pattern generalization...")
     for prompt in similar_prompts:
         confidence = adaptive.get_confidence(prompt)
         prediction = adaptive.predict_response(prompt)
         print(f"  {prompt}: {prediction} (confidence: {confidence:.2f})")
-        
+
         if confidence > 0.7:
             print("    ✅ High confidence prediction")
         else:
@@ -160,7 +160,7 @@ for i in range(100):
         prompt = f"Select option: " + " ".join([f"{j}) Option {j}" for j in range(1, options+1)])
     else:
         prompt = "Press Enter to continue..."
-    
+
     test_prompts.append(prompt)
 
 print(f"Testing performance with {len(test_prompts)} prompts...")
@@ -219,44 +219,44 @@ with tempfile.TemporaryDirectory() as temp_dir:
     # Initialize AI components
     analyzer = ResponseAnalyzer(data_dir=temp_dir)
     adaptive = AdaptiveResponse(data_dir=temp_dir)
-    
+
     # Generate large amount of training data
     print("Generating large training dataset...")
     for i in range(1000):
         prompt = f"Test prompt {i}: Do you want to continue? (y/n)"
         analyzer.record_interaction(prompt, "y", True)
         adaptive.learn_from_feedback(prompt, "y", True)
-    
+
     # Check memory usage after training
     current_memory = process.memory_info().rss / 1024 / 1024  # MB
     memory_increase = current_memory - initial_memory
-    
+
     print(f"Memory usage: {initial_memory:.1f}MB -> {current_memory:.1f}MB (increase: {memory_increase:.1f}MB)")
-    
+
     if memory_increase < 100:  # Less than 100MB increase
         print("✅ Memory usage is acceptable")
     else:
         print("❌ Memory usage is too high")
-    
+
     # Test data persistence
     print("Testing data persistence...")
-    
+
     # Save data
     analyzer.save_data()
     adaptive.save_patterns()
-    
+
     # Create new instances (should load saved data)
     analyzer2 = ResponseAnalyzer(data_dir=temp_dir)
     adaptive2 = AdaptiveResponse(data_dir=temp_dir)
-    
+
     # Test if data was loaded
     test_prompt = "Test prompt 500: Do you want to continue? (y/n)"
     confidence1 = adaptive.get_confidence(test_prompt)
     confidence2 = adaptive2.get_confidence(test_prompt)
-    
+
     print(f"Original confidence: {confidence1:.2f}")
     print(f"Loaded confidence: {confidence2:.2f}")
-    
+
     if abs(confidence1 - confidence2) < 0.01:
         print("✅ Data persistence is working")
     else:
@@ -293,7 +293,7 @@ for prompt, case_type in edge_cases:
         pattern_type = analyzer.classify_pattern(prompt)
         response = adaptive.predict_response(prompt)
         confidence = adaptive.get_confidence(prompt)
-        
+
         print(f"✅ {case_type}: type={pattern_type}, response='{response}', confidence={confidence:.2f}")
     except Exception as e:
         print(f"❌ {case_type}: Error - {str(e)}")

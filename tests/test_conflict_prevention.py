@@ -1,33 +1,33 @@
 """Tests for ConflictPreventionSystem"""
 
-import pytest
 import asyncio
-import tempfile
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+
+from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.collaboration_engine import (
+    CollaborationEngine,
+    MessagePriority,
+    MessageType,
+)
+from libs.multi_agent.conflict_prediction import (
+    ConflictPattern,
+    ConflictPredictor,
+    PredictionConfidence,
+    PredictionResult,
+)
 from libs.multi_agent.conflict_prevention import (
     ConflictPreventionSystem,
-    PreventionStrategy,
     PreventionAction,
     PreventionMeasure,
     PreventionResult,
+    PreventionStrategy,
 )
-from libs.multi_agent.conflict_prediction import (
-    ConflictPredictor,
-    PredictionResult,
-    PredictionConfidence,
-    ConflictPattern,
-)
-from libs.multi_agent.auto_resolver import AutoResolver, AutoResolutionMode
-from libs.multi_agent.collaboration_engine import (
-    CollaborationEngine,
-    MessageType,
-    MessagePriority,
-)
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import ConflictType, ConflictSeverity
+from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
 
 
 class TestPreventionMeasure:
@@ -173,15 +173,9 @@ class TestConflictPreventionSystem:
 
     def test_init(self, prevention_system, mock_dependencies):
         """Test ConflictPreventionSystem initialization"""
-        assert (
-            prevention_system.conflict_predictor
-            == mock_dependencies["conflict_predictor"]
-        )
+        assert prevention_system.conflict_predictor == mock_dependencies["conflict_predictor"]
         assert prevention_system.auto_resolver == mock_dependencies["auto_resolver"]
-        assert (
-            prevention_system.collaboration_engine
-            == mock_dependencies["collaboration_engine"]
-        )
+        assert prevention_system.collaboration_engine == mock_dependencies["collaboration_engine"]
         assert prevention_system.branch_manager == mock_dependencies["branch_manager"]
         assert prevention_system.repo_path == Path("/tmp/test_repo")
 
@@ -201,25 +195,13 @@ class TestConflictPreventionSystem:
 
         # Check strategy handlers
         assert len(prevention_system.strategy_handlers) == 7
-        assert (
-            PreventionStrategy.BRANCH_ISOLATION in prevention_system.strategy_handlers
-        )
-        assert (
-            PreventionStrategy.WORK_REALLOCATION in prevention_system.strategy_handlers
-        )
+        assert PreventionStrategy.BRANCH_ISOLATION in prevention_system.strategy_handlers
+        assert PreventionStrategy.WORK_REALLOCATION in prevention_system.strategy_handlers
         assert PreventionStrategy.DEPENDENCY_SYNC in prevention_system.strategy_handlers
         assert PreventionStrategy.EARLY_MERGE in prevention_system.strategy_handlers
-        assert (
-            PreventionStrategy.AGENT_COORDINATION in prevention_system.strategy_handlers
-        )
-        assert (
-            PreventionStrategy.TEMPORAL_SEPARATION
-            in prevention_system.strategy_handlers
-        )
-        assert (
-            PreventionStrategy.SEMANTIC_REFACTORING
-            in prevention_system.strategy_handlers
-        )
+        assert PreventionStrategy.AGENT_COORDINATION in prevention_system.strategy_handlers
+        assert PreventionStrategy.TEMPORAL_SEPARATION in prevention_system.strategy_handlers
+        assert PreventionStrategy.SEMANTIC_REFACTORING in prevention_system.strategy_handlers
 
         # Check initial statistics
         expected_stats = {
@@ -252,12 +234,14 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_analyze_and_prevent_conflicts_no_predictions(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test analyze_and_prevent_conflicts when no predictions are found"""
         # Mock predict_conflicts to return empty list
         mock_dependencies["conflict_predictor"].predict_conflicts = AsyncMock(
-            return_value=[]
+            return_value=[],
         )
 
         branches = ["main", "feature/a", "feature/b"]
@@ -285,7 +269,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_analyze_and_prevent_conflicts_with_predictions(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test analyze_and_prevent_conflicts with actual predictions"""
         # Create mock prediction
@@ -304,12 +290,12 @@ class TestConflictPreventionSystem:
 
         # Mock predict_conflicts to return prediction
         mock_dependencies["conflict_predictor"].predict_conflicts = AsyncMock(
-            return_value=[mock_prediction]
+            return_value=[mock_prediction],
         )
 
         # Mock collaboration engine send_message
         mock_dependencies["collaboration_engine"].send_message = AsyncMock(
-            return_value=True
+            return_value=True,
         )
 
         branches = ["main", "feature/a"]
@@ -347,7 +333,7 @@ class TestConflictPreventionSystem:
         )
 
         measures = await prevention_system._generate_dependency_measures(
-            mock_prediction
+            mock_prediction,
         )
 
         assert len(measures) == 1
@@ -382,7 +368,7 @@ class TestConflictPreventionSystem:
         )
 
         measures = await prevention_system._generate_coordination_measures(
-            mock_prediction
+            mock_prediction,
         )
 
         assert len(measures) == 1
@@ -522,7 +508,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_prevention_measure_success(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_prevention_measure with successful application"""
         measure = PreventionMeasure(
@@ -538,7 +526,9 @@ class TestConflictPreventionSystem:
 
         # Mock the strategy handler to return success
         with patch.object(
-            prevention_system, "_apply_branch_isolation", return_value=True
+            prevention_system,
+            "_apply_branch_isolation",
+            return_value=True,
         ) as mock_handler:
             success = await prevention_system._apply_prevention_measure(measure)
 
@@ -551,7 +541,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_prevention_measure_failure(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_prevention_measure with failed application"""
         measure = PreventionMeasure(
@@ -567,7 +559,9 @@ class TestConflictPreventionSystem:
 
         # Mock the strategy handler to return failure
         with patch.object(
-            prevention_system, "_apply_work_reallocation", return_value=False
+            prevention_system,
+            "_apply_work_reallocation",
+            return_value=False,
         ) as mock_handler:
             success = await prevention_system._apply_prevention_measure(measure)
 
@@ -579,7 +573,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_prevention_measure_exception(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_prevention_measure with exception during application"""
         measure = PreventionMeasure(
@@ -611,7 +607,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_prevention_measure_no_handler(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_prevention_measure with missing strategy handler"""
         measure = PreventionMeasure(
@@ -627,7 +625,7 @@ class TestConflictPreventionSystem:
 
         # Remove the handler temporarily
         original_handler = prevention_system.strategy_handlers.pop(
-            PreventionStrategy.SEMANTIC_REFACTORING
+            PreventionStrategy.SEMANTIC_REFACTORING,
         )
 
         try:
@@ -635,9 +633,7 @@ class TestConflictPreventionSystem:
             assert success is False
         finally:
             # Restore the handler
-            prevention_system.strategy_handlers[
-                PreventionStrategy.SEMANTIC_REFACTORING
-            ] = original_handler
+            prevention_system.strategy_handlers[PreventionStrategy.SEMANTIC_REFACTORING] = original_handler
 
     @pytest.mark.asyncio
     async def test_apply_work_reallocation(self, prevention_system, mock_dependencies):
@@ -655,7 +651,7 @@ class TestConflictPreventionSystem:
 
         # Mock collaboration engine send_message
         mock_dependencies["collaboration_engine"].send_message = AsyncMock(
-            return_value=True
+            return_value=True,
         )
 
         success = await prevention_system._apply_work_reallocation(measure)
@@ -698,7 +694,7 @@ class TestConflictPreventionSystem:
 
         # Mock collaboration engine send_message
         mock_dependencies["collaboration_engine"].send_message = AsyncMock(
-            return_value=True
+            return_value=True,
         )
 
         success = await prevention_system._apply_dependency_sync(measure)
@@ -741,7 +737,7 @@ class TestConflictPreventionSystem:
         mock_result = Mock()
         mock_result.outcome = "fully_resolved"
         mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts = AsyncMock(
-            return_value=mock_result
+            return_value=mock_result,
         )
 
         success = await prevention_system._apply_early_merge(measure)
@@ -749,9 +745,7 @@ class TestConflictPreventionSystem:
         assert success is True
 
         # Verify auto resolver was called
-        mock_dependencies[
-            "auto_resolver"
-        ].auto_resolve_branch_conflicts.assert_called_once_with(
+        mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts.assert_called_once_with(
             branch1="branch1",
             branch2="branch2",
             mode=AutoResolutionMode.PREDICTIVE,
@@ -759,7 +753,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_early_merge_insufficient_branches(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_early_merge with insufficient branches"""
         measure = PreventionMeasure(
@@ -778,9 +774,7 @@ class TestConflictPreventionSystem:
         assert success is False
 
         # Verify auto resolver was not called
-        mock_dependencies[
-            "auto_resolver"
-        ].auto_resolve_branch_conflicts.assert_not_called()
+        mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_apply_agent_coordination(self, prevention_system, mock_dependencies):
@@ -799,7 +793,7 @@ class TestConflictPreventionSystem:
 
         # Mock collaboration engine send_message
         mock_dependencies["collaboration_engine"].send_message = AsyncMock(
-            return_value=True
+            return_value=True,
         )
 
         success = await prevention_system._apply_agent_coordination(measure)
@@ -832,7 +826,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_temporal_separation(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_temporal_separation strategy"""
         measure = PreventionMeasure(
@@ -848,7 +844,7 @@ class TestConflictPreventionSystem:
 
         # Mock collaboration engine send_message
         mock_dependencies["collaboration_engine"].send_message = AsyncMock(
-            return_value=True
+            return_value=True,
         )
 
         success = await prevention_system._apply_temporal_separation(measure)
@@ -862,9 +858,7 @@ class TestConflictPreventionSystem:
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for i, call in enumerate(calls):
             args, kwargs = call
-            expected_delay = (
-                i * prevention_system.prevention_config["coordination_delay"]
-            )
+            expected_delay = i * prevention_system.prevention_config["coordination_delay"]
 
             assert kwargs["sender_id"] == "prevention_system"
             assert kwargs["recipient_id"] == f"agent{i + 1}"
@@ -881,7 +875,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_apply_semantic_refactoring(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test _apply_semantic_refactoring strategy"""
         measure = PreventionMeasure(
@@ -901,7 +897,7 @@ class TestConflictPreventionSystem:
 
         # Mock collaboration engine send_message
         mock_dependencies["collaboration_engine"].send_message = AsyncMock(
-            return_value=True
+            return_value=True,
         )
 
         success = await prevention_system._apply_semantic_refactoring(measure)
@@ -1024,7 +1020,9 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_prevention_monitor_loop_integration(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test prevention monitor loop integration"""
         # Mock _get_active_branches to return test branches
@@ -1048,7 +1046,7 @@ class TestConflictPreventionSystem:
             ):
                 # Start monitoring with very short interval
                 await prevention_system.start_prevention_monitoring(
-                    monitoring_interval=0.1
+                    monitoring_interval=0.1,
                 )
 
                 # Let it run for a short time
@@ -1062,19 +1060,22 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_analyze_and_prevent_conflicts_with_time_horizon(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test analyze_and_prevent_conflicts with custom time horizon"""
         # Mock predict_conflicts to return empty list
         mock_dependencies["conflict_predictor"].predict_conflicts = AsyncMock(
-            return_value=[]
+            return_value=[],
         )
 
         branches = ["main", "feature"]
         custom_horizon = timedelta(hours=12)
 
         result = await prevention_system.analyze_and_prevent_conflicts(
-            branches, time_horizon=custom_horizon
+            branches,
+            time_horizon=custom_horizon,
         )
 
         # Verify custom time horizon was passed
@@ -1088,19 +1089,22 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     async def test_analyze_and_prevent_conflicts_with_agents_filter(
-        self, prevention_system, mock_dependencies
+        self,
+        prevention_system,
+        mock_dependencies,
     ):
         """Test analyze_and_prevent_conflicts with specific agents"""
         # Mock predict_conflicts to return empty list
         mock_dependencies["conflict_predictor"].predict_conflicts = AsyncMock(
-            return_value=[]
+            return_value=[],
         )
 
         branches = ["main", "feature"]
         specific_agents = ["agent1", "agent3"]
 
         result = await prevention_system.analyze_and_prevent_conflicts(
-            branches, agents=specific_agents
+            branches,
+            agents=specific_agents,
         )
 
         # Verify result metadata includes agents filter

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { 
-    config, 
-    isConfigLoading, 
-    configError, 
+  import {
+    config,
+    isConfigLoading,
+    configError,
     hasUnsavedChanges,
     updateConfig,
     updateThemeConfig,
@@ -91,7 +91,7 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       showNotification('success', 'Config Exported', 'Configuration exported successfully');
     } catch (error) {
       showNotification('error', 'Export Failed', 'Failed to export configuration');
@@ -102,13 +102,13 @@
   async function handleImport(event: Event) {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    
+
     if (!file) return;
 
     try {
       const text = await file.text();
       const success = await importConfig(text);
-      
+
       if (success) {
         showNotification('success', 'Config Imported', 'Configuration imported successfully');
       } else {
@@ -117,7 +117,7 @@
     } catch (error) {
       showNotification('error', 'Import Failed', 'Failed to import configuration');
     }
-    
+
     // 파일 입력 초기화
     target.value = '';
   }
@@ -164,23 +164,23 @@
           Configure your dashboard preferences and behavior
         </p>
       </div>
-      
+
       <div class="header-actions flex gap-3">
         {#if $hasUnsavedChanges}
           <div class="badge badge-warning gap-2">
             ⚠️ Unsaved Changes
           </div>
         {/if}
-        
-        <button 
+
+        <button
           class="btn btn-outline btn-sm"
           on:click={handleReset}
           disabled={$isConfigLoading}
         >
           🔄 Reset
         </button>
-        
-        <button 
+
+        <button
           class="btn btn-primary btn-sm"
           class:loading={$isConfigLoading}
           on:click={handleSave}
@@ -207,7 +207,7 @@
     <div class="settings-sidebar">
       <ul class="menu bg-base-200 rounded-box">
         <li>
-          <button 
+          <button
             class="menu-item"
             class:active={activeTab === 'general'}
             on:click={() => activeTab = 'general'}
@@ -216,7 +216,7 @@
           </button>
         </li>
         <li>
-          <button 
+          <button
             class="menu-item"
             class:active={activeTab === 'notifications'}
             on:click={() => activeTab = 'notifications'}
@@ -225,7 +225,7 @@
           </button>
         </li>
         <li>
-          <button 
+          <button
             class="menu-item"
             class:active={activeTab === 'dashboard'}
             on:click={() => activeTab = 'dashboard'}
@@ -234,7 +234,7 @@
           </button>
         </li>
         <li>
-          <button 
+          <button
             class="menu-item"
             class:active={activeTab === 'advanced'}
             on:click={() => activeTab = 'advanced'}
@@ -243,7 +243,7 @@
           </button>
         </li>
         <li>
-          <button 
+          <button
             class="menu-item"
             class:active={activeTab === 'system'}
             on:click={() => activeTab = 'system'}
@@ -252,7 +252,7 @@
           </button>
         </li>
         <li>
-          <button 
+          <button
             class="menu-item"
             class:active={activeTab === 'import-export'}
             on:click={() => activeTab = 'import-export'}
@@ -268,18 +268,18 @@
       {#if activeTab === 'general'}
         <div class="settings-section">
           <h2 class="text-xl font-semibold mb-4">🎨 General Settings</h2>
-          
+
           <!-- 테마 설정 -->
           <div class="setting-group">
             <h3 class="text-lg font-medium mb-3">Appearance</h3>
-            
+
             <div class="form-control">
               <label class="label" for="theme-selection">
                 <span class="label-text">Theme</span>
               </label>
               <div class="join" id="theme-selection" role="radiogroup">
                 {#each themeOptions as option}
-                  <input 
+                  <input
                     class="join-item btn"
                     type="radio"
                     name="theme"
@@ -297,7 +297,7 @@
               <label class="label" for="language-select">
                 <span class="label-text">Language</span>
               </label>
-              <select 
+              <select
                 id="language-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.language}
@@ -313,15 +313,15 @@
           <!-- 자동 새로고침 설정 -->
           <div class="setting-group">
             <h3 class="text-lg font-medium mb-3">Auto Refresh</h3>
-            
+
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Enable auto refresh</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-primary"
                   bind:checked={$config.autoRefresh.enabled}
-                  on:change={(e) => updateConfig({ 
+                  on:change={(e) => updateConfig({
                     autoRefresh: { ...$config.autoRefresh, enabled: e.currentTarget.checked }
                   })}
                 />
@@ -333,7 +333,7 @@
                 <label class="label" for="refresh-interval">
                   <span class="label-text">Refresh interval (seconds)</span>
                 </label>
-                <input 
+                <input
                   id="refresh-interval"
                   type="range"
                   min="5"
@@ -341,7 +341,7 @@
                   step="5"
                   class="range range-primary"
                   value={$config.autoRefresh.interval / 1000}
-                  on:input={(e) => updateConfig({ 
+                  on:input={(e) => updateConfig({
                     autoRefresh: { ...$config.autoRefresh, interval: parseInt(e.currentTarget.value) * 1000 }
                   })}
                 />
@@ -361,13 +361,13 @@
       {:else if activeTab === 'notifications'}
         <div class="settings-section">
           <h2 class="text-xl font-semibold mb-4">🔔 Notification Settings</h2>
-          
+
           <div class="setting-group">
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Enable notifications</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-primary"
                   bind:checked={$config.notifications.enabled}
                   on:change={(e) => updateNotificationConfig({ enabled: e.currentTarget.checked })}
@@ -378,8 +378,8 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Desktop notifications</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-secondary"
                   bind:checked={$config.notifications.desktop}
                   on:change={(e) => updateNotificationConfig({ desktop: e.currentTarget.checked })}
@@ -391,8 +391,8 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Sound notifications</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-accent"
                   bind:checked={$config.notifications.sounds}
                   on:change={(e) => updateNotificationConfig({ sounds: e.currentTarget.checked })}
@@ -404,8 +404,8 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Auto-hide notifications</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-info"
                   bind:checked={$config.notifications.autoHide}
                   on:change={(e) => updateNotificationConfig({ autoHide: e.currentTarget.checked })}
@@ -419,7 +419,7 @@
                 <label class="label" for="hide-delay">
                   <span class="label-text">Auto-hide delay (seconds)</span>
                 </label>
-                <input 
+                <input
                   id="hide-delay"
                   type="range"
                   min="2"
@@ -427,8 +427,8 @@
                   step="1"
                   class="range range-info"
                   value={$config.notifications.hideDelay / 1000}
-                  on:input={(e) => updateNotificationConfig({ 
-                    hideDelay: parseInt(e.currentTarget.value) * 1000 
+                  on:input={(e) => updateNotificationConfig({
+                    hideDelay: parseInt(e.currentTarget.value) * 1000
                   })}
                 />
                 <div class="text-center text-sm mt-1">
@@ -438,7 +438,7 @@
             {/if}
 
             <div class="mt-4">
-              <button 
+              <button
                 class="btn btn-outline btn-sm"
                 on:click={handleTestNotification}
               >
@@ -451,13 +451,13 @@
       {:else if activeTab === 'dashboard'}
         <div class="settings-section">
           <h2 class="text-xl font-semibold mb-4">📊 Dashboard Settings</h2>
-          
+
           <div class="setting-group">
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Compact mode</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-primary"
                   bind:checked={$config.dashboard.compactMode}
                   on:change={(e) => updateDashboardConfig({ compactMode: e.currentTarget.checked })}
@@ -468,8 +468,8 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Show performance metrics</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-secondary"
                   bind:checked={$config.dashboard.showMetrics}
                   on:change={(e) => updateDashboardConfig({ showMetrics: e.currentTarget.checked })}
@@ -480,8 +480,8 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Show charts</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-accent"
                   bind:checked={$config.dashboard.showCharts}
                   on:change={(e) => updateDashboardConfig({ showCharts: e.currentTarget.checked })}
@@ -495,7 +495,7 @@
               </label>
               <div class="join" id="default-view-selection" role="radiogroup">
                 {#each defaultViewOptions as option}
-                  <input 
+                  <input
                     class="join-item btn"
                     type="radio"
                     name="defaultView"
@@ -513,7 +513,7 @@
               <label class="label" for="sessions-per-page">
                 <span class="label-text">Sessions per page</span>
               </label>
-              <input 
+              <input
                 id="sessions-per-page"
                 type="range"
                 min="10"
@@ -521,8 +521,8 @@
                 step="5"
                 class="range range-primary"
                 bind:value={$config.dashboard.sessionsPerPage}
-                on:input={(e) => updateDashboardConfig({ 
-                  sessionsPerPage: parseInt(e.currentTarget.value) 
+                on:input={(e) => updateDashboardConfig({
+                  sessionsPerPage: parseInt(e.currentTarget.value)
                 })}
               />
               <div class="text-center text-sm mt-1">
@@ -535,13 +535,13 @@
       {:else if activeTab === 'advanced'}
         <div class="settings-section">
           <h2 class="text-xl font-semibold mb-4">🔧 Advanced Settings</h2>
-          
+
           <div class="setting-group">
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Debug mode</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-warning"
                   bind:checked={$config.advanced.debugMode}
                   on:change={toggleDebugMode}
@@ -556,7 +556,7 @@
               <label class="label" for="log-level-select">
                 <span class="label-text">Log level</span>
               </label>
-              <select 
+              <select
                 id="log-level-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.advanced.logLevel}
@@ -572,15 +572,15 @@
               <label class="label" for="max-log-size">
                 <span class="label-text">Max log size (MB)</span>
               </label>
-              <input 
+              <input
                 id="max-log-size"
                 type="number"
                 min="1"
                 max="100"
                 class="input input-bordered w-full max-w-xs"
                 value={Math.round($config.advanced.maxLogSize / 1048576)}
-                on:input={(e) => updateAdvancedConfig({ 
-                  maxLogSize: parseInt(e.currentTarget.value) * 1048576 
+                on:input={(e) => updateAdvancedConfig({
+                  maxLogSize: parseInt(e.currentTarget.value) * 1048576
                 })}
               />
             </div>
@@ -588,8 +588,8 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Enable telemetry</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-info"
                   bind:checked={$config.advanced.enableTelemetry}
                   on:change={(e) => updateAdvancedConfig({ enableTelemetry: e.currentTarget.checked })}
@@ -601,7 +601,7 @@
             </div>
 
             <div class="mt-4">
-              <button 
+              <button
                 class="btn btn-outline btn-sm"
                 on:click={handleOpenLogs}
               >
@@ -614,20 +614,20 @@
       {:else if activeTab === 'system'}
         <div class="settings-section">
           <h2 class="text-xl font-semibold mb-4">🖥️ System Settings</h2>
-          
+
           <div class="setting-group">
             <h3 class="text-lg font-medium mb-3">Python Configuration</h3>
-            
+
             <div class="form-control">
               <label class="label" for="python-executable">
                 <span class="label-text">Python executable</span>
               </label>
-              <input 
+              <input
                 id="python-executable"
                 type="text"
                 class="input input-bordered w-full"
                 bind:value={$config.python.executable}
-                on:input={(e) => updateConfig({ 
+                on:input={(e) => updateConfig({
                   python: { ...$config.python, executable: e.currentTarget.value }
                 })}
                 placeholder="python3"
@@ -638,12 +638,12 @@
               <label class="label" for="python-venv">
                 <span class="label-text">Virtual environment (optional)</span>
               </label>
-              <input 
+              <input
                 id="python-venv"
                 type="text"
                 class="input input-bordered w-full"
                 bind:value={$config.python.virtualEnv}
-                on:input={(e) => updateConfig({ 
+                on:input={(e) => updateConfig({
                   python: { ...$config.python, virtualEnv: e.currentTarget.value }
                 })}
                 placeholder="/path/to/venv"
@@ -653,17 +653,17 @@
 
           <div class="setting-group">
             <h3 class="text-lg font-medium mb-3">Tmux Configuration</h3>
-            
+
             <div class="form-control">
               <label class="label" for="tmux-executable">
                 <span class="label-text">Tmux executable</span>
               </label>
-              <input 
+              <input
                 id="tmux-executable"
                 type="text"
                 class="input input-bordered w-full"
                 bind:value={$config.tmux.executable}
-                on:input={(e) => updateConfig({ 
+                on:input={(e) => updateConfig({
                   tmux: { ...$config.tmux, executable: e.currentTarget.value }
                 })}
                 placeholder="tmux"
@@ -673,11 +673,11 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Auto-attach to sessions</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-primary"
                   bind:checked={$config.tmux.autoAttach}
-                  on:change={(e) => updateConfig({ 
+                  on:change={(e) => updateConfig({
                     tmux: { ...$config.tmux, autoAttach: e.currentTarget.checked }
                   })}
                 />
@@ -687,11 +687,11 @@
             <div class="form-control">
               <label class="label cursor-pointer">
                 <span class="label-text">Enable mouse mode</span>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="toggle toggle-secondary"
                   bind:checked={$config.tmux.mouseMode}
-                  on:change={(e) => updateConfig({ 
+                  on:change={(e) => updateConfig({
                     tmux: { ...$config.tmux, mouseMode: e.currentTarget.checked }
                   })}
                 />
@@ -701,9 +701,9 @@
 
           <div class="setting-group">
             <h3 class="text-lg font-medium mb-3">Application Actions</h3>
-            
+
             <div class="flex gap-3">
-              <button 
+              <button
                 class="btn btn-warning btn-sm"
                 on:click={handleRestart}
               >
@@ -716,19 +716,19 @@
       {:else if activeTab === 'import-export'}
         <div class="settings-section">
           <h2 class="text-xl font-semibold mb-4">📁 Import/Export Settings</h2>
-          
+
           <div class="setting-group">
             <h3 class="text-lg font-medium mb-3">Configuration Backup</h3>
-            
+
             <div class="flex gap-3 mb-4">
-              <button 
+              <button
                 class="btn btn-primary btn-sm"
                 on:click={handleExport}
               >
                 📤 Export Configuration
               </button>
-              
-              <button 
+
+              <button
                 class="btn btn-secondary btn-sm"
                 on:click={() => importFileInput.click()}
               >
@@ -736,7 +736,7 @@
               </button>
             </div>
 
-            <input 
+            <input
               bind:this={importFileInput}
               type="file"
               accept=".json"
@@ -764,19 +764,19 @@
   .settings-page {
     @apply max-w-7xl mx-auto;
   }
-  
+
   .settings-section {
     @apply bg-base-100 rounded-lg border border-base-content/10 p-6;
   }
-  
+
   .setting-group {
     @apply space-y-4 mb-6 pb-6 border-b border-base-content/10 last:border-b-0 last:mb-0 last:pb-0;
   }
-  
+
   .menu-item {
     @apply w-full text-left;
   }
-  
+
   .menu-item.active {
     @apply bg-primary text-primary-content;
   }

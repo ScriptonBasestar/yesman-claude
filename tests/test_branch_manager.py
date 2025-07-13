@@ -1,13 +1,12 @@
 """Tests for BranchManager class"""
 
-import pytest
-import tempfile
 import subprocess
-from pathlib import Path
 from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from libs.multi_agent.branch_manager import BranchManager, BranchInfo
+import pytest
+
+from libs.multi_agent.branch_manager import BranchInfo, BranchManager
 
 
 class TestBranchManager:
@@ -22,17 +21,19 @@ class TestBranchManager:
         # Initialize git repo
         subprocess.run(["git", "init"], cwd=repo_path, check=True)
         subprocess.run(
-            ["git", "config", "user.email", "test@example.com"], cwd=repo_path
+            ["git", "config", "user.email", "test@example.com"],
+            check=False,
+            cwd=repo_path,
         )
-        subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_path)
+        subprocess.run(["git", "config", "user.name", "Test User"], check=False, cwd=repo_path)
 
         # Create initial commit
         (repo_path / "README.md").write_text("# Test Repo")
-        subprocess.run(["git", "add", "."], cwd=repo_path)
-        subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path)
+        subprocess.run(["git", "add", "."], check=False, cwd=repo_path)
+        subprocess.run(["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path)
 
         # Create develop branch
-        subprocess.run(["git", "checkout", "-b", "develop"], cwd=repo_path)
+        subprocess.run(["git", "checkout", "-b", "develop"], check=False, cwd=repo_path)
 
         return repo_path
 
@@ -68,7 +69,8 @@ class TestBranchManager:
             ]
 
             branch_name = branch_manager.create_feature_branch(
-                "test-issue-123", base_branch="develop"
+                "test-issue-123",
+                base_branch="develop",
             )
 
             assert branch_name.startswith("feat/multi-agent/test-issue-123-")
@@ -91,7 +93,7 @@ class TestBranchManager:
             ]
 
             branch_name = branch_manager.create_feature_branch(
-                "Test Issue #123 (with special chars!)"
+                "Test Issue #123 (with special chars!)",
             )
 
             # Check sanitization
@@ -120,7 +122,7 @@ class TestBranchManager:
 
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.return_value = MagicMock(
-                stdout="  develop\n  feat/multi-agent/issue1\n  feat/multi-agent/issue2\n"
+                stdout="  develop\n  feat/multi-agent/issue1\n  feat/multi-agent/issue2\n",
             )
 
             active = branch_manager.list_active_branches()
@@ -142,7 +144,7 @@ class TestBranchManager:
                 MagicMock(stdout="feat/multi-agent/test\n"),  # branch exists
                 MagicMock(stdout="2\t5"),  # ahead/behind
                 MagicMock(
-                    stdout="abc123|John Doe|2024-01-10|Test commit"
+                    stdout="abc123|John Doe|2024-01-10|Test commit",
                 ),  # last commit
             ]
 
@@ -180,14 +182,13 @@ class TestBranchManager:
 
         # Update non-existent branch
         branch_manager.update_branch_metadata(
-            branch_name, {"agent_id": "agent-1", "task": "implement feature"}
+            branch_name,
+            {"agent_id": "agent-1", "task": "implement feature"},
         )
 
         assert branch_name in branch_manager.branches
         assert branch_manager.branches[branch_name].metadata["agent_id"] == "agent-1"
-        assert (
-            branch_manager.branches[branch_name].metadata["task"] == "implement feature"
-        )
+        assert branch_manager.branches[branch_name].metadata["task"] == "implement feature"
 
     def test_mark_branch_merged(self, branch_manager):
         """Test marking branch as merged"""
@@ -247,7 +248,8 @@ class TestBranchManager:
             ]
 
             conflicts = branch_manager.get_branch_conflicts(
-                "feat/multi-agent/test", "develop"
+                "feat/multi-agent/test",
+                "develop",
             )
 
             assert conflicts["has_conflicts"] is True

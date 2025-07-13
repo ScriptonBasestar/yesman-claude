@@ -1,6 +1,9 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from libs.dashboard import DashboardLauncher
+
 
 class TestInterfaceDetection:
     """Tests for dashboard interface detection and availability"""
@@ -9,14 +12,15 @@ class TestInterfaceDetection:
     def temp_project_root(self):
         """Create temporary project directory"""
         import tempfile
+
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
-            
+
             # Create tauri-dashboard directory with package.json
             tauri_dir = project_root / "tauri-dashboard"
             tauri_dir.mkdir()
             (tauri_dir / "package.json").write_text('{"name": "test-dashboard"}')
-            
+
             yield project_root
 
     @pytest.fixture
@@ -28,20 +32,20 @@ class TestInterfaceDetection:
         """Test 1: Interface detection and availability checking"""
         # Test auto-detection
         best_interface = launcher.detect_best_interface()
-        assert best_interface in ['tui', 'web', 'tauri']
-        
+        assert best_interface in ["tui", "web", "tauri"]
+
         # Test interface availability
         interfaces = launcher.get_available_interfaces()
         assert len(interfaces) == 3
-        assert 'tui' in interfaces
-        assert 'web' in interfaces
-        assert 'tauri' in interfaces
-        
+        assert "tui" in interfaces
+        assert "web" in interfaces
+        assert "tauri" in interfaces
+
         # Test TUI always available
-        assert interfaces['tui'].available is True
-        
+        assert interfaces["tui"].available is True
+
         # Test system requirements
         requirements = launcher.check_system_requirements()
-        assert 'tui' in requirements
-        assert 'web' in requirements
-        assert 'tauri' in requirements
+        assert "tui" in requirements
+        assert "web" in requirements
+        assert "tauri" in requirements

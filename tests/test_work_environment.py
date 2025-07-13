@@ -1,14 +1,12 @@
 """Tests for WorkEnvironmentManager"""
 
-import pytest
-import tempfile
-import shutil
 import os
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
+from unittest.mock import MagicMock, patch
 
-from libs.multi_agent.work_environment import WorkEnvironmentManager, WorkEnvironment
+import pytest
+
+from libs.multi_agent.work_environment import WorkEnvironment, WorkEnvironmentManager
 
 
 class TestWorkEnvironmentManager:
@@ -25,20 +23,22 @@ class TestWorkEnvironmentManager:
 
         subprocess.run(["git", "init"], cwd=repo_path, check=True)
         subprocess.run(
-            ["git", "config", "user.email", "test@example.com"], cwd=repo_path
+            ["git", "config", "user.email", "test@example.com"],
+            check=False,
+            cwd=repo_path,
         )
-        subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_path)
+        subprocess.run(["git", "config", "user.name", "Test User"], check=False, cwd=repo_path)
 
         # Create initial files
         (repo_path / "README.md").write_text("# Test Repo")
         (repo_path / "requirements.txt").write_text("pytest>=6.0\nclick>=8.0")
 
         # Initial commit
-        subprocess.run(["git", "add", "."], cwd=repo_path)
-        subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path)
+        subprocess.run(["git", "add", "."], check=False, cwd=repo_path)
+        subprocess.run(["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path)
 
         # Create test branch
-        subprocess.run(["git", "checkout", "-b", "test-branch"], cwd=repo_path)
+        subprocess.run(["git", "checkout", "-b", "test-branch"], check=False, cwd=repo_path)
 
         return repo_path
 
@@ -67,9 +67,7 @@ class TestWorkEnvironmentManager:
             with patch.object(manager, "_create_venv") as mock_venv:
                 with patch.object(manager, "_setup_environment") as mock_setup:
                     # Mock return values
-                    mock_worktree.return_value = (
-                        manager.work_dir / "worktrees" / "test-branch"
-                    )
+                    mock_worktree.return_value = manager.work_dir / "worktrees" / "test-branch"
                     mock_venv.return_value = manager.work_dir / "venvs" / "test-branch"
 
                     # Create environment
@@ -275,7 +273,7 @@ class TestWorkEnvironmentManager:
 
             # Verify git worktree removal
             mock_run.assert_called_with(
-                ["git", "worktree", "remove", str(env.worktree_path)]
+                ["git", "worktree", "remove", str(env.worktree_path)],
             )
 
             # Verify removed from environments
@@ -319,7 +317,8 @@ class TestWorkEnvironmentManager:
 
         # Create new manager to test loading
         new_manager = WorkEnvironmentManager(
-            repo_path=str(manager.repo_path), work_dir=str(manager.work_dir)
+            repo_path=str(manager.repo_path),
+            work_dir=str(manager.work_dir),
         )
 
         assert len(new_manager.environments) == 1

@@ -1,31 +1,28 @@
 """Tests for CodeReviewEngine module"""
 
-import pytest
 import asyncio
 import tempfile
-import os
+from datetime import datetime
 from pathlib import Path
-from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.code_review_engine import (
+    CodeReview,
     CodeReviewEngine,
-    ReviewType,
+    QualityMetric,
+    QualityMetrics,
+    ReviewFinding,
     ReviewSeverity,
     ReviewStatus,
-    QualityMetric,
-    ReviewFinding,
-    QualityMetrics,
-    CodeReview,
-    ReviewSummary,
+    ReviewType,
 )
 from libs.multi_agent.collaboration_engine import (
     CollaborationEngine,
-    MessageType,
-    MessagePriority,
 )
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.branch_manager import BranchManager
 
 
 @pytest.fixture
@@ -40,7 +37,8 @@ def temp_repo():
 
         # Create a Python file with various issues
         test_file = repo_path / "src" / "test_module.py"
-        test_file.write_text('''
+        test_file.write_text(
+            '''
 """Test module for code review testing"""
 
 import os
@@ -51,12 +49,12 @@ def long_function_with_many_issues(param1, param2, param3, param4, param5, param
     """This function has many issues that should be detected"""
     password = "hardcoded_secret_123"  # Security issue
     result = ""
-    
+
     # Performance issue: range(len())
     for i in range(len(param1)):
         # Performance issue: string concatenation
         result += str(param1[i])
-    
+
     # Long function body to trigger maintainability warning
     if param2:
         if param3:
@@ -91,35 +89,37 @@ def long_function_with_many_issues(param1, param2, param3, param4, param5, param
                                 print("Line 23")
                                 print("Line 24")
                                 print("Line 25")
-    
+
     return result
 
 
 class TestClassWithoutDocstring:
     def public_method_without_docstring(self):
         pass
-    
+
     def _private_method(self):
         pass
 
 
 def function_without_docstring():
     pass
-''')
+'''
+        )
 
         # Create a simple good file
         good_file = repo_path / "src" / "good_module.py"
-        good_file.write_text('''
+        good_file.write_text(
+            '''
 """A well-written module for testing"""
 
 
 def well_written_function(data: list) -> str:
     """
     A well-documented function with good practices
-    
+
     Args:
         data: Input data to process
-        
+
     Returns:
         Processed result as string
     """
@@ -128,15 +128,16 @@ def well_written_function(data: list) -> str:
 
 class WellWrittenClass:
     """A well-documented class"""
-    
+
     def __init__(self, value: str):
         """Initialize with a value"""
         self.value = value
-    
+
     def process(self) -> str:
         """Process the value"""
         return self.value.upper()
-''')
+'''
+        )
 
         yield repo_path
 
@@ -169,7 +170,10 @@ def mock_branch_manager():
 
 @pytest.fixture
 async def code_review_engine(
-    temp_repo, mock_collaboration_engine, mock_semantic_analyzer, mock_branch_manager
+    temp_repo,
+    mock_collaboration_engine,
+    mock_semantic_analyzer,
+    mock_branch_manager,
 ):
     """Create a CodeReviewEngine instance for testing"""
     engine = CodeReviewEngine(
@@ -231,9 +235,7 @@ class TestCodeReviewEngine:
         findings = await code_review_engine._check_security(["src/test_module.py"])
 
         # Should detect hardcoded password
-        security_findings = [
-            f for f in findings if "hardcoded secret" in f.message.lower()
-        ]
+        security_findings = [f for f in findings if "hardcoded secret" in f.message.lower()]
         assert len(security_findings) > 0
 
         for finding in security_findings:
@@ -262,7 +264,7 @@ class TestCodeReviewEngine:
     async def test_automated_review_maintainability(self, code_review_engine):
         """Test automated maintainability review"""
         findings = await code_review_engine._check_maintainability(
-            ["src/test_module.py"]
+            ["src/test_module.py"],
         )
 
         # Should detect long function
@@ -311,7 +313,7 @@ class TestCodeReviewEngine:
     async def test_quality_metrics_calculation(self, code_review_engine):
         """Test quality metrics calculation"""
         metrics = await code_review_engine._calculate_quality_metrics(
-            "src/test_module.py"
+            "src/test_module.py",
         )
 
         assert metrics.file_path == "src/test_module.py"
@@ -326,21 +328,17 @@ class TestCodeReviewEngine:
     async def test_quality_check_multiple_files(self, code_review_engine):
         """Test quality check on multiple files"""
         metrics_list = await code_review_engine.perform_quality_check(
-            ["src/test_module.py", "src/good_module.py"]
+            ["src/test_module.py", "src/good_module.py"],
         )
 
         assert len(metrics_list) == 2
 
         # Test module should have violations
-        test_metrics = next(
-            m for m in metrics_list if m.file_path == "src/test_module.py"
-        )
+        test_metrics = next(m for m in metrics_list if m.file_path == "src/test_module.py")
         assert len(test_metrics.violations) > 0
 
         # Good module should have fewer or no violations
-        good_metrics = next(
-            m for m in metrics_list if m.file_path == "src/good_module.py"
-        )
+        good_metrics = next(m for m in metrics_list if m.file_path == "src/good_module.py")
         assert len(good_metrics.violations) <= len(test_metrics.violations)
 
     @pytest.mark.asyncio
@@ -369,7 +367,7 @@ class TestCodeReviewEngine:
             QualityMetrics(
                 file_path="test.py",
                 violations=[QualityMetric.CYCLOMATIC_COMPLEXITY],
-            )
+            ),
         ]
 
         score = code_review_engine._calculate_overall_score(findings, metrics)
@@ -396,7 +394,7 @@ class TestCodeReviewEngine:
                     severity=ReviewSeverity.LOW,
                     file_path="test.py",
                     message="Minor style issue",
-                )
+                ),
             ],
             overall_score=9.0,
         )
@@ -413,7 +411,7 @@ class TestCodeReviewEngine:
                 severity=ReviewSeverity.CRITICAL,
                 file_path="test.py",
                 message="Critical security issue",
-            )
+            ),
         )
 
         # Should not be auto-approvable with critical issues
@@ -443,11 +441,7 @@ class TestCodeReviewEngine:
         assert any(r.review_id == review_id for r in code_review_engine.review_history)
 
         # Check that approval message was sent
-        approval_messages = [
-            call
-            for call in mock_collaboration_engine.send_message.call_args_list
-            if "approved" in str(call)
-        ]
+        approval_messages = [call for call in mock_collaboration_engine.send_message.call_args_list if "approved" in str(call)]
         assert len(approval_messages) > 0
 
     @pytest.mark.asyncio
@@ -474,11 +468,7 @@ class TestCodeReviewEngine:
         assert any(r.review_id == review_id for r in code_review_engine.review_history)
 
         # Check that rejection message was sent
-        rejection_messages = [
-            call
-            for call in mock_collaboration_engine.send_message.call_args_list
-            if "rejected" in str(call)
-        ]
+        rejection_messages = [call for call in mock_collaboration_engine.send_message.call_args_list if "rejected" in str(call)]
         assert len(rejection_messages) > 0
 
     @pytest.mark.asyncio
@@ -528,7 +518,7 @@ class TestCodeReviewEngine:
                         severity=ReviewSeverity.LOW,
                         file_path="file1.py",
                         message="Style issue",
-                    )
+                    ),
                 ],
             ),
             CodeReview(
@@ -547,7 +537,7 @@ class TestCodeReviewEngine:
                         severity=ReviewSeverity.CRITICAL,
                         file_path="file2.py",
                         message="Security issue",
-                    )
+                    ),
                 ],
             ),
         ]
@@ -634,7 +624,8 @@ def function():
 '''
 
         mi = code_review_engine._calculate_maintainability_index(
-            well_documented_code, 10
+            well_documented_code,
+            10,
         )
         assert mi > 50.0
 
@@ -645,7 +636,9 @@ def function():
 
     @pytest.mark.asyncio
     async def test_full_automated_review_flow(
-        self, code_review_engine, mock_collaboration_engine
+        self,
+        code_review_engine,
+        mock_collaboration_engine,
     ):
         """Test full automated review flow"""
         # Initiate review
@@ -662,11 +655,7 @@ def function():
         if not review:
             # Review might have been auto-approved and moved to history
             review = next(
-                (
-                    r
-                    for r in code_review_engine.review_history
-                    if r.review_id == review_id
-                ),
+                (r for r in code_review_engine.review_history if r.review_id == review_id),
                 None,
             )
 
@@ -676,11 +665,7 @@ def function():
         assert review.overall_score >= 0.0
 
         # Review should not be auto-approved due to security issues
-        assert (
-            not review.auto_approved
-            or review.overall_score
-            < code_review_engine.review_config["auto_approve_threshold"]
-        )
+        assert not review.auto_approved or review.overall_score < code_review_engine.review_config["auto_approve_threshold"]
 
 
 class TestReviewDataClasses:

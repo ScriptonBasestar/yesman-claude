@@ -32,9 +32,9 @@ print_status() {
 run_test_suite() {
     local suite_name=$1
     local test_command=$2
-    
+
     print_status "INFO" "Running $suite_name..."
-    
+
     if $test_command; then
         print_status "PASS" "$suite_name completed successfully"
         ((PASSED_TESTS++))
@@ -49,57 +49,57 @@ run_test_suite() {
 main() {
     print_status "INFO" "Starting Yesman-Claude Test Suite"
     print_status "INFO" "================================="
-    
+
     # Check Python version
     print_status "INFO" "Python version: $(python --version)"
-    
+
     # Install test dependencies if needed
     if ! python -c "import pytest" 2>/dev/null; then
         print_status "WARN" "pytest not found, installing test dependencies..."
         pip install pytest pytest-cov pytest-mock pytest-asyncio
     fi
-    
+
     # Clean previous test artifacts
     print_status "INFO" "Cleaning previous test artifacts..."
     rm -rf .pytest_cache/ htmlcov/ .coverage
-    
+
     # Run unit tests
     echo ""
     print_status "INFO" "UNIT TESTS"
     print_status "INFO" "----------"
-    
+
     run_test_suite "Core Unit Tests" "python -m pytest tests/unit/core/ -v"
     run_test_suite "Command Unit Tests" "python -m pytest tests/unit/commands/ -v"
     run_test_suite "API Unit Tests" "python -m pytest tests/unit/api/ -v"
-    
+
     # Run integration tests
     echo ""
     print_status "INFO" "INTEGRATION TESTS"
     print_status "INFO" "-----------------"
-    
+
     run_test_suite "Python Integration Tests" "python -m pytest tests/integration/ -v -m 'not slow'"
-    
+
     # Run shell integration tests if available
     if [ -f "tests/integration/run_tests.sh" ]; then
         run_test_suite "Shell Integration Tests" "cd tests/integration && ./run_tests.sh --quiet"
     fi
-    
+
     # Run coverage analysis
     echo ""
     print_status "INFO" "COVERAGE ANALYSIS"
     print_status "INFO" "-----------------"
-    
+
     python -m pytest tests/ \
         --cov=libs \
         --cov=commands \
         --cov-report=term-missing:skip-covered \
         --cov-report=html \
         --quiet
-    
+
     # Extract coverage percentage
     COVERAGE=$(python -m pytest tests/ --cov=libs --cov=commands --cov-report=term | grep TOTAL | awk '{print $4}')
     print_status "INFO" "Total coverage: $COVERAGE"
-    
+
     # Check coverage threshold
     COVERAGE_NUM=$(echo $COVERAGE | sed 's/%//')
     if (( $(echo "$COVERAGE_NUM < 80" | bc -l) )); then
@@ -107,7 +107,7 @@ main() {
     else
         print_status "PASS" "Coverage meets threshold"
     fi
-    
+
     # Summary
     echo ""
     print_status "INFO" "TEST SUMMARY"
@@ -120,9 +120,9 @@ main() {
     if [ $SKIPPED_TESTS -gt 0 ]; then
         print_status "WARN" "Skipped: $SKIPPED_TESTS"
     fi
-    
+
     print_status "INFO" "Coverage report: htmlcov/index.html"
-    
+
     # Exit with appropriate code
     if [ $FAILED_TESTS -gt 0 ]; then
         exit 1

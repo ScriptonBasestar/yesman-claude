@@ -1,5 +1,5 @@
-import pytest
 from libs.dashboard.renderers import RendererFactory, RenderFormat
+
 
 class TestMissingDependencies:
     """Tests for behavior with missing optional dependencies"""

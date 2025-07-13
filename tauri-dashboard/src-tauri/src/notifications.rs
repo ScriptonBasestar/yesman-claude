@@ -23,7 +23,7 @@ pub fn notify_controller_status_change(
 ) -> Result<(), String> {
     let title = "Controller Status Changed".to_string();
     let body = format!("{}: {}", session_name, status);
-    
+
     Notification::new(&app.config().tauri.bundle.identifier)
         .title(&title)
         .body(&body)
@@ -40,7 +40,7 @@ pub fn notify_session_event(
 ) -> Result<(), String> {
     let title = format!("Session Event: {}", event);
     let body = format!("{}: {}", session_name, message);
-    
+
     Notification::new(&app.config().tauri.bundle.identifier)
         .title(&title)
         .body(&body)

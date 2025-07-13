@@ -1,34 +1,30 @@
 """Tests for SemanticMerger automatic conflict resolution"""
 
-import pytest
-import ast
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
+from unittest.mock import AsyncMock, Mock
 
-from libs.multi_agent.semantic_merger import (
-    SemanticMerger,
-    MergeStrategy,
-    MergeResolution,
-    MergeResult,
-    ConflictResolutionRule,
-)
-from libs.multi_agent.semantic_analyzer import (
-    SemanticAnalyzer,
-    SemanticConflict,
-    SemanticConflictType,
-    FunctionSignature,
-    ClassDefinition,
-    SemanticContext,
-    SymbolVisibility,
-)
+import pytest
+
+from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import (
     ConflictResolutionEngine,
     ConflictSeverity,
-    ResolutionStrategy,
 )
-from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.semantic_analyzer import (
+    FunctionSignature,
+    SemanticAnalyzer,
+    SemanticConflict,
+    SemanticConflictType,
+    SemanticContext,
+)
+from libs.multi_agent.semantic_merger import (
+    ConflictResolutionRule,
+    MergeResolution,
+    MergeResult,
+    MergeStrategy,
+    SemanticMerger,
+)
 
 
 class TestMergeResult:
@@ -155,9 +151,7 @@ class TestSemanticMerger:
         # Check specific rules
         import_rule = next((r for r in rules if r.rule_id == "import_order"), None)
         assert import_rule is not None
-        assert (
-            SemanticConflictType.IMPORT_SEMANTIC_CONFLICT in import_rule.conflict_types
-        )
+        assert SemanticConflictType.IMPORT_SEMANTIC_CONFLICT in import_rule.conflict_types
         assert import_rule.resolution_strategy == MergeStrategy.SEMANTIC_UNION
 
     def test_validate_ast_integrity(self, merger):
@@ -205,7 +199,7 @@ def test_function(
                 branch1="branch1",
                 branch2="branch2",
                 description="Function signature conflict",
-            )
+            ),
         ]
 
         strategy1 = merger._select_optimal_strategy(conflicts1)
@@ -222,7 +216,7 @@ def test_function(
                 branch1="branch1",
                 branch2="branch2",
                 description="Import conflict",
-            )
+            ),
         ]
 
         strategy2 = merger._select_optimal_strategy(conflicts2)
@@ -239,7 +233,7 @@ def test_function(
                 branch1="branch1",
                 branch2="branch2",
                 description="Class interface conflict",
-            )
+            ),
         ]
 
         strategy3 = merger._select_optimal_strategy(conflicts3)
@@ -257,14 +251,18 @@ def test_function(
                 branch1="branch1",
                 branch2="branch2",
                 description="Test conflict",
-            )
+            ),
         ]
 
         content = "def test_function():\n    return True"
 
         # Test prefer first
         result1 = merger._prefer_branch_merge(
-            "merge-1", "test.py", content, conflicts, "first"
+            "merge-1",
+            "test.py",
+            content,
+            conflicts,
+            "first",
         )
         assert result1.resolution == MergeResolution.AUTO_RESOLVED
         assert result1.strategy_used == MergeStrategy.PREFER_FIRST
@@ -274,7 +272,11 @@ def test_function(
 
         # Test prefer second
         result2 = merger._prefer_branch_merge(
-            "merge-2", "test.py", content, conflicts, "second"
+            "merge-2",
+            "test.py",
+            content,
+            conflicts,
+            "second",
         )
         assert result2.strategy_used == MergeStrategy.PREFER_SECOND
 
@@ -467,12 +469,16 @@ def function2():
         # Create semantic contexts
         context1 = SemanticContext(file_path="test.py")
         context1.functions["test_func"] = FunctionSignature(
-            name="test_func", args=["x"], return_type="int"
+            name="test_func",
+            args=["x"],
+            return_type="int",
         )
 
         context2 = SemanticContext(file_path="test.py")
         context2.functions["test_func"] = FunctionSignature(
-            name="test_func", args=["x", "y"], return_type="int"
+            name="test_func",
+            args=["x", "y"],
+            return_type="int",
         )
 
         # Function signature conflict
@@ -491,7 +497,11 @@ def function2():
         content2 = "def test_func(x, y): return x + y"
 
         result = await merger._resolve_individual_conflict(
-            conflict, content1, content2, context1, context2
+            conflict,
+            content1,
+            content2,
+            context1,
+            context2,
         )
 
         assert "resolved" in result
@@ -509,7 +519,10 @@ def function2():
         merger.semantic_analyzer._analyze_file_semantic_conflicts.return_value = []
 
         result = await merger.perform_semantic_merge(
-            "test.py", "branch1", "branch2", strategy=MergeStrategy.PREFER_SECOND
+            "test.py",
+            "branch1",
+            "branch2",
+            strategy=MergeStrategy.PREFER_SECOND,
         )
 
         assert result.file_path == "test.py"
@@ -550,9 +563,7 @@ def function2():
         results = await merger.batch_merge_files(file_paths, "branch1", "branch2")
 
         assert len(results) == 3
-        assert all(
-            result.resolution == MergeResolution.AUTO_RESOLVED for result in results
-        )
+        assert all(result.resolution == MergeResolution.AUTO_RESOLVED for result in results)
         assert all(result.merge_confidence == 0.8 for result in results)
 
     @pytest.mark.asyncio

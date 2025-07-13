@@ -2,36 +2,25 @@
 
 import ast
 import asyncio
+import hashlib
 import logging
-import re
-from typing import Dict, List, Optional, Any, Tuple, Union, Set
+from collections import defaultdict
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime
 from enum import Enum
-from collections import defaultdict
-import difflib
-import hashlib
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
+from .branch_manager import BranchManager
 from .conflict_resolution import (
-    ConflictInfo,
-    ConflictType,
-    ConflictSeverity,
-    ResolutionStrategy,
-    ResolutionResult,
     ConflictResolutionEngine,
 )
 from .semantic_analyzer import (
     SemanticAnalyzer,
     SemanticConflict,
     SemanticConflictType,
-    FunctionSignature,
-    ClassDefinition,
     SemanticContext,
-    SymbolVisibility,
 )
-from .branch_manager import BranchManager
-
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +152,7 @@ class SemanticMerger:
             MergeResult with merge outcome and details
         """
         logger.info(
-            f"Performing semantic merge for {file_path} between {branch1} and {branch2}"
+            f"Performing semantic merge for {file_path} between {branch1} and {branch2}",
         )
 
         merge_id = f"merge_{branch1}_{branch2}_{hashlib.md5(file_path.encode()).hexdigest()[:8]}"
@@ -191,13 +180,18 @@ class SemanticMerger:
 
             # Apply resolution strategy
             merge_result = await self._apply_merge_strategy(
-                merge_id, file_path, content1, content2, conflicts, strategy
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
+                strategy,
             )
 
             # Validate semantic integrity
             if merge_result.merged_content and self.enable_ast_validation:
                 merge_result.semantic_integrity = self._validate_ast_integrity(
-                    merge_result.merged_content
+                    merge_result.merged_content,
                 )
 
             # Store result
@@ -236,7 +230,10 @@ class SemanticMerger:
         async def merge_file(file_path: str) -> MergeResult:
             async with semaphore:
                 return await self.perform_semantic_merge(
-                    file_path, branch1, branch2, target_branch
+                    file_path,
+                    branch1,
+                    branch2,
+                    target_branch,
                 )
 
         tasks = [merge_file(fp) for fp in file_paths]
@@ -254,7 +251,7 @@ class SemanticMerger:
                         resolution=MergeResolution.MERGE_FAILED,
                         strategy_used=self.default_strategy,
                         metadata={"error": str(result)},
-                    )
+                    ),
                 )
             else:
                 merge_results.append(result)
@@ -263,7 +260,8 @@ class SemanticMerger:
         return merge_results
 
     async def auto_resolve_conflicts(
-        self, conflicts: List[SemanticConflict]
+        self,
+        conflicts: List[SemanticConflict],
     ) -> List[MergeResult]:
         """
         Automatically resolve a list of semantic conflicts
@@ -323,36 +321,68 @@ class SemanticMerger:
 
         if strategy == MergeStrategy.INTELLIGENT_MERGE:
             return await self._intelligent_merge(
-                merge_id, file_path, content1, content2, conflicts
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
             )
         elif strategy == MergeStrategy.AST_BASED_MERGE:
             return await self._ast_based_merge(
-                merge_id, file_path, content1, content2, conflicts
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
             )
         elif strategy == MergeStrategy.FUNCTION_LEVEL_MERGE:
             return await self._function_level_merge(
-                merge_id, file_path, content1, content2, conflicts
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
             )
         elif strategy == MergeStrategy.SEMANTIC_UNION:
             return await self._semantic_union_merge(
-                merge_id, file_path, content1, content2, conflicts
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
             )
         elif strategy == MergeStrategy.CONTEXTUAL_MERGE:
             return await self._contextual_merge(
-                merge_id, file_path, content1, content2, conflicts
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
             )
         elif strategy == MergeStrategy.PREFER_FIRST:
             return self._prefer_branch_merge(
-                merge_id, file_path, content1, conflicts, "first"
+                merge_id,
+                file_path,
+                content1,
+                conflicts,
+                "first",
             )
         elif strategy == MergeStrategy.PREFER_SECOND:
             return self._prefer_branch_merge(
-                merge_id, file_path, content2, conflicts, "second"
+                merge_id,
+                file_path,
+                content2,
+                conflicts,
+                "second",
             )
         else:
             # Fallback to intelligent merge
             return await self._intelligent_merge(
-                merge_id, file_path, content1, content2, conflicts
+                merge_id,
+                file_path,
+                content1,
+                content2,
+                conflicts,
             )
 
     async def _intelligent_merge(
@@ -372,10 +402,12 @@ class SemanticMerger:
 
             # Extract semantic contexts
             context1 = self.semantic_analyzer._extract_semantic_context(
-                file_path, content1
+                file_path,
+                content1,
             )
             context2 = self.semantic_analyzer._extract_semantic_context(
-                file_path, content2
+                file_path,
+                content2,
             )
 
             # Start with base content
@@ -387,7 +419,11 @@ class SemanticMerger:
             # Process each conflict type intelligently
             for conflict in conflicts:
                 resolution_result = await self._resolve_individual_conflict(
-                    conflict, content1, content2, context1, context2
+                    conflict,
+                    content1,
+                    content2,
+                    context1,
+                    context2,
                 )
 
                 if resolution_result["resolved"]:
@@ -395,17 +431,14 @@ class SemanticMerger:
                     confidence_scores.append(resolution_result["confidence"])
                     # Apply the resolution to merged content
                     merged_content = resolution_result.get(
-                        "merged_content", merged_content
+                        "merged_content",
+                        merged_content,
                     )
                 else:
                     unresolved_conflicts.append(conflict.conflict_id)
 
             # Calculate overall confidence
-            overall_confidence = (
-                sum(confidence_scores) / len(confidence_scores)
-                if confidence_scores
-                else 0.0
-            )
+            overall_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
 
             # Determine resolution status
             if not unresolved_conflicts:
@@ -481,15 +514,15 @@ class SemanticMerger:
             return MergeResult(
                 merge_id=merge_id,
                 file_path=file_path,
-                resolution=MergeResolution.AUTO_RESOLVED
-                if semantic_integrity
-                else MergeResolution.MERGE_FAILED,
+                resolution=MergeResolution.AUTO_RESOLVED if semantic_integrity else MergeResolution.MERGE_FAILED,
                 strategy_used=MergeStrategy.AST_BASED_MERGE,
                 merged_content=merged_content,
                 merge_confidence=0.8 if semantic_integrity else 0.0,
                 semantic_integrity=semantic_integrity,
                 diff_stats=self._calculate_diff_stats(
-                    content1, content2, merged_content
+                    content1,
+                    content2,
+                    merged_content,
                 ),
             )
 
@@ -535,7 +568,9 @@ class SemanticMerger:
                     func_conflict = self._find_function_conflict(func_name, conflicts)
                     if func_conflict:
                         merge_result = self._merge_function_definitions(
-                            functions1[func_name], functions2[func_name], func_conflict
+                            functions1[func_name],
+                            functions2[func_name],
+                            func_conflict,
                         )
                         merged_functions[func_name] = merge_result["content"]
 
@@ -562,14 +597,7 @@ class SemanticMerger:
             confidence = len(resolved_conflicts) / max(len(conflicts), 1)
 
             # Determine resolution status
-            if unresolved_conflicts:
-                resolution = (
-                    MergeResolution.PARTIAL_RESOLUTION
-                    if resolved_conflicts
-                    else MergeResolution.MANUAL_REQUIRED
-                )
-            else:
-                resolution = MergeResolution.AUTO_RESOLVED
+            resolution = (MergeResolution.PARTIAL_RESOLUTION if resolved_conflicts else MergeResolution.MANUAL_REQUIRED) if unresolved_conflicts else MergeResolution.AUTO_RESOLVED
 
             return MergeResult(
                 merge_id=merge_id,
@@ -582,7 +610,9 @@ class SemanticMerger:
                 merge_confidence=confidence,
                 semantic_integrity=True,
                 diff_stats=self._calculate_diff_stats(
-                    content1, content2, merged_content
+                    content1,
+                    content2,
+                    merged_content,
                 ),
             )
 
@@ -611,24 +641,32 @@ class SemanticMerger:
         try:
             # Extract semantic contexts
             context1 = self.semantic_analyzer._extract_semantic_context(
-                file_path, content1
+                file_path,
+                content1,
             )
             context2 = self.semantic_analyzer._extract_semantic_context(
-                file_path, content2
+                file_path,
+                content2,
             )
 
             # Create union of compatible elements
             merged_imports = self._merge_imports(context1.imports, context2.imports)
             merged_functions = self._merge_function_signatures(
-                context1.functions, context2.functions
+                context1.functions,
+                context2.functions,
             )
             merged_classes = self._merge_class_definitions(
-                context1.classes, context2.classes
+                context1.classes,
+                context2.classes,
             )
 
             # Reconstruct content from merged elements
             merged_content = self._reconstruct_from_semantic_elements(
-                merged_imports, merged_functions, merged_classes, content1, content2
+                merged_imports,
+                merged_functions,
+                merged_classes,
+                content1,
+                content2,
             )
 
             # Assess conflicts resolution
@@ -641,18 +679,10 @@ class SemanticMerger:
                 ]:
                     resolved_conflicts.append(conflict.conflict_id)
 
-            unresolved_conflicts = [
-                c.conflict_id
-                for c in conflicts
-                if c.conflict_id not in resolved_conflicts
-            ]
+            unresolved_conflicts = [c.conflict_id for c in conflicts if c.conflict_id not in resolved_conflicts]
 
             confidence = len(resolved_conflicts) / max(len(conflicts), 1)
-            resolution = (
-                MergeResolution.AUTO_RESOLVED
-                if not unresolved_conflicts
-                else MergeResolution.PARTIAL_RESOLUTION
-            )
+            resolution = MergeResolution.AUTO_RESOLVED if not unresolved_conflicts else MergeResolution.PARTIAL_RESOLUTION
 
             return MergeResult(
                 merge_id=merge_id,
@@ -665,7 +695,9 @@ class SemanticMerger:
                 merge_confidence=confidence,
                 semantic_integrity=True,
                 diff_stats=self._calculate_diff_stats(
-                    content1, content2, merged_content
+                    content1,
+                    content2,
+                    merged_content,
                 ),
             )
 
@@ -694,7 +726,11 @@ class SemanticMerger:
         # This would implement advanced contextual analysis
         # For now, delegate to intelligent merge
         return await self._intelligent_merge(
-            merge_id, file_path, content1, content2, conflicts
+            merge_id,
+            file_path,
+            content1,
+            content2,
+            conflicts,
         )
 
     def _prefer_branch_merge(
@@ -711,9 +747,7 @@ class SemanticMerger:
             merge_id=merge_id,
             file_path=file_path,
             resolution=MergeResolution.AUTO_RESOLVED,
-            strategy_used=MergeStrategy.PREFER_FIRST
-            if branch_preference == "first"
-            else MergeStrategy.PREFER_SECOND,
+            strategy_used=MergeStrategy.PREFER_FIRST if branch_preference == "first" else MergeStrategy.PREFER_SECOND,
             merged_content=content,
             conflicts_resolved=[c.conflict_id for c in conflicts],
             merge_confidence=1.0,
@@ -725,11 +759,16 @@ class SemanticMerger:
     # Helper methods
 
     async def _detect_file_conflicts(
-        self, file_path: str, branch1: str, branch2: str
+        self,
+        file_path: str,
+        branch1: str,
+        branch2: str,
     ) -> List[SemanticConflict]:
         """Detect conflicts in a specific file between branches"""
         return await self.semantic_analyzer._analyze_file_semantic_conflicts(
-            file_path, branch1, branch2
+            file_path,
+            branch1,
+            branch2,
         )
 
     async def _get_file_content(self, file_path: str, branch: str) -> Optional[str]:
@@ -745,7 +784,10 @@ class SemanticMerger:
             return False
 
     def _calculate_diff_stats(
-        self, content1: str, content2: str, merged: str
+        self,
+        content1: str,
+        content2: str,
+        merged: str,
     ) -> Dict[str, int]:
         """Calculate diff statistics for merge result"""
         lines1 = content1.split("\n")
@@ -790,7 +832,8 @@ class SemanticMerger:
         ]
 
     def _select_optimal_strategy(
-        self, conflicts: List[SemanticConflict]
+        self,
+        conflicts: List[SemanticConflict],
     ) -> MergeStrategy:
         """Select optimal merge strategy based on conflict types and patterns"""
 
@@ -832,17 +875,12 @@ class SemanticMerger:
                 merged_imports = self._merge_imports(context1.imports, context2.imports)
                 # Apply to content (simplified)
                 resolution_result.update(
-                    {"resolved": True, "confidence": 0.9, "strategy": "import_union"}
+                    {"resolved": True, "confidence": 0.9, "strategy": "import_union"},
                 )
 
-            elif (
-                conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE
-            ):
+            elif conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE:
                 # Intelligent function signature merge
-                if (
-                    conflict.symbol_name in context1.functions
-                    and conflict.symbol_name in context2.functions
-                ):
+                if conflict.symbol_name in context1.functions and conflict.symbol_name in context2.functions:
                     func1 = context1.functions[conflict.symbol_name]
                     func2 = context2.functions[conflict.symbol_name]
 
@@ -853,7 +891,7 @@ class SemanticMerger:
                                 "resolved": True,
                                 "confidence": 0.7,
                                 "strategy": "prefer_extended_signature",
-                            }
+                            },
                         )
 
             elif conflict.conflict_type == SemanticConflictType.VARIABLE_TYPE_CONFLICT:
@@ -863,7 +901,7 @@ class SemanticMerger:
                         "resolved": False,  # Usually requires manual intervention
                         "confidence": 0.0,
                         "strategy": "manual_required",
-                    }
+                    },
                 )
 
         except Exception as e:
@@ -872,14 +910,12 @@ class SemanticMerger:
         return resolution_result
 
     def _conflict_resolved_by_merge(
-        self, conflict: SemanticConflict, merge_result: MergeResult
+        self,
+        conflict: SemanticConflict,
+        merge_result: MergeResult,
     ) -> bool:
         """Check if a conflict was resolved by the merge operation"""
-        return (
-            merge_result.resolution
-            in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]
-            and merge_result.semantic_integrity
-        )
+        return merge_result.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION] and merge_result.semantic_integrity
 
     def _update_merge_stats(self, merge_result: MergeResult):
         """Update merge statistics"""
@@ -897,17 +933,16 @@ class SemanticMerger:
             self.merge_stats["semantic_integrity_maintained"] += 1
 
         # Update average confidence
-        total_confidence = self.merge_stats["average_confidence"] * (
-            self.merge_stats["total_merges"] - 1
-        )
-        self.merge_stats["average_confidence"] = (
-            total_confidence + merge_result.merge_confidence
-        ) / self.merge_stats["total_merges"]
+        total_confidence = self.merge_stats["average_confidence"] * (self.merge_stats["total_merges"] - 1)
+        self.merge_stats["average_confidence"] = (total_confidence + merge_result.merge_confidence) / self.merge_stats["total_merges"]
 
     # Placeholder methods for complex operations (would be fully implemented)
 
     def _merge_ast_trees(
-        self, tree1: ast.AST, tree2: ast.AST, conflicts: List[SemanticConflict]
+        self,
+        tree1: ast.AST,
+        tree2: ast.AST,
+        conflicts: List[SemanticConflict],
     ) -> ast.AST:
         """Merge two AST trees intelligently"""
         # Simplified implementation - would need complex AST merging logic
@@ -927,7 +962,7 @@ class SemanticMerger:
                     # Would need proper end line detection
                     end_line = start_line + 10  # Simplified
                     func_content = "\n".join(
-                        lines[start_line : min(end_line, len(lines))]
+                        lines[start_line : min(end_line, len(lines))],
                     )
                     functions[node.name] = func_content
         except Exception:
@@ -942,7 +977,7 @@ class SemanticMerger:
 
         for line in lines:
             if not line.strip().startswith("def ") and not line.strip().startswith(
-                "async def "
+                "async def ",
             ):
                 non_func_lines.append(line)
             else:
@@ -951,20 +986,21 @@ class SemanticMerger:
         return "\n".join(non_func_lines)
 
     def _find_function_conflict(
-        self, func_name: str, conflicts: List[SemanticConflict]
+        self,
+        func_name: str,
+        conflicts: List[SemanticConflict],
     ) -> Optional[SemanticConflict]:
         """Find conflict related to a specific function"""
         for conflict in conflicts:
-            if (
-                conflict.symbol_name == func_name
-                and conflict.conflict_type
-                == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE
-            ):
+            if conflict.symbol_name == func_name and conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE:
                 return conflict
         return None
 
     def _merge_function_definitions(
-        self, func1: str, func2: str, conflict: SemanticConflict
+        self,
+        func1: str,
+        func2: str,
+        conflict: SemanticConflict,
     ) -> Dict[str, Any]:
         """Merge two function definitions"""
         # Simplified implementation
@@ -1001,7 +1037,12 @@ class SemanticMerger:
         return merged
 
     def _reconstruct_from_semantic_elements(
-        self, imports, functions, classes, content1, content2
+        self,
+        imports,
+        functions,
+        classes,
+        content1,
+        content2,
     ):
         """Reconstruct source code from semantic elements"""
         # Simplified implementation - would need proper code generation
@@ -1011,18 +1052,9 @@ class SemanticMerger:
         """Get comprehensive summary of merge operations"""
         return {
             "total_merges": self.merge_stats["total_merges"],
-            "success_rate": (
-                self.merge_stats["successful_merges"]
-                / max(self.merge_stats["total_merges"], 1)
-            ),
-            "auto_resolution_rate": (
-                self.merge_stats["auto_resolved"]
-                / max(self.merge_stats["total_merges"], 1)
-            ),
-            "semantic_integrity_rate": (
-                self.merge_stats["semantic_integrity_maintained"]
-                / max(self.merge_stats["total_merges"], 1)
-            ),
+            "success_rate": (self.merge_stats["successful_merges"] / max(self.merge_stats["total_merges"], 1)),
+            "auto_resolution_rate": (self.merge_stats["auto_resolved"] / max(self.merge_stats["total_merges"], 1)),
+            "semantic_integrity_rate": (self.merge_stats["semantic_integrity_maintained"] / max(self.merge_stats["total_merges"], 1)),
             "average_confidence": self.merge_stats["average_confidence"],
             "strategy_performance": dict(self.success_rate_by_strategy),
             "recent_merges": [

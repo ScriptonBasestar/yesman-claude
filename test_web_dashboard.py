@@ -3,8 +3,9 @@
 임시 웹 대시보드 테스트 스크립트
 """
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from commands.dashboard import launch_web_dashboard

@@ -1,10 +1,10 @@
 """Shared types for multi-agent system"""
 
+import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any
-import subprocess
+from typing import Any, Dict, List, Optional
 
 
 class AgentState(Enum):

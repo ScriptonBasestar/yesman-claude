@@ -13,4 +13,4 @@
     "types": ["vite/client"]
   }
   // SvelteKit's "paths" are already handled by the "extends"
-} 
+}

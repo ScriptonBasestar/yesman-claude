@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-import click
-import yaml
 import logging
 from pathlib import Path
-from typing import Dict, Any, List
-from libs.yesman_config import YesmanConfig
+from typing import Any, Dict, List
+
+import click
+import libtmux  # type: ignore
+import yaml
 from tmuxp.workspace.builder import WorkspaceBuilder  # type: ignore
 from tmuxp.workspace.loader import expand  # type: ignore
-import libtmux  # type: ignore
+
+from libs.yesman_config import YesmanConfig
+
 
 class TmuxManager:
     def __init__(self, config: YesmanConfig):
@@ -16,7 +19,6 @@ class TmuxManager:
         # Directory for session templates
         self.templates_path = Path.home() / ".yesman" / "templates"
         self.templates_path.mkdir(parents=True, exist_ok=True)
-        
 
     def create_session(self, session_name: str, config_dict: Dict) -> bool:
         """Create tmux session from a YAML config file in templates directory"""
@@ -27,7 +29,7 @@ class TmuxManager:
             if server.find_where({"session_name": session_name_from_config}):
                 self.logger.warning(f"Session {session_name_from_config} already exists.")
                 return False
-            
+
             # print("--------------------------------")
             # # print(config_dict)
             # print(yaml.dump(config_dict))
@@ -39,7 +41,7 @@ class TmuxManager:
             builder = WorkspaceBuilder(config_dict, server=server)
             builder.build()
             self.logger.info(f"Session {session_name_from_config} created successfully.")
-            
+
             return True
         except Exception as e:
             # print e
@@ -58,11 +60,11 @@ class TmuxManager:
         projects: Dict[str, Any] = {}
         # Load global projects
         if global_path.exists():
-            with open(global_path, "r", encoding="utf-8") as f:
+            with open(global_path, encoding="utf-8") as f:
                 projects = yaml.safe_load(f) or {}
         # Override with local projects if present
         if local_path.exists():
-            with open(local_path, "r", encoding="utf-8") as f:
+            with open(local_path, encoding="utf-8") as f:
                 local_projects = yaml.safe_load(f) or {}
             projects = {**projects, **local_projects}
         return projects
@@ -78,9 +80,10 @@ class TmuxManager:
         for sess in sessions:
             name = sess.get("session_name")
             click.echo(f"  - {name}")
-    
+
     def get_session_info(self, session_name: str) -> Dict[str, Any]:
         """Get session information directly from tmux"""
+
         def fetch_session_info():
             """Fetch session information from tmux"""
             try:
@@ -88,40 +91,44 @@ class TmuxManager:
                 session = server.find_where({"session_name": session_name})
                 if not session:
                     return {"exists": False, "session_name": session_name}
-                
+
                 # Get session details
                 windows = []
                 for window in session.list_windows():
                     panes = []
                     for pane in window.list_panes():
-                        panes.append({
-                            "pane_id": pane.get("pane_id"),
-                            "pane_current_command": pane.get("pane_current_command", ""),
-                            "pane_active": pane.get("pane_active") == "1",
-                            "pane_width": pane.get("pane_width"),
-                            "pane_height": pane.get("pane_height")
-                        })
-                    
-                    windows.append({
-                        "window_id": window.get("window_id"),
-                        "window_name": window.get("window_name"),
-                        "window_active": window.get("window_active") == "1",
-                        "panes": panes
-                    })
-                
+                        panes.append(
+                            {
+                                "pane_id": pane.get("pane_id"),
+                                "pane_current_command": pane.get("pane_current_command", ""),
+                                "pane_active": pane.get("pane_active") == "1",
+                                "pane_width": pane.get("pane_width"),
+                                "pane_height": pane.get("pane_height"),
+                            }
+                        )
+
+                    windows.append(
+                        {
+                            "window_id": window.get("window_id"),
+                            "window_name": window.get("window_name"),
+                            "window_active": window.get("window_active") == "1",
+                            "panes": panes,
+                        }
+                    )
+
                 return {
                     "exists": True,
                     "session_name": session_name,
                     "session_id": session.get("session_id"),
                     "session_created": session.get("session_created"),
-                    "windows": windows
+                    "windows": windows,
                 }
             except Exception as e:
                 self.logger.error(f"Failed to get session info for {session_name}: {e}")
                 return {"exists": False, "session_name": session_name, "error": str(e)}
-        
+
         return fetch_session_info()
-    
+
     def get_cached_sessions_list(self) -> List[Dict[str, Any]]:
         """Get list of all sessions directly from tmux"""
         try:
@@ -132,7 +139,7 @@ class TmuxManager:
                     "session_name": sess.get("session_name"),
                     "session_id": sess.get("session_id"),
                     "session_created": sess.get("session_created"),
-                    "session_windows": sess.get("session_windows", 0)
+                    "session_windows": sess.get("session_windows", 0),
                 }
                 for sess in sessions
             ]
@@ -168,6 +175,7 @@ class TmuxManager:
     def attach_to_session(self, session_name: str) -> None:
         """Attach to a specific tmux session"""
         import os
+
         os.system(f"tmux attach -t {session_name}")
 
     def get_session_activity(self, session_name: str) -> Dict[str, Any]:
@@ -176,7 +184,7 @@ class TmuxManager:
         """
         try:
             log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
-            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ('-', '_')).rstrip()
+            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
             log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 
             if not log_file.exists():
@@ -185,43 +193,39 @@ class TmuxManager:
                 if not log_file.exists():
                     return {"session_name": session_name, "activity_data": []}
 
-            from datetime import datetime, timedelta
             import re
             from collections import defaultdict
+            from datetime import datetime, timedelta
 
             # Activity per hour for the last 7 days
             activity_counts = defaultdict(int)
-            
+
             now = datetime.now()
             seven_days_ago = now - timedelta(days=7)
 
-            with open(log_file, "r", encoding="utf-8") as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
                     # Extract timestamp from log line
                     # Example log format: [2025-07-10 14:22:01,161] [INFO] [session:my-session] Log message
-                    match = re.match(r'\[(.*?)\]', line)
+                    match = re.match(r"\[(.*?)\]", line)
                     if match:
-                        timestamp_str = match.group(1).split(',')[0] # Get 'YYYY-MM-DD HH:MM:SS'
+                        timestamp_str = match.group(1).split(",")[0]  # Get 'YYYY-MM-DD HH:MM:SS'
                         try:
-                            log_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                            log_time = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
                             if log_time > seven_days_ago:
                                 # Round down to the hour
-                                hour_timestamp = log_time.strftime('%Y-%m-%dT%H:00:00')
+                                hour_timestamp = log_time.strftime("%Y-%m-%dT%H:00:00")
                                 activity_counts[hour_timestamp] += 1
                         except ValueError:
                             continue
-            
+
             # Format data for heatmap
-            activity_data = [
-                {"timestamp": ts, "activity": count}
-                for ts, count in activity_counts.items()
-            ]
-            
+            activity_data = [{"timestamp": ts, "activity": count} for ts, count in activity_counts.items()]
+
             return {
                 "session_name": session_name,
-                "activity_data": activity_data
+                "activity_data": activity_data,
             }
         except Exception as e:
             self.logger.error(f"Failed to get session activity for {session_name}: {e}")
             return {"session_name": session_name, "activity_data": []}
-    

@@ -1,12 +1,9 @@
 """Tests for TaskScheduler class"""
 
 import pytest
-import heapq
-from datetime import datetime, timedelta
-from unittest.mock import Mock, MagicMock
 
-from libs.multi_agent.task_scheduler import TaskScheduler, AgentCapability, PriorityTask
-from libs.multi_agent.types import Agent, Task, AgentState, TaskStatus
+from libs.multi_agent.task_scheduler import AgentCapability, PriorityTask, TaskScheduler
+from libs.multi_agent.types import Agent, Task
 
 
 class TestAgentCapability:
@@ -27,7 +24,9 @@ class TestAgentCapability:
     def test_get_efficiency_score_basic(self):
         """Test basic efficiency score calculation"""
         capability = AgentCapability(
-            agent_id="test-agent", processing_power=1.5, success_rate=0.9
+            agent_id="test-agent",
+            processing_power=1.5,
+            success_rate=0.9,
         )
 
         task = Task(
@@ -45,7 +44,8 @@ class TestAgentCapability:
     def test_get_efficiency_score_with_specialization(self):
         """Test efficiency score with specialization bonus"""
         capability = AgentCapability(
-            agent_id="test-agent", specializations=["python", "testing"]
+            agent_id="test-agent",
+            specializations=["python", "testing"],
         )
 
         task = Task(
@@ -100,10 +100,16 @@ class TestPriorityTask:
     def test_priority_comparison(self):
         """Test priority task comparison for heap"""
         task1 = Task(
-            task_id="task-1", title="Task 1", command=["echo"], working_directory="/tmp"
+            task_id="task-1",
+            title="Task 1",
+            command=["echo"],
+            working_directory="/tmp",
         )
         task2 = Task(
-            task_id="task-2", title="Task 2", command=["echo"], working_directory="/tmp"
+            task_id="task-2",
+            title="Task 2",
+            command=["echo"],
+            working_directory="/tmp",
         )
 
         pt1 = PriorityTask(priority_score=0.8, task=task1)
@@ -211,7 +217,10 @@ class TestTaskScheduler:
         assert scheduler.scheduling_metrics["total_scheduled"] == 1
 
     def test_get_next_task_for_unregistered_agent(
-        self, scheduler, sample_agent, sample_task
+        self,
+        scheduler,
+        sample_agent,
+        sample_task,
     ):
         """Test getting task for unregistered agent"""
         scheduler.add_task(sample_task)
@@ -219,9 +228,7 @@ class TestTaskScheduler:
         task = scheduler.get_next_task_for_agent(sample_agent)
 
         assert task == sample_task
-        assert (
-            sample_agent.agent_id in scheduler.agent_capabilities
-        )  # Should auto-register
+        assert sample_agent.agent_id in scheduler.agent_capabilities  # Should auto-register
 
     def test_get_next_task_empty_queue(self, scheduler, sample_agent):
         """Test getting task from empty queue"""
@@ -241,13 +248,17 @@ class TestTaskScheduler:
         scheduler.register_agent(
             agent1,
             AgentCapability(
-                agent_id="agent-1", processing_power=1.5, specializations=["python"]
+                agent_id="agent-1",
+                processing_power=1.5,
+                specializations=["python"],
             ),
         )
         scheduler.register_agent(
             agent2,
             AgentCapability(
-                agent_id="agent-2", processing_power=1.0, specializations=["javascript"]
+                agent_id="agent-2",
+                processing_power=1.0,
+                specializations=["javascript"],
             ),
         )
 
@@ -287,7 +298,10 @@ class TestTaskScheduler:
 
         # Simulate successful task completion
         scheduler.update_agent_performance(
-            sample_agent.agent_id, sample_task, success=True, execution_time=120.0
+            sample_agent.agent_id,
+            sample_task,
+            success=True,
+            execution_time=120.0,
         )
 
         capability = scheduler.agent_capabilities[sample_agent.agent_id]
@@ -296,14 +310,20 @@ class TestTaskScheduler:
         assert len(scheduler.task_history[sample_agent.agent_id]) == 1
 
     def test_update_agent_performance_failure(
-        self, scheduler, sample_agent, sample_task
+        self,
+        scheduler,
+        sample_agent,
+        sample_task,
     ):
         """Test updating agent performance on failure"""
         scheduler.register_agent(sample_agent)
 
         # Simulate failed task
         scheduler.update_agent_performance(
-            sample_agent.agent_id, sample_task, success=False, execution_time=60.0
+            sample_agent.agent_id,
+            sample_task,
+            success=False,
+            execution_time=60.0,
         )
 
         capability = scheduler.agent_capabilities[sample_agent.agent_id]
@@ -312,7 +332,9 @@ class TestTaskScheduler:
     def test_estimate_task_time(self, scheduler):
         """Test task time estimation"""
         capability = AgentCapability(
-            agent_id="test-agent", processing_power=2.0, specializations=["python"]
+            agent_id="test-agent",
+            processing_power=2.0,
+            specializations=["python"],
         )
 
         task = Task(
@@ -468,7 +490,10 @@ class TestTaskScheduler:
                 working_directory="/tmp",
             )
             scheduler.update_agent_performance(
-                sample_agent.agent_id, task, success=True, execution_time=60.0
+                sample_agent.agent_id,
+                task,
+                success=True,
+                execution_time=60.0,
             )
 
         # History should be limited to 100

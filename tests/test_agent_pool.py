@@ -1,15 +1,12 @@
 """Tests for AgentPool class"""
 
-import pytest
-import asyncio
-import tempfile
-import json
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.types import Agent, Task, AgentState, TaskStatus
+from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 
 
 class TestAgentPool:
@@ -284,7 +281,10 @@ class TestAgentPool:
 
         # Add tasks
         task1 = Task(
-            task_id="task-1", title="Task 1", command=["echo"], working_directory="/tmp"
+            task_id="task-1",
+            title="Task 1",
+            command=["echo"],
+            working_directory="/tmp",
         )
         task2 = Task(
             task_id="task-2",

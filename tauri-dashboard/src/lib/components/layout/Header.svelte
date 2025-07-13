@@ -3,15 +3,15 @@
   import { page } from '$app/stores';
   import { sessions, isLoading } from '$lib/stores/sessions';
   import { notifications } from '$lib/stores/notifications';
-  
+
   const dispatch = createEventDispatcher();
-  
+
   // 현재 시간 업데이트
   let currentTime = new Date();
   setInterval(() => {
     currentTime = new Date();
   }, 1000);
-  
+
   // 페이지 타이틀 매핑
   const pageTitles: Record<string, string> = {
     '/': 'Dashboard Overview',
@@ -20,24 +20,24 @@
     '/logs': 'Activity Logs',
     '/settings': 'Settings'
   };
-  
+
   // 세션 통계 계산
   $: totalSessions = $sessions.length;
   $: activeSessions = $sessions.filter(s => s.status === 'active').length;
   $: runningControllers = $sessions.filter(s => s.controller_status === 'running').length;
   $: unreadNotifications = $notifications.filter(n => !n.read).length;
-  
+
   // 현재 페이지 타이틀
   $: currentPageTitle = pageTitles[$page.url.pathname] || 'Yesman Dashboard';
-  
+
   function handleNotificationClick() {
     dispatch('toggleNotifications');
   }
-  
+
   function handleSettingsClick() {
     dispatch('openSettings');
   }
-  
+
   function handleRefresh() {
     dispatch('refresh');
   }
@@ -50,10 +50,10 @@
       <div class="page-info">
         <h1 class="text-xl font-semibold text-base-content">{currentPageTitle}</h1>
         <p class="text-sm text-base-content/60">
-          {currentTime.toLocaleString('ko-KR', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
+          {currentTime.toLocaleString('ko-KR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -61,7 +61,7 @@
         </p>
       </div>
     </div>
-    
+
     <!-- 가운데: 주요 메트릭 -->
     <div class="header-center flex items-center gap-6">
       <div class="metrics flex gap-4">
@@ -76,7 +76,7 @@
             <div class="stat-desc text-xs">Active/Total</div>
           </div>
         </div>
-        
+
         <!-- 컨트롤러 통계 -->
         <div class="metric-item">
           <div class="stat">
@@ -88,7 +88,7 @@
             <div class="stat-desc text-xs">Running</div>
           </div>
         </div>
-        
+
         <!-- 로딩 상태 -->
         {#if $isLoading}
           <div class="metric-item">
@@ -104,11 +104,11 @@
         {/if}
       </div>
     </div>
-    
+
     <!-- 오른쪽: 액션 버튼들 -->
     <div class="header-right flex items-center gap-3">
       <!-- 새로고침 버튼 -->
-      <button 
+      <button
         class="btn btn-ghost btn-sm"
         class:loading={$isLoading}
         on:click={handleRefresh}
@@ -117,9 +117,9 @@
       >
         <span class="text-lg">🔄</span>
       </button>
-      
+
       <!-- 알림 버튼 -->
-      <button 
+      <button
         class="btn btn-ghost btn-sm relative"
         on:click={handleNotificationClick}
         title="Notifications"
@@ -131,16 +131,16 @@
           </div>
         {/if}
       </button>
-      
+
       <!-- 설정 버튼 -->
-      <button 
+      <button
         class="btn btn-ghost btn-sm"
         on:click={handleSettingsClick}
         title="Settings"
       >
         <span class="text-lg">⚙️</span>
       </button>
-      
+
       <!-- 사용자 프로필 -->
       <div class="dropdown dropdown-end">
         <button class="btn btn-ghost btn-circle avatar">
@@ -166,32 +166,32 @@
   .header {
     @apply sticky top-0 z-40;
   }
-  
+
   .metric-item {
     @apply bg-base-200 rounded-lg p-2;
   }
-  
+
   .metrics {
     @apply hidden md:flex;
   }
-  
+
   .stat {
     @apply text-center;
   }
-  
+
   .stat-figure {
     @apply text-lg;
   }
-  
+
   .stat-value {
     @apply font-bold;
   }
-  
+
   .stat-title,
   .stat-desc {
     @apply text-base-content/60;
   }
-  
+
   @media (max-width: 768px) {
     .header-center {
       @apply hidden;

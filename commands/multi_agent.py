@@ -1,40 +1,37 @@
 """Multi-agent system commands for parallel development automation"""
 
 import asyncio
-import click
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import click
+
 from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.types import Task, Agent
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-from libs.multi_agent.conflict_prediction import ConflictPredictor
-from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.semantic_merger import (
-    SemanticMerger,
-    MergeStrategy,
-    MergeResolution,
-)
-from libs.multi_agent.auto_resolver import AutoResolver, AutoResolutionMode
+from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.dependency_propagation import (
-    DependencyPropagationSystem,
-    DependencyType,
-    ChangeImpact,
-    PropagationStrategy,
-)
-from libs.multi_agent.collaboration_engine import CollaborationEngine
-from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 from libs.multi_agent.code_review_engine import (
     CodeReviewEngine,
-    ReviewType,
-    ReviewSeverity,
-    ReviewStatus,
     QualityMetric,
+    ReviewSeverity,
+    ReviewType,
 )
-
+from libs.multi_agent.conflict_prediction import ConflictPredictor
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
+from libs.multi_agent.dependency_propagation import (
+    ChangeImpact,
+    DependencyPropagationSystem,
+    DependencyType,
+    PropagationStrategy,
+)
+from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
+from libs.multi_agent.semantic_merger import (
+    MergeResolution,
+    MergeStrategy,
+    SemanticMerger,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +77,7 @@ def start_agents(max_agents: int, work_dir: Optional[str], monitor: bool):
 
     except Exception as e:
         click.echo(f"❌ Error starting agents: {e}", err=True)
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e)) from e
 
 
 @multi_agent_cli.command("monitor")
@@ -132,7 +129,7 @@ def monitor_agents(work_dir: Optional[str], duration: Optional[float], refresh: 
         click.echo("\n👋 Monitoring stopped")
     except Exception as e:
         click.echo(f"❌ Error in monitoring: {e}", err=True)
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e)) from e
 
 
 @multi_agent_cli.command("status")
@@ -157,7 +154,7 @@ def status(work_dir: Optional[str]):
         click.echo(f"Failed Tasks: {stats.get('failed_tasks', 0)}")
         click.echo(f"Queue Size: {stats.get('queue_size', 0)}")
         click.echo(
-            f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s"
+            f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s",
         )
 
         if agents:
@@ -171,9 +168,7 @@ def status(work_dir: Optional[str]):
                 }.get(agent.get("state", "unknown"), "❓")
 
                 click.echo(
-                    f"  {status_icon} {agent['agent_id']} - "
-                    f"Completed: {agent.get('completed_tasks', 0)}, "
-                    f"Failed: {agent.get('failed_tasks', 0)}"
+                    f"  {status_icon} {agent['agent_id']} - Completed: {agent.get('completed_tasks', 0)}, Failed: {agent.get('failed_tasks', 0)}",
                 )
 
     except Exception as e:
@@ -327,7 +322,7 @@ def detect_conflicts(branches: tuple, repo_path: Optional[str], auto_resolve: bo
                 click.echo(f"   Files: {', '.join(conflict.files)}")
                 click.echo(f"   Description: {conflict.description}")
                 click.echo(
-                    f"   Suggested Strategy: {conflict.suggested_strategy.value}"
+                    f"   Suggested Strategy: {conflict.suggested_strategy.value}",
                 )
                 click.echo()
 
@@ -344,7 +339,7 @@ def detect_conflicts(branches: tuple, repo_path: Optional[str], auto_resolve: bo
 
                 if failed > 0:
                     click.echo(
-                        "\n🚨 Manual intervention required for remaining conflicts"
+                        "\n🚨 Manual intervention required for remaining conflicts",
                     )
 
         asyncio.run(run_detection())
@@ -361,7 +356,9 @@ def detect_conflicts(branches: tuple, repo_path: Optional[str], auto_resolve: bo
 )
 @click.option("--repo-path", "-r", help="Path to git repository")
 def resolve_conflict(
-    conflict_id: str, strategy: Optional[str], repo_path: Optional[str]
+    conflict_id: str,
+    strategy: Optional[str],
+    repo_path: Optional[str],
 ):
     """Resolve a specific conflict"""
     try:
@@ -381,7 +378,7 @@ def resolve_conflict(
             except ValueError:
                 click.echo(f"❌ Invalid strategy: {strategy}")
                 click.echo(
-                    "Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis"
+                    "Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis",
                 )
                 return
 
@@ -389,19 +386,19 @@ def resolve_conflict(
             result = await engine.resolve_conflict(conflict_id, resolution_strategy)
 
             if result.success:
-                click.echo(f"✅ Conflict resolved successfully!")
+                click.echo("✅ Conflict resolved successfully!")
                 click.echo(f"   Strategy used: {result.strategy_used.value}")
                 click.echo(f"   Resolution time: {result.resolution_time:.2f}s")
                 click.echo(f"   Message: {result.message}")
                 if result.resolved_files:
                     click.echo(f"   Resolved files: {', '.join(result.resolved_files)}")
             else:
-                click.echo(f"❌ Failed to resolve conflict")
+                click.echo("❌ Failed to resolve conflict")
                 click.echo(f"   Strategy attempted: {result.strategy_used.value}")
                 click.echo(f"   Error: {result.message}")
                 if result.remaining_conflicts:
                     click.echo(
-                        f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}"
+                        f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}",
                     )
 
         asyncio.run(run_resolution())
@@ -457,7 +454,7 @@ def conflict_summary(repo_path: Optional[str]):
                         "merge_conflict": "⚡",
                     }.get(conflict_type, "❓")
                     click.echo(
-                        f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}"
+                        f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}",
                     )
 
         # Resolution statistics
@@ -477,7 +474,11 @@ def conflict_summary(repo_path: Optional[str]):
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option(
-    "--time-horizon", "-t", type=int, default=7, help="Prediction time horizon in days"
+    "--time-horizon",
+    "-t",
+    type=int,
+    default=7,
+    help="Prediction time horizon in days",
 )
 @click.option(
     "--min-confidence",
@@ -487,7 +488,11 @@ def conflict_summary(repo_path: Optional[str]):
     help="Minimum confidence threshold",
 )
 @click.option(
-    "--limit", "-l", type=int, default=10, help="Maximum number of predictions to show"
+    "--limit",
+    "-l",
+    type=int,
+    default=10,
+    help="Maximum number of predictions to show",
 )
 def predict_conflicts(
     branches: tuple,
@@ -522,9 +527,7 @@ def predict_conflicts(
                 return
 
             # Filter and limit results
-            filtered_predictions = [
-                p for p in predictions if p.likelihood_score >= min_confidence
-            ]
+            filtered_predictions = [p for p in predictions if p.likelihood_score >= min_confidence]
             filtered_predictions = filtered_predictions[:limit]
 
             click.echo(f"⚠️  Found {len(filtered_predictions)} potential conflicts:")
@@ -550,13 +553,13 @@ def predict_conflicts(
                 }.get(prediction.pattern.value, "❓")
 
                 click.echo(
-                    f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}"
+                    f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}",
                 )
                 click.echo(
-                    f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}"
+                    f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}",
                 )
                 click.echo(
-                    f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})"
+                    f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})",
                 )
                 click.echo(f"   Branches: {', '.join(prediction.affected_branches)}")
                 if prediction.affected_files:
@@ -568,7 +571,7 @@ def predict_conflicts(
 
                 if prediction.timeline_prediction:
                     click.echo(
-                        f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}"
+                        f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}",
                     )
 
                 if prediction.prevention_suggestions:
@@ -614,7 +617,7 @@ def prediction_summary(repo_path: Optional[str]):
                         "critical": "💀",
                     }.get(confidence, "❓")
                     click.echo(
-                        f"  {confidence_icon} {confidence.capitalize()}: {count}"
+                        f"  {confidence_icon} {confidence.capitalize()}: {count}",
                     )
 
         # Pattern breakdown
@@ -633,7 +636,7 @@ def prediction_summary(repo_path: Optional[str]):
                         "merge_context_loss": "🔀",
                     }.get(pattern, "❓")
                     click.echo(
-                        f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}"
+                        f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}",
                     )
 
         # Accuracy metrics
@@ -649,7 +652,7 @@ def prediction_summary(repo_path: Optional[str]):
             click.echo("\n🚨 Most Likely Conflicts:")
             for conflict in summary["most_likely_conflicts"]:
                 click.echo(
-                    f"  • {conflict['description']} ({conflict['likelihood']:.1%})"
+                    f"  • {conflict['description']} ({conflict['likelihood']:.1%})",
                 )
 
     except Exception as e:
@@ -688,7 +691,8 @@ def analyze_conflict_patterns(
                     click.echo(f"\n🔗 {branch1} ↔ {branch2}")
 
                     vector = await predictor._calculate_conflict_vector(
-                        branch1, branch2
+                        branch1,
+                        branch2,
                     )
                     analysis_results[f"{branch1}:{branch2}"] = {
                         "vector": vector._asdict(),
@@ -698,28 +702,22 @@ def analyze_conflict_patterns(
                     # Display vector components
                     click.echo(f"   File Overlap: {vector.file_overlap_score:.2f}")
                     click.echo(
-                        f"   Change Frequency: {vector.change_frequency_score:.2f}"
+                        f"   Change Frequency: {vector.change_frequency_score:.2f}",
                     )
                     click.echo(f"   Complexity: {vector.complexity_score:.2f}")
                     click.echo(
-                        f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}"
+                        f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}",
                     )
                     click.echo(
-                        f"   Semantic Distance: {vector.semantic_distance_score:.2f}"
+                        f"   Semantic Distance: {vector.semantic_distance_score:.2f}",
                     )
                     click.echo(
-                        f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}"
+                        f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}",
                     )
 
                     # Overall risk score
                     risk_score = sum(vector) / len(vector)
-                    risk_level = (
-                        "🔴 HIGH"
-                        if risk_score > 0.7
-                        else "🟡 MEDIUM"
-                        if risk_score > 0.4
-                        else "🟢 LOW"
-                    )
+                    risk_level = "🔴 HIGH" if risk_score > 0.7 else "🟡 MEDIUM" if risk_score > 0.4 else "🟢 LOW"
                     click.echo(f"   Overall Risk: {risk_level} ({risk_score:.2f})")
 
                     # Pattern-specific analysis
@@ -732,15 +730,13 @@ def analyze_conflict_patterns(
                             if detector:
                                 result = await detector(branch1, branch2, vector)
                                 if result:
-                                    analysis_results[f"{branch1}:{branch2}"][
-                                        "patterns"
-                                    ][pattern] = {
+                                    analysis_results[f"{branch1}:{branch2}"]["patterns"][pattern] = {
                                         "likelihood": result.likelihood_score,
                                         "confidence": result.confidence.value,
                                         "description": result.description,
                                     }
                                     click.echo(
-                                        f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence"
+                                        f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence",
                                     )
                         except ValueError:
                             click.echo(f"   ❌ Unknown pattern: {pattern}")
@@ -764,7 +760,10 @@ def analyze_conflict_patterns(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--files", "-f", help="Specific files to analyze (comma-separated)")
 @click.option(
-    "--include-private", "-p", is_flag=True, help="Include private members in analysis"
+    "--include-private",
+    "-p",
+    is_flag=True,
+    help="Include private members in analysis",
 )
 @click.option("--export", "-e", help="Export results to JSON file")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed analysis")
@@ -806,7 +805,9 @@ def analyze_semantic_conflicts(
                     click.echo(f"\n🔬 Analyzing {branch1} ↔ {branch2}")
 
                     conflicts = await analyzer.analyze_semantic_conflicts(
-                        branch1, branch2, file_list
+                        branch1,
+                        branch2,
+                        file_list,
                     )
 
                     pair_key = f"{branch1}:{branch2}"
@@ -842,10 +843,10 @@ def analyze_semantic_conflicts(
                         }.get(conflict.conflict_type.value, "❓")
 
                         click.echo(
-                            f"{j}. {severity_icon} {conflict_type_icon} {conflict.symbol_name}"
+                            f"{j}. {severity_icon} {conflict_type_icon} {conflict.symbol_name}",
                         )
                         click.echo(
-                            f"   Type: {conflict.conflict_type.value.replace('_', ' ').title()}"
+                            f"   Type: {conflict.conflict_type.value.replace('_', ' ').title()}",
                         )
                         click.echo(f"   Severity: {conflict.severity.value.upper()}")
                         click.echo(f"   File: {conflict.file_path}")
@@ -857,7 +858,7 @@ def analyze_semantic_conflicts(
                             if conflict.new_definition:
                                 click.echo(f"   New: {conflict.new_definition}")
                             click.echo(
-                                f"   Suggested Resolution: {conflict.suggested_resolution.value}"
+                                f"   Suggested Resolution: {conflict.suggested_resolution.value}",
                             )
 
                         click.echo()
@@ -875,7 +876,7 @@ def analyze_semantic_conflicts(
                                 "new_definition": conflict.new_definition,
                                 "suggested_resolution": conflict.suggested_resolution.value,
                                 "metadata": conflict.metadata,
-                            }
+                            },
                         )
 
                     if len(conflicts) > 10:
@@ -885,7 +886,7 @@ def analyze_semantic_conflicts(
 
             # Show summary
             if all_conflicts:
-                click.echo(f"\n📊 Analysis Summary:")
+                click.echo("\n📊 Analysis Summary:")
                 click.echo(f"Total conflicts: {len(all_conflicts)}")
 
                 # Group by type
@@ -897,7 +898,7 @@ def analyze_semantic_conflicts(
                 click.echo("\n🏷️  By Type:")
                 for conflict_type, count in type_counts.most_common():
                     click.echo(
-                        f"  • {conflict_type.replace('_', ' ').title()}: {count}"
+                        f"  • {conflict_type.replace('_', ' ').title()}: {count}",
                     )
 
                 click.echo("\n⚡ By Severity:")
@@ -912,7 +913,7 @@ def analyze_semantic_conflicts(
 
                 # Analysis performance
                 summary = analyzer.get_analysis_summary()
-                click.echo(f"\n📈 Performance:")
+                click.echo("\n📈 Performance:")
                 click.echo(f"  Files analyzed: {summary['files_analyzed']}")
                 click.echo(f"  Analysis time: {summary['analysis_time']:.2f}s")
                 click.echo(f"  Cache hits: {summary['cache_hits']}")
@@ -944,7 +945,9 @@ def analyze_semantic_conflicts(
 @click.option("--branch", "-b", help="Branch to analyze (default: current)")
 @click.option("--files", "-f", help="Specific files to analyze (comma-separated)")
 def semantic_summary(
-    repo_path: Optional[str], branch: Optional[str], files: Optional[str]
+    repo_path: Optional[str],
+    branch: Optional[str],
+    files: Optional[str],
 ):
     """Show semantic structure summary of code"""
     try:
@@ -970,15 +973,16 @@ def semantic_summary(
                 files_to_analyze = []
                 try:
                     result = await analyzer._get_changed_python_files(
-                        current_branch, current_branch
+                        current_branch,
+                        current_branch,
                     )
                     files_to_analyze = result
-                except:
+                except Exception:
                     # Fallback: scan current directory
                     for py_file in analyzer.repo_path.rglob("*.py"):
                         if not any(part.startswith(".") for part in py_file.parts):
                             files_to_analyze.append(
-                                str(py_file.relative_to(analyzer.repo_path))
+                                str(py_file.relative_to(analyzer.repo_path)),
                             )
 
             total_functions = 0
@@ -992,7 +996,8 @@ def semantic_summary(
 
             for file_path in files_to_analyze[:20]:  # Limit to first 20 files
                 context = await analyzer._get_semantic_context(
-                    file_path, current_branch
+                    file_path,
+                    current_branch,
                 )
                 if not context:
                     continue
@@ -1059,7 +1064,7 @@ def function_diff(
     """Compare function signatures between branches"""
     try:
         click.echo(
-            f"🔧 Comparing function '{function_name}' between {branch1} and {branch2}"
+            f"🔧 Comparing function '{function_name}' between {branch1} and {branch2}",
         )
 
         # Create semantic analyzer
@@ -1072,6 +1077,7 @@ def function_diff(
             func2 = None
             file1 = None
             file2 = None
+            current_function_name = function_name  # Local copy to avoid closure issues
 
             # Get list of files to search
             if file:
@@ -1083,41 +1089,41 @@ def function_diff(
                     result1 = await analyzer._get_changed_python_files(branch1, branch1)
                     result2 = await analyzer._get_changed_python_files(branch2, branch2)
                     files_to_search = list(set(result1 + result2))
-                except:
+                except Exception:
                     # Fallback: scan current directory
                     for py_file in analyzer.repo_path.rglob("*.py"):
                         if not any(part.startswith(".") for part in py_file.parts):
                             files_to_search.append(
-                                str(py_file.relative_to(analyzer.repo_path))
+                                str(py_file.relative_to(analyzer.repo_path)),
                             )
 
             # Search for function
             for file_path in files_to_search:
                 # Check branch1
                 context1 = await analyzer._get_semantic_context(file_path, branch1)
-                if context1 and function_name in context1.functions:
-                    func1 = context1.functions[function_name]
+                if context1 and current_function_name in context1.functions:
+                    func1 = context1.functions[current_function_name]
                     file1 = file_path
 
                 # Check classes for methods
                 if context1:
                     for class_name, class_def in context1.classes.items():
-                        if function_name in class_def.methods:
-                            func1 = class_def.methods[function_name]
+                        if current_function_name in class_def.methods:
+                            func1 = class_def.methods[current_function_name]
                             file1 = file_path
-                            function_name = f"{class_name}.{function_name}"
+                            current_function_name = f"{class_name}.{current_function_name}"
                             break
 
                 # Check branch2
                 context2 = await analyzer._get_semantic_context(file_path, branch2)
-                if context2 and function_name.split(".")[-1] in context2.functions:
-                    func2 = context2.functions[function_name.split(".")[-1]]
+                if context2 and current_function_name.split(".")[-1] in context2.functions:
+                    func2 = context2.functions[current_function_name.split(".")[-1]]
                     file2 = file_path
 
                 # Check classes for methods
                 if context2:
                     for class_name, class_def in context2.classes.items():
-                        method_name = function_name.split(".")[-1]
+                        method_name = current_function_name.split(".")[-1]
                         if method_name in class_def.methods:
                             func2 = class_def.methods[method_name]
                             file2 = file_path
@@ -1144,14 +1150,14 @@ def function_diff(
                 return
 
             # Compare signatures
-            click.echo(f"✅ Found in both branches")
+            click.echo("✅ Found in both branches")
             click.echo(f"   {branch1}: {file1}")
             click.echo(f"   {branch2}: {file2}")
 
             sig1_str = analyzer._signature_to_string(func1)
             sig2_str = analyzer._signature_to_string(func2)
 
-            click.echo(f"\n📋 Signature Comparison:")
+            click.echo("\n📋 Signature Comparison:")
             click.echo(f"{branch1}: {sig1_str}")
             click.echo(f"{branch2}: {sig2_str}")
 
@@ -1172,12 +1178,12 @@ def function_diff(
 
                 if impact["return_type_change"]:
                     click.echo(
-                        f"Return Type Changed: {func1.return_type} → {func2.return_type}"
+                        f"Return Type Changed: {func1.return_type} → {func2.return_type}",
                     )
 
                 if impact["decorator_changes"]:
                     click.echo(
-                        f"Decorator Changes: {func1.decorators} → {func2.decorators}"
+                        f"Decorator Changes: {func1.decorators} → {func2.decorators}",
                     )
 
                 # Suggest resolution
@@ -1198,7 +1204,9 @@ def function_diff(
 @click.argument("branch2")
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option(
-    "--target-branch", "-t", help="Target branch for merge (default: branch1)"
+    "--target-branch",
+    "-t",
+    help="Target branch for merge (default: branch1)",
 )
 @click.option(
     "--strategy",
@@ -1234,7 +1242,10 @@ def semantic_merge(
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
         semantic_merger = SemanticMerger(
-            semantic_analyzer, conflict_engine, branch_manager, repo_path
+            semantic_analyzer,
+            conflict_engine,
+            branch_manager,
+            repo_path,
         )
 
         async def run_merge():
@@ -1248,29 +1259,29 @@ def semantic_merge(
             )
 
             # Display results
-            click.echo(f"\n📊 Merge Result:")
+            click.echo("\n📊 Merge Result:")
             click.echo(f"   Merge ID: {merge_result.merge_id}")
             click.echo(f"   Resolution: {merge_result.resolution.value}")
             click.echo(f"   Strategy Used: {merge_result.strategy_used.value}")
             click.echo(f"   Confidence: {merge_result.merge_confidence:.1%}")
             click.echo(
-                f"   Semantic Integrity: {'✅' if merge_result.semantic_integrity else '❌'}"
+                f"   Semantic Integrity: {'✅' if merge_result.semantic_integrity else '❌'}",
             )
 
             if merge_result.conflicts_resolved:
                 click.echo(
-                    f"   Conflicts Resolved: {len(merge_result.conflicts_resolved)}"
+                    f"   Conflicts Resolved: {len(merge_result.conflicts_resolved)}",
                 )
                 for conflict_id in merge_result.conflicts_resolved[:5]:
                     click.echo(f"     • {conflict_id}")
                 if len(merge_result.conflicts_resolved) > 5:
                     click.echo(
-                        f"     ... and {len(merge_result.conflicts_resolved) - 5} more"
+                        f"     ... and {len(merge_result.conflicts_resolved) - 5} more",
                     )
 
             if merge_result.unresolved_conflicts:
                 click.echo(
-                    f"   ⚠️  Unresolved Conflicts: {len(merge_result.unresolved_conflicts)}"
+                    f"   ⚠️  Unresolved Conflicts: {len(merge_result.unresolved_conflicts)}",
                 )
                 for conflict_id in merge_result.unresolved_conflicts[:3]:
                     click.echo(f"     • {conflict_id}")
@@ -1278,7 +1289,7 @@ def semantic_merge(
             # Show diff stats
             if merge_result.diff_stats:
                 stats = merge_result.diff_stats
-                click.echo(f"\n📈 Changes:")
+                click.echo("\n📈 Changes:")
                 if "lines_merged" in stats:
                     click.echo(f"   Total lines: {stats['lines_merged']}")
                 if "lines_added" in stats:
@@ -1299,16 +1310,16 @@ def semantic_merge(
             ]:
                 if merge_result.semantic_integrity:
                     click.echo(
-                        f"\n✅ Merge would be applied to {target_branch or branch1}"
+                        f"\n✅ Merge would be applied to {target_branch or branch1}",
                     )
                     # In actual implementation, this would write the merged content
                     click.echo("   (Dry run - actual application not implemented yet)")
                 else:
                     click.echo(
-                        f"\n❌ Cannot apply merge due to semantic integrity issues"
+                        "\n❌ Cannot apply merge due to semantic integrity issues",
                     )
             elif apply:
-                click.echo(f"\n❌ Cannot apply merge - resolution failed")
+                click.echo("\n❌ Cannot apply merge - resolution failed")
 
         asyncio.run(run_merge())
 
@@ -1321,7 +1332,9 @@ def semantic_merge(
 @click.argument("branch2")
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option(
-    "--target-branch", "-t", help="Target branch for merge (default: branch1)"
+    "--target-branch",
+    "-t",
+    help="Target branch for merge (default: branch1)",
 )
 @click.option("--files", "-f", help="Specific files to merge (comma-separated)")
 @click.option(
@@ -1355,7 +1368,10 @@ def batch_merge(
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
         semantic_merger = SemanticMerger(
-            semantic_analyzer, conflict_engine, branch_manager, repo_path
+            semantic_analyzer,
+            conflict_engine,
+            branch_manager,
+            repo_path,
         )
 
         async def run_batch_merge():
@@ -1366,11 +1382,12 @@ def batch_merge(
                 # Get all changed Python files
                 try:
                     file_list = await semantic_analyzer._get_changed_python_files(
-                        branch1, branch2
+                        branch1,
+                        branch2,
                     )
-                except:
+                except Exception:
                     click.echo(
-                        "❌ Could not determine changed files. Please specify --files"
+                        "❌ Could not determine changed files. Please specify --files",
                     )
                     return
 
@@ -1385,7 +1402,7 @@ def batch_merge(
                 click.echo(f"   ... and {len(file_list) - 10} more")
 
             click.echo(
-                f"\n🚀 Starting batch merge (max {max_concurrent} concurrent)..."
+                f"\n🚀 Starting batch merge (max {max_concurrent} concurrent)...",
             )
 
             # Perform batch merge
@@ -1398,23 +1415,12 @@ def batch_merge(
             )
 
             # Analyze results
-            successful = [
-                r
-                for r in merge_results
-                if r.resolution
-                in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]
-            ]
-            failed = [
-                r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED
-            ]
-            manual_required = [
-                r
-                for r in merge_results
-                if r.resolution == MergeResolution.MANUAL_REQUIRED
-            ]
+            successful = [r for r in merge_results if r.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]]
+            failed = [r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED]
+            manual_required = [r for r in merge_results if r.resolution == MergeResolution.MANUAL_REQUIRED]
 
             # Display summary
-            click.echo(f"\n📊 Batch Merge Summary:")
+            click.echo("\n📊 Batch Merge Summary:")
             click.echo(f"   Total files: {len(merge_results)}")
             click.echo(f"   ✅ Successful: {len(successful)}")
             click.echo(f"   ⚠️  Manual required: {len(manual_required)}")
@@ -1422,17 +1428,15 @@ def batch_merge(
 
             if successful:
                 avg_confidence = sum(r.merge_confidence for r in successful) / len(
-                    successful
+                    successful,
                 )
-                semantic_integrity_rate = sum(
-                    1 for r in successful if r.semantic_integrity
-                ) / len(successful)
+                semantic_integrity_rate = sum(1 for r in successful if r.semantic_integrity) / len(successful)
                 click.echo(f"   📈 Average confidence: {avg_confidence:.1%}")
                 click.echo(f"   🔒 Semantic integrity: {semantic_integrity_rate:.1%}")
 
             # Show detailed results for failures
             if failed:
-                click.echo(f"\n❌ Failed merges:")
+                click.echo("\n❌ Failed merges:")
                 for result in failed[:5]:
                     error = result.metadata.get("error", "Unknown error")
                     click.echo(f"   • {result.file_path}: {error}")
@@ -1440,10 +1444,10 @@ def batch_merge(
                     click.echo(f"   ... and {len(failed) - 5} more")
 
             if manual_required:
-                click.echo(f"\n⚠️  Manual intervention required:")
+                click.echo("\n⚠️  Manual intervention required:")
                 for result in manual_required[:5]:
                     click.echo(
-                        f"   • {result.file_path}: {len(result.unresolved_conflicts)} unresolved conflicts"
+                        f"   • {result.file_path}: {len(result.unresolved_conflicts)} unresolved conflicts",
                     )
                 if len(manual_required) > 5:
                     click.echo(f"   ... and {len(manual_required) - 5} more")
@@ -1457,7 +1461,7 @@ def batch_merge(
                         # In actual implementation, this would write the merged content
                     else:
                         click.echo(
-                            f"   ⚠️  Skipping due to integrity issues: {result.file_path}"
+                            f"   ⚠️  Skipping due to integrity issues: {result.file_path}",
                         )
                 click.echo("   (Dry run - actual application not implemented yet)")
 
@@ -1472,17 +1476,13 @@ def batch_merge(
                         "branch1": branch1,
                         "branch2": branch2,
                         "target_branch": target_branch or branch1,
-                        "strategy": strategy_enum.value
-                        if strategy_enum
-                        else "intelligent_merge",
+                        "strategy": strategy_enum.value if strategy_enum else "intelligent_merge",
                         "total_files": len(merge_results),
                         "successful": len(successful),
                         "manual_required": len(manual_required),
                         "failed": len(failed),
                         "average_confidence": avg_confidence if successful else 0.0,
-                        "semantic_integrity_rate": semantic_integrity_rate
-                        if successful
-                        else 0.0,
+                        "semantic_integrity_rate": semantic_integrity_rate if successful else 0.0,
                     },
                     "detailed_results": [
                         {
@@ -1515,7 +1515,9 @@ def batch_merge(
 @click.argument("branch2")
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option(
-    "--target-branch", "-t", help="Target branch for resolution (default: branch1)"
+    "--target-branch",
+    "-t",
+    help="Target branch for resolution (default: branch1)",
 )
 @click.option(
     "--mode",
@@ -1528,7 +1530,10 @@ def batch_merge(
 @click.option("--apply", "-a", is_flag=True, help="Apply successful resolutions")
 @click.option("--export", "-e", help="Export resolution report to JSON file")
 @click.option(
-    "--preview", "-p", is_flag=True, help="Preview mode - show what would be resolved"
+    "--preview",
+    "-p",
+    is_flag=True,
+    help="Preview mode - show what would be resolved",
 )
 def auto_resolve(
     branch1: str,
@@ -1557,14 +1562,19 @@ def auto_resolve(
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
         semantic_merger = SemanticMerger(
-            semantic_analyzer, conflict_engine, branch_manager, repo_path
+            semantic_analyzer,
+            conflict_engine,
+            branch_manager,
+            repo_path,
         )
 
         # Create conflict predictor for advanced resolution
         from libs.multi_agent.conflict_prediction import ConflictPredictor
 
         conflict_predictor = ConflictPredictor(
-            conflict_engine, branch_manager, repo_path
+            conflict_engine,
+            branch_manager,
+            repo_path,
         )
 
         # Create auto resolver
@@ -1583,7 +1593,7 @@ def auto_resolve(
             if files:
                 file_filter = [f.strip() for f in files.split(",")]
 
-            click.echo(f"\n🔍 Analyzing conflicts...")
+            click.echo("\n🔍 Analyzing conflicts...")
 
             # Perform auto-resolution
             result = await auto_resolver.auto_resolve_branch_conflicts(
@@ -1595,13 +1605,13 @@ def auto_resolve(
             )
 
             # Display detailed results
-            click.echo(f"\n📊 Auto-Resolution Results:")
+            click.echo("\n📊 Auto-Resolution Results:")
             click.echo(f"   Session ID: {result.session_id}")
             click.echo(f"   Outcome: {result.outcome.value}")
             click.echo(f"   Resolution time: {result.resolution_time:.2f}s")
 
             # Conflict statistics
-            click.echo(f"\n🎯 Conflict Analysis:")
+            click.echo("\n🎯 Conflict Analysis:")
             click.echo(f"   Conflicts detected: {result.conflicts_detected}")
             click.echo(f"   Conflicts resolved: {result.conflicts_resolved}")
             click.echo(f"   Files processed: {result.files_processed}")
@@ -1611,16 +1621,16 @@ def auto_resolve(
                 click.echo(f"   Resolution rate: {resolution_rate:.1%}")
 
             # Quality metrics
-            click.echo(f"\n✨ Quality Metrics:")
+            click.echo("\n✨ Quality Metrics:")
             click.echo(f"   Confidence score: {result.confidence_score:.1%}")
             click.echo(
-                f"   Semantic integrity: {'✅' if result.semantic_integrity_preserved else '❌'}"
+                f"   Semantic integrity: {'✅' if result.semantic_integrity_preserved else '❌'}",
             )
 
             # Escalated conflicts
             if result.escalated_conflicts:
                 click.echo(
-                    f"\n⚠️  Escalated to human ({len(result.escalated_conflicts)}):"
+                    f"\n⚠️  Escalated to human ({len(result.escalated_conflicts)}):",
                 )
                 for conflict_id in result.escalated_conflicts[:5]:
                     click.echo(f"   • {conflict_id}")
@@ -1629,7 +1639,7 @@ def auto_resolve(
 
             # Merge results details
             if result.merge_results:
-                click.echo(f"\n📁 File Results:")
+                click.echo("\n📁 File Results:")
                 successful_merges = [
                     r
                     for r in result.merge_results
@@ -1641,49 +1651,41 @@ def auto_resolve(
                 ]
 
                 for merge_result in successful_merges[:10]:
-                    resolution_icon = (
-                        "✅"
-                        if merge_result.resolution == MergeResolution.AUTO_RESOLVED
-                        else "⚠️"
-                    )
+                    resolution_icon = "✅" if merge_result.resolution == MergeResolution.AUTO_RESOLVED else "⚠️"
                     click.echo(f"   {resolution_icon} {merge_result.file_path}")
                     click.echo(f"      Strategy: {merge_result.strategy_used.value}")
                     click.echo(f"      Confidence: {merge_result.merge_confidence:.1%}")
                     if merge_result.conflicts_resolved:
                         click.echo(
-                            f"      Resolved: {len(merge_result.conflicts_resolved)} conflicts"
+                            f"      Resolved: {len(merge_result.conflicts_resolved)} conflicts",
                         )
 
                 if len(successful_merges) > 10:
                     click.echo(
-                        f"   ... and {len(successful_merges) - 10} more successful merges"
+                        f"   ... and {len(successful_merges) - 10} more successful merges",
                     )
 
             # Manual intervention requirements
             if result.manual_intervention_required:
-                click.echo(f"\n👥 Manual Intervention Required:")
+                click.echo("\n👥 Manual Intervention Required:")
                 for item in result.manual_intervention_required[:5]:
                     click.echo(f"   • {item}")
                 if len(result.manual_intervention_required) > 5:
                     click.echo(
-                        f"   ... and {len(result.manual_intervention_required) - 5} more"
+                        f"   ... and {len(result.manual_intervention_required) - 5} more",
                     )
 
             # Apply results if requested and not in preview mode
-            if (
-                apply
-                and not preview
-                and result.outcome in ["fully_resolved", "partially_resolved"]
-            ):
-                click.echo(f"\n🚀 Applying resolution results...")
+            if apply and not preview and result.outcome in ["fully_resolved", "partially_resolved"]:
+                click.echo("\n🚀 Applying resolution results...")
                 applied_count = len(
-                    [r for r in result.merge_results if r.semantic_integrity]
+                    [r for r in result.merge_results if r.semantic_integrity],
                 )
                 click.echo(f"   Would apply {applied_count} successful merges")
                 click.echo("   (Dry run - actual application not implemented yet)")
             elif apply and preview:
                 click.echo(
-                    f"\n👁️  Preview mode - would apply resolution to {len(result.merge_results)} files"
+                    f"\n👁️  Preview mode - would apply resolution to {len(result.merge_results)} files",
                 )
 
             # Export report if requested
@@ -1733,18 +1735,18 @@ def auto_resolve(
                 click.echo(f"\n💾 Resolution report exported to: {export}")
 
             # Provide recommendations
-            click.echo(f"\n💡 Recommendations:")
+            click.echo("\n💡 Recommendations:")
             if result.outcome == "fully_resolved":
                 click.echo("   ✅ All conflicts resolved successfully")
             elif result.outcome == "partially_resolved":
                 click.echo("   ⚠️  Some conflicts require manual review")
                 click.echo(
-                    "   💡 Consider using 'conservative' mode for higher precision"
+                    "   💡 Consider using 'conservative' mode for higher precision",
                 )
             elif result.outcome == "escalated_to_human":
                 click.echo("   👥 Most conflicts require human intervention")
                 click.echo(
-                    "   💡 Review conflict complexity and consider breaking down changes"
+                    "   💡 Review conflict complexity and consider breaking down changes",
                 )
             else:
                 click.echo("   ❌ Resolution failed - check logs for details")
@@ -1766,7 +1768,10 @@ def auto_resolve(
     help="Prevention mode",
 )
 @click.option(
-    "--apply-measures", "-a", is_flag=True, help="Apply automatic preventive measures"
+    "--apply-measures",
+    "-a",
+    is_flag=True,
+    help="Apply automatic preventive measures",
 )
 @click.option("--export", "-e", help="Export prevention report to JSON file")
 def prevent_conflicts(
@@ -1780,7 +1785,7 @@ def prevent_conflicts(
     try:
         mode_enum = AutoResolutionMode(mode)
 
-        click.echo(f"🔮 Predictive conflict prevention")
+        click.echo("🔮 Predictive conflict prevention")
         click.echo(f"   Branches: {', '.join(branches)}")
         click.echo(f"   Mode: {mode_enum.value}")
 
@@ -1793,13 +1798,18 @@ def prevent_conflicts(
         conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
         semantic_merger = SemanticMerger(
-            semantic_analyzer, conflict_engine, branch_manager, repo_path
+            semantic_analyzer,
+            conflict_engine,
+            branch_manager,
+            repo_path,
         )
 
         from libs.multi_agent.conflict_prediction import ConflictPredictor
 
         conflict_predictor = ConflictPredictor(
-            conflict_engine, branch_manager, repo_path
+            conflict_engine,
+            branch_manager,
+            repo_path,
         )
 
         auto_resolver = AutoResolver(
@@ -1813,33 +1823,34 @@ def prevent_conflicts(
 
         async def run_prevention():
             click.echo(
-                f"\n🔍 Analyzing {len(branches)} branches for potential conflicts..."
+                f"\n🔍 Analyzing {len(branches)} branches for potential conflicts...",
             )
 
             # Perform predictive conflict prevention
             result = await auto_resolver.prevent_conflicts_predictively(
-                branches=list(branches), prevention_mode=mode_enum
+                branches=list(branches),
+                prevention_mode=mode_enum,
             )
 
             # Display results
-            click.echo(f"\n📊 Prevention Results:")
+            click.echo("\n📊 Prevention Results:")
             click.echo(f"   Status: {result['status']}")
             click.echo(f"   Branches analyzed: {result['branches_analyzed']}")
 
             if "predictions_found" in result:
                 click.echo(f"   Predictions found: {result['predictions_found']}")
                 click.echo(
-                    f"   High confidence: {result['high_confidence_predictions']}"
+                    f"   High confidence: {result['high_confidence_predictions']}",
                 )
 
             if "preventive_measures_applied" in result:
                 click.echo(
-                    f"   Preventive measures applied: {result['preventive_measures_applied']}"
+                    f"   Preventive measures applied: {result['preventive_measures_applied']}",
                 )
 
             # Show recommendations
             if "recommendations" in result and result["recommendations"]:
-                click.echo(f"\n💡 Prevention Strategies:")
+                click.echo("\n💡 Prevention Strategies:")
                 for i, strategy in enumerate(result["recommendations"][:10], 1):
                     click.echo(f"{i}. Pattern: {strategy['pattern']}")
                     click.echo(f"   Prediction ID: {strategy['prediction_id']}")
@@ -1863,21 +1874,15 @@ def prevent_conflicts(
 
             # Show applied measures
             if "applied_measures" in result and result["applied_measures"]:
-                click.echo(f"🚀 Applied Preventive Measures:")
-                successful = [
-                    m
-                    for m in result["applied_measures"]
-                    if m["status"] == "applied_successfully"
-                ]
-                failed = [
-                    m for m in result["applied_measures"] if m["status"] == "failed"
-                ]
+                click.echo("🚀 Applied Preventive Measures:")
+                successful = [m for m in result["applied_measures"] if m["status"] == "applied_successfully"]
+                failed = [m for m in result["applied_measures"] if m["status"] == "failed"]
 
                 if successful:
                     click.echo(f"   ✅ Successful ({len(successful)}):")
                     for measure in successful:
                         click.echo(
-                            f"     • {measure['measure'].replace('_', ' ').title()}"
+                            f"     • {measure['measure'].replace('_', ' ').title()}",
                         )
 
                 if failed:
@@ -1885,16 +1890,16 @@ def prevent_conflicts(
                     for measure in failed:
                         error = measure.get("error", "Unknown error")
                         click.echo(
-                            f"     • {measure['measure'].replace('_', ' ').title()}: {error}"
+                            f"     • {measure['measure'].replace('_', ' ').title()}: {error}",
                         )
 
             # Show prevention summary
             if "prevention_summary" in result:
                 summary = result["prevention_summary"]
-                click.echo(f"\n📈 Prevention Summary:")
+                click.echo("\n📈 Prevention Summary:")
                 click.echo(f"   Conflicts prevented: {summary['conflicts_prevented']}")
                 click.echo(
-                    f"   Manual intervention needed: {summary['manual_intervention_needed']}"
+                    f"   Manual intervention needed: {summary['manual_intervention_needed']}",
                 )
 
             # Export results if requested
@@ -1908,7 +1913,7 @@ def prevent_conflicts(
                         "branches": list(branches),
                         "mode": mode_enum.value,
                         "results": result,
-                    }
+                    },
                 }
 
                 with open(export, "w") as f:
@@ -1928,17 +1933,24 @@ def prevent_conflicts(
     "--mode",
     "-m",
     type=click.Choice(
-        ["isolated", "cooperative", "synchronized", "hierarchical", "peer_to_peer"]
+        ["isolated", "cooperative", "synchronized", "hierarchical", "peer_to_peer"],
     ),
     default="cooperative",
     help="Collaboration mode",
 )
 @click.option("--purpose", "-p", required=True, help="Purpose of collaboration")
 @click.option(
-    "--duration", "-d", type=int, default=3600, help="Session duration in seconds"
+    "--duration",
+    "-d",
+    type=int,
+    default=3600,
+    help="Session duration in seconds",
 )
 @click.option(
-    "--enable-sync", "-s", is_flag=True, help="Enable auto-sync between agents"
+    "--enable-sync",
+    "-s",
+    is_flag=True,
+    help="Enable auto-sync between agents",
 )
 def collaborate(
     agents: tuple,
@@ -1952,7 +1964,7 @@ def collaborate(
     try:
         from libs.multi_agent.collaboration_engine import CollaborationMode
 
-        click.echo(f"🤝 Starting collaboration session")
+        click.echo("🤝 Starting collaboration session")
         click.echo(f"   Agents: {', '.join(agents)}")
         click.echo(f"   Mode: {mode}")
         click.echo(f"   Purpose: {purpose}")
@@ -1984,8 +1996,8 @@ def collaborate(
 
         async def run_collaboration():
             from libs.multi_agent.collaboration_engine import (
-                MessageType,
                 MessagePriority,
+                MessageType,
             )
 
             # Start collaboration engine
@@ -2039,10 +2051,10 @@ def collaborate(
             # Get collaboration summary
             summary = collab_engine.get_collaboration_summary()
 
-            click.echo(f"\n📊 Collaboration Statistics:")
+            click.echo("\n📊 Collaboration Statistics:")
             click.echo(f"   Messages sent: {summary['statistics']['messages_sent']}")
             click.echo(
-                f"   Knowledge shared: {summary['statistics']['knowledge_shared']}"
+                f"   Knowledge shared: {summary['statistics']['knowledge_shared']}",
             )
             click.echo(f"   Active sessions: {summary['active_sessions']}")
 
@@ -2055,7 +2067,8 @@ def collaborate(
 
             # End session
             await collab_engine.end_collaboration_session(
-                session_id, outcomes=[f"Collaboration completed: {purpose}"]
+                session_id,
+                outcomes=[f"Collaboration completed: {purpose}"],
             )
 
             # Stop engine
@@ -2064,16 +2077,16 @@ def collaborate(
 
             # Final summary
             final_summary = collab_engine.get_collaboration_summary()
-            click.echo(f"\n📈 Final Summary:")
+            click.echo("\n📈 Final Summary:")
             click.echo(
-                f"   Total messages: {final_summary['statistics']['messages_sent']}"
+                f"   Total messages: {final_summary['statistics']['messages_sent']}",
             )
             click.echo(
-                f"   Messages delivered: {final_summary['statistics']['messages_delivered']}"
+                f"   Messages delivered: {final_summary['statistics']['messages_delivered']}",
             )
             click.echo(f"   Knowledge items: {final_summary['shared_knowledge_count']}")
             click.echo(
-                f"   Successful collaborations: {final_summary['statistics']['successful_collaborations']}"
+                f"   Successful collaborations: {final_summary['statistics']['successful_collaborations']}",
             )
 
         asyncio.run(run_collaboration())
@@ -2098,7 +2111,7 @@ def collaborate(
             "review",
             "sync",
             "broadcast",
-        ]
+        ],
     ),
     required=True,
     help="Message type",
@@ -2125,7 +2138,8 @@ def send_message(
     """Send a message between agents in the collaboration system"""
     try:
         import json
-        from libs.multi_agent.collaboration_engine import MessageType, MessagePriority
+
+        from libs.multi_agent.collaboration_engine import MessagePriority, MessageType
 
         # Parse content as JSON
         try:
@@ -2157,14 +2171,14 @@ def send_message(
         }
         message_priority = priority_mapping[priority]
 
-        click.echo(f"📨 Sending message")
+        click.echo("📨 Sending message")
         click.echo(f"   From: {sender}")
         click.echo(f"   To: {recipient or 'All agents (broadcast)'}")
         click.echo(f"   Type: {msg_type}")
         click.echo(f"   Priority: {priority}")
 
         # This is a demo - in real usage, would connect to running collaboration engine
-        click.echo(f"\n✅ Message sent successfully")
+        click.echo("\n✅ Message sent successfully")
         click.echo(f"   Subject: {subject}")
         click.echo(f"   Content: {json.dumps(content_data, indent=2)}")
 
@@ -2183,7 +2197,11 @@ def send_message(
 @click.option("--content", "-c", required=True, help="Knowledge content (JSON format)")
 @click.option("--tags", help="Tags for categorization (comma-separated)")
 @click.option(
-    "--relevance", "-r", type=float, default=1.0, help="Relevance score (0.0-1.0)"
+    "--relevance",
+    "-r",
+    type=float,
+    default=1.0,
+    help="Relevance score (0.0-1.0)",
 )
 @click.option("--repo-path", help="Path to git repository")
 def share_knowledge(
@@ -2209,7 +2227,7 @@ def share_knowledge(
         if tags:
             tag_list = [t.strip() for t in tags.split(",")]
 
-        click.echo(f"📚 Sharing knowledge")
+        click.echo("📚 Sharing knowledge")
         click.echo(f"   Contributor: {agent}")
         click.echo(f"   Type: {type}")
         click.echo(f"   Relevance: {relevance}")
@@ -2217,7 +2235,7 @@ def share_knowledge(
             click.echo(f"   Tags: {', '.join(tag_list)}")
 
         # This is a demo - in real usage, would connect to running collaboration engine
-        click.echo(f"\n✅ Knowledge shared successfully")
+        click.echo("\n✅ Knowledge shared successfully")
         click.echo(f"   Content: {json.dumps(content_data, indent=2)}")
 
     except Exception as e:
@@ -2229,7 +2247,7 @@ def share_knowledge(
     "--action",
     "-a",
     type=click.Choice(
-        ["register", "update", "status", "sync", "subscribe", "merge-report"]
+        ["register", "update", "status", "sync", "subscribe", "merge-report"],
     ),
     required=True,
     help="Action to perform",
@@ -2251,7 +2269,7 @@ def share_knowledge(
             "merge",
             "progress",
             "api",
-        ]
+        ],
     ),
     help="Type of information to update",
 )
@@ -2274,19 +2292,19 @@ def branch_info(
 ):
     """Manage branch information sharing protocol"""
     try:
-        from libs.multi_agent.branch_info_protocol import (
-            BranchInfoProtocol,
-            BranchInfoType,
-            SyncStrategy,
-        )
         import json
+
+        from libs.multi_agent.branch_info_protocol import (
+            BranchInfoType,
+        )
 
         click.echo(f"🌿 Branch Info Protocol - {action}")
 
         if action == "register":
             if not branch or not agent:
                 click.echo(
-                    "❌ Branch and agent are required for registration", err=True
+                    "❌ Branch and agent are required for registration",
+                    err=True,
                 )
                 return
 
@@ -2367,7 +2385,8 @@ def branch_info(
         elif action == "subscribe":
             if not agent or not branch:
                 click.echo(
-                    "❌ Agent and branch are required for subscription", err=True
+                    "❌ Agent and branch are required for subscription",
+                    err=True,
                 )
                 return
 
@@ -2432,7 +2451,7 @@ def dependency_track(
     try:
         import json
 
-        click.echo(f"📊 Tracking dependency change")
+        click.echo("📊 Tracking dependency change")
         click.echo(f"   File: {file}")
         click.echo(f"   Agent: {agent}")
         click.echo(f"   Type: {type}")
@@ -2480,7 +2499,7 @@ def dependency_track(
                 propagation_strategy=propagation_strategy,
             )
 
-            click.echo(f"\n✅ Change tracked successfully")
+            click.echo("\n✅ Change tracked successfully")
             click.echo(f"   Change ID: {change_id}")
 
             # Get summary
@@ -2493,7 +2512,7 @@ def dependency_track(
         except Exception:
             # Fallback to demo output
             mock_change_id = f"dep_change_{agent}_{file.replace('/', '_')}"
-            click.echo(f"\n✅ Change tracked successfully")
+            click.echo("\n✅ Change tracked successfully")
             click.echo(f"   Change ID: {mock_change_id}")
             click.echo("   (Demo mode - actual tracking not performed)")
 
@@ -2552,7 +2571,7 @@ def dependency_status(repo_path: Optional[str], detailed: bool, export: Optional
                         "nodes": 0,
                         "dependencies": 0,
                     },
-                }
+                },
             }
 
             with open(export, "w") as f:
@@ -2598,7 +2617,7 @@ def dependency_impact(file_path: str, repo_path: Optional[str], export: Optional
                 click.echo(f"❌ {report['error']}")
                 return
 
-            click.echo(f"\n📊 Impact Analysis:")
+            click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {report['file_path']}")
             click.echo(f"   Module: {report['module_name']}")
             click.echo(f"   Direct dependents: {report['direct_dependents']}")
@@ -2608,7 +2627,7 @@ def dependency_impact(file_path: str, repo_path: Optional[str], export: Optional
             click.echo(f"   Risk level: {report['risk_level'].upper()}")
 
             if report["affected_branches"]:
-                click.echo(f"\n🌿 Affected Branches:")
+                click.echo("\n🌿 Affected Branches:")
                 for branch in report["affected_branches"]:
                     click.echo(f"   • {branch}")
 
@@ -2637,14 +2656,14 @@ def dependency_impact(file_path: str, repo_path: Optional[str], export: Optional
             asyncio.run(analyze_impact())
         except Exception:
             # Fallback to demo output
-            click.echo(f"\n📊 Impact Analysis:")
+            click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {file_path}")
             click.echo(f"   Module: {file_path.replace('/', '.').replace('.py', '')}")
-            click.echo(f"   Direct dependents: 0")
-            click.echo(f"   Indirect dependents: 0")
-            click.echo(f"   Total impact: 0")
-            click.echo(f"   Complexity score: 0.0")
-            click.echo(f"   Risk level: LOW")
+            click.echo("   Direct dependents: 0")
+            click.echo("   Indirect dependents: 0")
+            click.echo("   Total impact: 0")
+            click.echo("   Complexity score: 0.0")
+            click.echo("   Risk level: LOW")
             click.echo("   (Demo mode - actual analysis not performed)")
 
     except Exception as e:
@@ -2664,7 +2683,7 @@ def dependency_propagate(
 ):
     """Manually propagate specific dependency changes to branches"""
     try:
-        click.echo(f"🚀 Propagating dependency changes")
+        click.echo("🚀 Propagating dependency changes")
         click.echo(f"   Change IDs: {', '.join(change_ids)}")
 
         target_branches = None
@@ -2692,10 +2711,11 @@ def dependency_propagate(
 
             # Propagate changes
             results = await dep_system.propagate_changes_to_branches(
-                change_ids=list(change_ids), target_branches=target_branches
+                change_ids=list(change_ids),
+                target_branches=target_branches,
             )
 
-            click.echo(f"\n📊 Propagation Results:")
+            click.echo("\n📊 Propagation Results:")
 
             for result in results:
                 success_icon = "✅" if result.success else "❌"
@@ -2712,12 +2732,12 @@ def dependency_propagate(
                     click.echo(f"   ❌ Failed: {', '.join(result.failed_targets)}")
 
                 if result.warnings:
-                    click.echo(f"   ⚠️  Warnings:")
+                    click.echo("   ⚠️  Warnings:")
                     for warning in result.warnings:
                         click.echo(f"     • {warning}")
 
                 if result.recommendations:
-                    click.echo(f"   💡 Recommendations:")
+                    click.echo("   💡 Recommendations:")
                     for rec in result.recommendations:
                         click.echo(f"     • {rec}")
 
@@ -2737,7 +2757,7 @@ def dependency_propagate(
                             "metadata": r.metadata,
                         }
                         for r in results
-                    ]
+                    ],
                 }
 
                 with open(export, "w") as f:
@@ -2748,12 +2768,12 @@ def dependency_propagate(
             asyncio.run(propagate_changes())
         except Exception:
             # Fallback to demo output
-            click.echo(f"\n📊 Propagation Results:")
+            click.echo("\n📊 Propagation Results:")
             for change_id in change_ids:
                 click.echo(f"\n✅ Change: {change_id}")
-                click.echo(f"   Success: True")
-                click.echo(f"   Propagated to: 0 branches")
-                click.echo(f"   Processing time: 0.0s")
+                click.echo("   Success: True")
+                click.echo("   Propagated to: 0 branches")
+                click.echo("   Processing time: 0.0s")
             click.echo("   (Demo mode - actual propagation not performed)")
 
     except Exception as e:
@@ -2791,7 +2811,7 @@ def review_initiate(
     try:
         from libs.multi_agent.collaboration_engine import MessagePriority
 
-        click.echo(f"📋 Initiating code review")
+        click.echo("📋 Initiating code review")
         click.echo(f"   Branch: {branch_name}")
         click.echo(f"   Requester: {agent}")
         click.echo(f"   Priority: {priority}")
@@ -2813,8 +2833,8 @@ def review_initiate(
                 "testing": ReviewType.TESTING,
                 "complexity": ReviewType.COMPLEXITY,
             }
-            for t in types.split(","):
-                t = t.strip()
+            for t_str in types.split(","):
+                t = t_str.strip()
                 if t in type_mapping:
                     review_types.append(type_mapping[t])
 
@@ -2862,7 +2882,7 @@ def review_initiate(
                     priority=msg_priority,
                 )
 
-                click.echo(f"\n✅ Review initiated successfully")
+                click.echo("\n✅ Review initiated successfully")
                 click.echo(f"   Review ID: {review_id}")
 
                 # Wait for automated review to complete
@@ -2876,11 +2896,7 @@ def review_initiate(
                     click.echo(f"   Findings: {len(review.findings)}")
 
                     # Show critical findings
-                    critical_findings = [
-                        f
-                        for f in review.findings
-                        if f.severity == ReviewSeverity.CRITICAL
-                    ]
+                    critical_findings = [f for f in review.findings if f.severity == ReviewSeverity.CRITICAL]
                     if critical_findings:
                         click.echo(f"   🚨 Critical issues: {len(critical_findings)}")
 
@@ -2894,7 +2910,7 @@ def review_initiate(
         except Exception:
             # Fallback to demo output
             mock_review_id = f"review_{branch_name}_{agent}"
-            click.echo(f"\n✅ Review initiated successfully")
+            click.echo("\n✅ Review initiated successfully")
             click.echo(f"   Review ID: {mock_review_id}")
             click.echo("   (Demo mode - actual review not performed)")
 
@@ -2908,11 +2924,14 @@ def review_initiate(
 @click.option("--comments", "-c", help="Approval comments")
 @click.option("--repo-path", help="Path to git repository")
 def review_approve(
-    review_id: str, reviewer: str, comments: Optional[str], repo_path: Optional[str]
+    review_id: str,
+    reviewer: str,
+    comments: Optional[str],
+    repo_path: Optional[str],
 ):
     """Approve a code review"""
     try:
-        click.echo(f"✅ Approving code review")
+        click.echo("✅ Approving code review")
         click.echo(f"   Review ID: {review_id}")
         click.echo(f"   Reviewer: {reviewer}")
 
@@ -2942,12 +2961,12 @@ def review_approve(
                 )
 
                 if success:
-                    click.echo(f"\n✅ Review approved successfully")
+                    click.echo("\n✅ Review approved successfully")
                     if comments:
                         click.echo(f"   Comments: {comments}")
                 else:
-                    click.echo(f"\n❌ Failed to approve review")
-                    click.echo(f"   Review may not exist or reviewer not assigned")
+                    click.echo("\n❌ Failed to approve review")
+                    click.echo("   Review may not exist or reviewer not assigned")
 
                 await review_engine.stop()
 
@@ -2958,7 +2977,7 @@ def review_approve(
             asyncio.run(run_approval())
         except Exception:
             # Fallback to demo output
-            click.echo(f"\n✅ Review approved successfully")
+            click.echo("\n✅ Review approved successfully")
             if comments:
                 click.echo(f"   Comments: {comments}")
             click.echo("   (Demo mode - actual approval not performed)")
@@ -2982,7 +3001,7 @@ def review_reject(
 ):
     """Reject a code review with reasons"""
     try:
-        click.echo(f"❌ Rejecting code review")
+        click.echo("❌ Rejecting code review")
         click.echo(f"   Review ID: {review_id}")
         click.echo(f"   Reviewer: {reviewer}")
 
@@ -3021,18 +3040,18 @@ def review_reject(
                 )
 
                 if success:
-                    click.echo(f"\n❌ Review rejected")
-                    click.echo(f"   Reasons:")
+                    click.echo("\n❌ Review rejected")
+                    click.echo("   Reasons:")
                     for reason in reason_list:
                         click.echo(f"     • {reason}")
 
                     if suggestion_list:
-                        click.echo(f"   Suggestions:")
+                        click.echo("   Suggestions:")
                         for suggestion in suggestion_list:
                             click.echo(f"     • {suggestion}")
                 else:
-                    click.echo(f"\n❌ Failed to reject review")
-                    click.echo(f"   Review may not exist or reviewer not assigned")
+                    click.echo("\n❌ Failed to reject review")
+                    click.echo("   Review may not exist or reviewer not assigned")
 
                 await review_engine.stop()
 
@@ -3043,8 +3062,8 @@ def review_reject(
             asyncio.run(run_rejection())
         except Exception:
             # Fallback to demo output
-            click.echo(f"\n❌ Review rejected")
-            click.echo(f"   Reasons:")
+            click.echo("\n❌ Review rejected")
+            click.echo("   Reasons:")
             for reason in reason_list:
                 click.echo(f"     • {reason}")
             click.echo("   (Demo mode - actual rejection not performed)")
@@ -3087,7 +3106,7 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
                     # Get specific review status
                     review = await review_engine.get_review_status(review_id)
                     if review:
-                        click.echo(f"\n📋 Review Details:")
+                        click.echo("\n📋 Review Details:")
                         click.echo(f"   Branch: {review.branch_name}")
                         click.echo(f"   Requester: {review.agent_id}")
                         click.echo(f"   Status: {review.status.value}")
@@ -3096,7 +3115,7 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
 
                         if review.reviewer_ids:
                             click.echo(
-                                f"   Reviewers: {', '.join(review.reviewer_ids)}"
+                                f"   Reviewers: {', '.join(review.reviewer_ids)}",
                             )
 
                         click.echo(f"   Files: {len(review.files_changed)}")
@@ -3109,9 +3128,7 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
                             # Group findings by severity
                             from collections import Counter
 
-                            severity_counts = Counter(
-                                f.severity.value for f in review.findings
-                            )
+                            severity_counts = Counter(f.severity.value for f in review.findings)
                             for severity, count in severity_counts.items():
                                 severity_icon = {
                                     "critical": "💀",
@@ -3124,7 +3141,7 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
 
                         if review.quality_metrics:
                             click.echo(
-                                f"   Quality metrics: {len(review.quality_metrics)}"
+                                f"   Quality metrics: {len(review.quality_metrics)}",
                             )
                             if detailed:
                                 for metric in review.quality_metrics:
@@ -3139,7 +3156,7 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
                 else:
                     # Get review summary
                     summary = review_engine.get_review_summary()
-                    click.echo(f"\n📊 Review Summary:")
+                    click.echo("\n📊 Review Summary:")
                     click.echo(f"   Total reviews: {summary.total_reviews}")
                     click.echo(f"   Approved: {summary.approved_reviews}")
                     click.echo(f"   Rejected: {summary.rejected_reviews}")
@@ -3152,14 +3169,11 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
                     click.echo(f"   Critical findings: {summary.critical_findings}")
 
                     if summary.most_common_issues:
-                        click.echo(f"\n🔍 Most Common Issues:")
+                        click.echo("\n🔍 Most Common Issues:")
                         for issue, count in summary.most_common_issues[:5]:
                             click.echo(f"   • {issue}: {count}")
 
-                    if (
-                        summary.review_time_stats
-                        and "average_time" in summary.review_time_stats
-                    ):
+                    if summary.review_time_stats and "average_time" in summary.review_time_stats:
                         avg_time = summary.review_time_stats["average_time"]
                         click.echo(f"   Average review time: {avg_time:.1f}s")
 
@@ -3173,13 +3187,13 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
         except Exception:
             # Fallback to demo output
             if review_id:
-                click.echo(f"\n📋 Review Details:")
-                click.echo(f"   Status: pending")
-                click.echo(f"   Overall score: 0.0/10")
+                click.echo("\n📋 Review Details:")
+                click.echo("   Status: pending")
+                click.echo("   Overall score: 0.0/10")
                 click.echo("   (Demo mode - actual status not available)")
             else:
-                click.echo(f"\n📊 Review Summary:")
-                click.echo(f"   Total reviews: 0")
+                click.echo("\n📊 Review Summary:")
+                click.echo("   Total reviews: 0")
                 click.echo("   (Demo mode - actual summary not available)")
 
     except Exception as e:
@@ -3203,7 +3217,7 @@ def quality_check(
 ):
     """Perform quality check on specified files"""
     try:
-        click.echo(f"🔍 Performing quality check")
+        click.echo("🔍 Performing quality check")
         click.echo(f"   Files: {len(files)} files")
 
         # Parse metrics
@@ -3220,8 +3234,8 @@ def quality_check(
                 "performance": QualityMetric.PERFORMANCE_SCORE,
             }
             quality_metrics = []
-            for m in metrics.split(","):
-                m = m.strip()
+            for m_str in metrics.split(","):
+                m = m_str.strip()
                 if m in metric_mapping:
                     quality_metrics.append(metric_mapping[m])
 
@@ -3245,10 +3259,11 @@ def quality_check(
 
                 # Perform quality check
                 results = await review_engine.perform_quality_check(
-                    file_paths=list(files), quality_types=quality_metrics
+                    file_paths=list(files),
+                    quality_types=quality_metrics,
                 )
 
-                click.echo(f"\n📊 Quality Check Results:")
+                click.echo("\n📊 Quality Check Results:")
 
                 for i, result in enumerate(results, 1):
                     click.echo(f"\n{i}. {result.file_path}")
@@ -3271,7 +3286,7 @@ def quality_check(
                         status_icon = "❌" if violates else "✅"
 
                         click.echo(
-                            f"   {metric_icon} {status_icon} {metric.value}: {value}"
+                            f"   {metric_icon} {status_icon} {metric.value}: {value}",
                         )
 
                     if result.violations:
@@ -3287,18 +3302,14 @@ def quality_check(
                             "results": [
                                 {
                                     "file_path": r.file_path,
-                                    "metrics": {
-                                        m.value: v for m, v in r.metrics.items()
-                                    },
-                                    "thresholds": {
-                                        m.value: v for m, v in r.thresholds.items()
-                                    },
+                                    "metrics": {m.value: v for m, v in r.metrics.items()},
+                                    "thresholds": {m.value: v for m, v in r.thresholds.items()},
                                     "violations": [v.value for v in r.violations],
                                     "calculated_at": r.calculated_at.isoformat(),
                                 }
                                 for r in results
                             ],
-                        }
+                        },
                     }
 
                     with open(export, "w") as f:
@@ -3314,11 +3325,11 @@ def quality_check(
             asyncio.run(run_quality_check())
         except Exception:
             # Fallback to demo output
-            click.echo(f"\n📊 Quality Check Results:")
+            click.echo("\n📊 Quality Check Results:")
             for i, file in enumerate(files, 1):
                 click.echo(f"\n{i}. {file}")
-                click.echo(f"   🔄 ✅ cyclomatic_complexity: 5.0")
-                click.echo(f"   🔧 ✅ maintainability_index: 75.0")
+                click.echo("   🔄 ✅ cyclomatic_complexity: 5.0")
+                click.echo("   🔧 ✅ maintainability_index: 75.0")
             click.echo("   (Demo mode - actual quality check not performed)")
 
     except Exception as e:
@@ -3355,48 +3366,48 @@ def review_summary(repo_path: Optional[str], export: Optional[str]):
                 # Get engine summary
                 summary = review_engine.get_engine_summary()
 
-                click.echo(f"Engine Status: Running")
+                click.echo("Engine Status: Running")
                 click.echo(f"Active reviews: {summary['active_reviews']}")
                 click.echo(f"Total reviews: {summary['total_reviews']}")
 
                 # Statistics
                 stats = summary["statistics"]
-                click.echo(f"\n📈 Statistics:")
+                click.echo("\n📈 Statistics:")
                 click.echo(f"   Reviews initiated: {stats['reviews_initiated']}")
                 click.echo(f"   Reviews completed: {stats['reviews_completed']}")
                 click.echo(f"   Auto-approved: {stats['auto_approved']}")
                 click.echo(
-                    f"   Manual reviews required: {stats['manual_reviews_required']}"
+                    f"   Manual reviews required: {stats['manual_reviews_required']}",
                 )
                 click.echo(f"   Total findings: {stats['total_findings']}")
 
                 if stats["reviews_completed"] > 0:
                     click.echo(
-                        f"   Average review time: {stats['average_review_time']:.1f}s"
+                        f"   Average review time: {stats['average_review_time']:.1f}s",
                     )
 
                 # Available tools
                 tools = summary["available_tools"]
-                click.echo(f"\n🛠️ Available Tools:")
+                click.echo("\n🛠️ Available Tools:")
                 for tool, available in tools.items():
                     status = "✅" if available else "❌"
                     click.echo(f"   {status} {tool}")
 
                 # Configuration
                 config = summary["review_config"]
-                click.echo(f"\n⚙️ Configuration:")
+                click.echo("\n⚙️ Configuration:")
                 click.echo(
-                    f"   Auto-approve threshold: {config['auto_approve_threshold']}"
+                    f"   Auto-approve threshold: {config['auto_approve_threshold']}",
                 )
                 click.echo(
-                    f"   Max concurrent reviews: {config['max_concurrent_reviews']}"
+                    f"   Max concurrent reviews: {config['max_concurrent_reviews']}",
                 )
                 click.echo(f"   Default reviewers: {config['default_reviewers']}")
                 click.echo(f"   AI reviewer enabled: {config['enable_ai_reviewer']}")
 
                 # Recent reviews
                 if summary["recent_reviews"]:
-                    click.echo(f"\n📋 Recent Reviews:")
+                    click.echo("\n📋 Recent Reviews:")
                     for review in summary["recent_reviews"][-5:]:
                         status_icon = {
                             "pending": "⏳",
@@ -3407,8 +3418,7 @@ def review_summary(repo_path: Optional[str], export: Optional[str]):
                         }.get(review["status"], "❓")
 
                         click.echo(
-                            f"   {status_icon} {review['review_id']} - {review['branch_name']} "
-                            f"(Score: {review['overall_score']:.1f})"
+                            f"   {status_icon} {review['review_id']} - {review['branch_name']} (Score: {review['overall_score']:.1f})",
                         )
 
                 # Export if requested
@@ -3428,9 +3438,9 @@ def review_summary(repo_path: Optional[str], export: Optional[str]):
             asyncio.run(get_summary())
         except Exception:
             # Fallback to demo output
-            click.echo(f"Engine Status: Running")
-            click.echo(f"Active reviews: 0")
-            click.echo(f"Total reviews: 0")
+            click.echo("Engine Status: Running")
+            click.echo("Active reviews: 0")
+            click.echo("Total reviews: 0")
             click.echo("   (Demo mode - actual summary not available)")
 
     except Exception as e:

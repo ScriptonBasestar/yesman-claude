@@ -96,7 +96,7 @@ print(f"Overall health score: {health_score:.1f}/100")
 
 # Test individual categories
 categories = [
-    'build', 'tests', 'dependencies', 'security', 
+    'build', 'tests', 'dependencies', 'security',
     'performance', 'code_quality', 'git', 'documentation'
 ]
 
@@ -177,7 +177,7 @@ print(f"Test files: {test_files}")
 if src_files > 0:
     test_coverage_ratio = (test_files / src_files) * 100
     print(f"Test coverage ratio: {test_coverage_ratio:.1f}%")
-    
+
     if test_coverage_ratio >= 80:
         print("✅ Excellent test coverage")
     elif test_coverage_ratio >= 50:
@@ -203,16 +203,16 @@ calculator = HealthCalculator()
 # Test git repository detection
 if os.path.exists('/tmp/health-test-project/.git'):
     print("✅ Git repository detected")
-    
+
     # Check git status
     try:
-        result = subprocess.run(['git', 'status', '--porcelain'], 
-                              cwd='/tmp/health-test-project', 
+        result = subprocess.run(['git', 'status', '--porcelain'],
+                              cwd='/tmp/health-test-project',
                               capture_output=True, text=True)
         if result.returncode == 0:
             uncommitted_files = len(result.stdout.strip().split('\n')) if result.stdout.strip() else 0
             print(f"Uncommitted files: {uncommitted_files}")
-            
+
             if uncommitted_files == 0:
                 print("✅ Clean git repository")
             else:
@@ -221,16 +221,16 @@ if os.path.exists('/tmp/health-test-project/.git'):
             print("❌ Git status check failed")
     except Exception as e:
         print(f"❌ Git check error: {e}")
-    
+
     # Check commit history
     try:
-        result = subprocess.run(['git', 'log', '--oneline', '-n', '10'], 
-                              cwd='/tmp/health-test-project', 
+        result = subprocess.run(['git', 'log', '--oneline', '-n', '10'],
+                              cwd='/tmp/health-test-project',
                               capture_output=True, text=True)
         if result.returncode == 0:
             commit_count = len(result.stdout.strip().split('\n')) if result.stdout.strip() else 0
             print(f"Recent commits: {commit_count}")
-            
+
             if commit_count > 0:
                 print("✅ Git history available")
             else:
@@ -271,26 +271,26 @@ if 'package.json' in dependency_files:
     try:
         with open('/tmp/health-test-project/package.json', 'r') as f:
             package_data = json.load(f)
-        
+
         deps = package_data.get('dependencies', {})
         dev_deps = package_data.get('devDependencies', {})
-        
+
         print(f"Production dependencies: {len(deps)}")
         print(f"Development dependencies: {len(dev_deps)}")
-        
+
         # Check for known vulnerable packages (example)
         vulnerable_packages = ['lodash', 'moment', 'request']
         found_vulnerable = []
-        
+
         for dep in deps:
             if dep in vulnerable_packages:
                 found_vulnerable.append(dep)
-        
+
         if found_vulnerable:
             print(f"⚠️ Potentially vulnerable packages: {found_vulnerable}")
         else:
             print("✅ No known vulnerable packages detected")
-            
+
     except Exception as e:
         print(f"❌ Package.json analysis error: {e}")
 
@@ -299,22 +299,22 @@ if 'requirements.txt' in dependency_files:
     try:
         with open('/tmp/health-test-project/requirements.txt', 'r') as f:
             requirements = f.read().strip().split('\n')
-        
+
         print(f"Python dependencies: {len(requirements)}")
-        
+
         # Check for version pinning
         pinned_deps = sum(1 for req in requirements if '>=' in req or '==' in req)
         pinning_ratio = (pinned_deps / len(requirements)) * 100 if requirements else 0
-        
+
         print(f"Version pinning ratio: {pinning_ratio:.1f}%")
-        
+
         if pinning_ratio >= 80:
             print("✅ Good version pinning")
         elif pinning_ratio >= 50:
             print("⚠️ Some version pinning")
         else:
             print("❌ Poor version pinning")
-            
+
     except Exception as e:
         print(f"❌ Requirements.txt analysis error: {e}")
 EOF
@@ -384,13 +384,13 @@ print("Simulating real-time monitoring...")
 # Simulate health monitoring over time
 for i in range(5):
     health_score = calculator.calculate_health('/tmp/health-test-project')
-    
+
     # Add some random variation to simulate real changes
     variation = random.uniform(-5, 5)
     simulated_score = max(0, min(100, health_score + variation))
-    
+
     print(f"Monitoring cycle {i+1}: Health score = {simulated_score:.1f}")
-    
+
     # Simulate different health states
     if simulated_score >= 80:
         status = "🟢 Healthy"
@@ -398,9 +398,9 @@ for i in range(5):
         status = "🟡 Warning"
     else:
         status = "🔴 Critical"
-    
+
     print(f"  Status: {status}")
-    
+
     time.sleep(1)
 
 print("✅ Real-time monitoring simulation completed")
@@ -426,7 +426,7 @@ health_data = {
 }
 
 categories = [
-    'build', 'tests', 'dependencies', 'security', 
+    'build', 'tests', 'dependencies', 'security',
     'performance', 'code_quality', 'git', 'documentation'
 ]
 

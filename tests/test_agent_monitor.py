@@ -1,17 +1,17 @@
 """Tests for AgentMonitor dashboard widget"""
 
-import pytest
-import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from libs.dashboard.widgets.agent_monitor import (
-    AgentMonitor,
     AgentMetrics,
-    TaskMetrics,
+    AgentMonitor,
     MonitorDisplayMode,
+    TaskMetrics,
 )
-from libs.multi_agent.types import Agent, Task, AgentState, TaskStatus
+from libs.multi_agent.types import TaskStatus
 
 
 class TestAgentMetrics:
@@ -39,7 +39,10 @@ class TestAgentMetrics:
     def test_efficiency_score_with_tasks(self):
         """Test efficiency score calculation with completed tasks"""
         metrics = AgentMetrics(
-            agent_id="test-agent", tasks_completed=10, tasks_failed=2, current_load=0.3
+            agent_id="test-agent",
+            tasks_completed=10,
+            tasks_failed=2,
+            current_load=0.3,
         )
         metrics.success_rate = 10 / 12  # 83%
 
@@ -54,7 +57,9 @@ class TestTaskMetrics:
     def test_init(self):
         """Test TaskMetrics initialization"""
         metrics = TaskMetrics(
-            task_id="task-1", title="Test Task", status=TaskStatus.PENDING
+            task_id="task-1",
+            title="Test Task",
+            status=TaskStatus.PENDING,
         )
 
         assert metrics.task_id == "task-1"
@@ -338,9 +343,7 @@ class TestAgentMonitor:
         """Test performance history size limiting"""
         # Add more than 100 data points
         agent_id = "agent-1"
-        monitor.performance_history[agent_id] = [
-            (datetime.now(), 0.5) for _ in range(105)
-        ]
+        monitor.performance_history[agent_id] = [(datetime.now(), 0.5) for _ in range(105)]
 
         monitor.update_metrics()
 

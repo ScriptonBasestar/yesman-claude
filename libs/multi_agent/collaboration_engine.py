@@ -1,23 +1,20 @@
 """Collaboration engine for multi-agent branch development coordination"""
 
 import asyncio
+import hashlib
 import logging
-import json
-from typing import Dict, List, Optional, Any, Set, Tuple, Union
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
-from collections import defaultdict, deque
-import hashlib
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
-from .branch_manager import BranchManager
-from .types import Agent, Task, AgentState, TaskStatus
 from .agent_pool import AgentPool
-from .conflict_resolution import ConflictResolutionEngine, ConflictInfo
-from .semantic_analyzer import SemanticAnalyzer, SemanticConflict
-from .auto_resolver import AutoResolver, AutoResolutionMode
-
+from .branch_manager import BranchManager
+from .conflict_resolution import ConflictInfo, ConflictResolutionEngine
+from .semantic_analyzer import SemanticAnalyzer
+from .types import AgentState
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +142,7 @@ class CollaborationEngine:
         # Knowledge base
         self.shared_knowledge: Dict[str, SharedKnowledge] = {}
         self.knowledge_index: Dict[str, List[str]] = defaultdict(
-            list
+            list,
         )  # tag -> knowledge_ids
 
         # Collaboration sessions
@@ -154,7 +151,7 @@ class CollaborationEngine:
 
         # Dependency tracking
         self.dependency_graph: Dict[str, Set[str]] = defaultdict(
-            set
+            set,
         )  # file -> dependent files
         self.change_propagation_queue: deque = deque()
 
@@ -272,12 +269,14 @@ class CollaborationEngine:
         self.collaboration_stats["messages_sent"] += 1
 
         logger.info(
-            f"Message {message_id} sent from {sender_id} to {recipient_id or 'all'}"
+            f"Message {message_id} sent from {sender_id} to {recipient_id or 'all'}",
         )
         return message_id
 
     async def receive_messages(
-        self, agent_id: str, max_messages: Optional[int] = None
+        self,
+        agent_id: str,
+        max_messages: Optional[int] = None,
     ) -> List[CollaborationMessage]:
         """
         Receive messages for an agent
@@ -423,9 +422,7 @@ class CollaborationEngine:
 
             # Filter by type
             if knowledge_type:
-                candidates = [
-                    k for k in candidates if k.knowledge_type == knowledge_type
-                ]
+                candidates = [k for k in candidates if k.knowledge_type == knowledge_type]
 
             # Sort by relevance and recency
             candidates.sort(
@@ -501,7 +498,7 @@ class CollaborationEngine:
                 )
 
         logger.info(
-            f"Collaboration session {session_id} created with {len(participant_ids)} participants"
+            f"Collaboration session {session_id} created with {len(participant_ids)} participants",
         )
         return session_id
 
@@ -614,8 +611,7 @@ class CollaborationEngine:
             "changed_by": changed_by,
             "change_type": change_type,
             "change_details": change_details,
-            "affected_files": affected_files
-            or list(self.dependency_graph.get(file_path, [])),
+            "affected_files": affected_files or list(self.dependency_graph.get(file_path, [])),
             "timestamp": datetime.now().isoformat(),
         }
 
@@ -681,11 +677,7 @@ class CollaborationEngine:
                 score += len(matching_expertise) / len(expertise_needed)
 
             # Check recent related knowledge contributions
-            agent_knowledge = [
-                k
-                for k in self.shared_knowledge.values()
-                if k.contributor_id == agent.id
-            ]
+            agent_knowledge = [k for k in self.shared_knowledge.values() if k.contributor_id == agent.id]
 
             for knowledge in agent_knowledge:
                 if problem_type in knowledge.tags:
@@ -771,7 +763,7 @@ class CollaborationEngine:
             )
 
         logger.info(
-            f"Code review initiated by {author_id} with {len(reviewers)} reviewers"
+            f"Code review initiated by {author_id} with {len(reviewers)} reviewers",
         )
         return reviewers
 
@@ -840,7 +832,9 @@ class CollaborationEngine:
                 }
 
                 await self.update_session_context(
-                    session_id, agents_branch1[0], resolution_context
+                    session_id,
+                    agents_branch1[0],
+                    resolution_context,
                 )
 
                 # If agents agree on resolution, count as prevented
@@ -879,7 +873,7 @@ class CollaborationEngine:
                         for _ in range(removed):
                             queue.popleft()
                         logger.warning(
-                            f"Trimmed {removed} messages from {agent_id} queue"
+                            f"Trimmed {removed} messages from {agent_id} queue",
                         )
 
                 await asyncio.sleep(5)
@@ -901,7 +895,7 @@ class CollaborationEngine:
                     if change_info.get("affected_files"):
                         # Could trigger additional analysis or notifications
                         logger.info(
-                            f"Processing dependency change in {change_info['file_path']}"
+                            f"Processing dependency change in {change_info['file_path']}",
                         )
 
                     processed += 1
@@ -917,15 +911,12 @@ class CollaborationEngine:
         while self._running:
             try:
                 cutoff_date = datetime.now() - timedelta(
-                    days=self.knowledge_retention_days
+                    days=self.knowledge_retention_days,
                 )
                 removed = []
 
                 for kid, knowledge in self.shared_knowledge.items():
-                    if (
-                        knowledge.last_accessed < cutoff_date
-                        and knowledge.access_count < 5
-                    ):
+                    if knowledge.last_accessed < cutoff_date and knowledge.access_count < 5:
                         removed.append(kid)
 
                 for kid in removed:
@@ -1023,24 +1014,18 @@ class CollaborationEngine:
         return {
             "statistics": self.collaboration_stats.copy(),
             "active_sessions": len(self.active_sessions),
-            "message_queues": {
-                agent_id: len(queue) for agent_id, queue in self.message_queues.items()
-            },
+            "message_queues": {agent_id: len(queue) for agent_id, queue in self.message_queues.items()},
             "pending_acknowledgments": len(self.pending_acknowledgments),
             "shared_knowledge_count": len(self.shared_knowledge),
             "knowledge_by_type": self._count_knowledge_by_type(),
-            "dependency_graph_size": sum(
-                len(deps) for deps in self.dependency_graph.values()
-            ),
+            "dependency_graph_size": sum(len(deps) for deps in self.dependency_graph.values()),
             "recent_sessions": [
                 {
                     "session_id": session.session_id,
                     "participants": len(session.participant_ids),
                     "mode": session.mode.value,
                     "purpose": session.purpose,
-                    "duration": (
-                        (session.ended_at or datetime.now()) - session.started_at
-                    ).total_seconds(),
+                    "duration": ((session.ended_at or datetime.now()) - session.started_at).total_seconds(),
                     "outcomes": session.outcomes,
                 }
                 for session in self.session_history[-10:]

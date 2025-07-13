@@ -1,32 +1,28 @@
 """Tests for DependencyPropagationSystem dependency change tracking and propagation"""
 
-import pytest
 import asyncio
-from typing import Dict, List, Optional, Any
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta
-from pathlib import Path
 import tempfile
-import os
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock
 
-from libs.multi_agent.dependency_propagation import (
-    DependencyPropagationSystem,
-    DependencyType,
-    ChangeImpact,
-    PropagationStrategy,
-    DependencyNode,
-    DependencyChange,
-    PropagationResult,
+import pytest
+
+from libs.multi_agent.branch_info_protocol import (
+    BranchInfoProtocol,
 )
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import (
     CollaborationEngine,
-    MessageType,
-    MessagePriority,
 )
-from libs.multi_agent.branch_info_protocol import (
-    BranchInfoProtocol,
-    BranchInfoType,
+from libs.multi_agent.dependency_propagation import (
+    ChangeImpact,
+    DependencyChange,
+    DependencyNode,
+    DependencyPropagationSystem,
+    DependencyType,
+    PropagationResult,
+    PropagationStrategy,
 )
 
 
@@ -128,37 +124,43 @@ class TestDependencyPropagationSystem:
             (repo_path / "tests").mkdir()
 
             # Main module
-            (repo_path / "src" / "main.py").write_text("""
+            (repo_path / "src" / "main.py").write_text(
+                """
 import pandas as pd
 from .utils import process_data, validate_input
 
 class DataProcessor:
     def __init__(self):
         self.data = None
-    
+
     def process(self, data):
         validated = validate_input(data)
         return process_data(validated)
-""")
+"""
+            )
 
             # Utils module
-            (repo_path / "src" / "utils.py").write_text("""
+            (repo_path / "src" / "utils.py").write_text(
+                """
 def process_data(data):
     return data * 2
 
 def validate_input(data):
     return data is not None
-""")
+"""
+            )
 
             # Test file
-            (repo_path / "tests" / "test_main.py").write_text("""
+            (repo_path / "tests" / "test_main.py").write_text(
+                """
 from src.main import DataProcessor
 
 def test_processor():
     processor = DataProcessor()
     result = processor.process(5)
     assert result == 10
-""")
+"""
+            )
 
             yield repo_path
 
@@ -178,10 +180,10 @@ def test_processor():
             return_value={
                 "feature-x": Mock(agent_id="agent-1", files_modified=["src/main.py"]),
                 "feature-y": Mock(agent_id="agent-2", files_modified=["src/utils.py"]),
-            }
+            },
         )
         protocol.get_branch_info = AsyncMock(
-            return_value=Mock(agent_id="agent-1", files_modified=["src/main.py"])
+            return_value=Mock(agent_id="agent-1", files_modified=["src/main.py"]),
         )
         return protocol
 
@@ -267,7 +269,8 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_track_dependency_change_auto_impact_detection(
-        self, propagation_system
+        self,
+        propagation_system,
     ):
         """Test auto-detection of change impact level"""
         # Breaking change keywords
@@ -278,9 +281,7 @@ def test_processor():
             change_details={"description": "remove deprecated function"},
         )
 
-        change = next(
-            c for c in propagation_system.change_history if c.change_id == change_id
-        )
+        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
         assert change.impact_level == ChangeImpact.BREAKING
 
         # Security change keywords
@@ -291,9 +292,7 @@ def test_processor():
             change_details={"description": "update security token validation"},
         )
 
-        change = next(
-            c for c in propagation_system.change_history if c.change_id == change_id
-        )
+        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
         assert change.impact_level == ChangeImpact.SECURITY
 
         # Enhancement changes
@@ -304,9 +303,7 @@ def test_processor():
             change_details={"description": "add new feature functionality"},
         )
 
-        change = next(
-            c for c in propagation_system.change_history if c.change_id == change_id
-        )
+        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
         assert change.impact_level == ChangeImpact.ENHANCEMENT
 
     @pytest.mark.asyncio
@@ -317,9 +314,7 @@ def test_processor():
         assert len(dependency_graph) > 0
 
         # Check that Python files were analyzed
-        src_files = [
-            path for path in dependency_graph.keys() if path.startswith("src/")
-        ]
+        src_files = [path for path in dependency_graph.keys() if path.startswith("src/")]
         assert len(src_files) >= 2
 
         # Check specific dependency relationships
@@ -352,7 +347,7 @@ def test_processor():
 
         # Test non-existent file
         report = await propagation_system.get_dependency_impact_report(
-            "non_existent.py"
+            "non_existent.py",
         )
         assert "error" in report
 
@@ -413,14 +408,14 @@ def test_processor():
 
         # Filter by agent
         pending_agent1 = await propagation_system.get_pending_changes(
-            agent_id="agent-1"
+            agent_id="agent-1",
         )
         assert len(pending_agent1) == 1
         assert pending_agent1[0].changed_by == "agent-1"
 
         # Filter by branch (mock will need to return branch info)
         pending_branch = await propagation_system.get_pending_changes(
-            branch_name="feature-x"
+            branch_name="feature-x",
         )
         assert len(pending_branch) >= 0  # Depends on mock branch info
 
@@ -453,7 +448,9 @@ def test_processor():
 
         # Test class inheritance changes
         impact = await propagation_system._analyze_change_impact(
-            "src/main.py", DependencyType.CLASS_INHERITANCE, {"base_class": "changed"}
+            "src/main.py",
+            DependencyType.CLASS_INHERITANCE,
+            {"base_class": "changed"},
         )
         assert impact == ChangeImpact.BREAKING
 
@@ -481,7 +478,9 @@ def test_processor():
 
         # Test finding affected files
         affected = await propagation_system._find_affected_files(
-            "src/utils.py", DependencyType.FUNCTION_CALL, {"function": "process_data"}
+            "src/utils.py",
+            DependencyType.FUNCTION_CALL,
+            {"function": "process_data"},
         )
 
         # Should include files that depend on utils.py
@@ -493,7 +492,7 @@ def test_processor():
         affected_files = ["src/main.py", "src/utils.py"]
 
         affected_branches = await propagation_system._find_affected_branches(
-            affected_files
+            affected_files,
         )
 
         # Should return branches based on mock branch info protocol
@@ -507,7 +506,7 @@ def test_processor():
 
         if "src/utils.py" in propagation_system.dependency_graph:
             count = await propagation_system._calculate_indirect_dependents(
-                "src/utils.py"
+                "src/utils.py",
             )
             assert isinstance(count, int)
             assert count >= 0
@@ -581,10 +580,7 @@ def test_processor():
         )
 
         # Check stats updated
-        assert (
-            propagation_system.propagation_stats["changes_tracked"]
-            == initial_stats["changes_tracked"] + 1
-        )
+        assert propagation_system.propagation_stats["changes_tracked"] == initial_stats["changes_tracked"] + 1
 
     @pytest.mark.asyncio
     async def test_immediate_propagation_for_critical_changes(self, propagation_system):

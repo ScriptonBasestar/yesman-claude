@@ -1,7 +1,7 @@
 """Simple directed graph implementation for task dependencies"""
 
-from typing import Dict, List, Set, Tuple, Any, Optional
 from collections import defaultdict, deque
+from typing import Any, Dict, List, Set, Tuple
 
 
 class DirectedGraph:
@@ -91,12 +91,7 @@ class DirectedGraph:
             rec_stack.remove(node)
             return False
 
-        for node in self.nodes:
-            if node not in visited:
-                if has_cycle(node):
-                    return False
-
-        return True
+        return all(not (node not in visited and has_cycle(node)) for node in self.nodes)
 
     def simple_cycles(self) -> List[List[str]]:
         """Find simple cycles in the graph"""

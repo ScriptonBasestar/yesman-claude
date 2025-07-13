@@ -108,18 +108,18 @@ export async function loadConfig(): Promise<void> {
   try {
     // Tauri에서 설정 파일 로드
     const savedConfig = await tauriUtils.loadConfig();
-    
+
     if (savedConfig) {
       // 기본 설정과 병합 (새로운 설정 키가 추가될 수 있음)
       const mergedConfig = mergeConfigs(defaultConfig, savedConfig);
       config.set(mergedConfig);
     }
-    
+
     hasUnsavedChanges.set(false);
   } catch (error) {
     console.error('Failed to load config:', error);
     configError.set(error instanceof Error ? error.message : 'Failed to load configuration');
-    
+
     // 실패 시 기본 설정 사용
     config.set(defaultConfig);
   } finally {
@@ -205,7 +205,7 @@ export async function resetSection(section: keyof AppConfig): Promise<void> {
     ...currentConfig,
     [section]: defaultConfig[section]
   };
-  
+
   config.set(resetConfig);
   hasUnsavedChanges.set(true);
 }
@@ -225,7 +225,7 @@ export function exportConfig(): string {
 export async function importConfig(jsonData: string): Promise<boolean> {
   try {
     const data = JSON.parse(jsonData);
-    
+
     if (data.config && typeof data.config === 'object') {
       const importedConfig = mergeConfigs(defaultConfig, data.config);
       config.set(importedConfig);
@@ -233,7 +233,7 @@ export async function importConfig(jsonData: string): Promise<boolean> {
       await saveConfig();
       return true;
     }
-    
+
     return false;
   } catch (error) {
     console.error('Failed to import config:', error);
@@ -246,7 +246,7 @@ export async function importConfig(jsonData: string): Promise<boolean> {
  */
 export function applyTheme(theme: AppConfig['theme']): void {
   const html = document.documentElement;
-  
+
   if (theme === 'auto') {
     // 시스템 테마 따르기
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -261,7 +261,7 @@ export function applyTheme(theme: AppConfig['theme']): void {
  */
 export function changeLanguage(language: AppConfig['language']): void {
   updateConfig({ language });
-  
+
   // 언어 변경 이벤트 발송
   window.dispatchEvent(new CustomEvent('language-changed', {
     detail: { language }
@@ -273,7 +273,7 @@ export function changeLanguage(language: AppConfig['language']): void {
  */
 export function validateConfig(configToValidate: Partial<AppConfig>): string[] {
   const errors: string[] = [];
-  
+
   // 자동 새로고침 간격 검사
   if (configToValidate.autoRefresh?.interval !== undefined) {
     if (configToValidate.autoRefresh.interval < 1000) {
@@ -283,14 +283,14 @@ export function validateConfig(configToValidate: Partial<AppConfig>): string[] {
       errors.push('Auto-refresh interval must not exceed 5 minutes');
     }
   }
-  
+
   // 알림 숨김 지연 시간 검사
   if (configToValidate.notifications?.hideDelay !== undefined) {
     if (configToValidate.notifications.hideDelay < 1000) {
       errors.push('Notification hide delay must be at least 1 second');
     }
   }
-  
+
   // 페이지당 세션 수 검사
   if (configToValidate.dashboard?.sessionsPerPage !== undefined) {
     if (configToValidate.dashboard.sessionsPerPage < 5) {
@@ -300,14 +300,14 @@ export function validateConfig(configToValidate: Partial<AppConfig>): string[] {
       errors.push('Sessions per page must not exceed 100');
     }
   }
-  
+
   // 최대 로그 크기 검사
   if (configToValidate.advanced?.maxLogSize !== undefined) {
     if (configToValidate.advanced.maxLogSize < 1048576) { // 1MB
       errors.push('Max log size must be at least 1MB');
     }
   }
-  
+
   return errors;
 }
 
@@ -321,9 +321,9 @@ export function setupAutoSave(enabled: boolean = true, delay: number = 30000): v
   }
 
   if (!enabled) return;
-  
+
   let saveTimeout: number;
-  
+
   hasUnsavedChanges.subscribe(hasChanges => {
     if (hasChanges) {
       // 변경사항이 있으면 일정 시간 후 자동 저장
@@ -368,7 +368,7 @@ export const keyboardShortcuts: KeyboardShortcut[] = [
  */
 function mergeConfigs(base: AppConfig, override: Partial<AppConfig>): AppConfig {
   const merged = { ...base };
-  
+
   for (const [key, value] of Object.entries(override)) {
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       // 객체 타입은 재귀적으로 병합
@@ -381,7 +381,7 @@ function mergeConfigs(base: AppConfig, override: Partial<AppConfig>): AppConfig 
       merged[key as keyof AppConfig] = value as any;
     }
   }
-  
+
   return merged;
 }
 
@@ -395,17 +395,17 @@ export function setupThemeDetection(): void {
   }
 
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  
+
   const handleThemeChange = () => {
     const currentConfig = get(config);
     if (currentConfig.theme === 'auto') {
       applyTheme('auto');
     }
   };
-  
+
   // 초기 테마 적용
   handleThemeChange();
-  
+
   // 시스템 테마 변경 감지
   mediaQuery.addEventListener('change', handleThemeChange);
 }
@@ -422,7 +422,7 @@ export function toggleDebugMode(): void {
     }
   }));
   hasUnsavedChanges.set(true);
-  
+
   // 디버그 모드 이벤트 발송
   const isDebug = get(config).advanced.debugMode;
   window.dispatchEvent(new CustomEvent('debug-mode-changed', {

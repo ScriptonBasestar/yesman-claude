@@ -1,12 +1,14 @@
+import os
+import sys
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import sys
-import os
 
 # 프로젝트 루트를 경로에 추가
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from libs.yesman_config import YesmanConfig
+
 
 # API 응답을 위한 Pydantic 모델
 class AppConfig(BaseModel):
@@ -15,8 +17,10 @@ class AppConfig(BaseModel):
     # 다른 설정들도 필요에 따라 추가
     # 예: confidence_threshold: float
 
+
 router = APIRouter()
 config_manager = YesmanConfig()
+
 
 @router.get("/config", response_model=AppConfig)
 def get_app_config():
@@ -29,6 +33,7 @@ def get_app_config():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get config: {str(e)}")
 
+
 # TODO: POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
 #       YesmanConfig에 save 메서드를 추가해야 합니다.
 @router.post("/config", status_code=204)
@@ -39,4 +44,4 @@ def save_app_config(config: AppConfig):
         config_manager.save(config_data)
         return
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}")

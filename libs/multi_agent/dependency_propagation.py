@@ -1,25 +1,23 @@
 """Dependency change propagation system for multi-agent collaboration"""
 
-import asyncio
-import logging
 import ast
-import re
-from typing import Dict, List, Optional, Any, Set, Tuple
-from dataclasses import dataclass, field
-from pathlib import Path
-from datetime import datetime, timedelta
-from enum import Enum
-from collections import defaultdict, deque
+import asyncio
 import hashlib
+import logging
+from collections import deque
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
+from .branch_info_protocol import BranchInfoProtocol, BranchInfoType
 from .branch_manager import BranchManager
 from .collaboration_engine import (
     CollaborationEngine,
-    MessageType,
     MessagePriority,
+    MessageType,
 )
-from .branch_info_protocol import BranchInfoProtocol, BranchInfoType
-
 
 logger = logging.getLogger(__name__)
 
@@ -216,12 +214,16 @@ class DependencyPropagationSystem:
         # Auto-detect impact level if not provided
         if impact_level is None:
             impact_level = await self._analyze_change_impact(
-                file_path, change_type, change_details
+                file_path,
+                change_type,
+                change_details,
             )
 
         # Analyze affected files and branches
         affected_files = await self._find_affected_files(
-            file_path, change_type, change_details
+            file_path,
+            change_type,
+            change_details,
         )
         affected_branches = await self._find_affected_branches(affected_files)
 
@@ -236,8 +238,7 @@ class DependencyPropagationSystem:
             affected_files=affected_files,
             affected_branches=affected_branches,
             propagation_strategy=propagation_strategy,
-            requires_manual_review=impact_level
-            in [ChangeImpact.BREAKING, ChangeImpact.SECURITY],
+            requires_manual_review=impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY],
         )
 
         # Queue for processing
@@ -246,21 +247,18 @@ class DependencyPropagationSystem:
         self.propagation_stats["changes_tracked"] += 1
 
         logger.info(
-            f"Tracked dependency change {change_id} in {file_path} by {changed_by}"
+            f"Tracked dependency change {change_id} in {file_path} by {changed_by}",
         )
 
         # Immediate propagation for critical changes
-        if (
-            propagation_strategy == PropagationStrategy.IMMEDIATE
-            and impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY]
-            and self.auto_propagate
-        ):
+        if propagation_strategy == PropagationStrategy.IMMEDIATE and impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY] and self.auto_propagate:
             await self._process_single_change(dependency_change)
 
         return change_id
 
     async def build_dependency_graph(
-        self, file_paths: Optional[List[str]] = None
+        self,
+        file_paths: Optional[List[str]] = None,
     ) -> Dict[str, DependencyNode]:
         """
         Build or rebuild the dependency graph
@@ -330,7 +328,9 @@ class DependencyPropagationSystem:
         }
 
     async def propagate_changes_to_branches(
-        self, change_ids: List[str], target_branches: Optional[List[str]] = None
+        self,
+        change_ids: List[str],
+        target_branches: Optional[List[str]] = None,
     ) -> List[PropagationResult]:
         """
         Propagate specific changes to target branches
@@ -347,7 +347,8 @@ class DependencyPropagationSystem:
         for change_id in change_ids:
             # Find the change
             change = next(
-                (c for c in self.change_history if c.change_id == change_id), None
+                (c for c in self.change_history if c.change_id == change_id),
+                None,
             )
             if not change:
                 logger.warning(f"Change {change_id} not found")
@@ -363,7 +364,9 @@ class DependencyPropagationSystem:
         return results
 
     async def get_pending_changes(
-        self, agent_id: Optional[str] = None, branch_name: Optional[str] = None
+        self,
+        agent_id: Optional[str] = None,
+        branch_name: Optional[str] = None,
     ) -> List[DependencyChange]:
         """
         Get pending changes for review or action
@@ -396,11 +399,11 @@ class DependencyPropagationSystem:
         """Analyze dependencies for a single file"""
         full_path = self.repo_path / file_path
 
-        if not full_path.exists() or not full_path.suffix == ".py":
+        if not full_path.exists() or full_path.suffix != ".py":
             return
 
         try:
-            with open(full_path, "r", encoding="utf-8") as f:
+            with open(full_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST
@@ -478,7 +481,9 @@ class DependencyPropagationSystem:
             logger.error(f"Error analyzing dependencies for {file_path}: {e}")
 
     async def _update_reverse_dependencies(
-        self, file_path: str, dependencies: Set[str]
+        self,
+        file_path: str,
+        dependencies: Set[str],
     ):
         """Update reverse dependency relationships"""
         for dep in dependencies:
@@ -486,11 +491,7 @@ class DependencyPropagationSystem:
             matching_files = []
 
             for dep_file_path, node in self.dependency_graph.items():
-                if (
-                    node.module_name == dep
-                    or dep_file_path == dep
-                    or dep_file_path.endswith(f"{dep}.py")
-                ):
+                if dep in (node.module_name, dep_file_path) or dep_file_path.endswith(f"{dep}.py"):
                     matching_files.append(dep_file_path)
 
             # Update dependents
@@ -559,10 +560,7 @@ class DependencyPropagationSystem:
         affected = list(node.dependents)
 
         # For breaking changes, include indirect dependents
-        if (
-            await self._analyze_change_impact(file_path, change_type, change_details)
-            == ChangeImpact.BREAKING
-        ):
+        if await self._analyze_change_impact(file_path, change_type, change_details) == ChangeImpact.BREAKING:
             indirect = await self._calculate_indirect_dependents(file_path)
             affected.extend(self._get_indirect_dependent_files(file_path))
 
@@ -647,7 +645,8 @@ class DependencyPropagationSystem:
             return "low"
 
     async def _process_single_change(
-        self, change: DependencyChange
+        self,
+        change: DependencyChange,
     ) -> PropagationResult:
         """Process a single dependency change"""
         start_time = datetime.now()
@@ -665,8 +664,7 @@ class DependencyPropagationSystem:
                         "impact_level": change.impact_level.value,
                         "affected_files": change.affected_files,
                     },
-                    requires_immediate_sync=change.impact_level
-                    in [ChangeImpact.BREAKING, ChangeImpact.SECURITY],
+                    requires_immediate_sync=change.impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY],
                 )
 
             # Send notifications to affected agents
@@ -731,15 +729,14 @@ class DependencyPropagationSystem:
                         "change_details": change.change_details,
                         "requires_manual_review": change.requires_manual_review,
                     },
-                    priority=MessagePriority.HIGH
-                    if change.impact_level
-                    in [ChangeImpact.BREAKING, ChangeImpact.SECURITY]
-                    else MessagePriority.NORMAL,
+                    priority=MessagePriority.HIGH if change.impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY] else MessagePriority.NORMAL,
                     requires_ack=change.requires_manual_review,
                 )
 
     async def _propagate_change_to_branches(
-        self, change: DependencyChange, branches: List[str]
+        self,
+        change: DependencyChange,
+        branches: List[str],
     ) -> PropagationResult:
         """Propagate a specific change to target branches"""
         # This is a simplified implementation
@@ -752,7 +749,7 @@ class DependencyPropagationSystem:
             try:
                 # Simulate propagation (in real implementation, would apply changes)
                 logger.info(
-                    f"Propagating change {change.change_id} to branch {branch_name}"
+                    f"Propagating change {change.change_id} to branch {branch_name}",
                 )
                 propagated_to.append(branch_name)
 
@@ -772,16 +769,11 @@ class DependencyPropagationSystem:
         # Update average processing time
         total_changes = self.propagation_stats["changes_propagated"]
         current_avg = self.propagation_stats["average_propagation_time"]
-        new_avg = (
-            (current_avg * (total_changes - 1)) + processing_time
-        ) / total_changes
+        new_avg = ((current_avg * (total_changes - 1)) + processing_time) / total_changes
         self.propagation_stats["average_propagation_time"] = new_avg
 
         # Update success rate
-        if success:
-            successful = self.propagation_stats["changes_propagated"]
-        else:
-            successful = self.propagation_stats["changes_propagated"] - 1
+        successful = self.propagation_stats["changes_propagated"] if success else self.propagation_stats["changes_propagated"] - 1
 
         self.propagation_stats["propagation_success_rate"] = successful / total_changes
 
@@ -795,11 +787,7 @@ class DependencyPropagationSystem:
                     change = self.change_queue.popleft()
 
                     # Check if should be processed
-                    if (
-                        change.propagation_strategy == PropagationStrategy.IMMEDIATE
-                        or change.impact_level
-                        in [ChangeImpact.BREAKING, ChangeImpact.SECURITY]
-                    ):
+                    if change.propagation_strategy == PropagationStrategy.IMMEDIATE or change.impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY]:
                         await self._process_single_change(change)
                         processed += 1
 

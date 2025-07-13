@@ -1,5 +1,7 @@
 import pytest
-from libs.dashboard import PerformanceOptimizer, ThemeManager, OptimizationLevel
+
+from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
+
 
 class TestPerformanceThemeIntegration:
     """Tests for performance optimization affecting theme rendering"""
@@ -18,6 +20,7 @@ class TestPerformanceThemeIntegration:
         """Create ThemeManager instance"""
         import tempfile
         from pathlib import Path
+
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 
@@ -25,11 +28,11 @@ class TestPerformanceThemeIntegration:
         """Test 9: Performance optimization affects theme rendering"""
         # Set aggressive optimization
         performance_optimizer.set_optimization_level(OptimizationLevel.AGGRESSIVE)
-        
+
         # Verify optimization applied
         assert performance_optimizer.current_optimization_level == OptimizationLevel.AGGRESSIVE
         assert "animations" in performance_optimizer.applied_optimizations
-        
+
         # Test theme rendering still works
         css = theme_manager.export_css()
         assert css is not None

@@ -1,13 +1,11 @@
 """Tests for TaskAnalyzer class"""
 
-import pytest
-import tempfile
 import json
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 
-from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition, CodeDependency
+import pytest
+
 from libs.multi_agent.graph import DirectedGraph
+from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition
 
 
 class TestTaskAnalyzer:
@@ -19,38 +17,46 @@ class TestTaskAnalyzer:
         # Create test files
         (tmp_path / "libs").mkdir()
         (tmp_path / "libs" / "__init__.py").write_text("")
-        (tmp_path / "libs" / "module_a.py").write_text("""
+        (tmp_path / "libs" / "module_a.py").write_text(
+            """
 import os
 from typing import List
 from libs.module_b import helper_function
 
 def main():
     helper_function()
-""")
+"""
+        )
 
-        (tmp_path / "libs" / "module_b.py").write_text("""
+        (tmp_path / "libs" / "module_b.py").write_text(
+            """
 from libs.module_c import BaseClass
 
 def helper_function():
     return BaseClass()
-    
+
 class HelperClass:
     pass
-""")
+"""
+        )
 
-        (tmp_path / "libs" / "module_c.py").write_text("""
+        (tmp_path / "libs" / "module_c.py").write_text(
+            """
 class BaseClass:
     def __init__(self):
         self.value = 42
-""")
+"""
+        )
 
-        (tmp_path / "main.py").write_text("""
+        (tmp_path / "main.py").write_text(
+            """
 from libs.module_a import main
 from libs.module_b import HelperClass
 
 if __name__ == "__main__":
     main()
-""")
+"""
+        )
 
         return tmp_path
 
@@ -85,7 +91,8 @@ if __name__ == "__main__":
 
         # Check local import
         local_import = next(
-            (d for d in deps if d.imported_module == "libs.module_b"), None
+            (d for d in deps if d.imported_module == "libs.module_b"),
+            None,
         )
         assert local_import is not None
         assert local_import.import_type == "from_import"
@@ -186,10 +193,16 @@ if __name__ == "__main__":
         tasks = [
             TaskDefinition(task_id="A", title="Task A", file_paths=["a.py"]),
             TaskDefinition(
-                task_id="B", title="Task B", file_paths=["b.py"], dependencies=["A"]
+                task_id="B",
+                title="Task B",
+                file_paths=["b.py"],
+                dependencies=["A"],
             ),
             TaskDefinition(
-                task_id="C", title="Task C", file_paths=["c.py"], dependencies=["A"]
+                task_id="C",
+                title="Task C",
+                file_paths=["c.py"],
+                dependencies=["A"],
             ),
             TaskDefinition(
                 task_id="D",
@@ -217,13 +230,22 @@ if __name__ == "__main__":
         """Test execution order with dependency cycle"""
         tasks = [
             TaskDefinition(
-                task_id="A", title="Task A", file_paths=["a.py"], dependencies=["C"]
+                task_id="A",
+                title="Task A",
+                file_paths=["a.py"],
+                dependencies=["C"],
             ),
             TaskDefinition(
-                task_id="B", title="Task B", file_paths=["b.py"], dependencies=["A"]
+                task_id="B",
+                title="Task B",
+                file_paths=["b.py"],
+                dependencies=["A"],
             ),
             TaskDefinition(
-                task_id="C", title="Task C", file_paths=["c.py"], dependencies=["B"]
+                task_id="C",
+                title="Task C",
+                file_paths=["c.py"],
+                dependencies=["B"],
             ),
         ]
 
@@ -238,7 +260,10 @@ if __name__ == "__main__":
         """Test estimating parallel execution time"""
         tasks = [
             TaskDefinition(
-                task_id="A", title="Task A", file_paths=["a.py"], estimated_hours=2.0
+                task_id="A",
+                title="Task A",
+                file_paths=["a.py"],
+                estimated_hours=2.0,
             ),
             TaskDefinition(
                 task_id="B",

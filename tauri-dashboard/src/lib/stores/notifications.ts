@@ -60,13 +60,13 @@ export function showNotification(
   // 스토어에 추가
   notifications.update(current => {
     const updated = [notification, ...current];
-    
+
     // 최대 개수 제한
     const maxNotifications = get(notificationSettings).maxNotifications;
     if (updated.length > maxNotifications) {
       return updated.slice(0, maxNotifications);
     }
-    
+
     return updated;
   });
 
@@ -146,9 +146,9 @@ export function clearReadNotifications(): void {
 export function executeNotificationAction(notificationId: string, actionId: string): void {
   const allNotifications = get(notifications);
   const notification = allNotifications.find(n => n.id === notificationId);
-  
+
   if (!notification) return;
-  
+
   const action = notification.actions?.find(a => a.action === actionId);
   if (!action) return;
 
@@ -160,21 +160,21 @@ export function executeNotificationAction(notificationId: string, actionId: stri
         detail: { notificationId, originalNotification: notification }
       }));
       break;
-      
+
     case 'view_logs':
       // 로그 보기
       tauriUtils.openLogFile();
       break;
-      
+
     case 'open_settings':
       // 설정 열기
       window.dispatchEvent(new CustomEvent('open-settings'));
       break;
-      
+
     case 'dismiss':
       dismissNotification(notificationId);
       break;
-      
+
     default:
       // 커스텀 액션 - 이벤트 발송
       window.dispatchEvent(new CustomEvent('notification-action', {
@@ -318,7 +318,7 @@ export const notificationTemplates = {
   batchOperationComplete(operation: string, successful: number, failed: number): Notification {
     const type = failed === 0 ? 'success' : successful === 0 ? 'error' : 'warning';
     const title = failed === 0 ? 'Operation Complete' : 'Operation Partial';
-    const message = failed === 0 
+    const message = failed === 0
       ? `${operation} completed successfully for ${successful} item${successful > 1 ? 's' : ''}`
       : `${operation} completed: ${successful} successful, ${failed} failed`;
 

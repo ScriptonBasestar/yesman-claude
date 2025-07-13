@@ -1,32 +1,28 @@
 """Predictive conflict prevention system for proactive multi-agent development"""
 
 import asyncio
-import logging
+import contextlib
 import hashlib
-from typing import Dict, List, Optional, Any, Set, Tuple
+import logging
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
-from collections import defaultdict, Counter
-import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from .conflict_prediction import (
-    ConflictPredictor,
-    PredictionResult,
-    PredictionConfidence,
-    ConflictPattern,
-    ConflictVector,
-)
-from .auto_resolver import AutoResolver, AutoResolutionMode
+from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
 from .collaboration_engine import (
     CollaborationEngine,
-    MessageType,
     MessagePriority,
+    MessageType,
 )
-from .types import Agent, AgentState
-
+from .conflict_prediction import (
+    ConflictPattern,
+    ConflictPredictor,
+    PredictionConfidence,
+    PredictionResult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +176,7 @@ class ConflictPreventionSystem:
         """Start continuous conflict prevention monitoring"""
         self._running = True
         self._prevention_monitor_task = asyncio.create_task(
-            self._prevention_monitor_loop(monitoring_interval)
+            self._prevention_monitor_loop(monitoring_interval),
         )
         logger.info("Started conflict prevention monitoring")
 
@@ -189,10 +185,8 @@ class ConflictPreventionSystem:
         self._running = False
         if self._prevention_monitor_task:
             self._prevention_monitor_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._prevention_monitor_task
-            except asyncio.CancelledError:
-                pass
         logger.info("Stopped conflict prevention monitoring")
 
     async def analyze_and_prevent_conflicts(
@@ -223,18 +217,15 @@ class ConflictPreventionSystem:
 
         # Predict potential conflicts
         predictions = await self.conflict_predictor.predict_conflicts(
-            branches, time_horizon
+            branches,
+            time_horizon,
         )
 
         # Filter predictions by confidence threshold
-        significant_predictions = [
-            p
-            for p in predictions
-            if p.likelihood_score >= self.prevention_config["prediction_threshold"]
-        ]
+        significant_predictions = [p for p in predictions if p.likelihood_score >= self.prevention_config["prediction_threshold"]]
 
         logger.info(
-            f"Found {len(significant_predictions)} significant conflict predictions"
+            f"Found {len(significant_predictions)} significant conflict predictions",
         )
 
         # Generate prevention measures
@@ -248,9 +239,7 @@ class ConflictPreventionSystem:
         failed_measures = []
         conflicts_prevented = 0
 
-        for measure in prevention_measures[
-            : self.prevention_config["max_prevention_measures"]
-        ]:
+        for measure in prevention_measures[: self.prevention_config["max_prevention_measures"]]:
             try:
                 success = await self._apply_prevention_measure(measure)
                 if success:
@@ -260,7 +249,7 @@ class ConflictPreventionSystem:
                     failed_measures.append(measure)
             except Exception as e:
                 logger.error(
-                    f"Failed to apply prevention measure {measure.measure_id}: {e}"
+                    f"Failed to apply prevention measure {measure.measure_id}: {e}",
                 )
                 measure.status = "failed"
                 measure.metadata["error"] = str(e)
@@ -268,16 +257,10 @@ class ConflictPreventionSystem:
 
         # Calculate prevention effectiveness
         prevention_time = (datetime.now() - start_time).total_seconds()
-        success_rate = (
-            len(applied_measures) / len(prevention_measures)
-            if prevention_measures
-            else 0.0
-        )
+        success_rate = len(applied_measures) / len(prevention_measures) if prevention_measures else 0.0
 
         # Estimate time saved (rough heuristic)
-        time_saved = (
-            conflicts_prevented * 2.0
-        )  # Assume 2 hours saved per prevented conflict
+        time_saved = conflicts_prevented * 2.0  # Assume 2 hours saved per prevented conflict
 
         # Update statistics
         self.prevention_stats["predictions_analyzed"] += len(predictions)
@@ -286,10 +269,7 @@ class ConflictPreventionSystem:
         self.prevention_stats["total_time_saved"] += time_saved
 
         if self.prevention_stats["measures_applied"] > 0:
-            self.prevention_stats["prevention_success_rate"] = (
-                self.prevention_stats["conflicts_prevented"]
-                / self.prevention_stats["measures_applied"]
-            )
+            self.prevention_stats["prevention_success_rate"] = self.prevention_stats["conflicts_prevented"] / self.prevention_stats["measures_applied"]
 
         # Create result
         result = PreventionResult(
@@ -313,7 +293,7 @@ class ConflictPreventionSystem:
 
         self.prevention_history.append(result)
         logger.info(
-            f"Prevention session {session_id} completed: {conflicts_prevented} conflicts prevented"
+            f"Prevention session {session_id} completed: {conflicts_prevented} conflicts prevented",
         )
 
         return result
@@ -340,16 +320,13 @@ class ConflictPreventionSystem:
             measures.extend(await self._generate_generic_measures(prediction))
 
         # Filter by effort threshold
-        feasible_measures = [
-            m
-            for m in measures
-            if m.estimated_effort <= self.prevention_config["effort_threshold"]
-        ]
+        feasible_measures = [m for m in measures if m.estimated_effort <= self.prevention_config["effort_threshold"]]
 
         return feasible_measures
 
     async def _generate_dependency_measures(
-        self, prediction: PredictionResult
+        self,
+        prediction: PredictionResult,
     ) -> List[PreventionMeasure]:
         """Generate measures for dependency-related conflicts"""
         measures = []
@@ -378,7 +355,8 @@ class ConflictPreventionSystem:
         return measures
 
     async def _generate_coordination_measures(
-        self, prediction: PredictionResult
+        self,
+        prediction: PredictionResult,
     ) -> List[PreventionMeasure]:
         """Generate measures for coordination-related conflicts"""
         measures = []
@@ -407,7 +385,8 @@ class ConflictPreventionSystem:
         return measures
 
     async def _generate_interface_measures(
-        self, prediction: PredictionResult
+        self,
+        prediction: PredictionResult,
     ) -> List[PreventionMeasure]:
         """Generate measures for API/interface conflicts"""
         measures = []
@@ -436,7 +415,8 @@ class ConflictPreventionSystem:
         return measures
 
     async def _generate_temporal_measures(
-        self, prediction: PredictionResult
+        self,
+        prediction: PredictionResult,
     ) -> List[PreventionMeasure]:
         """Generate measures for temporal/timing conflicts"""
         measures = []
@@ -465,16 +445,14 @@ class ConflictPreventionSystem:
         return measures
 
     async def _generate_generic_measures(
-        self, prediction: PredictionResult
+        self,
+        prediction: PredictionResult,
     ) -> List[PreventionMeasure]:
         """Generate generic prevention measures"""
         measures = []
 
         # Early merge if high confidence
-        if (
-            prediction.likelihood_score
-            >= self.prevention_config["early_merge_threshold"]
-        ):
+        if prediction.likelihood_score >= self.prevention_config["early_merge_threshold"]:
             merge_measure = PreventionMeasure(
                 measure_id=f"early_merge_{prediction.prediction_id}",
                 strategy=PreventionStrategy.EARLY_MERGE,
@@ -665,7 +643,7 @@ class ConflictPreventionSystem:
 
                     if result.measures_applied > 0:
                         logger.info(
-                            f"Prevention monitor applied {result.measures_applied} measures"
+                            f"Prevention monitor applied {result.measures_applied} measures",
                         )
 
                 await asyncio.sleep(interval)
@@ -690,9 +668,7 @@ class ConflictPreventionSystem:
     def get_prevention_summary(self) -> Dict[str, Any]:
         """Get summary of prevention system status and performance"""
         active_measures_count = len(self.active_measures)
-        recent_results = (
-            self.prevention_history[-10:] if self.prevention_history else []
-        )
+        recent_results = self.prevention_history[-10:] if self.prevention_history else []
 
         return {
             "statistics": self.prevention_stats.copy(),
@@ -700,12 +676,7 @@ class ConflictPreventionSystem:
             "prevention_sessions": len(self.prevention_history),
             "recent_effectiveness": {
                 "sessions": len(recent_results),
-                "avg_prevention_rate": sum(
-                    r.prevention_success_rate for r in recent_results
-                )
-                / len(recent_results)
-                if recent_results
-                else 0.0,
+                "avg_prevention_rate": sum(r.prevention_success_rate for r in recent_results) / len(recent_results) if recent_results else 0.0,
                 "total_time_saved": sum(r.time_saved for r in recent_results),
             },
             "configuration": self.prevention_config.copy(),

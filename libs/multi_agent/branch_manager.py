@@ -1,14 +1,13 @@
 """Branch management system for multi-agent parallel development"""
 
-import subprocess
 import json
+import logging
 import re
-from typing import Dict, List, Optional, Tuple, Any
+import subprocess
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-import logging
-from dataclasses import dataclass, asdict
-
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +57,9 @@ class BranchManager:
         self._load_branch_metadata()
 
     def _run_git_command(
-        self, args: List[str], check: bool = True
+        self,
+        args: List[str],
+        check: bool = True,
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result"""
         cmd = ["git"] + args
@@ -101,11 +102,9 @@ class BranchManager:
 
         if metadata_file.exists():
             try:
-                with open(metadata_file, "r") as f:
+                with open(metadata_file) as f:
                     data = json.load(f)
-                    self.branches = {
-                        name: BranchInfo.from_dict(info) for name, info in data.items()
-                    }
+                    self.branches = {name: BranchInfo.from_dict(info) for name, info in data.items()}
                 logger.info(f"Loaded {len(self.branches)} branch metadata entries")
             except Exception as e:
                 logger.error(f"Failed to load branch metadata: {e}")
@@ -129,7 +128,9 @@ class BranchManager:
             logger.error(f"Failed to save branch metadata: {e}")
 
     def create_feature_branch(
-        self, issue_name: str, base_branch: str = "develop"
+        self,
+        issue_name: str,
+        base_branch: str = "develop",
     ) -> str:
         """
         Create a feature branch for an issue
@@ -184,11 +185,7 @@ class BranchManager:
 
         # Get all branches
         result = self._run_git_command(["branch", "-a"])
-        all_branches = [
-            line.strip().replace("* ", "")
-            for line in result.stdout.strip().split("\n")
-            if line.strip()
-        ]
+        all_branches = [line.strip().replace("* ", "") for line in result.stdout.strip().split("\n") if line.strip()]
 
         # Filter for our multi-agent branches
         for branch in all_branches:
@@ -221,7 +218,9 @@ class BranchManager:
         info = self.branches.get(branch_name)
         if not info:
             info = BranchInfo(
-                name=branch_name, base_branch="unknown", created_at=datetime.now()
+                name=branch_name,
+                base_branch="unknown",
+                created_at=datetime.now(),
             )
 
         # Get commits ahead/behind base
@@ -234,7 +233,7 @@ class BranchManager:
                     "--left-right",
                     "--count",
                     f"origin/{base}...{branch_name}",
-                ]
+                ],
             )
 
             if result.stdout.strip():
@@ -246,7 +245,7 @@ class BranchManager:
 
         # Get last commit
         result = self._run_git_command(
-            ["log", "-1", "--pretty=format:%H|%an|%ad|%s", branch_name]
+            ["log", "-1", "--pretty=format:%H|%an|%ad|%s", branch_name],
         )
 
         last_commit = None
@@ -286,13 +285,17 @@ class BranchManager:
             return False
 
     def update_branch_metadata(
-        self, branch_name: str, metadata: Dict[str, Any]
+        self,
+        branch_name: str,
+        metadata: Dict[str, Any],
     ) -> None:
         """Update metadata for a branch"""
         if branch_name not in self.branches:
             logger.warning(f"Branch '{branch_name}' not in metadata, creating entry")
             self.branches[branch_name] = BranchInfo(
-                name=branch_name, base_branch="unknown", created_at=datetime.now()
+                name=branch_name,
+                base_branch="unknown",
+                created_at=datetime.now(),
             )
 
         self.branches[branch_name].metadata.update(metadata)
@@ -319,7 +322,8 @@ class BranchManager:
 
                         # Try to delete remote branch
                         self._run_git_command(
-                            ["push", "origin", "--delete", branch_name], check=False
+                            ["push", "origin", "--delete", branch_name],
+                            check=False,
                         )
 
                     except subprocess.CalledProcessError as e:
@@ -337,7 +341,9 @@ class BranchManager:
         return cleaned
 
     def get_branch_conflicts(
-        self, branch_name: str, target_branch: str = None
+        self,
+        branch_name: str,
+        target_branch: str = None,
     ) -> Dict[str, Any]:
         """Check for potential conflicts with target branch"""
         if not self._branch_exists(branch_name):
@@ -350,7 +356,8 @@ class BranchManager:
 
         # Try merge in memory (dry run)
         result = self._run_git_command(
-            ["merge-tree", f"origin/{target_branch}", branch_name], check=False
+            ["merge-tree", f"origin/{target_branch}", branch_name],
+            check=False,
         )
 
         conflicts = []

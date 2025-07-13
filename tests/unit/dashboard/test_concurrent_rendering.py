@@ -1,7 +1,10 @@
-import pytest
 import asyncio
+
+import pytest
+
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
+
 
 class TestConcurrentRendering:
     """Tests for concurrent rendering operations"""
@@ -10,33 +13,33 @@ class TestConcurrentRendering:
     async def test_concurrent_rendering(self):
         """Test 7: Concurrent rendering operations"""
         factory = RendererFactory()
-        
+
         # Test data
         session_data = SessionData(
             name="concurrent-session",
             status=SessionStatus.ACTIVE,
-            uptime=1800
+            uptime=1800,
         )
-        
+
         async def render_widget_async(format_type, widget_type, data):
             """Async wrapper for rendering"""
             renderer = factory.create_renderer(format_type)
             return renderer.render_widget(widget_type, data)
-        
+
         # Create multiple concurrent rendering tasks
         tasks = []
         for i in range(10):
             for format_type in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
                 task = render_widget_async(
-                    format_type, 
-                    WidgetType.SESSION_BROWSER, 
-                    [session_data]
+                    format_type,
+                    WidgetType.SESSION_BROWSER,
+                    [session_data],
                 )
                 tasks.append(task)
-        
+
         # Execute all tasks concurrently
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Verify all rendered successfully
         for result in results:
             assert not isinstance(result, Exception)

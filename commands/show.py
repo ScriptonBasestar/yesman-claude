@@ -1,6 +1,8 @@
 import click
-from libs.yesman_config import YesmanConfig
+
 from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
+
 
 @click.command()
 def show():

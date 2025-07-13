@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 import click
 
+from commands.ai import ai
+from commands.automate import automate
+from commands.browse import browse
+from commands.cleanup import cleanup
+from commands.dashboard import dashboard, dashboard_group
+from commands.down import down, teardown  # teardown is main, down is alias
+from commands.enter import enter
+from commands.logs import logs
+from commands.ls import ls
+from commands.multi_agent import multi_agent_cli
+from commands.show import show
+from commands.status import status
+from commands.task_runner import task_runner
+from commands.up import setup, up  # setup is main, up is alias
+
 
 @click.group()
 def cli():
     """Yesman - Claude automation tool"""
     pass
-
-
-from commands.ls import ls
-from commands.show import show
-from commands.up import setup, up  # setup is main, up is alias
-from commands.down import teardown, down  # teardown is main, down is alias
-from commands.dashboard import dashboard, dashboard_group
-from commands.enter import enter
-from commands.browse import browse
-from commands.ai import ai
-from commands.status import status
-from commands.logs import logs
-from commands.automate import automate
-from commands.cleanup import cleanup
-from commands.task_runner import task_runner
-from commands.multi_agent import multi_agent_cli
 
 cli.add_command(ls)
 cli.add_command(show)

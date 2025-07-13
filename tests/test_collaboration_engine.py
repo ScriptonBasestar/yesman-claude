@@ -1,26 +1,25 @@
 """Tests for CollaborationEngine multi-agent coordination system"""
 
-import pytest
-import asyncio
-from typing import Dict, List, Optional, Any
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta
 from collections import deque
+from datetime import datetime, timedelta
+from unittest.mock import Mock
 
-from libs.multi_agent.collaboration_engine import (
-    CollaborationEngine,
-    CollaborationMode,
-    MessageType,
-    MessagePriority,
-    CollaborationMessage,
-    SharedKnowledge,
-    CollaborationSession,
-)
+import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ConflictInfo
+from libs.multi_agent.collaboration_engine import (
+    CollaborationEngine,
+    CollaborationMessage,
+    CollaborationMode,
+    CollaborationSession,
+    MessagePriority,
+    MessageType,
+    SharedKnowledge,
+)
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.types import Agent, AgentState
+from libs.multi_agent.types import AgentState
 
 
 class TestCollaborationMessage:
@@ -268,10 +267,7 @@ class TestCollaborationEngine:
         # Should be queued for all agents except sender
         assert len(engine.message_queues["agent-2"]) == 1
         assert len(engine.message_queues["agent-3"]) == 1
-        assert (
-            "agent-1" not in engine.message_queues
-            or len(engine.message_queues["agent-1"]) == 0
-        )
+        assert "agent-1" not in engine.message_queues or len(engine.message_queues["agent-1"]) == 0
 
     @pytest.mark.asyncio
     async def test_receive_messages(self, engine):
@@ -423,14 +419,18 @@ class TestCollaborationEngine:
 
         # Access by tags
         results = await engine.access_knowledge(
-            "agent-1", tags=["design_pattern"], limit=10
+            "agent-1",
+            tags=["design_pattern"],
+            limit=10,
         )
         assert len(results) == 2
         assert all(k.knowledge_type == "pattern" for k in results)
 
         # Access by multiple tags
         results = await engine.access_knowledge(
-            "agent-1", tags=["creational"], limit=10
+            "agent-1",
+            tags=["creational"],
+            limit=10,
         )
         assert len(results) == 2
 
@@ -456,7 +456,9 @@ class TestCollaborationEngine:
 
         # Access by type
         results = await engine.access_knowledge(
-            "agent-1", knowledge_type="function_signature", limit=10
+            "agent-1",
+            knowledge_type="function_signature",
+            limit=10,
         )
         assert len(results) == 2
         assert all(k.knowledge_type == "function_signature" for k in results)
@@ -634,9 +636,7 @@ class TestCollaborationEngine:
         # Check review request messages
         for reviewer_id in reviewers:
             messages = list(engine.message_queues[reviewer_id])
-            assert any(
-                msg.message_type == MessageType.REVIEW_REQUEST for msg in messages
-            )
+            assert any(msg.message_type == MessageType.REVIEW_REQUEST for msg in messages)
 
     @pytest.mark.asyncio
     async def test_prevent_conflict_collaboratively(self, engine):
@@ -656,11 +656,13 @@ class TestCollaborationEngine:
                     "file_path": "src/main.py",
                     "conflict_type": Mock(value="function_conflict"),
                 },
-            )
+            ),
         ]
 
         prevented = await engine.prevent_conflict_collaboratively(
-            "feature-a", "feature-b", mock_conflicts
+            "feature-a",
+            "feature-b",
+            mock_conflicts,
         )
 
         assert prevented == 1  # One conflict prevented

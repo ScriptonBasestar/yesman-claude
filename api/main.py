@@ -1,10 +1,13 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from api.routers import sessions, controllers, config, logs, dashboard, websocket
-from api.background_tasks import task_runner
 import asyncio
+import os
 from datetime import datetime
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from api.background_tasks import task_runner
+from api.routers import config, controllers, dashboard, logs, sessions, websocket
 
 app = FastAPI()
 
@@ -33,11 +36,12 @@ app.include_router(websocket.router, tags=["websocket"])
 app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="fonts")
 
 # Mount SvelteKit assets
-import os
+
 sveltekit_build_path = "tauri-dashboard/build"
 if os.path.exists(sveltekit_build_path):
     # Mount SvelteKit static assets
     app.mount("/_app", StaticFiles(directory="tauri-dashboard/build/_app"), name="app-assets")
+
 
 # Health check endpoint
 @app.get("/healthz")
@@ -47,8 +51,9 @@ async def health_check():
         "status": "healthy",
         "service": "yesman-claude-api",
         "timestamp": datetime.now().isoformat(),
-        "version": "0.1.0"
+        "version": "0.1.0",
     }
+
 
 # API info endpoint
 @app.get("/api")
@@ -59,24 +64,25 @@ async def api_info():
         "version": "0.1.0",
         "endpoints": {
             "sessions": "/api/sessions",
-            "controllers": "/api/controllers", 
+            "controllers": "/api/controllers",
             "config": "/api/config",
             "logs": "/api/logs",
             "dashboard": "/api/dashboard",
             "websocket": "/ws",
-            "health": "/healthz"
+            "health": "/healthz",
         },
         "ui": {
-            "dashboard": "/" if os.path.exists(sveltekit_build_path) else None
+            "dashboard": "/" if os.path.exists(sveltekit_build_path) else None,
         },
         "docs": "/docs",
-        "openapi": "/openapi.json"
+        "openapi": "/openapi.json",
     }
+
 
 # SvelteKit dashboard route (serves at root)
 if os.path.exists(sveltekit_build_path):
     from fastapi.responses import FileResponse
-    
+
     @app.get("/")
     @app.get("/{path:path}")
     async def serve_dashboard(path: str = ""):
@@ -84,10 +90,12 @@ if os.path.exists(sveltekit_build_path):
         # Skip API routes and specific endpoints
         if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail="Not found")
-        
+
         # For SPA, always serve index.html
         return FileResponse("tauri-dashboard/build/index.html")
+
 
 # Startup event
 @app.on_event("startup")
@@ -95,15 +103,18 @@ async def startup_event():
     """Start background tasks on application startup"""
     asyncio.create_task(task_runner.start())
 
+
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
     """Stop background tasks on application shutdown"""
     await task_runner.stop()
-    
+
     # Shutdown WebSocket manager and batch processor
     from api.routers.websocket import manager
+
     await manager.shutdown()
+
 
 # Add endpoint to check task status
 @app.get("/api/tasks/status")
@@ -111,20 +122,21 @@ async def get_task_status():
     """Get status of background tasks"""
     return {
         "is_running": task_runner.is_running,
-        "tasks": task_runner.get_task_states()
+        "tasks": task_runner.get_task_states(),
     }
+
 
 # Add endpoint to check WebSocket batch processing stats
 @app.get("/api/websocket/stats")
 async def get_websocket_stats():
     """Get WebSocket connection and batch processing statistics"""
     from api.routers.websocket import manager
-    
+
     connection_stats = manager.get_connection_stats()
     batch_stats = manager.get_batch_statistics()
-    
+
     return {
         "connections": connection_stats,
         "batch_processing": batch_stats,
-        "timestamp": datetime.now().isoformat()
-    } 
+        "timestamp": datetime.now().isoformat(),
+    }

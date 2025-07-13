@@ -84,14 +84,16 @@ def setup_tmux_session(project_name: str):
 
         # create_session에 실제 세션 이름을 전달
         session_name_for_creation = project_config.get("override", {}).get(
-            "session_name", project_name
+            "session_name",
+            project_name,
         )
         tm.create_session(session_name_for_creation, project_config)
         return
     except Exception as e:
         # libtmux가 세션을 생성할 때 발생하는 예외를 그대로 전달
         raise HTTPException(
-            status_code=500, detail=f"Failed to create session: {str(e)}"
+            status_code=500,
+            detail=f"Failed to create session: {str(e)}",
         )
 
 
@@ -106,7 +108,8 @@ def start_session(session_name: str):
         if existing_session:
             # 이미 존재하는 세션이면 에러 반환
             raise HTTPException(
-                status_code=400, detail=f"Session '{session_name}' is already running"
+                status_code=400,
+                detail=f"Session '{session_name}' is already running",
             )
 
         # projects.yaml에서 해당 세션의 설정을 찾기
@@ -117,7 +120,8 @@ def start_session(session_name: str):
         # 세션명으로 프로젝트 찾기
         for name, config in projects.items():
             session_name_from_config = config.get("override", {}).get(
-                "session_name", name
+                "session_name",
+                name,
             )
             if session_name_from_config == session_name:
                 project_config = config
@@ -132,7 +136,8 @@ def start_session(session_name: str):
 
         # 세션 생성 - 실제 세션 이름을 사용
         session_name_for_creation = project_config.get("override", {}).get(
-            "session_name", project_name
+            "session_name",
+            project_name,
         )
         tm.create_session(session_name_for_creation, project_config)
         return
@@ -141,7 +146,8 @@ def start_session(session_name: str):
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to start session: {str(e)}"
+            status_code=500,
+            detail=f"Failed to start session: {str(e)}",
         )
 
 
@@ -152,10 +158,7 @@ def teardown_all_sessions():
         server = libtmux.Server()
         # yesman이 관리하는 세션만 종료하기 위해, projects.yaml 기반으로 필터링
         projects = tm.load_projects().get("sessions", {})
-        managed_session_names = [
-            p.get("override", {}).get("session_name", name)
-            for name, p in projects.items()
-        ]
+        managed_session_names = [p.get("override", {}).get("session_name", name) for name, p in projects.items()]
 
         for session in server.sessions:
             if session.name in managed_session_names:

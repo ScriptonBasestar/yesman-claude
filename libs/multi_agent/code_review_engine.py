@@ -1,28 +1,25 @@
 """Automated code review and quality checking engine for multi-agent collaboration"""
 
-import asyncio
-import logging
 import ast
+import asyncio
+import hashlib
+import logging
 import re
-import subprocess
-from typing import Dict, List, Optional, Any, Set, Tuple, Union
+from collections import Counter
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
-from collections import defaultdict, Counter
-import hashlib
-import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 from .branch_manager import BranchManager
 from .collaboration_engine import (
     CollaborationEngine,
-    MessageType,
     MessagePriority,
+    MessageType,
 )
 from .semantic_analyzer import SemanticAnalyzer
-from .types import Agent, AgentState
-
+from .types import AgentState
 
 logger = logging.getLogger(__name__)
 
@@ -239,9 +236,7 @@ class CodeReviewEngine:
             self._quality_monitor_task.cancel()
 
         # Wait for tasks to complete
-        tasks = [
-            t for t in [self._review_monitor_task, self._quality_monitor_task] if t
-        ]
+        tasks = [t for t in [self._review_monitor_task, self._quality_monitor_task] if t]
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -283,7 +278,9 @@ class CodeReviewEngine:
         # Find reviewers if not specified
         if reviewer_ids is None:
             reviewer_ids = await self._find_suitable_reviewers(
-                agent_id, files_changed, self.review_config["default_reviewers"]
+                agent_id,
+                files_changed,
+                self.review_config["default_reviewers"],
             )
 
         # Create review object
@@ -301,7 +298,7 @@ class CodeReviewEngine:
         self.review_stats["reviews_initiated"] += 1
 
         logger.info(
-            f"Initiated review {review_id} for branch {branch_name} by {agent_id}"
+            f"Initiated review {review_id} for branch {branch_name} by {agent_id}",
         )
 
         # Start automated review process
@@ -359,7 +356,8 @@ class CodeReviewEngine:
         if not review:
             # Check review history
             review = next(
-                (r for r in self.review_history if r.review_id == review_id), None
+                (r for r in self.review_history if r.review_id == review_id),
+                None,
             )
         return review
 
@@ -401,7 +399,7 @@ class CodeReviewEngine:
                 "reviewer_id": reviewer_id,
                 "approved_at": datetime.now().isoformat(),
                 "comments": comments,
-            }
+            },
         )
 
         # Move to history
@@ -551,14 +549,13 @@ class CodeReviewEngine:
             review.findings = all_findings
             review.quality_metrics = all_metrics
             review.overall_score = self._calculate_overall_score(
-                all_findings, all_metrics
+                all_findings,
+                all_metrics,
             )
 
             # Update statistics
             self.review_stats["total_findings"] += len(all_findings)
-            critical_findings = [
-                f for f in all_findings if f.severity == ReviewSeverity.CRITICAL
-            ]
+            critical_findings = [f for f in all_findings if f.severity == ReviewSeverity.CRITICAL]
             self.review_stats["critical_findings_resolved"] += len(critical_findings)
 
             # Determine if auto-approval is possible
@@ -593,7 +590,7 @@ class CodeReviewEngine:
                 )
 
                 logger.info(
-                    f"Review {review.review_id} auto-approved with score {review.overall_score}"
+                    f"Review {review.review_id} auto-approved with score {review.overall_score}",
                 )
 
             else:
@@ -619,7 +616,7 @@ class CodeReviewEngine:
                     )
 
                 logger.info(
-                    f"Review {review.review_id} requires manual review - score: {review.overall_score}"
+                    f"Review {review.review_id} requires manual review - score: {review.overall_score}",
                 )
 
         except Exception as e:
@@ -656,7 +653,7 @@ class CodeReviewEngine:
                             findings.append(finding)
 
                 # Check line length
-                with open(full_path, "r", encoding="utf-8") as f:
+                with open(full_path, encoding="utf-8") as f:
                     for line_num, line in enumerate(f, 1):
                         if len(line.rstrip()) > 88:  # Black default
                             finding = ReviewFinding(
@@ -705,7 +702,7 @@ class CodeReviewEngine:
                             findings.append(finding)
 
                 # Basic security pattern checks
-                with open(full_path, "r", encoding="utf-8") as f:
+                with open(full_path, encoding="utf-8") as f:
                     content = f.read()
 
                     # Check for hardcoded secrets
@@ -750,7 +747,7 @@ class CodeReviewEngine:
                 continue
 
             try:
-                with open(full_path, "r", encoding="utf-8") as f:
+                with open(full_path, encoding="utf-8") as f:
                     content = f.read()
 
                 # Parse AST for performance analysis
@@ -759,47 +756,42 @@ class CodeReviewEngine:
                 for node in ast.walk(tree):
                     # Check for inefficient loops
                     if isinstance(node, ast.For):
-                        if isinstance(node.iter, ast.Call):
-                            if (
-                                isinstance(node.iter.func, ast.Name)
-                                and node.iter.func.id == "range"
-                            ):
-                                # Check for range(len(list)) pattern
-                                if (
-                                    len(node.iter.args) == 1
-                                    and isinstance(node.iter.args[0], ast.Call)
-                                    and isinstance(node.iter.args[0].func, ast.Name)
-                                    and node.iter.args[0].func.id == "len"
-                                ):
-                                    finding = ReviewFinding(
-                                        finding_id=f"perf_range_len_{file_path}_{node.lineno}",
-                                        review_type=ReviewType.PERFORMANCE,
-                                        severity=ReviewSeverity.MEDIUM,
-                                        file_path=file_path,
-                                        line_number=node.lineno,
-                                        message="Consider using enumerate() instead of range(len())",
-                                        description="Using enumerate() is more Pythonic and potentially faster",
-                                        suggestion="Replace 'for i in range(len(items)):' with 'for i, item in enumerate(items):'",
-                                    )
-                                    findings.append(finding)
+                        if isinstance(node.iter, ast.Call) and isinstance(node.iter.func, ast.Name) and node.iter.func.id == "range":
+                            # Check for range(len(list)) pattern
+                            if len(node.iter.args) == 1 and isinstance(node.iter.args[0], ast.Call) and isinstance(node.iter.args[0].func, ast.Name) and node.iter.args[0].func.id == "len":
+                                finding = ReviewFinding(
+                                    finding_id=f"perf_range_len_{file_path}_{node.lineno}",
+                                    review_type=ReviewType.PERFORMANCE,
+                                    severity=ReviewSeverity.MEDIUM,
+                                    file_path=file_path,
+                                    line_number=node.lineno,
+                                    message="Consider using enumerate() instead of range(len())",
+                                    description="Using enumerate() is more Pythonic and potentially faster",
+                                    suggestion="Replace 'for i in range(len(items)):' with 'for i, item in enumerate(items):'",
+                                )
+                                findings.append(finding)
 
                     # Check for string concatenation in loops
-                    elif isinstance(node, ast.AugAssign) and isinstance(
-                        node.op, ast.Add
+                    elif (
+                        isinstance(node, ast.AugAssign)
+                        and isinstance(
+                            node.op,
+                            ast.Add,
+                        )
+                        and isinstance(node.target, ast.Name)
                     ):
-                        if isinstance(node.target, ast.Name):
-                            # This is a simplified check - could be more sophisticated
-                            finding = ReviewFinding(
-                                finding_id=f"perf_string_concat_{file_path}_{node.lineno}",
-                                review_type=ReviewType.PERFORMANCE,
-                                severity=ReviewSeverity.LOW,
-                                file_path=file_path,
-                                line_number=node.lineno,
-                                message="Consider using join() for string concatenation",
-                                description="String concatenation in loops can be inefficient",
-                                suggestion="Use ''.join(list) for better performance when concatenating many strings",
-                            )
-                            findings.append(finding)
+                        # This is a simplified check - could be more sophisticated
+                        finding = ReviewFinding(
+                            finding_id=f"perf_string_concat_{file_path}_{node.lineno}",
+                            review_type=ReviewType.PERFORMANCE,
+                            severity=ReviewSeverity.LOW,
+                            file_path=file_path,
+                            line_number=node.lineno,
+                            message="Consider using join() for string concatenation",
+                            description="String concatenation in loops can be inefficient",
+                            suggestion="Use ''.join(list) for better performance when concatenating many strings",
+                        )
+                        findings.append(finding)
 
             except Exception as e:
                 logger.error(f"Error checking performance for {file_path}: {e}")
@@ -807,7 +799,8 @@ class CodeReviewEngine:
         return findings
 
     async def _check_maintainability(
-        self, file_paths: List[str]
+        self,
+        file_paths: List[str],
     ) -> List[ReviewFinding]:
         """Check code maintainability"""
         findings = []
@@ -821,7 +814,7 @@ class CodeReviewEngine:
                 continue
 
             try:
-                with open(full_path, "r", encoding="utf-8") as f:
+                with open(full_path, encoding="utf-8") as f:
                     content = f.read()
 
                 # Basic maintainability checks
@@ -931,7 +924,7 @@ class CodeReviewEngine:
                 continue
 
             try:
-                with open(full_path, "r", encoding="utf-8") as f:
+                with open(full_path, encoding="utf-8") as f:
                     content = f.read()
 
                 tree = ast.parse(content)
@@ -939,26 +932,21 @@ class CodeReviewEngine:
                 # Check for missing docstrings
                 for node in ast.walk(tree):
                     if isinstance(
-                        node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+                        node,
+                        (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef),
                     ):
                         # Check if function/class has docstring
-                        has_docstring = (
-                            len(node.body) > 0
-                            and isinstance(node.body[0], ast.Expr)
-                            and isinstance(node.body[0].value, ast.Constant)
-                            and isinstance(node.body[0].value.value, str)
-                        )
+                        has_docstring = len(node.body) > 0 and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant) and isinstance(node.body[0].value.value, str)
 
                         if not has_docstring:
                             # Skip private methods (start with _) unless they're special methods
-                            if node.name.startswith("_") and not (
-                                node.name.startswith("__") and node.name.endswith("__")
-                            ):
+                            if node.name.startswith("_") and not (node.name.startswith("__") and node.name.endswith("__")):
                                 continue
 
                             severity = ReviewSeverity.LOW
                             if isinstance(
-                                node, ast.ClassDef
+                                node,
+                                ast.ClassDef,
                             ) or not node.name.startswith("_"):
                                 severity = ReviewSeverity.MEDIUM
 
@@ -997,9 +985,7 @@ class CodeReviewEngine:
                 f"{Path(file_path).parent}/test_{Path(file_path).stem}.py",
             ]
 
-            has_test_file = any(
-                (self.repo_path / pattern).exists() for pattern in test_file_patterns
-            )
+            has_test_file = any((self.repo_path / pattern).exists() for pattern in test_file_patterns)
 
             if not has_test_file:
                 finding = ReviewFinding(
@@ -1068,7 +1054,7 @@ class CodeReviewEngine:
             return metrics
 
         try:
-            with open(full_path, "r", encoding="utf-8") as f:
+            with open(full_path, encoding="utf-8") as f:
                 content = f.read()
 
             lines = content.split("\n")
@@ -1089,7 +1075,8 @@ class CodeReviewEngine:
             # Maintainability index (simplified)
             if QualityMetric.MAINTAINABILITY_INDEX in metric_types:
                 mi = self._calculate_maintainability_index(
-                    content, len(non_empty_lines)
+                    content,
+                    len(non_empty_lines),
                 )
                 metrics.metrics[QualityMetric.MAINTAINABILITY_INDEX] = mi
 
@@ -1108,9 +1095,7 @@ class CodeReviewEngine:
             complexity = 1  # Base complexity
 
             for node in ast.walk(tree):
-                if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor)):
-                    complexity += 1
-                elif isinstance(node, ast.ExceptHandler):
+                if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler)):
                     complexity += 1
                 elif isinstance(node, ast.BoolOp):
                     complexity += len(node.values) - 1
@@ -1178,11 +1163,7 @@ class CodeReviewEngine:
                     return False
 
         # Check for quality metric violations
-        for metrics in review.quality_metrics:
-            if metrics.violations:
-                return False
-
-        return True
+        return all(not metrics.violations for metrics in review.quality_metrics)
 
     def _summarize_findings(self, findings: List[ReviewFinding]) -> Dict[str, Any]:
         """Create a summary of review findings"""
@@ -1219,7 +1200,9 @@ class CodeReviewEngine:
         return available_agents[:num_reviewers]
 
     async def _run_tool_check(
-        self, tool_name: str, file_path: str
+        self,
+        tool_name: str,
+        file_path: str,
     ) -> Optional[List[str]]:
         """Run an external tool for code checking"""
         # This is a placeholder implementation
@@ -1236,11 +1219,8 @@ class CodeReviewEngine:
                 stale_reviews = []
 
                 for review_id, review in self.active_reviews.items():
-                    if review.status == ReviewStatus.IN_PROGRESS:
-                        if review.started_at and (
-                            current_time - review.started_at
-                        ) > timedelta(hours=24):
-                            stale_reviews.append(review_id)
+                    if review.status == ReviewStatus.IN_PROGRESS and review.started_at and (current_time - review.started_at) > timedelta(hours=24):
+                        stale_reviews.append(review_id)
 
                 # Handle stale reviews
                 for review_id in stale_reviews:
@@ -1276,17 +1256,13 @@ class CodeReviewEngine:
         # Calculate statistics
         total_reviews = len(all_reviews)
         approved_reviews = len(
-            [r for r in all_reviews if r.status == ReviewStatus.APPROVED]
+            [r for r in all_reviews if r.status == ReviewStatus.APPROVED],
         )
         rejected_reviews = len(
-            [r for r in all_reviews if r.status == ReviewStatus.REJECTED]
+            [r for r in all_reviews if r.status == ReviewStatus.REJECTED],
         )
         pending_reviews = len(
-            [
-                r
-                for r in all_reviews
-                if r.status in [ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS]
-            ]
+            [r for r in all_reviews if r.status in [ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS]],
         )
 
         # Calculate average score
@@ -1300,25 +1276,20 @@ class CodeReviewEngine:
 
         total_findings = len(all_findings)
         critical_findings = len(
-            [f for f in all_findings if f.severity == ReviewSeverity.CRITICAL]
+            [f for f in all_findings if f.severity == ReviewSeverity.CRITICAL],
         )
         high_findings = len(
-            [f for f in all_findings if f.severity == ReviewSeverity.HIGH]
+            [f for f in all_findings if f.severity == ReviewSeverity.HIGH],
         )
 
         # Most common issues
-        issue_counts = Counter(
-            f"{f.review_type.value}: {f.message}" for f in all_findings
-        )
+        issue_counts = Counter(f"{f.review_type.value}: {f.message}" for f in all_findings)
         most_common_issues = issue_counts.most_common(5)
 
         # Review time statistics
         completed_reviews = [r for r in all_reviews if r.completed_at and r.started_at]
         if completed_reviews:
-            review_times = [
-                (r.completed_at - r.started_at).total_seconds()
-                for r in completed_reviews
-            ]
+            review_times = [(r.completed_at - r.started_at).total_seconds() for r in completed_reviews]
             review_time_stats = {
                 "average_time": sum(review_times) / len(review_times),
                 "min_time": min(review_times),
@@ -1358,8 +1329,6 @@ class CodeReviewEngine:
                     "findings_count": len(review.findings),
                     "created_at": review.created_at.isoformat(),
                 }
-                for review in (
-                    list(self.active_reviews.values()) + self.review_history
-                )[-10:]
+                for review in (list(self.active_reviews.values()) + self.review_history)[-10:]
             ],
         }

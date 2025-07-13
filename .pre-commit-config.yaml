@@ -1,26 +1,17 @@
-# Pre-commit configuration for Yesman-Claude project
+# Pre-commit configuration for Yesman-Claude project (Ruff-integrated version)
 # Run with: pre-commit run --all-files
 
 repos:
-  # Python code formatting and linting
-  - repo: https://github.com/psf/black
-    rev: 24.3.0
+  # Python code formatting and linting with Ruff (replaces black, isort, flake8)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
     hooks:
-      - id: black
-        args: [--line-length=88]
+      # Linting (replaces flake8)
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
         exclude: ^(migrations/|node_modules/)
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [--profile=black]
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        args: [--max-line-length=88, --extend-ignore=E203]
+      # Formatting (replaces black)
+      - id: ruff-format
         exclude: ^(migrations/|node_modules/)
 
   # Test naming validation (custom hooks)
@@ -59,7 +50,7 @@ repos:
       - id: debug-statements
         exclude: ^(debug/|scripts/debug_)
 
-  # Python-specific checks
+  # Security checks (optional: keep bandit for comprehensive security scanning)
   - repo: https://github.com/pycqa/bandit
     rev: 1.7.7
     hooks:

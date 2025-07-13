@@ -10,4 +10,4 @@ windows:
   - window_name: another-project
     start_directory: ~/dev/another-project # <-- IMPORTANT: Change this to your project path
     panes:
-      - # A single pane window 
+      - # A single pane window

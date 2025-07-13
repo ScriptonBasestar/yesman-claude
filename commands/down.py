@@ -1,8 +1,11 @@
-import click
 import subprocess
-from libs.yesman_config import YesmanConfig
-from libs.tmux_manager import TmuxManager
+
+import click
 import libtmux
+
+from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
+
 
 # Main command
 @click.command()
@@ -14,16 +17,16 @@ def teardown():
     if not sessions:
         click.echo("No sessions defined in projects.yaml")
         return
-    
+
     server = libtmux.Server()
     for session_name, sess_conf in sessions.items():
         # Get the actual session name from override or use the key
         override_conf = sess_conf.get("override", {})
         actual_session_name = override_conf.get("session_name", session_name)
-        
+
         # Check if session exists before trying to kill it
         if server.find_where({"session_name": actual_session_name}):
-            subprocess.run(["tmux", "kill-session", "-t", actual_session_name])
+            subprocess.run(["tmux", "kill-session", "-t", actual_session_name], check=False)
             click.echo(f"Killed session: {actual_session_name}")
         else:
             click.echo(f"Session {actual_session_name} not found")
@@ -40,4 +43,4 @@ def down():
 
 
 # Export both commands
-__all__ = ['teardown', 'down'] 
+__all__ = ["teardown", "down"]

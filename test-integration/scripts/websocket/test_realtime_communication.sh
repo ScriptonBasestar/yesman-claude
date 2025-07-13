@@ -35,15 +35,15 @@ class WebSocketServer:
     def __init__(self):
         self.clients = set()
         self.running = False
-    
+
     async def register_client(self, websocket):
         self.clients.add(websocket)
         print(f'Client connected: {websocket.remote_address}')
-        
+
     async def unregister_client(self, websocket):
         self.clients.discard(websocket)
         print(f'Client disconnected: {websocket.remote_address}')
-    
+
     async def handle_client(self, websocket, path):
         await self.register_client(websocket)
         try:
@@ -53,11 +53,11 @@ class WebSocketServer:
                 'message': 'Connected to Yesman-Claude WebSocket',
                 'timestamp': datetime.now().isoformat()
             }))
-            
+
             async for message in websocket:
                 data = json.loads(message)
                 print(f'Received: {data}')
-                
+
                 # Echo back with timestamp
                 response = {
                     'type': 'echo',
@@ -65,12 +65,12 @@ class WebSocketServer:
                     'timestamp': datetime.now().isoformat()
                 }
                 await websocket.send(json.dumps(response))
-                
+
         except websockets.exceptions.ConnectionClosed:
             pass
         finally:
             await self.unregister_client(websocket)
-    
+
     async def broadcast_periodic_updates(self):
         counter = 0
         while self.running:
@@ -81,24 +81,24 @@ class WebSocketServer:
                     'timestamp': datetime.now().isoformat(),
                     'active_clients': len(self.clients)
                 }
-                
+
                 # Send to all connected clients
                 if self.clients:
                     await asyncio.gather(
                         *[client.send(json.dumps(message)) for client in self.clients],
                         return_exceptions=True
                     )
-                
+
                 counter += 1
-            
+
             await asyncio.sleep(2)  # Send update every 2 seconds
-    
+
     async def start_server(self):
         self.running = True
-        
+
         # Start periodic updates
         update_task = asyncio.create_task(self.broadcast_periodic_updates())
-        
+
         # Start WebSocket server
         server = await websockets.serve(
             self.handle_client,
@@ -107,9 +107,9 @@ class WebSocketServer:
             ping_interval=20,
             ping_timeout=10
         )
-        
+
         print('WebSocket server started on ws://localhost:8765')
-        
+
         try:
             await server.wait_closed()
         finally:
@@ -133,9 +133,9 @@ if [ "$WEBSOCKET_CLIENT" = "websocat" ]; then
     echo "Testing with websocat..."
     timeout 5 websocat ws://localhost:8765 <<< '{"type": "test", "message": "Hello WebSocket"}' > /tmp/ws_response.txt &
     WS_CLIENT_PID=$!
-    
+
     sleep 2
-    
+
     if ps -p $WS_CLIENT_PID > /dev/null 2>&1; then
         echo "✅ WebSocket client connected successfully"
         kill $WS_CLIENT_PID 2>/dev/null || true
@@ -151,7 +151,7 @@ else
         -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
         -H "Sec-WebSocket-Version: 13" \
         "http://localhost:8765/")
-    
+
     if [ "$RESPONSE" = "101" ]; then
         echo "✅ WebSocket upgrade successful"
     else
@@ -171,35 +171,35 @@ async def test_client(client_id, duration=5):
     try:
         async with websockets.connect('ws://localhost:8765') as websocket:
             print(f'Client {client_id} connected')
-            
+
             # Send initial message
             await websocket.send(json.dumps({
                 'type': 'client_test',
                 'client_id': client_id,
                 'message': f'Hello from client {client_id}'
             }))
-            
+
             # Listen for messages
             start_time = time.time()
             message_count = 0
-            
+
             while time.time() - start_time < duration:
                 try:
                     message = await asyncio.wait_for(websocket.recv(), timeout=1)
                     data = json.loads(message)
                     message_count += 1
-                    
+
                     if data['type'] == 'welcome':
                         print(f'Client {client_id} received welcome')
                     elif data['type'] == 'update':
                         print(f'Client {client_id} received update #{data[\"counter\"]}')
-                    
+
                 except asyncio.TimeoutError:
                     continue
-            
+
             print(f'Client {client_id} received {message_count} messages')
             return message_count
-            
+
     except Exception as e:
         print(f'Client {client_id} error: {e}')
         return 0
@@ -210,16 +210,16 @@ async def test_concurrent_clients():
     for i in range(5):
         task = test_client(i, duration=10)
         tasks.append(task)
-    
+
     # Wait for all clients to complete
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    
+
     successful_clients = sum(1 for result in results if isinstance(result, int) and result > 0)
     total_messages = sum(result for result in results if isinstance(result, int))
-    
+
     print(f'Successful clients: {successful_clients}/5')
     print(f'Total messages received: {total_messages}')
-    
+
     if successful_clients >= 4:
         print('✅ Multiple concurrent connections working')
     else:
@@ -245,7 +245,7 @@ async def test_message_ordering():
     try:
         async with websockets.connect('ws://localhost:8765') as websocket:
             print('Testing message ordering...')
-            
+
             # Send sequence of messages
             messages = []
             for i in range(10):
@@ -257,7 +257,7 @@ async def test_message_ordering():
                 messages.append(message)
                 await websocket.send(json.dumps(message))
                 await asyncio.sleep(0.1)  # Small delay between messages
-            
+
             # Receive echoed messages
             received_messages = []
             for i in range(10):
@@ -269,21 +269,21 @@ async def test_message_ordering():
                 except asyncio.TimeoutError:
                     print(f'Timeout waiting for message {i}')
                     break
-            
+
             print(f'Sent {len(messages)} messages, received {len(received_messages)} echoes')
-            
+
             # Check ordering
             ordered_correctly = True
             for i, msg in enumerate(received_messages):
                 if msg['sequence'] != i:
                     ordered_correctly = False
                     print(f'Message {i} out of order: expected {i}, got {msg[\"sequence\"]}')
-            
+
             if ordered_correctly and len(received_messages) == len(messages):
                 print('✅ Message ordering and delivery working correctly')
             else:
                 print('❌ Message ordering or delivery issues detected')
-                
+
     except Exception as e:
         print(f'Message ordering test error: {e}')
 
@@ -305,24 +305,24 @@ import random
 async def test_connection_resilience():
     reconnect_attempts = 0
     max_reconnects = 3
-    
+
     for attempt in range(max_reconnects + 1):
         try:
             print(f'Connection attempt {attempt + 1}...')
-            
+
             async with websockets.connect('ws://localhost:8765') as websocket:
                 print('Connected successfully')
-                
+
                 # Test normal communication
                 await websocket.send(json.dumps({
                     'type': 'resilience_test',
                     'attempt': attempt
                 }))
-                
+
                 # Receive welcome message
                 welcome = await asyncio.wait_for(websocket.recv(), timeout=2)
                 print('Received welcome message')
-                
+
                 # Simulate connection drop by closing after short time
                 if attempt < max_reconnects:
                     await asyncio.sleep(2)
@@ -335,7 +335,7 @@ async def test_connection_resilience():
                     await asyncio.sleep(3)
                     print('Final connection test completed')
                     break
-                    
+
         except Exception as e:
             print(f'Connection attempt {attempt + 1} failed: {e}')
             if attempt < max_reconnects:
@@ -343,9 +343,9 @@ async def test_connection_resilience():
             else:
                 print('Max reconnect attempts reached')
                 break
-    
+
     print(f'Reconnection attempts: {reconnect_attempts}')
-    
+
     if reconnect_attempts > 0:
         print('✅ Connection resilience test completed')
     else:
@@ -372,11 +372,11 @@ async def load_test_client(client_id, messages_per_second=10, duration=5):
             message_times = []
             messages_sent = 0
             messages_received = 0
-            
+
             # Send messages at specified rate
             interval = 1.0 / messages_per_second
             end_time = time.time() + duration
-            
+
             while time.time() < end_time:
                 # Send message
                 start_time = time.time()
@@ -387,7 +387,7 @@ async def load_test_client(client_id, messages_per_second=10, duration=5):
                     'timestamp': start_time
                 }))
                 messages_sent += 1
-                
+
                 # Try to receive response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=0.1)
@@ -396,13 +396,13 @@ async def load_test_client(client_id, messages_per_second=10, duration=5):
                     messages_received += 1
                 except asyncio.TimeoutError:
                     pass
-                
+
                 # Wait for next message
                 await asyncio.sleep(interval)
-            
+
             # Calculate statistics
             avg_response_time = statistics.mean(message_times) if message_times else 0
-            
+
             return {
                 'client_id': client_id,
                 'messages_sent': messages_sent,
@@ -410,7 +410,7 @@ async def load_test_client(client_id, messages_per_second=10, duration=5):
                 'avg_response_time': avg_response_time,
                 'success_rate': (messages_received / messages_sent) * 100 if messages_sent > 0 else 0
             }
-            
+
     except Exception as e:
         print(f'Load test client {client_id} error: {e}')
         return None
@@ -420,36 +420,36 @@ async def run_load_test():
     clients = 10
     messages_per_second = 5
     duration = 8
-    
+
     print(f'Starting load test: {clients} clients, {messages_per_second} msg/s each, {duration}s duration')
-    
+
     tasks = []
     for i in range(clients):
         task = load_test_client(i, messages_per_second, duration)
         tasks.append(task)
-    
+
     # Wait for all clients to complete
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    
+
     # Analyze results
     successful_clients = [r for r in results if r is not None and isinstance(r, dict)]
-    
+
     if successful_clients:
         total_sent = sum(r['messages_sent'] for r in successful_clients)
         total_received = sum(r['messages_received'] for r in successful_clients)
         avg_response_times = [r['avg_response_time'] for r in successful_clients if r['avg_response_time'] > 0]
-        
+
         print(f'Load test results:')
         print(f'  Successful clients: {len(successful_clients)}/{clients}')
         print(f'  Total messages sent: {total_sent}')
         print(f'  Total messages received: {total_received}')
         print(f'  Overall success rate: {(total_received/total_sent)*100:.1f}%')
-        
+
         if avg_response_times:
             print(f'  Average response time: {statistics.mean(avg_response_times)*1000:.1f}ms')
             print(f'  Min response time: {min(avg_response_times)*1000:.1f}ms')
             print(f'  Max response time: {max(avg_response_times)*1000:.1f}ms')
-        
+
         if len(successful_clients) >= clients * 0.8:  # 80% success rate
             print('✅ Load test passed')
         else:

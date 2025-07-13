@@ -34,7 +34,7 @@ fn main() {
                 // WebKit GTK 경고 메시지 억제
                 std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
             }
-            
+
             Ok(())
         })
         .run(tauri::generate_context!())

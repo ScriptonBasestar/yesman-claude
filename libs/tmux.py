@@ -1,7 +1,9 @@
+from pathlib import Path
+
 import tmuxp
 import yaml
 from jinja2 import Template
-from pathlib import Path
+
 
 def generate(session_name: str, start_directory: str):
     template_path = Path(__file__).parent / "session_template.yaml"
@@ -16,6 +18,7 @@ def generate(session_name: str, start_directory: str):
 
     # YAML → dict
     return yaml.safe_load(rendered)
+
 
 if __name__ == "__main__":
     config = generate(session_name="my-uv-project", start_directory="~/workspace/uv")

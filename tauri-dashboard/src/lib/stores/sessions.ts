@@ -58,7 +58,7 @@ export const filteredSessions = derived(
 
     // 에러만 표시
     if ($filters.showOnlyErrors) {
-      filtered = filtered.filter(session => 
+      filtered = filtered.filter(session =>
         !!session.controller_error // Fix: check controller_error existence
       );
     }
@@ -132,7 +132,7 @@ export async function refreshSessions(isInitial: boolean = false): Promise<void>
   try {
     // 1. API 함수 이름 변경
     const sessionData = await pythonBridge.get_sessions();
-    
+
     // 데이터 가공 (필요 시)
     const processedData = sessionData.map((s: Session) => ({
       ...s,
@@ -146,17 +146,17 @@ export async function refreshSessions(isInitial: boolean = false): Promise<void>
     const hasChanged = isInitial || !currentSessions || currentSessions.length !== processedData.length ||
       currentSessions.some((current, index) => {
         const newSession = processedData[index];
-        return !newSession || 
+        return !newSession ||
                current.session_name !== newSession.session_name ||
                current.status !== newSession.status ||
                current.controller_status !== newSession.controller_status ||
                current.windows?.length !== newSession.windows?.length;
       });
-    
+
     if (hasChanged) {
       sessions.set(processedData);
     }
-    
+
     if (isInitial && processedData.length === 0) {
       // Fix: Correct argument order for showNotification
       showNotification('warning', 'No Sessions', 'No tmux sessions found.');
@@ -181,7 +181,7 @@ export async function refreshSessions(isInitial: boolean = false): Promise<void>
  */
 export function startAutoRefresh(): void {
   stopAutoRefresh(); // 기존 인터벌 정리
-  
+
   const interval = get(autoRefreshInterval);
   if (get(autoRefreshEnabled) && interval > 0) {
     refreshIntervalId = setInterval(refreshSessions, interval) as unknown as number;
@@ -208,7 +208,7 @@ export function configureAutoRefresh(enabled: boolean, interval?: number): void 
   if (interval !== undefined) {
     autoRefreshInterval.set(interval);
   }
-  
+
   if (enabled) {
     startAutoRefresh();
   } else {
@@ -268,7 +268,7 @@ export async function startController(sessionName: string): Promise<void> {
     await pythonBridge.start_claude(sessionName);
     // Fix: Correct argument order
     showNotification('success', 'Controller Started', `Controller started for ${sessionName}`);
-    
+
     updateSessionControllerStatus(sessionName, 'running');
     setTimeout(refreshSessions, 1000); // 상태 반영을 위해 새로고침
   } catch (err) {
@@ -345,24 +345,24 @@ export async function getAvailableProjects(): Promise<string[]> {
 export async function setupAllSessions(): Promise<void> {
   try {
     showNotification('info', 'Setup Sessions', 'Setting up all sessions from configuration...');
-    
+
     // projects.yaml에서 모든 프로젝트 가져오기
     const availableProjects = await getAvailableProjects();
-    
+
     if (availableProjects.length === 0) {
       showNotification('warning', 'No Projects', 'No projects found in configuration.');
       return;
     }
-    
+
     // 모든 프로젝트에 대해 세션 생성
     const results = await Promise.allSettled(
       availableProjects.map(project => pythonBridge.create_session({ project_name: project }))
     );
-    
+
     // 성공/실패 카운트
     const succeeded = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.filter(r => r.status === 'rejected').length;
-    
+
     if (failed === 0) {
       showNotification('success', 'Setup Complete', `Successfully created ${succeeded} sessions.`);
     } else if (succeeded === 0) {
@@ -370,7 +370,7 @@ export async function setupAllSessions(): Promise<void> {
     } else {
       showNotification('warning', 'Partial Success', `Created ${succeeded} sessions, ${failed} failed.`);
     }
-    
+
     // 세션 목록 새로고침
     setTimeout(refreshSessions, 1000);
   } catch (err) {
@@ -426,12 +426,12 @@ export async function startAllControllers(): Promise<void> {
 export async function stopAllControllers(): Promise<void> {
     const selected = get(selectedSessions);
     const sessionsToStop = selected.length > 0 ? get(sessions).filter(s => selected.includes(s.session_name)) : get(sessions);
-  
+
     if (sessionsToStop.length === 0) {
       showNotification('info', 'Info', 'No sessions selected to stop controllers.');
       return;
     }
-  
+
     showNotification('info', 'Stopping All', `Stopping controllers for ${sessionsToStop.length} sessions...`);
     try {
       await Promise.all(sessionsToStop.map(s => pythonBridge.stop_claude(s.session_name)));
@@ -450,10 +450,10 @@ export async function stopAllControllers(): Promise<void> {
  * @param status - 새로운 컨트롤러 상태
  */
 function updateSessionControllerStatus(sessionName: string, status: 'running' | 'not running' | 'unknown'): void {
-  sessions.update(current => 
-    current.map(s => 
-      s.session_name === sessionName 
-        ? { ...s, controller_status: status } 
+  sessions.update(current =>
+    current.map(s =>
+      s.session_name === sessionName
+        ? { ...s, controller_status: status }
         : s
     )
   );

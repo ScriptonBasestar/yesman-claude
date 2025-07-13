@@ -1,15 +1,14 @@
-
-
-from datetime import datetime, timedelta
+import logging
 import re
 from collections import defaultdict
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any, List
-import logging
+from typing import Any, Dict, List
 
 from libs.yesman_config import YesmanConfig
 
 logger = logging.getLogger(__name__)
+
 
 class ActivityHeatmapGenerator:
     def __init__(self, config: YesmanConfig):
@@ -20,7 +19,7 @@ class ActivityHeatmapGenerator:
         start_time_collect = datetime.now()
         try:
             log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
-            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ('-', '_')).rstrip()
+            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
             log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 
             if not log_file.exists():
@@ -30,19 +29,19 @@ class ActivityHeatmapGenerator:
                     return {}
 
             activity_counts = defaultdict(int)
-            
+
             now = datetime.now()
             start_time_filter = now - timedelta(days=days)
 
-            with open(log_file, "r", encoding="utf-8") as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
-                    match = re.match(r'\[(.*?)\]', line)
+                    match = re.match(r"\[(.*?)\]", line)
                     if match:
-                        timestamp_str = match.group(1).split(',')[0]
+                        timestamp_str = match.group(1).split(",")[0]
                         try:
-                            log_time = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                            log_time = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
                             if log_time > start_time_filter:
-                                hour_timestamp = log_time.strftime('%Y-%m-%dT%H:00:00')
+                                hour_timestamp = log_time.strftime("%Y-%m-%dT%H:00:00")
                                 activity_counts[hour_timestamp] += 1
                         except ValueError:
                             continue
@@ -56,18 +55,17 @@ class ActivityHeatmapGenerator:
         """24x7 그리드 형태의 히트맵 데이터 생성"""
         start_time_generate = datetime.now()
         heatmap_data = defaultdict(lambda: defaultdict(int))
-        
+
         for session_name in sessions:
             activity = self.collect_session_activity(session_name, days)
             for timestamp, count in activity.items():
                 # Assuming timestamp is in ISO format 'YYYY-MM-DDTHH:00:00'
-                day_of_week = datetime.fromisoformat(timestamp).weekday() # Monday is 0 and Sunday is 6
+                day_of_week = datetime.fromisoformat(timestamp).weekday()  # Monday is 0 and Sunday is 6
                 hour = datetime.fromisoformat(timestamp).hour
                 heatmap_data[day_of_week][hour] += count
         logger.info(f"Generated heatmap data for sessions {sessions} in {(datetime.now() - start_time_generate).total_seconds():.4f} seconds.")
         return {
             "heatmap": heatmap_data,
             "sessions": sessions,
-            "days": days
+            "days": days,
         }
-

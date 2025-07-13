@@ -15,11 +15,11 @@ CACHE_TTL=1
 cat > /tmp/perf-config.yaml << EOF
 logging:
   level: ERROR
-  
+
 cache:
   ttl: $CACHE_TTL
   max_entries: 100
-  
+
 default_choices:
   auto_next: true
 EOF
@@ -43,10 +43,10 @@ sessions:
           panes:
             - shell_command: ["echo 'Session $i created'"]
 EOF
-    
+
     cp /tmp/perf-project-$i.yaml ~/.yesman/projects.yaml
     uv run ./yesman.py setup &
-    
+
     # Limit concurrent operations
     if [ $((i % CONCURRENT_OPERATIONS)) -eq 0 ]; then
         wait

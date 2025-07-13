@@ -50,11 +50,11 @@ fn execute_python_script(script: &str) -> Result<String, String> {
         .args(["-c", script])
         .output()
         .map_err(|e| format!("Failed to execute command: {}", e))?;
-    
+
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
     }
-    
+
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
@@ -70,7 +70,7 @@ try:
     from libs.core.session_manager import SessionManager
     sm = SessionManager()
     sessions = sm.get_all_sessions()
-    
+
     import json
     result = []
     for s in sessions:
@@ -90,7 +90,7 @@ try:
                     'name': getattr(w, 'name', ''),
                     'panes': panes
                 })
-        
+
         result.append({
             'session_name': getattr(s, 'session_name', ''),
             'project_name': getattr(s, 'project_name', ''),
@@ -98,19 +98,19 @@ try:
             'template': getattr(s, 'template', ''),
             'windows': windows
         })
-    
+
     print(json.dumps(result))
 except Exception as e:
     print(json.dumps({'error': str(e)}))
 "#;
-    
+
     let result = execute_python_script(script)?;
-    
+
     // 에러 체크
     if result.contains("\"error\"") {
         return Err(format!("Python error: {}", result));
     }
-    
+
     serde_json::from_str(&result)
         .map_err(|e| format!("Failed to parse JSON: {}", e))
 }
@@ -136,7 +136,7 @@ try:
 except Exception as e:
     print('Error')
 "#, session_name);
-    
+
     execute_python_script(&script)
 }
 
@@ -159,7 +159,7 @@ try:
 except Exception as e:
     print(False)
 "#, session_name);
-    
+
     let result = execute_python_script(&script)?;
     Ok(result.trim() == "True")
 }
@@ -183,7 +183,7 @@ try:
 except Exception as e:
     print(False)
 "#, session_name);
-    
+
     let result = execute_python_script(&script)?;
     Ok(result.trim() == "True")
 }
@@ -207,7 +207,7 @@ try:
 except Exception as e:
     print(False)
 "#, session_name);
-    
+
     let result = execute_python_script(&script)?;
     Ok(result.trim() == "True")
 }
@@ -222,7 +222,7 @@ sys.path.append('..')
 try:
     from libs.yesman_config import YesmanConfig
     config = YesmanConfig()
-    
+
     # 기본 설정값들
     result = {
         'confidence_threshold': 0.8,
@@ -233,20 +233,20 @@ try:
         'auto_refresh': True,
         'refresh_interval': 2
     }
-    
+
     import json
     print(json.dumps(result))
 except Exception as e:
     import json
     print(json.dumps({'error': str(e)}))
 "#;
-    
+
     let result = execute_python_script(script)?;
-    
+
     if result.contains("\"error\"") {
         return Err(format!("Python error: {}", result));
     }
-    
+
     serde_json::from_str(&result)
         .map_err(|e| format!("Failed to parse config JSON: {}", e))
 }
@@ -261,14 +261,14 @@ pub async fn save_app_config(config: AppConfig) -> Result<bool, String> {
 #[command]
 pub async fn get_session_logs(session_name: String, limit: Option<i32>) -> Result<Vec<String>, String> {
     let limit = limit.unwrap_or(100);
-    
+
     // 더미 로그 데이터 (실제로는 Python에서 로그 파일 읽기)
     let mut logs = Vec::new();
     for i in 0..limit {
-        logs.push(format!("[{:02}:{:02}:{:02}] Log entry {} for session {}", 
+        logs.push(format!("[{:02}:{:02}:{:02}] Log entry {} for session {}",
             (i / 3600) % 24, (i / 60) % 60, i % 60, i, session_name));
     }
-    
+
     Ok(logs)
 }
 
@@ -277,7 +277,7 @@ pub async fn get_metrics_data(_time_range: String) -> Result<Vec<MetricData>, St
     // 더미 메트릭 데이터
     let mut metrics = Vec::new();
     let now = Utc::now();
-    
+
     for i in 0..20 {
         metrics.push(MetricData {
             timestamp: now - chrono::Duration::minutes(i),
@@ -286,7 +286,7 @@ pub async fn get_metrics_data(_time_range: String) -> Result<Vec<MetricData>, St
             session_name: "example".to_string(),
         });
     }
-    
+
     Ok(metrics)
 }
 
@@ -320,7 +320,7 @@ except Exception as e:
     print(False)
 "#.to_string()
     };
-    
+
     let result = execute_python_script(&script)?;
     Ok(result.trim() == "True")
 }
@@ -355,7 +355,7 @@ except Exception as e:
     print(False)
 "#.to_string()
     };
-    
+
     let result = execute_python_script(&script)?;
     Ok(result.trim() == "True")
 }
@@ -364,13 +364,13 @@ except Exception as e:
 pub async fn start_all_controllers() -> Result<i32, String> {
     let sessions = get_all_sessions().await?;
     let mut success_count = 0;
-    
+
     for session in sessions {
         if let Ok(true) = start_controller(session.session_name).await {
             success_count += 1;
         }
     }
-    
+
     Ok(success_count)
 }
 
@@ -378,12 +378,12 @@ pub async fn start_all_controllers() -> Result<i32, String> {
 pub async fn stop_all_controllers() -> Result<i32, String> {
     let sessions = get_all_sessions().await?;
     let mut success_count = 0;
-    
+
     for session in sessions {
         if let Ok(true) = stop_controller(session.session_name).await {
             success_count += 1;
         }
     }
-    
+
     Ok(success_count)
 }

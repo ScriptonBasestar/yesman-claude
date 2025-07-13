@@ -1,13 +1,13 @@
 """Test dynamic work redistribution algorithm"""
 
 import asyncio
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import Mock, patch
-from datetime import datetime
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.task_scheduler import TaskScheduler, AgentCapability
-from libs.multi_agent.types import Agent, Task, AgentState, TaskStatus
+from libs.multi_agent.task_scheduler import AgentCapability, TaskScheduler
+from libs.multi_agent.types import Agent, Task
 
 
 class TestDynamicRedistribution:
@@ -33,13 +33,19 @@ class TestDynamicRedistribution:
 
         # Register agents with different capabilities and loads
         overloaded_cap = AgentCapability(
-            agent_id="agent-1", current_load=0.9, processing_power=1.0
+            agent_id="agent-1",
+            current_load=0.9,
+            processing_power=1.0,
         )
         normal_cap = AgentCapability(
-            agent_id="agent-2", current_load=0.5, processing_power=1.0
+            agent_id="agent-2",
+            current_load=0.5,
+            processing_power=1.0,
         )
         underloaded_cap = AgentCapability(
-            agent_id="agent-3", current_load=0.1, processing_power=1.0
+            agent_id="agent-3",
+            current_load=0.1,
+            processing_power=1.0,
         )
 
         scheduler.register_agent(overloaded_agent, overloaded_cap)
@@ -51,10 +57,7 @@ class TestDynamicRedistribution:
 
         # Should detect need for rebalancing
         assert len(rebalancing_actions) > 0
-        assert any(
-            action[0] == "agent-1" and action[1] == "agent-3"
-            for action in rebalancing_actions
-        )
+        assert any(action[0] == "agent-1" and action[1] == "agent-3" for action in rebalancing_actions)
 
     def test_assignment_preference_adjustment(self, scheduler):
         """Test adjustment of task assignment preferences"""
@@ -63,10 +66,14 @@ class TestDynamicRedistribution:
         underloaded_agent = Agent(agent_id="agent-2")
 
         overloaded_cap = AgentCapability(
-            agent_id="agent-1", current_load=0.9, processing_power=1.0
+            agent_id="agent-1",
+            current_load=0.9,
+            processing_power=1.0,
         )
         underloaded_cap = AgentCapability(
-            agent_id="agent-2", current_load=0.1, processing_power=1.0
+            agent_id="agent-2",
+            current_load=0.1,
+            processing_power=1.0,
         )
 
         scheduler.register_agent(overloaded_agent, overloaded_cap)
@@ -81,7 +88,7 @@ class TestDynamicRedistribution:
 
         # Should detect need for rebalancing and adjust preferences
         assert len(rebalancing_actions) > 0
-        
+
         # Processing power should be adjusted
         assert overloaded_cap.processing_power < initial_overloaded_power  # Penalty applied
         assert underloaded_cap.processing_power > initial_underloaded_power  # Boost applied
@@ -89,7 +96,9 @@ class TestDynamicRedistribution:
     def test_load_estimation(self, scheduler):
         """Test task load estimation"""
         agent_cap = AgentCapability(
-            agent_id="test-agent", processing_power=1.0, success_rate=0.9
+            agent_id="test-agent",
+            processing_power=1.0,
+            success_rate=0.9,
         )
 
         task = Task(
@@ -112,11 +121,11 @@ class TestDynamicRedistribution:
         """Test automatic rebalancing loop"""
         # Set the agent pool as running
         agent_pool._running = True
-        
+
         # Mock the scheduler to return low load balancing score
         with patch.object(agent_pool, "scheduler") as mock_scheduler:
             mock_scheduler.get_scheduling_metrics.return_value = {
-                "load_balancing_score": 0.6  # Below threshold
+                "load_balancing_score": 0.6,  # Below threshold
             }
             mock_scheduler.rebalance_tasks.return_value = [("agent-1", "agent-2")]
 
@@ -133,7 +142,7 @@ class TestDynamicRedistribution:
             # Stop the loop
             agent_pool._auto_rebalancing_enabled = False
             agent_pool._running = False
-            
+
             try:
                 await asyncio.wait_for(task, timeout=0.1)
             except (asyncio.TimeoutError, asyncio.CancelledError):
@@ -153,10 +162,12 @@ class TestDynamicRedistribution:
 
         # Setup scheduler capabilities
         agent_pool.scheduler.agent_capabilities["agent-1"] = AgentCapability(
-            agent_id="agent-1", current_load=0.8
+            agent_id="agent-1",
+            current_load=0.8,
         )
         agent_pool.scheduler.agent_capabilities["agent-2"] = AgentCapability(
-            agent_id="agent-2", current_load=0.2
+            agent_id="agent-2",
+            current_load=0.2,
         )
 
         # Execute rebalancing
@@ -200,7 +211,9 @@ class TestDynamicRedistribution:
         for i in range(3):
             agent = Agent(agent_id=f"agent-{i}")
             cap = AgentCapability(
-                agent_id=f"agent-{i}", current_load=0.5, processing_power=1.0
+                agent_id=f"agent-{i}",
+                current_load=0.5,
+                processing_power=1.0,
             )
             scheduler.register_agent(agent, cap)
 
@@ -225,7 +238,7 @@ class TestDynamicRedistribution:
 
         # Should be reset to baseline
         assert cap.processing_power == 1.0
-        assert hasattr(cap, '_baseline_processing_power')
+        assert hasattr(cap, "_baseline_processing_power")
 
     def test_load_balancing_with_specializations(self, scheduler):
         """Test load balancing considers agent specializations"""
@@ -240,7 +253,7 @@ class TestDynamicRedistribution:
             processing_power=1.0,
         )
         underloaded_cap = AgentCapability(
-            agent_id="agent-2", 
+            agent_id="agent-2",
             current_load=0.1,
             specializations=["javascript", "build"],
             processing_power=1.0,
@@ -254,7 +267,7 @@ class TestDynamicRedistribution:
 
         # Should still rebalance despite different specializations
         assert len(rebalancing_actions) > 0
-        
+
         # Verify load was redistributed
         assert overloaded_cap.current_load < 0.9
         assert underloaded_cap.current_load > 0.1

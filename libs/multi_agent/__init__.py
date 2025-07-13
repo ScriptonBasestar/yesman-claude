@@ -1,92 +1,92 @@
 """Multi-agent system for parallel branch-based development automation"""
 
-from .branch_manager import BranchManager
-from .task_analyzer import TaskAnalyzer, TaskDefinition, CodeDependency
-from .graph import DirectedGraph
-from .work_environment import WorkEnvironmentManager, WorkEnvironment
-from .types import Agent, Task, AgentState, TaskStatus
 from .agent_pool import AgentPool
-from .task_scheduler import TaskScheduler, AgentCapability
-from .conflict_resolution import (
-    ConflictResolutionEngine,
-    ConflictInfo,
-    ConflictType,
-    ConflictSeverity,
-    ResolutionStrategy,
-    ResolutionResult,
+from .auto_resolver import (
+    AutoResolutionMode,
+    AutoResolutionResult,
+    AutoResolver,
+    ResolutionOutcome,
+)
+from .branch_info_protocol import (
+    BranchInfo,
+    BranchInfoProtocol,
+    BranchInfoType,
+    BranchSyncEvent,
+    SyncStrategy,
+)
+from .branch_manager import BranchManager
+from .code_review_engine import (
+    CodeReview,
+    CodeReviewEngine,
+    QualityMetric,
+    QualityMetrics,
+    ReviewFinding,
+    ReviewSeverity,
+    ReviewStatus,
+    ReviewSummary,
+    ReviewType,
+)
+from .collaboration_engine import (
+    CollaborationEngine,
+    CollaborationMessage,
+    CollaborationMode,
+    CollaborationSession,
+    MessagePriority,
+    MessageType,
+    SharedKnowledge,
 )
 from .conflict_prediction import (
-    ConflictPredictor,
-    PredictionResult,
-    PredictionConfidence,
     ConflictPattern,
+    ConflictPredictor,
     ConflictVector,
+    PredictionConfidence,
+    PredictionResult,
 )
+from .conflict_prevention import (
+    ConflictPreventionSystem,
+    PreventionAction,
+    PreventionMeasure,
+    PreventionResult,
+    PreventionStrategy,
+)
+from .conflict_resolution import (
+    ConflictInfo,
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
+    ResolutionResult,
+    ResolutionStrategy,
+)
+from .dependency_propagation import (
+    ChangeImpact,
+    DependencyChange,
+    DependencyNode,
+    DependencyPropagationSystem,
+    DependencyType,
+    PropagationResult,
+    PropagationStrategy,
+)
+from .graph import DirectedGraph
 from .semantic_analyzer import (
+    ClassDefinition,
+    FunctionSignature,
     SemanticAnalyzer,
     SemanticConflict,
     SemanticConflictType,
-    FunctionSignature,
-    ClassDefinition,
     SemanticContext,
     SymbolVisibility,
 )
 from .semantic_merger import (
-    SemanticMerger,
-    MergeStrategy,
+    ConflictResolutionRule,
     MergeResolution,
     MergeResult,
-    ConflictResolutionRule,
+    MergeStrategy,
+    SemanticMerger,
 )
-from .auto_resolver import (
-    AutoResolver,
-    AutoResolutionMode,
-    ResolutionOutcome,
-    AutoResolutionResult,
-)
-from .collaboration_engine import (
-    CollaborationEngine,
-    CollaborationMode,
-    MessageType,
-    MessagePriority,
-    CollaborationMessage,
-    SharedKnowledge,
-    CollaborationSession,
-)
-from .branch_info_protocol import (
-    BranchInfoProtocol,
-    BranchInfo,
-    BranchInfoType,
-    SyncStrategy,
-    BranchSyncEvent,
-)
-from .dependency_propagation import (
-    DependencyPropagationSystem,
-    DependencyType,
-    ChangeImpact,
-    PropagationStrategy,
-    DependencyNode,
-    DependencyChange,
-    PropagationResult,
-)
-from .code_review_engine import (
-    CodeReviewEngine,
-    ReviewType,
-    ReviewSeverity,
-    ReviewStatus,
-    QualityMetric,
-    ReviewFinding,
-    QualityMetrics,
-    CodeReview,
-    ReviewSummary,
-)
-from .conflict_prevention import (
-    ConflictPreventionSystem,
-    PreventionStrategy,
-    PreventionAction,
-    PreventionMeasure,
-    PreventionResult,
-)
+from .task_analyzer import CodeDependency, TaskAnalyzer, TaskDefinition
+from .task_scheduler import AgentCapability, TaskScheduler
+from .types import Agent, AgentState, Task, TaskStatus
+from .work_environment import WorkEnvironment, WorkEnvironmentManager
 
 __all__ = [
     "BranchManager",

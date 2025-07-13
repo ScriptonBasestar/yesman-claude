@@ -1,47 +1,52 @@
-import click
 import subprocess
-import libtmux
 import sys
-from libs.yesman_config import YesmanConfig
+
+import click
+import libtmux
+
 from libs.tmux_manager import TmuxManager
 from libs.ui.session_selector import show_session_selector
+from libs.yesman_config import YesmanConfig
+
 
 @click.command()
-@click.argument('session_name', required=False)
-@click.option('--list', '-l', 'list_sessions', is_flag=True, help='List available sessions')
+@click.argument("session_name", required=False)
+@click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
 def enter(session_name, list_sessions):
     """Enter (attach to) a tmux session"""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
     server = libtmux.Server()
-    
+
     if list_sessions:
         # Show available sessions
         tmux_manager.list_running_sessions()
         return
-    
+
     # If no session name provided, show available sessions and prompt
     if not session_name:
         # Get all running sessions
         running_sessions = []
         projects = tmux_manager.load_projects().get("sessions", {})
-        
+
         for project_name, project_conf in projects.items():
             override = project_conf.get("override", {})
             actual_session_name = override.get("session_name", project_name)
-            
+
             # Check if session exists
             if server.find_where({"session_name": actual_session_name}):
-                running_sessions.append({
-                    'project': project_name,
-                    'session': actual_session_name
-                })
-        
+                running_sessions.append(
+                    {
+                        "project": project_name,
+                        "session": actual_session_name,
+                    }
+                )
+
         if not running_sessions:
             click.echo("No running yesman sessions found.")
             click.echo("Run 'yesman up' to create sessions.")
             return
-        
+
         # Try to use TUI selector first
         try:
             selected = show_session_selector(running_sessions)
@@ -50,33 +55,33 @@ def enter(session_name, list_sessions):
             else:
                 click.echo("Selection cancelled")
                 return
-        except Exception as e:
+        except Exception:
             # Fallback to text-based selection
             click.echo("TUI unavailable, falling back to text selection...")
             click.echo("Available sessions:")
             for i, sess in enumerate(running_sessions, 1):
                 click.echo(f"  [{i}] {sess['project']} (session: {sess['session']})")
-            
+
             # Prompt for selection
             choice = click.prompt("Select session number", type=int)
             if 1 <= choice <= len(running_sessions):
-                session_name = running_sessions[choice - 1]['session']
+                session_name = running_sessions[choice - 1]["session"]
             else:
                 click.echo("Invalid selection")
                 return
-    
+
     # Check if the session exists
     if not server.find_where({"session_name": session_name}):
         # Try to find by project name
         projects = tmux_manager.load_projects().get("sessions", {})
         actual_session_name = None
-        
+
         for project_name, project_conf in projects.items():
             if project_name == session_name:
                 override = project_conf.get("override", {})
                 actual_session_name = override.get("session_name", project_name)
                 break
-        
+
         if actual_session_name and server.find_where({"session_name": actual_session_name}):
             session_name = actual_session_name
         else:
@@ -84,20 +89,20 @@ def enter(session_name, list_sessions):
             click.echo("Available sessions:")
             tmux_manager.list_running_sessions()
             return
-    
+
     # Check if running in interactive terminal
     if not sys.stdin.isatty():
         click.echo("❌ Error: 'enter' command requires an interactive terminal")
         click.echo("💡 Tip: Run this command directly in your terminal, not through pipes or scripts")
         return
-    
+
     # Attach to the session
     click.echo(f"Attaching to session: {session_name}")
-    
+
     # Check if we're already in a tmux session
-    if 'TMUX' in subprocess.os.environ:
+    if "TMUX" in subprocess.os.environ:
         # Switch to the session
-        subprocess.run(["tmux", "switch-client", "-t", session_name])
+        subprocess.run(["tmux", "switch-client", "-t", session_name], check=False)
     else:
         # Attach to the session
-        subprocess.run(["tmux", "attach-session", "-t", session_name])
+        subprocess.run(["tmux", "attach-session", "-t", session_name], check=False)

@@ -1,25 +1,25 @@
 """Tests for ConflictPredictor"""
 
-import pytest
-import asyncio
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock
 
+import pytest
+
+from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_prediction import (
-    ConflictPredictor,
-    PredictionResult,
-    PredictionConfidence,
     ConflictPattern,
+    ConflictPredictor,
     ConflictVector,
+    PredictionConfidence,
+    PredictionResult,
 )
 from libs.multi_agent.conflict_resolution import (
     ConflictResolutionEngine,
-    ConflictType,
     ConflictSeverity,
+    ConflictType,
 )
-from libs.multi_agent.branch_manager import BranchManager
 
 
 class TestConflictVector:
@@ -103,7 +103,11 @@ class TestConflictPredictor:
         )
 
     def test_init(
-        self, predictor, mock_conflict_engine, mock_branch_manager, temp_repo
+        self,
+        predictor,
+        mock_conflict_engine,
+        mock_branch_manager,
+        temp_repo,
     ):
         """Test ConflictPredictor initialization"""
         assert predictor.conflict_engine == mock_conflict_engine
@@ -117,9 +121,7 @@ class TestConflictPredictor:
 
     def test_likelihood_to_confidence(self, predictor):
         """Test likelihood to confidence conversion"""
-        assert (
-            predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
-        )
+        assert predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
         assert predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH
         assert predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM
         assert predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW
@@ -135,7 +137,7 @@ class TestConflictPredictor:
         """Test conflict vector calculation"""
         # Mock the required methods
         predictor.conflict_engine._get_changed_files = AsyncMock(
-            return_value={"file1.py": "M", "file2.py": "A"}
+            return_value={"file1.py": "M", "file2.py": "A"},
         )
         predictor._get_change_frequency = AsyncMock(return_value=2.5)
         predictor._calculate_branch_complexity = AsyncMock(return_value=50.0)
@@ -228,7 +230,7 @@ from sys import path
             return_value={
                 "file1.py": ["import os", "import sys", "import json"],
                 "file2.py": ["from datetime import datetime"],
-            }
+            },
         )
 
         # Mock conflict detection
@@ -259,7 +261,7 @@ from sys import path
                     "file1.py:test_func": "def test_func(a, b):",  # Different signature
                     "file1.py:other_func": "def other_func(x):",  # Same signature
                 },
-            ]
+            ],
         )
 
         result = await predictor._detect_signature_drift("branch1", "branch2", vector)
@@ -280,7 +282,7 @@ from sys import path
             side_effect=[
                 {"TestClass": "file1.py:10", "my_function": "file1.py:20"},
                 {"TestClass": "file2.py:15", "other_function": "file2.py:25"},
-            ]
+            ],
         )
 
         result = await predictor._detect_naming_collisions("branch1", "branch2", vector)
@@ -300,7 +302,7 @@ from sys import path
             side_effect=[
                 {"requests": "2.25.1", "numpy": "1.21.0"},
                 {"requests": "2.26.0", "numpy": "1.21.0"},  # Different requests version
-            ]
+            ],
         )
 
         predictor._calculate_version_distance = Mock(return_value=0.3)
@@ -332,7 +334,7 @@ from sys import path
         """Test change frequency calculation"""
         # Mock git command
         predictor.conflict_engine._run_git_command = AsyncMock(
-            return_value=Mock(stdout="14\n")  # 14 commits in last week
+            return_value=Mock(stdout="14\n"),  # 14 commits in last week
         )
 
         frequency = await predictor._get_change_frequency("test-branch")
@@ -349,8 +351,8 @@ from sys import path
  file2.py | 5 +++++
  file3.py | 3 ---
  3 files changed, 15 insertions(+), 3 deletions(-)
-"""
-            )
+""",
+            ),
         )
 
         complexity = await predictor._calculate_branch_complexity("test-branch")
@@ -362,17 +364,17 @@ from sys import path
         """Test getting Python files with imports"""
         # Mock the required methods
         predictor.conflict_engine._get_python_files_changed = AsyncMock(
-            return_value=["file1.py", "file2.py"]
+            return_value=["file1.py", "file2.py"],
         )
         predictor.conflict_engine._get_file_content = AsyncMock(
             side_effect=[
                 "import os\nimport sys\n\ndef test():\n    pass",
                 "from datetime import datetime\n\nclass Test:\n    pass",
-            ]
+            ],
         )
 
         files_with_imports = await predictor._get_python_files_with_imports(
-            "test-branch"
+            "test-branch",
         )
 
         assert "file1.py" in files_with_imports
@@ -402,7 +404,7 @@ pytest = ">=6.0.0"
 """
 
         predictor.conflict_engine._get_file_content = AsyncMock(
-            side_effect=[requirements_content, pyproject_content]
+            side_effect=[requirements_content, pyproject_content],
         )
 
         versions = await predictor._get_dependency_versions("test-branch")
@@ -510,7 +512,7 @@ pytest = ">=6.0.0"
         """Test full conflict prediction integration"""
         # Mock all required methods for a minimal integration test
         predictor._calculate_conflict_vector = AsyncMock(
-            return_value=ConflictVector(0.5, 0.4, 0.6, 0.3, 0.7, 0.2)
+            return_value=ConflictVector(0.5, 0.4, 0.6, 0.3, 0.7, 0.2),
         )
 
         predictor._detect_import_conflicts = AsyncMock(
@@ -524,7 +526,7 @@ pytest = ">=6.0.0"
                 predicted_severity=ConflictSeverity.LOW,
                 likelihood_score=0.6,
                 description="Import conflict prediction",
-            )
+            ),
         )
 
         # Mock other detectors to return None

@@ -1,0 +1,153 @@
+# Ruff configuration for Yesman-Claude project
+# Same as Black
+line-length = 200
+indent-width = 4
+
+# Assume Python 3.8+
+target-version = "py38"
+
+# Exclude directories
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # isort
+    "I",
+    # flake8-builtins
+    "A",
+    # flake8-commas (disabled due to formatter conflict)
+    # "COM",
+    # flake8-quotes
+    "Q",
+    # pylint
+    "PL",
+    # Bandit security rules
+    "S",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # pyupgrade
+    "UP",
+]
+
+ignore = [
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Ignore complexity
+    "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+    # Allow print statements in debug scripts
+    "T201",
+    # Magic values are common in configuration and scoring
+    "PLR2004",
+    # Security warnings that are acceptable in development/automation contexts
+    "S603", "S607", "S605",
+    # Code style preferences that may not be worth enforcing
+    "SIM108", "SIM102", "SIM105", "SIM110", "SIM115", "SIM201",
+    # Allow some builtins shadowing in specific contexts
+    "A001", "A002",
+    # custom
+    "E402",
+    "F841",
+    "PLC0415", "B007",
+]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[lint.isort]
+known-first-party = ["libs", "commands", "api"]
+
+[lint.per-file-ignores]
+# API tests can use assertions and other test patterns
+"api/tests/**/*" = [
+    "S101",     # Use of `assert` detected
+    "PLR2004",  # Magic value used in comparison
+]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = [
+    "PLR2004",  # Magic value used in comparison
+    "S101",     # Use of `assert` detected
+    "S108",     # Probable insecure usage of temporary file or directory
+    "S603",     # `subprocess` call: check for execution of untrusted input
+    "S607",     # Starting a process with a partial executable path
+    "S110",     # `try`-`except`-`pass` detected
+    "E722",     # Bare except
+    "SIM103",   # Return the condition directly
+    "SIM117",   # Use a single `with` statement with multiple contexts
+    "SIM118",   # Use `key in dict` instead of `key in dict.keys()`
+    "SIM108",   # Use ternary operator instead of `if`-`else`-block
+    "TID252",   # Relative imports
+    "F821",     # Undefined name (common in test mocks)
+    "A002",     # Builtin argument shadowing
+]
+
+# Backup test files - very permissive for generated/cached tests
+".backup/**/*" = [
+    "PLR2004", "S101", "S108", "S603", "S607", "S110", "E722",
+    "SIM103", "SIM117", "SIM118", "SIM108", "F821", "A002"
+]
+
+# Debug scripts can use print statements and shell execution
+"debug/**/*" = ["T201", "S602", "S603", "S607", "S108", "PLR2004"]
+"scripts/**/*" = ["T201", "S602", "S603", "S607", "S108", "PLR2004", "SIM108", "A002"]
+
+# Examples can use insecure paths for demonstration
+"examples/**/*" = ["S108", "T201", "PLR2004", "S603", "S607"]
+
+# Libs can have some relaxed rules for development tooling
+"libs/multi_agent/**/*" = ["S324", "S110", "E722"]  # Allow MD5 and except patterns in dev tools
+"libs/task_runner.py" = ["S603", "S607", "S605", "SIM108", "PLR2004"]  # Task automation needs subprocess
+"libs/tmux_manager.py" = ["S605"]  # Tmux integration needs shell access
+"libs/ui/**/*" = ["E722", "S110", "PLR2004"]  # UI code can be more lenient
+
+# API files - allow exception chaining bypass for security
+"api/**/*" = ["B904"]  # HTTPException often should not expose internal errors

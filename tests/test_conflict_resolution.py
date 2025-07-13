@@ -1,21 +1,21 @@
 """Tests for ConflictResolutionEngine"""
 
-import pytest
-import asyncio
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import Mock, patch
 
-from libs.multi_agent.conflict_resolution import (
-    ConflictResolutionEngine,
-    ConflictInfo,
-    ConflictType,
-    ConflictSeverity,
-    ResolutionStrategy,
-    ResolutionResult,
-)
+import pytest
+
 from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_resolution import (
+    ConflictInfo,
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
+    ResolutionResult,
+    ResolutionStrategy,
+)
 
 
 class TestConflictInfo:
@@ -82,7 +82,8 @@ class TestConflictResolutionEngine:
     def engine(self, mock_branch_manager, temp_repo):
         """Create ConflictResolutionEngine instance"""
         return ConflictResolutionEngine(
-            branch_manager=mock_branch_manager, repo_path=str(temp_repo)
+            branch_manager=mock_branch_manager,
+            repo_path=str(temp_repo),
         )
 
     def test_init(self, engine, mock_branch_manager, temp_repo):
@@ -159,7 +160,10 @@ class TestConflictResolutionEngine:
     def test_create_merge_conflict(self, engine):
         """Test creation of merge conflict info"""
         conflict = engine._create_merge_conflict(
-            "test.py", "branch1", "branch2", "conflict content"
+            "test.py",
+            "branch1",
+            "branch2",
+            "conflict content",
         )
 
         assert conflict.conflict_type == ConflictType.MERGE_CONFLICT
@@ -180,7 +184,8 @@ class TestConflictResolutionEngine:
 
         # Test JSON file
         strategy = engine._suggest_resolution_strategy(
-            '{"key": "value"}', "config.json"
+            '{"key": "value"}',
+            "config.json",
         )
         assert strategy == ResolutionStrategy.PREFER_LATEST
 
@@ -307,7 +312,7 @@ class TestConflictResolutionEngine:
             description="Import conflict",
             suggested_strategy=ResolutionStrategy.CUSTOM_MERGE,
             metadata={
-                "conflict_content": "<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> "
+                "conflict_content": "<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> ",
             },
         )
 
@@ -479,7 +484,7 @@ class TestClass:
 
             # Test get_changed_files
             mock_git.return_value = Mock(
-                stdout="M\tfile1.py\nA\tfile2.py\nD\tfile3.py\n"
+                stdout="M\tfile1.py\nA\tfile2.py\nD\tfile3.py\n",
             )
             files = await engine._get_changed_files("branch1")
             assert files == {"file1.py": "M", "file2.py": "A", "file3.py": "D"}
@@ -557,11 +562,7 @@ class TestClass:
         total = len(engine.resolution_history)
         engine.resolution_stats["resolution_success_rate"] = successful / total
 
-        times = [
-            r.resolution_time
-            for r in engine.resolution_history
-            if r.resolution_time > 0
-        ]
+        times = [r.resolution_time for r in engine.resolution_history if r.resolution_time > 0]
         engine.resolution_stats["average_resolution_time"] = sum(times) / len(times)
 
         assert engine.resolution_stats["resolution_success_rate"] == 0.5

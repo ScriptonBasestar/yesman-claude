@@ -1,25 +1,25 @@
 """Tests for SemanticAnalyzer"""
 
-import pytest
 import ast
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_resolution import ConflictSeverity, ResolutionStrategy
 from libs.multi_agent.semantic_analyzer import (
+    ClassDefinition,
+    FunctionSignature,
+    ImportInfo,
     SemanticAnalyzer,
-    SemanticVisitor,
-    SemanticContext,
     SemanticConflict,
     SemanticConflictType,
-    FunctionSignature,
-    ClassDefinition,
-    ImportInfo,
+    SemanticContext,
+    SemanticVisitor,
     SymbolVisibility,
 )
-from libs.multi_agent.conflict_resolution import ConflictSeverity, ResolutionStrategy
-from libs.multi_agent.branch_manager import BranchManager
 
 
 class TestFunctionSignature:
@@ -134,16 +134,16 @@ def test_func(x: int, y: str = "default") -> bool:
         code = """
 class TestClass(BaseClass):
     \"\"\"Test class\"\"\"
-    
+
     def __init__(self):
         pass
-    
+
     def public_method(self):
         pass
-    
+
     def _protected_method(self):
         pass
-    
+
     def __private_method(self):
         pass
 """
@@ -255,7 +255,8 @@ class TestSemanticAnalyzer:
     def analyzer(self, mock_branch_manager, temp_repo):
         """Create SemanticAnalyzer instance"""
         return SemanticAnalyzer(
-            branch_manager=mock_branch_manager, repo_path=str(temp_repo)
+            branch_manager=mock_branch_manager,
+            repo_path=str(temp_repo),
         )
 
     def test_init(self, analyzer, mock_branch_manager, temp_repo):
@@ -299,7 +300,10 @@ class TestClass:
     def test_functions_have_signature_conflict(self, analyzer):
         """Test function signature conflict detection"""
         func1 = FunctionSignature(
-            name="test", args=["x", "y"], defaults=["None"], return_type="int"
+            name="test",
+            args=["x", "y"],
+            defaults=["None"],
+            return_type="int",
         )
 
         func2 = FunctionSignature(
@@ -313,7 +317,10 @@ class TestClass:
 
         # Same signature
         func3 = FunctionSignature(
-            name="test", args=["x", "y"], defaults=["None"], return_type="int"
+            name="test",
+            args=["x", "y"],
+            defaults=["None"],
+            return_type="int",
         )
 
         assert analyzer._functions_have_signature_conflict(func1, func3) is False
@@ -322,7 +329,9 @@ class TestClass:
         """Test function conflict severity assessment"""
         # Public function with removed parameters (breaking change)
         func1 = FunctionSignature(
-            name="test", args=["x", "y"], visibility=SymbolVisibility.PUBLIC
+            name="test",
+            args=["x", "y"],
+            visibility=SymbolVisibility.PUBLIC,
         )
 
         func2 = FunctionSignature(
@@ -336,11 +345,15 @@ class TestClass:
 
         # Private function change (less severe)
         func3 = FunctionSignature(
-            name="_test", args=["x", "y"], visibility=SymbolVisibility.PROTECTED
+            name="_test",
+            args=["x", "y"],
+            visibility=SymbolVisibility.PROTECTED,
         )
 
         func4 = FunctionSignature(
-            name="_test", args=["x"], visibility=SymbolVisibility.PROTECTED
+            name="_test",
+            args=["x"],
+            visibility=SymbolVisibility.PROTECTED,
         )
 
         severity = analyzer._assess_function_conflict_severity(func3, func4)
@@ -402,7 +415,9 @@ class TestClass:
         """Test function conflict detection"""
         context1 = SemanticContext(file_path="test.py")
         context1.functions["test_func"] = FunctionSignature(
-            name="test_func", args=["x", "y"], return_type="int"
+            name="test_func",
+            args=["x", "y"],
+            return_type="int",
         )
 
         context2 = SemanticContext(file_path="test.py")
@@ -413,7 +428,10 @@ class TestClass:
         )
 
         conflicts = analyzer._detect_function_conflicts(
-            context1, context2, "branch1", "branch2"
+            context1,
+            context2,
+            "branch1",
+            "branch2",
         )
 
         assert len(conflicts) > 0
@@ -427,7 +445,8 @@ class TestClass:
         """Test class conflict detection"""
         context1 = SemanticContext(file_path="test.py")
         context1.classes["TestClass"] = ClassDefinition(
-            name="TestClass", bases=["BaseClass"]
+            name="TestClass",
+            bases=["BaseClass"],
         )
 
         context2 = SemanticContext(file_path="test.py")
@@ -437,7 +456,10 @@ class TestClass:
         )
 
         conflicts = analyzer._detect_class_conflicts(
-            context1, context2, "branch1", "branch2"
+            context1,
+            context2,
+            "branch1",
+            "branch2",
         )
 
         assert len(conflicts) > 0
@@ -453,12 +475,17 @@ class TestClass:
         context2 = SemanticContext(file_path="test.py")
         context2.imports = [
             ImportInfo(
-                module="sys", name="path", alias="ospath"
-            )  # Same alias, different module
+                module="sys",
+                name="path",
+                alias="ospath",
+            ),  # Same alias, different module
         ]
 
         conflicts = analyzer._detect_import_conflicts(
-            context1, context2, "branch1", "branch2"
+            context1,
+            context2,
+            "branch1",
+            "branch2",
         )
 
         assert len(conflicts) > 0
@@ -475,7 +502,10 @@ class TestClass:
         context2.global_variables["my_var"] = "str"  # Different type
 
         conflicts = analyzer._detect_variable_conflicts(
-            context1, context2, "branch1", "branch2"
+            context1,
+            context2,
+            "branch1",
+            "branch2",
         )
 
         assert len(conflicts) > 0
@@ -521,7 +551,9 @@ class TestClass:
         test_code = "def test(): pass"
 
         with patch.object(
-            analyzer, "_get_file_content", new_callable=AsyncMock
+            analyzer,
+            "_get_file_content",
+            new_callable=AsyncMock,
         ) as mock_get:
             mock_get.return_value = test_code
 
@@ -572,8 +604,8 @@ class TestClass:
                     branch1="branch1",
                     branch2="branch2",
                     description="Test conflict",
-                )
-            ]
+                ),
+            ],
         )
 
         conflicts = await analyzer.analyze_semantic_conflicts("branch1", "branch2")

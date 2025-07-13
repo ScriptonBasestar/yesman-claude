@@ -1,29 +1,24 @@
 """Advanced conflict prediction system for multi-agent branch development"""
 
-import asyncio
+import ast
+import difflib
 import logging
 import re
-import ast
-import json
-from typing import Dict, List, Optional, Set, Tuple, Any, NamedTuple
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime, timedelta
 from enum import Enum
-import difflib
-from collections import defaultdict, Counter
+from pathlib import Path
+from typing import Any, Dict, List, NamedTuple, Optional
 
+from .branch_manager import BranchManager
 from .conflict_resolution import (
     ConflictInfo,
-    ConflictType,
-    ConflictSeverity,
-    ResolutionStrategy,
     ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
 )
-from .branch_manager import BranchManager
-from .types import Agent, Task
-from .semantic_analyzer import SemanticAnalyzer, SemanticConflictType
-
+from .semantic_analyzer import SemanticAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +135,9 @@ class ConflictPredictor:
         }
 
     async def predict_conflicts(
-        self, branches: List[str], time_horizon: Optional[timedelta] = None
+        self,
+        branches: List[str],
+        time_horizon: Optional[timedelta] = None,
     ) -> List[PredictionResult]:
         """
         Predict potential conflicts between branches
@@ -167,11 +164,7 @@ class ConflictPredictor:
                     # Run pattern detection
                     for pattern, detector in self.pattern_detectors.items():
                         prediction = await detector(branch1, branch2, vector)
-                        if (
-                            prediction
-                            and prediction.likelihood_score
-                            >= self.min_confidence_threshold
-                        ):
+                        if prediction and prediction.likelihood_score >= self.min_confidence_threshold:
                             predictions.append(prediction)
 
             # Apply machine learning scoring
@@ -179,7 +172,8 @@ class ConflictPredictor:
 
             # Sort by likelihood and confidence
             predictions.sort(
-                key=lambda p: (p.likelihood_score, p.confidence.value), reverse=True
+                key=lambda p: (p.likelihood_score, p.confidence.value),
+                reverse=True,
             )
 
             # Limit results
@@ -199,7 +193,9 @@ class ConflictPredictor:
         return predictions
 
     async def _calculate_conflict_vector(
-        self, branch1: str, branch2: str
+        self,
+        branch1: str,
+        branch2: str,
     ) -> ConflictVector:
         """Calculate multi-dimensional conflict probability vector"""
         try:
@@ -209,7 +205,8 @@ class ConflictPredictor:
 
             common_files = set(files1.keys()) & set(files2.keys())
             file_overlap_score = len(common_files) / max(
-                len(files1) + len(files2) - len(common_files), 1
+                len(files1) + len(files2) - len(common_files),
+                1,
             )
 
             # Change frequency analysis
@@ -245,7 +242,10 @@ class ConflictPredictor:
             return ConflictVector(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
     async def _detect_import_conflicts(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential import statement conflicts"""
         try:
@@ -306,7 +306,10 @@ class ConflictPredictor:
             return None
 
     async def _detect_signature_drift(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential function signature conflicts"""
         try:
@@ -340,11 +343,7 @@ class ConflictPredictor:
             drift_score = min(drift_score, 1.0)
 
             confidence = self._likelihood_to_confidence(drift_score)
-            severity = (
-                ConflictSeverity.HIGH
-                if len(affected_functions) > 5
-                else ConflictSeverity.MEDIUM
-            )
+            severity = ConflictSeverity.HIGH if len(affected_functions) > 5 else ConflictSeverity.MEDIUM
 
             return PredictionResult(
                 prediction_id=f"signature_drift_{branch1}_{branch2}_{len(affected_functions)}",
@@ -352,7 +351,7 @@ class ConflictPredictor:
                 pattern=ConflictPattern.FUNCTION_SIGNATURE_DRIFT,
                 affected_branches=[branch1, branch2],
                 affected_files=list(
-                    set(f.split(":")[0] for f in affected_functions if ":" in f)
+                    set(f.split(":")[0] for f in affected_functions if ":" in f),
                 ),
                 predicted_conflict_type=ConflictType.SEMANTIC,
                 predicted_severity=severity,
@@ -375,7 +374,10 @@ class ConflictPredictor:
             return None
 
     async def _detect_naming_collisions(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential variable/class naming collisions"""
         try:
@@ -426,7 +428,10 @@ class ConflictPredictor:
             return None
 
     async def _detect_hierarchy_changes(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential class hierarchy conflicts"""
         try:
@@ -481,7 +486,10 @@ class ConflictPredictor:
             return None
 
     async def _detect_version_conflicts(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential dependency version conflicts"""
         try:
@@ -536,7 +544,10 @@ class ConflictPredictor:
             return None
 
     async def _detect_api_changes(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential API breaking changes"""
         # Implementation would analyze public API changes
@@ -544,21 +555,28 @@ class ConflictPredictor:
         return None
 
     async def _detect_resource_conflicts(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential resource contention conflicts"""
         # Implementation would analyze file locks, database access, etc.
         return None
 
     async def _detect_context_loss(
-        self, branch1: str, branch2: str, vector: ConflictVector
+        self,
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> Optional[PredictionResult]:
         """Detect potential merge context loss scenarios"""
         # Implementation would analyze merge complexity
         return None
 
     async def _apply_ml_scoring(
-        self, predictions: List[PredictionResult]
+        self,
+        predictions: List[PredictionResult],
     ) -> List[PredictionResult]:
         """Apply machine learning scoring to improve prediction accuracy"""
         # This would implement actual ML scoring
@@ -569,11 +587,11 @@ class ConflictPredictor:
             pattern_history = self.historical_patterns.get(prediction.pattern, [])
             if pattern_history:
                 avg_accuracy = sum(p.get("accurate", 0) for p in pattern_history) / len(
-                    pattern_history
+                    pattern_history,
                 )
                 prediction.likelihood_score *= 0.5 + avg_accuracy * 0.5
                 prediction.confidence = self._likelihood_to_confidence(
-                    prediction.likelihood_score
+                    prediction.likelihood_score,
                 )
 
         return predictions
@@ -595,7 +613,7 @@ class ConflictPredictor:
         """Get change frequency for a branch (commits per day)"""
         try:
             result = await self.conflict_engine._run_git_command(
-                ["rev-list", "--count", "--since=1 week ago", branch]
+                ["rev-list", "--count", "--since=1 week ago", branch],
             )
             commit_count = int(result.stdout.strip())
             return commit_count / 7.0  # commits per day
@@ -607,7 +625,7 @@ class ConflictPredictor:
         try:
             # Simple complexity metric based on lines changed
             result = await self.conflict_engine._run_git_command(
-                ["diff", "--stat", f"HEAD..{branch}"]
+                ["diff", "--stat", f"HEAD..{branch}"],
             )
 
             lines_changed = 0
@@ -649,7 +667,8 @@ class ConflictPredictor:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(
-                    file_path, branch
+                    file_path,
+                    branch,
                 )
                 if content:
                     imports = self._extract_imports(content)
@@ -677,8 +696,8 @@ class ConflictPredictor:
                 r"^import\s+[\w\.]+",
                 r"^from\s+[\w\.]+\s+import\s+[\w\.,\s]+",
             ]
-            for line in content.split("\n"):
-                line = line.strip()
+            for raw_line in content.split("\n"):
+                line = raw_line.strip()
                 for pattern in import_patterns:
                     if re.match(pattern, line):
                         imports.append(line)
@@ -686,7 +705,9 @@ class ConflictPredictor:
         return imports
 
     def _imports_likely_to_conflict(
-        self, imports1: List[str], imports2: List[str]
+        self,
+        imports1: List[str],
+        imports2: List[str],
     ) -> bool:
         """Check if import lists are likely to conflict"""
         set1 = set(imports1)
@@ -703,10 +724,7 @@ class ConflictPredictor:
         # Check for similar but slightly different imports
         for imp1 in imports1:
             for imp2 in imports2:
-                if (
-                    imp1 != imp2
-                    and difflib.SequenceMatcher(None, imp1, imp2).ratio() > 0.8
-                ):
+                if imp1 != imp2 and difflib.SequenceMatcher(None, imp1, imp2).ratio() > 0.8:
                     return True
 
         return False
@@ -718,11 +736,12 @@ class ConflictPredictor:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(
-                    file_path, branch
+                    file_path,
+                    branch,
                 )
                 if content:
                     file_sigs = self.conflict_engine._extract_function_signatures(
-                        content
+                        content,
                     )
                     for func_name, signature in file_sigs.items():
                         signatures[f"{file_path}:{func_name}"] = signature
@@ -737,7 +756,8 @@ class ConflictPredictor:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(
-                    file_path, branch
+                    file_path,
+                    branch,
                 )
                 if content:
                     try:
@@ -761,7 +781,8 @@ class ConflictPredictor:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(
-                    file_path, branch
+                    file_path,
+                    branch,
                 )
                 if content:
                     try:
@@ -787,26 +808,27 @@ class ConflictPredictor:
         try:
             # Check requirements.txt
             req_content = await self.conflict_engine._get_file_content(
-                "requirements.txt", branch
+                "requirements.txt",
+                branch,
             )
             if req_content:
-                for line in req_content.split("\n"):
-                    line = line.strip()
-                    if line and not line.startswith("#"):
-                        if "==" in line:
-                            pkg, ver = line.split("==", 1)
-                            versions[pkg.strip()] = ver.strip()
+                for raw_line in req_content.split("\n"):
+                    line = raw_line.strip()
+                    if line and not line.startswith("#") and "==" in line:
+                        pkg, ver = line.split("==", 1)
+                        versions[pkg.strip()] = ver.strip()
 
             # Check pyproject.toml
             pyproject_content = await self.conflict_engine._get_file_content(
-                "pyproject.toml", branch
+                "pyproject.toml",
+                branch,
             )
             if pyproject_content:
                 # Simple parsing for dependencies
                 lines = pyproject_content.split("\n")
                 in_dependencies = False
-                for line in lines:
-                    line = line.strip()
+                for raw_line in lines:
+                    line = raw_line.strip()
                     if line == "[dependencies]" or "dependencies = [" in line:
                         in_dependencies = True
                     elif line.startswith("[") and in_dependencies:
@@ -857,19 +879,13 @@ class ConflictPredictor:
                 "accuracy_metrics": self.prediction_stats.copy(),
             }
 
-        confidence_counts = Counter(
-            p.confidence.value for p in self.predictions.values()
-        )
+        confidence_counts = Counter(p.confidence.value for p in self.predictions.values())
         pattern_counts = Counter(p.pattern.value for p in self.predictions.values())
 
         return {
             "total_predictions": len(self.predictions),
             "active_predictions": len(
-                [
-                    p
-                    for p in self.predictions.values()
-                    if p.timeline_prediction and p.timeline_prediction > datetime.now()
-                ]
+                [p for p in self.predictions.values() if p.timeline_prediction and p.timeline_prediction > datetime.now()],
             ),
             "by_confidence": dict(confidence_counts),
             "by_pattern": dict(pattern_counts),

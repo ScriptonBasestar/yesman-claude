@@ -1,17 +1,13 @@
 """Task analysis and dependency graph generation for multi-agent development"""
 
 import ast
-import re
 import json
-from typing import Dict, List, Set, Tuple, Optional, Any
-from pathlib import Path
-from dataclasses import dataclass, field, asdict
-from datetime import datetime
 import logging
-from collections import defaultdict
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 from .graph import DirectedGraph
-
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +83,7 @@ class TaskAnalyzer:
         dependencies = []
 
         try:
-            with open(full_path, "r", encoding="utf-8") as f:
+            with open(full_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST
@@ -106,17 +102,16 @@ class TaskAnalyzer:
                         )
                         dependencies.append(dep)
 
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module:
-                        symbols = [alias.name for alias in node.names]
-                        dep = CodeDependency(
-                            source_file=file_path,
-                            imported_module=node.module,
-                            import_type="from_import",
-                            line_number=node.lineno,
-                            symbols=symbols,
-                        )
-                        dependencies.append(dep)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    symbols = [alias.name for alias in node.names]
+                    dep = CodeDependency(
+                        source_file=file_path,
+                        imported_module=node.module,
+                        import_type="from_import",
+                        line_number=node.lineno,
+                        symbols=symbols,
+                    )
+                    dependencies.append(dep)
 
             # Cache results
             self.file_dependencies[file_path] = dependencies
@@ -245,10 +240,7 @@ class TaskAnalyzer:
             return True
 
         # Relative import match
-        if "." in imported and imported.split(".")[-1] == module.split(".")[-1]:
-            return True
-
-        return False
+        return bool("." in imported and imported.split(".")[-1] == module.split(".")[-1])
 
     def create_task_from_files(
         self,
@@ -324,16 +316,21 @@ class TaskAnalyzer:
                     complexity_order = {"low": 1, "medium": 2, "high": 3}
 
                     if complexity_order.get(task1.complexity, 2) > complexity_order.get(
-                        task2.complexity, 2
+                        task2.complexity,
+                        2,
                     ):
                         # task1 depends on task2
                         self.task_graph.add_edge(
-                            task2.task_id, task1.task_id, overlap=list(overlap)
+                            task2.task_id,
+                            task1.task_id,
+                            overlap=list(overlap),
                         )
                     else:
                         # task2 depends on task1
                         self.task_graph.add_edge(
-                            task1.task_id, task2.task_id, overlap=list(overlap)
+                            task1.task_id,
+                            task2.task_id,
+                            overlap=list(overlap),
                         )
 
         # Add explicit dependencies
@@ -391,7 +388,9 @@ class TaskAnalyzer:
         return layers
 
     def estimate_parallel_time(
-        self, tasks: List[TaskDefinition], max_agents: int = 3
+        self,
+        tasks: List[TaskDefinition],
+        max_agents: int = 3,
     ) -> float:
         """
         Estimate time to complete tasks with parallel execution

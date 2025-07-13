@@ -91,7 +91,10 @@ class BackgroundTaskRunner:
         return hashlib.md5(json_str.encode(), usedforsecurity=False).hexdigest()
 
     async def _run_task_safely(
-        self, task_name: str, task_func: Callable, interval: int
+        self,
+        task_name: str,
+        task_func: Callable,
+        interval: int,
     ):
         """Run a task with error handling and state tracking."""
         state = TaskState(name=task_name)
@@ -142,16 +145,11 @@ class BackgroundTaskRunner:
                 formatted_sessions = []
                 for project_name, project_config in project_sessions.items():
                     session_name = project_config.get("override", {}).get(
-                        "session_name", project_name
+                        "session_name",
+                        project_name,
                     )
-                    session_exists = any(
-                        s["session_name"] == session_name for s in sessions
-                    )
-                    session_detail = (
-                        self.session_manager.get_session_info(session_name)
-                        if session_exists
-                        else None
-                    )
+                    session_exists = any(s["session_name"] == session_name for s in sessions)
+                    session_detail = self.session_manager.get_session_info(session_name) if session_exists else None
 
                     formatted_sessions.append(
                         {
@@ -160,29 +158,10 @@ class BackgroundTaskRunner:
                             "template": project_config.get("template_name", "default"),
                             "status": "active" if session_exists else "stopped",
                             "exists": session_exists,
-                            "windows": (
-                                session_detail.get("windows", [])
-                                if session_detail
-                                else []
-                            ),
-                            "panes": (
-                                sum(
-                                    len(w.get("panes", []))
-                                    for w in session_detail.get("windows", [])
-                                )
-                                if session_detail
-                                else 0
-                            ),
-                            "claude_active": (
-                                any(
-                                    p.get("has_claude", False)
-                                    for w in session_detail.get("windows", [])
-                                    for p in w.get("panes", [])
-                                )
-                                if session_detail
-                                else False
-                            ),
-                        }
+                            "windows": (session_detail.get("windows", []) if session_detail else []),
+                            "panes": (sum(len(w.get("panes", [])) for w in session_detail.get("windows", [])) if session_detail else 0),
+                            "claude_active": (any(p.get("has_claude", False) for w in session_detail.get("windows", []) for p in w.get("panes", [])) if session_detail else False),
+                        },
                     )
 
                 # Calculate data hash
@@ -198,8 +177,7 @@ class BackgroundTaskRunner:
                     await manager.broadcast_session_update(formatted_sessions)
 
                     logger.debug(
-                        "Session data updated and broadcast "
-                        f"({len(formatted_sessions)} sessions)"
+                        f"Session data updated and broadcast ({len(formatted_sessions)} sessions)",
                     )
 
             except Exception as e:
@@ -207,7 +185,9 @@ class BackgroundTaskRunner:
                 raise
 
         await self._run_task_safely(
-            "sessions", check_sessions, self.intervals["sessions"]
+            "sessions",
+            check_sessions,
+            self.intervals["sessions"],
         )
 
     async def monitor_health(self):
@@ -225,37 +205,37 @@ class BackgroundTaskRunner:
                         "build": {
                             "score": health_data.get("build_score", 0),
                             "status": self._get_status(
-                                health_data.get("build_score", 0)
+                                health_data.get("build_score", 0),
                             ),
                         },
                         "tests": {
                             "score": health_data.get("test_score", 0),
                             "status": self._get_status(
-                                health_data.get("test_score", 0)
+                                health_data.get("test_score", 0),
                             ),
                         },
                         "dependencies": {
                             "score": health_data.get("deps_score", 0),
                             "status": self._get_status(
-                                health_data.get("deps_score", 0)
+                                health_data.get("deps_score", 0),
                             ),
                         },
                         "security": {
                             "score": health_data.get("security_score", 0),
                             "status": self._get_status(
-                                health_data.get("security_score", 0)
+                                health_data.get("security_score", 0),
                             ),
                         },
                         "performance": {
                             "score": health_data.get("perf_score", 0),
                             "status": self._get_status(
-                                health_data.get("perf_score", 0)
+                                health_data.get("perf_score", 0),
                             ),
                         },
                         "code_quality": {
                             "score": health_data.get("quality_score", 0),
                             "status": self._get_status(
-                                health_data.get("quality_score", 0)
+                                health_data.get("quality_score", 0),
                             ),
                         },
                         "git": {
@@ -265,7 +245,7 @@ class BackgroundTaskRunner:
                         "documentation": {
                             "score": health_data.get("docs_score", 0),
                             "status": self._get_status(
-                                health_data.get("docs_score", 0)
+                                health_data.get("docs_score", 0),
                             ),
                         },
                     },
@@ -286,8 +266,7 @@ class BackgroundTaskRunner:
                     await manager.broadcast_health_update(formatted_health)
 
                     logger.debug(
-                        "Health data updated and broadcast "
-                        f"(score: {formatted_health['overall_score']})"
+                        f"Health data updated and broadcast (score: {formatted_health['overall_score']})",
                     )
 
             except Exception as e:
@@ -317,7 +296,10 @@ class BackgroundTaskRunner:
                         "--date=short",
                     ]
                     result = subprocess.run(  # nosec
-                        cmd, capture_output=True, text=True, check=True
+                        cmd,
+                        capture_output=True,
+                        text=True,
+                        check=True,
                     )
 
                     for date_str in result.stdout.strip().split("\n"):
@@ -339,18 +321,14 @@ class BackgroundTaskRunner:
                         {
                             "date": date_str,
                             "activity_count": activity_counts.get(date_str, 0),
-                        }
+                        },
                     )
                     current_date += timedelta(days=1)
 
                 # Calculate statistics
                 active_days = sum(1 for a in activities if a["activity_count"] > 0)
                 max_activity = max((a["activity_count"] for a in activities), default=0)
-                avg_activity = (
-                    sum(a["activity_count"] for a in activities) / len(activities)
-                    if activities
-                    else 0
-                )
+                avg_activity = sum(a["activity_count"] for a in activities) / len(activities) if activities else 0
 
                 formatted_activity = {
                     "activities": activities,
@@ -373,8 +351,7 @@ class BackgroundTaskRunner:
                     await manager.broadcast_activity_update(formatted_activity)
 
                     logger.debug(
-                        "Activity data updated and broadcast "
-                        f"({active_days} active days)"
+                        f"Activity data updated and broadcast ({active_days} active days)",
                     )
 
             except Exception as e:
@@ -382,7 +359,9 @@ class BackgroundTaskRunner:
                 raise
 
         await self._run_task_safely(
-            "activity", check_activity, self.intervals["activity"]
+            "activity",
+            check_activity,
+            self.intervals["activity"],
         )
 
     async def cleanup_task(self):
@@ -405,8 +384,7 @@ class BackgroundTaskRunner:
                     if state.last_run:
                         age = (datetime.now() - state.last_run).total_seconds()
                         logger.debug(
-                            f"Task {name}: last run {age:.1f}s ago, "
-                            f"errors: {state.error_count}"
+                            f"Task {name}: last run {age:.1f}s ago, errors: {state.error_count}",
                         )
 
             except Exception as e:
@@ -435,7 +413,7 @@ class BackgroundTaskRunner:
                 "last_run": state.last_run.isoformat() if state.last_run else None,
                 "error_count": state.error_count,
                 "interval": self.intervals.get(
-                    name.replace("monitor_", "").replace("_task", "")
+                    name.replace("monitor_", "").replace("_task", ""),
                 ),
             }
         return states

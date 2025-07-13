@@ -2,19 +2,15 @@
 
 import asyncio
 import logging
-import subprocess
-import tempfile
-import os
 import re
-from typing import Dict, List, Optional, Set, Tuple, Any
+import subprocess
 from dataclasses import dataclass, field
-from pathlib import Path
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from .types import Agent, Task
 from .branch_manager import BranchManager
-
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +139,8 @@ class ConflictResolutionEngine:
         }
 
     async def detect_potential_conflicts(
-        self, branches: List[str]
+        self,
+        branches: List[str],
     ) -> List[ConflictInfo]:
         """
         Detect potential conflicts between branches
@@ -162,7 +159,8 @@ class ConflictResolutionEngine:
             for i, branch1 in enumerate(branches):
                 for branch2 in branches[i + 1 :]:
                     branch_conflicts = await self._detect_branch_conflicts(
-                        branch1, branch2
+                        branch1,
+                        branch2,
                     )
                     conflicts.extend(branch_conflicts)
 
@@ -179,7 +177,9 @@ class ConflictResolutionEngine:
         return conflicts
 
     async def _detect_branch_conflicts(
-        self, branch1: str, branch2: str
+        self,
+        branch1: str,
+        branch2: str,
     ) -> List[ConflictInfo]:
         """Detect conflicts between two specific branches"""
         conflicts = []
@@ -192,13 +192,13 @@ class ConflictResolutionEngine:
                     await self._get_merge_base(branch1, branch2),
                     branch1,
                     branch2,
-                ]
+                ],
             )
 
             if result.returncode == 0 and result.stdout:
                 # Parse merge-tree output for conflicts
                 conflicts.extend(
-                    self._parse_merge_tree_output(result.stdout, branch1, branch2)
+                    self._parse_merge_tree_output(result.stdout, branch1, branch2),
                 )
 
             # Check for file-level conflicts
@@ -211,13 +211,16 @@ class ConflictResolutionEngine:
 
         except Exception as e:
             logger.error(
-                f"Error detecting conflicts between {branch1} and {branch2}: {e}"
+                f"Error detecting conflicts between {branch1} and {branch2}: {e}",
             )
 
         return conflicts
 
     def _parse_merge_tree_output(
-        self, output: str, branch1: str, branch2: str
+        self,
+        output: str,
+        branch1: str,
+        branch2: str,
     ) -> List[ConflictInfo]:
         """Parse git merge-tree output to extract conflict information"""
         conflicts = []
@@ -232,8 +235,11 @@ class ConflictResolutionEngine:
                 if current_file and conflict_content:
                     conflicts.append(
                         self._create_merge_conflict(
-                            current_file, branch1, branch2, "\n".join(conflict_content)
-                        )
+                            current_file,
+                            branch1,
+                            branch2,
+                            "\n".join(conflict_content),
+                        ),
                     )
 
                 # Extract file name from git output
@@ -247,14 +253,21 @@ class ConflictResolutionEngine:
         if current_file and conflict_content:
             conflicts.append(
                 self._create_merge_conflict(
-                    current_file, branch1, branch2, "\n".join(conflict_content)
-                )
+                    current_file,
+                    branch1,
+                    branch2,
+                    "\n".join(conflict_content),
+                ),
             )
 
         return conflicts
 
     def _create_merge_conflict(
-        self, file_path: str, branch1: str, branch2: str, content: str
+        self,
+        file_path: str,
+        branch1: str,
+        branch2: str,
+        content: str,
     ) -> ConflictInfo:
         """Create a ConflictInfo object for a merge conflict"""
         conflict_id = f"merge_{branch1}_{branch2}_{file_path}".replace("/", "_")
@@ -287,7 +300,9 @@ class ConflictResolutionEngine:
         )
 
     def _suggest_resolution_strategy(
-        self, content: str, file_path: str
+        self,
+        content: str,
+        file_path: str,
     ) -> ResolutionStrategy:
         """Suggest the best resolution strategy for a conflict"""
         # Check against known patterns
@@ -306,7 +321,9 @@ class ConflictResolutionEngine:
             return ResolutionStrategy.AUTO_MERGE
 
     async def _detect_file_conflicts(
-        self, branch1: str, branch2: str
+        self,
+        branch1: str,
+        branch2: str,
     ) -> List[ConflictInfo]:
         """Detect file-level conflicts (additions, deletions, modifications)"""
         conflicts = []
@@ -327,10 +344,7 @@ class ConflictResolutionEngine:
                 severity = ConflictSeverity.MEDIUM
 
                 # Determine conflict type
-                if change1 == "D" and change2 == "M":
-                    conflict_type = ConflictType.FILE_DELETION
-                    severity = ConflictSeverity.HIGH
-                elif change1 == "M" and change2 == "D":
+                if change1 == "D" and change2 == "M" or change1 == "M" and change2 == "D":
                     conflict_type = ConflictType.FILE_DELETION
                     severity = ConflictSeverity.HIGH
                 elif change1 == "A" and change2 == "A":
@@ -349,7 +363,7 @@ class ConflictResolutionEngine:
                         description=f"File conflict: {file_path} ({change1} vs {change2})",
                         suggested_strategy=ResolutionStrategy.PREFER_LATEST,
                         metadata={"change_types": [change1, change2]},
-                    )
+                    ),
                 )
 
         except Exception as e:
@@ -358,7 +372,9 @@ class ConflictResolutionEngine:
         return conflicts
 
     async def _detect_semantic_conflicts(
-        self, branch1: str, branch2: str
+        self,
+        branch1: str,
+        branch2: str,
     ) -> List[ConflictInfo]:
         """Detect semantic conflicts (API changes, dependency conflicts)"""
         conflicts = []
@@ -373,7 +389,9 @@ class ConflictResolutionEngine:
             for file_path in common_python_files:
                 # Analyze semantic changes
                 semantic_conflicts = await self._analyze_semantic_changes(
-                    file_path, branch1, branch2
+                    file_path,
+                    branch1,
+                    branch2,
                 )
                 conflicts.extend(semantic_conflicts)
 
@@ -383,7 +401,10 @@ class ConflictResolutionEngine:
         return conflicts
 
     async def _analyze_semantic_changes(
-        self, file_path: str, branch1: str, branch2: str
+        self,
+        file_path: str,
+        branch1: str,
+        branch2: str,
     ) -> List[ConflictInfo]:
         """Analyze semantic changes in a Python file"""
         conflicts = []
@@ -402,14 +423,10 @@ class ConflictResolutionEngine:
             functions2 = self._extract_function_signatures(content2)
 
             for func_name in functions1:
-                if (
-                    func_name in functions2
-                    and functions1[func_name] != functions2[func_name]
-                ):
-                    conflict_id = (
-                        f"semantic_{branch1}_{branch2}_{file_path}_{func_name}".replace(
-                            "/", "_"
-                        )
+                if func_name in functions2 and functions1[func_name] != functions2[func_name]:
+                    conflict_id = f"semantic_{branch1}_{branch2}_{file_path}_{func_name}".replace(
+                        "/",
+                        "_",
                     )
 
                     conflicts.append(
@@ -426,7 +443,7 @@ class ConflictResolutionEngine:
                                 "signature1": functions1[func_name],
                                 "signature2": functions2[func_name],
                             },
-                        )
+                        ),
                     )
 
         except Exception as e:
@@ -450,7 +467,9 @@ class ConflictResolutionEngine:
         return signatures
 
     async def resolve_conflict(
-        self, conflict_id: str, strategy: Optional[ResolutionStrategy] = None
+        self,
+        conflict_id: str,
+        strategy: Optional[ResolutionStrategy] = None,
     ) -> ResolutionResult:
         """
         Resolve a specific conflict
@@ -507,22 +526,14 @@ class ConflictResolutionEngine:
             # Update success rate
             total_attempts = len(self.resolution_history)
             successful = len([r for r in self.resolution_history if r.success])
-            self.resolution_stats["resolution_success_rate"] = (
-                successful / total_attempts if total_attempts > 0 else 0.0
-            )
+            self.resolution_stats["resolution_success_rate"] = successful / total_attempts if total_attempts > 0 else 0.0
 
             # Update average resolution time
-            times = [
-                r.resolution_time
-                for r in self.resolution_history
-                if r.resolution_time > 0
-            ]
-            self.resolution_stats["average_resolution_time"] = (
-                sum(times) / len(times) if times else 0.0
-            )
+            times = [r.resolution_time for r in self.resolution_history if r.resolution_time > 0]
+            self.resolution_stats["average_resolution_time"] = sum(times) / len(times) if times else 0.0
 
             logger.info(
-                f"Conflict resolution result: {result.success} using {strategy.value}"
+                f"Conflict resolution result: {result.success} using {strategy.value}",
             )
 
         except Exception as e:
@@ -679,7 +690,8 @@ class ConflictResolutionEngine:
             )
 
     async def _semantic_analysis_strategy(
-        self, conflict: ConflictInfo
+        self,
+        conflict: ConflictInfo,
     ) -> ResolutionResult:
         """Use semantic analysis to resolve conflicts"""
         try:
@@ -704,7 +716,7 @@ class ConflictResolutionEngine:
                         success=True,
                         strategy_used=ResolutionStrategy.SEMANTIC_ANALYSIS,
                         resolution_time=0.0,
-                        message=f"Resolved using semantic analysis: chose signature with more parameters",
+                        message="Resolved using semantic analysis: chose signature with more parameters",
                         resolved_files=conflict.files,
                         metadata={"chosen_signature": chosen_sig},
                     )
@@ -738,16 +750,8 @@ class ConflictResolutionEngine:
             other_part = parts[1].split(">>>>>>> ")[0].strip()
 
             # Extract import statements
-            head_imports = [
-                line.strip()
-                for line in head_part.split("\n")
-                if line.strip().startswith("import")
-            ]
-            other_imports = [
-                line.strip()
-                for line in other_part.split("\n")
-                if line.strip().startswith("import")
-            ]
+            head_imports = [line.strip() for line in head_part.split("\n") if line.strip().startswith("import")]
+            other_imports = [line.strip() for line in other_part.split("\n") if line.strip().startswith("import")]
 
             # Merge unique imports
             all_imports = list(set(head_imports + other_imports))
@@ -775,32 +779,26 @@ class ConflictResolutionEngine:
         """Get a summary of all conflicts and resolution statistics"""
         total_conflicts = len(self.detected_conflicts)
         resolved_conflicts = len(
-            [c for c in self.detected_conflicts.values() if c.resolved_at is not None]
+            [c for c in self.detected_conflicts.values() if c.resolved_at is not None],
         )
 
         severity_counts = {}
         for severity in ConflictSeverity:
             severity_counts[severity.value] = len(
-                [c for c in self.detected_conflicts.values() if c.severity == severity]
+                [c for c in self.detected_conflicts.values() if c.severity == severity],
             )
 
         type_counts = {}
         for conflict_type in ConflictType:
             type_counts[conflict_type.value] = len(
-                [
-                    c
-                    for c in self.detected_conflicts.values()
-                    if c.conflict_type == conflict_type
-                ]
+                [c for c in self.detected_conflicts.values() if c.conflict_type == conflict_type],
             )
 
         return {
             "total_conflicts": total_conflicts,
             "resolved_conflicts": resolved_conflicts,
             "unresolved_conflicts": total_conflicts - resolved_conflicts,
-            "resolution_rate": resolved_conflicts / total_conflicts
-            if total_conflicts > 0
-            else 0.0,
+            "resolution_rate": resolved_conflicts / total_conflicts if total_conflicts > 0 else 0.0,
             "severity_breakdown": severity_counts,
             "type_breakdown": type_counts,
             "resolution_stats": self.resolution_stats.copy(),
@@ -833,7 +831,7 @@ class ConflictResolutionEngine:
     async def _get_changed_files(self, branch: str) -> Dict[str, str]:
         """Get files changed in a branch with their change types"""
         result = await self._run_git_command(
-            ["diff", "--name-status", f"HEAD..{branch}"]
+            ["diff", "--name-status", f"HEAD..{branch}"],
         )
 
         files = {}
@@ -850,7 +848,7 @@ class ConflictResolutionEngine:
     async def _get_python_files_changed(self, branch: str) -> List[str]:
         """Get Python files changed in a branch"""
         files = await self._get_changed_files(branch)
-        return [f for f in files.keys() if f.endswith(".py")]
+        return [f for f in files if f.endswith(".py")]
 
     async def _get_file_content(self, file_path: str, branch: str) -> Optional[str]:
         """Get file content from a specific branch"""
@@ -868,14 +866,15 @@ class ConflictResolutionEngine:
         for branch in branches:
             try:
                 result = await self._run_git_command(
-                    ["log", "-1", "--format=%ct", branch]
+                    ["log", "-1", "--format=%ct", branch],
                 )
                 timestamp = int(result.stdout.strip())
 
                 if latest_time is None or timestamp > latest_time:
                     latest_time = timestamp
                     latest_branch = branch
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Could not get commit time for branch {branch}: {e}")
                 continue
 
         return latest_branch
