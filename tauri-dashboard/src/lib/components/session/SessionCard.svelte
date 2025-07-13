@@ -8,12 +8,12 @@
   
   // 상태별 스타일 정의
   const statusStyles = {
-    active: {
+    running: {
       badge: 'badge-success',
       icon: '🟢',
       bg: 'bg-success/10'
     },
-    inactive: {
+    stopped: {
       badge: 'badge-error',
       icon: '🔴',
       bg: 'bg-error/10'
@@ -53,7 +53,7 @@
   $: controllerStyle = controllerStyles[session.controller_status as keyof typeof controllerStyles] || controllerStyles.unknown;
   
   // 세션이 실행 중인지 확인
-  $: isSessionRunning = session.status === 'active';
+  $: isSessionRunning = session.status === 'running';
   $: canStartController = isSessionRunning && session.controller_status !== 'running';
   
   // 시간 포맷팅
