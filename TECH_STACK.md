@@ -4,7 +4,7 @@
 Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 스택 프로젝트입니다.
 
 ## 프로그래밍 언어
-- **Python** (>=3.10): 메인 백엔드 언어, CLI 도구 및 핵심 자동화 로직
+- **Python** (>=3.11): 메인 백엔드 언어, CLI 도구 및 핵심 자동화 로직
 - **JavaScript/TypeScript**: Tauri 대시보드 프론트엔드 개발
 - **Rust**: 네이티브 데스크톱 애플리케이션 백엔드 (Tauri 프레임워크)
 - **HTML/CSS**: 프론트엔드 마크업 및 스타일링
