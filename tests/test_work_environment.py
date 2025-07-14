@@ -90,7 +90,7 @@ class TestWorkEnvironmentManager:
     def test_create_work_environment_custom_config(self, manager):
         """Test creating environment with custom configuration"""
         config = {
-            "python_version": "3.10",
+            "python_version": "3.12",
             "install_deps": False,
             "env_vars": {"FOO": "bar"},
         }
@@ -104,7 +104,7 @@ class TestWorkEnvironmentManager:
                     env = manager.create_work_environment("test-branch", config)
 
                     # Verify config merged
-                    assert env.config["python_version"] == "3.10"
+                    assert env.config["python_version"] == "3.12"
                     assert env.config["install_deps"] is False
                     assert env.config["env_vars"]["FOO"] == "bar"
 

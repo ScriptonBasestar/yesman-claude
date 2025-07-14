@@ -257,7 +257,7 @@ pip install pytest pytest-cov pytest-mock pytest-asyncio
 
 ### GitHub Actions
 - 모든 PR에서 자동 테스트 실행
-- Python 3.10, 3.11, 3.12 매트릭스 테스트
+- Python 3.11, 3.12 매트릭스 테스트
 - 커버리지 리포트 자동 생성
 - 실패 시 머지 차단
 
