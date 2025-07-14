@@ -138,7 +138,7 @@ known-first-party = ["libs", "commands", "api"]
 
 # Debug scripts can use print statements and shell execution
 "debug/**/*" = ["T201", "S602", "S603", "S607", "S108", "PLR2004"]
-"scripts/**/*" = ["T201", "S602", "S603", "S607", "S108", "PLR2004", "SIM108", "A002"]
+# Note: scripts/ directory moved to sb-libs-py package
 
 # Examples can use insecure paths for demonstration
 "examples/**/*" = ["S108", "T201", "PLR2004", "S603", "S607"]
