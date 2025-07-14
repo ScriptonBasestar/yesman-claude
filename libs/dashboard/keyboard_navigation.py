@@ -627,3 +627,14 @@ class KeyboardNavigationManager:
                     processed_actions.add(binding.action)
 
         return help_lines
+
+
+# Global convenience functions for singleton access
+def get_keyboard_manager() -> KeyboardNavigationManager:
+    """Get the global keyboard navigation manager instance"""
+    return KeyboardNavigationManager.get_instance()
+
+
+def reset_keyboard_manager() -> None:
+    """Reset the global keyboard navigation manager instance"""
+    KeyboardNavigationManager.reset_instance()

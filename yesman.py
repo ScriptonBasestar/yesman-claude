@@ -7,7 +7,7 @@ from commands.automate import automate
 from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
-from commands.teardown import teardown_group, teardown, destroy  # teardown_group is main, teardown is legacy
+from commands.teardown import teardown, destroy, down  # teardown is main group, down is deprecated alias
 from commands.enter import enter
 from commands.logs import logs
 from commands.ls import ls
@@ -16,7 +16,6 @@ from commands.show import show
 from commands.status import status
 from commands.task_runner import task_runner
 from commands.setup import setup, create, up  # setup is main group, up is deprecated alias
-from commands.teardown import teardown, destroy, down  # teardown is main group, down is deprecated alias
 
 
 @click.group()
