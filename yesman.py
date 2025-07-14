@@ -7,15 +7,15 @@ from commands.automate import automate
 from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
-from commands.teardown import teardown, down  # teardown is main, down is alias
 from commands.enter import enter
 from commands.logs import logs
 from commands.ls import ls
 from commands.multi_agent import multi_agent_cli
+from commands.setup import setup, up  # setup is main, up is alias
 from commands.show import show
 from commands.status import status
 from commands.task_runner import task_runner
-from commands.setup import setup, up  # setup is main, up is alias
+from commands.teardown import down, teardown  # teardown is main, down is alias
 from commands.validate import validate
 
 

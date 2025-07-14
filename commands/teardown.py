@@ -25,9 +25,9 @@ def teardown(session_name):
             click.echo(f"Session {session_name} not defined in projects.yaml")
             return
         sessions = {session_name: sessions[session_name]}
-    for session_name, sess_conf in sessions.items():
+    for session_key, sess_conf in sessions.items():
         override_conf = sess_conf.get("override", {})
-        actual_session_name = override_conf.get("session_name", session_name)
+        actual_session_name = override_conf.get("session_name", session_key)
         if server.find_where({"session_name": actual_session_name}):
             subprocess.run(["tmux", "kill-session", "-t", actual_session_name], check=False)
             click.echo(f"Killed session: {actual_session_name}")
