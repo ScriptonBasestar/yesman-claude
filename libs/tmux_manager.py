@@ -69,6 +69,53 @@ class TmuxManager:
             projects = {**projects, **local_projects}
         return projects
 
+    def load_template(self, template_name: str) -> Dict[str, Any]:
+        """Load a specific template file"""
+        template_path = self.templates_path / f"{template_name}.yaml"
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template {template_name} not found at {template_path}")
+        
+        with open(template_path, encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+
+    def get_session_config(self, session_name: str, session_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Get final session configuration after applying template and overrides"""
+        # Start with base configuration
+        final_config = {}
+        
+        # Load template if specified
+        template_name = session_config.get("template_name")
+        if template_name:
+            try:
+                template_config = self.load_template(template_name)
+                final_config = template_config.copy()
+            except FileNotFoundError:
+                self.logger.warning(f"Template {template_name} not found for session {session_name}")
+        
+        # Apply override configuration
+        override_config = session_config.get("override", {})
+        if override_config:
+            # Deep merge override config
+            final_config = self._deep_merge_dicts(final_config, override_config)
+        
+        # Ensure session_name is set
+        if "session_name" not in final_config:
+            final_config["session_name"] = session_name
+            
+        return final_config
+    
+    def _deep_merge_dicts(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep merge two dictionaries, with override taking precedence"""
+        result = base.copy()
+        
+        for key, value in override.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = self._deep_merge_dicts(result[key], value)
+            else:
+                result[key] = value
+                
+        return result
+
     def list_running_sessions(self) -> None:
         """List currently running tmux sessions"""
         server = libtmux.Server()
