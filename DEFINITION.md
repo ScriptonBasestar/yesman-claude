@@ -66,7 +66,7 @@
 
 ## 기술 스택
 
-### 백엔드 (Python 3.10+)
+### 백엔드 (Python 3.11+)
 - **CLI**: Click, Rich
 - **세션**: tmuxp, libtmux
 - **자동화**: pexpect, psutil
