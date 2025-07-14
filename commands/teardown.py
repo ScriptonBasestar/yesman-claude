@@ -7,9 +7,14 @@ from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
 
 
-# Main command
-@click.command()
+@click.group(name="teardown")
 def teardown():
+    """Session teardown commands"""
+    pass
+
+
+@teardown.command()
+def destroy():
     """Kill all tmux sessions defined in projects.yaml"""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
@@ -33,14 +38,12 @@ def teardown():
     click.echo("All sessions torn down.")
 
 
-# Alias command
+# Deprecated alias
 @click.command()
 def down():
-    """Alias for 'teardown' command"""
-    # Call the main teardown function
+    """[DEPRECATED] Use 'teardown destroy' instead."""
+    click.secho("[DEPRECATED] 'down' 명령어 대신 'teardown destroy'를 사용하세요.", fg="yellow")
     ctx = click.get_current_context()
-    ctx.invoke(teardown)
+    ctx.invoke(destroy)
 
-
-# Export both commands
-__all__ = ["teardown", "down"]
+__all__ = ["teardown", "destroy", "down"]

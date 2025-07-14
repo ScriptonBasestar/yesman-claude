@@ -7,10 +7,15 @@ from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
 
 
-# Main command
-@click.command()
+@click.group(name="setup")
+def setup():
+    """Session setup commands"""
+    pass
+
+
+@setup.command()
 @click.argument("session_name", required=False)
-def setup(session_name):
+def create(session_name):
     """Create all tmux sessions defined in projects.yaml; or only a specified session if provided."""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
@@ -132,15 +137,13 @@ def setup(session_name):
     click.echo("All sessions setup completed.")
 
 
-# Alias command
+# Deprecated alias
 @click.command()
 @click.argument("session_name", required=False)
 def up(session_name):
-    """Alias for 'setup' command"""
-    # Call the main setup function with the same arguments
+    """[DEPRECATED] Use 'setup create' instead."""
+    click.secho("[DEPRECATED] 'up' 명령어 대신 'setup create'를 사용하세요.", fg="yellow")
     ctx = click.get_current_context()
-    ctx.invoke(setup, session_name=session_name)
+    ctx.invoke(create, session_name=session_name)
 
-
-# Export both commands
-__all__ = ["setup", "up"]
+__all__ = ["setup", "create", "up"]

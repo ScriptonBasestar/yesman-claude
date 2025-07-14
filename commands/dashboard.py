@@ -158,100 +158,10 @@ def launch_web_dashboard(
             )
 
             # Create simple HTML dashboard
-            html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Yesman Claude Dashboard</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f5f5f5;
-        }}
-        .container {{ max-width: 1200px; margin: 0 auto; }}
-        .header {{
-            background: #2563eb;
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }}
-        .metrics {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }}
-        .metric-card {{
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
-        .metric-value {{
-            font-size: 2em;
-            font-weight: bold;
-            color: #2563eb;
-        }}
-        .status {{
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f9ff;
-            border-radius: 6px;
-        }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 Yesman Claude Web Dashboard</h1>
-            <p>Real-time session monitoring and management</p>
-        </div>
-
-        <div class="metrics">
-            <div class="metric-card">
-                <h3>Active Sessions</h3>
-                <div class="metric-value">3</div>
-                <div>🟢 All systems operational</div>
-            </div>
-
-            <div class="metric-card">
-                <h3>CPU Usage</h3>
-                <div class="metric-value">25%</div>
-                <div>🟢 Low usage</div>
-            </div>
-
-            <div class="metric-card">
-                <h3>Memory Usage</h3>
-                <div class="metric-value">45%</div>
-                <div>🟡 Moderate usage</div>
-            </div>
-
-            <div class="metric-card">
-                <h3>Claude Instances</h3>
-                <div class="metric-value">2</div>
-                <div>🟢 Active and responding</div>
-            </div>
-        </div>
-
-        <div class="status">
-            <h3>📊 Dashboard Status</h3>
-            <p><strong>Interface:</strong> Web Dashboard</p>
-            <p><strong>Host:</strong> {host}:{port}</p>
-            <p><strong>Theme:</strong> {theme or "default"}</p>
-            <p><strong>Mode:</strong> {"Development" if dev else "Production"}</p>
-        </div>
-    </div>
-
-    <script>
-        // Auto-refresh every 5 seconds
-        setTimeout(() => location.reload(), 5000);
-    </script>
-</body>
-</html>
-"""
+            template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "web_dashboard.html")
+            with open(template_path, encoding="utf-8") as f:
+                html_template = f.read()
+            html_content = html_template.format(host=host, port=port, theme=theme or "default", dev="Development" if dev else "Production")
 
             # Start simple HTTP server
             import http.server

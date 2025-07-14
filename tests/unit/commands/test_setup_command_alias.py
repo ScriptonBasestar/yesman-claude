@@ -1,5 +1,5 @@
 """
-Test for up command
+Test for setup alias (up command)
 """
 
 import unittest
@@ -7,16 +7,16 @@ from unittest.mock import MagicMock, call, patch
 
 from click.testing import CliRunner
 
-from commands.up import up
+from commands.setup import up
 
 
-class TestUpCommand(unittest.TestCase):
+class TestSetupAliasCommand(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
     @patch("commands.up.SessionManager")
-    def test_up_creates_all_sessions(self, mock_session_manager):
-        """Test up command creates all sessions from projects.yaml"""
+    def test_setup_alias_creates_all_sessions(self, mock_session_manager):
+        """Test setup alias (up) command creates all sessions from projects.yaml"""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_projects.return_value = [
@@ -41,8 +41,8 @@ class TestUpCommand(unittest.TestCase):
         )
 
     @patch("commands.up.SessionManager")
-    def test_up_with_specific_project(self, mock_session_manager):
-        """Test up command with specific project name"""
+    def test_setup_alias_with_specific_project(self, mock_session_manager):
+        """Test setup alias (up) command with specific project name"""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.return_value = True
@@ -56,8 +56,8 @@ class TestUpCommand(unittest.TestCase):
         mock_manager_instance.create_session.assert_called_once_with("myproject")
 
     @patch("commands.up.SessionManager")
-    def test_up_handles_session_exists(self, mock_session_manager):
-        """Test up handles existing session gracefully"""
+    def test_setup_alias_handles_session_exists(self, mock_session_manager):
+        """Test setup alias (up) handles existing session gracefully"""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.side_effect = Exception("Session already exists")
@@ -71,8 +71,8 @@ class TestUpCommand(unittest.TestCase):
         assert "already exists" in result.output or "Error" in result.output
 
     @patch("commands.up.SessionManager")
-    def test_up_with_force_flag(self, mock_session_manager):
-        """Test up with --force flag recreates session"""
+    def test_setup_alias_with_force_flag(self, mock_session_manager):
+        """Test setup alias (up) with --force flag recreates session"""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.return_value = True
@@ -88,8 +88,8 @@ class TestUpCommand(unittest.TestCase):
         mock_manager_instance.create_session.assert_called_once_with("myproject")
 
     @patch("commands.up.SessionManager")
-    def test_up_no_projects_found(self, mock_session_manager):
-        """Test up when no projects are configured"""
+    def test_setup_alias_no_projects_found(self, mock_session_manager):
+        """Test setup alias (up) when no projects are configured"""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_projects.return_value = []
