@@ -7,7 +7,7 @@ from commands.automate import automate
 from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
-from commands.teardown import teardown, destroy, down  # teardown is main group, down is deprecated alias
+from commands.teardown import teardown, down  # teardown is main, down is alias
 from commands.enter import enter
 from commands.logs import logs
 from commands.ls import ls
@@ -15,7 +15,8 @@ from commands.multi_agent import multi_agent_cli
 from commands.show import show
 from commands.status import status
 from commands.task_runner import task_runner
-from commands.setup import setup, create, up  # setup is main group, up is deprecated alias
+from commands.setup import setup, up  # setup is main, up is alias
+from commands.validate import validate
 
 
 @click.group()
@@ -26,10 +27,10 @@ def cli():
 
 cli.add_command(ls)
 cli.add_command(show)
-cli.add_command(setup)  # Main setup group
-cli.add_command(teardown)  # Main teardown group
-cli.add_command(up)  # Deprecated alias
-cli.add_command(down)  # Deprecated alias
+cli.add_command(setup)  # Main setup command
+cli.add_command(up)     # Alias for setup
+cli.add_command(teardown)  # Main teardown command
+cli.add_command(down)      # Alias for teardown
 cli.add_command(dashboard)
 cli.add_command(dashboard_group)  # New dashboard interface management
 # Add dash as an alias for dashboard
@@ -46,6 +47,7 @@ cli.add_command(automate)
 cli.add_command(cleanup)
 cli.add_command(task_runner)
 cli.add_command(multi_agent_cli)
+cli.add_command(validate)
 
 if __name__ == "__main__":
     cli()

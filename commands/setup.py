@@ -7,16 +7,10 @@ from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
 
 
-@click.group(name="setup")
-def setup():
-    """Session setup commands"""
-    pass
-
-
-@setup.command()
+@click.command()
 @click.argument("session_name", required=False)
-def create(session_name):
-    """Create all tmux sessions defined in projects.yaml; or only a specified session if provided."""
+def setup(session_name):
+    """Create all tmux sessions (기본) 또는 지정한 세션만 생성합니다."""
     config = YesmanConfig()
     tmux_manager = TmuxManager(config)
     sessions = tmux_manager.load_projects().get("sessions", {})
@@ -57,7 +51,6 @@ def create(session_name):
 
         # Apply default values
         config_dict["session_name"] = override_conf.get("session_name", s_name)
-        # config_dict["start_directory"] = override_conf.get("start_directory", "~")
         config_dict["start_directory"] = override_conf.get("start_directory", os.getcwd())
 
         # Apply all overrides
@@ -67,7 +60,6 @@ def create(session_name):
         # Validate start_directory exists
         start_dir = config_dict.get("start_directory")
         if start_dir:
-            # Expand user home directory if needed
             expanded_dir = os.path.expanduser(start_dir)
             if not os.path.exists(expanded_dir):
                 click.echo(f"❌ Error: start_directory '{start_dir}' does not exist for session '{s_name}'")
@@ -85,7 +77,6 @@ def create(session_name):
             elif not os.path.isdir(expanded_dir):
                 click.echo(f"❌ Error: start_directory '{start_dir}' is not a directory for session '{s_name}'")
                 continue
-            # Update with expanded path
             config_dict["start_directory"] = expanded_dir
 
         # Validate window start_directories if specified
@@ -94,7 +85,6 @@ def create(session_name):
         for i, window in enumerate(windows):
             window_start_dir = window.get("start_directory")
             if window_start_dir:
-                # If relative path, make it relative to session start_directory
                 if not os.path.isabs(window_start_dir):
                     base_dir = config_dict.get("start_directory", os.getcwd())
                     window_start_dir = os.path.join(base_dir, window_start_dir)
@@ -120,7 +110,6 @@ def create(session_name):
                     click.echo(f"❌ Error: Window '{window.get('window_name', i)}' start_directory '{window.get('start_directory')}' is not a directory")
                     validation_failed = True
                     break
-                # Update with expanded path
                 window["start_directory"] = expanded_window_dir
 
         if validation_failed:
@@ -136,14 +125,12 @@ def create(session_name):
 
     click.echo("All sessions setup completed.")
 
-
-# Deprecated alias
+# Alias
 @click.command()
 @click.argument("session_name", required=False)
 def up(session_name):
-    """[DEPRECATED] Use 'setup create' instead."""
-    click.secho("[DEPRECATED] 'up' 명령어 대신 'setup create'를 사용하세요.", fg="yellow")
+    """Alias for 'setup' command"""
     ctx = click.get_current_context()
-    ctx.invoke(create, session_name=session_name)
+    ctx.invoke(setup, session_name=session_name)
 
-__all__ = ["setup", "create", "up"]
+__all__ = ["setup", "up"]
