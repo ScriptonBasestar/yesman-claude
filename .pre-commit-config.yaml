@@ -51,7 +51,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-PyYAML]
-        exclude: ^(tests/|docs/examples/)
+        files: ^(libs/|commands/|api/)
         args: [--config-file=pyproject.toml]
 
   # Security checks (optional: keep bandit for comprehensive security scanning)

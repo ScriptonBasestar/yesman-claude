@@ -86,7 +86,7 @@ async def monitor_updates(duration: int = 60):
                             print(f"   Active Days: {activity.get('active_days')}")
                             print(f"   Max Activity: {activity.get('max_activity')}")
 
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # No message received in 1 second, continue
                     pass
 

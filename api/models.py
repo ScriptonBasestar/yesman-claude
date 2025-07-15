@@ -1,10 +1,8 @@
-from typing import List, Optional
-
 from pydantic import BaseModel
 
 
 class PaneInfo(BaseModel):
-    command: Optional[str] = None
+    command: str | None = None
     is_claude: bool = False
     is_controller: bool = False
 
@@ -12,12 +10,12 @@ class PaneInfo(BaseModel):
 class WindowInfo(BaseModel):
     index: int
     name: str
-    panes: List[PaneInfo] = []
+    panes: list[PaneInfo] = []
 
 
 class SessionInfo(BaseModel):
     session_name: str
-    project_name: Optional[str] = None
+    project_name: str | None = None
     status: str
-    template: Optional[str] = None
-    windows: List[WindowInfo] = []
+    template: str | None = None
+    windows: list[WindowInfo] = []

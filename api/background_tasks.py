@@ -5,9 +5,10 @@ import hashlib
 import json
 import logging
 import traceback
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from libs.core.session_manager import SessionManager
 from libs.dashboard.health_calculator import HealthCalculator
@@ -20,8 +21,8 @@ class TaskState:
     """State tracking for background tasks."""
 
     name: str
-    last_run: Optional[datetime] = None
-    last_data_hash: Optional[str] = None
+    last_run: datetime | None = None
+    last_data_hash: str | None = None
     error_count: int = 0
     is_running: bool = False
 
@@ -31,9 +32,9 @@ class BackgroundTaskRunner:
 
     def __init__(self):
         """Initialize the background task runner."""
-        self.tasks: List[asyncio.Task] = []
+        self.tasks: list[asyncio.Task] = []
         self.is_running = False
-        self.task_states: Dict[str, TaskState] = {}
+        self.task_states: dict[str, TaskState] = {}
 
         # Initialize managers
         self.session_manager = SessionManager()
@@ -172,7 +173,7 @@ class BackgroundTaskRunner:
                     self.last_data["sessions"] = data_hash
 
                     # Broadcast update via WebSocket
-                    from api.routers.websocket import manager
+                    from api.routers.websocket_router import manager
 
                     await manager.broadcast_session_update(formatted_sessions)
 
@@ -261,7 +262,7 @@ class BackgroundTaskRunner:
                     self.last_data["health"] = data_hash
 
                     # Broadcast update via WebSocket
-                    from api.routers.websocket import manager
+                    from api.routers.websocket_router import manager
 
                     await manager.broadcast_health_update(formatted_health)
 
@@ -346,7 +347,7 @@ class BackgroundTaskRunner:
                     self.last_data["activity"] = data_hash
 
                     # Broadcast update via WebSocket
-                    from api.routers.websocket import manager
+                    from api.routers.websocket_router import manager
 
                     await manager.broadcast_activity_update(formatted_activity)
 
@@ -370,7 +371,7 @@ class BackgroundTaskRunner:
         async def cleanup():
             try:
                 # Clean up old connections
-                from api.routers.websocket import manager
+                from api.routers.websocket_router import manager
 
                 # Get connection statistics
                 stats = manager.get_connection_stats()
@@ -404,7 +405,7 @@ class BackgroundTaskRunner:
         else:
             return "poor"
 
-    def get_task_states(self) -> Dict[str, Dict]:
+    def get_task_states(self) -> dict[str, dict]:
         """Get current state of all tasks."""
         states = {}
         for name, state in self.task_states.items():

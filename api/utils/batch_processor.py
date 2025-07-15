@@ -7,14 +7,14 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
 class MessageBatch:
     """A batch of WebSocket messages to be sent together."""
 
-    messages: List[Dict[str, Any]]
+    messages: list[dict[str, Any]]
     timestamp: float
     batch_id: str
     channel: str
@@ -39,12 +39,12 @@ class BatchConfig:
 class WebSocketBatchProcessor:
     """Processes WebSocket messages in batches for optimized performance."""
 
-    def __init__(self, config: Optional[BatchConfig] = None):
+    def __init__(self, config: BatchConfig | None = None):
         self.config = config or BatchConfig()
 
         # Message queues per channel
-        self.pending_messages: Dict[str, deque] = {}
-        self.last_flush_time: Dict[str, float] = {}
+        self.pending_messages: dict[str, deque] = {}
+        self.last_flush_time: dict[str, float] = {}
         self.batch_counter = 0
 
         # Statistics tracking
@@ -58,9 +58,9 @@ class WebSocketBatchProcessor:
         }
 
         # Processing control
-        self._processing_task: Optional[asyncio.Task] = None
+        self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
-        self._message_handlers: Dict[str, callable] = {}
+        self._message_handlers: dict[str, callable] = {}
 
         self.logger = logging.getLogger("yesman.websocket_batch")
 
@@ -88,7 +88,7 @@ class WebSocketBatchProcessor:
 
         try:
             await asyncio.wait_for(self._processing_task, timeout=5.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.warning("Batch processor stop timeout, cancelling task")
             self._processing_task.cancel()
 
@@ -97,7 +97,7 @@ class WebSocketBatchProcessor:
 
         self.logger.info("WebSocket batch processor stopped")
 
-    def queue_message(self, channel: str, message: Dict[str, Any]):
+    def queue_message(self, channel: str, message: dict[str, Any]):
         """Queue a message for batch processing."""
         # Initialize channel if not exists
         if channel not in self.pending_messages:
@@ -119,7 +119,7 @@ class WebSocketBatchProcessor:
             # Schedule immediate flush for this channel
             asyncio.create_task(self._flush_channel(channel))
 
-    async def send_immediate(self, channel: str, message: Dict[str, Any]):
+    async def send_immediate(self, channel: str, message: dict[str, Any]):
         """Send a message immediately without batching (for urgent messages)."""
         handler = self._message_handlers.get(channel)
         if handler:
@@ -243,7 +243,7 @@ class WebSocketBatchProcessor:
             self.logger.error(f"Handler error for channel {batch.channel}: {e}")
             raise
 
-    def _optimize_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _optimize_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Optimize a batch of messages by combining similar ones."""
         optimized = []
 
@@ -276,7 +276,7 @@ class WebSocketBatchProcessor:
 
         return optimized
 
-    def _combine_update_messages(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _combine_update_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple update messages into a single message."""
         if not messages:
             return {}
@@ -303,7 +303,7 @@ class WebSocketBatchProcessor:
 
         return combined
 
-    def _combine_log_messages(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _combine_log_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple log messages into a batched log message."""
         if not messages:
             return {}
@@ -337,7 +337,7 @@ class WebSocketBatchProcessor:
         for channel in list(self.pending_messages.keys()):
             await self._flush_channel(channel)
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get processing statistics."""
         active_channels = len([ch for ch, queue in self.pending_messages.items() if queue])
         total_pending = sum(len(queue) for queue in self.pending_messages.values())

@@ -13,8 +13,6 @@
       "Bash(timeout:*)",
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)",
-      "Bash(python:*)",
       "Bash(pkill:*)",
       "Bash(timeout 5 python -m yesman dashboard 2>&1)",
       "Bash(timeout 5 python -m yesman dashboard:*)",
@@ -39,7 +37,6 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(./yesman.py setup)",
-      "Bash(tmux send-keys:*)",
       "Bash(./yesman.py dashboard)",
       "Bash(tmux display-message:*)",
       "Bash(kill:*)",
@@ -57,7 +54,8 @@
       "Bash(git push:*)",
       "Bash(cp:*)",
       "Bash(npm run build:*)",
-      "WebFetch(domain:svelte.dev)"
+      "WebFetch(domain:svelte.dev)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

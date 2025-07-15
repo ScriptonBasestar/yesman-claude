@@ -2,7 +2,6 @@
 
 import os
 import sys
-from typing import List
 
 import libtmux
 from fastapi import APIRouter, HTTPException
@@ -50,7 +49,7 @@ def convert_session_to_pydantic(session_data) -> models.SessionInfo:
     )
 
 
-@router.get("/sessions", response_model=List[models.SessionInfo])
+@router.get("/sessions", response_model=list[models.SessionInfo])
 def get_all_sessions():
     """모든 tmux 세션의 상세 정보를 조회합니다. (캐시 적용)."""
     try:

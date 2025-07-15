@@ -127,6 +127,11 @@ strict_optional = false
 ignore_missing_imports = true
 show_error_codes = false
 disable_error_code = ["attr-defined", "arg-type", "override", "operator", "call-overload", "no-any-return", "var-annotated", "has-type", "misc", "assignment", "return-value", "index", "call-arg", "no-redef", "import-untyped", "valid-type", "dict-item", "func-returns-value", "union-attr", "annotation-unchecked"]
+explicit_package_bases = true
+exclude = [
+    "tauri-dashboard/",
+    "test-integration/",
+]
 
 [dependency-groups]
 dev = [

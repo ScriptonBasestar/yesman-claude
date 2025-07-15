@@ -4,7 +4,6 @@ import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Set
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -20,13 +19,13 @@ class ConnectionManager:
 
     def __init__(self):
         # All active connections
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
 
         # Channel-based connections
-        self.channel_connections: Dict[str, Set[WebSocket]] = defaultdict(set)
+        self.channel_connections: dict[str, set[WebSocket]] = defaultdict(set)
 
         # Connection metadata
-        self.connection_metadata: Dict[WebSocket, Dict] = {}
+        self.connection_metadata: dict[WebSocket, dict] = {}
 
         # Ping interval in seconds
         self.ping_interval = 30
@@ -53,27 +52,27 @@ class ConnectionManager:
         self.batch_processor.register_message_handler("activity", self._send_to_activity)
         self.batch_processor.register_message_handler("logs", self._send_to_logs)
 
-    async def _send_to_dashboard(self, messages: List[Dict]):
+    async def _send_to_dashboard(self, messages: list[dict]):
         """Send batched messages to dashboard channel"""
         await self._broadcast_messages_to_channel("dashboard", messages)
 
-    async def _send_to_sessions(self, messages: List[Dict]):
+    async def _send_to_sessions(self, messages: list[dict]):
         """Send batched messages to sessions channel"""
         await self._broadcast_messages_to_channel("sessions", messages)
 
-    async def _send_to_health(self, messages: List[Dict]):
+    async def _send_to_health(self, messages: list[dict]):
         """Send batched messages to health channel"""
         await self._broadcast_messages_to_channel("health", messages)
 
-    async def _send_to_activity(self, messages: List[Dict]):
+    async def _send_to_activity(self, messages: list[dict]):
         """Send batched messages to activity channel"""
         await self._broadcast_messages_to_channel("activity", messages)
 
-    async def _send_to_logs(self, messages: List[Dict]):
+    async def _send_to_logs(self, messages: list[dict]):
         """Send batched messages to logs channel"""
         await self._broadcast_messages_to_channel("logs", messages)
 
-    async def _broadcast_messages_to_channel(self, channel: str, messages: List[Dict]):
+    async def _broadcast_messages_to_channel(self, channel: str, messages: list[dict]):
         """Broadcast multiple messages to a specific channel"""
         connections = self.channel_connections.get(channel, set())
         disconnected = []

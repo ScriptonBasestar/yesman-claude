@@ -117,10 +117,9 @@ def monitor_logs(session_name, follow=True):
                                     print(f"ℹ️  [{timestamp}] {line}")
 
                     last_position = current_size
-            else:
-                # 로그 파일이 없으면 주기적으로 알림
-                if current_time - last_status_check >= status_check_interval:
-                    print(f"⚠️  [{time.strftime('%H:%M:%S')}] Log file not found: {controller_log}")
+            # 로그 파일이 없으면 주기적으로 알림
+            elif current_time - last_status_check >= status_check_interval:
+                print(f"⚠️  [{time.strftime('%H:%M:%S')}] Log file not found: {controller_log}")
 
             time.sleep(0.5)  # 0.5초마다 체크
 

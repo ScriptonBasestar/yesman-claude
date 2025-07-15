@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.background_tasks import task_runner
-from api.routers import config, controllers, dashboard, logs, sessions, websocket
+from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
 
 app = FastAPI()
 
@@ -30,7 +30,7 @@ app.include_router(logs.router, prefix="/api", tags=["logs"])
 app.include_router(dashboard.router, tags=["dashboard-api"])
 
 # Include WebSocket router
-app.include_router(websocket.router, tags=["websocket"])
+app.include_router(websocket_router.router, tags=["websocket"])
 
 # Mount SvelteKit static files
 app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="fonts")
@@ -111,7 +111,7 @@ async def shutdown_event():
     await task_runner.stop()
 
     # Shutdown WebSocket manager and batch processor
-    from api.routers.websocket import manager
+    from api.routers.websocket_router import manager
 
     await manager.shutdown()
 
@@ -130,7 +130,7 @@ async def get_task_status():
 @app.get("/api/websocket/stats")
 async def get_websocket_stats():
     """Get WebSocket connection and batch processing statistics"""
-    from api.routers.websocket import manager
+    from api.routers.websocket_router import manager
 
     connection_stats = manager.get_connection_stats()
     batch_stats = manager.get_batch_statistics()

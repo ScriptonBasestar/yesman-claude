@@ -112,7 +112,7 @@ lint:
 	@echo "Running ruff check..."
 	uv run ruff check --target-version py311 libs commands tests docs/examples
 	@echo "Running mypy..."
-	uv run mypy --config-file=pyproject.toml libs commands
+	uv run mypy --config-file=pyproject.toml libs commands api
 	@echo "Running bandit security check..."
 	@uv run bandit -r libs commands --skip B101,B404,B603,B607,B602 --severity-level medium --quiet || echo "✅ Security check completed"
 

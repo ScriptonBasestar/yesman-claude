@@ -4,7 +4,7 @@ Improved sessions router with dependency injection and proper error handling
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 
@@ -19,9 +19,9 @@ from libs.yesman_config import YesmanConfig
 logger = logging.getLogger("yesman.api.sessions")
 
 # Singleton instances
-_config_instance: Optional[YesmanConfig] = None
-_tmux_manager_instance: Optional[TmuxManager] = None
-_session_manager_instance: Optional[SessionManager] = None
+_config_instance: YesmanConfig | None = None
+_tmux_manager_instance: TmuxManager | None = None
+_session_manager_instance: SessionManager | None = None
 
 
 # Dependency injection functions
@@ -79,7 +79,7 @@ class SessionService:
         self.tmux_manager = tmux_manager
         self.logger = logging.getLogger("yesman.api.sessions.service")
 
-    def get_all_sessions(self) -> List[SessionAPIData]:
+    def get_all_sessions(self) -> list[SessionAPIData]:
         """Get all sessions with error handling"""
         try:
             sessions_data = self.session_manager.get_all_sessions()
@@ -92,7 +92,7 @@ class SessionService:
                 cause=e,
             )
 
-    def get_session_by_name(self, session_name: str) -> Optional[SessionAPIData]:
+    def get_session_by_name(self, session_name: str) -> SessionAPIData | None:
         """Get specific session by name"""
         try:
             session_data = self.session_manager.get_session_info(session_name)
@@ -107,7 +107,7 @@ class SessionService:
                 cause=e,
             )
 
-    def setup_session(self, session_name: str) -> Dict[str, Any]:
+    def setup_session(self, session_name: str) -> dict[str, Any]:
         """Set up a specific session"""
         try:
             # Check if session already exists
@@ -144,7 +144,7 @@ class SessionService:
                 cause=e,
             )
 
-    def teardown_session(self, session_name: str) -> Dict[str, Any]:
+    def teardown_session(self, session_name: str) -> dict[str, Any]:
         """Teardown a specific session"""
         try:
             if not self._session_exists(session_name):
@@ -171,7 +171,7 @@ class SessionService:
                 cause=e,
             )
 
-    def get_session_status(self, session_name: str) -> Dict[str, Any]:
+    def get_session_status(self, session_name: str) -> dict[str, Any]:
         """Get session status information"""
         try:
             session_data = self.session_manager.get_session_info(session_name)
@@ -238,7 +238,7 @@ class SessionService:
         except Exception:
             return False
 
-    def _setup_session_internal(self, session_name: str, session_config: Dict[str, Any]) -> Dict[str, Any]:
+    def _setup_session_internal(self, session_name: str, session_config: dict[str, Any]) -> dict[str, Any]:
         """Internal session setup logic"""
         # This would integrate with the improved SessionSetupService
         # For now, return a placeholder
@@ -258,7 +258,7 @@ class SessionService:
 router = APIRouter(tags=["sessions"])
 
 
-@router.get("/sessions", response_model=List[models.SessionInfo], summary="Get all sessions", description="Retrieve information about all active tmux sessions")
+@router.get("/sessions", response_model=list[models.SessionInfo], summary="Get all sessions", description="Retrieve information about all active tmux sessions")
 def get_all_sessions():
     """Get all tmux sessions with detailed information"""
     try:

@@ -4,7 +4,6 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
@@ -29,7 +28,7 @@ router = APIRouter()
 config = YesmanConfig()
 
 
-@router.get("/sessions/{session_name}/logs", response_model=List[str])
+@router.get("/sessions/{session_name}/logs", response_model=list[str])
 def get_session_logs(session_name: str, limit: int = 100):
     """특정 세션의 최근 로그를 조회합니다."""
     try:
@@ -54,7 +53,7 @@ def get_session_logs(session_name: str, limit: int = 100):
         raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}")
 
 
-def parse_log_line(line: str) -> Optional[LogEntry]:
+def parse_log_line(line: str) -> LogEntry | None:
     """Parse a log line into a structured LogEntry"""
     line = line.strip()
     if not line:
@@ -98,12 +97,12 @@ def parse_log_line(line: str) -> Optional[LogEntry]:
     )
 
 
-@router.get("/logs", response_model=List[LogEntry])
+@router.get("/logs", response_model=list[LogEntry])
 def get_logs(
     limit: int = Query(default=100, ge=1, le=1000),
-    level: Optional[str] = Query(default=None),
-    source: Optional[str] = Query(default=None),
-    search: Optional[str] = Query(default=None),
+    level: str | None = Query(default=None),
+    source: str | None = Query(default=None),
+    search: str | None = Query(default=None),
 ):
     """Get parsed log entries with optional filtering"""
     try:
