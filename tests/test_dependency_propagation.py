@@ -8,22 +8,10 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from libs.multi_agent.branch_info_protocol import (
-    BranchInfoProtocol,
-)
+from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.collaboration_engine import (
-    CollaborationEngine,
-)
-from libs.multi_agent.dependency_propagation import (
-    ChangeImpact,
-    DependencyChange,
-    DependencyNode,
-    DependencyPropagationSystem,
-    DependencyType,
-    PropagationResult,
-    PropagationStrategy,
-)
+from libs.multi_agent.collaboration_engine import CollaborationEngine
+from libs.multi_agent.dependency_propagation import ChangeImpact, DependencyChange, DependencyNode, DependencyPropagationSystem, DependencyType, PropagationResult, PropagationStrategy
 
 
 class TestDependencyNode:

@@ -4,7 +4,7 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class PromptType(Enum):
@@ -26,10 +26,10 @@ class PromptInfo:
 
     type: PromptType
     question: str
-    options: List[Tuple[str, str]]  # (key, description) pairs
+    options: list[tuple[str, str]]  # (key, description) pairs
     context: str  # Original content where prompt was found
     confidence: float  # 0.0 to 1.0 confidence score
-    metadata: Dict[str, Any]  # Additional information
+    metadata: dict[str, Any]  # Additional information
 
 
 class ClaudePromptDetector:
@@ -102,7 +102,7 @@ class ClaudePromptDetector:
             re.compile(r"(.+?)\?$", re.MULTILINE),
         ]
 
-    def detect_prompt(self, content: str) -> Optional[PromptInfo]:
+    def detect_prompt(self, content: str) -> PromptInfo | None:
         """
         Detect prompt type and extract information
 
@@ -161,7 +161,7 @@ class ClaudePromptDetector:
 
         return cleaned.strip()
 
-    def _detect_numbered_selection(self, content: str) -> Optional[PromptInfo]:
+    def _detect_numbered_selection(self, content: str) -> PromptInfo | None:
         """Detect numbered selection prompts (1, 2, 3, etc.)"""
         all_options = []
 
@@ -196,7 +196,7 @@ class ClaudePromptDetector:
 
         return None
 
-    def _detect_binary_choice(self, content: str) -> Optional[PromptInfo]:
+    def _detect_binary_choice(self, content: str) -> PromptInfo | None:
         """Detect binary choice prompts (1/2, y/n, etc.)"""
         for pattern in self.binary_patterns:
             if pattern.search(content):
@@ -222,7 +222,7 @@ class ClaudePromptDetector:
 
         return None
 
-    def _detect_true_false(self, content: str) -> Optional[PromptInfo]:
+    def _detect_true_false(self, content: str) -> PromptInfo | None:
         """Detect true/false prompts"""
         for pattern in self.true_false_patterns:
             if pattern.search(content):
@@ -240,7 +240,7 @@ class ClaudePromptDetector:
 
         return None
 
-    def _detect_text_input(self, content: str) -> Optional[PromptInfo]:
+    def _detect_text_input(self, content: str) -> PromptInfo | None:
         """Detect text input prompts"""
         for pattern in self.text_input_patterns:
             match = pattern.search(content)
@@ -259,7 +259,7 @@ class ClaudePromptDetector:
 
         return None
 
-    def _detect_terminal_settings(self, content: str) -> Optional[PromptInfo]:
+    def _detect_terminal_settings(self, content: str) -> PromptInfo | None:
         """Detect terminal settings prompts"""
         for pattern in self.terminal_patterns:
             if pattern.search(content):
@@ -276,7 +276,7 @@ class ClaudePromptDetector:
 
         return None
 
-    def _detect_login_redirect(self, content: str) -> Optional[PromptInfo]:
+    def _detect_login_redirect(self, content: str) -> PromptInfo | None:
         """Detect login/authentication prompts"""
         for pattern in self.login_patterns:
             if pattern.search(content):
@@ -293,7 +293,7 @@ class ClaudePromptDetector:
 
         return None
 
-    def _detect_confirmation(self, content: str) -> Optional[PromptInfo]:
+    def _detect_confirmation(self, content: str) -> PromptInfo | None:
         """Detect general confirmation prompts"""
         question = self._extract_question(content)
 

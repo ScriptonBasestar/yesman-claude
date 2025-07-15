@@ -5,7 +5,7 @@ import json
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from .graph import DirectedGraph
 
@@ -20,9 +20,9 @@ class CodeDependency:
     imported_module: str
     import_type: str  # 'import', 'from_import', 'dynamic'
     line_number: int
-    symbols: List[str] = field(default_factory=list)
+    symbols: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
 
@@ -34,18 +34,18 @@ class TaskDefinition:
     task_id: str
     title: str
     description: str
-    file_paths: List[str]  # Files this task will modify
-    dependencies: List[str] = field(default_factory=list)  # Other task IDs
+    file_paths: list[str]  # Files this task will modify
+    dependencies: list[str] = field(default_factory=list)  # Other task IDs
     estimated_hours: float = 1.0
     complexity: str = "medium"  # low, medium, high
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TaskDefinition":
+    def from_dict(cls, data: dict[str, Any]) -> "TaskDefinition":
         """Create from dictionary"""
         return cls(**data)
 
@@ -61,11 +61,11 @@ class TaskAnalyzer:
             repo_path: Path to repository
         """
         self.repo_path = Path(repo_path).resolve()
-        self.file_dependencies: Dict[str, List[CodeDependency]] = {}
+        self.file_dependencies: dict[str, list[CodeDependency]] = {}
         self.task_graph = DirectedGraph()
-        self._python_files_cache: Optional[List[Path]] = None
+        self._python_files_cache: list[Path] | None = None
 
-    def analyze_file_dependencies(self, file_path: str) -> List[CodeDependency]:
+    def analyze_file_dependencies(self, file_path: str) -> list[CodeDependency]:
         """
         Analyze dependencies of a Python file
 
@@ -121,7 +121,7 @@ class TaskAnalyzer:
 
         return dependencies
 
-    def find_related_files(self, file_path: str, depth: int = 2) -> Set[str]:
+    def find_related_files(self, file_path: str, depth: int = 2) -> set[str]:
         """
         Find files related to a given file through dependencies
 
@@ -171,7 +171,7 @@ class TaskAnalyzer:
 
         return related
 
-    def _get_python_files(self) -> List[Path]:
+    def _get_python_files(self) -> list[Path]:
         """Get all Python files in repository"""
         if self._python_files_cache is None:
             self._python_files_cache = []
@@ -214,7 +214,7 @@ class TaskAnalyzer:
 
         return module
 
-    def _module_to_file(self, module_name: str) -> Optional[str]:
+    def _module_to_file(self, module_name: str) -> str | None:
         """Convert module name to file path"""
         # Try different possibilities
         candidates = [
@@ -246,7 +246,7 @@ class TaskAnalyzer:
         self,
         task_id: str,
         title: str,
-        file_paths: List[str],
+        file_paths: list[str],
         description: str = "",
         **kwargs,
     ) -> TaskDefinition:
@@ -282,7 +282,7 @@ class TaskAnalyzer:
 
         return task
 
-    def analyze_task_dependencies(self, tasks: List[TaskDefinition]) -> DirectedGraph:
+    def analyze_task_dependencies(self, tasks: list[TaskDefinition]) -> DirectedGraph:
         """
         Analyze dependencies between tasks based on file overlaps
 
@@ -341,7 +341,7 @@ class TaskAnalyzer:
 
         return self.task_graph
 
-    def get_execution_order(self, tasks: List[TaskDefinition]) -> List[List[str]]:
+    def get_execution_order(self, tasks: list[TaskDefinition]) -> list[list[str]]:
         """
         Get optimal execution order for tasks
 
@@ -389,7 +389,7 @@ class TaskAnalyzer:
 
     def estimate_parallel_time(
         self,
-        tasks: List[TaskDefinition],
+        tasks: list[TaskDefinition],
         max_agents: int = 3,
     ) -> float:
         """

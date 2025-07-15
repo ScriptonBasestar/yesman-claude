@@ -8,21 +8,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
-from .collaboration_engine import (
-    CollaborationEngine,
-    MessagePriority,
-    MessageType,
-)
-from .conflict_prediction import (
-    ConflictPattern,
-    ConflictPredictor,
-    PredictionConfidence,
-    PredictionResult,
-)
+from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
+from .conflict_prediction import ConflictPattern, ConflictPredictor, PredictionConfidence, PredictionResult
 
 logger = logging.getLogger(__name__)
 
@@ -59,24 +50,24 @@ class PreventionMeasure:
     measure_id: str
     strategy: PreventionStrategy
     action: PreventionAction
-    target_branches: List[str]
-    target_agents: List[str]
+    target_branches: list[str]
+    target_agents: list[str]
     predicted_conflict_id: str
     urgency: PredictionConfidence
 
     # Implementation details
     description: str
-    implementation_steps: List[str] = field(default_factory=list)
+    implementation_steps: list[str] = field(default_factory=list)
     estimated_effort: int = 0  # hours
     success_probability: float = 0.0  # 0.0-1.0
 
     # Execution tracking
     status: str = "pending"  # pending, applied, failed, cancelled
-    applied_at: Optional[datetime] = None
-    effectiveness: Optional[float] = None  # measured post-application
+    applied_at: datetime | None = None
+    effectiveness: float | None = None  # measured post-application
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -85,7 +76,7 @@ class PreventionResult:
     """Result of applying prevention measures"""
 
     session_id: str
-    branches_analyzed: List[str]
+    branches_analyzed: list[str]
     predictions_found: int
     measures_applied: int
     conflicts_prevented: int
@@ -95,15 +86,15 @@ class PreventionResult:
     time_saved: float = 0.0  # estimated hours saved
 
     # Applied measures
-    applied_measures: List[PreventionMeasure] = field(default_factory=list)
-    failed_measures: List[PreventionMeasure] = field(default_factory=list)
+    applied_measures: list[PreventionMeasure] = field(default_factory=list)
+    failed_measures: list[PreventionMeasure] = field(default_factory=list)
 
     # Performance metrics
     prevention_time: float = 0.0
     analysis_overhead: float = 0.0
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     executed_at: datetime = field(default_factory=datetime.now)
 
 
@@ -116,7 +107,7 @@ class ConflictPreventionSystem:
         auto_resolver: AutoResolver,
         collaboration_engine: CollaborationEngine,
         branch_manager: BranchManager,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
     ):
         """
         Initialize the conflict prevention system
@@ -145,8 +136,8 @@ class ConflictPreventionSystem:
         }
 
         # Active prevention measures
-        self.active_measures: Dict[str, PreventionMeasure] = {}
-        self.prevention_history: List[PreventionResult] = []
+        self.active_measures: dict[str, PreventionMeasure] = {}
+        self.prevention_history: list[PreventionResult] = []
 
         # Prevention strategies registry
         self.strategy_handlers = {
@@ -191,9 +182,9 @@ class ConflictPreventionSystem:
 
     async def analyze_and_prevent_conflicts(
         self,
-        branches: List[str],
-        time_horizon: Optional[timedelta] = None,
-        agents: Optional[List[str]] = None,
+        branches: list[str],
+        time_horizon: timedelta | None = None,
+        agents: list[str] | None = None,
     ) -> PreventionResult:
         """
         Analyze branches for potential conflicts and apply prevention measures
@@ -207,7 +198,7 @@ class ConflictPreventionSystem:
             Result of prevention analysis and measures applied
         """
         start_time = datetime.now()
-        session_id = f"prevention_{start_time.strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(''.join(branches).encode()).hexdigest()[:8]}"
+        session_id = f"prevention_{start_time.strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(''.join(branches).encode()).hexdigest()[:8]}"
 
         logger.info(f"Starting conflict prevention analysis for session {session_id}")
 
@@ -301,8 +292,8 @@ class ConflictPreventionSystem:
     async def _generate_prevention_measures(
         self,
         prediction: PredictionResult,
-        agents: Optional[List[str]] = None,
-    ) -> List[PreventionMeasure]:
+        agents: list[str] | None = None,
+    ) -> list[PreventionMeasure]:
         """Generate appropriate prevention measures for a conflict prediction"""
         measures = []
 
@@ -327,7 +318,7 @@ class ConflictPreventionSystem:
     async def _generate_dependency_measures(
         self,
         prediction: PredictionResult,
-    ) -> List[PreventionMeasure]:
+    ) -> list[PreventionMeasure]:
         """Generate measures for dependency-related conflicts"""
         measures = []
 
@@ -357,7 +348,7 @@ class ConflictPreventionSystem:
     async def _generate_coordination_measures(
         self,
         prediction: PredictionResult,
-    ) -> List[PreventionMeasure]:
+    ) -> list[PreventionMeasure]:
         """Generate measures for coordination-related conflicts"""
         measures = []
 
@@ -387,7 +378,7 @@ class ConflictPreventionSystem:
     async def _generate_interface_measures(
         self,
         prediction: PredictionResult,
-    ) -> List[PreventionMeasure]:
+    ) -> list[PreventionMeasure]:
         """Generate measures for API/interface conflicts"""
         measures = []
 
@@ -417,7 +408,7 @@ class ConflictPreventionSystem:
     async def _generate_temporal_measures(
         self,
         prediction: PredictionResult,
-    ) -> List[PreventionMeasure]:
+    ) -> list[PreventionMeasure]:
         """Generate measures for temporal/timing conflicts"""
         measures = []
 
@@ -447,7 +438,7 @@ class ConflictPreventionSystem:
     async def _generate_generic_measures(
         self,
         prediction: PredictionResult,
-    ) -> List[PreventionMeasure]:
+    ) -> list[PreventionMeasure]:
         """Generate generic prevention measures"""
         measures = []
 
@@ -652,7 +643,7 @@ class ConflictPreventionSystem:
                 logger.error(f"Error in prevention monitor loop: {e}")
                 await asyncio.sleep(interval)
 
-    async def _get_active_branches(self) -> List[str]:
+    async def _get_active_branches(self) -> list[str]:
         """Get list of currently active branches with ongoing work"""
         # This would integrate with the branch manager and agent pool
         # For now, return a placeholder
@@ -665,7 +656,7 @@ class ConflictPreventionSystem:
             logger.error(f"Error getting active branches: {e}")
             return []
 
-    def get_prevention_summary(self) -> Dict[str, Any]:
+    def get_prevention_summary(self) -> dict[str, Any]:
         """Get summary of prevention system status and performance"""
         active_measures_count = len(self.active_measures)
         recent_results = self.prevention_history[-10:] if self.prevention_history else []
@@ -676,7 +667,7 @@ class ConflictPreventionSystem:
             "prevention_sessions": len(self.prevention_history),
             "recent_effectiveness": {
                 "sessions": len(recent_results),
-                "avg_prevention_rate": sum(r.prevention_success_rate for r in recent_results) / len(recent_results) if recent_results else 0.0,
+                "avg_prevention_rate": (sum(r.prevention_success_rate for r in recent_results) / len(recent_results) if recent_results else 0.0),
                 "total_time_saved": sum(r.time_saved for r in recent_results),
             },
             "configuration": self.prevention_config.copy(),

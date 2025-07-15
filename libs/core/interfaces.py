@@ -1,9 +1,10 @@
 """Abstract base classes and interfaces for the yesman-claude system"""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from .models import PromptInfo, SessionInfo
 
@@ -34,7 +35,7 @@ class PluginMetadata:
     version: str
     description: str
     author: str
-    dependencies: List[str]
+    dependencies: list[str]
     enabled: bool = True
 
 
@@ -42,22 +43,22 @@ class ISessionManager(ABC):
     """Interface for session management"""
 
     @abstractmethod
-    def get_all_sessions(self) -> List[SessionInfo]:
+    def get_all_sessions(self) -> list[SessionInfo]:
         """Get all available sessions"""
         pass
 
     @abstractmethod
-    def get_session(self, session_name: str) -> Optional[SessionInfo]:
+    def get_session(self, session_name: str) -> SessionInfo | None:
         """Get a specific session by name"""
         pass
 
     @abstractmethod
-    def invalidate_cache(self, session_name: Optional[str] = None) -> None:
+    def invalidate_cache(self, session_name: str | None = None) -> None:
         """Invalidate session cache"""
         pass
 
     @abstractmethod
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         pass
 
@@ -114,7 +115,7 @@ class IController(ABC):
         pass
 
     @abstractmethod
-    def get_current_prompt(self) -> Optional[PromptInfo]:
+    def get_current_prompt(self) -> PromptInfo | None:
         """Get current prompt information"""
         pass
 
@@ -129,7 +130,7 @@ class IController(ABC):
         pass
 
     @abstractmethod
-    def get_collection_stats(self) -> Dict[str, Any]:
+    def get_collection_stats(self) -> dict[str, Any]:
         """Get collection statistics"""
         pass
 
@@ -138,7 +139,7 @@ class IControllerManager(ABC):
     """Interface for controller management"""
 
     @abstractmethod
-    def get_controller(self, session_name: str) -> Optional[IController]:
+    def get_controller(self, session_name: str) -> IController | None:
         """Get controller for session"""
         pass
 
@@ -153,7 +154,7 @@ class IControllerManager(ABC):
         pass
 
     @abstractmethod
-    def list_controllers(self) -> List[str]:
+    def list_controllers(self) -> list[str]:
         """List all controller names"""
         pass
 
@@ -162,12 +163,12 @@ class ICache(ABC):
     """Interface for caching systems"""
 
     @abstractmethod
-    def get(self, key: str, ttl: Optional[float] = None) -> Optional[Any]:
+    def get(self, key: str, ttl: float | None = None) -> Any | None:
         """Get cached value"""
         pass
 
     @abstractmethod
-    def put(self, key: str, value: Any, ttl: Optional[float] = None) -> bool:
+    def put(self, key: str, value: Any, ttl: float | None = None) -> bool:
         """Store value in cache"""
         pass
 
@@ -182,7 +183,7 @@ class ICache(ABC):
         pass
 
     @abstractmethod
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         pass
 
@@ -191,12 +192,12 @@ class ICacheAnalytics(ABC):
     """Interface for cache analytics"""
 
     @abstractmethod
-    def get_cache_health_report(self) -> Dict[str, Any]:
+    def get_cache_health_report(self) -> dict[str, Any]:
         """Generate comprehensive cache health report"""
         pass
 
     @abstractmethod
-    def get_visual_status_summary(self) -> Dict[str, Any]:
+    def get_visual_status_summary(self) -> dict[str, Any]:
         """Get cache status summary for visualization"""
         pass
 
@@ -210,7 +211,7 @@ class IPromptDetector(ABC):
     """Interface for prompt detection"""
 
     @abstractmethod
-    def detect_prompts(self, content: str, context: Optional[Dict[str, Any]] = None) -> List[PromptInfo]:
+    def detect_prompts(self, content: str, context: dict[str, Any] | None = None) -> list[PromptInfo]:
         """Detect prompts in content"""
         pass
 
@@ -220,7 +221,7 @@ class IPromptDetector(ABC):
         pass
 
     @abstractmethod
-    def get_supported_types(self) -> List[str]:
+    def get_supported_types(self) -> list[str]:
         """Get supported prompt types"""
         pass
 
@@ -229,12 +230,12 @@ class IPatternLoader(ABC):
     """Interface for pattern loading"""
 
     @abstractmethod
-    def load_pattern(self, pattern_type: str) -> Dict[str, Any]:
+    def load_pattern(self, pattern_type: str) -> dict[str, Any]:
         """Load a specific pattern"""
         pass
 
     @abstractmethod
-    def get_available_patterns(self) -> List[str]:
+    def get_available_patterns(self) -> list[str]:
         """Get list of available patterns"""
         pass
 
@@ -254,7 +255,7 @@ class IPlugin(ABC):
         pass
 
     @abstractmethod
-    def initialize(self, config: Dict[str, Any]) -> bool:
+    def initialize(self, config: dict[str, Any]) -> bool:
         """Initialize the plugin"""
         pass
 
@@ -283,7 +284,7 @@ class IControllerPlugin(IPlugin):
         pass
 
     @abstractmethod
-    def on_prompt_detected(self, session_name: str, prompt: PromptInfo) -> Optional[str]:
+    def on_prompt_detected(self, session_name: str, prompt: PromptInfo) -> str | None:
         """Called when prompt is detected, return response or None"""
         pass
 
@@ -340,12 +341,12 @@ class IPluginManager(ABC):
         pass
 
     @abstractmethod
-    def get_plugin(self, plugin_name: str) -> Optional[IPlugin]:
+    def get_plugin(self, plugin_name: str) -> IPlugin | None:
         """Get a loaded plugin"""
         pass
 
     @abstractmethod
-    def list_plugins(self) -> List[PluginMetadata]:
+    def list_plugins(self) -> list[PluginMetadata]:
         """List all loaded plugins"""
         pass
 
@@ -360,7 +361,7 @@ class IPluginManager(ABC):
         pass
 
     @abstractmethod
-    def get_plugins_by_type(self, plugin_type: type) -> List[IPlugin]:
+    def get_plugins_by_type(self, plugin_type: type) -> list[IPlugin]:
         """Get plugins of specific type"""
         pass
 
@@ -369,7 +370,7 @@ class IEventBus(ABC):
     """Interface for event bus system"""
 
     @abstractmethod
-    def subscribe(self, event_type: str, handler: Callable[[Dict[str, Any]], None]) -> str:
+    def subscribe(self, event_type: str, handler: Callable[[dict[str, Any]], None]) -> str:
         """Subscribe to events, returns subscription ID"""
         pass
 
@@ -379,12 +380,12 @@ class IEventBus(ABC):
         pass
 
     @abstractmethod
-    def publish(self, event_type: str, data: Dict[str, Any]) -> None:
+    def publish(self, event_type: str, data: dict[str, Any]) -> None:
         """Publish an event"""
         pass
 
     @abstractmethod
-    def get_event_types(self) -> List[str]:
+    def get_event_types(self) -> list[str]:
         """Get available event types"""
         pass
 
@@ -408,12 +409,12 @@ class IConfigManager(ABC):
         pass
 
     @abstractmethod
-    def get_all_config(self) -> Dict[str, Any]:
+    def get_all_config(self) -> dict[str, Any]:
         """Get all configuration"""
         pass
 
     @abstractmethod
-    def validate_config(self) -> List[str]:
+    def validate_config(self) -> list[str]:
         """Validate configuration, return list of errors"""
         pass
 

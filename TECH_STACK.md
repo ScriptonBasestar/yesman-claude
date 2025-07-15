@@ -1,9 +1,11 @@
 # TECH_STACK.md - 기술 스택 문서
 
 ## 프로젝트 개요
+
 Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 스택 프로젝트입니다.
 
 ## 프로그래밍 언어
+
 - **Python** (>=3.11): 메인 백엔드 언어, CLI 도구 및 핵심 자동화 로직
 - **JavaScript/TypeScript**: Tauri 대시보드 프론트엔드 개발
 - **Rust**: 네이티브 데스크톱 애플리케이션 백엔드 (Tauri 프레임워크)
@@ -12,6 +14,7 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 ## 백엔드 기술 스택
 
 ### Python 핵심 의존성
+
 - **Click** (>=8.0): CLI 프레임워크
 - **PyYAML** (>=5.4): YAML 설정 파일 파싱
 - **pexpect** (>=4.8): 프로세스 자동화 및 상호작용
@@ -22,11 +25,13 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 - **psutil** (>=5.9.0): 시스템 및 프로세스 유틸리티
 
 ### API 서버 의존성
+
 - **FastAPI**: 최신 Python 웹 프레임워크 (REST API)
 - **Uvicorn**: FastAPI용 ASGI 서버
 - **Pydantic**: 데이터 검증 및 설정 관리
 
 ### 추가 Python 라이브러리
+
 - **setuptools** (>=64): Python 패키지 빌드
 - **wheel**: Python 패키지 배포 형식
 - **altair**: 통계 시각화 라이브러리
@@ -41,12 +46,14 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 ## 프론트엔드 기술 스택 (Tauri 대시보드)
 
 ### 핵심 프론트엔드 프레임워크
+
 - **SvelteKit** (^2.22.2): 풀스택 Svelte 프레임워크
 - **Svelte** (^4.2.20): 반응형 컴포넌트 프레임워크
 - **Vite** (^5.4.19): 빌드 도구 및 개발 서버
 - **TypeScript** (^5.8.3): 타입 안전 JavaScript
 
 ### UI 및 스타일링
+
 - **Tailwind CSS** (^3.4.17): 유틸리티 우선 CSS 프레임워크
 - **DaisyUI** (^4.12.24): Tailwind CSS 컴포넌트 라이브러리
 - **@tailwindcss/typography** (^0.5.16): 타이포그래피 플러그인
@@ -54,18 +61,21 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 - **Autoprefixer** (^10.4.21): CSS 벤더 프리픽스
 
 ### Tauri 데스크톱 프레임워크
+
 - **@tauri-apps/api** (^1.6.0): Tauri JavaScript API
 - **@tauri-apps/cli** (^1.6.3): Tauri CLI 도구
 - **@tauri-apps/plugin-fs** (^2.4.0): 파일 시스템 작업
 - **@tauri-apps/plugin-shell** (^2.3.0): 쉘 명령 실행
 
 ### 데이터 시각화 및 UI 컴포넌트
+
 - **Chart.js** (^4.5.0): 차트 라이브러리
 - **chartjs-adapter-date-fns** (^3.0.0): 차트용 날짜 포맷팅
 - **date-fns** (^2.30.0): 날짜 유틸리티 라이브러리
 - **lucide-svelte** (^0.292.0): Svelte용 아이콘 라이브러리
 
 ## Rust 의존성 (Tauri 백엔드)
+
 - **tauri** (1.5): 크로스 플랫폼 데스크톱 애플리케이션 프레임워크
 - **serde** (1.0): 직렬화 프레임워크
 - **serde_json** (1.0): JSON 직렬화
@@ -79,18 +89,21 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 ## 개발 도구 및 빌드 시스템
 
 ### 패키지 관리
+
 - **uv**: Python 패키지 매니저 (개발 환경 권장)
 - **pip**: Python 패키지 설치기
 - **pnpm** (10.12.1): Node.js 패키지 매니저
 - **setuptools**: Python 패키지 빌드
 
 ### 빌드 도구
+
 - **Vite**: 프론트엔드 빌드 도구
 - **Tauri**: 데스크톱 앱 번들러
 - **esbuild**: JavaScript 번들러 (Vite 통해)
 - **Make**: 빌드 자동화
 
 ### 개발 의존성
+
 - **@sveltejs/adapter-static**: 정적 사이트 어댑터
 - **@sveltejs/vite-plugin-svelte**: Svelte Vite 플러그인
 - **@types/node**: Node.js용 TypeScript 정의
@@ -99,21 +112,25 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 - **tslib**: TypeScript 헬퍼 라이브러리
 
 ## 테스팅 프레임워크
+
 - **unittest**: Python 표준 테스팅 프레임워크
 - **pytest**: 고급 Python 테스팅 프레임워크
 - **unittest.mock**: 테스트용 모킹 라이브러리
 
 ## 시스템 의존성
+
 - **tmux**: 터미널 멀티플렉서
 - **Claude Code**: Claude AI CLI 도구 통합
 - **Linux/Unix**: 주요 운영 체제 지원
 
 ## 설정 및 데이터 형식
+
 - **YAML**: 설정 파일 형식
 - **JSON**: 데이터 교환 형식
 - **TOML**: 설정 형식 (pyproject.toml)
 
 ## 로깅 및 모니터링
+
 - **Python logging**: 표준 로깅 모듈
 - **Rich**: 향상된 터미널 출력
 - **Streamlit**: 웹 기반 모니터링 대시보드
@@ -121,6 +138,7 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 ## 아키텍처 컴포넌트
 
 ### 핵심 애플리케이션 구조
+
 - **CLI 애플리케이션**: Click 기반 명령줄 인터페이스
 - **웹 대시보드**: Streamlit 기반 모니터링 인터페이스
 - **네이티브 데스크톱 앱**: Tauri 기반 크로스 플랫폼 애플리케이션
@@ -131,6 +149,7 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 - **설정 관리**: YAML 기반 설정 시스템
 
 ### 자동화 시스템
+
 - **콘텐츠 수집**: tmux 패널 콘텐츠 실시간 캡처
 - **프롬프트 감지**: 정규식 기반 고급 프롬프트 인식
 - **자동 응답**: 패턴 기반 자동 응답 시스템
@@ -140,12 +159,14 @@ Yesman-Claude는 Claude Code 자동화 및 모니터링을 위한 멀티 기술 
 ## 향후 기술 스택 계획
 
 ### 개발 도구
+
 - **ruff**: 린터 및 코드 포매터
 - **mypy**: 타입 체킹
 - **pytest**: 단위 테스트 프레임워크
 - **pytest-mock**: 모킹 지원
 
 ### 성능 최적화
+
 - **캐싱**: 설정 및 상태 캐싱
 - **멀티 엔진 지원**: GPT, Claude-3 등 다양한 LLM 지원
 - **에러 복구**: 자동 에러 복구 메커니즘

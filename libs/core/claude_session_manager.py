@@ -1,7 +1,7 @@
 """Claude session and pane management"""
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import libtmux  # type: ignore
 
@@ -11,7 +11,7 @@ from ..utils import ensure_log_directory, get_default_log_path
 class ClaudeSessionManager:
     """Manages tmux session and Claude pane discovery"""
 
-    def __init__(self, session_name: str, pane_id: Optional[str] = None):
+    def __init__(self, session_name: str, pane_id: str | None = None):
         self.session_name = session_name
         self.pane_id = pane_id
         self.server = libtmux.Server()

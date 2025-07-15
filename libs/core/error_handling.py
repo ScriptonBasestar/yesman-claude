@@ -7,7 +7,7 @@ import logging
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 
 class ErrorCategory(Enum):
@@ -39,10 +39,10 @@ class ErrorContext:
 
     operation: str
     component: str
-    session_name: Optional[str] = None
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    additional_info: Optional[Dict[str, Any]] = None
+    session_name: str | None = None
+    file_path: str | None = None
+    line_number: int | None = None
+    additional_info: dict[str, Any] | None = None
 
 
 class YesmanError(Exception):
@@ -53,8 +53,8 @@ class YesmanError(Exception):
         message: str,
         category: ErrorCategory = ErrorCategory.UNKNOWN,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-        context: Optional[ErrorContext] = None,
-        cause: Optional[Exception] = None,
+        context: ErrorContext | None = None,
+        cause: Exception | None = None,
         exit_code: int = 1,
     ):
         self.message = message
@@ -65,7 +65,7 @@ class YesmanError(Exception):
         self.exit_code = exit_code
         super().__init__(message)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert error to dictionary for logging/serialization"""
         return {
             "message": self.message,
@@ -78,7 +78,7 @@ class YesmanError(Exception):
                 "session_name": self.context.session_name if self.context else None,
                 "file_path": self.context.file_path if self.context else None,
                 "line_number": self.context.line_number if self.context else None,
-                "additional_info": self.context.additional_info if self.context else None,
+                "additional_info": (self.context.additional_info if self.context else None),
             },
             "cause": str(self.cause) if self.cause else None,
         }
@@ -87,7 +87,7 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors"""
 
-    def __init__(self, message: str, config_file: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, config_file: str | None = None, **kwargs):
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -104,7 +104,7 @@ class ConfigurationError(YesmanError):
 class ValidationError(YesmanError):
     """Validation-related errors"""
 
-    def __init__(self, message: str, field_name: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, field_name: str | None = None, **kwargs):
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -121,7 +121,7 @@ class ValidationError(YesmanError):
 class SessionError(YesmanError):
     """Session management related errors"""
 
-    def __init__(self, message: str, session_name: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, session_name: str | None = None, **kwargs):
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -138,7 +138,7 @@ class SessionError(YesmanError):
 class NetworkError(YesmanError):
     """Network-related errors"""
 
-    def __init__(self, message: str, endpoint: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, endpoint: str | None = None, **kwargs):
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -155,7 +155,7 @@ class NetworkError(YesmanError):
 class PermissionError(YesmanError):
     """Permission-related errors"""
 
-    def __init__(self, message: str, resource_path: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, resource_path: str | None = None, **kwargs):
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -172,11 +172,11 @@ class PermissionError(YesmanError):
 class TimeoutError(YesmanError):
     """Timeout-related errors"""
 
-    def __init__(self, message: str, timeout_duration: Optional[float] = None, **kwargs):
+    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs):
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
-            additional_info={"timeout_duration": timeout_duration} if timeout_duration else None,
+            additional_info=({"timeout_duration": timeout_duration} if timeout_duration else None),
         )
         super().__init__(
             message,
@@ -198,7 +198,13 @@ class ErrorHandler:
             "by_component": {},
         }
 
-    def handle_error(self, error: Union[YesmanError, Exception], context: Optional[ErrorContext] = None, log_traceback: bool = True, exit_on_critical: bool = True) -> None:
+    def handle_error(
+        self,
+        error: YesmanError | Exception,
+        context: ErrorContext | None = None,
+        log_traceback: bool = True,
+        exit_on_critical: bool = True,
+    ) -> None:
         """
         Handle an error with logging and optional exit
 
@@ -289,7 +295,7 @@ class ErrorHandler:
 
         sys.exit(error.exit_code)
 
-    def get_error_summary(self) -> Dict[str, Any]:
+    def get_error_summary(self) -> dict[str, Any]:
         """Get error statistics summary"""
         return self.error_stats.copy()
 
@@ -319,14 +325,21 @@ def handle_exceptions(func):
             # Create context from function
             context = ErrorContext(
                 operation=func.__name__,
-                component=func.__module__.split(".")[-1] if hasattr(func, "__module__") else "unknown",
+                component=(func.__module__.split(".")[-1] if hasattr(func, "__module__") else "unknown"),
             )
             error_handler.handle_error(e, context)
 
     return wrapper
 
 
-def safe_execute(operation: str, component: str, func: callable, *args, error_category: ErrorCategory = ErrorCategory.UNKNOWN, **kwargs) -> Any:
+def safe_execute(
+    operation: str,
+    component: str,
+    func: callable,
+    *args,
+    error_category: ErrorCategory = ErrorCategory.UNKNOWN,
+    **kwargs,
+) -> Any:
     """
     Safely execute a function with error handling
 

@@ -4,7 +4,7 @@ import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class AgentState(Enum):
@@ -35,25 +35,25 @@ class Task:
     task_id: str
     title: str
     description: str
-    command: List[str]
+    command: list[str]
     working_directory: str
-    environment: Dict[str, str] = field(default_factory=dict)
+    environment: dict[str, str] = field(default_factory=dict)
     timeout: int = 300  # 5 minutes default
     priority: int = 5  # 1-10, higher is more priority
     complexity: int = 5  # 1-10, estimate of task complexity
-    dependencies: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     # Execution tracking
     status: TaskStatus = TaskStatus.PENDING
-    assigned_agent: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    assigned_agent: str | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
     output: str = ""
     error: str = ""
-    exit_code: Optional[int] = None
+    exit_code: int | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         from dataclasses import asdict
 
@@ -68,7 +68,7 @@ class Task:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Task":
+    def from_dict(cls, data: dict[str, Any]) -> "Task":
         """Create from dictionary"""
         # Convert status back to enum
         if "status" in data:
@@ -87,18 +87,18 @@ class Agent:
 
     agent_id: str
     state: AgentState = AgentState.IDLE
-    current_task: Optional[str] = None
-    branch_name: Optional[str] = None
-    work_environment: Optional[str] = None
-    process: Optional[subprocess.Popen] = None
+    current_task: str | None = None
+    branch_name: str | None = None
+    work_environment: str | None = None
+    process: subprocess.Popen | None = None
     created_at: datetime = field(default_factory=datetime.now)
     last_heartbeat: datetime = field(default_factory=datetime.now)
     completed_tasks: int = 0
     failed_tasks: int = 0
     total_execution_time: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary (excluding process)"""
         from dataclasses import asdict
 
@@ -112,7 +112,7 @@ class Agent:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Agent":
+    def from_dict(cls, data: dict[str, Any]) -> "Agent":
         """Create from dictionary"""
         # Convert state back to enum
         if "state" in data:

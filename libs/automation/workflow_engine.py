@@ -3,11 +3,12 @@
 import asyncio
 import json
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .context_detector import ContextInfo, ContextType
 
@@ -44,14 +45,14 @@ class WorkflowAction:
 
     action_type: ActionType
     command: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     timeout: int = 60
     retry_count: int = 0
     retry_delay: int = 5
     continue_on_failure: bool = False
-    condition: Optional[str] = None  # Python expression to evaluate
+    condition: str | None = None  # Python expression to evaluate
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "action_type": self.action_type.value,
@@ -70,13 +71,13 @@ class WorkflowChain:
     """A chain of workflow actions triggered by specific contexts."""
 
     name: str
-    trigger_contexts: List[ContextType]
-    actions: List[WorkflowAction]
+    trigger_contexts: list[ContextType]
+    actions: list[WorkflowAction]
     priority: int = 1
     enabled: bool = True
     description: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "name": self.name,
@@ -96,12 +97,12 @@ class WorkflowExecution:
     context_info: ContextInfo
     status: WorkflowStatus
     start_time: float
-    end_time: Optional[float] = None
+    end_time: float | None = None
     current_action: int = 0
-    results: List[Dict[str, Any]] = field(default_factory=list)
-    error_message: Optional[str] = None
+    results: list[dict[str, Any]] = field(default_factory=list)
+    error_message: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "workflow_name": self.workflow_name,
@@ -115,16 +116,160 @@ class WorkflowExecution:
         }
 
 
+class ConditionEvaluator:
+    """Safe condition evaluator that replaces eval() with regex-based parsing."""
+
+    def __init__(self, context_info: ContextInfo):
+        self.context = {
+            "context_type": context_info.context_type.value,
+            "confidence": context_info.confidence,
+            "details": context_info.details,
+            "project_path": str(context_info.project_path) if context_info.project_path else None,
+            "session_name": context_info.session_name,
+            "timestamp": context_info.timestamp,
+        }
+
+        # Supported operators
+        self.operators = {
+            "==": self._equals,
+            "!=": self._not_equals,
+            ">": self._greater_than,
+            "<": self._less_than,
+            ">=": self._greater_equal,
+            "<=": self._less_equal,
+            "in": self._contains,
+            "not in": self._not_contains,
+        }
+
+        # Condition pattern: variable operator value
+        self.condition_pattern = re.compile(r"^\s*(\w+)\s+(==|!=|>=|<=|>|<|not\s+in|in)\s+(.+?)\s*$")
+
+    def evaluate(self, condition: str) -> bool:
+        """Evaluate a condition string safely."""
+        # Handle simple boolean literals
+        condition_lower = condition.strip().lower()
+        if condition_lower in ("true", "1"):
+            return True
+        elif condition_lower in ("false", "0"):
+            return False
+
+        # Parse complex conditions
+        match = self.condition_pattern.match(condition)
+        if not match:
+            logger.warning(f"Invalid condition format: {condition}")
+            return False
+
+        variable, operator, value_str = match.groups()
+
+        # Check if variable exists in context
+        if variable not in self.context:
+            logger.warning(f"Unknown variable in condition: {variable}")
+            return False
+
+        # Get variable value
+        var_value = self.context[variable]
+
+        # Parse the expected value
+        expected_value = self._parse_value(value_str)
+
+        # Apply operator
+        if operator not in self.operators:
+            logger.warning(f"Unsupported operator: {operator}")
+            return False
+
+        return self.operators[operator](var_value, expected_value)
+
+    def _parse_value(self, value_str: str) -> Any:
+        """Parse a value string into appropriate Python type."""
+        value_str = value_str.strip()
+
+        # String literal (quoted)
+        if (value_str.startswith('"') and value_str.endswith('"')) or (value_str.startswith("'") and value_str.endswith("'")):
+            return value_str[1:-1]  # Remove quotes
+
+        # Boolean
+        if value_str.lower() == "true":
+            return True
+        elif value_str.lower() == "false":
+            return False
+
+        # None
+        if value_str.lower() == "none":
+            return None
+
+        # Number
+        try:
+            if "." in value_str:
+                return float(value_str)
+            else:
+                return int(value_str)
+        except ValueError:
+            pass
+
+        # Default to string
+        return value_str
+
+    def _equals(self, left: Any, right: Any) -> bool:
+        """Equality comparison."""
+        return left == right
+
+    def _not_equals(self, left: Any, right: Any) -> bool:
+        """Inequality comparison."""
+        return left != right
+
+    def _greater_than(self, left: Any, right: Any) -> bool:
+        """Greater than comparison."""
+        try:
+            return left > right
+        except TypeError:
+            return False
+
+    def _less_than(self, left: Any, right: Any) -> bool:
+        """Less than comparison."""
+        try:
+            return left < right
+        except TypeError:
+            return False
+
+    def _greater_equal(self, left: Any, right: Any) -> bool:
+        """Greater than or equal comparison."""
+        try:
+            return left >= right
+        except TypeError:
+            return False
+
+    def _less_equal(self, left: Any, right: Any) -> bool:
+        """Less than or equal comparison."""
+        try:
+            return left <= right
+        except TypeError:
+            return False
+
+    def _contains(self, left: Any, right: Any) -> bool:
+        """Containment check."""
+        try:
+            return right in left
+        except TypeError:
+            return False
+
+    def _not_contains(self, left: Any, right: Any) -> bool:
+        """Not containment check."""
+        try:
+            return right not in left
+        except TypeError:
+            return True
+
+
 class WorkflowEngine:
     """Engine for executing workflow automation chains."""
 
-    def __init__(self, project_path: Optional[Path] = None):
+    def __init__(self, project_path: Path | None = None):
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.workflow_engine")
 
-        self.workflows: Dict[str, WorkflowChain] = {}
-        self.active_executions: Dict[str, WorkflowExecution] = {}
-        self.execution_history: List[WorkflowExecution] = []
+        self.workflows: dict[str, WorkflowChain] = {}
+        self.active_executions: dict[str, WorkflowExecution] = {}
+        self.execution_history: list[WorkflowExecution] = []
 
         # Load default workflows
         self._load_default_workflows()
@@ -134,7 +279,7 @@ class WorkflowEngine:
         self.workflows[workflow.name] = workflow
         self.logger.info(f"Registered workflow: {workflow.name}")
 
-    def trigger_workflows(self, context_info: ContextInfo) -> List[str]:
+    def trigger_workflows(self, context_info: ContextInfo) -> list[str]:
         """Trigger workflows based on detected context."""
         triggered_workflows = []
 
@@ -271,7 +416,7 @@ class WorkflowEngine:
         else:
             raise ValueError(f"Unsupported action type: {action.action_type}")
 
-    async def _execute_shell_command(self, action: WorkflowAction) -> Dict[str, Any]:
+    async def _execute_shell_command(self, action: WorkflowAction) -> dict[str, Any]:
         """Execute shell command."""
         process = await asyncio.create_subprocess_shell(
             action.command,
@@ -292,11 +437,11 @@ class WorkflowEngine:
                 "stderr": stderr.decode("utf-8"),
             }
 
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             process.kill()
             raise TimeoutError(f"Command timed out after {action.timeout}s: {action.command}") from e
 
-    async def _execute_tmux_command(self, action: WorkflowAction, execution: WorkflowExecution) -> Dict[str, Any]:
+    async def _execute_tmux_command(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
         """Execute tmux command."""
         session_name = execution.context_info.session_name or action.parameters.get("session_name")
 
@@ -319,7 +464,7 @@ class WorkflowEngine:
             "command_sent": action.command,
         }
 
-    async def _execute_claude_input(self, action: WorkflowAction, execution: WorkflowExecution) -> Dict[str, Any]:
+    async def _execute_claude_input(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
         """Send input to Claude through the dashboard controller."""
         # This would integrate with the ClaudeManager
         # For now, simulate the action
@@ -330,7 +475,7 @@ class WorkflowEngine:
             "session_name": execution.context_info.session_name,
         }
 
-    async def _execute_file_operation(self, action: WorkflowAction) -> Dict[str, Any]:
+    async def _execute_file_operation(self, action: WorkflowAction) -> dict[str, Any]:
         """Execute file operation."""
         operation = action.parameters.get("operation", "read")
         file_path = Path(self.project_path) / action.command
@@ -351,7 +496,7 @@ class WorkflowEngine:
         else:
             raise ValueError(f"Unsupported file operation: {operation}")
 
-    async def _execute_notification(self, action: WorkflowAction) -> Dict[str, Any]:
+    async def _execute_notification(self, action: WorkflowAction) -> dict[str, Any]:
         """Send notification."""
         # Platform-specific notification
         title = action.parameters.get("title", "Yesman Automation")
@@ -368,18 +513,18 @@ class WorkflowEngine:
 
         return {"notification_sent": action.command}
 
-    async def _execute_delay(self, action: WorkflowAction) -> Dict[str, Any]:
+    async def _execute_delay(self, action: WorkflowAction) -> dict[str, Any]:
         """Execute delay."""
         delay_seconds = int(action.command)
         await asyncio.sleep(delay_seconds)
         return {"delay_seconds": delay_seconds}
 
-    async def _execute_condition_check(self, action: WorkflowAction, execution: WorkflowExecution) -> Dict[str, Any]:
+    async def _execute_condition_check(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
         """Execute condition check."""
         result = self._evaluate_condition(action.command, execution.context_info)
         return {"condition": action.command, "result": result}
 
-    async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> Dict[str, Any]:
+    async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
         """Execute multiple actions in parallel."""
         parallel_actions = action.parameters.get("actions", [])
 
@@ -394,21 +539,10 @@ class WorkflowEngine:
         return {"parallel_results": results, "action_count": len(tasks)}
 
     def _evaluate_condition(self, condition: str, context_info: ContextInfo) -> bool:
-        """Evaluate a condition expression."""
+        """Evaluate a condition expression safely without using eval()."""
         try:
-            # Create safe evaluation context
-            eval_context = {
-                "context_type": context_info.context_type.value,
-                "confidence": context_info.confidence,
-                "details": context_info.details,
-                "project_path": context_info.project_path,
-                "session_name": context_info.session_name,
-                "timestamp": context_info.timestamp,
-            }
-
-            # Safe evaluation (limited scope)
-            return bool(eval(condition, {"__builtins__": {}}, eval_context))  # noqa: S307
-
+            evaluator = ConditionEvaluator(context_info)
+            return evaluator.evaluate(condition)
         except Exception as e:
             self.logger.warning(f"Condition evaluation failed: {condition} - {e}")
             return False
@@ -492,7 +626,7 @@ class WorkflowEngine:
         self.register_workflow(test_failure_workflow)
         self.register_workflow(claude_idle_workflow)
 
-    def get_workflow_status(self) -> Dict[str, Any]:
+    def get_workflow_status(self) -> dict[str, Any]:
         """Get current workflow engine status."""
         return {
             "registered_workflows": len(self.workflows),

@@ -1,13 +1,5 @@
-from libs.dashboard.renderers import (
-    RendererFactory,
-    RenderFormat,
-    WidgetType,
-)
-from libs.dashboard.renderers.widget_models import (
-    HealthData,
-    SessionData,
-    SessionStatus,
-)
+from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
+from libs.dashboard.renderers.widget_models import HealthData, SessionData, SessionStatus
 
 
 class TestMultiFormatRendering:

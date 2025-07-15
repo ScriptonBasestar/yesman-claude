@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from rich.align import Align
 from rich.console import Console
@@ -65,7 +65,7 @@ class AgentMetrics:
     """Real-time agent performance metrics"""
 
     agent_id: str
-    current_task: Optional[str] = None
+    current_task: str | None = None
     tasks_completed: int = 0
     tasks_failed: int = 0
     total_execution_time: float = 0.0
@@ -89,9 +89,9 @@ class TaskMetrics:
     task_id: str
     title: str
     status: TaskStatus
-    assigned_agent: Optional[str] = None
-    start_time: Optional[datetime] = None
-    estimated_duration: Optional[float] = None
+    assigned_agent: str | None = None
+    start_time: datetime | None = None
+    estimated_duration: float | None = None
     progress: float = 0.0
 
 
@@ -100,8 +100,8 @@ class AgentMonitor:
 
     def __init__(
         self,
-        agent_pool: Optional[AgentPool] = None,
-        console: Optional[Console] = None,
+        agent_pool: AgentPool | None = None,
+        console: Console | None = None,
     ):
         self.console = console or Console()
         self.logger = logging.getLogger("yesman.dashboard.agent_monitor")
@@ -109,13 +109,13 @@ class AgentMonitor:
 
         # Display state
         self.display_mode = MonitorDisplayMode.OVERVIEW
-        self.selected_agent: Optional[str] = None
+        self.selected_agent: str | None = None
         self.auto_refresh = True
         self.refresh_interval = 1.0  # seconds
 
         # Metrics storage
-        self.agent_metrics: Dict[str, AgentMetrics] = {}
-        self.task_metrics: Dict[str, TaskMetrics] = {}
+        self.agent_metrics: dict[str, AgentMetrics] = {}
+        self.task_metrics: dict[str, TaskMetrics] = {}
         self.system_metrics = {
             "total_agents": 0,
             "active_agents": 0,
@@ -128,12 +128,12 @@ class AgentMonitor:
         }
 
         # Performance tracking
-        self.performance_history: Dict[str, List[Tuple[datetime, float]]] = {}
-        self.task_completion_rate: List[Tuple[datetime, int]] = []
+        self.performance_history: dict[str, list[tuple[datetime, float]]] = {}
+        self.task_completion_rate: list[tuple[datetime, int]] = []
 
         # Visual components
-        self.progress_bars: Dict[str, TaskID] = {}
-        self.progress_display: Optional[Progress] = None
+        self.progress_bars: dict[str, TaskID] = {}
+        self.progress_display: Progress | None = None
 
     def update_metrics(self) -> None:
         """Update all metrics from agent pool"""
@@ -184,7 +184,7 @@ class AgentMonitor:
                     title=task_data["title"],
                     status=TaskStatus(task_data["status"]),
                     assigned_agent=task_data.get("assigned_agent"),
-                    start_time=datetime.fromisoformat(task_data["start_time"]) if task_data.get("start_time") else None,
+                    start_time=(datetime.fromisoformat(task_data["start_time"]) if task_data.get("start_time") else None),
                     progress=self._calculate_task_progress(task_data),
                 )
 
@@ -206,7 +206,7 @@ class AgentMonitor:
         except Exception as e:
             self.logger.error(f"Error updating metrics: {e}")
 
-    def _calculate_task_progress(self, task_data: Dict[str, Any]) -> float:
+    def _calculate_task_progress(self, task_data: dict[str, Any]) -> float:
         """Calculate task progress percentage"""
         status = task_data["status"]
         start_time = task_data.get("start_time")
@@ -370,7 +370,7 @@ class AgentMonitor:
 
             tasks_table.add_row(
                 task_id[:8] + "...",  # Truncate long IDs
-                metrics.title[:30] + "..." if len(metrics.title) > 30 else metrics.title,
+                (metrics.title[:30] + "..." if len(metrics.title) > 30 else metrics.title),
                 Text(metrics.status.value.upper(), style=status_color),
                 metrics.assigned_agent or "-",
                 f"{progress_bar} {metrics.progress:.0%}",
@@ -461,7 +461,7 @@ Keyboard Shortcuts:
   h       - Show this help
         """.strip()
 
-    async def start_monitoring(self, duration: Optional[float] = None) -> None:
+    async def start_monitoring(self, duration: float | None = None) -> None:
         """Start real-time monitoring"""
         start_time = time.time()
 
@@ -483,15 +483,15 @@ Keyboard Shortcuts:
 
 
 # Helper function for standalone usage
-def create_agent_monitor(agent_pool: Optional[AgentPool] = None) -> AgentMonitor:
+def create_agent_monitor(agent_pool: AgentPool | None = None) -> AgentMonitor:
     """Create and configure an agent monitor"""
     return AgentMonitor(agent_pool=agent_pool)
 
 
 # CLI integration function
 async def run_agent_monitor(
-    agent_pool: Optional[AgentPool] = None,
-    duration: Optional[float] = None,
+    agent_pool: AgentPool | None = None,
+    duration: float | None = None,
 ) -> None:
     """Run the agent monitor as a standalone application"""
     monitor = create_agent_monitor(agent_pool)

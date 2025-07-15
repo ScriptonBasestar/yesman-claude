@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -15,9 +15,9 @@ class YesmanConfig:
         self.config = self._load_config()
         self._setup_logging()
 
-    def _load_config(self) -> Dict[str, Any]:
-        global_cfg: Dict[str, Any] = {}
-        local_cfg: Dict[str, Any] = {}
+    def _load_config(self) -> dict[str, Any]:
+        global_cfg: dict[str, Any] = {}
+        local_cfg: dict[str, Any] = {}
 
         if self.global_path.exists():
             with open(self.global_path, encoding="utf-8") as f:
@@ -59,9 +59,9 @@ class YesmanConfig:
     def get(self, key: str, default: Any = None) -> Any:
         return self.config.get(key, default)
 
-    def save(self, new_config_data: Dict[str, Any]):
+    def save(self, new_config_data: dict[str, Any]):
         """Saves the configuration updates to the local yesman.yaml file."""
-        current_local_cfg: Dict[str, Any] = {}
+        current_local_cfg: dict[str, Any] = {}
         if self.local_path.exists():
             with open(self.local_path, encoding="utf-8") as f:
                 current_local_cfg = yaml.safe_load(f) or {}

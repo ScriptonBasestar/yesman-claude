@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import click
 from rich.console import Console
@@ -22,7 +22,13 @@ def logs():
 
 @logs.command()
 @click.option("--output-dir", "-o", default="~/.yesman/logs", help="Log output directory")
-@click.option("--format", "-f", default="json", type=click.Choice(["json", "text"]), help="Log format")
+@click.option(
+    "--format",
+    "-f",
+    default="json",
+    type=click.Choice(["json", "text"]),
+    help="Log format",
+)
 @click.option("--compression", "-c", is_flag=True, help="Enable gzip compression")
 @click.option("--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching")
 def configure(output_dir, format, compression, buffer_size):
@@ -180,7 +186,7 @@ def cleanup(log_dir, days):
         console.print(f"[red]Error cleaning up logs: {e}[/]")
 
 
-def _analyze_log_files(log_files: list, last_hours: int, level_filter: str = None) -> Dict[str, Any]:
+def _analyze_log_files(log_files: list, last_hours: int, level_filter: str = None) -> dict[str, Any]:
     """Analyze log files and return statistics"""
     import gzip
     from collections import defaultdict
@@ -243,7 +249,7 @@ def _analyze_log_files(log_files: list, last_hours: int, level_filter: str = Non
     return stats
 
 
-def _display_log_statistics(console: Console, stats: Dict[str, Any]):
+def _display_log_statistics(console: Console, stats: dict[str, Any]):
     """Display log analysis statistics"""
     # Overview
     overview = Panel(

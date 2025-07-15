@@ -6,7 +6,6 @@ import logging
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
 
 from ..utils import ensure_log_directory, get_default_log_path
 
@@ -49,7 +48,12 @@ class ClaudeContentCollector:
         """Generate hash for content to detect changes"""
         return hashlib.sha256(content.encode("utf-8")).hexdigest()[:8]
 
-    def collect_interaction(self, content: str, prompt_info: Optional[Dict] = None, response: Optional[str] = None) -> bool:
+    def collect_interaction(
+        self,
+        content: str,
+        prompt_info: dict | None = None,
+        response: str | None = None,
+    ) -> bool:
         """
         Collect Claude interaction data
 
@@ -106,7 +110,7 @@ class ClaudeContentCollector:
             self.logger.error(f"Failed to save interaction: {e}")
             return False
 
-    def collect_raw_content(self, content: str, metadata: Optional[Dict] = None) -> bool:
+    def collect_raw_content(self, content: str, metadata: dict | None = None) -> bool:
         """
         Collect raw content without prompt analysis
 
@@ -152,7 +156,7 @@ class ClaudeContentCollector:
             self.logger.error(f"Failed to save raw content: {e}")
             return False
 
-    def get_collection_stats(self) -> Dict:
+    def get_collection_stats(self) -> dict:
         """Get statistics about collected data"""
         try:
             files = list(self.collection_path.glob("*.json"))
@@ -209,7 +213,7 @@ class ContentCollectionManager:
     """Manages content collectors for multiple sessions"""
 
     def __init__(self):
-        self.collectors: Dict[str, ClaudeContentCollector] = {}
+        self.collectors: dict[str, ClaudeContentCollector] = {}
         self.logger = logging.getLogger("yesman.dashboard.content_collection_manager")
 
     def get_collector(self, session_name: str) -> ClaudeContentCollector:
@@ -218,15 +222,21 @@ class ContentCollectionManager:
             self.collectors[session_name] = ClaudeContentCollector(session_name)
         return self.collectors[session_name]
 
-    def collect_for_session(self, session_name: str, content: str, prompt_info: Optional[Dict] = None, response: Optional[str] = None) -> bool:
+    def collect_for_session(
+        self,
+        session_name: str,
+        content: str,
+        prompt_info: dict | None = None,
+        response: str | None = None,
+    ) -> bool:
         """Collect content for a specific session"""
         collector = self.get_collector(session_name)
         return collector.collect_interaction(content, prompt_info, response)
 
-    def get_all_stats(self) -> Dict[str, Dict]:
+    def get_all_stats(self) -> dict[str, dict]:
         """Get statistics for all sessions"""
         return {session: collector.get_collection_stats() for session, collector in self.collectors.items()}
 
-    def cleanup_all_sessions(self, days_to_keep: int = 7) -> Dict[str, int]:
+    def cleanup_all_sessions(self, days_to_keep: int = 7) -> dict[str, int]:
         """Clean up old files for all sessions"""
         return {session: collector.cleanup_old_files(days_to_keep) for session, collector in self.collectors.items()}

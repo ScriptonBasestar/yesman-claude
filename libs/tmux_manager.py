@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import click
 import libtmux  # type: ignore
@@ -20,7 +20,7 @@ class TmuxManager:
         self.templates_path = Path.home() / ".yesman" / "templates"
         self.templates_path.mkdir(parents=True, exist_ok=True)
 
-    def create_session(self, session_name: str, config_dict: Dict) -> bool:
+    def create_session(self, session_name: str, config_dict: dict) -> bool:
         """Create tmux session from a YAML config file in templates directory"""
         try:
             server = libtmux.Server()
@@ -49,15 +49,15 @@ class TmuxManager:
             self.logger.error(f"Failed to create session from {session_name}: {e}")
             return False
 
-    def get_templates(self) -> List[str]:
+    def get_templates(self) -> list[str]:
         """Get all available session templates"""
         return [f.stem for f in self.templates_path.glob("*.yaml")]
 
-    def load_projects(self) -> Dict[str, Any]:
+    def load_projects(self) -> dict[str, Any]:
         """Load project sessions defined in projects.yaml"""
         global_path = Path.home() / ".yesman" / "projects.yaml"
         local_path = Path.cwd() / ".yesman" / "projects.yaml"
-        projects: Dict[str, Any] = {}
+        projects: dict[str, Any] = {}
         # Load global projects
         if global_path.exists():
             with open(global_path, encoding="utf-8") as f:
@@ -69,7 +69,7 @@ class TmuxManager:
             projects = {**projects, **local_projects}
         return projects
 
-    def load_template(self, template_name: str) -> Dict[str, Any]:
+    def load_template(self, template_name: str) -> dict[str, Any]:
         """Load a specific template file"""
         template_path = self.templates_path / f"{template_name}.yaml"
         if not template_path.exists():
@@ -78,7 +78,7 @@ class TmuxManager:
         with open(template_path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
-    def get_session_config(self, session_name: str, session_config: Dict[str, Any]) -> Dict[str, Any]:
+    def get_session_config(self, session_name: str, session_config: dict[str, Any]) -> dict[str, Any]:
         """Get final session configuration after applying template and overrides"""
         # Start with base configuration
         final_config = {}
@@ -104,7 +104,7 @@ class TmuxManager:
 
         return final_config
 
-    def _deep_merge_dicts(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    def _deep_merge_dicts(self, base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
         """Deep merge two dictionaries, with override taking precedence"""
         result = base.copy()
 
@@ -128,7 +128,7 @@ class TmuxManager:
             name = sess.get("session_name")
             click.echo(f"  - {name}")
 
-    def get_session_info(self, session_name: str) -> Dict[str, Any]:
+    def get_session_info(self, session_name: str) -> dict[str, Any]:
         """Get session information directly from tmux"""
 
         def fetch_session_info():
@@ -176,7 +176,7 @@ class TmuxManager:
 
         return fetch_session_info()
 
-    def get_cached_sessions_list(self) -> List[Dict[str, Any]]:
+    def get_cached_sessions_list(self) -> list[dict[str, Any]]:
         """Get list of all sessions directly from tmux"""
         try:
             server = libtmux.Server()
@@ -221,11 +221,17 @@ class TmuxManager:
 
     def attach_to_session(self, session_name: str) -> None:
         """Attach to a specific tmux session"""
-        import os
+        import subprocess
 
-        os.system(f"tmux attach -t {session_name}")
+        # Use subprocess.run for security (no shell injection)
+        try:
+            subprocess.run(["tmux", "attach", "-t", session_name], check=True)
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to attach to session {session_name}: {e}")
+        except FileNotFoundError:
+            self.logger.error("tmux command not found")
 
-    def get_session_activity(self, session_name: str) -> Dict[str, Any]:
+    def get_session_activity(self, session_name: str) -> dict[str, Any]:
         """
         Get session activity data by parsing session logs.
         """

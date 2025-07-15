@@ -1,7 +1,7 @@
 """Simple directed graph implementation for task dependencies"""
 
 from collections import defaultdict, deque
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any
 
 
 class DirectedGraph:
@@ -9,9 +9,9 @@ class DirectedGraph:
 
     def __init__(self):
         """Initialize empty graph"""
-        self.nodes: Dict[str, Dict[str, Any]] = {}
-        self.edges: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(dict)
-        self.reverse_edges: Dict[str, Set[str]] = defaultdict(set)
+        self.nodes: dict[str, dict[str, Any]] = {}
+        self.edges: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
+        self.reverse_edges: dict[str, set[str]] = defaultdict(set)
 
     def add_node(self, node_id: str, **attrs) -> None:
         """Add a node with attributes"""
@@ -42,13 +42,13 @@ class DirectedGraph:
         """Check if edge exists"""
         return source in self.edges and target in self.edges[source]
 
-    def nodes_iter(self) -> List[str]:
+    def nodes_iter(self) -> list[str]:
         """Iterate over nodes"""
         return list(self.nodes.keys())
 
-    def edges_iter(self, data: bool = False) -> List[Tuple]:
+    def edges_iter(self, data: bool = False) -> list[tuple[str, str] | tuple[str, str, dict[str, Any]]]:
         """Iterate over edges"""
-        result = []
+        result: list[tuple[str, str] | tuple[str, str, dict[str, Any]]] = []
         for source, targets in self.edges.items():
             for target, attrs in targets.items():
                 if data:
@@ -57,11 +57,11 @@ class DirectedGraph:
                     result.append((source, target))
         return result
 
-    def predecessors(self, node: str) -> List[str]:
+    def predecessors(self, node: str) -> list[str]:
         """Get predecessor nodes"""
         return list(self.reverse_edges.get(node, set()))
 
-    def successors(self, node: str) -> List[str]:
+    def successors(self, node: str) -> list[str]:
         """Get successor nodes"""
         return list(self.edges.get(node, {}).keys())
 
@@ -93,11 +93,11 @@ class DirectedGraph:
 
         return all(not (node not in visited and has_cycle(node)) for node in self.nodes)
 
-    def simple_cycles(self) -> List[List[str]]:
+    def simple_cycles(self) -> list[list[str]]:
         """Find simple cycles in the graph"""
         cycles = []
         visited = set()
-        rec_stack = []
+        rec_stack: list[str] = []
 
         def find_cycles(node: str, start: str) -> None:
             if node in rec_stack:
@@ -139,7 +139,7 @@ class DirectedGraph:
 
         return unique_cycles
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """Return nodes in topological order"""
         if not self.is_directed_acyclic_graph():
             raise ValueError("Graph contains cycles")

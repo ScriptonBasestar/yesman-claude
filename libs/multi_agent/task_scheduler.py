@@ -4,7 +4,7 @@ import heapq
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .types import Agent, Task
 
@@ -20,7 +20,7 @@ class AgentCapability:
     success_rate: float = 1.0  # Historical success rate (0.0-1.0)
     average_execution_time: float = 0.0  # Average time per task in seconds
     complexity_preference: float = 0.5  # Preference for complex tasks (0.0-1.0)
-    specializations: List[str] = field(
+    specializations: list[str] = field(
         default_factory=list,
     )  # Task type specializations
     current_load: float = 0.0  # Current workload (0.0-1.0)
@@ -68,9 +68,9 @@ class TaskScheduler:
 
     def __init__(self):
         """Initialize the task scheduler"""
-        self.agent_capabilities: Dict[str, AgentCapability] = {}
-        self.priority_queue: List[PriorityTask] = []
-        self.task_history: Dict[str, List[Task]] = {}  # agent_id -> task history
+        self.agent_capabilities: dict[str, AgentCapability] = {}
+        self.priority_queue: list[PriorityTask] = []
+        self.task_history: dict[str, list[Task]] = {}  # agent_id -> task history
         self.scheduling_metrics = {
             "total_scheduled": 0,
             "average_wait_time": 0.0,
@@ -91,7 +91,7 @@ class TaskScheduler:
     def register_agent(
         self,
         agent: Agent,
-        capabilities: Optional[AgentCapability] = None,
+        capabilities: AgentCapability | None = None,
     ) -> None:
         """Register an agent with the scheduler"""
         if capabilities is None:
@@ -112,7 +112,7 @@ class TaskScheduler:
             f"Added task {task.task_id} with priority score {priority_score:.3f}",
         )
 
-    def get_next_task_for_agent(self, agent: Agent) -> Optional[Task]:
+    def get_next_task_for_agent(self, agent: Agent) -> Task | None:
         """Get the best next task for a specific agent"""
         if not self.priority_queue:
             return None
@@ -138,8 +138,8 @@ class TaskScheduler:
 
     def get_optimal_task_assignment(
         self,
-        available_agents: List[Agent],
-    ) -> List[Tuple[Agent, Task]]:
+        available_agents: list[Agent],
+    ) -> list[tuple[Agent, Task]]:
         """Get optimal task assignments for multiple agents"""
         assignments = []
 
@@ -265,7 +265,7 @@ class TaskScheduler:
     def _find_best_task_for_agent(
         self,
         agent_capability: AgentCapability,
-    ) -> Optional[int]:
+    ) -> int | None:
         """Find the best task index for a specific agent"""
         if not self.priority_queue:
             return None
@@ -350,7 +350,7 @@ class TaskScheduler:
         if capability:
             capability.current_load = max(0.0, min(1.0, load))
 
-    def get_scheduling_metrics(self) -> Dict[str, Any]:
+    def get_scheduling_metrics(self) -> dict[str, Any]:
         """Get current scheduling performance metrics"""
         if not self.agent_capabilities:
             return self.scheduling_metrics
@@ -381,7 +381,7 @@ class TaskScheduler:
 
         return self.scheduling_metrics.copy()
 
-    def rebalance_tasks(self) -> List[Tuple[str, str]]:
+    def rebalance_tasks(self) -> list[tuple[str, str]]:
         """Rebalance workload between agents by adjusting task assignment preferences"""
         rebalancing_actions = []
 

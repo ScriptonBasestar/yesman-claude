@@ -9,30 +9,12 @@ from datetime import datetime
 
 import pytest
 
-from libs.dashboard.renderers.base_renderer import (
-    BaseRenderer,
-    RenderFormat,
-    WidgetType,
-)
-from libs.dashboard.renderers.renderer_factory import (
-    RendererFactory,
-    RendererFactoryError,
-    UnsupportedFormatError,
-    create_renderer,
-    get_renderer,
-    render_all_formats,
-    render_formats,
-    render_widget,
-)
+from libs.dashboard.renderers.base_renderer import BaseRenderer, RenderFormat, WidgetType
+from libs.dashboard.renderers.renderer_factory import RendererFactory, RendererFactoryError, UnsupportedFormatError, create_renderer, get_renderer, render_all_formats, render_formats, render_widget
 from libs.dashboard.renderers.tauri_renderer import TauriRenderer
 from libs.dashboard.renderers.tui_renderer import TUIRenderer
 from libs.dashboard.renderers.web_renderer import WebRenderer
-from libs.dashboard.renderers.widget_models import (
-    MetricCardData,
-    SessionData,
-    SessionStatus,
-    WindowData,
-)
+from libs.dashboard.renderers.widget_models import MetricCardData, SessionData, SessionStatus, WindowData
 
 
 class MockRenderer(BaseRenderer):

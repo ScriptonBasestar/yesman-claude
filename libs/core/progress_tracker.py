@@ -1,7 +1,6 @@
 """Progress tracking for Claude sessions"""
 
 import re
-from typing import Dict, List, Optional
 
 from .models import SessionProgress, TaskPhase, TaskProgress
 
@@ -57,9 +56,9 @@ class ProgressAnalyzer:
     }
 
     def __init__(self):
-        self.session_progress: Dict[str, SessionProgress] = {}
+        self.session_progress: dict[str, SessionProgress] = {}
 
-    def analyze_pane_output(self, session_name: str, pane_output: List[str]) -> Optional[SessionProgress]:
+    def analyze_pane_output(self, session_name: str, pane_output: list[str]) -> SessionProgress | None:
         """Analyze pane output to determine progress"""
         if not pane_output:
             return None
@@ -112,7 +111,7 @@ class ProgressAnalyzer:
 
         return current_phase
 
-    def _analyze_file_activity(self, output_lines: List[str], task: TaskProgress):
+    def _analyze_file_activity(self, output_lines: list[str], task: TaskProgress):
         """Analyze file-related activity"""
         for line in output_lines:
             # Check for file creation
@@ -126,7 +125,7 @@ class ProgressAnalyzer:
             if match:
                 task.files_modified += 1
 
-    def _analyze_command_activity(self, output_lines: List[str], task: TaskProgress):
+    def _analyze_command_activity(self, output_lines: list[str], task: TaskProgress):
         """Analyze command execution activity"""
         for i, line in enumerate(output_lines):
             # Check for command execution
@@ -142,7 +141,7 @@ class ProgressAnalyzer:
                         task.commands_failed += 1
                         break
 
-    def _analyze_todo_activity(self, output_lines: List[str], task: TaskProgress):
+    def _analyze_todo_activity(self, output_lines: list[str], task: TaskProgress):
         """Analyze TODO-related activity"""
         for line in output_lines:
             # Check for TODO identification
@@ -184,11 +183,11 @@ class ProgressAnalyzer:
         # Recalculate overall progress
         task._recalculate_overall_progress()
 
-    def get_session_progress(self, session_name: str) -> Optional[SessionProgress]:
+    def get_session_progress(self, session_name: str) -> SessionProgress | None:
         """Get progress for a specific session"""
         return self.session_progress.get(session_name)
 
-    def get_all_progress(self) -> Dict[str, SessionProgress]:
+    def get_all_progress(self) -> dict[str, SessionProgress]:
         """Get progress for all sessions"""
         return self.session_progress.copy()
 

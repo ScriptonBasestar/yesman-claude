@@ -125,6 +125,7 @@ def setup(session_name):
 
     click.echo("All sessions setup completed.")
 
+
 # Alias
 @click.command()
 @click.argument("session_name", required=False)
@@ -132,5 +133,6 @@ def up(session_name):
     """Alias for 'setup' command"""
     ctx = click.get_current_context()
     ctx.invoke(setup, session_name=session_name)
+
 
 __all__ = ["setup", "up"]

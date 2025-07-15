@@ -34,7 +34,12 @@ def task_runner():
 
 
 @task_runner.command()
-@click.option("--dir", "-d", "directory", help="Specific directory to process (e.g. /tasks/todo/phase3)")
+@click.option(
+    "--dir",
+    "-d",
+    "directory",
+    help="Specific directory to process (e.g. /tasks/todo/phase3)",
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 def next(directory, verbose):
     """Process the next available task
@@ -62,9 +67,24 @@ def next(directory, verbose):
 
 
 @task_runner.command()
-@click.option("--dir", "-d", "directory", help="Specific directory to process (e.g. /tasks/todo/phase3)")
-@click.option("--max-iterations", "-m", default=100, type=int, help="Maximum number of tasks to process (default: 100)")
-@click.option("--dry-run", is_flag=True, help="Show what would be processed without making changes")
+@click.option(
+    "--dir",
+    "-d",
+    "directory",
+    help="Specific directory to process (e.g. /tasks/todo/phase3)",
+)
+@click.option(
+    "--max-iterations",
+    "-m",
+    default=100,
+    type=int,
+    help="Maximum number of tasks to process (default: 100)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be processed without making changes",
+)
 def run(directory, max_iterations, dry_run):
     """Run task processor continuously
 

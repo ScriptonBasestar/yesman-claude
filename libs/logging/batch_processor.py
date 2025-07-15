@@ -8,14 +8,14 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Deque, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
 class LogBatch:
     """A batch of log entries to be processed together."""
 
-    entries: List[Dict[str, Any]]
+    entries: list[dict[str, Any]]
     timestamp: float
     batch_id: str
     size_bytes: int = 0
@@ -35,7 +35,7 @@ class BatchProcessor:
         max_batch_time: float = 5.0,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
         compression_enabled: bool = True,
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ):
         self.max_batch_size = max_batch_size
         self.max_batch_time = max_batch_time
@@ -47,11 +47,11 @@ class BatchProcessor:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Batch management
-        self.pending_entries: Deque[Dict[str, Any]] = deque()
+        self.pending_entries: deque[dict[str, Any]] = deque()
         self.last_flush_time = time.time()
         self.batch_counter = 0
         self.current_file_size = 0
-        self.current_log_file: Optional[Path] = None
+        self.current_log_file: Path | None = None
 
         # Statistics
         self.stats = {
@@ -64,7 +64,7 @@ class BatchProcessor:
         }
 
         # Processing task
-        self._processing_task: Optional[asyncio.Task] = None
+        self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
 
         self.logger = logging.getLogger("yesman.batch_processor")
@@ -88,7 +88,7 @@ class BatchProcessor:
 
         try:
             await asyncio.wait_for(self._processing_task, timeout=10.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.warning("Batch processor stop timeout, cancelling task")
             self._processing_task.cancel()
 
@@ -97,7 +97,7 @@ class BatchProcessor:
 
         self.logger.info("Batch processor stopped")
 
-    def add_entry(self, entry: Dict[str, Any]):
+    def add_entry(self, entry: dict[str, Any]):
         """Add a log entry to the processing queue."""
         # Add timestamp if not present
         if "timestamp" not in entry:
@@ -208,7 +208,7 @@ class BatchProcessor:
 
         self.logger.info(f"Rotated to new log file: {self.current_log_file}")
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get processing statistics."""
         uptime = time.time() - (self.last_flush_time if self.stats["batches_processed"] > 0 else time.time())
 
@@ -243,7 +243,7 @@ class BatchProcessor:
 
         return removed_count
 
-    async def read_batch_file(self, file_path: Path) -> List[LogBatch]:
+    async def read_batch_file(self, file_path: Path) -> list[LogBatch]:
         """Read and parse a batch log file."""
         batches = []
 
@@ -272,7 +272,7 @@ class BatchProcessor:
 
         return batches
 
-    def get_recent_entries(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_recent_entries(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent log entries from memory (pending entries)."""
         recent = list(self.pending_entries)
         return recent[-limit:] if len(recent) > limit else recent

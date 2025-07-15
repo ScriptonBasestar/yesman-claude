@@ -18,4 +18,4 @@ class TestErrorHandlingIntegration:
             assert result is not None
         except Exception as e:
             # If exception is raised, it should be a known type
-            assert isinstance(e, (ValueError, TypeError))
+            assert isinstance(e, ValueError | TypeError)

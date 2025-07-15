@@ -8,10 +8,11 @@ import json
 import threading
 import time
 from collections import OrderedDict
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 
@@ -42,7 +43,7 @@ class RenderCache:
     automatic eviction, and performance tracking.
     """
 
-    def __init__(self, max_size: int = 1000, ttl: Optional[float] = None):
+    def __init__(self, max_size: int = 1000, ttl: float | None = None):
         """
         Initialize render cache
 
@@ -52,7 +53,7 @@ class RenderCache:
         """
         self.max_size = max_size
         self.ttl = ttl
-        self._cache: OrderedDict[str, Dict[str, Any]] = OrderedDict()
+        self._cache: OrderedDict[str, dict[str, Any]] = OrderedDict()
         self._lock = threading.RLock()
         self.stats = CacheStats()
 
@@ -60,8 +61,8 @@ class RenderCache:
         self,
         widget_type: WidgetType,
         data: Any,
-        options: Optional[Dict[str, Any]] = None,
-        renderer_format: Optional[RenderFormat] = None,
+        options: dict[str, Any] | None = None,
+        renderer_format: RenderFormat | None = None,
     ) -> str:
         """
         Generate consistent cache key from render parameters
@@ -88,7 +89,7 @@ class RenderCache:
                 data_repr = data.to_dict()
             elif hasattr(data, "__dict__"):
                 data_repr = {k: str(v) for k, v in data.__dict__.items()}
-            elif isinstance(data, (list, tuple)):
+            elif isinstance(data, list | tuple):
                 data_repr = [str(item) for item in data]
             elif isinstance(data, dict):
                 data_repr = {k: str(v) for k, v in data.items()}
@@ -109,7 +110,7 @@ class RenderCache:
             # Ultimate fallback
             return hashlib.sha256(str(key_components).encode()).hexdigest()
 
-    def get(self, cache_key: str) -> Optional[Any]:
+    def get(self, cache_key: str) -> Any | None:
         """
         Get cached result
 
@@ -210,7 +211,7 @@ _widget_cache = RenderCache(max_size=500, ttl=300)  # 5 minute TTL
 _layout_cache = RenderCache(max_size=100, ttl=600)  # 10 minute TTL
 
 
-def cached_render(cache: Optional[RenderCache] = None):
+def cached_render(cache: RenderCache | None = None):
     """
     Decorator for caching render method results
 
@@ -222,7 +223,12 @@ def cached_render(cache: Optional[RenderCache] = None):
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(self, widget_type: WidgetType, data: Any, options: Optional[Dict[str, Any]] = None):
+        def wrapper(
+            self,
+            widget_type: WidgetType,
+            data: Any,
+            options: dict[str, Any] | None = None,
+        ):
             # Generate cache key
             renderer_format = getattr(self, "format_type", None)
             cache_key = cache._generate_cache_key(widget_type, data, options, renderer_format)
@@ -242,7 +248,7 @@ def cached_render(cache: Optional[RenderCache] = None):
     return decorator
 
 
-def cached_layout(cache: Optional[RenderCache] = None):
+def cached_layout(cache: RenderCache | None = None):
     """
     Decorator for caching layout method results
 
@@ -254,12 +260,16 @@ def cached_layout(cache: Optional[RenderCache] = None):
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(self, widgets: List[Dict[str, Any]], layout_config: Optional[Dict[str, Any]] = None):
+        def wrapper(
+            self,
+            widgets: list[dict[str, Any]],
+            layout_config: dict[str, Any] | None = None,
+        ):
             # Generate cache key from widgets and layout config
             cache_key_data = {
                 "widgets": [
                     {
-                        "type": w.get("type", "").value if hasattr(w.get("type", ""), "value") else str(w.get("type", "")),
+                        "type": (w.get("type", "").value if hasattr(w.get("type", ""), "value") else str(w.get("type", ""))),
                         "data_hash": str(hash(str(w.get("data", {}))))[:16],
                         "options": w.get("options", {}),
                     }
@@ -299,7 +309,13 @@ class LazyRenderer:
     reducing unnecessary computation.
     """
 
-    def __init__(self, renderer: BaseRenderer, widget_type: WidgetType, data: Any, options: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        renderer: BaseRenderer,
+        widget_type: WidgetType,
+        data: Any,
+        options: dict[str, Any] | None = None,
+    ):
         """
         Initialize lazy renderer
 
@@ -372,9 +388,9 @@ class BatchRenderer:
 
     def render_batch(
         self,
-        render_requests: List[Tuple[WidgetType, Any, Optional[Dict[str, Any]]]],
+        render_requests: list[tuple[WidgetType, Any, dict[str, Any] | None]],
         parallel: bool = True,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """
         Render multiple widgets in batch
 
@@ -393,7 +409,7 @@ class BatchRenderer:
         else:
             return self._render_sequential(render_requests)
 
-    def _render_sequential(self, render_requests: List[Tuple]) -> List[Any]:
+    def _render_sequential(self, render_requests: list[tuple]) -> list[Any]:
         """Render requests sequentially"""
         results = []
         for widget_type, data, options in render_requests:
@@ -401,11 +417,16 @@ class BatchRenderer:
             results.append(result)
         return results
 
-    def _render_parallel(self, render_requests: List[Tuple]) -> List[Any]:
+    def _render_parallel(self, render_requests: list[tuple]) -> list[Any]:
         """Render requests in parallel"""
         results = [None] * len(render_requests)
 
-        def render_single(index: int, widget_type: WidgetType, data: Any, options: Optional[Dict[str, Any]]) -> Tuple[int, Any]:
+        def render_single(
+            index: int,
+            widget_type: WidgetType,
+            data: Any,
+            options: dict[str, Any] | None,
+        ) -> tuple[int, Any]:
             try:
                 result = self.renderer.render_widget(widget_type, data, options or {})
                 return index, result
@@ -425,8 +446,8 @@ class BatchRenderer:
 
     def render_lazy_batch(
         self,
-        render_requests: List[Tuple[WidgetType, Any, Optional[Dict[str, Any]]]],
-    ) -> List[LazyRenderer]:
+        render_requests: list[tuple[WidgetType, Any, dict[str, Any] | None]],
+    ) -> list[LazyRenderer]:
         """
         Create lazy renderers for batch processing
 
@@ -448,7 +469,7 @@ class PerformanceProfiler:
     """
 
     def __init__(self):
-        self.metrics: Dict[str, List[float]] = {}
+        self.metrics: dict[str, list[float]] = {}
         self._lock = threading.Lock()
 
     def time_operation(self, operation_name: str):
@@ -473,7 +494,7 @@ class PerformanceProfiler:
                 self.metrics[operation_name] = []
             self.metrics[operation_name].append(duration)
 
-    def get_stats(self, operation_name: str) -> Dict[str, float]:
+    def get_stats(self, operation_name: str) -> dict[str, float]:
         """
         Get statistics for an operation
 
@@ -495,7 +516,7 @@ class PerformanceProfiler:
                 "count": len(times),
             }
 
-    def get_all_stats(self) -> Dict[str, Dict[str, float]]:
+    def get_all_stats(self) -> dict[str, dict[str, float]]:
         """Get statistics for all tracked operations"""
         return {name: self.get_stats(name) for name in self.metrics}
 
@@ -527,7 +548,7 @@ class TimingContext:
 global_profiler = PerformanceProfiler()
 
 
-def profile_render(operation_name: Optional[str] = None):
+def profile_render(operation_name: str | None = None):
     """
     Decorator for profiling render operations
 
@@ -550,7 +571,7 @@ def profile_render(operation_name: Optional[str] = None):
 # Utility functions
 
 
-def get_cache_stats() -> Dict[str, CacheStats]:
+def get_cache_stats() -> dict[str, CacheStats]:
     """Get statistics for all caches"""
     return {
         "widget_cache": _widget_cache.get_stats(),
@@ -564,7 +585,7 @@ def clear_all_caches() -> None:
     _layout_cache.clear()
 
 
-def get_performance_stats() -> Dict[str, Dict[str, float]]:
+def get_performance_stats() -> dict[str, dict[str, float]]:
     """Get all performance statistics"""
     return global_profiler.get_all_stats()
 

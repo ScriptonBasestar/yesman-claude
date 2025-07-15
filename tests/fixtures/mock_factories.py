@@ -3,7 +3,6 @@ Centralized Mock Factory System
 Provides standardized mock objects to reduce duplication across test files
 """
 
-from typing import Dict, Optional
 from unittest.mock import MagicMock, patch
 
 from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
@@ -195,7 +194,7 @@ class ComponentMockFactory:
         return mock_result
 
     @staticmethod
-    def create_api_response_mock(status_code: int = 200, json_data: Optional[Dict] = None) -> MagicMock:
+    def create_api_response_mock(status_code: int = 200, json_data: dict | None = None) -> MagicMock:
         """Create a standardized API response mock"""
         mock_response = MagicMock()
         mock_response.status_code = status_code

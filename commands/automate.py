@@ -52,14 +52,46 @@ def status(project_path):
         context_table.add_column("Triggers", style="yellow")
 
         context_info = {
-            ContextType.GIT_COMMIT: ("Git Commit", "Detects new commits", "commit hooks, git log"),
-            ContextType.TEST_FAILURE: ("Test Failure", "Detects failing tests", "test output, CI status"),
-            ContextType.BUILD_EVENT: ("Build Event", "Detects build starts/completion", "build scripts, CI"),
-            ContextType.DEPENDENCY_UPDATE: ("Dependencies", "Detects dependency changes", "package files"),
-            ContextType.ERROR_OCCURRENCE: ("Error", "Detects runtime errors", "log analysis"),
-            ContextType.PERFORMANCE_ISSUE: ("Performance", "Detects performance issues", "metrics, profiling"),
-            ContextType.DEPLOYMENT: ("Deployment", "Detects deployment events", "deploy scripts"),
-            ContextType.CODE_REVIEW: ("Code Review", "Detects review requests", "PR/MR events"),
+            ContextType.GIT_COMMIT: (
+                "Git Commit",
+                "Detects new commits",
+                "commit hooks, git log",
+            ),
+            ContextType.TEST_FAILURE: (
+                "Test Failure",
+                "Detects failing tests",
+                "test output, CI status",
+            ),
+            ContextType.BUILD_EVENT: (
+                "Build Event",
+                "Detects build starts/completion",
+                "build scripts, CI",
+            ),
+            ContextType.DEPENDENCY_UPDATE: (
+                "Dependencies",
+                "Detects dependency changes",
+                "package files",
+            ),
+            ContextType.ERROR_OCCURRENCE: (
+                "Error",
+                "Detects runtime errors",
+                "log analysis",
+            ),
+            ContextType.PERFORMANCE_ISSUE: (
+                "Performance",
+                "Detects performance issues",
+                "metrics, profiling",
+            ),
+            ContextType.DEPLOYMENT: (
+                "Deployment",
+                "Detects deployment events",
+                "deploy scripts",
+            ),
+            ContextType.CODE_REVIEW: (
+                "Code Review",
+                "Detects review requests",
+                "PR/MR events",
+            ),
         }
 
         for _context_type, (name, desc, triggers) in context_info.items():
@@ -129,7 +161,13 @@ def monitor(project_path, interval):
 
 @automate.command()
 @click.option("--project-path", "-p", default=".", help="Project directory path")
-@click.option("--context-type", "-c", required=True, type=click.Choice([ct.value for ct in ContextType]), help="Context type to simulate")
+@click.option(
+    "--context-type",
+    "-c",
+    required=True,
+    type=click.Choice([ct.value for ct in ContextType]),
+    help="Context type to simulate",
+)
 @click.option("--description", "-d", default="Manual trigger", help="Context description")
 def trigger(project_path, context_type, description):
     """Manually trigger automation for a specific context"""

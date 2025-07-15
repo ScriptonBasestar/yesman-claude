@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class HealthMetric:
     score: int
     max_score: int = 100
     description: str = ""
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
     last_updated: float = field(default_factory=time.time)
 
     @property
@@ -74,7 +74,7 @@ class HealthMetric:
         """Get percentage score."""
         return (self.score / self.max_score) * 100 if self.max_score > 0 else 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "category": self.category.value,
@@ -96,7 +96,7 @@ class ProjectHealth:
 
     project_path: str
     overall_score: int
-    metrics: List[HealthMetric]
+    metrics: list[HealthMetric]
     last_assessment: float = field(default_factory=time.time)
 
     @property
@@ -105,7 +105,7 @@ class ProjectHealth:
         return HealthLevel.from_score(self.overall_score)
 
     @property
-    def category_scores(self) -> Dict[str, float]:
+    def category_scores(self) -> dict[str, float]:
         """Get average scores by category."""
         category_metrics = {}
         for metric in self.metrics:
@@ -116,7 +116,7 @@ class ProjectHealth:
 
         return {category: sum(scores) / len(scores) if scores else 0 for category, scores in category_metrics.items()}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "project_path": self.project_path,
@@ -133,12 +133,12 @@ class ProjectHealth:
 class HealthCalculator:
     """Calculates project health scores based on various metrics."""
 
-    def __init__(self, project_path: Optional[Path] = None):
+    def __init__(self, project_path: Path | None = None):
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.health_calculator")
 
         # Cache for expensive operations
-        self._cache: Dict[str, Any] = {}
+        self._cache: dict[str, Any] = {}
         self._cache_ttl = 300  # 5 minutes
 
     async def calculate_health(self, force_refresh: bool = False) -> ProjectHealth:
@@ -208,7 +208,7 @@ class HealthCalculator:
 
         return health
 
-    async def _assess_build_health(self) -> List[HealthMetric]:
+    async def _assess_build_health(self) -> list[HealthMetric]:
         """Assess build system health."""
         metrics = []
 
@@ -260,7 +260,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_test_health(self) -> List[HealthMetric]:
+    async def _assess_test_health(self) -> list[HealthMetric]:
         """Assess test suite health."""
         metrics = []
 
@@ -310,7 +310,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_dependency_health(self) -> List[HealthMetric]:
+    async def _assess_dependency_health(self) -> list[HealthMetric]:
         """Assess dependency health."""
         metrics = []
 
@@ -346,7 +346,10 @@ class HealthCalculator:
                     name="Dependency Freshness",
                     score=dependency_score,
                     description=f"Dependency status: {total_deps} total, {outdated_deps} potentially outdated",
-                    details={"total_dependencies": total_deps, "outdated_dependencies": outdated_deps},
+                    details={
+                        "total_dependencies": total_deps,
+                        "outdated_dependencies": outdated_deps,
+                    },
                 )
             )
 
@@ -355,7 +358,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_performance_health(self) -> List[HealthMetric]:
+    async def _assess_performance_health(self) -> list[HealthMetric]:
         """Assess performance-related health."""
         metrics = []
 
@@ -409,7 +412,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_security_health(self) -> List[HealthMetric]:
+    async def _assess_security_health(self) -> list[HealthMetric]:
         """Assess security-related health."""
         metrics = []
 
@@ -435,7 +438,13 @@ class HealthCalculator:
             gitignore_path = self.project_path / ".gitignore"
             if gitignore_path.exists():
                 gitignore_content = gitignore_path.read_text()
-                sensitive_patterns = [".env", "*.key", "*.pem", "secrets", "credentials"]
+                sensitive_patterns = [
+                    ".env",
+                    "*.key",
+                    "*.pem",
+                    "secrets",
+                    "credentials",
+                ]
                 protected_patterns = sum(1 for pattern in sensitive_patterns if pattern in gitignore_content)
                 security_score += protected_patterns * 4  # 4 points per protected pattern
 
@@ -456,7 +465,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_code_quality_health(self) -> List[HealthMetric]:
+    async def _assess_code_quality_health(self) -> list[HealthMetric]:
         """Assess code quality health."""
         metrics = []
 
@@ -509,7 +518,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_git_health(self) -> List[HealthMetric]:
+    async def _assess_git_health(self) -> list[HealthMetric]:
         """Assess Git repository health."""
         metrics = []
 
@@ -578,7 +587,7 @@ class HealthCalculator:
 
         return metrics
 
-    async def _assess_documentation_health(self) -> List[HealthMetric]:
+    async def _assess_documentation_health(self) -> list[HealthMetric]:
         """Assess documentation health."""
         metrics = []
 
@@ -632,7 +641,7 @@ class HealthCalculator:
 
         return metrics
 
-    def _calculate_overall_score(self, metrics: List[HealthMetric]) -> int:
+    def _calculate_overall_score(self, metrics: list[HealthMetric]) -> int:
         """Calculate overall project health score."""
         if not metrics:
             return 0
@@ -712,7 +721,7 @@ class HealthCalculator:
 
         return 40  # Default score if no test command works
 
-    async def _check_npm_dependencies(self, package_json_path: Path) -> Tuple[int, int]:
+    async def _check_npm_dependencies(self, package_json_path: Path) -> tuple[int, int]:
         """Check npm dependencies for outdated packages."""
         try:
             with open(package_json_path) as f:
@@ -730,7 +739,7 @@ class HealthCalculator:
         except Exception:
             return 0, 0
 
-    async def _check_python_dependencies(self, requirements_path: Path) -> Tuple[int, int]:
+    async def _check_python_dependencies(self, requirements_path: Path) -> tuple[int, int]:
         """Check Python dependencies."""
         try:
             content = requirements_path.read_text()
@@ -745,7 +754,7 @@ class HealthCalculator:
         except Exception:
             return 0, 0
 
-    async def _check_rust_dependencies(self, cargo_toml_path: Path) -> Tuple[int, int]:
+    async def _check_rust_dependencies(self, cargo_toml_path: Path) -> tuple[int, int]:
         """Check Rust/Cargo dependencies."""
         try:
             import toml
@@ -753,11 +762,14 @@ class HealthCalculator:
             content = toml.load(cargo_toml_path)
             deps = content.get("dependencies", {})
             dev_deps = content.get("dev-dependencies", {})
-            return len(deps) + len(dev_deps), 0  # Assuming no easy way to check outdated
+            return (
+                len(deps) + len(dev_deps),
+                0,
+            )  # Assuming no easy way to check outdated
         except (ImportError, Exception):
             return 0, 0
 
-    def _get_dependencies_from_toml(self, content: str) -> Tuple[List[str], List[str]]:
+    def _get_dependencies_from_toml(self, content: str) -> tuple[list[str], list[str]]:
         """Extract dependencies from Cargo.toml content."""
         dependencies = []
         dev_dependencies = []
@@ -786,7 +798,7 @@ class HealthCalculator:
 
         return dependencies, dev_dependencies
 
-    async def _check_go_dependencies(self, go_mod_path: Path) -> Tuple[int, int]:
+    async def _check_go_dependencies(self, go_mod_path: Path) -> tuple[int, int]:
         """Check Go dependencies."""
         try:
             content = go_mod_path.read_text()
@@ -837,7 +849,7 @@ class HealthCalculator:
         except Exception:
             return 50  # Default on error
 
-    def get_health_summary(self, health: ProjectHealth) -> Dict[str, Any]:
+    def get_health_summary(self, health: ProjectHealth) -> dict[str, Any]:
         """Get a summary of project health."""
         return {
             "overall": {

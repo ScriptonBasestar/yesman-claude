@@ -8,14 +8,10 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from .branch_manager import BranchManager
-from .collaboration_engine import (
-    CollaborationEngine,
-    MessagePriority,
-    MessageType,
-)
+from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +51,15 @@ class BranchInfo:
     created_at: datetime
     last_updated: datetime
     commit_count: int = 0
-    files_modified: List[str] = field(default_factory=list)
-    tests_passed: Optional[bool] = None
-    build_status: Optional[str] = None
+    files_modified: list[str] = field(default_factory=list)
+    tests_passed: bool | None = None
+    build_status: str | None = None
     merge_ready: bool = False
-    conflicts_detected: List[str] = field(default_factory=list)
-    dependencies: Dict[str, List[str]] = field(default_factory=dict)
-    api_signatures: Dict[str, Any] = field(default_factory=dict)
-    work_items: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    conflicts_detected: list[str] = field(default_factory=list)
+    dependencies: dict[str, list[str]] = field(default_factory=dict)
+    api_signatures: dict[str, Any] = field(default_factory=dict)
+    work_items: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,11 +70,11 @@ class BranchSyncEvent:
     branch_name: str
     agent_id: str
     event_type: BranchInfoType
-    event_data: Dict[str, Any]
+    event_data: dict[str, Any]
     timestamp: datetime = field(default_factory=datetime.now)
     priority: MessagePriority = MessagePriority.NORMAL
     requires_action: bool = False
-    action_items: List[str] = field(default_factory=list)
+    action_items: list[str] = field(default_factory=list)
 
 
 class BranchInfoProtocol:
@@ -88,7 +84,7 @@ class BranchInfoProtocol:
         self,
         branch_manager: BranchManager,
         collaboration_engine: CollaborationEngine,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
         sync_strategy: SyncStrategy = SyncStrategy.SMART,
     ):
         """
@@ -106,9 +102,9 @@ class BranchInfoProtocol:
         self.sync_strategy = sync_strategy
 
         # Branch information storage
-        self.branch_info: Dict[str, BranchInfo] = {}
-        self.sync_history: List[BranchSyncEvent] = []
-        self.branch_subscriptions: Dict[str, Set[str]] = defaultdict(
+        self.branch_info: dict[str, BranchInfo] = {}
+        self.sync_history: list[BranchSyncEvent] = []
+        self.branch_subscriptions: dict[str, set[str]] = defaultdict(
             set,
         )  # branch -> interested agents
 
@@ -158,7 +154,7 @@ class BranchInfoProtocol:
         branch_name: str,
         agent_id: str,
         base_branch: str = "main",
-        work_items: Optional[List[str]] = None,
+        work_items: list[str] | None = None,
     ) -> BranchInfo:
         """
         Register a new branch with the protocol
@@ -201,7 +197,7 @@ class BranchInfoProtocol:
         self,
         branch_name: str,
         info_type: BranchInfoType,
-        update_data: Dict[str, Any],
+        update_data: dict[str, Any],
         requires_immediate_sync: bool = False,
     ):
         """
@@ -260,11 +256,11 @@ class BranchInfoProtocol:
         if should_sync:
             await self._share_branch_info(branch_info, info_type, update_data)
 
-    async def get_branch_info(self, branch_name: str) -> Optional[BranchInfo]:
+    async def get_branch_info(self, branch_name: str) -> BranchInfo | None:
         """Get current information about a branch"""
         return self.branch_info.get(branch_name)
 
-    async def get_all_branches_info(self) -> Dict[str, BranchInfo]:
+    async def get_all_branches_info(self) -> dict[str, BranchInfo]:
         """Get information about all branches"""
         return self.branch_info.copy()
 
@@ -294,7 +290,7 @@ class BranchInfoProtocol:
     async def request_branch_sync(
         self,
         requester_id: str,
-        branch_names: Optional[List[str]] = None,
+        branch_names: list[str] | None = None,
     ):
         """
         Request synchronization of branch information
@@ -315,7 +311,7 @@ class BranchInfoProtocol:
                     {"sync_requested": True},
                 )
 
-    async def detect_branch_conflicts(self, branch1: str, branch2: str) -> List[str]:
+    async def detect_branch_conflicts(self, branch1: str, branch2: str) -> list[str]:
         """
         Detect potential conflicts between two branches
 
@@ -353,7 +349,7 @@ class BranchInfoProtocol:
 
         return conflicts
 
-    async def prepare_merge_report(self, branch_name: str) -> Dict[str, Any]:
+    async def prepare_merge_report(self, branch_name: str) -> dict[str, Any]:
         """
         Prepare a comprehensive merge readiness report
 
@@ -424,7 +420,7 @@ class BranchInfoProtocol:
         self,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: Dict[str, Any],
+        event_data: dict[str, Any],
     ):
         """Share branch information with subscribed agents"""
         # Create sync event
@@ -483,7 +479,7 @@ class BranchInfoProtocol:
         agent_id: str,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: Dict[str, Any],
+        event_data: dict[str, Any],
     ):
         """Send branch update to specific agent"""
         message_type = MessageType.STATUS_UPDATE
@@ -578,7 +574,7 @@ class BranchInfoProtocol:
             except Exception as e:
                 logger.error(f"Error in periodic sync: {e}")
 
-    def get_protocol_summary(self) -> Dict[str, Any]:
+    def get_protocol_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of protocol activity"""
         active_branches = [
             {

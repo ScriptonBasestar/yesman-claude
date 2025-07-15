@@ -6,7 +6,7 @@ Updated: Enhanced with factory system integration for better mock management
 """
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 
 # Tmux 관련 Mock
@@ -157,7 +157,7 @@ class EnhancedMockTmuxSession(MockTmuxSession):
 
 
 # Convenience functions for common mock patterns
-def create_mock_session_with_controller(**kwargs) -> Dict[str, Any]:
+def create_mock_session_with_controller(**kwargs) -> dict[str, Any]:
     """Create a complete mock session with controller for integration tests"""
     session_mock = get_factory_mock("session_manager", **kwargs)
     claude_mock = get_factory_mock("claude_manager", **kwargs)
@@ -169,15 +169,23 @@ def create_mock_session_with_controller(**kwargs) -> Dict[str, Any]:
     }
 
 
-def create_api_test_mocks(success: bool = True) -> Dict[str, Any]:
+def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
     """Create standard API test mocks"""
     if success:
         return {
-            "response": get_factory_mock("api_response", status_code=200, json_data=MOCK_API_RESPONSES["sessions_list"]),
+            "response": get_factory_mock(
+                "api_response",
+                status_code=200,
+                json_data=MOCK_API_RESPONSES["sessions_list"],
+            ),
             "session_manager": get_factory_mock("session_manager"),
         }
     else:
         return {
-            "response": get_factory_mock("api_response", status_code=500, json_data=MOCK_API_RESPONSES["error_response"]),
+            "response": get_factory_mock(
+                "api_response",
+                status_code=500,
+                json_data=MOCK_API_RESPONSES["error_response"],
+            ),
             "session_manager": get_factory_mock("session_manager", create_session_result=False),
         }

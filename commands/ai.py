@@ -44,8 +44,14 @@ def status():
 
         # Configuration
         config = stats.get("adaptive_config", {})
-        table.add_row("Auto-Response", "✅ Enabled" if config.get("auto_response_enabled") else "❌ Disabled")
-        table.add_row("Learning", "✅ Enabled" if config.get("learning_enabled") else "❌ Disabled")
+        table.add_row(
+            "Auto-Response",
+            "✅ Enabled" if config.get("auto_response_enabled") else "❌ Disabled",
+        )
+        table.add_row(
+            "Learning",
+            "✅ Enabled" if config.get("learning_enabled") else "❌ Disabled",
+        )
         table.add_row("Confidence Threshold", f"{config.get('min_confidence_threshold', 0.6):.2f}")
 
         # Runtime info
@@ -85,7 +91,11 @@ def status():
 
 @ai.command()
 @click.option("--threshold", "-t", type=float, help="New confidence threshold (0.0-1.0)")
-@click.option("--auto-response/--no-auto-response", default=None, help="Enable/disable auto-response")
+@click.option(
+    "--auto-response/--no-auto-response",
+    default=None,
+    help="Enable/disable auto-response",
+)
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
 def config(threshold, auto_response, learning):
     """Configure AI learning system settings"""

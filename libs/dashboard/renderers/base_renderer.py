@@ -7,7 +7,7 @@ import re
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 
 class RenderFormat(Enum):
@@ -61,7 +61,7 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(self, format_type: RenderFormat, theme: Optional[Dict[str, Any]] = None):
+    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None):
         """
         Initialize base renderer
 
@@ -74,7 +74,12 @@ class BaseRenderer(ABC):
         self._cache = {}
 
     @abstractmethod
-    def render_widget(self, widget_type: WidgetType, data: Any, options: Optional[Dict[str, Any]] = None) -> str:
+    def render_widget(
+        self,
+        widget_type: WidgetType,
+        data: Any,
+        options: dict[str, Any] | None = None,
+    ) -> str:
         """
         Render a single widget
 
@@ -89,7 +94,11 @@ class BaseRenderer(ABC):
         pass
 
     @abstractmethod
-    def render_layout(self, widgets: List[Dict[str, Any]], layout_config: Optional[Dict[str, Any]] = None) -> str:
+    def render_layout(
+        self,
+        widgets: list[dict[str, Any]],
+        layout_config: dict[str, Any] | None = None,
+    ) -> str:
         """
         Render a layout containing multiple widgets
 
@@ -103,7 +112,7 @@ class BaseRenderer(ABC):
         pass
 
     @abstractmethod
-    def render_container(self, content: str, container_config: Optional[Dict[str, Any]] = None) -> str:
+    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """
         Render a container wrapping content
 
@@ -118,7 +127,7 @@ class BaseRenderer(ABC):
 
     # Common utility methods
 
-    def format_number(self, value: Union[int, float], precision: int = 2, suffix: str = "") -> str:
+    def format_number(self, value: int | float, precision: int = 2, suffix: str = "") -> str:
         """
         Format a number with optional precision and suffix
 
@@ -138,7 +147,7 @@ class BaseRenderer(ABC):
 
         return f"{value:,.{precision}f}{suffix}"
 
-    def format_date(self, date: Union[datetime, str], format_str: str = "%Y-%m-%d %H:%M") -> str:
+    def format_date(self, date: datetime | str, format_str: str = "%Y-%m-%d %H:%M") -> str:
         """
         Format a date/datetime object
 
@@ -168,7 +177,7 @@ class BaseRenderer(ABC):
 
         return str(date)
 
-    def format_percentage(self, value: Union[int, float], precision: int = 1) -> str:
+    def format_percentage(self, value: int | float, precision: int = 1) -> str:
         """
         Format a percentage value
 
@@ -204,7 +213,7 @@ class BaseRenderer(ABC):
 
         return f"{bytes_value:.1f} PB"
 
-    def format_duration(self, seconds: Union[int, float]) -> str:
+    def format_duration(self, seconds: int | float) -> str:
         """
         Format duration in seconds to human-readable format
 
@@ -306,7 +315,7 @@ class BaseRenderer(ABC):
         else:
             return ThemeColor.NEUTRAL
 
-    def calculate_health_score(self, metrics: Dict[str, Union[int, float]]) -> float:
+    def calculate_health_score(self, metrics: dict[str, int | float]) -> float:
         """
         Calculate overall health score from metrics
 
@@ -348,7 +357,7 @@ class BaseRenderer(ABC):
 
         return total_score / total_weight if total_weight > 0 else 0.0
 
-    def _get_default_theme(self) -> Dict[str, Any]:
+    def _get_default_theme(self) -> dict[str, Any]:
         """
         Get default theme configuration
 
@@ -357,13 +366,33 @@ class BaseRenderer(ABC):
         """
         return {
             "colors": {
-                "primary": {"default": "#3B82F6", "light": "#93C5FD", "dark": "#1E40AF"},
-                "secondary": {"default": "#6B7280", "light": "#D1D5DB", "dark": "#374151"},
-                "success": {"default": "#10B981", "light": "#86EFAC", "dark": "#047857"},
-                "warning": {"default": "#F59E0B", "light": "#FCD34D", "dark": "#D97706"},
+                "primary": {
+                    "default": "#3B82F6",
+                    "light": "#93C5FD",
+                    "dark": "#1E40AF",
+                },
+                "secondary": {
+                    "default": "#6B7280",
+                    "light": "#D1D5DB",
+                    "dark": "#374151",
+                },
+                "success": {
+                    "default": "#10B981",
+                    "light": "#86EFAC",
+                    "dark": "#047857",
+                },
+                "warning": {
+                    "default": "#F59E0B",
+                    "light": "#FCD34D",
+                    "dark": "#D97706",
+                },
                 "error": {"default": "#EF4444", "light": "#FCA5A5", "dark": "#DC2626"},
                 "info": {"default": "#06B6D4", "light": "#67E8F9", "dark": "#0891B2"},
-                "neutral": {"default": "#6B7280", "light": "#F3F4F6", "dark": "#1F2937"},
+                "neutral": {
+                    "default": "#6B7280",
+                    "light": "#F3F4F6",
+                    "dark": "#1F2937",
+                },
                 "accent": {"default": "#8B5CF6", "light": "#C4B5FD", "dark": "#7C3AED"},
             },
             "spacing": {
@@ -389,7 +418,7 @@ class BaseRenderer(ABC):
         """Clear the internal cache"""
         self._cache.clear()
 
-    def set_theme(self, theme: Dict[str, Any]):
+    def set_theme(self, theme: dict[str, Any]):
         """
         Set new theme configuration
 

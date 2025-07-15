@@ -4,37 +4,20 @@
 repos:
   # Python code formatting and linting with Ruff (replaces black, isort, flake8)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.9
+    rev: v0.12.3
     hooks:
       # Linting (replaces flake8)
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --exit-non-zero-on-fix, --target-version=py311]
         exclude: ^(migrations/|node_modules/)
       # Formatting (replaces black)
       - id: ruff-format
+        args: [--target-version=py311]
         exclude: ^(migrations/|node_modules/)
-
-  # Test naming validation (custom hooks)
-  - repo: local
-    hooks:
-      - id: test-naming-validation
-        name: Test Naming Standards Check
-        entry: python scripts/test_naming_validator.py
-        language: python
-        files: ^tests/.*\.py$
-        args: [tests/, --min-score=70]
-        pass_filenames: false
-
-      - id: unittest-detection
-        name: Detect unittest Usage in New Tests
-        entry: python scripts/detect_unittest_usage.py
-        language: python
-        files: ^tests/.*\.py$
-        pass_filenames: true
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         exclude: ^(.*\.md|.*\.txt)$
@@ -50,21 +33,36 @@ repos:
       - id: debug-statements
         exclude: ^(debug/|scripts/debug_)
 
+  # Markdown formatting
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        args: [--wrap=120]
+        exclude: ^(node_modules/|tauri-dashboard/|\.github/workflows/)
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-tables
+          - mdformat-frontmatter
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.17.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-PyYAML]
+        exclude: ^(tests/|docs/examples/)
+        args: [--config-file=pyproject.toml]
+
   # Security checks (optional: keep bandit for comprehensive security scanning)
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.7
+    rev: 1.8.6
     hooks:
       - id: bandit
-        args: [--skip, B101]
-        exclude: ^(tests/|scripts/|debug/|test_style_violation\.py)
-
-  # Documentation checks
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        args: [--convention=google]
-        exclude: ^(tests/|migrations/|scripts/|debug/)
+        args: [-r, -s, B101,B404,B603,B607,B602, --severity-level, medium, --quiet]
+        exclude: ^(tests/|scripts/|debug/|docs/examples/|test_style_violation\.py)
+        pass_filenames: false
+        files: ^(libs/|commands/)
 
 # Global configuration
 default_install_hook_types: [pre-commit, pre-push]

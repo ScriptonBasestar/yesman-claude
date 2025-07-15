@@ -9,18 +9,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .branch_manager import BranchManager
-from .conflict_resolution import (
-    ConflictResolutionEngine,
-)
-from .semantic_analyzer import (
-    SemanticAnalyzer,
-    SemanticConflict,
-    SemanticConflictType,
-    SemanticContext,
-)
+from .conflict_resolution import ConflictResolutionEngine
+from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType, SemanticContext
 
 logger = logging.getLogger(__name__)
 
@@ -55,13 +48,13 @@ class MergeResult:
     file_path: str
     resolution: MergeResolution
     strategy_used: MergeStrategy
-    merged_content: Optional[str] = None
-    conflicts_resolved: List[str] = field(default_factory=list)
-    unresolved_conflicts: List[str] = field(default_factory=list)
+    merged_content: str | None = None
+    conflicts_resolved: list[str] = field(default_factory=list)
+    unresolved_conflicts: list[str] = field(default_factory=list)
     merge_confidence: float = 0.0
     semantic_integrity: bool = True
-    diff_stats: Dict[str, int] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    diff_stats: dict[str, int] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     merge_time: datetime = field(default_factory=datetime.now)
 
 
@@ -71,7 +64,7 @@ class ConflictResolutionRule:
 
     rule_id: str
     pattern: str
-    conflict_types: List[SemanticConflictType]
+    conflict_types: list[SemanticConflictType]
     resolution_strategy: MergeStrategy
     confidence_threshold: float = 0.7
     description: str = ""
@@ -86,7 +79,7 @@ class SemanticMerger:
         semantic_analyzer: SemanticAnalyzer,
         conflict_engine: ConflictResolutionEngine,
         branch_manager: BranchManager,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
     ):
         """
         Initialize the semantic merger
@@ -103,8 +96,8 @@ class SemanticMerger:
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
 
         # Merge results storage
-        self.merge_results: Dict[str, MergeResult] = {}
-        self.merge_history: List[MergeResult] = []
+        self.merge_results: dict[str, MergeResult] = {}
+        self.merge_history: list[MergeResult] = []
 
         # Resolution rules
         self.resolution_rules = self._initialize_resolution_rules()
@@ -135,8 +128,8 @@ class SemanticMerger:
         file_path: str,
         branch1: str,
         branch2: str,
-        target_branch: Optional[str] = None,
-        strategy: Optional[MergeStrategy] = None,
+        target_branch: str | None = None,
+        strategy: MergeStrategy | None = None,
     ) -> MergeResult:
         """
         Perform intelligent semantic merge of a file between branches
@@ -155,7 +148,7 @@ class SemanticMerger:
             f"Performing semantic merge for {file_path} between {branch1} and {branch2}",
         )
 
-        merge_id = f"merge_{branch1}_{branch2}_{hashlib.md5(file_path.encode()).hexdigest()[:8]}"
+        merge_id = f"merge_{branch1}_{branch2}_{hashlib.sha256(file_path.encode()).hexdigest()[:8]}"
         strategy = strategy or self.default_strategy
         target_branch = target_branch or branch1
 
@@ -216,12 +209,12 @@ class SemanticMerger:
 
     async def batch_merge_files(
         self,
-        file_paths: List[str],
+        file_paths: list[str],
         branch1: str,
         branch2: str,
-        target_branch: Optional[str] = None,
+        target_branch: str | None = None,
         max_concurrent: int = 5,
-    ) -> List[MergeResult]:
+    ) -> list[MergeResult]:
         """Perform batch semantic merge of multiple files"""
         logger.info(f"Starting batch merge of {len(file_paths)} files")
 
@@ -261,8 +254,8 @@ class SemanticMerger:
 
     async def auto_resolve_conflicts(
         self,
-        conflicts: List[SemanticConflict],
-    ) -> List[MergeResult]:
+        conflicts: list[SemanticConflict],
+    ) -> list[MergeResult]:
         """
         Automatically resolve a list of semantic conflicts
 
@@ -314,7 +307,7 @@ class SemanticMerger:
         file_path: str,
         content1: str,
         content2: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
         strategy: MergeStrategy,
     ) -> MergeResult:
         """Apply specific merge strategy to resolve conflicts"""
@@ -391,7 +384,7 @@ class SemanticMerger:
         file_path: str,
         content1: str,
         content2: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> MergeResult:
         """Perform intelligent merge using multiple heuristics"""
 
@@ -489,7 +482,7 @@ class SemanticMerger:
         file_path: str,
         content1: str,
         content2: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> MergeResult:
         """Perform AST-based merge preserving code structure"""
 
@@ -514,7 +507,7 @@ class SemanticMerger:
             return MergeResult(
                 merge_id=merge_id,
                 file_path=file_path,
-                resolution=MergeResolution.AUTO_RESOLVED if semantic_integrity else MergeResolution.MERGE_FAILED,
+                resolution=(MergeResolution.AUTO_RESOLVED if semantic_integrity else MergeResolution.MERGE_FAILED),
                 strategy_used=MergeStrategy.AST_BASED_MERGE,
                 merged_content=merged_content,
                 merge_confidence=0.8 if semantic_integrity else 0.0,
@@ -544,7 +537,7 @@ class SemanticMerger:
         file_path: str,
         content1: str,
         content2: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> MergeResult:
         """Perform function-level merge for granular conflict resolution"""
 
@@ -634,7 +627,7 @@ class SemanticMerger:
         file_path: str,
         content1: str,
         content2: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> MergeResult:
         """Perform semantic union merge combining compatible changes"""
 
@@ -719,7 +712,7 @@ class SemanticMerger:
         file_path: str,
         content1: str,
         content2: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> MergeResult:
         """Perform contextual merge considering code dependencies and usage patterns"""
 
@@ -738,7 +731,7 @@ class SemanticMerger:
         merge_id: str,
         file_path: str,
         content: str,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
         branch_preference: str,
     ) -> MergeResult:
         """Simple merge strategy preferring one branch over the other"""
@@ -747,7 +740,7 @@ class SemanticMerger:
             merge_id=merge_id,
             file_path=file_path,
             resolution=MergeResolution.AUTO_RESOLVED,
-            strategy_used=MergeStrategy.PREFER_FIRST if branch_preference == "first" else MergeStrategy.PREFER_SECOND,
+            strategy_used=(MergeStrategy.PREFER_FIRST if branch_preference == "first" else MergeStrategy.PREFER_SECOND),
             merged_content=content,
             conflicts_resolved=[c.conflict_id for c in conflicts],
             merge_confidence=1.0,
@@ -763,7 +756,7 @@ class SemanticMerger:
         file_path: str,
         branch1: str,
         branch2: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Detect conflicts in a specific file between branches"""
         return await self.semantic_analyzer._analyze_file_semantic_conflicts(
             file_path,
@@ -771,7 +764,7 @@ class SemanticMerger:
             branch2,
         )
 
-    async def _get_file_content(self, file_path: str, branch: str) -> Optional[str]:
+    async def _get_file_content(self, file_path: str, branch: str) -> str | None:
         """Get file content from a specific branch"""
         return await self.semantic_analyzer._get_file_content(file_path, branch)
 
@@ -788,7 +781,7 @@ class SemanticMerger:
         content1: str,
         content2: str,
         merged: str,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Calculate diff statistics for merge result"""
         lines1 = content1.split("\n")
         lines2 = content2.split("\n")
@@ -802,7 +795,7 @@ class SemanticMerger:
             "lines_removed": max(0, len(lines1) - len(lines_merged)),
         }
 
-    def _initialize_resolution_rules(self) -> List[ConflictResolutionRule]:
+    def _initialize_resolution_rules(self) -> list[ConflictResolutionRule]:
         """Initialize default conflict resolution rules"""
         return [
             ConflictResolutionRule(
@@ -833,7 +826,7 @@ class SemanticMerger:
 
     def _select_optimal_strategy(
         self,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> MergeStrategy:
         """Select optimal merge strategy based on conflict types and patterns"""
 
@@ -859,7 +852,7 @@ class SemanticMerger:
         content2: str,
         context1: SemanticContext,
         context2: SemanticContext,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Resolve an individual semantic conflict"""
 
         resolution_result = {
@@ -942,13 +935,13 @@ class SemanticMerger:
         self,
         tree1: ast.AST,
         tree2: ast.AST,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ) -> ast.AST:
         """Merge two AST trees intelligently"""
         # Simplified implementation - would need complex AST merging logic
         return tree1
 
-    def _extract_functions_with_content(self, content: str) -> Dict[str, str]:
+    def _extract_functions_with_content(self, content: str) -> dict[str, str]:
         """Extract function definitions with their full content"""
         functions = {}
         try:
@@ -956,7 +949,7 @@ class SemanticMerger:
             lines = content.split("\n")
 
             for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                     # Extract function content (simplified)
                     start_line = node.lineno - 1
                     # Would need proper end line detection
@@ -988,8 +981,8 @@ class SemanticMerger:
     def _find_function_conflict(
         self,
         func_name: str,
-        conflicts: List[SemanticConflict],
-    ) -> Optional[SemanticConflict]:
+        conflicts: list[SemanticConflict],
+    ) -> SemanticConflict | None:
         """Find conflict related to a specific function"""
         for conflict in conflicts:
             if conflict.symbol_name == func_name and conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE:
@@ -1001,7 +994,7 @@ class SemanticMerger:
         func1: str,
         func2: str,
         conflict: SemanticConflict,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Merge two function definitions"""
         # Simplified implementation
         return {
@@ -1048,7 +1041,7 @@ class SemanticMerger:
         # Simplified implementation - would need proper code generation
         return content2  # Fallback to second version
 
-    def get_merge_summary(self) -> Dict[str, Any]:
+    def get_merge_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of merge operations"""
         return {
             "total_merges": self.merge_stats["total_merges"],

@@ -13,16 +13,8 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Fixture imports
-from tests.fixtures.mock_data import (
-    MOCK_PROMPTS,
-    MOCK_SESSION_DATA,
-    MockClaudeProcess,
-    MockTmuxSession,
-)
-from tests.fixtures.mock_factories import (
-    ComponentMockFactory,
-    ManagerMockFactory,
-)
+from tests.fixtures.mock_data import MOCK_PROMPTS, MOCK_SESSION_DATA, MockClaudeProcess, MockTmuxSession
+from tests.fixtures.mock_factories import ComponentMockFactory, ManagerMockFactory
 from tests.fixtures.test_helpers import temp_directory
 
 

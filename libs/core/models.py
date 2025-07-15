@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class TaskPhase(Enum):
@@ -38,8 +38,8 @@ class TaskProgress:
     commands_failed: int = 0
 
     # Time metrics
-    start_time: Optional[datetime] = None
-    phase_start_time: Optional[datetime] = None
+    start_time: datetime | None = None
+    phase_start_time: datetime | None = None
     active_duration: float = 0.0  # seconds of active work
     idle_duration: float = 0.0  # seconds of idle time
 
@@ -80,7 +80,7 @@ class TaskProgress:
 
         self.overall_progress = round(min(100.0, base_progress * 100), 1)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "phase": self.phase.value,
@@ -106,17 +106,17 @@ class SessionProgress:
     """Overall progress tracking for a session"""
 
     session_name: str
-    tasks: List[TaskProgress] = field(default_factory=list)
+    tasks: list[TaskProgress] = field(default_factory=list)
     current_task_index: int = 0
 
     # Aggregate metrics
     total_files_changed: int = 0
     total_commands: int = 0
     total_todos_completed: int = 0
-    session_start_time: Optional[datetime] = None
-    last_update_time: Optional[datetime] = None
+    session_start_time: datetime | None = None
+    last_update_time: datetime | None = None
 
-    def get_current_task(self) -> Optional[TaskProgress]:
+    def get_current_task(self) -> TaskProgress | None:
         """Get the current task progress"""
         if 0 <= self.current_task_index < len(self.tasks):
             return self.tasks[self.current_task_index]
@@ -147,7 +147,7 @@ class SessionProgress:
         self.total_todos_completed = sum(task.todos_completed for task in self.tasks)
         self.last_update_time = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "session_name": self.session_name,
@@ -157,8 +157,8 @@ class SessionProgress:
             "total_files_changed": self.total_files_changed,
             "total_commands": self.total_commands,
             "total_todos_completed": self.total_todos_completed,
-            "session_start_time": self.session_start_time.isoformat() if self.session_start_time else None,
-            "last_update_time": self.last_update_time.isoformat() if self.last_update_time else None,
+            "session_start_time": (self.session_start_time.isoformat() if self.session_start_time else None),
+            "last_update_time": (self.last_update_time.isoformat() if self.last_update_time else None),
         }
 
 
@@ -172,18 +172,18 @@ class PaneInfo:
     is_controller: bool = False
 
     # Extended pane information
-    current_task: Optional[str] = None
+    current_task: str | None = None
     idle_time: float = 0.0  # seconds since last activity
-    last_activity: Optional[datetime] = None
+    last_activity: datetime | None = None
     cpu_usage: float = 0.0  # percentage
     memory_usage: float = 0.0  # MB
-    pid: Optional[int] = None
+    pid: int | None = None
     running_time: float = 0.0  # seconds since pane started
     status: str = "unknown"  # active, idle, sleeping, etc.
 
     # Activity tracking
     activity_score: float = 0.0  # 0-100 based on recent activity
-    last_output: Optional[str] = None
+    last_output: str | None = None
     output_lines: int = 0
 
     def __post_init__(self):
@@ -211,7 +211,7 @@ class WindowInfo:
 
     name: str
     index: str
-    panes: List[PaneInfo]
+    panes: list[PaneInfo]
 
 
 @dataclass
@@ -223,11 +223,11 @@ class SessionInfo:
     template: str
     exists: bool
     status: str  # 'running' or 'stopped'
-    windows: List[WindowInfo]
+    windows: list[WindowInfo]
     controller_status: str  # 'running', 'not running', 'unknown'
-    progress: Optional[SessionProgress] = None
+    progress: SessionProgress | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for compatibility"""
         return {
             "project_name": self.project_name,
@@ -247,7 +247,7 @@ class SessionInfo:
                             "is_controller": p.is_controller,
                             "current_task": p.current_task,
                             "idle_time": p.idle_time,
-                            "last_activity": p.last_activity.isoformat() if p.last_activity else None,
+                            "last_activity": (p.last_activity.isoformat() if p.last_activity else None),
                             "cpu_usage": p.cpu_usage,
                             "memory_usage": p.memory_usage,
                             "pid": p.pid,
@@ -276,7 +276,7 @@ class DashboardStats:
     active_controllers: int
 
     @classmethod
-    def from_sessions(cls, sessions: List[SessionInfo]) -> "DashboardStats":
+    def from_sessions(cls, sessions: list[SessionInfo]) -> "DashboardStats":
         """Create stats from session list"""
         total = len(sessions)
         running = sum(1 for s in sessions if s.status == "running")

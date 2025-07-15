@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from .batch_processor import BatchProcessor
 
@@ -44,10 +44,10 @@ class LogEntry:
     line_number: int = 0
     thread_id: int = field(default_factory=lambda: threading.get_ident())
     process_id: int = field(default_factory=lambda: os.getpid())
-    extra_data: Dict[str, Any] = field(default_factory=dict)
-    exception_info: Optional[str] = None
+    extra_data: dict[str, Any] = field(default_factory=dict)
+    exception_info: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "timestamp": self.timestamp,
@@ -79,7 +79,7 @@ class AsyncLoggerConfig:
         enable_file: bool = True,
         enable_batch_processor: bool = True,
         log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ):
         """Initialize the async logger configuration."""
         self.name = name
@@ -128,7 +128,7 @@ class AsyncLogger:
         self.log_queue: asyncio.Queue = asyncio.Queue(maxsize=self.config.max_queue_size)
 
         # Processing components
-        self.batch_processor: Optional[BatchProcessor] = None
+        self.batch_processor: BatchProcessor | None = None
         if self.config.enable_batch_processor:
             self.batch_processor = BatchProcessor(
                 max_batch_size=self.config.batch_size,
@@ -161,7 +161,7 @@ class AsyncLogger:
         }
 
         # Processing task
-        self._processing_task: Optional[asyncio.Task] = None
+        self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
         self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="async_logger")
 
@@ -202,7 +202,7 @@ class AsyncLogger:
         # Wait for processing task to complete
         try:
             await asyncio.wait_for(self._processing_task, timeout=5.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._processing_task.cancel()
 
         # Stop batch processor
@@ -227,7 +227,7 @@ class AsyncLogger:
                     await self._process_entry(entry)
                     self.log_queue.task_done()
 
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # Timeout is normal, continue processing
                     continue
 
@@ -365,7 +365,7 @@ class AsyncLogger:
         """Async context manager exit."""
         await self.stop()
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get logger statistics."""
         batch_stats = {}
         if self.batch_processor:

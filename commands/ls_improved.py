@@ -3,7 +3,7 @@
 Improved ls command using base command class
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 import click
 
@@ -13,7 +13,7 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
     """List all available projects and templates"""
 
-    def execute(self, output_format: str = "table") -> Dict[str, Any]:
+    def execute(self, output_format: str = "table") -> dict[str, Any]:
         """
         Execute the ls command
 
@@ -39,7 +39,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
 
         return result
 
-    def _get_templates(self) -> List[str]:
+    def _get_templates(self) -> list[str]:
         """Get available session templates"""
         try:
             return self.tmux_manager.get_templates()
@@ -47,7 +47,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
             self.logger.error(f"Failed to get templates: {e}")
             return []
 
-    def _get_projects(self) -> List[Dict[str, Any]]:
+    def _get_projects(self) -> list[dict[str, Any]]:
         """Get configured projects with details"""
         try:
             projects_config = self.load_projects_config()
@@ -85,7 +85,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
         except Exception:
             return "unknown"
 
-    def _display_output(self, data: Dict[str, Any], output_format: str) -> None:
+    def _display_output(self, data: dict[str, Any], output_format: str) -> None:
         """Display output in specified format"""
         if output_format == "json":
             click.echo(self.format_json(data))
@@ -97,7 +97,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
         # Default table format
         self._display_table_format(data)
 
-    def _display_table_format(self, data: Dict[str, Any]) -> None:
+    def _display_table_format(self, data: dict[str, Any]) -> None:
         """Display output in table format"""
         templates = data["templates"]
         projects = data["projects"]
@@ -123,7 +123,13 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
 
 
 @click.command()
-@click.option("--format", "output_format", type=click.Choice(["table", "json", "yaml"]), default="table", help="Output format")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["table", "json", "yaml"]),
+    default="table",
+    help="Output format",
+)
 def ls(output_format: str):
     """List all available projects and templates"""
     command = LsCommand()

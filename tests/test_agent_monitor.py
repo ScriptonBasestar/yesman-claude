@@ -5,12 +5,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from libs.dashboard.widgets.agent_monitor import (
-    AgentMetrics,
-    AgentMonitor,
-    MonitorDisplayMode,
-    TaskMetrics,
-)
+from libs.dashboard.widgets.agent_monitor import AgentMetrics, AgentMonitor, MonitorDisplayMode, TaskMetrics
 from libs.multi_agent.types import TaskStatus
 
 

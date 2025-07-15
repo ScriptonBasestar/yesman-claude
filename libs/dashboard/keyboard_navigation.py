@@ -7,9 +7,10 @@ with context-aware bindings, focus management, and accessibility support.
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +51,10 @@ class KeyBinding:
     """
 
     key: str
-    modifiers: List[KeyModifier] = field(default_factory=list)
+    modifiers: list[KeyModifier] = field(default_factory=list)
     action: str = ""
     description: str = ""
-    context: Optional[NavigationContext] = None
+    context: NavigationContext | None = None
     enabled: bool = True
     priority: int = 0  # Higher priority takes precedence
 
@@ -74,18 +75,23 @@ class KeyBinding:
         parts = []
 
         # Add modifiers in standard order
-        for mod in [KeyModifier.CTRL, KeyModifier.SHIFT, KeyModifier.ALT, KeyModifier.META]:
+        for mod in [
+            KeyModifier.CTRL,
+            KeyModifier.SHIFT,
+            KeyModifier.ALT,
+            KeyModifier.META,
+        ]:
             if mod in self.modifiers:
                 parts.append(mod.value)
 
         parts.append(self.key)
         return "+".join(parts)
 
-    def matches(self, key: str, modifiers: List[KeyModifier]) -> bool:
+    def matches(self, key: str, modifiers: list[KeyModifier]) -> bool:
         """Check if this binding matches the given key combination"""
         return self.key.lower() == key.lower() and set(self.modifiers) == set(modifiers) and self.enabled
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         return {
             "key": self.key,
@@ -98,7 +104,7 @@ class KeyBinding:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "KeyBinding":
+    def from_dict(cls, data: dict[str, Any]) -> "KeyBinding":
         """Create KeyBinding from dictionary"""
         return cls(
             key=data["key"],
@@ -119,9 +125,9 @@ class FocusableElement:
     element_type: str  # button, input, link, etc.
     tab_index: int = 0
     enabled: bool = True
-    context: Optional[NavigationContext] = None
+    context: NavigationContext | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "element_id": self.element_id,
@@ -146,9 +152,9 @@ class KeyboardNavigationManager:
         """Initialize keyboard navigation manager"""
         if KeyboardNavigationManager._instance is not None:
             raise RuntimeError("KeyboardNavigationManager is a singleton, use get_instance()")
-        self.bindings: Dict[str, List[KeyBinding]] = {}
-        self.actions: Dict[str, Callable] = {}
-        self.focusable_elements: List[FocusableElement] = []
+        self.bindings: dict[str, list[KeyBinding]] = {}
+        self.actions: dict[str, Callable] = {}
+        self.focusable_elements: list[FocusableElement] = []
         self.current_focus_index: int = -1
         self.current_context: NavigationContext = NavigationContext.GLOBAL
         self.vim_mode_enabled: bool = False
@@ -161,7 +167,13 @@ class KeyboardNavigationManager:
         """Setup default keyboard bindings"""
         # Global navigation
         self.register_binding("tab", [], "focus_next", "Next element", NavigationContext.GLOBAL)
-        self.register_binding("tab", [KeyModifier.SHIFT], "focus_prev", "Previous element", NavigationContext.GLOBAL)
+        self.register_binding(
+            "tab",
+            [KeyModifier.SHIFT],
+            "focus_prev",
+            "Previous element",
+            NavigationContext.GLOBAL,
+        )
         self.register_binding("enter", [], "activate", "Activate element", NavigationContext.GLOBAL)
         self.register_binding("escape", [], "cancel", "Cancel/Close", NavigationContext.GLOBAL)
 
@@ -183,7 +195,13 @@ class KeyboardNavigationManager:
         self.register_binding("arrowup", [], "navigate_up", "Navigate up", NavigationContext.GLOBAL)
         self.register_binding("arrowdown", [], "navigate_down", "Navigate down", NavigationContext.GLOBAL)
         self.register_binding("arrowleft", [], "navigate_left", "Navigate left", NavigationContext.GLOBAL)
-        self.register_binding("arrowright", [], "navigate_right", "Navigate right", NavigationContext.GLOBAL)
+        self.register_binding(
+            "arrowright",
+            [],
+            "navigate_right",
+            "Navigate right",
+            NavigationContext.GLOBAL,
+        )
 
         # Vim mode bindings
         self.register_binding(":", [], "vim_command_mode", "Command mode", NavigationContext.VIM_NORMAL)
@@ -236,10 +254,10 @@ class KeyboardNavigationManager:
     def register_binding(
         self,
         key: str,
-        modifiers: List[KeyModifier],
+        modifiers: list[KeyModifier],
         action: str,
         description: str = "",
-        context: Optional[NavigationContext] = None,
+        context: NavigationContext | None = None,
         priority: int = 0,
     ) -> None:
         """
@@ -272,7 +290,12 @@ class KeyboardNavigationManager:
 
         logger.debug(f"Registered key binding: {key_combo} -> {action}")
 
-    def unregister_binding(self, key: str, modifiers: List[KeyModifier], context: Optional[NavigationContext] = None) -> bool:
+    def unregister_binding(
+        self,
+        key: str,
+        modifiers: list[KeyModifier],
+        context: NavigationContext | None = None,
+    ) -> bool:
         """
         Unregister a keyboard binding
 
@@ -333,7 +356,12 @@ class KeyboardNavigationManager:
             return True
         return False
 
-    def handle_key_event(self, key: str, modifiers: List[KeyModifier], context: Optional[NavigationContext] = None) -> bool:
+    def handle_key_event(
+        self,
+        key: str,
+        modifiers: list[KeyModifier],
+        context: NavigationContext | None = None,
+    ) -> bool:
         """
         Handle a keyboard event
 
@@ -349,7 +377,11 @@ class KeyboardNavigationManager:
             context = self.current_context
 
         # Special handling for Vim mode
-        if self.vim_mode_enabled and context in [NavigationContext.VIM_NORMAL, NavigationContext.VIM_INSERT, NavigationContext.VIM_VISUAL]:
+        if self.vim_mode_enabled and context in [
+            NavigationContext.VIM_NORMAL,
+            NavigationContext.VIM_INSERT,
+            NavigationContext.VIM_VISUAL,
+        ]:
             context = self.vim_mode
 
         key_combo = "+".join([mod.value for mod in modifiers] + [key.lower()])
@@ -412,7 +444,13 @@ class KeyboardNavigationManager:
         self.current_context = context
         logger.debug(f"Navigation context changed to: {context}")
 
-    def add_focusable_element(self, element_id: str, element_type: str = "generic", tab_index: int = 0, context: Optional[NavigationContext] = None) -> None:
+    def add_focusable_element(
+        self,
+        element_id: str,
+        element_type: str = "generic",
+        tab_index: int = 0,
+        context: NavigationContext | None = None,
+    ) -> None:
         """
         Add a focusable element to the navigation system
 
@@ -531,7 +569,7 @@ class KeyboardNavigationManager:
         logger.debug(f"Focusing element: {element.element_id}")
         # This would be implemented by subclasses or interface-specific handlers
 
-    def get_current_focus(self) -> Optional[FocusableElement]:
+    def get_current_focus(self) -> FocusableElement | None:
         """Get the currently focused element"""
         if 0 <= self.current_focus_index < len(self.focusable_elements):
             return self.focusable_elements[self.current_focus_index]
@@ -599,21 +637,21 @@ class KeyboardNavigationManager:
 
     # Serialization methods
 
-    def export_bindings(self) -> Dict[str, Any]:
+    def export_bindings(self) -> dict[str, Any]:
         """Export all key bindings to dictionary"""
         exported = {}
         for key_combo, bindings in self.bindings.items():
             exported[key_combo] = [binding.to_dict() for binding in bindings]
         return exported
 
-    def import_bindings(self, bindings_data: Dict[str, Any]) -> None:
+    def import_bindings(self, bindings_data: dict[str, Any]) -> None:
         """Import key bindings from dictionary"""
         self.bindings.clear()
 
         for key_combo, binding_list in bindings_data.items():
             self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in binding_list]
 
-    def get_help_text(self, context: Optional[NavigationContext] = None) -> List[str]:
+    def get_help_text(self, context: NavigationContext | None = None) -> list[str]:
         """Get help text for current context"""
         help_lines = []
         processed_actions = set()

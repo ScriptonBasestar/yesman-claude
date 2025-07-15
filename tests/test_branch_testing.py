@@ -10,13 +10,7 @@ from unittest.mock import patch
 import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.branch_test_manager import (
-    BranchTestManager,
-    TestResult,
-    TestStatus,
-    TestSuite,
-    TestType,
-)
+from libs.multi_agent.branch_test_manager import BranchTestManager, TestResult, TestStatus, TestSuite, TestType
 
 
 class TestBranchTestManager:
@@ -30,8 +24,18 @@ class TestBranchTestManager:
 
             # Initialize actual git repository
             subprocess.run(["git", "init"], check=False, cwd=repo_path, capture_output=True)
-            subprocess.run(["git", "config", "user.name", "Test User"], check=False, cwd=repo_path, capture_output=True)
-            subprocess.run(["git", "config", "user.email", "test@example.com"], check=False, cwd=repo_path, capture_output=True)
+            subprocess.run(
+                ["git", "config", "user.name", "Test User"],
+                check=False,
+                cwd=repo_path,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.email", "test@example.com"],
+                check=False,
+                cwd=repo_path,
+                capture_output=True,
+            )
 
             # Create basic directory structure
             (repo_path / "tests").mkdir()
@@ -47,10 +51,20 @@ class TestBranchTestManager:
 
             # Create initial commit
             subprocess.run(["git", "add", "."], check=False, cwd=repo_path, capture_output=True)
-            subprocess.run(["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path, capture_output=True)
+            subprocess.run(
+                ["git", "commit", "-m", "Initial commit"],
+                check=False,
+                cwd=repo_path,
+                capture_output=True,
+            )
 
             # Create develop branch
-            subprocess.run(["git", "branch", "develop"], check=False, cwd=repo_path, capture_output=True)
+            subprocess.run(
+                ["git", "branch", "develop"],
+                check=False,
+                cwd=repo_path,
+                capture_output=True,
+            )
 
             yield repo_path
 
@@ -145,7 +159,11 @@ class TestBranchTestManager:
 
         # Mock branch switching
         with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
-            with patch.object(branch_test_manager.branch_manager, "_get_current_branch", return_value="test-branch"):
+            with patch.object(
+                branch_test_manager.branch_manager,
+                "_get_current_branch",
+                return_value="test-branch",
+            ):
                 result = await branch_test_manager.run_test_suite(
                     branch_name="test-branch",
                     suite_name="simple_test",
@@ -168,7 +186,11 @@ class TestBranchTestManager:
         )
 
         with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
-            with patch.object(branch_test_manager.branch_manager, "_get_current_branch", return_value="test-branch"):
+            with patch.object(
+                branch_test_manager.branch_manager,
+                "_get_current_branch",
+                return_value="test-branch",
+            ):
                 result = await branch_test_manager.run_test_suite(
                     branch_name="test-branch",
                     suite_name="failing_test",
@@ -190,7 +212,11 @@ class TestBranchTestManager:
         )
 
         with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
-            with patch.object(branch_test_manager.branch_manager, "_get_current_branch", return_value="test-branch"):
+            with patch.object(
+                branch_test_manager.branch_manager,
+                "_get_current_branch",
+                return_value="test-branch",
+            ):
                 result = await branch_test_manager.run_test_suite(
                     branch_name="test-branch",
                     suite_name="timeout_test",
@@ -218,7 +244,11 @@ class TestBranchTestManager:
         )
 
         with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
-            with patch.object(branch_test_manager.branch_manager, "_get_current_branch", return_value="test-branch"):
+            with patch.object(
+                branch_test_manager.branch_manager,
+                "_get_current_branch",
+                return_value="test-branch",
+            ):
                 results = await branch_test_manager.run_all_tests(
                     branch_name="test-branch",
                     parallel=False,  # Sequential for deterministic testing
@@ -254,7 +284,11 @@ class TestBranchTestManager:
         )
 
         with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
-            with patch.object(branch_test_manager.branch_manager, "_get_current_branch", return_value="test-branch"):
+            with patch.object(
+                branch_test_manager.branch_manager,
+                "_get_current_branch",
+                return_value="test-branch",
+            ):
                 results = await branch_test_manager.run_all_tests(
                     branch_name="test-branch",
                     parallel=False,

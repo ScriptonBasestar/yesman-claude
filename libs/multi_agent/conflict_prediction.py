@@ -9,15 +9,10 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, NamedTuple
 
 from .branch_manager import BranchManager
-from .conflict_resolution import (
-    ConflictInfo,
-    ConflictResolutionEngine,
-    ConflictSeverity,
-    ConflictType,
-)
+from .conflict_resolution import ConflictInfo, ConflictResolutionEngine, ConflictSeverity, ConflictType
 from .semantic_analyzer import SemanticAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -52,16 +47,16 @@ class PredictionResult:
     prediction_id: str
     confidence: PredictionConfidence
     pattern: ConflictPattern
-    affected_branches: List[str]
-    affected_files: List[str]
+    affected_branches: list[str]
+    affected_files: list[str]
     predicted_conflict_type: ConflictType
     predicted_severity: ConflictSeverity
     likelihood_score: float  # 0.0-1.0
     description: str
-    prevention_suggestions: List[str] = field(default_factory=list)
-    timeline_prediction: Optional[datetime] = None
-    affected_agents: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    prevention_suggestions: list[str] = field(default_factory=list)
+    timeline_prediction: datetime | None = None
+    affected_agents: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     predicted_at: datetime = field(default_factory=datetime.now)
 
 
@@ -83,7 +78,7 @@ class ConflictPredictor:
         self,
         conflict_engine: ConflictResolutionEngine,
         branch_manager: BranchManager,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
     ):
         """
         Initialize the conflict predictor
@@ -101,8 +96,8 @@ class ConflictPredictor:
         self.semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
 
         # Prediction storage
-        self.predictions: Dict[str, PredictionResult] = {}
-        self.prediction_history: List[PredictionResult] = []
+        self.predictions: dict[str, PredictionResult] = {}
+        self.prediction_history: list[PredictionResult] = []
 
         # Pattern recognition models
         self.pattern_detectors = {
@@ -136,9 +131,9 @@ class ConflictPredictor:
 
     async def predict_conflicts(
         self,
-        branches: List[str],
-        time_horizon: Optional[timedelta] = None,
-    ) -> List[PredictionResult]:
+        branches: list[str],
+        time_horizon: timedelta | None = None,
+    ) -> list[PredictionResult]:
         """
         Predict potential conflicts between branches
 
@@ -246,7 +241,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential import statement conflicts"""
         try:
             # Get Python files changed in both branches
@@ -310,7 +305,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential function signature conflicts"""
         try:
             # Get function signatures from both branches
@@ -378,7 +373,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential variable/class naming collisions"""
         try:
             # Get symbol definitions from both branches
@@ -432,7 +427,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential class hierarchy conflicts"""
         try:
             # Get class hierarchies from both branches
@@ -490,7 +485,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential dependency version conflicts"""
         try:
             # Get dependency versions from both branches
@@ -548,7 +543,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential API breaking changes"""
         # Implementation would analyze public API changes
         # This is a simplified version
@@ -559,7 +554,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential resource contention conflicts"""
         # Implementation would analyze file locks, database access, etc.
         return None
@@ -569,15 +564,15 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
         vector: ConflictVector,
-    ) -> Optional[PredictionResult]:
+    ) -> PredictionResult | None:
         """Detect potential merge context loss scenarios"""
         # Implementation would analyze merge complexity
         return None
 
     async def _apply_ml_scoring(
         self,
-        predictions: List[PredictionResult],
-    ) -> List[PredictionResult]:
+        predictions: list[PredictionResult],
+    ) -> list[PredictionResult]:
         """Apply machine learning scoring to improve prediction accuracy"""
         # This would implement actual ML scoring
         # For now, apply simple heuristics
@@ -660,7 +655,7 @@ class ConflictPredictor:
         # Simplified implementation
         return 0.5
 
-    async def _get_python_files_with_imports(self, branch: str) -> Dict[str, List[str]]:
+    async def _get_python_files_with_imports(self, branch: str) -> dict[str, list[str]]:
         """Get Python files and their import statements"""
         files = {}
         try:
@@ -677,7 +672,7 @@ class ConflictPredictor:
             logger.error(f"Error getting Python files with imports: {e}")
         return files
 
-    def _extract_imports(self, content: str) -> List[str]:
+    def _extract_imports(self, content: str) -> list[str]:
         """Extract import statements from Python code"""
         imports = []
         try:
@@ -706,8 +701,8 @@ class ConflictPredictor:
 
     def _imports_likely_to_conflict(
         self,
-        imports1: List[str],
-        imports2: List[str],
+        imports1: list[str],
+        imports2: list[str],
     ) -> bool:
         """Check if import lists are likely to conflict"""
         set1 = set(imports1)
@@ -729,7 +724,7 @@ class ConflictPredictor:
 
         return False
 
-    async def _get_all_function_signatures(self, branch: str) -> Dict[str, str]:
+    async def _get_all_function_signatures(self, branch: str) -> dict[str, str]:
         """Get all function signatures from a branch"""
         signatures = {}
         try:
@@ -749,7 +744,7 @@ class ConflictPredictor:
             logger.error(f"Error getting function signatures: {e}")
         return signatures
 
-    async def _extract_symbol_definitions(self, branch: str) -> Dict[str, str]:
+    async def _extract_symbol_definitions(self, branch: str) -> dict[str, str]:
         """Extract symbol definitions from a branch"""
         symbols = {}
         try:
@@ -765,7 +760,7 @@ class ConflictPredictor:
                         for node in ast.walk(tree):
                             if isinstance(
                                 node,
-                                (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef),
+                                ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef,
                             ):
                                 symbols[node.name] = f"{file_path}:{node.lineno}"
                     except SyntaxError:
@@ -774,7 +769,7 @@ class ConflictPredictor:
             logger.error(f"Error extracting symbol definitions: {e}")
         return symbols
 
-    async def _extract_class_hierarchies(self, branch: str) -> Dict[str, List[str]]:
+    async def _extract_class_hierarchies(self, branch: str) -> dict[str, list[str]]:
         """Extract class inheritance hierarchies"""
         hierarchies = {}
         try:
@@ -802,7 +797,7 @@ class ConflictPredictor:
             logger.error(f"Error extracting class hierarchies: {e}")
         return hierarchies
 
-    async def _get_dependency_versions(self, branch: str) -> Dict[str, str]:
+    async def _get_dependency_versions(self, branch: str) -> dict[str, str]:
         """Get dependency versions from requirements files"""
         versions = {}
         try:
@@ -861,7 +856,7 @@ class ConflictPredictor:
 
             distance = 0.0
             weight = 1.0
-            for a, b in zip(v1_parts, v2_parts):
+            for a, b in zip(v1_parts, v2_parts, strict=False):
                 distance += abs(a - b) * weight
                 weight *= 0.1  # Major versions matter more
 
@@ -869,7 +864,7 @@ class ConflictPredictor:
         except Exception:
             return 0.5  # Default moderate distance
 
-    def get_prediction_summary(self) -> Dict[str, Any]:
+    def get_prediction_summary(self) -> dict[str, Any]:
         """Get summary of all predictions and statistics"""
         if not self.predictions:
             return {
@@ -905,7 +900,7 @@ class ConflictPredictor:
             ],
         }
 
-    def validate_prediction_accuracy(self, actual_conflicts: List[ConflictInfo]):
+    def validate_prediction_accuracy(self, actual_conflicts: list[ConflictInfo]):
         """Validate prediction accuracy against actual conflicts"""
         # Implementation would compare predictions with actual conflicts
         # and update accuracy metrics

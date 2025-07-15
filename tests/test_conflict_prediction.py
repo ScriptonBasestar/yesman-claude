@@ -8,18 +8,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_prediction import (
-    ConflictPattern,
-    ConflictPredictor,
-    ConflictVector,
-    PredictionConfidence,
-    PredictionResult,
-)
-from libs.multi_agent.conflict_resolution import (
-    ConflictResolutionEngine,
-    ConflictSeverity,
-    ConflictType,
-)
+from libs.multi_agent.conflict_prediction import ConflictPattern, ConflictPredictor, ConflictVector, PredictionConfidence, PredictionResult
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ConflictSeverity, ConflictType
 
 
 class TestConflictVector:

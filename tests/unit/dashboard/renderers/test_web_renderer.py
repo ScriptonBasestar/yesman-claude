@@ -454,8 +454,14 @@ class TestWebRenderer:
     def test_render_layout_vertical(self):
         """Test vertical layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "vertical", "spacing": "space-y-6"})
@@ -469,8 +475,14 @@ class TestWebRenderer:
     def test_render_layout_flex(self):
         """Test flex layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "flex", "direction": "row", "gap": "gap-6"})
@@ -486,10 +498,22 @@ class TestWebRenderer:
     def test_render_layout_grid(self):
         """Test grid layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 3", value=30)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 4", value=40)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 3", value=30),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 4", value=40),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "grid", "columns": 2, "gap": "gap-4"})
@@ -807,10 +831,22 @@ class TestWebRendererIntegration:
     def test_responsive_layout_rendering(self):
         """Test responsive layout with multiple breakpoints"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="CPU", value=75.5, suffix="%")},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Memory", value=45.2, suffix="%")},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Disk", value=60.1, suffix="%")},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Network", value=12.3, suffix="MB/s")},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="CPU", value=75.5, suffix="%"),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Memory", value=45.2, suffix="%"),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Disk", value=60.1, suffix="%"),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Network", value=12.3, suffix="MB/s"),
+            },
         ]
 
         # Test grid layout

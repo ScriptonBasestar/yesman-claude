@@ -2,8 +2,9 @@
 
 import datetime
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from ..utils import ensure_log_directory, get_default_log_path
 from ..yesman_config import YesmanConfig
@@ -14,9 +15,9 @@ class ClaudeStatusManager:
 
     def __init__(self, session_name: str):
         self.session_name = session_name
-        self.status_callback: Optional[Callable] = None
-        self.activity_callback: Optional[Callable] = None
-        self.response_history: List[Dict[str, Any]] = []
+        self.status_callback: Callable | None = None
+        self.activity_callback: Callable | None = None
+        self.response_history: list[dict[str, Any]] = []
         self.logger = logging.getLogger(f"yesman.claude_status.{session_name}")
 
     def set_status_callback(self, callback: Callable):
@@ -53,11 +54,11 @@ class ClaudeStatusManager:
         if len(self.response_history) > 100:
             self.response_history = self.response_history[-100:]
 
-    def get_response_history(self) -> List[Dict[str, Any]]:
+    def get_response_history(self) -> list[dict[str, Any]]:
         """Get the response history"""
         return self.response_history
 
-    def save_capture_to_file(self, content: str, pane_id: Optional[str] = None) -> str:
+    def save_capture_to_file(self, content: str, pane_id: str | None = None) -> str:
         """Save captured content to file and return file path"""
         try:
             config = YesmanConfig()

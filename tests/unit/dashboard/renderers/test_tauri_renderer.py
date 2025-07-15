@@ -462,7 +462,11 @@ class TestTauriRenderer:
 
         # Check processed rows
         assert result["data"]["rows"][0] == ["Session 1", "Active", "5"]
-        assert result["data"]["rows"][2] == ["Session 3", "Error", "0"]  # Dict converted to list
+        assert result["data"]["rows"][2] == [
+            "Session 3",
+            "Error",
+            "0",
+        ]  # Dict converted to list
 
         # Check actions
         action_ids = [action["id"] for action in result["actions"]]
@@ -486,8 +490,14 @@ class TestTauriRenderer:
     def test_render_layout(self):
         """Test layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "grid", "columns": 2})
@@ -673,9 +683,17 @@ class TestTauriRendererIntegration:
 
         # Render multiple widgets
         widgets = [
-            {"type": WidgetType.SESSION_BROWSER, "data": [session], "options": {"view_mode": "cards"}},
+            {
+                "type": WidgetType.SESSION_BROWSER,
+                "data": [session],
+                "options": {"view_mode": "cards"},
+            },
             {"type": WidgetType.HEALTH_METER, "data": health, "options": {}},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="CPU", value=45.2, suffix="%"), "options": {}},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="CPU", value=45.2, suffix="%"),
+                "options": {},
+            },
         ]
 
         dashboard = self.renderer.render_layout(widgets, {"type": "grid", "columns": 2})

@@ -10,13 +10,7 @@ from rich.live import Live
 from rich.panel import Panel
 
 from libs.core.session_manager import SessionManager
-from libs.dashboard.widgets import (
-    ActivityHeatmapGenerator,
-    GitActivityWidget,
-    ProgressTracker,
-    ProjectHealth,
-    SessionBrowser,
-)
+from libs.dashboard.widgets import ActivityHeatmapGenerator, GitActivityWidget, ProgressTracker, ProjectHealth, SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
@@ -176,7 +170,12 @@ class StatusDashboard:
             session_progress_content = self.session_progress.render_progress_overview(self.progress_data)
             layout["session_progress"].update(session_progress_content)
         else:
-            layout["session_progress"].update(Panel("[dim]Loading session progress...[/dim]", title="📊 Session Progress"))
+            layout["session_progress"].update(
+                Panel(
+                    "[dim]Loading session progress...[/dim]",
+                    title="📊 Session Progress",
+                )
+            )
 
         # Footer with compact status
         footer_parts = []
@@ -240,7 +239,13 @@ class StatusDashboard:
 @click.command()
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 @click.option("--interactive", "-i", is_flag=True, help="Run interactive dashboard")
-@click.option("--update-interval", "-u", default=5.0, type=float, help="Update interval in seconds")
+@click.option(
+    "--update-interval",
+    "-u",
+    default=5.0,
+    type=float,
+    help="Update interval in seconds",
+)
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
 def status(project_path, interactive, update_interval, detailed):
     """Comprehensive project status dashboard"""

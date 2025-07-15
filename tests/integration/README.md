@@ -1,6 +1,7 @@
 # Yesman-Claude Integration Test Suite
 
-This directory contains comprehensive integration tests for the Yesman-Claude automation tool. The tests validate all aspects of the system in real-world scenarios.
+This directory contains comprehensive integration tests for the Yesman-Claude automation tool. The tests validate all
+aspects of the system in real-world scenarios.
 
 ## Quick Start
 
@@ -27,6 +28,7 @@ python3 lib/parallel_runner.py --suites scripts/basic scripts/ai scripts/monitor
 ## 🚀 새로운 기능 (v2.0)
 
 ### 병렬 테스트 실행
+
 ```bash
 # 4개 워커로 병렬 실행 (60% 시간 단축)
 python3 lib/parallel_runner.py --suites scripts/basic scripts/ai --workers 4
@@ -36,6 +38,7 @@ python3 lib/parallel_runner.py --suites scripts/all --exclude legacy old_test
 ```
 
 ### 개선된 테스트 스크립트
+
 ```bash
 # AI 테스트 (개선된 버전)
 ./scripts/ai/test_pattern_learning_improved.sh
@@ -50,35 +53,42 @@ python3 lib/parallel_runner.py --suites scripts/all --exclude legacy old_test
 ## Test Suites
 
 ### 1. Basic Tests (`scripts/basic/`)
+
 - **Session Lifecycle**: Complete tmux session management
 - **Claude Automation**: Auto-response functionality testing
 
 ### 2. Performance Tests (`scripts/performance/`)
+
 - **Load Testing**: Multi-session performance under load
 - **Cache Efficiency**: Session caching performance
 - **Memory Usage**: Resource consumption monitoring
 
 ### 3. Security Tests (`scripts/security/`)
+
 - **API Security**: Authentication and authorization
 - **Input Validation**: SQL injection, XSS protection
 - **Session Isolation**: Cross-session security
 
 ### 4. Chaos Engineering (`scripts/chaos/`)
+
 - **Network Failures**: Connection resilience
 - **Process Crashes**: Recovery mechanisms
 - **Resource Exhaustion**: Stress testing
 
 ### 5. AI Learning Tests (`scripts/ai/`)
+
 - **Pattern Recognition**: Prompt classification accuracy
 - **Learning Adaptation**: Response improvement over time
 - **Performance**: AI system response times
 
 ### 6. Health Monitoring (`scripts/monitoring/`)
+
 - **Project Health**: Multi-category assessment
 - **Real-time Monitoring**: Live metrics collection
 - **Visualization Data**: Dashboard data generation
 
 ### 7. WebSocket Tests (`scripts/websocket/`)
+
 - **Real-time Communication**: WebSocket functionality
 - **Message Ordering**: Delivery guarantees
 - **Connection Resilience**: Reconnection handling
@@ -86,6 +96,7 @@ python3 lib/parallel_runner.py --suites scripts/all --exclude legacy old_test
 ## Test Results
 
 Test results are stored in `results/` directory:
+
 - `test_results.log`: Raw test output
 - `test_report.md`: Formatted test report
 - `*_*.log`: Individual test logs
@@ -99,36 +110,43 @@ Test results are stored in `results/` directory:
 - git (for repository tests)
 
 Optional:
+
 - websocat (for WebSocket testing)
 - tc (for network simulation)
 
 ## Configuration
 
-Tests use temporary configurations and do not modify your existing yesman setup. Your original configuration is automatically backed up before testing.
+Tests use temporary configurations and do not modify your existing yesman setup. Your original configuration is
+automatically backed up before testing.
 
 ## Test Categories
 
 ### Functional Tests
+
 - Core functionality verification
 - User workflow validation
 - Integration point testing
 
 ### Performance Tests
+
 - Response time measurement
 - Resource usage monitoring
 - Scalability assessment
 
 ### Security Tests
+
 - Authentication validation
 - Input sanitization
 - Session isolation
 
 ### Reliability Tests
+
 - Error handling
 - Recovery mechanisms
 - Stress testing
 
 ### Compatibility Tests
+
 - Cross-platform validation
 - Version compatibility
 - Dependency testing
@@ -136,6 +154,7 @@ Tests use temporary configurations and do not modify your existing yesman setup.
 ## Test Data
 
 Tests generate temporary data in:
+
 - `/tmp/test-*`: Temporary test files
 - `/tmp/perf-*`: Performance test data
 - `/tmp/chaos-*`: Chaos engineering data
@@ -160,13 +179,14 @@ The test suite is designed for CI/CD integration:
 ### Common Issues
 
 1. **Permission Errors**: Ensure test scripts are executable
-2. **Port Conflicts**: Tests use ports 8001, 8765 - ensure they're available
-3. **Tmux Issues**: Close existing tmux sessions before testing
-4. **Python Modules**: Ensure yesman is properly installed
+1. **Port Conflicts**: Tests use ports 8001, 8765 - ensure they're available
+1. **Tmux Issues**: Close existing tmux sessions before testing
+1. **Python Modules**: Ensure yesman is properly installed
 
 ### Debug Mode
 
 Enable verbose output for debugging:
+
 ```bash
 ./run_tests.sh --verbose
 ```
@@ -174,6 +194,7 @@ Enable verbose output for debugging:
 ### Manual Test Execution
 
 Run individual tests:
+
 ```bash
 cd scripts/basic
 ./test_session_lifecycle.sh
@@ -184,11 +205,11 @@ cd scripts/basic
 When adding new tests:
 
 1. Place test scripts in appropriate `scripts/` subdirectory
-2. Make scripts executable with `chmod +x`
-3. Follow naming convention: `test_*.sh`
-4. Include setup/cleanup in each test
-5. Use exit codes: 0 for success, 1 for failure
-6. Add test descriptions in comments
+1. Make scripts executable with `chmod +x`
+1. Follow naming convention: `test_*.sh`
+1. Include setup/cleanup in each test
+1. Use exit codes: 0 for success, 1 for failure
+1. Add test descriptions in comments
 
 ### Test Script Template
 
@@ -226,14 +247,14 @@ echo -e "\n✅ All tests completed!"
 ## Features to Implement
 
 1. **Logging system** - ✅ Implemented
-2. **Input validation** - ✅ Implemented  
-3. **Better error handling** - ✅ Implemented
-4. **Configuration file support** - ✅ Implemented
+1. **Input validation** - ✅ Implemented
+1. **Better error handling** - ✅ Implemented
+1. **Configuration file support** - ✅ Implemented
 
 ## Testing Goals
 
 - ✅ Test claude manager auto-response to selection prompts
-- ✅ Verify dashboard monitoring functionality  
+- ✅ Verify dashboard monitoring functionality
 - ✅ Confirm tmux session management works correctly
 - ✅ Validate security measures
 - ✅ Test performance under load

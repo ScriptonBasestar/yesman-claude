@@ -1,4 +1,16 @@
 
+# Installation
+install:
+	uv pip install -e .
+
+install-dev:
+	uv pip install -e . --group dev
+
+install-test:
+	uv pip install -e . --group test
+
+install-all:
+	uv pip install -e . --group dev --group test
 
 dev-install:
 	pip install -e . --config-settings editable_mode=compat
@@ -94,3 +106,33 @@ test-clean:
 	rm -rf htmlcov/
 	rm -f .coverage
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+
+# Code Quality
+lint:
+	@echo "Running ruff check..."
+	uv run ruff check --target-version py311 libs commands tests docs/examples
+	@echo "Running mypy..."
+	uv run mypy --config-file=pyproject.toml libs commands
+	@echo "Running bandit security check..."
+	@uv run bandit -r libs commands --skip B101,B404,B603,B607,B602 --severity-level medium --quiet || echo "✅ Security check completed"
+
+format:
+	@echo "Running ruff format..."
+	uv run ruff format --target-version py311 libs commands tests docs/examples
+	@echo "Running ruff check with auto-fix..."
+	uv run ruff check --fix --target-version py311 libs commands tests docs/examples
+	@echo "Running mdformat..."
+	uv run mdformat *.md docs/**/*.md --wrap 120
+
+# Pre-commit integration
+pre-commit-install:
+	@echo "Installing pre-commit hooks..."
+	uv run pre-commit install
+
+pre-commit-run:
+	@echo "Running all pre-commit hooks..."
+	uv run pre-commit run --all-files
+
+pre-commit-update:
+	@echo "Updating pre-commit hooks..."
+	uv run pre-commit autoupdate

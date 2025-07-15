@@ -3,7 +3,6 @@
 import sys
 import threading
 import time
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -36,7 +35,7 @@ class InteractiveBrowser:
 
         self.update_interval = update_interval
         self.running = False
-        self.update_thread: Optional[threading.Thread] = None
+        self.update_thread: threading.Thread | None = None
         self.progress_data = None
 
     def update_data(self):
@@ -182,7 +181,13 @@ class InteractiveBrowser:
 
 
 @click.command()
-@click.option("--update-interval", "-i", default=2.0, type=float, help="Update interval in seconds (default: 2.0)")
+@click.option(
+    "--update-interval",
+    "-i",
+    default=2.0,
+    type=float,
+    help="Update interval in seconds (default: 2.0)",
+)
 def browse(update_interval):
     """Interactive session browser with activity monitoring"""
 

@@ -7,11 +7,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.metrics_verifier import (
-    MetricsVerifier,
-    PerformanceMetrics,
-    SuccessCriteria,
-)
+from libs.multi_agent.metrics_verifier import MetricsVerifier, PerformanceMetrics, SuccessCriteria
 
 
 class TestPerformanceMetrics:
@@ -271,7 +267,11 @@ class TestMetricsVerifier:
         metrics_verifier.current_metrics.speed_improvement_ratio = 2.2
         metrics_verifier.current_metrics.single_agent_time = 10.0
         metrics_verifier.current_metrics.multi_agent_time = 4.5
-        metrics_verifier.current_metrics.task_completion_times = [1.0, 2.0, 3.0]  # Add completion times
+        metrics_verifier.current_metrics.task_completion_times = [
+            1.0,
+            2.0,
+            3.0,
+        ]  # Add completion times
         metrics_verifier.track_conflict_resolution(15, 13)
         metrics_verifier.track_merge_success(50, 49)
         metrics_verifier.track_code_quality(7.8, 8.1)

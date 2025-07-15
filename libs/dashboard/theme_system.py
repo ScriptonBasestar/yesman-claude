@@ -13,7 +13,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -63,12 +63,12 @@ class ColorPalette:
     accent: str = "#8b5cf6"  # Purple
     highlight: str = "#fbbf24"  # Amber
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """Convert to dictionary"""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, str]) -> "ColorPalette":
+    def from_dict(cls, data: dict[str, str]) -> "ColorPalette":
         """Create from dictionary"""
         return cls(**data)
 
@@ -113,12 +113,12 @@ class Typography:
     line_height_normal: str = "1.5"
     line_height_relaxed: str = "1.75"
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """Convert to dictionary"""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, str]) -> "Typography":
+    def from_dict(cls, data: dict[str, str]) -> "Typography":
         """Create from dictionary"""
         return cls(**data)
 
@@ -156,12 +156,12 @@ class Spacing:
     radius_2xl: str = "1rem"  # 16px
     radius_full: str = "9999px"
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """Convert to dictionary"""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, str]) -> "Spacing":
+    def from_dict(cls, data: dict[str, str]) -> "Spacing":
         """Create from dictionary"""
         return cls(**data)
 
@@ -180,7 +180,7 @@ class Theme:
     author: str = ""
     version: str = "1.0.0"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "name": self.name,
@@ -195,7 +195,7 @@ class Theme:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Theme":
+    def from_dict(cls, data: dict[str, Any]) -> "Theme":
         """Create from dictionary"""
         return cls(
             name=data["name"],
@@ -327,7 +327,7 @@ class ThemeManager:
     _instance: Optional["ThemeManager"] = None
 
     @classmethod
-    def get_instance(cls, config_dir: Optional[Path] = None) -> "ThemeManager":
+    def get_instance(cls, config_dir: Path | None = None) -> "ThemeManager":
         """Get the singleton instance of the theme manager."""
         if cls._instance is None:
             cls._instance = cls(config_dir=config_dir)
@@ -338,7 +338,7 @@ class ThemeManager:
         """Reset the singleton instance."""
         cls._instance = None
 
-    def __init__(self, config_dir: Optional[Path] = None):
+    def __init__(self, config_dir: Path | None = None):
         """
         Initialize the theme manager
 
@@ -360,14 +360,14 @@ class ThemeManager:
         self.current_mode = ThemeMode.LIGHT
 
         # User themes
-        self.user_themes: Dict[str, Theme] = {}
+        self.user_themes: dict[str, Theme] = {}
         self.load_user_themes()
 
         # Auto-detect system theme
         self.auto_theme_enabled = True
         self.update_from_system()
 
-    def _create_builtin_themes(self) -> Dict[str, Theme]:
+    def _create_builtin_themes(self) -> dict[str, Theme]:
         """Create built-in themes"""
         themes = {}
 
@@ -439,18 +439,18 @@ class ThemeManager:
 
         return themes
 
-    def get_all_themes(self) -> Dict[str, Theme]:
+    def get_all_themes(self) -> dict[str, Theme]:
         """Get all available themes (built-in + user)"""
         all_themes = self.built_in_themes.copy()
         all_themes.update(self.user_themes)
         return all_themes
 
-    def get_theme(self, name: str) -> Optional[Theme]:
+    def get_theme(self, name: str) -> Theme | None:
         """Get theme by name"""
         all_themes = self.get_all_themes()
         return all_themes.get(name)
 
-    def set_theme(self, theme: Union[str, Theme]) -> bool:
+    def set_theme(self, theme: str | Theme) -> bool:
         """
         Set current theme
 
@@ -538,7 +538,7 @@ class ThemeManager:
             logger.error(f"Error saving theme {name}: {e}")
             return False
 
-    def load_theme(self, name: str) -> Optional[Theme]:
+    def load_theme(self, name: str) -> Theme | None:
         """
         Load user theme from disk
 
@@ -607,7 +607,7 @@ class ThemeManager:
             logger.error(f"Error deleting theme {name}: {e}")
             return False
 
-    def export_css(self, theme: Optional[Theme] = None) -> str:
+    def export_css(self, theme: Theme | None = None) -> str:
         """
         Export theme as CSS variables
 
@@ -652,7 +652,7 @@ class ThemeManager:
 
         return "\n".join(css_lines)
 
-    def export_rich_theme(self, theme: Optional[Theme] = None) -> Dict[str, str]:
+    def export_rich_theme(self, theme: Theme | None = None) -> dict[str, str]:
         """
         Export theme for Rich library
 
@@ -697,7 +697,7 @@ class ThemeManager:
             "tree.guide": colors.secondary,
         }
 
-    def export_textual_css(self, theme: Optional[Theme] = None) -> str:
+    def export_textual_css(self, theme: Theme | None = None) -> str:
         """Export theme as CSS for Textual TUI framework"""
         theme = theme or self.current_theme
         if not theme:

@@ -14,7 +14,13 @@ from libs.yesman_config import YesmanConfig
 
 @click.command()
 @click.argument("session_name", required=False)
-@click.option("--format", "-f", type=click.Choice(["table", "tree", "simple"]), default="table", help="Output format")
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["table", "tree", "simple"]),
+    default="table",
+    help="Output format",
+)
 def validate(session_name, format):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
     console = Console()
@@ -110,7 +116,7 @@ def _display_success(console: Console, valid_count: int, total_count: int):
         title="[green]Validation Complete[/green]",
         subtitle=f"[dim]{valid_count}/{total_count} sessions validated[/dim]",
         border_style="green",
-        padding=(1, 2)
+        padding=(1, 2),
     )
     console.print(success_panel)
 
@@ -122,7 +128,7 @@ def _display_table_format(console: Console, missing: list, valid_count: int, tot
         caption=f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]",
         show_header=True,
         header_style="bold blue",
-        border_style="red"
+        border_style="red",
     )
 
     table.add_column("Session", style="cyan", width=15)
@@ -224,8 +230,9 @@ def _shorten_path(path: str, max_length: int = 60) -> str:
     if len(parts) > 3:
         return f".../{'/'.join(parts[-3:])}"
     elif len(path) > max_length:
-        return f"...{path[-(max_length-3):]}"
+        return f"...{path[-(max_length - 3) :]}"
 
     return path
+
 
 __all__ = ["validate"]

@@ -5,7 +5,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .response_analyzer import ResponseAnalyzer
 
@@ -27,17 +27,17 @@ class AdaptiveConfig:
 class AdaptiveResponse:
     """Adaptive response system that learns from user patterns."""
 
-    def __init__(self, config: Optional[AdaptiveConfig] = None, data_dir: Optional[Path] = None):
+    def __init__(self, config: AdaptiveConfig | None = None, data_dir: Path | None = None):
         self.config = config or AdaptiveConfig()
         self.analyzer = ResponseAnalyzer(data_dir)
 
-        self._response_queue: List[Tuple[str, str, str, str]] = []
-        self._learning_cache: Dict[str, Any] = {}
+        self._response_queue: list[tuple[str, str, str, str]] = []
+        self._learning_cache: dict[str, Any] = {}
         self._last_pattern_update = time.time()
 
         logger.info("Adaptive response system initialized")
 
-    async def should_auto_respond(self, prompt_text: str, context: str = "", project_name: str = None) -> Tuple[bool, str, float]:
+    async def should_auto_respond(self, prompt_text: str, context: str = "", project_name: str = None) -> tuple[bool, str, float]:
         """Determine if we should auto-respond to a prompt and what the response should be."""
         if not self.config.auto_response_enabled:
             return False, "", 0.0
@@ -59,7 +59,14 @@ class AdaptiveResponse:
 
         return should_respond, predicted_response, confidence
 
-    async def send_adaptive_response(self, prompt_text: str, response: str, confidence: float, context: str = "", project_name: str = None) -> bool:
+    async def send_adaptive_response(
+        self,
+        prompt_text: str,
+        response: str,
+        confidence: float,
+        context: str = "",
+        project_name: str = None,
+    ) -> bool:
         """Send an adaptive response with appropriate delay and logging."""
         try:
             # Add delay to simulate human response time
@@ -78,7 +85,14 @@ class AdaptiveResponse:
             logger.error(f"Failed to send adaptive response: {e}")
             return False
 
-    def confirm_response_success(self, prompt_text: str, response: str, context: str = "", project_name: str = None, success: bool = True):
+    def confirm_response_success(
+        self,
+        prompt_text: str,
+        response: str,
+        context: str = "",
+        project_name: str = None,
+        success: bool = True,
+    ):
         """Confirm whether a response was successful and record it for learning."""
         if not self.config.learning_enabled:
             return
@@ -95,7 +109,13 @@ class AdaptiveResponse:
         except Exception as e:
             logger.error(f"Failed to record response: {e}")
 
-    def learn_from_manual_response(self, prompt_text: str, user_response: str, context: str = "", project_name: str = None):
+    def learn_from_manual_response(
+        self,
+        prompt_text: str,
+        user_response: str,
+        context: str = "",
+        project_name: str = None,
+    ):
         """Learn from a manual user response that was not auto-generated."""
         if not self.config.learning_enabled:
             return
@@ -141,7 +161,7 @@ class AdaptiveResponse:
         except Exception as e:
             logger.error(f"Failed to update patterns: {e}")
 
-    def get_learning_statistics(self) -> Dict[str, Any]:
+    def get_learning_statistics(self) -> dict[str, Any]:
         """Get comprehensive learning statistics."""
         try:
             base_stats = self.analyzer.get_statistics()
@@ -167,7 +187,7 @@ class AdaptiveResponse:
             logger.error(f"Failed to get learning statistics: {e}")
             return {}
 
-    def get_prompt_suggestions(self, partial_prompt: str, limit: int = 5) -> List[str]:
+    def get_prompt_suggestions(self, partial_prompt: str, limit: int = 5) -> list[str]:
         """Get suggestions for similar prompts based on learning history."""
         try:
             # Simple implementation - find prompts that contain similar keywords

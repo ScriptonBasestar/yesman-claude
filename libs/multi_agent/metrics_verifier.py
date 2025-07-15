@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .agent_pool import AgentPool
 
@@ -40,11 +40,11 @@ class PerformanceMetrics:
     quality_improvement: float = 0.0
 
     # Additional performance data
-    task_completion_times: List[float] = field(default_factory=list)
-    agent_utilization_rates: Dict[str, float] = field(default_factory=dict)
-    resource_usage: Dict[str, Any] = field(default_factory=dict)
+    task_completion_times: list[float] = field(default_factory=list)
+    agent_utilization_rates: dict[str, float] = field(default_factory=dict)
+    resource_usage: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         return {
             "single_agent_time": self.single_agent_time,
@@ -76,7 +76,7 @@ class SuccessCriteria:
     min_merge_success_rate: float = 0.99  # 99% successful merges
     min_quality_maintenance: float = 0.0  # No quality degradation
 
-    def check_compliance(self, metrics: PerformanceMetrics) -> Dict[str, bool]:
+    def check_compliance(self, metrics: PerformanceMetrics) -> dict[str, bool]:
         """Check if metrics meet success criteria"""
         results = {
             "speed_improvement": (self.min_speed_improvement <= metrics.speed_improvement_ratio <= self.max_speed_improvement),
@@ -110,12 +110,12 @@ class MetricsVerifier:
         self.success_criteria = SuccessCriteria()
 
         # Benchmark data
-        self.single_agent_benchmarks: List[float] = []
-        self.multi_agent_benchmarks: List[float] = []
+        self.single_agent_benchmarks: list[float] = []
+        self.multi_agent_benchmarks: list[float] = []
 
         # Active measurement
-        self._measurement_start_time: Optional[float] = None
-        self._active_tasks: Dict[str, float] = {}  # task_id -> start_time
+        self._measurement_start_time: float | None = None
+        self._active_tasks: dict[str, float] = {}  # task_id -> start_time
 
         # Load existing data
         self._load_metrics()
@@ -159,7 +159,7 @@ class MetricsVerifier:
     async def measure_single_agent_performance(
         self,
         agent_pool: AgentPool,
-        benchmark_tasks: List[Dict[str, Any]],
+        benchmark_tasks: list[dict[str, Any]],
         iterations: int = 3,
     ) -> float:
         """
@@ -234,7 +234,7 @@ class MetricsVerifier:
     async def measure_multi_agent_performance(
         self,
         agent_pool: AgentPool,
-        benchmark_tasks: List[Dict[str, Any]],
+        benchmark_tasks: list[dict[str, Any]],
         iterations: int = 3,
     ) -> float:
         """
@@ -351,7 +351,7 @@ class MetricsVerifier:
         )
         self._save_metrics()
 
-    def verify_success_criteria(self) -> Dict[str, Any]:
+    def verify_success_criteria(self) -> dict[str, Any]:
         """Verify if system meets all success criteria"""
         compliance = self.success_criteria.check_compliance(self.current_metrics)
 
@@ -430,42 +430,62 @@ class MetricsVerifier:
 
         return "\n".join(report_lines)
 
-    def get_benchmark_tasks(self) -> List[Dict[str, Any]]:
+    def get_benchmark_tasks(self) -> list[dict[str, Any]]:
         """Get standard benchmark tasks for performance testing"""
         return [
             {
                 "id": "file_analysis",
                 "title": "Analyze Python files",
                 "description": "Analyze Python files for complexity and issues",
-                "command": ["python", "-c", "import ast; import time; time.sleep(1); print('Analysis complete')"],
+                "command": [
+                    "python",
+                    "-c",
+                    "import ast; import time; time.sleep(1); print('Analysis complete')",
+                ],
                 "working_directory": ".",
             },
             {
                 "id": "lint_check",
                 "title": "Run linting checks",
                 "description": "Check code formatting and style",
-                "command": ["python", "-c", "import time; time.sleep(0.8); print('Linting complete')"],
+                "command": [
+                    "python",
+                    "-c",
+                    "import time; time.sleep(0.8); print('Linting complete')",
+                ],
                 "working_directory": ".",
             },
             {
                 "id": "type_check",
                 "title": "Type checking",
                 "description": "Run static type analysis",
-                "command": ["python", "-c", "import time; time.sleep(1.2); print('Type check complete')"],
+                "command": [
+                    "python",
+                    "-c",
+                    "import time; time.sleep(1.2); print('Type check complete')",
+                ],
                 "working_directory": ".",
             },
             {
                 "id": "test_run",
                 "title": "Execute tests",
                 "description": "Run unit and integration tests",
-                "command": ["python", "-c", "import time; time.sleep(1.5); print('Tests complete')"],
+                "command": [
+                    "python",
+                    "-c",
+                    "import time; time.sleep(1.5); print('Tests complete')",
+                ],
                 "working_directory": ".",
             },
             {
                 "id": "doc_generation",
                 "title": "Generate documentation",
                 "description": "Create API documentation",
-                "command": ["python", "-c", "import time; time.sleep(0.7); print('Documentation complete')"],
+                "command": [
+                    "python",
+                    "-c",
+                    "import time; time.sleep(0.7); print('Documentation complete')",
+                ],
                 "working_directory": ".",
             },
         ]
@@ -474,7 +494,7 @@ class MetricsVerifier:
 async def run_comprehensive_verification(
     agent_pool: AgentPool,
     work_dir: str = ".yesman",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Run comprehensive metrics verification
 

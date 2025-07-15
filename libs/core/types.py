@@ -4,11 +4,12 @@ Type definitions and type hints for Yesman-Claude
 """
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Literal
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 # Session-related types
 SessionName = str
@@ -28,40 +29,40 @@ class WindowConfig(TypedDict, total=False):
     """Window configuration structure"""
 
     window_name: str
-    layout: Optional[str]
-    start_directory: Optional[str]
-    panes: List["PaneConfig"]
+    layout: str | None
+    start_directory: str | None
+    panes: list["PaneConfig"]
 
 
 class PaneConfig(TypedDict, total=False):
     """Pane configuration structure"""
 
-    shell_command: List[str]
-    start_directory: Optional[str]
-    focus: Optional[bool]
+    shell_command: list[str]
+    start_directory: str | None
+    focus: bool | None
 
 
 class SessionConfig(TypedDict, total=False):
     """Complete session configuration structure"""
 
     session_name: str
-    start_directory: Optional[str]
-    windows: List[WindowConfig]
-    before_script: Optional[str]
-    after_script: Optional[str]
+    start_directory: str | None
+    windows: list[WindowConfig]
+    before_script: str | None
+    after_script: str | None
 
 
 class ProjectConfig(TypedDict, total=False):
     """Project configuration structure"""
 
-    template_name: Optional[str]
+    template_name: str | None
     override: SessionConfig
 
 
 class ProjectsConfig(TypedDict):
     """Projects configuration file structure"""
 
-    sessions: Dict[str, ProjectConfig]
+    sessions: dict[str, ProjectConfig]
 
 
 # Runtime data types
@@ -71,9 +72,9 @@ class SessionInfo:
 
     session_name: str
     status: SessionStatusType
-    windows: List["WindowInfo"]
-    created_at: Optional[float] = None
-    last_activity: Optional[float] = None
+    windows: list["WindowInfo"]
+    created_at: float | None = None
+    last_activity: float | None = None
 
     def __post_init__(self):
         if self.created_at is None:
@@ -89,7 +90,7 @@ class WindowInfo:
     window_name: str
     window_index: int
     active: bool = False
-    panes: List["PaneInfo"] = None
+    panes: list["PaneInfo"] = None
 
     def __post_init__(self):
         if self.panes is None:
@@ -103,8 +104,8 @@ class PaneInfo:
     pane_id: str
     pane_index: int
     active: bool = False
-    current_path: Optional[str] = None
-    current_command: Optional[str] = None
+    current_path: str | None = None
+    current_command: str | None = None
 
 
 # Controller and monitoring types
@@ -115,7 +116,7 @@ class ControllerState:
     session_name: str
     status: ControllerStatusType
     auto_next_enabled: bool = True
-    last_activity: Optional[float] = None
+    last_activity: float | None = None
     response_count: int = 0
     error_count: int = 0
 
@@ -131,8 +132,8 @@ class PromptDetection:
     prompt_type: str
     confidence: float
     matched_pattern: str
-    suggested_response: Optional[str] = None
-    context: Optional[str] = None
+    suggested_response: str | None = None
+    context: str | None = None
 
 
 @dataclass
@@ -171,7 +172,7 @@ class HealthScore:
     category: HealthCategory
     score: float  # 0-100
     status: HealthStatusType
-    details: Dict[str, Any]
+    details: dict[str, Any]
     last_checked: float
 
     def __post_init__(self):
@@ -185,9 +186,9 @@ class ProjectHealth:
 
     project_path: str
     overall_score: float
-    category_scores: Dict[HealthCategory, HealthScore]
+    category_scores: dict[HealthCategory, HealthScore]
     last_updated: float
-    trends: List["HealthTrend"]
+    trends: list["HealthTrend"]
 
     def __post_init__(self):
         if hasattr(self, "last_updated") and self.last_updated is None:
@@ -202,7 +203,7 @@ class HealthTrend:
 
     timestamp: float
     score: float
-    category: Optional[HealthCategory] = None
+    category: HealthCategory | None = None
 
 
 # Cache types
@@ -220,7 +221,7 @@ class CacheEntry:
     created_at: float
     ttl: CacheTTL
     access_count: int = 0
-    last_accessed: Optional[float] = None
+    last_accessed: float | None = None
 
     def __post_init__(self):
         if self.last_accessed is None:
@@ -241,8 +242,8 @@ class APIResponse(TypedDict):
     """Standard API response structure"""
 
     success: bool
-    data: Optional[Any]
-    error: Optional[str]
+    data: Any | None
+    error: str | None
     timestamp: float
 
 
@@ -251,9 +252,9 @@ class SessionAPIData(TypedDict):
 
     session_name: str
     status: SessionStatusType
-    windows: List[Dict[str, Any]]
-    created_at: Optional[float]
-    last_activity: Optional[float]
+    windows: list[dict[str, Any]]
+    created_at: float | None
+    last_activity: float | None
 
 
 class ControllerAPIData(TypedDict):
@@ -262,24 +263,23 @@ class ControllerAPIData(TypedDict):
     session_name: str
     status: ControllerStatusType
     auto_next_enabled: bool
-    last_activity: Optional[float]
+    last_activity: float | None
     response_count: int
     error_count: int
 
 
 # Callback and handler types
-EventCallback = Callable[[str, Dict[str, Any]], None]
+EventCallback = Callable[[str, dict[str, Any]], None]
 ErrorHandler = Callable[[Exception], None]
 ValidationFunction = Callable[[Any], bool]
 TransformFunction = Callable[[Any], Any]
 
 # Logging types
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-LogEntry = Dict[str, Any]
+LogEntry = dict[str, Any]
 
 # File system types
 FilePath = str
-DirectoryPath = str
 FileName = str
 FileExtension = str
 
@@ -292,19 +292,19 @@ HTTPMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
 # Template types
 TemplateName = str
 TemplateVariable = str
-TemplateValue = Union[str, int, float, bool]
-TemplateContext = Dict[TemplateVariable, TemplateValue]
+TemplateValue = str | int | float | bool
+TemplateContext = dict[TemplateVariable, TemplateValue]
 
 # Validation types
-ValidationResult = Tuple[bool, Optional[str]]  # (is_valid, error_message)
-ValidationRules = Dict[str, ValidationFunction]
+ValidationResult = tuple[bool, str | None]  # (is_valid, error_message)
+ValidationRules = dict[str, ValidationFunction]
 
 # Configuration merge strategies
 MergeStrategy = Literal["override", "merge", "append"]
 
 # Command execution types
-CommandResult = Tuple[int, str, str]  # (return_code, stdout, stderr)
-CommandTimeout = Optional[float]
+CommandResult = tuple[int, str, str]  # (return_code, stdout, stderr)
+CommandTimeout = float | None
 
 
 # Statistics and metrics types
@@ -316,7 +316,7 @@ class PerformanceMetrics:
     start_time: float
     end_time: float
     success: bool
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
     @property
     def duration(self) -> float:
@@ -341,5 +341,5 @@ class UsageStatistics:
 
 
 # Update forward references
-WindowConfig.__annotations__["panes"] = List[PaneConfig]
-ProjectHealth.__annotations__["trends"] = List[HealthTrend]
+WindowConfig.__annotations__["panes"] = list[PaneConfig]
+ProjectHealth.__annotations__["trends"] = list[HealthTrend]

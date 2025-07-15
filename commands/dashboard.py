@@ -8,7 +8,6 @@ import sys
 import time
 import webbrowser
 from pathlib import Path
-from typing import Dict, Optional
 
 import click
 
@@ -47,7 +46,7 @@ class DashboardEnvironment:
             return "web"
 
 
-def check_dependencies(interface: str) -> Dict[str, bool]:
+def check_dependencies(interface: str) -> dict[str, bool]:
     """Check if required dependencies are available for interface.""" ""
     deps = {
         "tui": True,  # Always available (uses rich)
@@ -62,7 +61,7 @@ def check_dependencies(interface: str) -> Dict[str, bool]:
     return deps
 
 
-def launch_tui_dashboard(theme: Optional[str] = None, dev: bool = False) -> None:
+def launch_tui_dashboard(theme: str | None = None, dev: bool = False) -> None:
     """Launch TUI-based dashboard interface.""" ""
     click.echo("🖥️  Starting TUI Dashboard...")
 
@@ -127,7 +126,7 @@ def launch_tui_dashboard(theme: Optional[str] = None, dev: bool = False) -> None
 def launch_web_dashboard(
     host: str = "localhost",
     port: int = 8080,
-    theme: Optional[str] = None,
+    theme: str | None = None,
     dev: bool = False,
     detach: bool = False,
 ) -> None:
@@ -161,7 +160,12 @@ def launch_web_dashboard(
             template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "web_dashboard.html")
             with open(template_path, encoding="utf-8") as f:
                 html_template = f.read()
-            html_content = html_template.format(host=host, port=port, theme=theme or "default", dev="Development" if dev else "Production")
+            html_content = html_template.format(
+                host=host,
+                port=port,
+                theme=theme or "default",
+                dev="Development" if dev else "Production",
+            )
 
             # Start simple HTTP server
             import http.server
@@ -251,7 +255,7 @@ def launch_web_dashboard(
 
 
 def launch_tauri_dashboard(
-    theme: Optional[str] = None,
+    theme: str | None = None,
     dev: bool = False,
     detach: bool = False,
 ) -> None:

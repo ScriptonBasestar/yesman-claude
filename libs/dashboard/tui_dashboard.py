@@ -6,7 +6,7 @@ Provides comprehensive project monitoring with multiple views and real-time upda
 """
 
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -14,26 +14,10 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.message import Message
 from textual.reactive import reactive
 from textual.timer import Timer
-from textual.widgets import (
-    Footer,
-    Header,
-    Label,
-    Placeholder,
-    RichLog,
-    Static,
-    Switch,
-    TabbedContent,
-    TabPane,
-)
+from textual.widgets import Footer, Header, Label, Placeholder, RichLog, Static, Switch, TabbedContent, TabPane
 
 from .renderers import TUIRenderer, WidgetType
-from .renderers.widget_models import (
-    ActivityData,
-    HealthData,
-    HealthLevel,
-    SessionData,
-    SessionStatus,
-)
+from .renderers.widget_models import ActivityData, HealthData, HealthLevel, SessionData, SessionStatus
 
 
 class DashboardWidget(Static):
@@ -64,8 +48,8 @@ class DashboardWidget(Static):
         self.title = title
         self.update_interval = update_interval
         self.renderer = TUIRenderer()
-        self._timer: Optional[Timer] = None
-        self._last_data: Optional[Any] = None
+        self._timer: Timer | None = None
+        self._last_data: Any | None = None
 
     def compose(self) -> ComposeResult:
         """Compose the widget structure"""
@@ -206,7 +190,7 @@ class LogsView(Static):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.log_buffer: List[str] = []
+        self.log_buffer: list[str] = []
         self.max_logs = 100
 
     def compose(self) -> ComposeResult:
@@ -334,14 +318,14 @@ class TUIDashboard(App):
         self.sub_title = "Real-time Project Monitoring"
 
         # View components
-        self.sessions_view: Optional[SessionsView] = None
-        self.health_view: Optional[HealthView] = None
-        self.activity_view: Optional[ActivityView] = None
-        self.logs_view: Optional[LogsView] = None
-        self.settings_view: Optional[SettingsView] = None
+        self.sessions_view: SessionsView | None = None
+        self.health_view: HealthView | None = None
+        self.activity_view: ActivityView | None = None
+        self.logs_view: LogsView | None = None
+        self.settings_view: SettingsView | None = None
 
         # Refresh timer
-        self._refresh_timer: Optional[Timer] = None
+        self._refresh_timer: Timer | None = None
 
     def compose(self) -> ComposeResult:
         """Compose the main dashboard layout"""
@@ -432,7 +416,10 @@ class TUIDashboard(App):
                 await self.activity_view.auto_update()
 
             if self.logs_view:
-                self.logs_view.add_log("DEBUG", f"Auto-refreshed {current_tab.id if current_tab else 'unknown'}")
+                self.logs_view.add_log(
+                    "DEBUG",
+                    f"Auto-refreshed {current_tab.id if current_tab else 'unknown'}",
+                )
 
         except Exception as e:
             if self.logs_view:

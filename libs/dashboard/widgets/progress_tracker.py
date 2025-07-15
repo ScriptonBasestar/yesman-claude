@@ -5,7 +5,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -32,10 +32,10 @@ class TodoItem:
     priority: str
     created_at: float
     updated_at: float
-    project: Optional[str] = None
-    category: Optional[str] = None
-    estimated_hours: Optional[float] = None
-    actual_hours: Optional[float] = None
+    project: str | None = None
+    category: str | None = None
+    estimated_hours: float | None = None
+    actual_hours: float | None = None
 
 
 @dataclass
@@ -48,15 +48,15 @@ class ProgressStats:
     pending_items: int
     completion_rate: float
     velocity: float  # items per day
-    estimated_completion: Optional[float] = None
+    estimated_completion: float | None = None
 
 
 class ProgressTracker:
     """TODO progress tracking and visualization"""
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         self.console = console or Console()
-        self.todos: List[TodoItem] = []
+        self.todos: list[TodoItem] = []
 
     def load_todos_from_file(self, file_path: str) -> bool:
         """Load TODO items from markdown file"""
@@ -79,7 +79,7 @@ class ProgressTracker:
         self.todos = []
         return True
 
-    def _parse_markdown_todos(self, content: str) -> List[TodoItem]:
+    def _parse_markdown_todos(self, content: str) -> list[TodoItem]:
         """Parse TODO items from markdown content"""
         todos = []
         current_time = time.time()
@@ -135,7 +135,7 @@ class ProgressTracker:
 
         return todos
 
-    def _extract_project_from_text(self, text: str) -> Optional[str]:
+    def _extract_project_from_text(self, text: str) -> str | None:
         """Extract project name from TODO text"""
         # Look for patterns like "IMPROVE-001:", "Fix:", etc.
         project_patterns = [
@@ -151,7 +151,7 @@ class ProgressTracker:
 
         return None
 
-    def _extract_category_from_text(self, text: str) -> Optional[str]:
+    def _extract_category_from_text(self, text: str) -> str | None:
         """Extract category from TODO text"""
         categories = {
             "performance": ["performance", "optimization", "cache", "speed"],
@@ -234,7 +234,10 @@ class ProgressTracker:
 
         content.append("📊 Overall Progress\\n", style="bold cyan")
         content.append(f"  {bar} {stats.completion_rate:.1%}\\n", style="green")
-        content.append(f"  {stats.completed_items}/{stats.total_items} completed\\n\\n", style="white")
+        content.append(
+            f"  {stats.completed_items}/{stats.total_items} completed\\n\\n",
+            style="white",
+        )
 
         # Status breakdown
         content.append("📋 Status Breakdown\\n", style="bold yellow")
@@ -256,7 +259,7 @@ class ProgressTracker:
 
         return Panel(content, title="📊 Progress Overview", border_style="green")
 
-    def render_todo_list(self, status_filter: Optional[TodoStatus] = None, limit: int = 10) -> Panel:
+    def render_todo_list(self, status_filter: TodoStatus | None = None, limit: int = 10) -> Panel:
         """Render TODO list with optional filtering"""
         todos = self.todos
 
@@ -369,7 +372,7 @@ class ProgressTracker:
 
         return text
 
-    def get_progress_data(self) -> Dict[str, Any]:
+    def get_progress_data(self) -> dict[str, Any]:
         """Get progress data for external use"""
         stats = self.calculate_progress_stats()
 

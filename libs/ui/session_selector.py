@@ -2,8 +2,6 @@
 TUI Session Selector using Rich
 """
 
-from typing import Dict, List, Optional
-
 import libtmux
 from rich.console import Console
 from rich.panel import Panel
@@ -15,11 +13,11 @@ from rich.text import Text
 class SessionSelector:
     """Interactive TUI session selector"""
 
-    def __init__(self, sessions: List[Dict[str, str]]):
+    def __init__(self, sessions: list[dict[str, str]]):
         self.sessions = sessions
         self.console = Console()
 
-    def _get_session_details(self, session_name: str) -> Dict[str, str]:
+    def _get_session_details(self, session_name: str) -> dict[str, str]:
         """Get session details from tmux"""
         try:
             server = libtmux.Server()
@@ -46,7 +44,13 @@ class SessionSelector:
 
     def _create_display(self, search_term: str = "") -> Table:
         """Create the display table"""
-        table = Table(title="🖥️  Select a tmux session", show_header=True, header_style="bold magenta", title_style="bold cyan", expand=True)
+        table = Table(
+            title="🖥️  Select a tmux session",
+            show_header=True,
+            header_style="bold magenta",
+            title_style="bold cyan",
+            expand=True,
+        )
         table.add_column("#", style="dim", width=4)
         table.add_column("Project", style="cyan", no_wrap=True)
         table.add_column("Session", style="green")
@@ -84,7 +88,7 @@ class SessionSelector:
 
         return table, filtered_sessions
 
-    def select_session(self) -> Optional[str]:
+    def select_session(self) -> str | None:
         """Show interactive session selector and return selected session"""
         if not self.sessions:
             return None
@@ -136,7 +140,7 @@ class SessionSelector:
                 self.console.print("[red]Invalid input. Enter a number, 's' to search, or 'q' to quit[/]")
 
 
-def show_session_selector(sessions: List[Dict[str, str]]) -> Optional[str]:
+def show_session_selector(sessions: list[dict[str, str]]) -> str | None:
     """
     Show interactive session selector
 

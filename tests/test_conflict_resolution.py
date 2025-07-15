@@ -8,14 +8,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import (
-    ConflictInfo,
-    ConflictResolutionEngine,
-    ConflictSeverity,
-    ConflictType,
-    ResolutionResult,
-    ResolutionStrategy,
-)
+from libs.multi_agent.conflict_resolution import ConflictInfo, ConflictResolutionEngine, ConflictSeverity, ConflictType, ResolutionResult, ResolutionStrategy
 
 
 class TestConflictInfo:

@@ -13,19 +13,7 @@ from datetime import datetime
 import psutil
 import pytest
 
-from libs.dashboard.renderers import (
-    BatchRenderer,
-    LazyRenderer,
-    RenderCache,
-    RendererFactory,
-    RenderFormat,
-    TUIRenderer,
-    WebRenderer,
-    WidgetType,
-    clear_all_caches,
-    render_all_formats,
-    render_widget,
-)
+from libs.dashboard.renderers import BatchRenderer, LazyRenderer, RenderCache, RendererFactory, RenderFormat, TUIRenderer, WebRenderer, WidgetType, clear_all_caches, render_all_formats, render_widget
 from libs.dashboard.renderers.widget_models import (
     ActivityData,
     ActivityEntry,
@@ -318,7 +306,11 @@ class TestRendererSystemIntegration:
         ]
 
         for widget_type, data in edge_cases:
-            for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
+            for render_format in [
+                RenderFormat.TUI,
+                RenderFormat.WEB,
+                RenderFormat.TAURI,
+            ]:
                 result = render_widget(widget_type, data, render_format)
                 assert result is not None
 
@@ -355,7 +347,11 @@ class TestRendererSystemIntegration:
                 )
 
                 # Render with different formats
-                for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
+                for render_format in [
+                    RenderFormat.TUI,
+                    RenderFormat.WEB,
+                    RenderFormat.TAURI,
+                ]:
                     result = render_widget(WidgetType.METRIC_CARD, metric, render_format)
                     results.append((worker_id, render_format, result))
 
@@ -737,9 +733,15 @@ class TestRendererCompatibility:
             # Empty strings
             (WidgetType.METRIC_CARD, MetricCardData(title="", value=0)),
             # Zero values
-            (WidgetType.METRIC_CARD, MetricCardData(title="Zero Test", value=0, trend=0)),
+            (
+                WidgetType.METRIC_CARD,
+                MetricCardData(title="Zero Test", value=0, trend=0),
+            ),
             # None values where allowed
-            (WidgetType.METRIC_CARD, MetricCardData(title="None Test", value=100, trend=None)),
+            (
+                WidgetType.METRIC_CARD,
+                MetricCardData(title="None Test", value=100, trend=None),
+            ),
             # Empty collections
             (WidgetType.SESSION_BROWSER, []),
             (WidgetType.TABLE, {"headers": [], "rows": []}),
@@ -747,7 +749,11 @@ class TestRendererCompatibility:
         ]
 
         for widget_type, data in empty_data_tests:
-            for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
+            for render_format in [
+                RenderFormat.TUI,
+                RenderFormat.WEB,
+                RenderFormat.TAURI,
+            ]:
                 try:
                     result = render_widget(widget_type, data, render_format)
                     assert result is not None

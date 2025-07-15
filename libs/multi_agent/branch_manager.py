@@ -7,7 +7,7 @@ import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -19,22 +19,22 @@ class BranchInfo:
     name: str
     base_branch: str
     created_at: datetime
-    last_commit: Optional[str] = None
+    last_commit: str | None = None
     status: str = "active"  # active, merged, abandoned
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         data = asdict(self)
         data["created_at"] = self.created_at.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "BranchInfo":
+    def from_dict(cls, data: dict[str, Any]) -> "BranchInfo":
         """Create from dictionary"""
         data["created_at"] = datetime.fromisoformat(data["created_at"])
         return cls(**data)
@@ -53,12 +53,12 @@ class BranchManager:
         """
         self.repo_path = Path(repo_path).resolve()
         self.branch_prefix = branch_prefix
-        self.branches: Dict[str, BranchInfo] = {}
+        self.branches: dict[str, BranchInfo] = {}
         self._load_branch_metadata()
 
     def _run_git_command(
         self,
-        args: List[str],
+        args: list[str],
         check: bool = True,
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result"""
@@ -179,7 +179,7 @@ class BranchManager:
         logger.info(f"Successfully created branch: {branch_name}")
         return branch_name
 
-    def list_active_branches(self) -> List[BranchInfo]:
+    def list_active_branches(self) -> list[BranchInfo]:
         """List all active multi-agent branches"""
         active_branches = []
 
@@ -209,7 +209,7 @@ class BranchManager:
 
         return active_branches
 
-    def get_branch_status(self, branch_name: str) -> Dict[str, Any]:
+    def get_branch_status(self, branch_name: str) -> dict[str, Any]:
         """Get detailed status of a branch"""
         if not self._branch_exists(branch_name):
             raise ValueError(f"Branch '{branch_name}' does not exist")
@@ -287,7 +287,7 @@ class BranchManager:
     def update_branch_metadata(
         self,
         branch_name: str,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
     ) -> None:
         """Update metadata for a branch"""
         if branch_name not in self.branches:
@@ -308,7 +308,7 @@ class BranchManager:
             self._save_branch_metadata()
             logger.info(f"Marked branch '{branch_name}' as merged")
 
-    def cleanup_merged_branches(self, dry_run: bool = True) -> List[str]:
+    def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:
         """Clean up merged branches"""
         cleaned = []
 
@@ -344,7 +344,7 @@ class BranchManager:
         self,
         branch_name: str,
         target_branch: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Check for potential conflicts with target branch"""
         if not self._branch_exists(branch_name):
             raise ValueError(f"Branch '{branch_name}' does not exist")

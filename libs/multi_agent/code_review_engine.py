@@ -10,14 +10,10 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .branch_manager import BranchManager
-from .collaboration_engine import (
-    CollaborationEngine,
-    MessagePriority,
-    MessageType,
-)
+from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
 from .semantic_analyzer import SemanticAnalyzer
 from .types import AgentState
 
@@ -79,14 +75,14 @@ class ReviewFinding:
     review_type: ReviewType
     severity: ReviewSeverity
     file_path: str
-    line_number: Optional[int] = None
-    column_number: Optional[int] = None
+    line_number: int | None = None
+    column_number: int | None = None
     message: str = ""
     description: str = ""
-    suggestion: Optional[str] = None
-    rule_id: Optional[str] = None
-    tool_name: Optional[str] = None
-    context: Dict[str, Any] = field(default_factory=dict)
+    suggestion: str | None = None
+    rule_id: str | None = None
+    tool_name: str | None = None
+    context: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -95,11 +91,11 @@ class QualityMetrics:
     """Quality metrics for a piece of code"""
 
     file_path: str
-    metrics: Dict[QualityMetric, float] = field(default_factory=dict)
-    thresholds: Dict[QualityMetric, float] = field(default_factory=dict)
-    violations: List[QualityMetric] = field(default_factory=list)
+    metrics: dict[QualityMetric, float] = field(default_factory=dict)
+    thresholds: dict[QualityMetric, float] = field(default_factory=dict)
+    violations: list[QualityMetric] = field(default_factory=list)
     calculated_at: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -109,19 +105,19 @@ class CodeReview:
     review_id: str
     branch_name: str
     agent_id: str
-    reviewer_ids: List[str]
-    files_changed: List[str]
-    review_types: List[ReviewType]
+    reviewer_ids: list[str]
+    files_changed: list[str]
+    review_types: list[ReviewType]
     status: ReviewStatus = ReviewStatus.PENDING
-    findings: List[ReviewFinding] = field(default_factory=list)
-    quality_metrics: List[QualityMetrics] = field(default_factory=list)
+    findings: list[ReviewFinding] = field(default_factory=list)
+    quality_metrics: list[QualityMetrics] = field(default_factory=list)
     overall_score: float = 0.0
     approval_required: bool = True
     auto_approved: bool = False
     created_at: datetime = field(default_factory=datetime.now)
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -136,8 +132,8 @@ class ReviewSummary:
     total_findings: int = 0
     critical_findings: int = 0
     high_findings: int = 0
-    most_common_issues: List[Tuple[str, int]] = field(default_factory=list)
-    review_time_stats: Dict[str, float] = field(default_factory=dict)
+    most_common_issues: list[tuple[str, int]] = field(default_factory=list)
+    review_time_stats: dict[str, float] = field(default_factory=dict)
 
 
 class CodeReviewEngine:
@@ -148,7 +144,7 @@ class CodeReviewEngine:
         collaboration_engine: CollaborationEngine,
         semantic_analyzer: SemanticAnalyzer,
         branch_manager: BranchManager,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
         enable_auto_review: bool = True,
     ):
         """
@@ -168,9 +164,9 @@ class CodeReviewEngine:
         self.enable_auto_review = enable_auto_review
 
         # Review storage and tracking
-        self.active_reviews: Dict[str, CodeReview] = {}
-        self.review_history: List[CodeReview] = []
-        self.quality_profiles: Dict[str, Dict] = {}  # file -> quality profile
+        self.active_reviews: dict[str, CodeReview] = {}
+        self.review_history: list[CodeReview] = []
+        self.quality_profiles: dict[str, dict] = {}  # file -> quality profile
 
         # Review configuration
         self.review_config = {
@@ -244,9 +240,9 @@ class CodeReviewEngine:
         self,
         branch_name: str,
         agent_id: str,
-        files_changed: List[str],
-        review_types: Optional[List[ReviewType]] = None,
-        reviewer_ids: Optional[List[str]] = None,
+        files_changed: list[str],
+        review_types: list[ReviewType] | None = None,
+        reviewer_ids: list[str] | None = None,
         priority: MessagePriority = MessagePriority.NORMAL,
     ) -> str:
         """
@@ -263,7 +259,7 @@ class CodeReviewEngine:
         Returns:
             Review ID
         """
-        review_id = f"review_{branch_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(agent_id.encode()).hexdigest()[:8]}"
+        review_id = f"review_{branch_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(agent_id.encode()).hexdigest()[:8]}"
 
         # Default review types if not specified
         if review_types is None:
@@ -326,9 +322,9 @@ class CodeReviewEngine:
 
     async def perform_quality_check(
         self,
-        file_paths: List[str],
-        quality_types: Optional[List[QualityMetric]] = None,
-    ) -> List[QualityMetrics]:
+        file_paths: list[str],
+        quality_types: list[QualityMetric] | None = None,
+    ) -> list[QualityMetrics]:
         """
         Perform comprehensive quality check on files
 
@@ -350,7 +346,7 @@ class CodeReviewEngine:
 
         return results
 
-    async def get_review_status(self, review_id: str) -> Optional[CodeReview]:
+    async def get_review_status(self, review_id: str) -> CodeReview | None:
         """Get status of a specific review"""
         review = self.active_reviews.get(review_id)
         if not review:
@@ -365,7 +361,7 @@ class CodeReviewEngine:
         self,
         review_id: str,
         reviewer_id: str,
-        comments: Optional[str] = None,
+        comments: str | None = None,
     ) -> bool:
         """
         Approve a code review
@@ -431,8 +427,8 @@ class CodeReviewEngine:
         self,
         review_id: str,
         reviewer_id: str,
-        reasons: List[str],
-        suggestions: Optional[List[str]] = None,
+        reasons: list[str],
+        suggestions: list[str] | None = None,
     ) -> bool:
         """
         Reject a code review with reasons
@@ -624,7 +620,7 @@ class CodeReviewEngine:
             review.status = ReviewStatus.COMPLETED
             review.metadata["error"] = str(e)
 
-    async def _check_style_quality(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_style_quality(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check code style and formatting quality"""
         findings = []
 
@@ -643,7 +639,7 @@ class CodeReviewEngine:
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
-                                finding_id=f"style_{hashlib.md5(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
+                                finding_id=f"style_{hashlib.sha256(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
                                 review_type=ReviewType.STYLE_QUALITY,
                                 severity=ReviewSeverity.LOW,
                                 file_path=file_path,
@@ -672,7 +668,7 @@ class CodeReviewEngine:
 
         return findings
 
-    async def _check_security(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_security(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check for security vulnerabilities"""
         findings = []
 
@@ -691,7 +687,7 @@ class CodeReviewEngine:
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
-                                finding_id=f"security_{hashlib.md5(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
+                                finding_id=f"security_{hashlib.sha256(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
                                 review_type=ReviewType.SECURITY,
                                 severity=ReviewSeverity.HIGH,
                                 file_path=file_path,
@@ -734,7 +730,7 @@ class CodeReviewEngine:
 
         return findings
 
-    async def _check_performance(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_performance(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check for performance issues"""
         findings = []
 
@@ -800,8 +796,8 @@ class CodeReviewEngine:
 
     async def _check_maintainability(
         self,
-        file_paths: List[str],
-    ) -> List[ReviewFinding]:
+        file_paths: list[str],
+    ) -> list[ReviewFinding]:
         """Check code maintainability"""
         findings = []
 
@@ -823,7 +819,7 @@ class CodeReviewEngine:
                 # Check for long functions
                 tree = ast.parse(content)
                 for node in ast.walk(tree):
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                         # Calculate function length
                         func_lines = 0
                         if hasattr(node, "end_lineno") and node.end_lineno:
@@ -874,7 +870,7 @@ class CodeReviewEngine:
 
         return findings
 
-    async def _check_functionality(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_functionality(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check functional correctness"""
         findings = []
 
@@ -896,7 +892,7 @@ class CodeReviewEngine:
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
-                                finding_id=f"func_{hashlib.md5(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
+                                finding_id=f"func_{hashlib.sha256(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
                                 review_type=ReviewType.FUNCTIONALITY,
                                 severity=ReviewSeverity.MEDIUM,
                                 file_path=file_path,
@@ -911,7 +907,7 @@ class CodeReviewEngine:
 
         return findings
 
-    async def _check_documentation(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_documentation(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check documentation quality"""
         findings = []
 
@@ -933,7 +929,7 @@ class CodeReviewEngine:
                 for node in ast.walk(tree):
                     if isinstance(
                         node,
-                        (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef),
+                        ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
                     ):
                         # Check if function/class has docstring
                         has_docstring = len(node.body) > 0 and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant) and isinstance(node.body[0].value.value, str)
@@ -967,7 +963,7 @@ class CodeReviewEngine:
 
         return findings
 
-    async def _check_testing(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_testing(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check testing coverage and quality"""
         findings = []
 
@@ -1001,7 +997,7 @@ class CodeReviewEngine:
 
         return findings
 
-    async def _check_complexity(self, file_paths: List[str]) -> List[ReviewFinding]:
+    async def _check_complexity(self, file_paths: list[str]) -> list[ReviewFinding]:
         """Check code complexity"""
         findings = []
 
@@ -1020,7 +1016,7 @@ class CodeReviewEngine:
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
-                                finding_id=f"complex_{hashlib.md5(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
+                                finding_id=f"complex_{hashlib.sha256(f'{file_path}_{issue}'.encode()).hexdigest()[:8]}",
                                 review_type=ReviewType.COMPLEXITY,
                                 severity=ReviewSeverity.MEDIUM,
                                 file_path=file_path,
@@ -1038,7 +1034,7 @@ class CodeReviewEngine:
     async def _calculate_quality_metrics(
         self,
         file_path: str,
-        metric_types: Optional[List[QualityMetric]] = None,
+        metric_types: list[QualityMetric] | None = None,
     ) -> QualityMetrics:
         """Calculate quality metrics for a file"""
         if metric_types is None:
@@ -1095,7 +1091,7 @@ class CodeReviewEngine:
             complexity = 1  # Base complexity
 
             for node in ast.walk(tree):
-                if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler)):
+                if isinstance(node, ast.If | ast.While | ast.For | ast.AsyncFor | ast.ExceptHandler):
                     complexity += 1
                 elif isinstance(node, ast.BoolOp):
                     complexity += len(node.values) - 1
@@ -1125,8 +1121,8 @@ class CodeReviewEngine:
 
     def _calculate_overall_score(
         self,
-        findings: List[ReviewFinding],
-        metrics: List[QualityMetrics],
+        findings: list[ReviewFinding],
+        metrics: list[QualityMetrics],
     ) -> float:
         """Calculate overall review score from findings and metrics"""
         base_score = 10.0
@@ -1165,7 +1161,7 @@ class CodeReviewEngine:
         # Check for quality metric violations
         return all(not metrics.violations for metrics in review.quality_metrics)
 
-    def _summarize_findings(self, findings: List[ReviewFinding]) -> Dict[str, Any]:
+    def _summarize_findings(self, findings: list[ReviewFinding]) -> dict[str, Any]:
         """Create a summary of review findings"""
         severity_counts = Counter(f.severity.value for f in findings)
         type_counts = Counter(f.review_type.value for f in findings)
@@ -1180,9 +1176,9 @@ class CodeReviewEngine:
     async def _find_suitable_reviewers(
         self,
         requester_id: str,
-        files_changed: List[str],
+        files_changed: list[str],
         num_reviewers: int,
-    ) -> List[str]:
+    ) -> list[str]:
         """Find suitable reviewers for a code review"""
         # This is a simplified implementation
         # In a real system, this would consider expertise, availability, workload, etc.
@@ -1203,7 +1199,7 @@ class CodeReviewEngine:
         self,
         tool_name: str,
         file_path: str,
-    ) -> Optional[List[str]]:
+    ) -> list[str] | None:
         """Run an external tool for code checking"""
         # This is a placeholder implementation
         # In a real system, this would actually run the tools
@@ -1311,7 +1307,7 @@ class CodeReviewEngine:
             review_time_stats=review_time_stats,
         )
 
-    def get_engine_summary(self) -> Dict[str, Any]:
+    def get_engine_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of the review engine"""
         return {
             "statistics": self.review_stats.copy(),

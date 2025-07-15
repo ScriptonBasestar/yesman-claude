@@ -70,6 +70,10 @@ class TestClaudeRestart(unittest.TestCase):
 
     def test_restart_claude_pane_with_exception(self):
         """Test restart with exception during termination"""
-        with patch.object(self.controller, "_terminate_claude_process", side_effect=Exception("Termination failed")):
+        with patch.object(
+            self.controller,
+            "_terminate_claude_process",
+            side_effect=Exception("Termination failed"),
+        ):
             result = self.controller.restart_claude_pane()
             self.assertFalse(result)

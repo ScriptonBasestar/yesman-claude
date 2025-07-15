@@ -9,19 +9,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.code_review_engine import (
-    CodeReview,
-    CodeReviewEngine,
-    QualityMetric,
-    QualityMetrics,
-    ReviewFinding,
-    ReviewSeverity,
-    ReviewStatus,
-    ReviewType,
-)
-from libs.multi_agent.collaboration_engine import (
-    CollaborationEngine,
-)
+from libs.multi_agent.code_review_engine import CodeReview, CodeReviewEngine, QualityMetric, QualityMetrics, ReviewFinding, ReviewSeverity, ReviewStatus, ReviewType
+from libs.multi_agent.collaboration_engine import CollaborationEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 
 

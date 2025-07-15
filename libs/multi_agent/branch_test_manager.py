@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .branch_manager import BranchManager
 
@@ -50,16 +50,16 @@ class TestResult:
     branch_name: str
     status: TestStatus
     start_time: datetime
-    end_time: Optional[datetime] = None
+    end_time: datetime | None = None
     duration: float = 0.0
     output: str = ""
     error: str = ""
-    exit_code: Optional[int] = None
-    coverage: Optional[float] = None
-    failed_tests: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    exit_code: int | None = None
+    coverage: float | None = None
+    failed_tests: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         return {
             "test_id": self.test_id,
@@ -78,7 +78,7 @@ class TestResult:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TestResult":
+    def from_dict(cls, data: dict[str, Any]) -> "TestResult":
         """Create from dictionary"""
         data["test_type"] = TestType(data["test_type"])
         data["status"] = TestStatus(data["status"])
@@ -94,14 +94,14 @@ class TestSuite:
 
     name: str
     test_type: TestType
-    command: List[str]
+    command: list[str]
     working_directory: str = "."
     timeout: int = 600  # 10 minutes default
     requires_build: bool = False
     parallel: bool = True
     critical: bool = False  # If true, failure blocks other tests
-    environment: Dict[str, str] = field(default_factory=dict)
-    file_patterns: List[str] = field(default_factory=list)  # Files to watch for changes
+    environment: dict[str, str] = field(default_factory=dict)
+    file_patterns: list[str] = field(default_factory=list)  # Files to watch for changes
 
 
 class BranchTestManager:
@@ -129,11 +129,11 @@ class BranchTestManager:
         self.agent_pool = agent_pool
 
         # Test configuration
-        self.test_suites: Dict[str, TestSuite] = {}
-        self.branch_results: Dict[str, List[TestResult]] = {}
+        self.test_suites: dict[str, TestSuite] = {}
+        self.branch_results: dict[str, list[TestResult]] = {}
 
         # Execution tracking
-        self.running_tests: Dict[str, TestResult] = {}
+        self.running_tests: dict[str, TestResult] = {}
         self.test_queue: asyncio.Queue = asyncio.Queue()
 
         # Auto-testing configuration
@@ -396,7 +396,7 @@ class BranchTestManager:
                 # Parse test output for additional info
                 await self._parse_test_output(result, suite)
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(f"Test {test_id} timed out after {suite.timeout}s")
 
                 # Terminate process
@@ -440,7 +440,7 @@ class BranchTestManager:
         self,
         branch_name: str,
         parallel: bool = True,
-    ) -> List[TestResult]:
+    ) -> list[TestResult]:
         """
         Run all test suites on a branch
 
@@ -554,7 +554,7 @@ class BranchTestManager:
             logger.error(f"Build failed for {branch_name}: {e}")
             return False
 
-    def get_branch_test_summary(self, branch_name: str) -> Dict[str, Any]:
+    def get_branch_test_summary(self, branch_name: str) -> dict[str, Any]:
         """Get test summary for a branch"""
         if branch_name not in self.branch_results:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
@@ -597,7 +597,7 @@ class BranchTestManager:
             "last_run": max(r.start_time for r in latest_results.values()).isoformat(),
         }
 
-    def get_all_branch_summaries(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_branch_summaries(self) -> dict[str, dict[str, Any]]:
         """Get test summaries for all active branches"""
         summaries = {}
 
@@ -612,7 +612,7 @@ class BranchTestManager:
 
         return summaries
 
-    async def auto_test_on_commit(self, branch_name: str) -> List[TestResult]:
+    async def auto_test_on_commit(self, branch_name: str) -> list[TestResult]:
         """Automatically run tests when commits are detected on a branch"""
         if not self.auto_testing_enabled or not self.test_on_commit:
             return []
@@ -624,7 +624,7 @@ class BranchTestManager:
         self,
         name: str,
         test_type: TestType,
-        command: List[str],
+        command: list[str],
         **kwargs,
     ) -> None:
         """Configure or update a test suite"""
@@ -670,7 +670,13 @@ class BranchTestManager:
                     # Get last commit time (simplified check)
                     try:
                         result = subprocess.run(
-                            ["git", "log", "-1", "--pretty=format:%ct", branch_info.name],
+                            [
+                                "git",
+                                "log",
+                                "-1",
+                                "--pretty=format:%ct",
+                                branch_info.name,
+                            ],
                             check=False,
                             cwd=self.repo_path,
                             capture_output=True,

@@ -6,15 +6,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
-from .conflict_resolution import (
-    ConflictResolutionEngine,
-    ConflictSeverity,
-    ResolutionStrategy,
-)
+from .conflict_resolution import ConflictResolutionEngine, ConflictSeverity, ResolutionStrategy
 from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType
 from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
 
@@ -55,7 +51,7 @@ class AutoResolutionResult:
     conflicts_detected: int = 0
     conflicts_resolved: int = 0
     files_processed: int = 0
-    merge_results: List[MergeResult] = field(default_factory=list)
+    merge_results: list[MergeResult] = field(default_factory=list)
 
     # Performance metrics
     resolution_time: float = 0.0
@@ -63,11 +59,11 @@ class AutoResolutionResult:
     semantic_integrity_preserved: bool = True
 
     # Escalation information
-    escalated_conflicts: List[str] = field(default_factory=list)
-    manual_intervention_required: List[str] = field(default_factory=list)
+    escalated_conflicts: list[str] = field(default_factory=list)
+    manual_intervention_required: list[str] = field(default_factory=list)
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     resolved_at: datetime = field(default_factory=datetime.now)
 
 
@@ -81,7 +77,7 @@ class AutoResolver:
         conflict_engine: ConflictResolutionEngine,
         conflict_predictor: ConflictPredictor,
         branch_manager: BranchManager,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
     ):
         """
         Initialize the auto resolver
@@ -119,7 +115,7 @@ class AutoResolver:
         }
 
         # Resolution history and learning
-        self.resolution_history: List[AutoResolutionResult] = []
+        self.resolution_history: list[AutoResolutionResult] = []
         self.success_patterns = defaultdict(list)
         self.failure_patterns = defaultdict(list)
 
@@ -137,9 +133,9 @@ class AutoResolver:
         self,
         branch1: str,
         branch2: str,
-        target_branch: Optional[str] = None,
-        mode: Optional[AutoResolutionMode] = None,
-        file_filter: Optional[List[str]] = None,
+        target_branch: str | None = None,
+        mode: AutoResolutionMode | None = None,
+        file_filter: list[str] | None = None,
     ) -> AutoResolutionResult:
         """
         Automatically resolve conflicts between two branches
@@ -270,9 +266,9 @@ class AutoResolver:
 
     async def prevent_conflicts_predictively(
         self,
-        branches: List[str],
+        branches: list[str],
         prevention_mode: AutoResolutionMode = AutoResolutionMode.PREDICTIVE,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Use prediction to prevent conflicts before they occur
 
@@ -337,9 +333,9 @@ class AutoResolver:
 
     def _assess_conflict_resolvability(
         self,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
         mode: AutoResolutionMode,
-    ) -> Tuple[List[SemanticConflict], List[SemanticConflict]]:
+    ) -> tuple[list[SemanticConflict], list[SemanticConflict]]:
         """Assess which conflicts can be auto-resolved based on mode and risk"""
 
         threshold = self.confidence_thresholds[mode]
@@ -407,9 +403,9 @@ class AutoResolver:
 
     async def _perform_batch_resolution(
         self,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
         mode: AutoResolutionMode,
-    ) -> List[MergeResult]:
+    ) -> list[MergeResult]:
         """Perform batch resolution of conflicts using semantic merger"""
 
         logger.info(f"Performing batch resolution of {len(conflicts)} conflicts")
@@ -433,8 +429,8 @@ class AutoResolver:
 
     async def _validate_resolution_results(
         self,
-        merge_results: List[MergeResult],
-    ) -> List[MergeResult]:
+        merge_results: list[MergeResult],
+    ) -> list[MergeResult]:
         """Validate merge results before application"""
 
         logger.info(f"Validating {len(merge_results)} merge results")
@@ -473,9 +469,9 @@ class AutoResolver:
 
     async def _apply_merge_results(
         self,
-        merge_results: List[MergeResult],
+        merge_results: list[MergeResult],
         target_branch: str,
-    ) -> List[MergeResult]:
+    ) -> list[MergeResult]:
         """Apply validated merge results to target branch"""
 
         logger.info(f"Applying {len(merge_results)} merge results to {target_branch}")
@@ -520,9 +516,9 @@ class AutoResolver:
 
     def _determine_resolution_outcome(
         self,
-        all_conflicts: List[SemanticConflict],
-        escalated_conflicts: List[SemanticConflict],
-        applied_results: List[MergeResult],
+        all_conflicts: list[SemanticConflict],
+        escalated_conflicts: list[SemanticConflict],
+        applied_results: list[MergeResult],
     ) -> ResolutionOutcome:
         """Determine the overall outcome of the resolution session"""
 
@@ -544,7 +540,7 @@ class AutoResolver:
 
     def _calculate_session_confidence(
         self,
-        applied_results: List[MergeResult],
+        applied_results: list[MergeResult],
     ) -> float:
         """Calculate overall confidence score for the resolution session"""
 
@@ -556,8 +552,8 @@ class AutoResolver:
 
     def _generate_prevention_strategies(
         self,
-        predictions: List[PredictionResult],
-    ) -> List[Dict[str, Any]]:
+        predictions: list[PredictionResult],
+    ) -> list[dict[str, Any]]:
         """Generate strategies to prevent predicted conflicts"""
 
         strategies = []
@@ -586,9 +582,9 @@ class AutoResolver:
 
     async def _apply_preventive_measures(
         self,
-        predictions: List[PredictionResult],
-        strategies: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        predictions: list[PredictionResult],
+        strategies: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """Apply automated preventive measures"""
 
         applied_measures = []
@@ -619,7 +615,7 @@ class AutoResolver:
     async def _apply_preventive_measure(
         self,
         measure: str,
-        strategy: Dict[str, Any],
+        strategy: dict[str, Any],
     ) -> bool:
         """Apply a specific preventive measure"""
 
@@ -659,7 +655,7 @@ class AutoResolver:
     def _learn_from_resolution(
         self,
         result: AutoResolutionResult,
-        conflicts: List[SemanticConflict],
+        conflicts: list[SemanticConflict],
     ):
         """Learn from resolution results to improve future performance"""
 
@@ -691,7 +687,7 @@ class AutoResolver:
                     },
                 )
 
-    def get_resolution_summary(self) -> Dict[str, Any]:
+    def get_resolution_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of auto-resolution performance"""
 
         return {
@@ -714,7 +710,7 @@ class AutoResolver:
             "recommendations": self._generate_performance_recommendations(),
         }
 
-    def _analyze_mode_performance(self) -> Dict[str, Any]:
+    def _analyze_mode_performance(self) -> dict[str, Any]:
         """Analyze performance by resolution mode"""
 
         mode_stats = defaultdict(
@@ -748,7 +744,7 @@ class AutoResolver:
 
         return dict(mode_stats)
 
-    def _generate_performance_recommendations(self) -> List[str]:
+    def _generate_performance_recommendations(self) -> list[str]:
         """Generate recommendations based on performance analysis"""
 
         recommendations = []

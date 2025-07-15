@@ -4,8 +4,9 @@ import asyncio
 import contextlib
 import logging
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from .context_detector import ContextDetector, ContextInfo, ContextType
 from .workflow_engine import WorkflowChain, WorkflowEngine
@@ -14,7 +15,7 @@ from .workflow_engine import WorkflowChain, WorkflowEngine
 class AutomationManager:
     """Manages context-aware automation for yesman-claude."""
 
-    def __init__(self, project_path: Optional[Path] = None):
+    def __init__(self, project_path: Path | None = None):
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.automation_manager")
 
@@ -24,8 +25,8 @@ class AutomationManager:
 
         # Monitoring state
         self.is_monitoring = False
-        self._monitor_task: Optional[asyncio.Task] = None
-        self._callbacks: Dict[str, List[Callable]] = {
+        self._monitor_task: asyncio.Task | None = None
+        self._callbacks: dict[str, list[Callable]] = {
             "context_detected": [],
             "workflow_triggered": [],
             "workflow_completed": [],
@@ -100,7 +101,7 @@ class AutomationManager:
         except Exception as e:
             self.logger.error(f"Error in monitoring loop: {e}", exc_info=True)
 
-    async def _detect_all_contexts(self) -> List[ContextInfo]:
+    async def _detect_all_contexts(self) -> list[ContextInfo]:
         """Detect all possible contexts."""
         detected_contexts = []
 
@@ -158,11 +159,11 @@ class AutomationManager:
                 except Exception as e:
                     self.logger.error(f"Workflow trigger callback error: {e}")
 
-    def analyze_content_for_context(self, content: str, session_name: str = None) -> List[ContextInfo]:
+    def analyze_content_for_context(self, content: str, session_name: str = None) -> list[ContextInfo]:
         """Analyze content (e.g., tmux pane output) for context clues."""
         return self.context_detector.detect_context_from_content(content, session_name)
 
-    def analyze_claude_idle(self, last_activity_time: float, idle_threshold: int = 30) -> Optional[ContextInfo]:
+    def analyze_claude_idle(self, last_activity_time: float, idle_threshold: int = 30) -> ContextInfo | None:
         """Analyze Claude idle state for potential automation."""
         return self.context_detector.detect_claude_idle_context(last_activity_time, idle_threshold)
 
@@ -170,7 +171,7 @@ class AutomationManager:
         """Register a custom workflow chain."""
         self.workflow_engine.register_workflow(workflow)
 
-    def get_automation_status(self) -> Dict[str, Any]:
+    def get_automation_status(self) -> dict[str, Any]:
         """Get comprehensive automation status."""
         workflow_status = self.workflow_engine.get_workflow_status()
         context_summary = self.context_detector.get_current_context_summary()
@@ -178,7 +179,7 @@ class AutomationManager:
         return {
             "monitoring": {
                 "is_monitoring": self.is_monitoring,
-                "uptime": time.time() - self.stats["start_time"] if self.is_monitoring else 0,
+                "uptime": (time.time() - self.stats["start_time"] if self.is_monitoring else 0),
             },
             "statistics": self.stats.copy(),
             "workflows": workflow_status,
@@ -186,7 +187,7 @@ class AutomationManager:
             "project_path": str(self.project_path),
         }
 
-    async def manual_trigger_workflow(self, workflow_name: str, context_info: ContextInfo) -> Optional[str]:
+    async def manual_trigger_workflow(self, workflow_name: str, context_info: ContextInfo) -> str | None:
         """Manually trigger a specific workflow."""
         if workflow_name not in self.workflow_engine.workflows:
             self.logger.error(f"Workflow not found: {workflow_name}")
@@ -223,12 +224,12 @@ class AutomationManager:
         else:
             self.logger.debug(f"No automation config found at: {config_path}")
 
-    def get_execution_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_execution_history(self, limit: int = 20) -> list[dict[str, Any]]:
         """Get recent workflow execution history."""
         history = self.workflow_engine.execution_history[-limit:]
         return [execution.to_dict() for execution in history]
 
-    async def test_automation_chain(self, context_type: ContextType, test_details: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def test_automation_chain(self, context_type: ContextType, test_details: dict[str, Any] = None) -> dict[str, Any]:
         """Test automation chain with simulated context."""
         test_context = ContextInfo(
             context_type=context_type,
@@ -260,7 +261,7 @@ class AutomationManager:
 
         return result
 
-    def get_workflow_recommendations(self, context_info: ContextInfo) -> List[str]:
+    def get_workflow_recommendations(self, context_info: ContextInfo) -> list[str]:
         """Get recommendations for workflows based on context."""
         recommendations = []
 

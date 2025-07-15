@@ -7,7 +7,7 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import click
 
@@ -29,7 +29,12 @@ class CommandError(Exception):
 class BaseCommand(ABC):
     """Base class for all yesman commands"""
 
-    def __init__(self, config: Optional[YesmanConfig] = None, tmux_manager: Optional[TmuxManager] = None, claude_manager: Optional[ClaudeManager] = None):
+    def __init__(
+        self,
+        config: YesmanConfig | None = None,
+        tmux_manager: TmuxManager | None = None,
+        claude_manager: ClaudeManager | None = None,
+    ):
         """
         Initialize base command with dependency injection support
 
@@ -177,7 +182,7 @@ class BaseCommand(ABC):
 class SessionCommandMixin:
     """Mixin for commands that work with sessions"""
 
-    def get_session_list(self) -> List[str]:
+    def get_session_list(self) -> list[str]:
         """Get list of available sessions"""
         try:
             sessions = self.tmux_manager.get_all_sessions()
@@ -212,7 +217,7 @@ class SessionCommandMixin:
 class ConfigCommandMixin:
     """Mixin for commands that work with configuration"""
 
-    def load_projects_config(self) -> Dict[str, Any]:
+    def load_projects_config(self) -> dict[str, Any]:
         """Load projects configuration with error handling"""
         try:
             import yaml
@@ -225,7 +230,7 @@ class ConfigCommandMixin:
         except Exception as e:
             raise CommandError(f"Failed to load projects configuration: {e}") from e
 
-    def save_projects_config(self, config: Dict[str, Any]) -> None:
+    def save_projects_config(self, config: dict[str, Any]) -> None:
         """Save projects configuration with error handling"""
         try:
             import yaml
@@ -253,7 +258,7 @@ class ConfigCommandMixin:
 class OutputFormatterMixin:
     """Mixin for commands that need output formatting"""
 
-    def format_table(self, data: List[Dict[str, Any]], headers: List[str]) -> str:
+    def format_table(self, data: list[dict[str, Any]], headers: list[str]) -> str:
         """Format data as table"""
         if not data:
             return "No data to display"

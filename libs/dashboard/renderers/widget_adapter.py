@@ -5,7 +5,7 @@ Converts raw data from various sources into standardized widget models
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from .widget_models import (
     ActivityData,
@@ -41,7 +41,7 @@ class WidgetDataAdapter:
         """Initialize the adapter"""
         self.logger = logging.getLogger("yesman.dashboard.widget_adapter")
 
-    def adapt_session_data(self, raw_data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> Union[SessionData, List[SessionData]]:
+    def adapt_session_data(self, raw_data: dict[str, Any] | list[dict[str, Any]]) -> SessionData | list[SessionData]:
         """
         Convert raw session data to SessionData model(s)
 
@@ -56,7 +56,7 @@ class WidgetDataAdapter:
 
         return self._adapt_single_session(raw_data)
 
-    def _adapt_single_session(self, data: Dict[str, Any]) -> SessionData:
+    def _adapt_single_session(self, data: dict[str, Any]) -> SessionData:
         """Convert single session data"""
         try:
             # Parse session status
@@ -125,7 +125,7 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_health_data(self, raw_data: Dict[str, Any]) -> HealthData:
+    def adapt_health_data(self, raw_data: dict[str, Any]) -> HealthData:
         """
         Convert raw health data to HealthData model
 
@@ -203,7 +203,7 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_activity_data(self, raw_data: Dict[str, Any]) -> ActivityData:
+    def adapt_activity_data(self, raw_data: dict[str, Any]) -> ActivityData:
         """
         Convert raw activity data to ActivityData model
 
@@ -262,7 +262,7 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_progress_data(self, raw_data: Dict[str, Any]) -> ProgressData:
+    def adapt_progress_data(self, raw_data: dict[str, Any]) -> ProgressData:
         """
         Convert raw progress data to ProgressData model
 
@@ -323,7 +323,7 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_metric_card_data(self, raw_data: Dict[str, Any]) -> MetricCardData:
+    def adapt_metric_card_data(self, raw_data: dict[str, Any]) -> MetricCardData:
         """Convert raw data to MetricCardData model"""
         return MetricCardData(
             title=raw_data.get("title", ""),
@@ -336,7 +336,7 @@ class WidgetDataAdapter:
             metadata=raw_data.get("metadata", {}),
         )
 
-    def adapt_status_indicator_data(self, raw_data: Dict[str, Any]) -> StatusIndicatorData:
+    def adapt_status_indicator_data(self, raw_data: dict[str, Any]) -> StatusIndicatorData:
         """Convert raw data to StatusIndicatorData model"""
         return StatusIndicatorData(
             status=raw_data.get("status", "unknown"),
@@ -347,7 +347,7 @@ class WidgetDataAdapter:
             metadata=raw_data.get("metadata", {}),
         )
 
-    def adapt_chart_data(self, raw_data: Dict[str, Any]) -> ChartData:
+    def adapt_chart_data(self, raw_data: dict[str, Any]) -> ChartData:
         """Convert raw data to ChartData model"""
         # Parse data points
         data_points = []
@@ -368,7 +368,7 @@ class WidgetDataAdapter:
                         metadata=point_data.get("metadata", {}),
                     )
                 )
-            elif isinstance(point_data, (list, tuple)) and len(point_data) >= 2:
+            elif isinstance(point_data, list | tuple) and len(point_data) >= 2:
                 # Handle [x, y] format
                 data_points.append(
                     ChartDataPoint(
@@ -391,7 +391,7 @@ class WidgetDataAdapter:
 
     # Helper methods
 
-    def _parse_timestamp(self, timestamp: Any) -> Optional[datetime]:
+    def _parse_timestamp(self, timestamp: Any) -> datetime | None:
         """Parse various timestamp formats to datetime"""
         if timestamp is None:
             return None
@@ -399,7 +399,7 @@ class WidgetDataAdapter:
         if isinstance(timestamp, datetime):
             return timestamp
 
-        if isinstance(timestamp, (int, float)):
+        if isinstance(timestamp, int | float):
             try:
                 return datetime.fromtimestamp(timestamp)
             except (ValueError, OSError):
@@ -488,21 +488,23 @@ class WidgetDataAdapter:
 adapter = WidgetDataAdapter()
 
 
-def adapt_session_data(raw_data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> Union[SessionData, List[SessionData]]:
+def adapt_session_data(
+    raw_data: dict[str, Any] | list[dict[str, Any]],
+) -> SessionData | list[SessionData]:
     """Convenience function for session data adaptation"""
     return adapter.adapt_session_data(raw_data)
 
 
-def adapt_health_data(raw_data: Dict[str, Any]) -> HealthData:
+def adapt_health_data(raw_data: dict[str, Any]) -> HealthData:
     """Convenience function for health data adaptation"""
     return adapter.adapt_health_data(raw_data)
 
 
-def adapt_activity_data(raw_data: Dict[str, Any]) -> ActivityData:
+def adapt_activity_data(raw_data: dict[str, Any]) -> ActivityData:
     """Convenience function for activity data adaptation"""
     return adapter.adapt_activity_data(raw_data)
 
 
-def adapt_progress_data(raw_data: Dict[str, Any]) -> ProgressData:
+def adapt_progress_data(raw_data: dict[str, Any]) -> ProgressData:
     """Convenience function for progress data adaptation"""
     return adapter.adapt_progress_data(raw_data)

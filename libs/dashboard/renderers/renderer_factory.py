@@ -5,7 +5,7 @@ Factory pattern for creating and managing dashboard renderers
 
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .registry import RendererRegistry
@@ -41,7 +41,7 @@ class RendererFactory:
     """
 
     # Registered renderer classes
-    _renderer_classes: Dict[RenderFormat, Type[BaseRenderer]] = {
+    _renderer_classes: dict[RenderFormat, type[BaseRenderer]] = {
         RenderFormat.TUI: TUIRenderer,
         RenderFormat.WEB: WebRenderer,
         RenderFormat.TAURI: TauriRenderer,
@@ -49,7 +49,7 @@ class RendererFactory:
 
     # Thread safety
     _lock = threading.Lock()
-    _instances: Dict[RenderFormat, BaseRenderer] = {}
+    _instances: dict[RenderFormat, BaseRenderer] = {}
     _initialized = False
 
     @classmethod
@@ -80,7 +80,7 @@ class RendererFactory:
                 ) from e
 
     @classmethod
-    def register_renderer(cls, render_format: RenderFormat, renderer_class: Type[BaseRenderer]) -> None:
+    def register_renderer(cls, render_format: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
         """
         Register a new renderer class
 
@@ -155,9 +155,9 @@ class RendererFactory:
         cls,
         widget_type: WidgetType,
         data: Any,
-        render_format: Optional[RenderFormat] = None,
-        options: Optional[Dict[str, Any]] = None,
-    ) -> Union[Any, Dict[RenderFormat, Any]]:
+        render_format: RenderFormat | None = None,
+        options: dict[str, Any] | None = None,
+    ) -> Any | dict[RenderFormat, Any]:
         """
         Universal rendering method with format selection
 
@@ -206,10 +206,10 @@ class RendererFactory:
         cls,
         widget_type: WidgetType,
         data: Any,
-        formats: Optional[List[RenderFormat]] = None,
-        options: Optional[Dict[str, Any]] = None,
+        formats: list[RenderFormat] | None = None,
+        options: dict[str, Any] | None = None,
         max_workers: int = 3,
-    ) -> Dict[RenderFormat, Any]:
+    ) -> dict[RenderFormat, Any]:
         """
         Render widget with multiple formats in parallel
 
@@ -255,7 +255,7 @@ class RendererFactory:
         return results
 
     @classmethod
-    def get_supported_formats(cls) -> List[RenderFormat]:
+    def get_supported_formats(cls) -> list[RenderFormat]:
         """Get list of supported render formats"""
         return list(cls._renderer_classes.keys())
 
@@ -285,7 +285,7 @@ def render_widget(
     widget_type: WidgetType,
     data: Any,
     render_format: RenderFormat,
-    options: Optional[Dict[str, Any]] = None,
+    options: dict[str, Any] | None = None,
 ) -> Any:
     """
     Render a single widget with specified format
@@ -305,8 +305,8 @@ def render_widget(
 def render_all_formats(
     widget_type: WidgetType,
     data: Any,
-    options: Optional[Dict[str, Any]] = None,
-) -> Dict[RenderFormat, Any]:
+    options: dict[str, Any] | None = None,
+) -> dict[RenderFormat, Any]:
     """
     Render a widget with all available formats
 
@@ -324,10 +324,10 @@ def render_all_formats(
 def render_formats(
     widget_type: WidgetType,
     data: Any,
-    formats: List[RenderFormat],
-    options: Optional[Dict[str, Any]] = None,
+    formats: list[RenderFormat],
+    options: dict[str, Any] | None = None,
     parallel: bool = False,
-) -> Dict[RenderFormat, Any]:
+) -> dict[RenderFormat, Any]:
     """
     Render a widget with specific formats
 

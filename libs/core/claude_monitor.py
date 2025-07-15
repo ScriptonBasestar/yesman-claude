@@ -4,7 +4,6 @@ import asyncio
 import logging
 import threading
 import time
-from typing import Optional
 
 from ..ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
 from ..automation.automation_manager import AutomationManager
@@ -25,8 +24,8 @@ class ClaudeMonitor:
 
         # Monitoring state
         self.is_running = False
-        self._monitor_thread: Optional[threading.Thread] = None
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._monitor_thread: threading.Thread | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
         # Auto-response settings
         self.is_auto_next_enabled = True
@@ -40,7 +39,7 @@ class ClaudeMonitor:
         # Prompt detection
         self.prompt_detector = ClaudePromptDetector()
         self.content_collector = ClaudeContentCollector(session_manager.session_name)
-        self.current_prompt: Optional[PromptInfo] = None
+        self.current_prompt: PromptInfo | None = None
         self.waiting_for_input = False
 
         # AI-powered adaptive response system
@@ -64,7 +63,7 @@ class ClaudeMonitor:
         )
 
         # High-performance async logging system
-        self.async_logger: Optional[AsyncLogger] = None
+        self.async_logger: AsyncLogger | None = None
 
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
 
@@ -201,7 +200,13 @@ class ClaudeMonitor:
                                     self.process_controller.send_input(ai_response)
                                     self.status_manager.update_activity(f"🤖 AI auto-responded: '{ai_response}' (confidence: {confidence:.2f})")
                                     self.status_manager.record_response(prompt_info.type.value, ai_response, content)
-                                    self.adaptive_response.confirm_response_success(prompt_info.question, ai_response, context, self.session_name, True)
+                                    self.adaptive_response.confirm_response_success(
+                                        prompt_info.question,
+                                        ai_response,
+                                        context,
+                                        self.session_name,
+                                        True,
+                                    )
                                     self._clear_prompt_state()
                                     continue
 
@@ -211,7 +216,12 @@ class ClaudeMonitor:
                                 self.status_manager.update_activity(f"✅ Legacy auto-responded: '{response}' to {prompt_info.type.value}")
                                 self.status_manager.record_response(prompt_info.type.value, response, content)
                                 # Learn from legacy response for future AI improvements
-                                self.adaptive_response.learn_from_manual_response(prompt_info.question, response, context, self.session_name)
+                                self.adaptive_response.learn_from_manual_response(
+                                    prompt_info.question,
+                                    response,
+                                    context,
+                                    self.session_name,
+                                )
                                 self._clear_prompt_state()
                                 continue
 
@@ -275,7 +285,7 @@ class ClaudeMonitor:
             self.is_running = False
             self.status_manager.update_status("[red]Claude monitor stopped[/]")
 
-    def _check_for_prompt(self, content: str) -> Optional[PromptInfo]:
+    def _check_for_prompt(self, content: str) -> PromptInfo | None:
         """Check if content contains a prompt waiting for input"""
         prompt_info = self.prompt_detector.detect_prompt(content)
 
@@ -381,7 +391,7 @@ class ClaudeMonitor:
         """Check if Claude is currently waiting for user input"""
         return self.waiting_for_input
 
-    def get_current_prompt(self) -> Optional[PromptInfo]:
+    def get_current_prompt(self) -> PromptInfo | None:
         """Get the current prompt information"""
         return self.current_prompt
 
@@ -562,7 +572,11 @@ class ClaudeMonitor:
             await self._start_async_logging()
             result = self.start_monitoring()
             if result:
-                self._async_log(LogLevel.INFO, "Claude monitor started with async logging", session=self.session_name)
+                self._async_log(
+                    LogLevel.INFO,
+                    "Claude monitor started with async logging",
+                    session=self.session_name,
+                )
             return result
         except Exception as e:
             self.logger.error(f"Failed to start async monitoring: {e}")

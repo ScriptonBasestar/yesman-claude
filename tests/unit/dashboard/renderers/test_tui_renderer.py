@@ -401,8 +401,14 @@ class TestTUIRenderer:
     def test_render_layout_vertical(self):
         """Test vertical layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "vertical", "spacing": 2})
@@ -414,8 +420,14 @@ class TestTUIRenderer:
     def test_render_layout_horizontal(self):
         """Test horizontal layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "horizontal"})
@@ -427,10 +439,22 @@ class TestTUIRenderer:
     def test_render_layout_grid(self):
         """Test grid layout rendering"""
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 1", value=10)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 2", value=20)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 3", value=30)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test 4", value=40)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 1", value=10),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 2", value=20),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 3", value=30),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test 4", value=40),
+            },
         ]
 
         result = self.renderer.render_layout(widgets, {"type": "grid", "columns": 2})

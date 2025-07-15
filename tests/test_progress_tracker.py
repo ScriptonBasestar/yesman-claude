@@ -141,12 +141,18 @@ class TestProgressAnalyzer:
         analyzer = ProgressAnalyzer()
 
         # Test starting phase
-        output = ["I'll help you implement this feature", "Let me begin by analyzing the code"]
+        output = [
+            "I'll help you implement this feature",
+            "Let me begin by analyzing the code",
+        ]
         progress = analyzer.analyze_pane_output("test-session", output)
         assert progress.get_current_task().phase == TaskPhase.STARTING
 
         # Test analyzing phase
-        output = ["Analyzing the existing codebase", "Let me check the current implementation"]
+        output = [
+            "Analyzing the existing codebase",
+            "Let me check the current implementation",
+        ]
         progress = analyzer.analyze_pane_output("test-session", output)
         assert progress.get_current_task().phase == TaskPhase.ANALYZING
 

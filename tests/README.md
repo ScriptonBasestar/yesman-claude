@@ -1,6 +1,7 @@
 # Yesman-Claude 테스트 가이드
 
 ## 📖 개요
+
 이 디렉토리는 Yesman-Claude 프로젝트의 모든 테스트를 포함합니다. 체계적인 테스트 구조로 단위 테스트, 통합 테스트, E2E 테스트를 분리하여 관리합니다.
 
 ## 📁 디렉토리 구조
@@ -67,10 +68,12 @@ make test-file FILE=tests/unit/core/cache/test_session_cache.py
 ### 명명 규칙
 
 #### 파일명
+
 - 테스트 파일: `test_<module>_<feature>.py`
 - 예: `test_cache_strategies.py`, `test_ls_command.py`
 
 #### 함수명
+
 - 패턴: `test_<기능>_<시나리오>_<예상결과>`
 - 예:
   ```python
@@ -80,6 +83,7 @@ make test-file FILE=tests/unit/core/cache/test_session_cache.py
   ```
 
 #### 클래스명
+
 - 패턴: `Test<Module><Feature>`
 - 예: `TestCacheExpiration`, `TestSessionManager`
 
@@ -172,6 +176,7 @@ pytest -m integration
 ## 📊 커버리지
 
 ### 목표
+
 - **최소 커버리지**: 80%
 - **권장 커버리지**: 90%
 
@@ -186,6 +191,7 @@ pytest --cov=libs --cov=commands --cov-report=term-missing
 ```
 
 ### 커버리지 제외
+
 `.coveragerc` 또는 `pyproject.toml`에서 설정:
 
 ```toml
@@ -200,6 +206,7 @@ exclude_lines = [
 ## 🔧 도구 및 의존성
 
 ### 테스트 프레임워크
+
 - **pytest**: 주요 테스트 프레임워크
 - **pytest-cov**: 커버리지 측정
 - **pytest-mock**: Mock 지원
@@ -220,19 +227,22 @@ pip install pytest pytest-cov pytest-mock pytest-asyncio
 ### 일반적인 문제
 
 1. **Import 에러**
+
    ```bash
    # 프로젝트 루트에서 실행
    cd /path/to/yesman-claude
    python -m pytest tests/
    ```
 
-2. **Mock 에러**
+1. **Mock 에러**
+
    ```python
    # 올바른 import
    from tests.fixtures.mock_data import MockTmuxSession
    ```
 
-3. **Fixture 에러**
+1. **Fixture 에러**
+
    ```python
    # conftest.py의 fixture 사용
    def test_example(mock_tmux_session):
@@ -242,12 +252,14 @@ pip install pytest pytest-cov pytest-mock pytest-asyncio
 ### 성능 최적화
 
 1. **병렬 실행**
+
    ```bash
    pip install pytest-xdist
    pytest -n auto
    ```
 
-2. **캐시 활용**
+1. **캐시 활용**
+
    ```bash
    pytest --cache-clear  # 캐시 초기화
    pytest --lf          # 마지막 실패한 테스트만
@@ -256,12 +268,14 @@ pip install pytest pytest-cov pytest-mock pytest-asyncio
 ## 🔄 CI/CD 통합
 
 ### GitHub Actions
+
 - 모든 PR에서 자동 테스트 실행
 - Python 3.11, 3.12 매트릭스 테스트
 - 커버리지 리포트 자동 생성
 - 실패 시 머지 차단
 
 ### 로컬 pre-commit 훅
+
 ```bash
 # pre-commit 설치 (선택사항)
 pip install pre-commit
@@ -274,14 +288,14 @@ pre-commit install
 - [pytest-cov 사용법](https://pytest-cov.readthedocs.io/)
 - [테스트 리팩토링 진행 상황](./refactoring_progress.md)
 
----
+______________________________________________________________________
 
 ## 🤝 기여 가이드
 
 1. 새 기능 개발 시 테스트 작성 필수
-2. 기존 테스트 수정 시 이유 명시
-3. 커버리지 80% 유지
-4. 테스트 이름은 명확하고 구체적으로
-5. Mock은 최소한으로 사용
+1. 기존 테스트 수정 시 이유 명시
+1. 커버리지 80% 유지
+1. 테스트 이름은 명확하고 구체적으로
+1. Mock은 최소한으로 사용
 
 **테스트 관련 질문이나 제안사항은 이슈로 등록해 주세요.**

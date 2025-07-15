@@ -6,12 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from libs.dashboard.renderers.base_renderer import (
-    BaseRenderer,
-    RenderFormat,
-    ThemeColor,
-    WidgetType,
-)
+from libs.dashboard.renderers.base_renderer import BaseRenderer, RenderFormat, ThemeColor, WidgetType
 from libs.dashboard.renderers.registry import RendererRegistry
 
 
@@ -302,7 +297,10 @@ class TestRendererRegistry:
 
         assert len(self.registry) == 2
         assert RenderFormat.WEB in self.registry
-        assert set(self.registry.get_registered_formats()) == {RenderFormat.WEB, RenderFormat.TUI}
+        assert set(self.registry.get_registered_formats()) == {
+            RenderFormat.WEB,
+            RenderFormat.TUI,
+        }
 
     def test_clear_registry(self):
         """Test clearing registry"""

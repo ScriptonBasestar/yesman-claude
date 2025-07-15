@@ -35,6 +35,7 @@ def teardown(session_name):
             click.echo(f"Session {actual_session_name} not found")
     click.echo("All sessions torn down.")
 
+
 # Alias
 @click.command()
 @click.argument("session_name", required=False)
@@ -42,5 +43,6 @@ def down(session_name):
     """Alias for 'teardown' command"""
     ctx = click.get_current_context()
     ctx.invoke(teardown, session_name=session_name)
+
 
 __all__ = ["teardown", "down"]

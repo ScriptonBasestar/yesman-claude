@@ -145,7 +145,7 @@ class TestDynamicRedistribution:
 
             try:
                 await asyncio.wait_for(task, timeout=0.1)
-            except (asyncio.TimeoutError, asyncio.CancelledError):
+            except (TimeoutError, asyncio.CancelledError):
                 task.cancel()
 
             # Verify rebalancing was called

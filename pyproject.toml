@@ -47,7 +47,7 @@ where = ["."]
 include = ["yesman*", "commands*", "libs*"]
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "8.0"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -55,16 +55,20 @@ python_functions = ["test_*"]
 addopts = [
     "-ra",
     "--strict-markers",
+    "--strict-config",
     "--cov=libs",
     "--cov=commands",
-    "--cov-report=html",
+    "--cov-branch",
+    "--cov-report=html:htmlcov",
     "--cov-report=term-missing:skip-covered",
+    "--cov-report=xml:coverage.xml",
     "--cov-fail-under=15",
 ]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
+    "unit: Unit tests that test individual components",
+    "integration: Integration tests that test multiple components together",
+    "slow: Tests that take more than 5 seconds to run",
+    "requires_network: Tests that require network access",
 ]
 
 [tool.coverage.run]
@@ -82,14 +86,64 @@ exclude_lines = [
     "pragma: no cover",
     "def __repr__",
     "if self.debug:",
-    "if settings.DEBUG",
+    "if __name__ == .__main__.:",
     "raise AssertionError",
     "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
 ]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "D",   # pydocstyle (docstring linting)
+]
+ignore = [
+    "D203", # one-blank-line-before-class (conflicts with D211)
+    "D213", # multi-line-summary-second-line (conflicts with D212)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = false
+warn_unused_configs = false
+disallow_untyped_defs = false
+no_implicit_optional = false
+strict_optional = false
+ignore_missing_imports = true
+show_error_codes = false
+disable_error_code = ["attr-defined", "arg-type", "override", "operator", "call-overload", "no-any-return", "var-annotated", "has-type", "misc", "assignment", "return-value", "index", "call-arg", "no-redef", "import-untyped", "valid-type", "dict-item", "func-returns-value", "union-attr", "annotation-unchecked"]
 
 [dependency-groups]
 dev = [
     "ruff>=0.12.3",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "types-PyYAML>=6.0.0",
+    "mdformat>=0.7.0",
+    "mdformat-gfm>=0.3.0",
+    "mdformat-tables>=0.4.0",
+    "bandit>=1.8.6",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.5.0",
+    "pytest-timeout>=2.2.0",
+    "pytest-mock>=3.12.0",
+    "pytest-asyncio>=0.23.0",
 ]

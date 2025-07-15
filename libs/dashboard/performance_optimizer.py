@@ -12,12 +12,13 @@ import statistics
 import threading
 import time
 from collections import defaultdict, deque
+from collections.abc import Callable
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable, Deque, Dict, List, Optional
+from typing import Any, Optional
 
 import psutil
 
@@ -69,7 +70,7 @@ class PerformanceMetrics:
     # Timestamps
     timestamp: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "cpu_usage": self.cpu_usage,
@@ -130,8 +131,8 @@ class PerformanceProfiler:
     """Performance profiling and measurement utilities"""
 
     def __init__(self):
-        self.measurements: Dict[str, Deque[float]] = defaultdict(lambda: deque(maxlen=100))
-        self.start_times: Dict[str, float] = {}
+        self.measurements: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=100))
+        self.start_times: dict[str, float] = {}
         self.lock = threading.Lock()
 
     @contextmanager
@@ -147,7 +148,7 @@ class PerformanceProfiler:
             with self.lock:
                 self.measurements[operation_name].append(duration)
 
-    def measure_function(self, operation_name: Optional[str] = None):
+    def measure_function(self, operation_name: str | None = None):
         """Decorator for measuring function execution time"""
 
         def decorator(func: Callable) -> Callable:
@@ -162,7 +163,7 @@ class PerformanceProfiler:
 
         return decorator
 
-    def get_stats(self, operation_name: str) -> Dict[str, float]:
+    def get_stats(self, operation_name: str) -> dict[str, float]:
         """Get statistics for an operation"""
         with self.lock:
             measurements = list(self.measurements[operation_name])
@@ -184,7 +185,7 @@ class PerformanceProfiler:
             "std": statistics.stdev(measurements) if len(measurements) > 1 else 0.0,
         }
 
-    def get_all_stats(self) -> Dict[str, Dict[str, float]]:
+    def get_all_stats(self) -> dict[str, dict[str, float]]:
         """Get statistics for all operations"""
         with self.lock:
             return {name: self.get_stats(name) for name in self.measurements}
@@ -226,10 +227,10 @@ class PerformanceOptimizer:
 
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
-        self.monitor_thread: Optional[threading.Thread] = None
+        self.monitor_thread: threading.Thread | None = None
 
         # Performance data
-        self.metrics_history: Deque[PerformanceMetrics] = deque(maxlen=300)  # 5 minutes at 1s interval
+        self.metrics_history: deque[PerformanceMetrics] = deque(maxlen=300)  # 5 minutes at 1s interval
         self.current_metrics = PerformanceMetrics()
 
         # Profiler
@@ -238,11 +239,11 @@ class PerformanceOptimizer:
         # Optimization
         self.current_optimization_level = OptimizationLevel.NONE
         self.optimization_strategies = self._create_optimization_strategies()
-        self.applied_optimizations: List[str] = []
+        self.applied_optimizations: list[str] = []
 
         # Callbacks
-        self.optimization_callbacks: List[Callable[[OptimizationLevel], None]] = []
-        self.metrics_callbacks: List[Callable[[PerformanceMetrics], None]] = []
+        self.optimization_callbacks: list[Callable[[OptimizationLevel], None]] = []
+        self.metrics_callbacks: list[Callable[[PerformanceMetrics], None]] = []
 
         # Thread safety
         self.lock = threading.Lock()
@@ -250,7 +251,9 @@ class PerformanceOptimizer:
         # System monitoring
         self.process = psutil.Process()
 
-    def _create_optimization_strategies(self) -> Dict[OptimizationLevel, OptimizationStrategy]:
+    def _create_optimization_strategies(
+        self,
+    ) -> dict[OptimizationLevel, OptimizationStrategy]:
         """Create built-in optimization strategies"""
         return {
             OptimizationLevel.NONE: OptimizationStrategy(
@@ -412,7 +415,7 @@ class PerformanceOptimizer:
             logger.error(f"Error collecting metrics: {e}")
             return PerformanceMetrics()
 
-    def _get_cache_stats(self) -> Dict[str, Any]:
+    def _get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics (placeholder for actual cache integration)"""
         # This would integrate with actual cache systems
         return {
@@ -529,14 +532,14 @@ class PerformanceOptimizer:
         with self.lock:
             return self.current_metrics
 
-    def get_metrics_history(self, duration_minutes: int = 5) -> List[PerformanceMetrics]:
+    def get_metrics_history(self, duration_minutes: int = 5) -> list[PerformanceMetrics]:
         """Get metrics history for specified duration"""
         cutoff_time = datetime.now() - timedelta(minutes=duration_minutes)
 
         with self.lock:
             return [metrics for metrics in self.metrics_history if metrics.timestamp >= cutoff_time]
 
-    def get_performance_report(self) -> Dict[str, Any]:
+    def get_performance_report(self) -> dict[str, Any]:
         """Generate comprehensive performance report"""
         current = self.get_current_metrics()
         history = self.get_metrics_history(5)
@@ -571,7 +574,7 @@ class PerformanceOptimizer:
             "history_count": len(history),
         }
 
-    def _generate_recommendations(self, current: PerformanceMetrics, history: List[PerformanceMetrics]) -> List[str]:
+    def _generate_recommendations(self, current: PerformanceMetrics, history: list[PerformanceMetrics]) -> list[str]:
         """Generate performance recommendations"""
         recommendations = []
 
@@ -639,7 +642,7 @@ class AsyncPerformanceOptimizer:
         """
         self.monitoring_interval = monitoring_interval
         self.semaphore = asyncio.Semaphore(max_concurrent_tasks)
-        self.monitoring_task: Optional[asyncio.Task] = None
+        self.monitoring_task: asyncio.Task | None = None
         self.optimizer = PerformanceOptimizer(monitoring_interval)
 
         # Rate limiting
@@ -733,7 +736,7 @@ class AsyncPerformanceOptimizer:
             level,
         )
 
-    async def get_performance_report(self) -> Dict[str, Any]:
+    async def get_performance_report(self) -> dict[str, Any]:
         """Get async performance report"""
         # For simplicity, delegate to sync implementation for now
         with self.lock:

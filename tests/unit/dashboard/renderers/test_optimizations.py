@@ -5,11 +5,7 @@ Tests for Rendering Optimizations and Caching
 import threading
 import time
 
-from libs.dashboard.renderers.base_renderer import (
-    BaseRenderer,
-    RenderFormat,
-    WidgetType,
-)
+from libs.dashboard.renderers.base_renderer import BaseRenderer, RenderFormat, WidgetType
 from libs.dashboard.renderers.optimizations import (
     BatchRenderer,
     CacheStats,
@@ -276,8 +272,14 @@ class TestCachedDecorators:
         bound_method = mock_render_layout.__get__(self.renderer, MockRenderer)
 
         widgets = [
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test1", value=100)},
-            {"type": WidgetType.METRIC_CARD, "data": MetricCardData(title="Test2", value=200)},
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test1", value=100),
+            },
+            {
+                "type": WidgetType.METRIC_CARD,
+                "data": MetricCardData(title="Test2", value=200),
+            },
         ]
         layout_config = {"type": "grid", "columns": 2}
 

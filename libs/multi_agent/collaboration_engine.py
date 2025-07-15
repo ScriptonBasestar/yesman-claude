@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from .agent_pool import AgentPool
 from .branch_manager import BranchManager
@@ -59,14 +59,14 @@ class CollaborationMessage:
 
     message_id: str
     sender_id: str
-    recipient_id: Optional[str]  # None for broadcast
+    recipient_id: str | None  # None for broadcast
     message_type: MessageType
     priority: MessagePriority
     subject: str
-    content: Dict[str, Any]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    content: dict[str, Any]
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     requires_ack: bool = False
     acknowledged: bool = False
 
@@ -84,12 +84,12 @@ class SharedKnowledge:
     knowledge_id: str
     contributor_id: str
     knowledge_type: str  # e.g., "function_signature", "api_change", "pattern"
-    content: Dict[str, Any]
+    content: dict[str, Any]
     relevance_score: float = 1.0
     access_count: int = 0
     created_at: datetime = field(default_factory=datetime.now)
     last_accessed: datetime = field(default_factory=datetime.now)
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -97,14 +97,14 @@ class CollaborationSession:
     """Active collaboration session between agents"""
 
     session_id: str
-    participant_ids: List[str]
+    participant_ids: list[str]
     mode: CollaborationMode
     purpose: str
     started_at: datetime = field(default_factory=datetime.now)
-    ended_at: Optional[datetime] = None
-    shared_context: Dict[str, Any] = field(default_factory=dict)
-    decisions: List[Dict[str, Any]] = field(default_factory=list)
-    outcomes: List[str] = field(default_factory=list)
+    ended_at: datetime | None = None
+    shared_context: dict[str, Any] = field(default_factory=dict)
+    decisions: list[dict[str, Any]] = field(default_factory=list)
+    outcomes: list[str] = field(default_factory=list)
 
 
 class CollaborationEngine:
@@ -115,8 +115,8 @@ class CollaborationEngine:
         agent_pool: AgentPool,
         branch_manager: BranchManager,
         conflict_engine: ConflictResolutionEngine,
-        semantic_analyzer: Optional[SemanticAnalyzer] = None,
-        repo_path: Optional[str] = None,
+        semantic_analyzer: SemanticAnalyzer | None = None,
+        repo_path: str | None = None,
     ):
         """
         Initialize the collaboration engine
@@ -135,22 +135,22 @@ class CollaborationEngine:
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
 
         # Message system
-        self.message_queues: Dict[str, deque] = defaultdict(deque)
-        self.message_history: List[CollaborationMessage] = []
-        self.pending_acknowledgments: Dict[str, CollaborationMessage] = {}
+        self.message_queues: dict[str, deque] = defaultdict(deque)
+        self.message_history: list[CollaborationMessage] = []
+        self.pending_acknowledgments: dict[str, CollaborationMessage] = {}
 
         # Knowledge base
-        self.shared_knowledge: Dict[str, SharedKnowledge] = {}
-        self.knowledge_index: Dict[str, List[str]] = defaultdict(
+        self.shared_knowledge: dict[str, SharedKnowledge] = {}
+        self.knowledge_index: dict[str, list[str]] = defaultdict(
             list,
         )  # tag -> knowledge_ids
 
         # Collaboration sessions
-        self.active_sessions: Dict[str, CollaborationSession] = {}
-        self.session_history: List[CollaborationSession] = []
+        self.active_sessions: dict[str, CollaborationSession] = {}
+        self.session_history: list[CollaborationSession] = []
 
         # Dependency tracking
-        self.dependency_graph: Dict[str, Set[str]] = defaultdict(
+        self.dependency_graph: dict[str, set[str]] = defaultdict(
             set,
         )  # file -> dependent files
         self.change_propagation_queue: deque = deque()
@@ -209,12 +209,12 @@ class CollaborationEngine:
     async def send_message(
         self,
         sender_id: str,
-        recipient_id: Optional[str],
+        recipient_id: str | None,
         message_type: MessageType,
         subject: str,
-        content: Dict[str, Any],
+        content: dict[str, Any],
         priority: MessagePriority = MessagePriority.NORMAL,
-        expires_in: Optional[timedelta] = None,
+        expires_in: timedelta | None = None,
         requires_ack: bool = False,
     ) -> str:
         """
@@ -233,7 +233,7 @@ class CollaborationEngine:
         Returns:
             Message ID
         """
-        message_id = f"msg_{sender_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(subject.encode()).hexdigest()[:8]}"
+        message_id = f"msg_{sender_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(subject.encode()).hexdigest()[:8]}"
 
         expires_at = None
         if expires_in:
@@ -276,8 +276,8 @@ class CollaborationEngine:
     async def receive_messages(
         self,
         agent_id: str,
-        max_messages: Optional[int] = None,
-    ) -> List[CollaborationMessage]:
+        max_messages: int | None = None,
+    ) -> list[CollaborationMessage]:
         """
         Receive messages for an agent
 
@@ -318,8 +318,8 @@ class CollaborationEngine:
         self,
         contributor_id: str,
         knowledge_type: str,
-        content: Dict[str, Any],
-        tags: Optional[List[str]] = None,
+        content: dict[str, Any],
+        tags: list[str] | None = None,
         relevance_score: float = 1.0,
     ) -> str:
         """
@@ -335,7 +335,7 @@ class CollaborationEngine:
         Returns:
             Knowledge ID
         """
-        knowledge_id = f"know_{contributor_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(content).encode()).hexdigest()[:8]}"
+        knowledge_id = f"know_{contributor_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(content).encode()).hexdigest()[:8]}"
 
         knowledge = SharedKnowledge(
             knowledge_id=knowledge_id,
@@ -376,11 +376,11 @@ class CollaborationEngine:
     async def access_knowledge(
         self,
         agent_id: str,
-        knowledge_id: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        knowledge_type: Optional[str] = None,
+        knowledge_id: str | None = None,
+        tags: list[str] | None = None,
+        knowledge_type: str | None = None,
         limit: int = 10,
-    ) -> List[SharedKnowledge]:
+    ) -> list[SharedKnowledge]:
         """
         Access shared knowledge
 
@@ -444,10 +444,10 @@ class CollaborationEngine:
     async def create_collaboration_session(
         self,
         initiator_id: str,
-        participant_ids: List[str],
+        participant_ids: list[str],
         mode: CollaborationMode,
         purpose: str,
-        initial_context: Optional[Dict[str, Any]] = None,
+        initial_context: dict[str, Any] | None = None,
     ) -> str:
         """
         Create a collaboration session between agents
@@ -506,7 +506,7 @@ class CollaborationEngine:
         self,
         session_id: str,
         agent_id: str,
-        context_update: Dict[str, Any],
+        context_update: dict[str, Any],
     ):
         """Update shared context in a collaboration session"""
         if session_id not in self.active_sessions:
@@ -539,7 +539,7 @@ class CollaborationEngine:
         self,
         session_id: str,
         agent_id: str,
-        decision: Dict[str, Any],
+        decision: dict[str, Any],
     ):
         """Add a decision to a collaboration session"""
         if session_id not in self.active_sessions:
@@ -560,7 +560,7 @@ class CollaborationEngine:
     async def end_collaboration_session(
         self,
         session_id: str,
-        outcomes: Optional[List[str]] = None,
+        outcomes: list[str] | None = None,
     ):
         """End a collaboration session"""
         if session_id not in self.active_sessions:
@@ -587,8 +587,8 @@ class CollaborationEngine:
         file_path: str,
         changed_by: str,
         change_type: str,
-        change_details: Dict[str, Any],
-        affected_files: Optional[List[str]] = None,
+        change_details: dict[str, Any],
+        affected_files: list[str] | None = None,
     ):
         """
         Track a dependency change that needs to be propagated
@@ -644,9 +644,9 @@ class CollaborationEngine:
         requester_id: str,
         problem_type: str,
         problem_description: str,
-        context: Optional[Dict[str, Any]] = None,
-        expertise_needed: Optional[List[str]] = None,
-    ) -> Optional[str]:
+        context: dict[str, Any] | None = None,
+        expertise_needed: list[str] | None = None,
+    ) -> str | None:
         """
         Request help from other agents
 
@@ -713,10 +713,10 @@ class CollaborationEngine:
         self,
         author_id: str,
         branch_name: str,
-        files_changed: List[str],
+        files_changed: list[str],
         review_type: str = "standard",
         priority: MessagePriority = MessagePriority.NORMAL,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Initiate code review by other agents
 
@@ -771,7 +771,7 @@ class CollaborationEngine:
         self,
         branch1: str,
         branch2: str,
-        potential_conflicts: List[ConflictInfo],
+        potential_conflicts: list[ConflictInfo],
     ) -> int:
         """
         Collaborate to prevent potential conflicts
@@ -1009,7 +1009,7 @@ class CollaborationEngine:
                 logger.error(f"Error in auto sync loop: {e}")
                 await asyncio.sleep(self.sync_interval)
 
-    def get_collaboration_summary(self) -> Dict[str, Any]:
+    def get_collaboration_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of collaboration activities"""
         return {
             "statistics": self.collaboration_stats.copy(),
@@ -1032,7 +1032,7 @@ class CollaborationEngine:
             ],
         }
 
-    def _count_knowledge_by_type(self) -> Dict[str, int]:
+    def _count_knowledge_by_type(self) -> dict[str, int]:
         """Count knowledge items by type"""
         counts = defaultdict(int)
         for knowledge in self.shared_knowledge.values():

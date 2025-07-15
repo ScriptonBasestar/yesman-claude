@@ -13,7 +13,12 @@ from libs.yesman_config import YesmanConfig
 
 
 @click.command()
-@click.option("--dry-run", "-n", is_flag=True, help="Show what would be cleaned without actually deleting")
+@click.option(
+    "--dry-run",
+    "-n",
+    is_flag=True,
+    help="Show what would be cleaned without actually deleting",
+)
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
 def cleanup(dry_run: bool, force: bool, cleanup_all: bool):

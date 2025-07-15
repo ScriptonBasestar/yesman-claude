@@ -7,7 +7,7 @@ import time
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class ResponseRecord:
     prompt_type: str  # 'numbered_selection', 'yes_no', 'confirmation', etc.
     user_response: str
     context: str  # Additional context about the situation
-    project_name: Optional[str] = None
+    project_name: str | None = None
     confidence_score: float = 1.0  # How confident we are in this response
 
 
@@ -33,23 +33,23 @@ class PromptPattern:
     prompt_type: str
     regex_pattern: str
     confidence_threshold: float
-    common_responses: Dict[str, int]  # response -> frequency
-    context_factors: Dict[str, float]  # context -> weight
+    common_responses: dict[str, int]  # response -> frequency
+    context_factors: dict[str, float]  # context -> weight
     last_updated: float
 
 
 class ResponseAnalyzer:
     """Analyzes user response patterns and learns optimal responses."""
 
-    def __init__(self, data_dir: Optional[Path] = None):
+    def __init__(self, data_dir: Path | None = None):
         self.data_dir = data_dir or Path.home() / ".yesman" / "ai_data"
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
         self.responses_file = self.data_dir / "response_history.json"
         self.patterns_file = self.data_dir / "learned_patterns.json"
 
-        self.response_history: List[ResponseRecord] = []
-        self.learned_patterns: Dict[str, PromptPattern] = {}
+        self.response_history: list[ResponseRecord] = []
+        self.learned_patterns: dict[str, PromptPattern] = {}
 
         self._load_data()
 
@@ -80,12 +80,22 @@ class ResponseAnalyzer:
 
             # Save patterns
             with open(self.patterns_file, "w") as f:
-                json.dump({pid: asdict(pattern) for pid, pattern in self.learned_patterns.items()}, f, indent=2)
+                json.dump(
+                    {pid: asdict(pattern) for pid, pattern in self.learned_patterns.items()},
+                    f,
+                    indent=2,
+                )
 
         except Exception as e:
             logger.error(f"Error saving AI data: {e}")
 
-    def record_response(self, prompt_text: str, user_response: str, context: str = "", project_name: str = None):
+    def record_response(
+        self,
+        prompt_text: str,
+        user_response: str,
+        context: str = "",
+        project_name: str = None,
+    ):
         """Record a user response for learning."""
         prompt_type = self._classify_prompt_type(prompt_text)
 
@@ -191,7 +201,7 @@ class ResponseAnalyzer:
         else:
             return "general_context"
 
-    def predict_response(self, prompt_text: str, context: str = "", project_name: str = None) -> Tuple[str, float]:
+    def predict_response(self, prompt_text: str, context: str = "", project_name: str = None) -> tuple[str, float]:
         """Predict the best response for a given prompt."""
         prompt_type = self._classify_prompt_type(prompt_text)
         pattern_id = f"{prompt_type}_{project_name or 'global'}"
@@ -245,7 +255,7 @@ class ResponseAnalyzer:
 
         return min(1.0, base_confidence)
 
-    def _get_default_response(self, prompt_type: str) -> Tuple[str, float]:
+    def _get_default_response(self, prompt_type: str) -> tuple[str, float]:
         """Get default response for a prompt type."""
         defaults = {
             "yes_no": ("yes", 0.3),
@@ -259,7 +269,7 @@ class ResponseAnalyzer:
 
         return defaults.get(prompt_type, ("", 0.1))
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get statistics about learned patterns and responses."""
         total_responses = len(self.response_history)
 

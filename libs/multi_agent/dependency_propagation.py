@@ -9,15 +9,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from .branch_info_protocol import BranchInfoProtocol, BranchInfoType
 from .branch_manager import BranchManager
-from .collaboration_engine import (
-    CollaborationEngine,
-    MessagePriority,
-    MessageType,
-)
+from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +58,12 @@ class DependencyNode:
 
     file_path: str
     module_name: str
-    dependencies: Set[str] = field(default_factory=set)  # What this depends on
-    dependents: Set[str] = field(default_factory=set)  # What depends on this
-    exports: Dict[str, Any] = field(default_factory=dict)  # What this exports
-    imports: Dict[str, Any] = field(default_factory=dict)  # What this imports
+    dependencies: set[str] = field(default_factory=set)  # What this depends on
+    dependents: set[str] = field(default_factory=set)  # What depends on this
+    exports: dict[str, Any] = field(default_factory=dict)  # What this exports
+    imports: dict[str, Any] = field(default_factory=dict)  # What this imports
     last_analyzed: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -79,17 +75,17 @@ class DependencyChange:
     changed_by: str
     change_type: DependencyType
     impact_level: ChangeImpact
-    change_details: Dict[str, Any]
-    affected_files: List[str] = field(default_factory=list)
-    affected_branches: List[str] = field(default_factory=list)
+    change_details: dict[str, Any]
+    affected_files: list[str] = field(default_factory=list)
+    affected_branches: list[str] = field(default_factory=list)
     propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE
-    propagated_to: Set[str] = field(default_factory=set)
+    propagated_to: set[str] = field(default_factory=set)
     propagation_attempts: int = 0
     max_propagation_attempts: int = 3
     created_at: datetime = field(default_factory=datetime.now)
-    processed_at: Optional[datetime] = None
+    processed_at: datetime | None = None
     requires_manual_review: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -98,12 +94,12 @@ class PropagationResult:
 
     change_id: str
     success: bool
-    propagated_to: List[str]
-    failed_targets: List[str]
-    warnings: List[str] = field(default_factory=list)
-    recommendations: List[str] = field(default_factory=list)
+    propagated_to: list[str]
+    failed_targets: list[str]
+    warnings: list[str] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
     processing_time: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class DependencyPropagationSystem:
@@ -114,7 +110,7 @@ class DependencyPropagationSystem:
         collaboration_engine: CollaborationEngine,
         branch_info_protocol: BranchInfoProtocol,
         branch_manager: BranchManager,
-        repo_path: Optional[str] = None,
+        repo_path: str | None = None,
         auto_propagate: bool = True,
     ):
         """
@@ -134,10 +130,10 @@ class DependencyPropagationSystem:
         self.auto_propagate = auto_propagate
 
         # Dependency graph and tracking
-        self.dependency_graph: Dict[str, DependencyNode] = {}
+        self.dependency_graph: dict[str, DependencyNode] = {}
         self.change_queue: deque[DependencyChange] = deque()
         self.processing_queue: deque[DependencyChange] = deque()
-        self.change_history: List[DependencyChange] = []
+        self.change_history: list[DependencyChange] = []
 
         # Propagation configuration
         self.batch_size = 10
@@ -191,8 +187,8 @@ class DependencyPropagationSystem:
         file_path: str,
         changed_by: str,
         change_type: DependencyType,
-        change_details: Dict[str, Any],
-        impact_level: Optional[ChangeImpact] = None,
+        change_details: dict[str, Any],
+        impact_level: ChangeImpact | None = None,
         propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE,
     ) -> str:
         """
@@ -209,7 +205,7 @@ class DependencyPropagationSystem:
         Returns:
             Change ID
         """
-        change_id = f"dep_change_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(file_path.encode()).hexdigest()[:8]}"
+        change_id = f"dep_change_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(file_path.encode()).hexdigest()[:8]}"
 
         # Auto-detect impact level if not provided
         if impact_level is None:
@@ -258,8 +254,8 @@ class DependencyPropagationSystem:
 
     async def build_dependency_graph(
         self,
-        file_paths: Optional[List[str]] = None,
-    ) -> Dict[str, DependencyNode]:
+        file_paths: list[str] | None = None,
+    ) -> dict[str, DependencyNode]:
         """
         Build or rebuild the dependency graph
 
@@ -283,7 +279,7 @@ class DependencyPropagationSystem:
         logger.info(f"Built dependency graph with {len(self.dependency_graph)} nodes")
         return self.dependency_graph
 
-    async def get_dependency_impact_report(self, file_path: str) -> Dict[str, Any]:
+    async def get_dependency_impact_report(self, file_path: str) -> dict[str, Any]:
         """
         Get comprehensive impact report for a file
 
@@ -329,9 +325,9 @@ class DependencyPropagationSystem:
 
     async def propagate_changes_to_branches(
         self,
-        change_ids: List[str],
-        target_branches: Optional[List[str]] = None,
-    ) -> List[PropagationResult]:
+        change_ids: list[str],
+        target_branches: list[str] | None = None,
+    ) -> list[PropagationResult]:
         """
         Propagate specific changes to target branches
 
@@ -365,9 +361,9 @@ class DependencyPropagationSystem:
 
     async def get_pending_changes(
         self,
-        agent_id: Optional[str] = None,
-        branch_name: Optional[str] = None,
-    ) -> List[DependencyChange]:
+        agent_id: str | None = None,
+        branch_name: str | None = None,
+    ) -> list[DependencyChange]:
         """
         Get pending changes for review or action
 
@@ -415,7 +411,7 @@ class DependencyPropagationSystem:
             exports = {}
 
             for node in ast.walk(tree):
-                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                if isinstance(node, ast.Import | ast.ImportFrom):
                     # Import statements
                     if isinstance(node, ast.Import):
                         for alias in node.names:
@@ -438,7 +434,7 @@ class DependencyPropagationSystem:
                                 "line": node.lineno,
                             }
 
-                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                     # Function definitions (exports)
                     exports[node.name] = {
                         "type": "function",
@@ -483,7 +479,7 @@ class DependencyPropagationSystem:
     async def _update_reverse_dependencies(
         self,
         file_path: str,
-        dependencies: Set[str],
+        dependencies: set[str],
     ):
         """Update reverse dependency relationships"""
         for dep in dependencies:
@@ -503,7 +499,7 @@ class DependencyPropagationSystem:
         self,
         file_path: str,
         change_type: DependencyType,
-        change_details: Dict[str, Any],
+        change_details: dict[str, Any],
     ) -> ChangeImpact:
         """Analyze the impact level of a change"""
 
@@ -547,8 +543,8 @@ class DependencyPropagationSystem:
         self,
         file_path: str,
         change_type: DependencyType,
-        change_details: Dict[str, Any],
-    ) -> List[str]:
+        change_details: dict[str, Any],
+    ) -> list[str]:
         """Find files affected by a dependency change"""
         if file_path not in self.dependency_graph:
             await self._analyze_file_dependencies(file_path)
@@ -566,7 +562,7 @@ class DependencyPropagationSystem:
 
         return list(set(affected))
 
-    async def _find_affected_branches(self, affected_files: List[str]) -> List[str]:
+    async def _find_affected_branches(self, affected_files: list[str]) -> list[str]:
         """Find branches that contain the affected files"""
         affected_branches = set()
 
@@ -604,7 +600,7 @@ class DependencyPropagationSystem:
 
         return indirect_count
 
-    def _get_indirect_dependent_files(self, file_path: str) -> List[str]:
+    def _get_indirect_dependent_files(self, file_path: str) -> list[str]:
         """Get list of indirect dependent files"""
         visited = set()
         queue = deque([file_path])
@@ -729,14 +725,14 @@ class DependencyPropagationSystem:
                         "change_details": change.change_details,
                         "requires_manual_review": change.requires_manual_review,
                     },
-                    priority=MessagePriority.HIGH if change.impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY] else MessagePriority.NORMAL,
+                    priority=(MessagePriority.HIGH if change.impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY] else MessagePriority.NORMAL),
                     requires_ack=change.requires_manual_review,
                 )
 
     async def _propagate_change_to_branches(
         self,
         change: DependencyChange,
-        branches: List[str],
+        branches: list[str],
     ) -> PropagationResult:
         """Propagate a specific change to target branches"""
         # This is a simplified implementation
@@ -809,7 +805,7 @@ class DependencyPropagationSystem:
                 logger.error(f"Error in dependency analysis loop: {e}")
                 await asyncio.sleep(3600)
 
-    def get_propagation_summary(self) -> Dict[str, Any]:
+    def get_propagation_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of propagation system"""
         return {
             "statistics": self.propagation_stats.copy(),

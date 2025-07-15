@@ -9,7 +9,7 @@ import venv
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +21,11 @@ class WorkEnvironment:
     branch_name: str
     worktree_path: Path
     venv_path: Path
-    config: Dict[str, Any]
-    agent_id: Optional[str] = None
+    config: dict[str, Any]
+    agent_id: str | None = None
     status: str = "initialized"  # initialized, active, suspended, terminated
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
         data["worktree_path"] = str(self.worktree_path)
@@ -33,7 +33,7 @@ class WorkEnvironment:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "WorkEnvironment":
+    def from_dict(cls, data: dict[str, Any]) -> "WorkEnvironment":
         """Create from dictionary"""
         data["worktree_path"] = Path(data["worktree_path"])
         data["venv_path"] = Path(data["venv_path"])
@@ -43,7 +43,7 @@ class WorkEnvironment:
 class WorkEnvironmentManager:
     """Manages isolated work environments for branches"""
 
-    def __init__(self, repo_path: str = ".", work_dir: Optional[str] = None):
+    def __init__(self, repo_path: str = ".", work_dir: str | None = None):
         """
         Initialize work environment manager
 
@@ -55,14 +55,14 @@ class WorkEnvironmentManager:
         self.work_dir = Path(work_dir) if work_dir else self.repo_path.parent / ".yesman-work"
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
-        self.environments: Dict[str, WorkEnvironment] = {}
+        self.environments: dict[str, WorkEnvironment] = {}
         self._load_environments()
 
     def _run_command(
         self,
-        cmd: List[str],
-        cwd: Optional[Path] = None,
-        env: Optional[Dict[str, str]] = None,
+        cmd: list[str],
+        cwd: Path | None = None,
+        env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
         """Run a command with optional working directory and environment"""
         logger.debug(f"Running command: {' '.join(cmd)} in {cwd or 'current dir'}")
@@ -122,7 +122,7 @@ class WorkEnvironmentManager:
     def create_work_environment(
         self,
         branch_name: str,
-        config: Optional[Dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
     ) -> WorkEnvironment:
         """
         Create an isolated work environment for a branch
@@ -200,7 +200,7 @@ class WorkEnvironmentManager:
         self,
         branch_name: str,
         worktree_path: Path,
-        config: Dict[str, Any],
+        config: dict[str, Any],
     ) -> Path:
         """Create a virtual environment for the branch"""
         safe_name = branch_name.replace("/", "_")
@@ -327,11 +327,11 @@ class WorkEnvironmentManager:
             if result.returncode != 0:
                 logger.error(f"Setup command failed: {cmd}")
 
-    def get_environment(self, branch_name: str) -> Optional[WorkEnvironment]:
+    def get_environment(self, branch_name: str) -> WorkEnvironment | None:
         """Get work environment for a branch"""
         return self.environments.get(branch_name)
 
-    def activate_environment(self, branch_name: str) -> Tuple[Path, Dict[str, str]]:
+    def activate_environment(self, branch_name: str) -> tuple[Path, dict[str, str]]:
         """
         Get activation details for an environment
 
@@ -431,7 +431,7 @@ class WorkEnvironmentManager:
         self._save_environments()
         logger.info(f"Terminated environment for branch: {branch_name}")
 
-    def cleanup_terminated(self) -> List[str]:
+    def cleanup_terminated(self) -> list[str]:
         """Clean up all terminated environments"""
         cleaned = []
 
@@ -442,6 +442,6 @@ class WorkEnvironmentManager:
 
         return cleaned
 
-    def list_environments(self) -> List[WorkEnvironment]:
+    def list_environments(self) -> list[WorkEnvironment]:
         """List all work environments"""
         return list(self.environments.values())

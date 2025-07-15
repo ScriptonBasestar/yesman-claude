@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +33,12 @@ class ContextInfo:
 
     context_type: ContextType
     confidence: float  # 0.0 to 1.0
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: float
-    project_path: Optional[str] = None
-    session_name: Optional[str] = None
+    project_path: str | None = None
+    session_name: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "context_type": self.context_type.value,
@@ -53,7 +53,7 @@ class ContextInfo:
 class ContextDetector:
     """Detects workflow contexts from various sources."""
 
-    def __init__(self, project_path: Optional[Path] = None):
+    def __init__(self, project_path: Path | None = None):
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.context_detector")
 
@@ -108,9 +108,9 @@ class ContextDetector:
         }
 
         self._last_git_hash = None
-        self._last_file_mtimes: Dict[str, float] = {}
+        self._last_file_mtimes: dict[str, float] = {}
 
-    def detect_context_from_content(self, content: str, session_name: str = None) -> List[ContextInfo]:
+    def detect_context_from_content(self, content: str, session_name: str = None) -> list[ContextInfo]:
         """Detect context from content (e.g., tmux pane output)."""
         detected_contexts = []
 
@@ -137,7 +137,7 @@ class ContextDetector:
 
         return detected_contexts
 
-    def detect_git_context(self) -> Optional[ContextInfo]:
+    def detect_git_context(self) -> ContextInfo | None:
         """Detect git-related context changes."""
         try:
             # Check current git status
@@ -177,10 +177,17 @@ class ContextDetector:
 
         return None
 
-    def detect_file_changes(self, watched_patterns: List[str] = None) -> List[ContextInfo]:
+    def detect_file_changes(self, watched_patterns: list[str] = None) -> list[ContextInfo]:
         """Detect file system changes."""
         if not watched_patterns:
-            watched_patterns = ["*.py", "*.js", "*.ts", "*.md", "package.json", "requirements.txt"]
+            watched_patterns = [
+                "*.py",
+                "*.js",
+                "*.ts",
+                "*.md",
+                "package.json",
+                "requirements.txt",
+            ]
 
         detected_changes = []
 
@@ -214,7 +221,7 @@ class ContextDetector:
 
         return detected_changes
 
-    def detect_claude_idle_context(self, last_activity_time: float, idle_threshold: int = 30) -> Optional[ContextInfo]:
+    def detect_claude_idle_context(self, last_activity_time: float, idle_threshold: int = 30) -> ContextInfo | None:
         """Detect when Claude has been idle for a while."""
         current_time = time.time()
         idle_duration = current_time - last_activity_time
@@ -233,7 +240,7 @@ class ContextDetector:
 
         return None
 
-    def detect_deployment_ready_context(self) -> Optional[ContextInfo]:
+    def detect_deployment_ready_context(self) -> ContextInfo | None:
         """Detect when project is ready for deployment."""
         try:
             # Check if tests are passing
@@ -285,7 +292,7 @@ class ContextDetector:
 
         return min(1.0, max(0.0, base_confidence))
 
-    def _get_commit_info(self, commit_hash: str) -> Dict[str, Any]:
+    def _get_commit_info(self, commit_hash: str) -> dict[str, Any]:
         """Get detailed information about a commit."""
         try:
             # Get commit message
@@ -300,7 +307,14 @@ class ContextDetector:
 
             # Get changed files
             files_result = subprocess.run(
-                ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit_hash],
+                [
+                    "git",
+                    "diff-tree",
+                    "--no-commit-id",
+                    "--name-only",
+                    "-r",
+                    commit_hash,
+                ],
                 check=False,
                 cwd=self.project_path,
                 capture_output=True,
@@ -309,8 +323,8 @@ class ContextDetector:
             )
 
             return {
-                "message": msg_result.stdout.strip() if msg_result.returncode == 0 else "",
-                "files_changed": files_result.stdout.strip().split("\n") if files_result.returncode == 0 else [],
+                "message": (msg_result.stdout.strip() if msg_result.returncode == 0 else ""),
+                "files_changed": (files_result.stdout.strip().split("\n") if files_result.returncode == 0 else []),
             }
 
         except Exception as e:
@@ -382,7 +396,7 @@ class ContextDetector:
         except Exception:
             return False
 
-    def get_current_context_summary(self) -> Dict[str, Any]:
+    def get_current_context_summary(self) -> dict[str, Any]:
         """Get a summary of the current project context."""
         summary = {
             "project_path": str(self.project_path),

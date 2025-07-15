@@ -6,7 +6,7 @@ Common data models used across all renderers for consistent data representation
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 
 class SessionStatus(Enum):
@@ -82,7 +82,7 @@ class WindowData:
     active: bool = False
     panes: int = 0
     layout: str = "even-horizontal"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -93,17 +93,17 @@ class SessionData:
     id: str
     status: SessionStatus
     created_at: datetime
-    last_activity: Optional[datetime] = None
-    windows: List[WindowData] = field(default_factory=list)
+    last_activity: datetime | None = None
+    windows: list[WindowData] = field(default_factory=list)
     panes: int = 0
     claude_active: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     # Performance metrics
     cpu_usage: float = 0.0
     memory_usage: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
         data["status"] = self.status.value
@@ -122,7 +122,7 @@ class SessionData:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "SessionData":
+    def from_dict(cls, data: dict[str, Any]) -> "SessionData":
         """Create from dictionary"""
         # Parse datetime fields
         created_at = None
@@ -173,8 +173,8 @@ class HealthCategoryData:
     score: int
     level: HealthLevel
     message: str = ""
-    details: Dict[str, Any] = field(default_factory=dict)
-    last_checked: Optional[datetime] = None
+    details: dict[str, Any] = field(default_factory=dict)
+    last_checked: datetime | None = None
 
 
 @dataclass
@@ -183,12 +183,12 @@ class HealthData:
 
     overall_score: int
     overall_level: HealthLevel
-    categories: List[HealthCategoryData] = field(default_factory=list)
-    last_updated: Optional[datetime] = None
+    categories: list[HealthCategoryData] = field(default_factory=list)
+    last_updated: datetime | None = None
     project_path: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
         data["overall_level"] = {
@@ -215,7 +215,7 @@ class HealthData:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "HealthData":
+    def from_dict(cls, data: dict[str, Any]) -> "HealthData":
         """Create from dictionary"""
         # Parse datetime
         last_updated = None
@@ -262,25 +262,25 @@ class ActivityEntry:
     timestamp: datetime
     activity_type: ActivityType
     description: str
-    details: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class ActivityData:
     """Activity information model"""
 
-    entries: List[ActivityEntry] = field(default_factory=list)
+    entries: list[ActivityEntry] = field(default_factory=list)
     total_activities: int = 0
     active_days: int = 0
     activity_rate: float = 0.0
     current_streak: int = 0
     longest_streak: int = 0
     avg_per_day: float = 0.0
-    date_range: Dict[str, str] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    date_range: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
 
@@ -295,7 +295,7 @@ class ActivityData:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ActivityData":
+    def from_dict(cls, data: dict[str, Any]) -> "ActivityData":
         """Create from dictionary"""
         # Parse entries
         entries = []
@@ -346,8 +346,8 @@ class ProgressData:
     commands_failed: int = 0
 
     # Time metrics
-    start_time: Optional[datetime] = None
-    phase_start_time: Optional[datetime] = None
+    start_time: datetime | None = None
+    phase_start_time: datetime | None = None
     active_duration: float = 0.0  # seconds of active work
     idle_duration: float = 0.0  # seconds of idle time
 
@@ -355,9 +355,9 @@ class ProgressData:
     todos_identified: int = 0
     todos_completed: int = 0
 
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
         data["phase"] = self.phase.value
@@ -366,7 +366,7 @@ class ProgressData:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ProgressData":
+    def from_dict(cls, data: dict[str, Any]) -> "ProgressData":
         """Create from dictionary"""
         # Parse datetime fields
         start_time = None
@@ -406,20 +406,20 @@ class MetricCardData:
     """Metric card display data"""
 
     title: str
-    value: Union[str, int, float]
+    value: str | int | float
     suffix: str = ""
-    trend: Optional[float] = None  # positive/negative trend
-    comparison: Optional[str] = None  # comparison text
+    trend: float | None = None  # positive/negative trend
+    comparison: str | None = None  # comparison text
     color: str = "neutral"
     icon: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MetricCardData":
+    def from_dict(cls, data: dict[str, Any]) -> "MetricCardData":
         """Create from dictionary"""
         return cls(**data)
 
@@ -433,14 +433,14 @@ class StatusIndicatorData:
     color: str = "neutral"
     icon: str = ""
     pulse: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StatusIndicatorData":
+    def from_dict(cls, data: dict[str, Any]) -> "StatusIndicatorData":
         """Create from dictionary"""
         return cls(**data)
 
@@ -449,10 +449,10 @@ class StatusIndicatorData:
 class ChartDataPoint:
     """Single chart data point"""
 
-    x: Union[str, int, float, datetime]
-    y: Union[int, float]
-    label: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    x: str | int | float | datetime
+    y: int | float
+    label: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -461,13 +461,13 @@ class ChartData:
 
     title: str
     chart_type: str = "line"  # line, bar, pie, area
-    data_points: List[ChartDataPoint] = field(default_factory=list)
+    data_points: list[ChartDataPoint] = field(default_factory=list)
     x_label: str = ""
     y_label: str = ""
-    colors: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    colors: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
 
@@ -482,7 +482,7 @@ class ChartData:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ChartData":
+    def from_dict(cls, data: dict[str, Any]) -> "ChartData":
         """Create from dictionary"""
         # Parse data points
         data_points = []

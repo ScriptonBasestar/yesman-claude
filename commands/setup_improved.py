@@ -3,8 +3,6 @@
 Improved setup command using refactored session setup logic
 """
 
-from typing import Optional
-
 import click
 
 from libs.core.base_command import BaseCommand, ConfigCommandMixin, SessionCommandMixin
@@ -15,7 +13,7 @@ from libs.core.session_setup import SessionSetupService
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     """Create all tmux sessions defined in projects.yaml"""
 
-    def execute(self, session_name: Optional[str] = None) -> dict:
+    def execute(self, session_name: str | None = None) -> dict:
         """
         Execute the setup command
 
@@ -35,7 +33,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
             "successful_sessions": successful_count,
             "failed_sessions": failed_count,
             "total_sessions": successful_count + failed_count,
-            "success_rate": (successful_count / (successful_count + failed_count) * 100) if (successful_count + failed_count) > 0 else 0,
+            "success_rate": ((successful_count / (successful_count + failed_count) * 100) if (successful_count + failed_count) > 0 else 0),
         }
 
         # Log results
@@ -62,9 +60,17 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
 
 @click.command()
 @click.argument("session_name", required=False)
-@click.option("--dry-run", is_flag=True, help="Show what would be done without actually creating sessions")
-@click.option("--force", is_flag=True, help="Force recreation of existing sessions without prompting")
-def setup(session_name: Optional[str], dry_run: bool, force: bool):
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be done without actually creating sessions",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force recreation of existing sessions without prompting",
+)
+def setup(session_name: str | None, dry_run: bool, force: bool):
     """
     Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
 

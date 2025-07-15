@@ -1,6 +1,7 @@
 # Yesman Claude
 
-Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions and automates interactions with Claude Code. It provides multiple dashboard interfaces for monitoring and controlling your development environment.
+Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions and automates interactions with Claude
+Code. It provides multiple dashboard interfaces for monitoring and controlling your development environment.
 
 ## 🚀 Key Features
 
@@ -16,13 +17,17 @@ Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions 
 Yesman-Claude offers three distinct dashboard interfaces to suit different environments and preferences:
 
 ### 🖥️ Terminal User Interface (TUI)
+
 Rich-based terminal dashboard with live updates and keyboard navigation.
+
 ```bash
 uv run ./yesman.py dash run --interface tui
 ```
 
 ### 🌐 Web Interface (SvelteKit)
+
 Modern web dashboard built with SvelteKit, served via FastAPI.
+
 ```bash
 # Build SvelteKit first (required for web interface)
 cd tauri-dashboard && npm run build
@@ -36,7 +41,9 @@ uv run ./yesman.py dash run --interface web --detach
 ```
 
 ### 🖱️ Desktop Application (Tauri + SvelteKit)
+
 Native desktop app with the same SvelteKit codebase as web interface.
+
 ```bash
 uv run ./yesman.py dash run --interface tauri
 uv run ./yesman.py dash run --interface tauri --dev  # Development mode
@@ -45,6 +52,7 @@ uv run ./yesman.py dash run --interface tauri --dev  # Development mode
 ## 🔧 Quick Start
 
 ### Installation
+
 ```bash
 # Development installation (recommended)
 make dev-install
@@ -56,6 +64,7 @@ uv run ./yesman.py --help
 ```
 
 ### Basic Commands
+
 ```bash
 # List available templates and projects
 ./yesman.py ls
@@ -88,25 +97,21 @@ uv run ./yesman.py automate monitor
 
 ## 📋 Interface Comparison
 
-| Feature | TUI | Web | Tauri |
-|---------|-----|-----|-------|
-| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Resource Usage** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Cross-platform** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Remote Access** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ |
-| **User Experience** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Customization** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **System Integration** | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Feature | TUI | Web | Tauri | |---------|-----|-----|-------| | **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | | **Resource
+Usage** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | | **Cross-platform** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | | **Remote Access** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ | |
+**User Experience** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | | **Customization** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | | **System Integration** | ⭐⭐ |
+⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 
 ### When to Use Each Interface
 
 - **TUI**: SSH sessions, minimal resource usage, terminal-only environments
-- **Web**: Remote monitoring, team collaboration, browser-based workflows  
+- **Web**: Remote monitoring, team collaboration, browser-based workflows
 - **Tauri**: Daily development, best user experience, desktop integration
 
 ## 🎯 Advanced Features
 
 ### AI Learning System
+
 ```bash
 # Configure adaptive responses
 uv run ./yesman.py ai config -t 0.8
@@ -119,6 +124,7 @@ uv run ./yesman.py ai export
 ```
 
 ### Context-Aware Automation
+
 ```bash
 # Monitor development context
 uv run ./yesman.py automate monitor
@@ -131,6 +137,7 @@ uv run ./yesman.py automate config
 ```
 
 ### Performance Monitoring
+
 ```bash
 # Live performance dashboard
 uv run ./yesman.py status -i
@@ -143,7 +150,9 @@ uv run ./yesman.py logs cleanup
 ```
 
 ### Chrome DevTools Integration (Development Only)
-The Tauri dashboard includes optional Chrome DevTools Workspace integration for enhanced development experience. This feature allows direct file editing from Chrome DevTools with automatic hot-reload.
+
+The Tauri dashboard includes optional Chrome DevTools Workspace integration for enhanced development experience. This
+feature allows direct file editing from Chrome DevTools with automatic hot-reload.
 
 **⚠️ Security Note**: This feature is automatically disabled in production builds.
 
@@ -155,7 +164,8 @@ cd tauri-dashboard && npm run dev
 # http://localhost:5173/.well-known/appspecific/com.chrome.devtools.json
 ```
 
-For detailed setup and usage instructions, see [Chrome DevTools Integration Guide](docs/development/chrome-devtools-integration.md).
+For detailed setup and usage instructions, see
+[Chrome DevTools Integration Guide](docs/development/chrome-devtools-integration.md).
 
 ## 설정 파일
 
@@ -175,9 +185,11 @@ $HOME/.yesman/projects.yaml
 Yesman-Claude는 재사용 가능한 tmux 세션 템플릿을 지원합니다. 템플릿을 사용하면 여러 프로젝트에서 일관된 개발 환경을 쉽게 구성할 수 있습니다.
 
 ### 템플릿 위치
+
 템플릿 파일은 `~/.yesman/templates/` 디렉터리에 YAML 형식으로 저장됩니다.
 
 ### 기본 템플릿 구조
+
 ```yaml
 session_name: "{{ session_name }}"
 start_directory: "{{ start_directory }}"
@@ -190,6 +202,7 @@ windows:
 ```
 
 ### Smart Templates
+
 "스마트 템플릿"은 조건부 명령 실행을 지원합니다:
 
 ```yaml
@@ -206,6 +219,7 @@ panes:
 ```
 
 ### 템플릿 사용하기
+
 `projects.yaml`에서 템플릿을 참조하고 필요한 값을 오버라이드할 수 있습니다:
 
 ```yaml

@@ -9,24 +9,9 @@ import pytest
 
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.collaboration_engine import (
-    CollaborationEngine,
-    MessagePriority,
-    MessageType,
-)
-from libs.multi_agent.conflict_prediction import (
-    ConflictPattern,
-    ConflictPredictor,
-    PredictionConfidence,
-    PredictionResult,
-)
-from libs.multi_agent.conflict_prevention import (
-    ConflictPreventionSystem,
-    PreventionAction,
-    PreventionMeasure,
-    PreventionResult,
-    PreventionStrategy,
-)
+from libs.multi_agent.collaboration_engine import CollaborationEngine, MessagePriority, MessageType
+from libs.multi_agent.conflict_prediction import ConflictPattern, ConflictPredictor, PredictionConfidence, PredictionResult
+from libs.multi_agent.conflict_prevention import ConflictPreventionSystem, PreventionAction, PreventionMeasure, PreventionResult, PreventionStrategy
 from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
 
 

@@ -5,7 +5,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import libtmux
 
@@ -60,7 +60,7 @@ class SessionManager:
 
         return logger
 
-    def get_all_sessions(self) -> List[SessionInfo]:
+    def get_all_sessions(self) -> list[SessionInfo]:
         """Get information about all yesman sessions"""
         sessions_info = []
 
@@ -79,7 +79,7 @@ class SessionManager:
             self.logger.error(f"Error getting sessions: {e}", exc_info=True)
             return []
 
-    def _get_session_info(self, project_name: str, project_conf: Dict[str, Any]) -> SessionInfo:
+    def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
         """Get information for a single session with mode-aware caching"""
 
         def compute_session_info():
@@ -222,7 +222,11 @@ class SessionManager:
                     except Exception:
                         current_task = cmd
 
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                except (
+                    psutil.NoSuchProcess,
+                    psutil.AccessDenied,
+                    psutil.ZombieProcess,
+                ):
                     # Process might have ended or we don't have permission
                     pass
             elif pid and not PSUTIL_AVAILABLE:
@@ -268,7 +272,7 @@ class SessionManager:
                 is_controller="controller" in cmd.lower() or "yesman" in cmd.lower(),
                 current_task=current_task,
                 idle_time=idle_time,
-                last_activity=datetime.fromtimestamp(activity_timestamp) if activity_timestamp > 0 else datetime.now(),
+                last_activity=(datetime.fromtimestamp(activity_timestamp) if activity_timestamp > 0 else datetime.now()),
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
                 pid=pid,
@@ -291,7 +295,7 @@ class SessionManager:
                 is_controller=False,
             )
 
-    def _analyze_current_task(self, cmdline: List[str], command: str) -> str:
+    def _analyze_current_task(self, cmdline: list[str], command: str) -> str:
         """Analyze command line to determine current task"""
         if not cmdline:
             return command
@@ -339,7 +343,7 @@ class SessionManager:
             main_cmd = cmdline[0].split("/")[-1] if cmdline else command
             return f"Running {main_cmd}"
 
-    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
+    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """
         Attach to a specific tmux pane
 
@@ -400,7 +404,7 @@ class SessionManager:
                 "action": "error",
             }
 
-    def get_progress_overview(self) -> Dict[str, Any]:
+    def get_progress_overview(self) -> dict[str, Any]:
         """Get progress overview for all sessions"""
         sessions = self.get_all_sessions()
 
@@ -438,7 +442,7 @@ class SessionManager:
                         "session_name": session.session_name,
                         "project_name": session.project_name,
                         "overall_progress": progress.calculate_overall_progress(),
-                        "current_phase": progress.get_current_task().phase.value if progress.get_current_task() else "idle",
+                        "current_phase": (progress.get_current_task().phase.value if progress.get_current_task() else "idle"),
                         "tasks_count": len(progress.tasks),
                         "files_changed": progress.total_files_changed,
                         "commands_executed": progress.total_commands,
@@ -496,7 +500,7 @@ echo "Attaching to tmux pane..."
             self.logger.error(f"Error creating attachment script: {e}")
             raise
 
-    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> Dict[str, Any]:
+    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """
         Execute pane attachment with error handling
 

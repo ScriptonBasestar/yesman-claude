@@ -3,7 +3,7 @@
 import logging
 import os
 import subprocess
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class ProjectHealth:
             "documentation",
         ]
 
-    def calculate_health(self) -> Dict[str, Any]:
+    def calculate_health(self) -> dict[str, Any]:
         """Calculate overall project health score"""
         try:
             scores = {}
@@ -131,7 +131,12 @@ class ProjectHealth:
         """Check code quality"""
         try:
             # Check for linting/formatting config
-            quality_files = [".flake8", ".pylintrc", "pyproject.toml", ".pre-commit-config.yaml"]
+            quality_files = [
+                ".flake8",
+                ".pylintrc",
+                "pyproject.toml",
+                ".pre-commit-config.yaml",
+            ]
             has_quality_config = any(os.path.exists(f) for f in quality_files)
 
             if has_quality_config:
@@ -179,7 +184,7 @@ class ProjectHealth:
         except Exception:
             return 50
 
-    def _generate_suggestions(self, scores: Dict[str, Any]) -> List[str]:
+    def _generate_suggestions(self, scores: dict[str, Any]) -> list[str]:
         """Generate improvement suggestions based on scores"""
         suggestions = []
 

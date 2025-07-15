@@ -4,7 +4,7 @@ import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -27,31 +27,31 @@ class SessionNode:
 
     session_name: str
     status: str
-    windows: List[Dict[str, Any]]
+    windows: list[dict[str, Any]]
     last_activity: float
     is_active: bool = False
-    claude_status: Optional[str] = None
+    claude_status: str | None = None
 
 
 class SessionBrowser:
     """Interactive tmux session browser with file-browser-like navigation"""
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         self.console = console or Console()
         self.logger = logging.getLogger("yesman.dashboard.session_browser")
 
         # Browser state
         self.view_mode = ViewMode.TREE
         self.selected_index = 0
-        self.sessions: List[SessionNode] = []
-        self.current_session: Optional[str] = None
+        self.sessions: list[SessionNode] = []
+        self.current_session: str | None = None
         self.show_details = True
 
         # Activity tracking
-        self.activity_levels: Dict[str, float] = {}
+        self.activity_levels: dict[str, float] = {}
         self.last_update = time.time()
 
-    def update_sessions(self, sessions_data: List[Dict[str, Any]]) -> None:
+    def update_sessions(self, sessions_data: list[dict[str, Any]]) -> None:
         """Update session data and refresh display"""
         self.sessions = []
         current_time = time.time()
@@ -72,7 +72,7 @@ class SessionBrowser:
 
         self.last_update = current_time
 
-    def _calculate_activity_level(self, session_data: Dict[str, Any]) -> float:
+    def _calculate_activity_level(self, session_data: dict[str, Any]) -> float:
         """Calculate activity level (0.0 - 1.0) based on session state"""
         activity = 0.0
 
@@ -89,7 +89,7 @@ class SessionBrowser:
 
         return min(activity, 1.0)
 
-    def _get_session_status(self, session_data: Dict[str, Any]) -> str:
+    def _get_session_status(self, session_data: dict[str, Any]) -> str:
         """Determine session status with emoji indicators"""
         if not session_data.get("exists", True):
             return "❌ Not Found"
@@ -111,7 +111,7 @@ class SessionBrowser:
         else:
             return "🟡 Idle"
 
-    def _detect_claude_status(self, session_data: Dict[str, Any]) -> Optional[str]:
+    def _detect_claude_status(self, session_data: dict[str, Any]) -> str | None:
         """Detect Claude status in session"""
         for window in session_data.get("windows", []):
             for pane in window.get("panes", []):
@@ -248,7 +248,7 @@ class SessionBrowser:
 
         return status
 
-    def render(self) -> Tuple[Panel, Text]:
+    def render(self) -> tuple[Panel, Text]:
         """Render current view based on view mode"""
         if self.view_mode == ViewMode.TREE:
             content = self.render_tree_view()
@@ -260,7 +260,7 @@ class SessionBrowser:
         status_bar = self.render_status_bar()
         return content, status_bar
 
-    def handle_key(self, key: str) -> Optional[str]:
+    def handle_key(self, key: str) -> str | None:
         """Handle keyboard input and return action if any"""
         if not self.sessions:
             return None
@@ -284,7 +284,7 @@ class SessionBrowser:
 
         return None
 
-    def get_selected_session(self) -> Optional[str]:
+    def get_selected_session(self) -> str | None:
         """Get currently selected session name"""
         if self.sessions and 0 <= self.selected_index < len(self.sessions):
             return self.sessions[self.selected_index].session_name

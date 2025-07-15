@@ -10,7 +10,10 @@ class TestConfigurationIsolation:
 
     def test_configuration_isolation(self):
         """Test configuration isolation between instances"""
-        with tempfile.TemporaryDirectory() as temp_dir1, tempfile.TemporaryDirectory() as temp_dir2:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir1,
+            tempfile.TemporaryDirectory() as temp_dir2,
+        ):
             theme_manager1 = ThemeManager(config_dir=Path(temp_dir1))
             theme_manager2 = ThemeManager(config_dir=Path(temp_dir2))
 

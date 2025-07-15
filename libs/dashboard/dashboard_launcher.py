@@ -11,7 +11,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 @dataclass
@@ -20,9 +20,9 @@ class InterfaceInfo:
 
     name: str
     description: str
-    requirements: List[str]
+    requirements: list[str]
     available: bool
-    reason: Optional[str] = None
+    reason: str | None = None
     priority: int = 1  # Lower = higher priority
 
 
@@ -34,7 +34,7 @@ class DashboardLauncher:
     user preferences, and environment constraints.
     """
 
-    def __init__(self, project_root: Optional[Path] = None):
+    def __init__(self, project_root: Path | None = None):
         """
         Initialize the dashboard launcher.
 
@@ -106,7 +106,7 @@ class DashboardLauncher:
         else:
             return "web"
 
-    def get_available_interfaces(self) -> Dict[str, InterfaceInfo]:
+    def get_available_interfaces(self) -> dict[str, InterfaceInfo]:
         """
         Get information about all available interfaces.
 
@@ -135,7 +135,7 @@ class DashboardLauncher:
         self._update_interface_availability()
         return self._interface_configs[interface]
 
-    def check_system_requirements(self) -> Dict[str, Dict[str, Any]]:
+    def check_system_requirements(self) -> dict[str, dict[str, Any]]:
         """
         Check system requirements for all interfaces.
 
@@ -290,7 +290,7 @@ class DashboardLauncher:
         self._interface_configs["tauri"].available = tauri_available
         self._interface_configs["tauri"].reason = tauri_reason
 
-    def _check_requirement(self, requirement: str) -> Tuple[bool, str]:
+    def _check_requirement(self, requirement: str) -> tuple[bool, str]:
         """
         Check if a specific requirement is met.
 
@@ -371,7 +371,7 @@ class DashboardLauncher:
         else:
             return False, f"Unknown requirement: {requirement}"
 
-    def _install_python_packages(self, packages: List[str]) -> None:
+    def _install_python_packages(self, packages: list[str]) -> None:
         """Install Python packages using pip"""
         for package in packages:
             if not self._is_python_package_available(package):

@@ -6,7 +6,7 @@ Central settings and configuration management
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass
@@ -81,7 +81,7 @@ class SecuritySettings:
     """Security configuration"""
 
     enable_auth: bool = False
-    session_secret: Optional[str] = None
+    session_secret: str | None = None
     token_expiry_hours: int = 24
     max_login_attempts: int = 5
     rate_limit_per_minute: int = 60
@@ -150,7 +150,7 @@ class AppSettings:
         for directory in directories:
             Path(directory).mkdir(parents=True, exist_ok=True)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert settings to dictionary for serialization"""
         return {
             "cache": {

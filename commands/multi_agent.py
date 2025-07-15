@@ -4,7 +4,6 @@ import asyncio
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -12,26 +11,12 @@ from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.code_review_engine import (
-    CodeReviewEngine,
-    QualityMetric,
-    ReviewSeverity,
-    ReviewType,
-)
+from libs.multi_agent.code_review_engine import CodeReviewEngine, QualityMetric, ReviewSeverity, ReviewType
 from libs.multi_agent.conflict_prediction import ConflictPredictor
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-from libs.multi_agent.dependency_propagation import (
-    ChangeImpact,
-    DependencyPropagationSystem,
-    DependencyType,
-    PropagationStrategy,
-)
+from libs.multi_agent.dependency_propagation import ChangeImpact, DependencyPropagationSystem, DependencyType, PropagationStrategy
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.semantic_merger import (
-    MergeResolution,
-    MergeStrategy,
-    SemanticMerger,
-)
+from libs.multi_agent.semantic_merger import MergeResolution, MergeStrategy, SemanticMerger
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +32,7 @@ def multi_agent_cli(ctx):
 @click.option("--max-agents", "-a", default=3, help="Maximum number of agents")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
-def start_agents(max_agents: int, work_dir: Optional[str], monitor: bool):
+def start_agents(max_agents: int, work_dir: str | None, monitor: bool):
     """Start the multi-agent pool"""
     click.echo(f"🤖 Starting multi-agent pool with {max_agents} agents...")
 
@@ -84,7 +69,7 @@ def start_agents(max_agents: int, work_dir: Optional[str], monitor: bool):
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--duration", "-d", type=float, help="Monitoring duration in seconds")
 @click.option("--refresh", "-r", default=1.0, help="Refresh interval in seconds")
-def monitor_agents(work_dir: Optional[str], duration: Optional[float], refresh: float):
+def monitor_agents(work_dir: str | None, duration: float | None, refresh: float):
     """Start real-time agent monitoring dashboard"""
     click.echo("📊 Starting agent monitoring dashboard...")
 
@@ -134,7 +119,7 @@ def monitor_agents(work_dir: Optional[str], duration: Optional[float], refresh: 
 
 @multi_agent_cli.command("status")
 @click.option("--work-dir", "-w", help="Work directory for agents")
-def status(work_dir: Optional[str]):
+def status(work_dir: str | None):
     """Show current agent pool status"""
     try:
         pool = AgentPool(work_dir=work_dir)
@@ -177,7 +162,7 @@ def status(work_dir: Optional[str]):
 
 @multi_agent_cli.command("stop")
 @click.option("--work-dir", "-w", help="Work directory for agents")
-def stop_agents(work_dir: Optional[str]):
+def stop_agents(work_dir: str | None):
     """Stop the multi-agent pool"""
     click.echo("🛑 Stopping multi-agent pool...")
 
@@ -206,12 +191,12 @@ def stop_agents(work_dir: Optional[str]):
 def add_task(
     title: str,
     command: tuple,
-    work_dir: Optional[str],
+    work_dir: str | None,
     directory: str,
     priority: int,
     complexity: int,
     timeout: int,
-    description: Optional[str],
+    description: str | None,
 ):
     """Add a task to the agent pool queue"""
     try:
@@ -239,7 +224,7 @@ def add_task(
 @multi_agent_cli.command("list-tasks")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--status", help="Filter by status (pending/running/completed/failed)")
-def list_tasks(work_dir: Optional[str], status: Optional[str]):
+def list_tasks(work_dir: str | None, status: str | None):
     """List tasks in the agent pool"""
     try:
         pool = AgentPool(work_dir=work_dir)
@@ -288,7 +273,7 @@ def list_tasks(work_dir: Optional[str], status: Optional[str]):
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--auto-resolve", "-a", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(branches: tuple, repo_path: Optional[str], auto_resolve: bool):
+def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool):
     """Detect conflicts between branches"""
     try:
         click.echo(f"🔍 Detecting conflicts between branches: {', '.join(branches)}")
@@ -357,8 +342,8 @@ def detect_conflicts(branches: tuple, repo_path: Optional[str], auto_resolve: bo
 @click.option("--repo-path", "-r", help="Path to git repository")
 def resolve_conflict(
     conflict_id: str,
-    strategy: Optional[str],
-    repo_path: Optional[str],
+    strategy: str | None,
+    repo_path: str | None,
 ):
     """Resolve a specific conflict"""
     try:
@@ -409,7 +394,7 @@ def resolve_conflict(
 
 @multi_agent_cli.command("conflict-summary")
 @click.option("--repo-path", "-r", help="Path to git repository")
-def conflict_summary(repo_path: Optional[str]):
+def conflict_summary(repo_path: str | None):
     """Show conflict resolution summary and statistics"""
     try:
         click.echo("📊 Conflict Resolution Summary")
@@ -496,7 +481,7 @@ def conflict_summary(repo_path: Optional[str]):
 )
 def predict_conflicts(
     branches: tuple,
-    repo_path: Optional[str],
+    repo_path: str | None,
     time_horizon: int,
     min_confidence: float,
     limit: int,
@@ -588,7 +573,7 @@ def predict_conflicts(
 
 @multi_agent_cli.command("prediction-summary")
 @click.option("--repo-path", "-r", help="Path to git repository")
-def prediction_summary(repo_path: Optional[str]):
+def prediction_summary(repo_path: str | None):
     """Show conflict prediction summary and statistics"""
     try:
         click.echo("🔮 Conflict Prediction Summary")
@@ -666,9 +651,9 @@ def prediction_summary(repo_path: Optional[str]):
 @click.option("--export", "-e", help="Export analysis to JSON file")
 def analyze_conflict_patterns(
     branches: tuple,
-    repo_path: Optional[str],
-    pattern: Optional[str],
-    export: Optional[str],
+    repo_path: str | None,
+    pattern: str | None,
+    export: str | None,
 ):
     """Analyze detailed conflict patterns between branches"""
     try:
@@ -769,10 +754,10 @@ def analyze_conflict_patterns(
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed analysis")
 def analyze_semantic_conflicts(
     branches: tuple,
-    repo_path: Optional[str],
-    files: Optional[str],
+    repo_path: str | None,
+    files: str | None,
     include_private: bool,
-    export: Optional[str],
+    export: str | None,
     detailed: bool,
 ):
     """Analyze AST-based semantic conflicts between branches"""
@@ -945,9 +930,9 @@ def analyze_semantic_conflicts(
 @click.option("--branch", "-b", help="Branch to analyze (default: current)")
 @click.option("--files", "-f", help="Specific files to analyze (comma-separated)")
 def semantic_summary(
-    repo_path: Optional[str],
-    branch: Optional[str],
-    files: Optional[str],
+    repo_path: str | None,
+    branch: str | None,
+    files: str | None,
 ):
     """Show semantic structure summary of code"""
     try:
@@ -1058,8 +1043,8 @@ def function_diff(
     function_name: str,
     branch1: str,
     branch2: str,
-    repo_path: Optional[str],
-    file: Optional[str],
+    repo_path: str | None,
+    file: str | None,
 ):
     """Compare function signatures between branches"""
     try:
@@ -1220,11 +1205,11 @@ def semantic_merge(
     file_path: str,
     branch1: str,
     branch2: str,
-    repo_path: Optional[str],
-    target_branch: Optional[str],
-    strategy: Optional[str],
+    repo_path: str | None,
+    target_branch: str | None,
+    strategy: str | None,
     apply: bool,
-    export: Optional[str],
+    export: str | None,
 ):
     """Perform intelligent semantic merge of a file between branches"""
     try:
@@ -1349,13 +1334,13 @@ def semantic_merge(
 def batch_merge(
     branch1: str,
     branch2: str,
-    repo_path: Optional[str],
-    target_branch: Optional[str],
-    files: Optional[str],
-    strategy: Optional[str],
+    repo_path: str | None,
+    target_branch: str | None,
+    files: str | None,
+    strategy: str | None,
     max_concurrent: int,
     apply: bool,
-    export_summary: Optional[str],
+    export_summary: str | None,
 ):
     """Perform batch semantic merge of multiple files between branches"""
     try:
@@ -1476,13 +1461,13 @@ def batch_merge(
                         "branch1": branch1,
                         "branch2": branch2,
                         "target_branch": target_branch or branch1,
-                        "strategy": strategy_enum.value if strategy_enum else "intelligent_merge",
+                        "strategy": (strategy_enum.value if strategy_enum else "intelligent_merge"),
                         "total_files": len(merge_results),
                         "successful": len(successful),
                         "manual_required": len(manual_required),
                         "failed": len(failed),
                         "average_confidence": avg_confidence if successful else 0.0,
-                        "semantic_integrity_rate": semantic_integrity_rate if successful else 0.0,
+                        "semantic_integrity_rate": (semantic_integrity_rate if successful else 0.0),
                     },
                     "detailed_results": [
                         {
@@ -1538,12 +1523,12 @@ def batch_merge(
 def auto_resolve(
     branch1: str,
     branch2: str,
-    repo_path: Optional[str],
-    target_branch: Optional[str],
+    repo_path: str | None,
+    target_branch: str | None,
     mode: str,
-    files: Optional[str],
+    files: str | None,
     apply: bool,
-    export: Optional[str],
+    export: str | None,
     preview: bool,
 ):
     """Automatically resolve conflicts between branches using AI-powered semantic analysis"""
@@ -1776,10 +1761,10 @@ def auto_resolve(
 @click.option("--export", "-e", help="Export prevention report to JSON file")
 def prevent_conflicts(
     branches: tuple,
-    repo_path: Optional[str],
+    repo_path: str | None,
     mode: str,
     apply_measures: bool,
-    export: Optional[str],
+    export: str | None,
 ):
     """Use AI prediction to prevent conflicts before they occur"""
     try:
@@ -1954,7 +1939,7 @@ def prevent_conflicts(
 )
 def collaborate(
     agents: tuple,
-    repo_path: Optional[str],
+    repo_path: str | None,
     mode: str,
     purpose: str,
     duration: int,
@@ -1995,10 +1980,7 @@ def collaborate(
             collab_engine.sync_interval = 30  # More frequent for demo
 
         async def run_collaboration():
-            from libs.multi_agent.collaboration_engine import (
-                MessagePriority,
-                MessageType,
-            )
+            from libs.multi_agent.collaboration_engine import MessagePriority, MessageType
 
             # Start collaboration engine
             await collab_engine.start()
@@ -2128,12 +2110,12 @@ def collaborate(
 @click.option("--repo-path", "-r", help="Path to git repository")
 def send_message(
     sender: str,
-    recipient: Optional[str],
+    recipient: str | None,
     msg_type: str,
     subject: str,
     content: str,
     priority: str,
-    repo_path: Optional[str],
+    repo_path: str | None,
 ):
     """Send a message between agents in the collaboration system"""
     try:
@@ -2208,9 +2190,9 @@ def share_knowledge(
     agent: str,
     type: str,
     content: str,
-    tags: Optional[str],
+    tags: str | None,
     relevance: float,
-    repo_path: Optional[str],
+    repo_path: str | None,
 ):
     """Share knowledge in the collaboration system"""
     try:
@@ -2283,20 +2265,18 @@ def share_knowledge(
 )
 def branch_info(
     action: str,
-    branch: Optional[str],
-    agent: Optional[str],
-    info_type: Optional[str],
-    data: Optional[str],
-    repo_path: Optional[str],
+    branch: str | None,
+    agent: str | None,
+    info_type: str | None,
+    data: str | None,
+    repo_path: str | None,
     sync_strategy: str,
 ):
     """Manage branch information sharing protocol"""
     try:
         import json
 
-        from libs.multi_agent.branch_info_protocol import (
-            BranchInfoType,
-        )
+        from libs.multi_agent.branch_info_protocol import BranchInfoType
 
         click.echo(f"🌿 Branch Info Protocol - {action}")
 
@@ -2443,9 +2423,9 @@ def dependency_track(
     agent: str,
     type: str,
     details: str,
-    impact: Optional[str],
+    impact: str | None,
     strategy: str,
-    repo_path: Optional[str],
+    repo_path: str | None,
 ):
     """Track a dependency change for propagation"""
     try:
@@ -2524,7 +2504,7 @@ def dependency_track(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
 @click.option("--export", "-e", help="Export dependency data to JSON file")
-def dependency_status(repo_path: Optional[str], detailed: bool, export: Optional[str]):
+def dependency_status(repo_path: str | None, detailed: bool, export: str | None):
     """Show dependency propagation system status"""
     try:
         click.echo("📊 Dependency Propagation System Status")
@@ -2586,7 +2566,7 @@ def dependency_status(repo_path: Optional[str], detailed: bool, export: Optional
 @click.argument("file_path")
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--export", "-e", help="Export impact report to JSON file")
-def dependency_impact(file_path: str, repo_path: Optional[str], export: Optional[str]):
+def dependency_impact(file_path: str, repo_path: str | None, export: str | None):
     """Analyze dependency impact for a specific file"""
     try:
         click.echo(f"🔍 Analyzing dependency impact for: {file_path}")
@@ -2677,9 +2657,9 @@ def dependency_impact(file_path: str, repo_path: Optional[str], export: Optional
 @click.option("--export", "-e", help="Export propagation results to JSON file")
 def dependency_propagate(
     change_ids: tuple,
-    branches: Optional[str],
-    repo_path: Optional[str],
-    export: Optional[str],
+    branches: str | None,
+    repo_path: str | None,
+    export: str | None,
 ):
     """Manually propagate specific dependency changes to branches"""
     try:
@@ -2802,10 +2782,10 @@ def review_initiate(
     branch_name: str,
     agent: str,
     files: str,
-    types: Optional[str],
-    reviewers: Optional[str],
+    types: str | None,
+    reviewers: str | None,
     priority: str,
-    repo_path: Optional[str],
+    repo_path: str | None,
 ):
     """Initiate a code review for changes in a branch"""
     try:
@@ -2926,8 +2906,8 @@ def review_initiate(
 def review_approve(
     review_id: str,
     reviewer: str,
-    comments: Optional[str],
-    repo_path: Optional[str],
+    comments: str | None,
+    repo_path: str | None,
 ):
     """Approve a code review"""
     try:
@@ -2996,8 +2976,8 @@ def review_reject(
     review_id: str,
     reviewer: str,
     reasons: str,
-    suggestions: Optional[str],
-    repo_path: Optional[str],
+    suggestions: str | None,
+    repo_path: str | None,
 ):
     """Reject a code review with reasons"""
     try:
@@ -3076,7 +3056,7 @@ def review_reject(
 @click.argument("review_id", required=False)
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed review information")
-def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: bool):
+def review_status(review_id: str | None, repo_path: str | None, detailed: bool):
     """Get status of a specific review or all reviews"""
     try:
         if review_id:
@@ -3211,9 +3191,9 @@ def review_status(review_id: Optional[str], repo_path: Optional[str], detailed: 
 @click.option("--repo-path", help="Path to git repository")
 def quality_check(
     files: tuple,
-    metrics: Optional[str],
-    export: Optional[str],
-    repo_path: Optional[str],
+    metrics: str | None,
+    export: str | None,
+    repo_path: str | None,
 ):
     """Perform quality check on specified files"""
     try:
@@ -3339,7 +3319,7 @@ def quality_check(
 @multi_agent_cli.command("review-summary")
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--export", "-e", help="Export summary to JSON file")
-def review_summary(repo_path: Optional[str], export: Optional[str]):
+def review_summary(repo_path: str | None, export: str | None):
     """Get comprehensive review engine summary"""
     try:
         click.echo("📊 Code Review Engine Summary")

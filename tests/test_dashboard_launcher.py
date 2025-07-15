@@ -148,7 +148,7 @@ class TestDashboardLauncher:
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     def test_is_node_available_with_both(self, mock_which, launcher):
         """Test Node.js availability with both node and npm"""
-        mock_which.side_effect = lambda cmd: "/usr/bin/" + cmd if cmd in ["node", "npm"] else None
+        mock_which.side_effect = lambda cmd: ("/usr/bin/" + cmd if cmd in ["node", "npm"] else None)
         assert launcher._is_node_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
@@ -298,7 +298,10 @@ class TestDashboardLauncher:
         """Test checking Node.js requirement successfully"""
         mock_run.return_value = MagicMock(stdout="v18.0.0\\n")
 
-        with patch("libs.dashboard.dashboard_launcher.shutil.which", return_value="/usr/bin/node"):
+        with patch(
+            "libs.dashboard.dashboard_launcher.shutil.which",
+            return_value="/usr/bin/node",
+        ):
             status, details = launcher._check_requirement("node")
 
             assert status is True
@@ -309,7 +312,10 @@ class TestDashboardLauncher:
         """Test checking Node.js requirement with failure"""
         mock_run.side_effect = subprocess.CalledProcessError(1, ["node"])
 
-        with patch("libs.dashboard.dashboard_launcher.shutil.which", return_value="/usr/bin/node"):
+        with patch(
+            "libs.dashboard.dashboard_launcher.shutil.which",
+            return_value="/usr/bin/node",
+        ):
             status, details = launcher._check_requirement("node")
 
             assert status is False

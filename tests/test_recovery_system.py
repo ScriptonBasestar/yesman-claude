@@ -9,12 +9,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.recovery_engine import (
-    OperationSnapshot,
-    OperationType,
-    RecoveryAction,
-    RecoveryEngine,
-)
+from libs.multi_agent.recovery_engine import OperationSnapshot, OperationType, RecoveryAction, RecoveryEngine
 from libs.multi_agent.types import AgentState, Task, TaskStatus
 
 
@@ -481,7 +476,11 @@ class TestAgentPoolRecoveryIntegration:
             )
 
             # Mock the recovery engine's handle_operation_failure
-            with patch.object(agent_pool.recovery_engine, "handle_operation_failure", new_callable=AsyncMock) as mock_handle:
+            with patch.object(
+                agent_pool.recovery_engine,
+                "handle_operation_failure",
+                new_callable=AsyncMock,
+            ) as mock_handle:
                 # Trigger task failed callbacks
                 for callback in agent_pool.task_failed_callbacks:
                     await callback(task)

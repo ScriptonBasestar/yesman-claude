@@ -7,13 +7,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from .branch_manager import BranchManager
-from .conflict_resolution import (
-    ConflictSeverity,
-    ResolutionStrategy,
-)
+from .conflict_resolution import ConflictSeverity, ResolutionStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -47,17 +44,17 @@ class FunctionSignature:
     """Detailed function signature information"""
 
     name: str
-    args: List[str]
-    varargs: Optional[str] = None
-    kwonlyargs: List[str] = field(default_factory=list)
-    defaults: List[str] = field(default_factory=list)
-    kwdefaults: Dict[str, str] = field(default_factory=dict)
-    kwarg: Optional[str] = None
-    return_type: Optional[str] = None
-    decorators: List[str] = field(default_factory=list)
+    args: list[str]
+    varargs: str | None = None
+    kwonlyargs: list[str] = field(default_factory=list)
+    defaults: list[str] = field(default_factory=list)
+    kwdefaults: dict[str, str] = field(default_factory=dict)
+    kwarg: str | None = None
+    return_type: str | None = None
+    decorators: list[str] = field(default_factory=list)
     visibility: SymbolVisibility = SymbolVisibility.PUBLIC
     line_number: int = 0
-    docstring: Optional[str] = None
+    docstring: str | None = None
 
 
 @dataclass
@@ -65,14 +62,14 @@ class ClassDefinition:
     """Detailed class definition information"""
 
     name: str
-    bases: List[str] = field(default_factory=list)
-    methods: Dict[str, FunctionSignature] = field(default_factory=dict)
-    attributes: Dict[str, str] = field(default_factory=dict)
-    decorators: List[str] = field(default_factory=list)
+    bases: list[str] = field(default_factory=list)
+    methods: dict[str, FunctionSignature] = field(default_factory=dict)
+    attributes: dict[str, str] = field(default_factory=dict)
+    decorators: list[str] = field(default_factory=list)
     visibility: SymbolVisibility = SymbolVisibility.PUBLIC
     line_number: int = 0
-    docstring: Optional[str] = None
-    metaclass: Optional[str] = None
+    docstring: str | None = None
+    metaclass: str | None = None
 
 
 @dataclass
@@ -80,8 +77,8 @@ class ImportInfo:
     """Import statement information"""
 
     module: str
-    name: Optional[str] = None  # For from imports
-    alias: Optional[str] = None
+    name: str | None = None  # For from imports
+    alias: str | None = None
     line_number: int = 0
     level: int = 0  # Relative import level
 
@@ -91,11 +88,11 @@ class SemanticContext:
     """Complete semantic context of a Python file"""
 
     file_path: str
-    functions: Dict[str, FunctionSignature] = field(default_factory=dict)
-    classes: Dict[str, ClassDefinition] = field(default_factory=dict)
-    imports: List[ImportInfo] = field(default_factory=list)
-    global_variables: Dict[str, str] = field(default_factory=dict)
-    constants: Dict[str, str] = field(default_factory=dict)
+    functions: dict[str, FunctionSignature] = field(default_factory=dict)
+    classes: dict[str, ClassDefinition] = field(default_factory=dict)
+    imports: list[ImportInfo] = field(default_factory=list)
+    global_variables: dict[str, str] = field(default_factory=dict)
+    constants: dict[str, str] = field(default_factory=dict)
     ast_hash: str = ""
     last_modified: datetime = field(default_factory=datetime.now)
 
@@ -112,18 +109,18 @@ class SemanticConflict:
     branch1: str
     branch2: str
     description: str
-    old_definition: Optional[str] = None
-    new_definition: Optional[str] = None
-    impact_analysis: Dict[str, Any] = field(default_factory=dict)
+    old_definition: str | None = None
+    new_definition: str | None = None
+    impact_analysis: dict[str, Any] = field(default_factory=dict)
     suggested_resolution: ResolutionStrategy = ResolutionStrategy.HUMAN_REQUIRED
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     detected_at: datetime = field(default_factory=datetime.now)
 
 
 class SemanticAnalyzer:
     """Advanced AST-based semantic conflict analysis engine"""
 
-    def __init__(self, branch_manager: BranchManager, repo_path: Optional[str] = None):
+    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None):
         """
         Initialize the semantic analyzer
 
@@ -135,8 +132,8 @@ class SemanticAnalyzer:
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
 
         # Semantic context cache
-        self.semantic_contexts: Dict[str, SemanticContext] = {}
-        self.conflict_cache: Dict[str, List[SemanticConflict]] = {}
+        self.semantic_contexts: dict[str, SemanticContext] = {}
+        self.conflict_cache: dict[str, list[SemanticConflict]] = {}
 
         # Analysis configuration
         self.enable_deep_analysis = True
@@ -156,8 +153,8 @@ class SemanticAnalyzer:
         self,
         branch1: str,
         branch2: str,
-        file_paths: Optional[List[str]] = None,
-    ) -> List[SemanticConflict]:
+        file_paths: list[str] | None = None,
+    ) -> list[SemanticConflict]:
         """
         Analyze semantic conflicts between two branches
 
@@ -209,7 +206,7 @@ class SemanticAnalyzer:
         file_path: str,
         branch1: str,
         branch2: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Analyze semantic conflicts in a specific file"""
         conflicts = []
 
@@ -266,7 +263,7 @@ class SemanticAnalyzer:
         self,
         file_path: str,
         branch: str,
-    ) -> Optional[SemanticContext]:
+    ) -> SemanticContext | None:
         """Get or create semantic context for a file in a specific branch"""
         cache_key = f"{branch}:{file_path}"
 
@@ -308,7 +305,7 @@ class SemanticAnalyzer:
             tree = ast.parse(content)
 
             # Calculate AST hash for change detection
-            context.ast_hash = hashlib.md5(content.encode()).hexdigest()
+            context.ast_hash = hashlib.sha256(content.encode()).hexdigest()
 
             # Extract semantic information
             visitor = SemanticVisitor()
@@ -333,7 +330,7 @@ class SemanticAnalyzer:
         context2: SemanticContext,
         branch1: str,
         branch2: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Detect function-related semantic conflicts"""
         conflicts = []
 
@@ -407,7 +404,7 @@ class SemanticAnalyzer:
         context2: SemanticContext,
         branch1: str,
         branch2: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Detect class-related semantic conflicts"""
         conflicts = []
 
@@ -454,7 +451,7 @@ class SemanticAnalyzer:
         context2: SemanticContext,
         branch1: str,
         branch2: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Detect import-related semantic conflicts"""
         conflicts = []
 
@@ -496,7 +493,7 @@ class SemanticAnalyzer:
         context2: SemanticContext,
         branch1: str,
         branch2: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Detect variable-related semantic conflicts"""
         conflicts = []
 
@@ -535,7 +532,7 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
         file_path: str,
-    ) -> List[SemanticConflict]:
+    ) -> list[SemanticConflict]:
         """Detect method conflicts within a class"""
         conflicts = []
 
@@ -623,7 +620,7 @@ class SemanticAnalyzer:
         self,
         func1: FunctionSignature,
         func2: FunctionSignature,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Analyze the impact of function signature changes"""
         impact = {
             "breaking_change": False,
@@ -702,8 +699,8 @@ class SemanticAnalyzer:
 
     def _rank_conflicts_by_impact(
         self,
-        conflicts: List[SemanticConflict],
-    ) -> List[SemanticConflict]:
+        conflicts: list[SemanticConflict],
+    ) -> list[SemanticConflict]:
         """Rank conflicts by their potential impact"""
 
         def conflict_priority(conflict):
@@ -739,15 +736,15 @@ class SemanticAnalyzer:
 
     def _merge_related_conflicts(
         self,
-        conflicts: List[SemanticConflict],
-    ) -> List[SemanticConflict]:
+        conflicts: list[SemanticConflict],
+    ) -> list[SemanticConflict]:
         """Merge related conflicts to reduce noise"""
         # Simple implementation - could be enhanced
         return conflicts
 
     # Helper methods
 
-    async def _get_changed_python_files(self, branch1: str, branch2: str) -> List[str]:
+    async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:
         """Get list of Python files changed between branches"""
         try:
             # This would use git to find changed files
@@ -756,7 +753,7 @@ class SemanticAnalyzer:
         except Exception:
             return []
 
-    async def _get_file_content(self, file_path: str, branch: str) -> Optional[str]:
+    async def _get_file_content(self, file_path: str, branch: str) -> str | None:
         """Get file content from specific branch"""
         try:
             # This would use git to get file content from branch
@@ -769,7 +766,7 @@ class SemanticAnalyzer:
             logger.error(f"Error reading file {file_path}: {e}")
         return None
 
-    def get_analysis_summary(self) -> Dict[str, Any]:
+    def get_analysis_summary(self) -> dict[str, Any]:
         """Get summary of semantic analysis"""
         return {
             "files_analyzed": self.analysis_stats["files_analyzed"],
@@ -784,12 +781,12 @@ class SemanticVisitor(ast.NodeVisitor):
     """AST visitor for extracting semantic information"""
 
     def __init__(self):
-        self.functions: Dict[str, FunctionSignature] = {}
-        self.classes: Dict[str, ClassDefinition] = {}
-        self.imports: List[ImportInfo] = []
-        self.global_variables: Dict[str, str] = {}
-        self.constants: Dict[str, str] = {}
-        self._current_class: Optional[str] = None
+        self.functions: dict[str, FunctionSignature] = {}
+        self.classes: dict[str, ClassDefinition] = {}
+        self.imports: list[ImportInfo] = []
+        self.global_variables: dict[str, str] = {}
+        self.constants: dict[str, str] = {}
+        self._current_class: str | None = None
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
         """Visit function definition"""
@@ -916,7 +913,7 @@ class SemanticVisitor(ast.NodeVisitor):
 
     def _extract_function_signature(
         self,
-        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> FunctionSignature:
         """Extract detailed function signature"""
         args = []

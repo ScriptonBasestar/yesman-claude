@@ -1,7 +1,7 @@
 """Claude manager for dashboard integration - Refactored.""" ""
 
 import logging
-from typing import Callable, Dict, Optional
+from collections.abc import Callable
 
 from .claude_monitor import ClaudeMonitor
 from .claude_process_controller import ClaudeProcessController
@@ -13,7 +13,7 @@ from .prompt_detector import PromptInfo
 class DashboardController:
     """Main controller that orchestrates Claude session management, process control, and monitoring."""
 
-    def __init__(self, session_name: str, pane_id: Optional[str] = None):
+    def __init__(self, session_name: str, pane_id: str | None = None):
         """Initialize the dashboard controller."""
         self.session_name = session_name
         self.pane_id = pane_id
@@ -126,7 +126,7 @@ class DashboardController:
         """Check if Claude is currently waiting for user input"""
         return self.monitor.is_waiting_for_input()
 
-    def get_current_prompt(self) -> Optional[PromptInfo]:
+    def get_current_prompt(self) -> PromptInfo | None:
         """Get the current prompt information"""
         return self.monitor.get_current_prompt()
 
@@ -244,7 +244,7 @@ class DashboardController:
         """Auto-respond to selection prompts (deprecated - use monitor methods)"""
         return self.monitor._auto_respond_to_selection(prompt_info)
 
-    def check_for_prompt(self, content: str) -> Optional[PromptInfo]:
+    def check_for_prompt(self, content: str) -> PromptInfo | None:
         """Check if content contains a prompt waiting for input (deprecated - use monitor methods)"""
         return self.monitor._check_for_prompt(content)
 
@@ -258,13 +258,13 @@ class ClaudeManager:
 
     def __init__(self):
         """Initialize the Claude manager."""
-        self.controllers: Dict[str, DashboardController] = {}
+        self.controllers: dict[str, DashboardController] = {}
         self.logger = logging.getLogger("yesman.dashboard.claude_manager")
 
     def get_controller(
         self,
         session_name: str,
-        pane_id: Optional[str] = None,
+        pane_id: str | None = None,
     ) -> DashboardController:
         """Get or create controller for session.""" ""
         if session_name not in self.controllers:

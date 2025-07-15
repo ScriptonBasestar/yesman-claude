@@ -8,15 +8,7 @@ import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.collaboration_engine import (
-    CollaborationEngine,
-    CollaborationMessage,
-    CollaborationMode,
-    CollaborationSession,
-    MessagePriority,
-    MessageType,
-    SharedKnowledge,
-)
+from libs.multi_agent.collaboration_engine import CollaborationEngine, CollaborationMessage, CollaborationMode, CollaborationSession, MessagePriority, MessageType, SharedKnowledge
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 from libs.multi_agent.types import AgentState

@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from libs.yesman_config import YesmanConfig
 
@@ -14,7 +14,7 @@ class ActivityHeatmapGenerator:
     def __init__(self, config: YesmanConfig):
         self.config = config
 
-    def collect_session_activity(self, session_name: str, days: int = 7) -> Dict[str, int]:
+    def collect_session_activity(self, session_name: str, days: int = 7) -> dict[str, int]:
         """tmux 세션의 활동 로그 수집 및 분석"""
         start_time_collect = datetime.now()
         try:
@@ -51,7 +51,7 @@ class ActivityHeatmapGenerator:
             logger.error(f"Error collecting session activity for {session_name}: {e}")
             return {}
 
-    def generate_heatmap_data(self, sessions: List[str], days: int = 7) -> Dict[str, Any]:
+    def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str, Any]:
         """24x7 그리드 형태의 히트맵 데이터 생성"""
         start_time_generate = datetime.now()
         heatmap_data = defaultdict(lambda: defaultdict(int))

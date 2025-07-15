@@ -14,13 +14,18 @@ import re
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 
 class TodoTask:
     """Represents a single todo task item"""
 
-    def __init__(self, content: str, completed: bool = False, skipped: bool = False, line_num: int = 0):
+    def __init__(
+        self,
+        content: str,
+        completed: bool = False,
+        skipped: bool = False,
+        line_num: int = 0,
+    ):
         self.content = content.strip()
         self.completed = completed
         self.skipped = skipped  # [>] marker for skipped tasks
@@ -37,8 +42,8 @@ class TodoFile:
 
     def __init__(self, file_path: str):
         self.file_path = Path(file_path)
-        self.tasks: List[TodoTask] = []
-        self.content_lines: List[str] = []
+        self.tasks: list[TodoTask] = []
+        self.content_lines: list[str] = []
         self._load_file()
 
     def _load_file(self):
@@ -67,7 +72,7 @@ class TodoFile:
             return TodoTask(content, completed, skipped, line_num)
         return TodoTask(line, False, False, line_num)
 
-    def get_next_incomplete_task(self) -> Optional[TodoTask]:
+    def get_next_incomplete_task(self) -> TodoTask | None:
         """Get the next uncompleted task"""
         for task in self.tasks:
             if not task.completed and not task.skipped:
@@ -87,7 +92,7 @@ class TodoFile:
         self.content_lines.append(f"**Reason**: {reason}\n")
         self._update_file()
 
-    def add_subtasks(self, parent_task: TodoTask, subtasks: List[str]):
+    def add_subtasks(self, parent_task: TodoTask, subtasks: list[str]):
         """Add subtasks before the parent task"""
         parent_line = parent_task.line_num
         new_lines = []
@@ -141,7 +146,7 @@ class TaskRunner:
         self.done_dir.mkdir(parents=True, exist_ok=True)
         self.alert_dir.mkdir(parents=True, exist_ok=True)
 
-    def find_todo_files(self, specific_dir: Optional[str] = None) -> List[Path]:
+    def find_todo_files(self, specific_dir: str | None = None) -> list[Path]:
         """Find all todo .md files in directory order"""
         if specific_dir:
             # Handle both absolute and relative paths
@@ -161,12 +166,12 @@ class TaskRunner:
 
         return todo_files
 
-    def get_next_task(self, specific_dir: Optional[str] = None) -> Optional[Tuple[TodoFile, TodoTask]]:
+    def get_next_task(self, specific_dir: str | None = None) -> tuple[TodoFile, TodoTask] | None:
         """Get the next incomplete task from todo files"""
         todo_files = self.find_todo_files(specific_dir)
 
         for file_path in todo_files:
-            todo_file = TodoFile(file_path)
+            todo_file = TodoFile(str(file_path))
             next_task = todo_file.get_next_incomplete_task()
             if next_task:
                 return todo_file, next_task
@@ -209,7 +214,7 @@ class TaskRunner:
         print(f"⚠️ Moved failed file to alert: {new_name}")
         return True
 
-    def analyze_task_dependencies(self, task: TodoTask) -> List[str]:
+    def analyze_task_dependencies(self, task: TodoTask) -> list[str]:
         """Analyze task and break down into subtasks if needed"""
         content = task.content.lower()
 
@@ -239,7 +244,7 @@ class TaskRunner:
 
         return []
 
-    def commit_changes(self, task: TodoTask, file_changes: List[str]):
+    def commit_changes(self, task: TodoTask, file_changes: list[str]):
         """Commit changes with appropriate message"""
         try:
             # Stage changes
@@ -253,7 +258,11 @@ class TaskRunner:
             commit_msg = f"feat(task-runner): {task_summary}"
 
             # Commit
-            subprocess.run(["git", "commit", "-m", commit_msg], check=True, cwd=self.todo_dir.parent)
+            subprocess.run(
+                ["git", "commit", "-m", commit_msg],
+                check=True,
+                cwd=self.todo_dir.parent,
+            )
 
             print(f"✅ Committed: {commit_msg}")
             return True
@@ -266,7 +275,13 @@ class TaskRunner:
         """Run relevant tests for the changes"""
         try:
             # Check if pytest is available and run tests
-            result = subprocess.run(["python", "-m", "pytest", "--tb=short"], check=False, capture_output=True, text=True, cwd=self.todo_dir.parent)
+            result = subprocess.run(
+                ["python", "-m", "pytest", "--tb=short"],
+                check=False,
+                capture_output=True,
+                text=True,
+                cwd=self.todo_dir.parent,
+            )
 
             if result.returncode == 0:
                 print("✅ Tests passed")
@@ -279,7 +294,7 @@ class TaskRunner:
             print(f"⚠️ Could not run tests: {e}")
             return True  # Don't fail if tests can't run
 
-    def process_next_task(self, specific_dir: Optional[str] = None) -> bool:
+    def process_next_task(self, specific_dir: str | None = None) -> bool:
         """Process the next available task"""
         result = self.get_next_task(specific_dir)
         if not result:
@@ -301,7 +316,10 @@ class TaskRunner:
         # At this point, we would implement the actual task
         # For now, we'll mark it as requiring manual implementation
         print("⚠️ Task requires manual implementation")
-        todo_file.mark_task_skipped(task, "Requires manual implementation - automated execution not yet supported")
+        todo_file.mark_task_skipped(
+            task,
+            "Requires manual implementation - automated execution not yet supported",
+        )
 
         # Check if file is complete and move if needed
         if todo_file.is_all_completed():
@@ -309,7 +327,7 @@ class TaskRunner:
 
         return True
 
-    def run_continuously(self, specific_dir: Optional[str] = None, max_iterations: int = 100):
+    def run_continuously(self, specific_dir: str | None = None, max_iterations: int = 100):
         """Run task processor continuously until no more tasks"""
         iterations = 0
 

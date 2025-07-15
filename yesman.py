@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Main entry point for the Yesman Claude application."""
+
 import click
 
 from commands.ai import ai
@@ -28,9 +29,9 @@ def cli():
 cli.add_command(ls)
 cli.add_command(show)
 cli.add_command(setup)  # Main setup command
-cli.add_command(up)     # Alias for setup
+cli.add_command(up)  # Alias for setup
 cli.add_command(teardown)  # Main teardown command
-cli.add_command(down)      # Alias for teardown
+cli.add_command(down)  # Alias for teardown
 cli.add_command(dashboard)
 cli.add_command(dashboard_group)  # New dashboard interface management
 # Add dash as an alias for dashboard

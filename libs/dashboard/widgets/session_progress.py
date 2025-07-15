@@ -1,7 +1,7 @@
 """Session progress overview widget"""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from rich.console import Console
 from rich.layout import Layout
@@ -13,13 +13,16 @@ from rich.text import Text
 class SessionProgressWidget:
     """Widget for displaying session progress overview"""
 
-    def __init__(self, console: Optional[Console] = None):
+    def __init__(self, console: Console | None = None):
         self.console = console or Console()
 
-    def render_progress_overview(self, progress_data: Dict[str, Any]) -> Panel:
+    def render_progress_overview(self, progress_data: dict[str, Any]) -> Panel:
         """Render the main progress overview panel"""
         if not progress_data:
-            return Panel(Text("No progress data available", style="dim"), title="📊 Progress Overview")
+            return Panel(
+                Text("No progress data available", style="dim"),
+                title="📊 Progress Overview",
+            )
 
         # Create layout
         layout = Layout()
@@ -36,7 +39,7 @@ class SessionProgressWidget:
 
         return Panel(layout, title="📊 Progress Overview", border_style="cyan")
 
-    def _render_summary(self, data: Dict[str, Any]) -> Panel:
+    def _render_summary(self, data: dict[str, Any]) -> Panel:
         """Render summary statistics"""
         content = Text()
 
@@ -62,7 +65,7 @@ class SessionProgressWidget:
 
         return Panel(content, title="Summary", border_style="dim")
 
-    def _render_sessions_table(self, sessions: List[Dict[str, Any]]) -> Panel:
+    def _render_sessions_table(self, sessions: list[dict[str, Any]]) -> Panel:
         """Render individual sessions progress table"""
         if not sessions:
             return Panel(Text("No active sessions", style="dim"), title="Sessions")
@@ -107,7 +110,7 @@ class SessionProgressWidget:
         }
         return phase_emojis.get(phase, "❓")
 
-    def render_compact_progress(self, progress_data: Dict[str, Any]) -> Text:
+    def render_compact_progress(self, progress_data: dict[str, Any]) -> Text:
         """Render compact progress for status bars"""
         if not progress_data:
             return Text("Progress: No data", style="dim")
@@ -126,7 +129,10 @@ class SessionProgressWidget:
     def render_session_detail(self, session_name: str, session_info: Any, progress: Any) -> Panel:
         """Render detailed progress for a specific session"""
         if not progress:
-            return Panel(Text("No progress data for this session", style="dim"), title=f"📊 {session_name} Progress")
+            return Panel(
+                Text("No progress data for this session", style="dim"),
+                title=f"📊 {session_name} Progress",
+            )
 
         content = Text()
 
