@@ -1,6 +1,5 @@
 """Interactive session browser command"""
 
-import sys
 import threading
 import time
 
@@ -9,21 +8,20 @@ from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 
+from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
-from libs.tmux_manager import TmuxManager
-from libs.yesman_config import YesmanConfig
 
 
 class InteractiveBrowser:
     """Interactive session browser with live updates"""
 
-    def __init__(self, update_interval: float = 2.0):
+    def __init__(self, tmux_manager, config, update_interval: float = 2.0):
         self.console = Console()
-        self.config = YesmanConfig()
-        self.tmux_manager = TmuxManager(self.config)
+        self.config = config
+        self.tmux_manager = tmux_manager
 
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
@@ -180,6 +178,35 @@ class InteractiveBrowser:
             self.update_thread.join(timeout=1.0)
 
 
+class BrowseCommand(BaseCommand, SessionCommandMixin):
+    """Interactive session browser with activity monitoring"""
+
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        # Check if tmux is available and running
+        if not self._is_tmux_available():
+            raise CommandError("tmux is not available or not properly installed")
+
+    def execute(self, update_interval: float = 2.0, **kwargs) -> dict:
+        """Execute the browse command"""
+        try:
+            browser = InteractiveBrowser(self.tmux_manager, self.config, update_interval)
+
+            self.print_info("Starting interactive session browser...")
+            self.print_info("Press Ctrl+C to exit")
+
+            browser.start()
+
+            return {"success": True}
+
+        except KeyboardInterrupt:
+            self.print_info("\nSession browser stopped.")
+            return {"success": True, "stopped_by_user": True}
+        except Exception as e:
+            raise CommandError(f"Error during browsing: {e}") from e
+
+
 @click.command()
 @click.option(
     "--update-interval",
@@ -190,17 +217,5 @@ class InteractiveBrowser:
 )
 def browse(update_interval):
     """Interactive session browser with activity monitoring"""
-
-    try:
-        browser = InteractiveBrowser(update_interval)
-        click.echo("Starting interactive session browser...")
-        click.echo("Press Ctrl+C to exit")
-
-        browser.start()
-
-    except KeyboardInterrupt:
-        click.echo("\nSession browser stopped.")
-        sys.exit(0)
-    except Exception as e:
-        click.echo(f"Error: {e}", err=True)
-        sys.exit(1)
+    command = BrowseCommand()
+    command.run(update_interval=update_interval)
