@@ -21,9 +21,9 @@ Yesman-Claude uses a hierarchical configuration system that merges settings from
 
 ```
 1. Default settings (built-in)
-2. Global configuration (~/.yesman/yesman.yaml)
-3. Global projects (~/.yesman/projects.yaml)
-4. Local overrides (./.yesman/yesman.yaml)
+2. Global configuration (~/.scripton/yesman/yesman.yaml)
+3. Global projects (~/.scripton/yesman/projects.yaml)
+4. Local overrides (./.scripton/yesman/yesman.yaml)
 5. Environment variables
 6. Command-line arguments
 ```
@@ -38,13 +38,13 @@ Yesman-Claude uses a hierarchical configuration system that merges settings from
 
 ### Global Configuration
 
-**File**: `~/.yesman/yesman.yaml`
+**File**: `~/.scripton/yesman/yesman.yaml`
 
 ```yaml
 # Logging configuration
 logging:
   level: INFO
-  file: ~/.yesman/logs/yesman.log
+  file: ~/.scripton/yesman/logs/yesman.log
   max_size: 10MB
   backup_count: 5
   format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -95,7 +95,7 @@ default_choices:
 
 ### Projects Configuration
 
-**File**: `~/.yesman/projects.yaml`
+**File**: `~/.scripton/yesman/projects.yaml`
 
 ```yaml
 # Configuration merge mode
@@ -140,7 +140,7 @@ sessions:
 
 ### Template Configuration
 
-**File**: `~/.yesman/templates/{template_name}.yaml`
+**File**: `~/.scripton/yesman/templates/{template_name}.yaml`
 
 ```yaml
 # Django template example
@@ -186,7 +186,7 @@ Override configuration settings using environment variables:
 ```bash
 # Logging
 export YESMAN_LOG_LEVEL=DEBUG
-export YESMAN_LOG_FILE=~/.yesman/logs/debug.log
+export YESMAN_LOG_FILE=~/.scripton/yesman/logs/debug.log
 
 # Dashboard
 export YESMAN_DASHBOARD_INTERFACE=tui
@@ -216,7 +216,7 @@ export YESMAN_VERBOSE=1
 
 # Performance profiling
 export YESMAN_PROFILING=1
-export YESMAN_PROFILE_OUTPUT=~/.yesman/profiles/
+export YESMAN_PROFILE_OUTPUT=~/.scripton/yesman/profiles/
 
 # Development mode
 export YESMAN_DEV_MODE=1
@@ -321,7 +321,7 @@ dashboard:
 Create custom themes:
 
 ```yaml
-# ~/.yesman/themes/my_theme.yaml
+# ~/.scripton/yesman/themes/my_theme.yaml
 name: "My Custom Theme"
 mode: custom
 
@@ -461,7 +461,7 @@ performance:
     profiling:
       enabled: false
       sample_rate: 0.1   # Profile 10% of operations
-      output_dir: ~/.yesman/profiles/
+      output_dir: ~/.scripton/yesman/profiles/
 ```
 
 ## 🤖 AI Learning Configuration
@@ -552,7 +552,7 @@ automation:
 Define automation workflows:
 
 ```yaml
-# ~/.yesman/automation.yaml
+# ~/.scripton/yesman/automation.yaml
 workflows:
   test_and_build:
     name: "Test and Build Pipeline"
@@ -608,7 +608,7 @@ Configure logging behavior:
 ```yaml
 logging:
   level: INFO              # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  file: ~/.yesman/logs/yesman.log
+  file: ~/.scripton/yesman/logs/yesman.log
   max_size: 10MB          # Max log file size
   backup_count: 5         # Number of backup files
   
@@ -686,12 +686,12 @@ logging:
 
 ```bash
 # Check YAML syntax
-python -c "import yaml; yaml.safe_load(open('~/.yesman/yesman.yaml'))"
+python -c "import yaml; yaml.safe_load(open('~/.scripton/yesman/yesman.yaml'))"
 
 # Use online YAML validator
 # Or install yamllint
 pip install yamllint
-yamllint ~/.yesman/yesman.yaml
+yamllint ~/.scripton/yesman/yesman.yaml
 ```
 
 #### Permission Issues
@@ -702,11 +702,11 @@ yamllint ~/.yesman/yesman.yaml
 
 ```bash
 # Fix directory permissions
-chmod 755 ~/.yesman
-chmod 644 ~/.yesman/*.yaml
+chmod 755 ~/.scripton/yesman
+chmod 644 ~/.scripton/yesman/*.yaml
 
 # Check ownership
-ls -la ~/.yesman/
+ls -la ~/.scripton/yesman/
 ```
 
 #### Environment Variable Conflicts
@@ -732,7 +732,7 @@ Validate your configuration:
 uv run ./yesman.py config --validate
 
 # Check specific configuration file
-uv run ./yesman.py config --validate ~/.yesman/yesman.yaml
+uv run ./yesman.py config --validate ~/.scripton/yesman/yesman.yaml
 
 # Export current effective configuration
 uv run ./yesman.py config --export > current_config.yaml
@@ -750,7 +750,7 @@ uv run ./yesman.py config --reset
 uv run ./yesman.py config --reset dashboard
 
 # Backup current config before reset
-cp ~/.yesman/yesman.yaml ~/.yesman/yesman.yaml.backup
+cp ~/.scripton/yesman/yesman.yaml ~/.scripton/yesman/yesman.yaml.backup
 ```
 
 ### Debug Configuration Loading

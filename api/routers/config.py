@@ -49,7 +49,7 @@ def save_app_config(config: AppConfig):
 
 @router.get("/config/projects", response_model=list[str])
 def get_available_projects():
-    """projects.yaml에 정의된 모든 프로젝트 목록을 반환합니다."""
+    """세션 설정에 정의된 모든 프로젝트 목록을 반환합니다."""
     try:
         # TmuxManager 임포트
         from libs.tmux_manager import TmuxManager
@@ -59,3 +59,34 @@ def get_available_projects():
         return list(projects.keys())
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get projects: {str(e)}")
+
+
+
+@router.get("/config/session-files", response_model=list[str])
+def list_session_files():
+    """사용 가능한 세션 설정 파일 목록을 반환합니다."""
+    try:
+        from libs.tmux_manager import TmuxManager
+        
+        tm = TmuxManager(config_manager)
+        return tm.list_session_configs()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list session files: {str(e)}")
+
+
+@router.get("/config/paths", response_model=dict[str, str])
+def get_config_paths():
+    """설정 파일 경로 정보를 반환합니다."""
+    try:
+        from libs.tmux_manager import TmuxManager
+        
+        tm = TmuxManager(config_manager)
+        return {
+            "root_dir": str(config_manager.root_dir),
+            "sessions_dir": str(tm.sessions_path),
+            "templates_dir": str(tm.templates_path),
+            "global_config": str(config_manager.global_path),
+            "local_config": str(config_manager.local_path)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get config paths: {str(e)}")

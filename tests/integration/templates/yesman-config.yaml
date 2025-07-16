@@ -1,6 +1,6 @@
 logging:
   level: INFO
-  file: ~/.yesman/logs/yesman.log
+  file: ~/.scripton/yesman/logs/yesman.log
 
 default_choices:
   auto_next: true

@@ -174,8 +174,8 @@ For detailed setup and usage instructions, see
 글로벌 설정 파일은 다음 경로에 위치합니다:
 
 ```bash
-$HOME/.yesman/yesman.yaml
-$HOME/.yesman/projects.yaml
+$HOME/.scripton/yesman/yesman.yaml
+$HOME/.scripton/yesman/projects.yaml
 ```
 
 파일 구조 examples/참고
@@ -186,7 +186,7 @@ Yesman-Claude는 재사용 가능한 tmux 세션 템플릿을 지원합니다. �
 
 ### 템플릿 위치
 
-템플릿 파일은 `~/.yesman/templates/` 디렉터리에 YAML 형식으로 저장됩니다.
+템플릿 파일은 `~/.scripton/yesman/templates/` 디렉터리에 YAML 형식으로 저장됩니다.
 
 ### 기본 템플릿 구조
 

@@ -21,7 +21,7 @@ def logs():
 
 
 @logs.command()
-@click.option("--output-dir", "-o", default="~/.yesman/logs", help="Log output directory")
+@click.option("--output-dir", "-o", default="~/.scripton/yesman/logs", help="Log output directory")
 @click.option(
     "--format",
     "-f",
@@ -75,7 +75,7 @@ def configure(output_dir, format, compression, buffer_size):
 
 
 @logs.command()
-@click.option("--log-dir", "-d", default="~/.yesman/logs", help="Log directory to analyze")
+@click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory to analyze")
 @click.option("--last-hours", "-h", default=24, type=int, help="Analyze last N hours")
 @click.option("--level", "-l", help="Filter by log level")
 def analyze(log_dir, last_hours, level):
@@ -107,7 +107,7 @@ def analyze(log_dir, last_hours, level):
 
 
 @logs.command()
-@click.option("--log-dir", "-d", default="~/.yesman/logs", help="Log directory")
+@click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
 @click.option("--level", "-l", default="INFO", help="Log level filter")
 @click.option("--follow", "-f", is_flag=True, help="Follow log output")
 @click.option("--last-lines", "-n", default=50, type=int, help="Show last N lines")
@@ -143,7 +143,7 @@ def tail(log_dir, level, follow, last_lines):
 
 
 @logs.command()
-@click.option("--log-dir", "-d", default="~/.yesman/logs", help="Log directory")
+@click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
 @click.option("--days", default=7, type=int, help="Days of logs to keep")
 def cleanup(log_dir, days):
     """Clean up old log files"""

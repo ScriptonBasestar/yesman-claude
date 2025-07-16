@@ -15,7 +15,7 @@ class TestConfigModes:
     def test_merge_mode_default(self, tmp_path):
         """Test default merge mode behavior"""
         # Create global config
-        global_dir = tmp_path / ".yesman"
+        global_dir = tmp_path / ".scripton" / "yesman"
         global_dir.mkdir()
         global_config = {
             "log_level": "INFO",
@@ -25,7 +25,7 @@ class TestConfigModes:
             yaml.dump(global_config, f)
 
         # Create local config
-        local_dir = tmp_path / "project" / ".yesman"
+        local_dir = tmp_path / "project" / ".scripton" / "yesman"
         local_dir.mkdir(parents=True)
         local_config = {
             "log_level": "DEBUG",
@@ -49,7 +49,7 @@ class TestConfigModes:
     def test_isolated_mode(self, tmp_path):
         """Test isolated mode (new name)"""
         # Create global config
-        global_dir = tmp_path / ".yesman"
+        global_dir = tmp_path / ".scripton" / "yesman"
         global_dir.mkdir()
         global_config = {
             "log_level": "INFO",
@@ -59,7 +59,7 @@ class TestConfigModes:
             yaml.dump(global_config, f)
 
         # Create local config with isolated mode
-        local_dir = tmp_path / "project" / ".yesman"
+        local_dir = tmp_path / "project" / ".scripton" / "yesman"
         local_dir.mkdir(parents=True)
         local_config = {
             "mode": "isolated",
@@ -83,7 +83,7 @@ class TestConfigModes:
     def test_local_mode_backward_compatibility(self, tmp_path):
         """Test that 'local' mode still works for backward compatibility"""
         # Create global config
-        global_dir = tmp_path / ".yesman"
+        global_dir = tmp_path / ".scripton" / "yesman"
         global_dir.mkdir()
         global_config = {
             "log_level": "INFO",
@@ -93,7 +93,7 @@ class TestConfigModes:
             yaml.dump(global_config, f)
 
         # Create local config with old 'local' mode
-        local_dir = tmp_path / "project" / ".yesman"
+        local_dir = tmp_path / "project" / ".scripton" / "yesman"
         local_dir.mkdir(parents=True)
         local_config = {
             "mode": "local",  # Old name
@@ -117,7 +117,7 @@ class TestConfigModes:
     def test_isolated_mode_empty_error(self, tmp_path):
         """Test error when isolated mode is set but local config is empty"""
         # Create empty local config with isolated mode
-        local_dir = tmp_path / "project" / ".yesman"
+        local_dir = tmp_path / "project" / ".scripton" / "yesman"
         local_dir.mkdir(parents=True)
         local_config = {"mode": "isolated"}
         with open(local_dir / "yesman.yaml", "w") as f:
@@ -132,7 +132,7 @@ class TestConfigModes:
     def test_unsupported_mode_error(self, tmp_path):
         """Test error for unsupported mode"""
         # Create local config with invalid mode
-        local_dir = tmp_path / "project" / ".yesman"
+        local_dir = tmp_path / "project" / ".scripton" / "yesman"
         local_dir.mkdir(parents=True)
         local_config = {"mode": "invalid_mode"}
         with open(local_dir / "yesman.yaml", "w") as f:

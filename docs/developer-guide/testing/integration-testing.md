@@ -20,23 +20,23 @@ pip install -e . --config-settings editable_mode=compat
 uv run ./yesman.py --help
 
 # 3. 설정 디렉토리 생성 확인
-ls -la ~/.yesman/
+ls -la ~/.scripton/yesman/
 ```
 
 **검증 포인트**:
 
 - [ ] 설치 과정에서 에러 없음
 - [ ] 모든 명령어가 help에 표시됨
-- [ ] `~/.yesman/` 디렉토리 생성됨
+- [ ] `~/.scripton/yesman/` 디렉토리 생성됨
 
 #### 1.2 기본 구성 파일 설정
 
 ```bash
 # 1. 전역 설정 파일 생성
-cat > ~/.yesman/yesman.yaml << 'EOF'
+cat > ~/.scripton/yesman/yesman.yaml << 'EOF'
 logging:
   level: INFO
-  file: ~/.yesman/logs/yesman.log
+  file: ~/.scripton/yesman/logs/yesman.log
   
 default_choices:
   auto_next: true
@@ -47,7 +47,7 @@ cache:
 EOF
 
 # 2. 프로젝트 설정 파일 생성 (테스트용)
-cat > ~/.yesman/projects.yaml << 'EOF'
+cat > ~/.scripton/yesman/projects.yaml << 'EOF'
 sessions:
   test-project:
     session_name: "yesman-test"
@@ -282,7 +282,7 @@ uv run /path/to/yesman-claude/yesman.py status
 
 ```bash
 # 1. 로그 시스템 설정
-uv run ./yesman.py logs configure --output-dir ~/.yesman/logs --format json --compression
+uv run ./yesman.py logs configure --output-dir ~/.scripton/yesman/logs --format json --compression
 
 # 2. 로그 생성 활동 수행
 uv run ./yesman.py setup
@@ -358,7 +358,7 @@ uv run /path/to/yesman-claude/yesman.py automate detect
 
 ```bash
 # 1. 워크플로우 설정 생성
-uv run ./yesman.py automate config --output ~/.yesman/workflows.json
+uv run ./yesman.py automate config --output ~/.scripton/yesman/workflows.json
 
 # 2. 실시간 모니터링 시작
 uv run ./yesman.py automate monitor --interval 5 &
@@ -535,7 +535,7 @@ tmux list-sessions
 ps aux | grep tmux
 
 # 설정 파일 문법 확인
-python -c "import yaml; yaml.safe_load(open('~/.yesman/projects.yaml'))"
+python -c "import yaml; yaml.safe_load(open('~/.scripton/yesman/projects.yaml'))"
 ```
 
 #### Q: 캐시가 업데이트되지 않는 경우
@@ -545,17 +545,17 @@ python -c "import yaml; yaml.safe_load(open('~/.yesman/projects.yaml'))"
 curl -X POST http://localhost:8001/sessions/cache/invalidate
 
 # 캐시 디렉토리 확인
-ls -la ~/.yesman/cache/
+ls -la ~/.scripton/yesman/cache/
 ```
 
 #### Q: AI 학습이 동작하지 않는 경우
 
 ```bash
 # 학습 데이터 디렉토리 확인
-ls -la ~/.yesman/ai_data/
+ls -la ~/.scripton/yesman/ai_data/
 
 # 권한 확인
-chmod -R 755 ~/.yesman/ai_data/
+chmod -R 755 ~/.scripton/yesman/ai_data/
 ```
 
 #### Q: 로그 파일이 너무 큰 경우
@@ -652,7 +652,7 @@ uv run ./yesman.py setup  # 동일한 세션 이름으로 재생성 시도
 echo "sudo rm -rf /" > malicious.sh
 chmod +x malicious.sh
 # projects.yaml에 악의적인 명령 주입 시도
-cat > ~/.yesman/projects-test.yaml << 'EOF'
+cat > ~/.scripton/yesman/projects-test.yaml << 'EOF'
 sessions:
   malicious:
     override:
@@ -678,15 +678,15 @@ export SECRET_API_KEY="super-secret-key-12345"
 export DATABASE_PASSWORD="db-password-xyz"
 
 # 2. 로그에 민감 정보 노출 확인
-uv run ./yesman.py logs configure --output-dir ~/.yesman/logs --format json
+uv run ./yesman.py logs configure --output-dir ~/.scripton/yesman/logs --format json
 uv run ./yesman.py setup
 uv run ./yesman.py ai predict "Enter API key:" --context "api_context"
 
 # 3. 로그 파일에서 민감 정보 검색
-grep -r "SECRET_API_KEY\|DATABASE_PASSWORD\|super-secret\|db-password" ~/.yesman/logs/
+grep -r "SECRET_API_KEY\|DATABASE_PASSWORD\|super-secret\|db-password" ~/.scripton/yesman/logs/
 
 # 4. 캐시에 민감 정보 저장 확인
-find ~/.yesman -name "*.cache" -o -name "*.json" | xargs grep -l "password\|secret\|key"
+find ~/.scripton/yesman -name "*.cache" -o -name "*.json" | xargs grep -l "password\|secret\|key"
 ```
 
 **검증 포인트**:
@@ -782,10 +782,10 @@ uv run ./yesman.py automate status
 ```bash
 # 1. 디스크 공간 부족 시뮬레이션
 # 대용량 더미 파일 생성
-dd if=/dev/zero of=~/.yesman/logs/dummy_large.log bs=1M count=1000
+dd if=/dev/zero of=~/.scripton/yesman/logs/dummy_large.log bs=1M count=1000
 
 # 로그 생성 시도
-uv run ./yesman.py logs configure --output-dir ~/.yesman/logs
+uv run ./yesman.py logs configure --output-dir ~/.scripton/yesman/logs
 for i in {1..100}; do
     uv run ./yesman.py show
 done
@@ -793,7 +793,7 @@ done
 # 2. 메모리 부족 시뮬레이션
 # 많은 수의 세션 동시 생성
 for i in {1..20}; do
-    cat > ~/.yesman/projects-stress-$i.yaml << EOF
+    cat > ~/.scripton/yesman/projects-stress-$i.yaml << EOF
 sessions:
   stress-test-$i:
     override:
@@ -802,7 +802,7 @@ sessions:
           panes:
             - shell_command: ["yes"]
 EOF
-    uv run ./yesman.py setup -f ~/.yesman/projects-stress-$i.yaml &
+    uv run ./yesman.py setup -f ~/.scripton/yesman/projects-stress-$i.yaml &
 done
 
 # 메모리 사용량 모니터링
@@ -1034,7 +1034,7 @@ for prompt in "${SENSITIVE_PROMPTS[@]}"; do
 done
 
 # 2. 학습 데이터에서 민감 정보 확인
-find ~/.yesman/ai_data -type f -name "*.json" | xargs grep -E "(password|api[_-]key|credit[_-]card|ssn|email)"
+find ~/.scripton/yesman/ai_data -type f -name "*.json" | xargs grep -E "(password|api[_-]key|credit[_-]card|ssn|email)"
 
 # 3. 익명화 확인
 uv run ./yesman.py ai export --output ai_export.json
@@ -1063,7 +1063,7 @@ with open('ai_export.json') as f:
 curl -H "X-Trace-ID: test-trace-123" http://localhost:8001/sessions
 
 # 로그에서 추적 ID 확인
-grep "test-trace-123" ~/.yesman/logs/*.log
+grep "test-trace-123" ~/.scripton/yesman/logs/*.log
 
 # 2. 요청 경로 추적
 cat > trace_request.py << 'EOF'
@@ -1079,7 +1079,7 @@ response = requests.get("http://localhost:8001/sessions", headers=headers)
 # 각 컴포넌트 로그에서 추적
 components = ["api", "session_manager", "tmux_manager", "cache"]
 for comp in components:
-    log_file = f"~/.yesman/logs/{comp}.log"
+    log_file = f"~/.scripton/yesman/logs/{comp}.log"
     # grep trace_id log_file
 EOF
 
@@ -1150,7 +1150,7 @@ done
 curl -X POST http://localhost:8001/sessions/slow-test/setup
 
 # 3. 알람 발생 확인
-grep "ALERT" ~/.yesman/logs/alerts.log
+grep "ALERT" ~/.scripton/yesman/logs/alerts.log
 ```
 
 **검증 포인트**:

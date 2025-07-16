@@ -92,7 +92,7 @@ class SuccessCriteria:
 class MetricsVerifier:
     """Comprehensive metrics verification system"""
 
-    def __init__(self, work_dir: str = ".yesman"):
+    def __init__(self, work_dir: str = ".scripton/yesman"):
         """
         Initialize metrics verifier
 
@@ -493,7 +493,7 @@ class MetricsVerifier:
 
 async def run_comprehensive_verification(
     agent_pool: AgentPool,
-    work_dir: str = ".yesman",
+    work_dir: str = ".scripton/yesman",
 ) -> dict[str, Any]:
     """
     Run comprehensive metrics verification

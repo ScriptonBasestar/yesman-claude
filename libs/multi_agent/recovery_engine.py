@@ -101,7 +101,7 @@ class RecoveryEngine:
 
     def __init__(
         self,
-        work_dir: str = ".yesman",
+        work_dir: str = ".scripton/yesman",
         max_snapshots: int = 50,
         auto_cleanup_hours: int = 24,
     ):

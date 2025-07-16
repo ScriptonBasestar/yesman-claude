@@ -30,4 +30,4 @@ def ensure_log_directory(log_path: Path) -> Path:
 
 def get_default_log_path() -> Path:
     """Get the default log path for yesman."""
-    return Path("~/tmp/logs/yesman/")
+    return Path("~/.scripton/yesman/logs/")

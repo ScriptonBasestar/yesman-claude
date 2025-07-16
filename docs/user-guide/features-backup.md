@@ -68,10 +68,10 @@ document outlines all implemented features and capabilities.
 
 ### Hierarchical Configuration
 
-- **Global Settings** - `~/.yesman/yesman.yaml` for logging and default choices
-- **Project Definitions** - `~/.yesman/projects.yaml` for session configurations
-- **Template System** - `~/.yesman/templates/*.yaml` for reusable session templates
-- **Local Overrides** - `./.yesman/*` for project-specific customizations
+- **Global Settings** - `~/.scripton/yesman/yesman.yaml` for logging and default choices
+- **Project Definitions** - `~/.scripton/yesman/projects.yaml` for session configurations
+- **Template System** - `~/.scripton/yesman/templates/*.yaml` for reusable session templates
+- **Local Overrides** - `./.scripton/yesman/*` for project-specific customizations
 
 ### Configuration Modes
 

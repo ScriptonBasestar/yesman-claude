@@ -125,10 +125,10 @@
 ### 설정 계층
 
 ```
-$HOME/.yesman/yesman.yaml     # 글로벌 설정
-$HOME/.yesman/projects.yaml   # 프로젝트 정의
-$HOME/.yesman/templates/      # 재사용 템플릿
-./.yesman/                    # 로컬 오버라이드
+$HOME/.scripton/yesman/yesman.yaml     # 글로벌 설정
+$HOME/.scripton/yesman/projects.yaml   # 프로젝트 정의
+$HOME/.scripton/yesman/templates/      # 재사용 템플릿
+./.scripton/yesman/                    # 로컬 오버라이드
 ```
 
 ### 템플릿 예시

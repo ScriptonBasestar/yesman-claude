@@ -687,7 +687,7 @@ class AgentPool:
             from .branch_test_manager import BranchTestManager
 
             repo_path = repo_path or "."
-            results_dir = results_dir or ".yesman/test_results"
+            results_dir = results_dir or ".scripton/yesman/test_results"
 
             self.branch_test_manager = BranchTestManager(
                 repo_path=repo_path,
@@ -846,7 +846,7 @@ class AgentPool:
         try:
             from .recovery_engine import RecoveryEngine
 
-            work_dir = work_dir or ".yesman"
+            work_dir = work_dir or ".scripton/yesman"
 
             self.recovery_engine = RecoveryEngine(
                 work_dir=work_dir,

@@ -17,8 +17,8 @@ class TmuxManager:
         self.config = config
         self.logger = logging.getLogger("yesman.tmux")
         # Directory for session templates
-        self.templates_path = Path.home() / ".yesman" / "templates"
-        self.templates_path.mkdir(parents=True, exist_ok=True)
+        self.templates_path = config.get_templates_dir()
+        self.sessions_path = config.get_sessions_dir()
 
     def create_session(self, session_name: str, config_dict: dict) -> bool:
         """Create tmux session from a YAML config file in templates directory"""
@@ -54,20 +54,97 @@ class TmuxManager:
         return [f.stem for f in self.templates_path.glob("*.yaml")]
 
     def load_projects(self) -> dict[str, Any]:
-        """Load project sessions defined in projects.yaml"""
-        global_path = Path.home() / ".yesman" / "projects.yaml"
-        local_path = Path.cwd() / ".yesman" / "projects.yaml"
-        projects: dict[str, Any] = {}
-        # Load global projects
-        if global_path.exists():
-            with open(global_path, encoding="utf-8") as f:
-                projects = yaml.safe_load(f) or {}
-        # Override with local projects if present
-        if local_path.exists():
-            with open(local_path, encoding="utf-8") as f:
-                local_projects = yaml.safe_load(f) or {}
-            projects = {**projects, **local_projects}
+        """Load project sessions from individual session files in sessions/ directory"""
+        projects = {"sessions": {}}
+        
+        # 새로운 sessions/ 디렉토리에서 개별 세션 파일들 로드
+        if self.sessions_path.exists():
+            for session_file in self.sessions_path.glob("*.yaml"):
+                try:
+                    with open(session_file, encoding="utf-8") as f:
+                        session_config = yaml.safe_load(f) or {}
+                    session_name = session_file.stem
+                    projects["sessions"][session_name] = session_config
+                    self.logger.debug(f"Loaded session config: {session_name}")
+                except Exception as e:
+                    self.logger.error(f"Failed to load session file {session_file}: {e}")
+            
+            # .yml 확장자도 지원
+            for session_file in self.sessions_path.glob("*.yml"):
+                try:
+                    with open(session_file, encoding="utf-8") as f:
+                        session_config = yaml.safe_load(f) or {}
+                    session_name = session_file.stem
+                    # .yaml 파일이 이미 있으면 건너뛰기 (중복 방지)
+                    if session_name not in projects["sessions"]:
+                        projects["sessions"][session_name] = session_config
+                        self.logger.debug(f"Loaded session config: {session_name}")
+                except Exception as e:
+                    self.logger.error(f"Failed to load session file {session_file}: {e}")
+        
+        
         return projects
+    
+    def save_session_config(self, session_name: str, session_config: dict[str, Any]) -> bool:
+        """Save a session configuration to an individual file"""
+        try:
+            session_file = self.sessions_path / f"{session_name}.yaml"
+            with open(session_file, "w", encoding="utf-8") as f:
+                yaml.dump(session_config, f, default_flow_style=False, allow_unicode=True)
+            self.logger.info(f"Saved session config: {session_name}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to save session config {session_name}: {e}")
+            return False
+    
+    def delete_session_config(self, session_name: str) -> bool:
+        """Delete a session configuration file"""
+        try:
+            session_file = self.sessions_path / f"{session_name}.yaml"
+            if session_file.exists():
+                session_file.unlink()
+                self.logger.info(f"Deleted session config: {session_name}")
+                return True
+            
+            # .yml 확장자도 확인
+            session_file_yml = self.sessions_path / f"{session_name}.yml"
+            if session_file_yml.exists():
+                session_file_yml.unlink()
+                self.logger.info(f"Deleted session config: {session_name}")
+                return True
+            
+            self.logger.warning(f"Session config file not found: {session_name}")
+            return False
+        except Exception as e:
+            self.logger.error(f"Failed to delete session config {session_name}: {e}")
+            return False
+    
+    def get_session_config_file(self, session_name: str) -> Path | None:
+        """Get the path to a session configuration file"""
+        yaml_file = self.sessions_path / f"{session_name}.yaml"
+        yml_file = self.sessions_path / f"{session_name}.yml"
+        
+        if yaml_file.exists():
+            return yaml_file
+        elif yml_file.exists():
+            return yml_file
+        else:
+            return None
+    
+    def list_session_configs(self) -> list[str]:
+        """List all available session configurations"""
+        session_names = set()
+        
+        # .yaml 파일들
+        for session_file in self.sessions_path.glob("*.yaml"):
+            session_names.add(session_file.stem)
+        
+        # .yml 파일들
+        for session_file in self.sessions_path.glob("*.yml"):
+            session_names.add(session_file.stem)
+        
+        return sorted(list(session_names))
+    
 
     def load_template(self, template_name: str) -> dict[str, Any]:
         """Load a specific template file"""
@@ -236,7 +313,7 @@ class TmuxManager:
         Get session activity data by parsing session logs.
         """
         try:
-            log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
+            log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
             safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
             log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 

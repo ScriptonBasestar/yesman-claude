@@ -60,7 +60,7 @@ class SessionManager:
         logger.setLevel(logging.INFO)
         logger.propagate = False
 
-        log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
+        log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
         log_path = ensure_log_directory(Path(log_path_str))
 
         log_file = log_path / "session_manager.log"

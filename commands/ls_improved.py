@@ -105,7 +105,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
         # Display templates
         click.echo("Available session templates:")
         if not templates:
-            self.print_warning("No session templates found in ~/.yesman/templates/")
+            self.print_warning("No session templates found in ~/.scripton/yesman/templates/")
         else:
             for template_name in templates:
                 click.echo(f"  - {template_name}")
@@ -115,7 +115,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
         # Display projects
         click.echo("Configured projects:")
         if not projects:
-            self.print_warning("No projects configured in ~/.yesman/projects.yaml")
+            self.print_warning("No projects configured in ~/.scripton/yesman/projects.yaml")
         else:
             headers = ["name", "template", "session", "windows", "status"]
             table = self.format_table(projects, headers)

@@ -91,7 +91,7 @@ class AsyncLoggerConfig:
         self.enable_file = enable_file
         self.enable_batch_processor = enable_batch_processor
         self.log_format = log_format
-        self.output_dir = output_dir or Path.home() / ".yesman" / "logs"
+        self.output_dir = output_dir or Path.home() / ".scripton" / "yesman" / "logs"
 
 
 class AsyncLogger:

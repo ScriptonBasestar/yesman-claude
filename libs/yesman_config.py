@@ -10,10 +10,13 @@ from .utils import ensure_log_directory
 
 class YesmanConfig:
     def __init__(self):
-        self.global_path = Path.home() / ".yesman" / "yesman.yaml"
-        self.local_path = Path.cwd() / ".yesman" / "yesman.yaml"
+        self.root_dir = Path.home() / ".scripton" / "yesman"
+        self.global_path = self.root_dir / "yesman.yaml"
+        self.local_path = Path.cwd() / ".scripton" / "yesman" / "yesman.yaml"
         self.config = self._load_config()
         self._setup_logging()
+        # 필요한 디렉토리 생성
+        self._ensure_directories()
 
     def _load_config(self) -> dict[str, Any]:
         global_cfg: dict[str, Any] = {}
@@ -41,7 +44,7 @@ class YesmanConfig:
 
     def _setup_logging(self):
         log_level = self.config.get("log_level", "INFO").upper()
-        log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
+        log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
         log_path = ensure_log_directory(Path(log_path_str))
 
         log_file = log_path / "yesman.log"
@@ -77,3 +80,23 @@ class YesmanConfig:
 
         # Reload the in-memory config to reflect the changes
         self.config = self._load_config()
+    
+    def _ensure_directories(self):
+        """필요한 디렉토리들을 생성합니다."""
+        directories = [
+            self.root_dir,
+            self.root_dir / "sessions",
+            self.root_dir / "templates",
+            self.root_dir / "logs",
+        ]
+        
+        for directory in directories:
+            directory.mkdir(parents=True, exist_ok=True)
+    
+    def get_sessions_dir(self) -> Path:
+        """세션 설정 파일들이 저장되는 디렉토리를 반환합니다."""
+        return self.root_dir / "sessions"
+    
+    def get_templates_dir(self) -> Path:
+        """템플릿 파일들이 저장되는 디렉토리를 반환합니다."""
+        return self.root_dir / "templates"

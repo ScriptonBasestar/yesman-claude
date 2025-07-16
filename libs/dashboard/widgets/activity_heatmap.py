@@ -18,7 +18,7 @@ class ActivityHeatmapGenerator:
         """tmux 세션의 활동 로그 수집 및 분석"""
         start_time_collect = datetime.now()
         try:
-            log_path_str = self.config.get("log_path", "~/tmp/logs/yesman/")
+            log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
             safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
             log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 

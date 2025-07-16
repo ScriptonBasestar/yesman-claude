@@ -42,7 +42,7 @@ class ResponseAnalyzer:
     """Analyzes user response patterns and learns optimal responses."""
 
     def __init__(self, data_dir: Path | None = None):
-        self.data_dir = data_dir or Path.home() / ".yesman" / "ai_data"
+        self.data_dir = data_dir or Path.home() / ".scripton" / "yesman" / "ai_data"
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
         self.responses_file = self.data_dir / "response_history.json"

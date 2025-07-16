@@ -64,9 +64,9 @@ def cleanup(dry_run: bool, force: bool, cleanup_all: bool):
     if cleanup_all:
         config = YesmanConfig()
         log_paths = [
-            Path(config.get("logging", {}).get("dashboard_log_file", "~/.yesman/logs/dashboard.log")).expanduser(),
-            Path(config.get("logging", {}).get("claude_log_file", "~/.yesman/logs/claude.log")).expanduser(),
-            Path(config.get("logging", {}).get("session_log_file", "~/.yesman/logs/session.log")).expanduser(),
+            Path(config.get("logging", {}).get("dashboard_log_file", "~/.scripton/yesman/logs/dashboard.log")).expanduser(),
+            Path(config.get("logging", {}).get("claude_log_file", "~/.scripton/yesman/logs/claude.log")).expanduser(),
+            Path(config.get("logging", {}).get("session_log_file", "~/.scripton/yesman/logs/session.log")).expanduser(),
         ]
 
         for log_path in log_paths:

@@ -1,6 +1,6 @@
 # notest, debug, info, warning, error, critical
 log_level: warning
-log_path: ~/tmp/logs/yesman/
+log_path: ~/.scripton/yesman/logs/
 
 choice:
   yn: yes

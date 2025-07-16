@@ -11,8 +11,8 @@
 글로벌 설정 파일은 다음 경로에 위치합니다:
 
 ```bash
-$HOME/.yesman/yesman.yaml
-$HOME/.yesman/projects.yaml
+$HOME/.scripton/yesman/yesman.yaml
+$HOME/.scripton/yesman/projects.yaml
 ```
 
 파일 구조 examples/참고

@@ -110,7 +110,7 @@ class BranchTestManager:
     def __init__(
         self,
         repo_path: str = ".",
-        results_dir: str = ".yesman/test_results",
+        results_dir: str = ".scripton/yesman/test_results",
         agent_pool=None,
     ):
         """
@@ -148,7 +148,7 @@ class BranchTestManager:
 
     def _get_config_file(self) -> Path:
         """Get path to test configuration file"""
-        return self.repo_path / ".yesman" / "test_config.json"
+        return self.repo_path / ".scripton" / "yesman" / "test_config.json"
 
     def _get_results_file(self, branch_name: str) -> Path:
         """Get path to test results file for a branch"""

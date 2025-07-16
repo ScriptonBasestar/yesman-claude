@@ -81,7 +81,7 @@ class Checkpoint:
         return calculated == self.checksum
 
 class CheckpointManager:
-    def __init__(self, checkpoint_dir: str = "~/.yesman/checkpoints"):
+    def __init__(self, checkpoint_dir: str = "~/.scripton/yesman/checkpoints"):
         self.checkpoint_dir = Path(checkpoint_dir).expanduser()
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.active_checkpoints: Dict[str, Checkpoint] = {}
@@ -643,7 +643,7 @@ class SelfHealingMonitor:
     async def _heal_disk_space(self):
         """Attempt to free up disk space"""
         # Clean old logs
-        log_dir = Path("~/.yesman/logs").expanduser()
+        log_dir = Path("~/.scripton/yesman/logs").expanduser()
         cutoff_time = time.time() - (7 * 24 * 3600)  # 7 days
         
         for log_file in log_dir.glob("*.log*"):

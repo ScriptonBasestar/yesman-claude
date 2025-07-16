@@ -206,7 +206,7 @@ class AutomationManager:
     def save_automation_config(self, config_path: Path = None) -> None:
         """Save automation configuration to file."""
         if not config_path:
-            config_path = Path.home() / ".yesman" / "automation_config.json"
+            config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
         config_path.parent.mkdir(parents=True, exist_ok=True)
         self.workflow_engine.save_workflows_config(config_path)
@@ -216,7 +216,7 @@ class AutomationManager:
     def load_automation_config(self, config_path: Path = None) -> None:
         """Load automation configuration from file."""
         if not config_path:
-            config_path = Path.home() / ".yesman" / "automation_config.json"
+            config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
         if config_path.exists():
             self.workflow_engine.load_workflows_config(config_path)

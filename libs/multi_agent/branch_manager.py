@@ -94,7 +94,7 @@ class BranchManager:
 
     def _get_branch_metadata_file(self) -> Path:
         """Get path to branch metadata file"""
-        return self.repo_path / ".yesman" / "multi_agent_branches.json"
+        return self.repo_path / ".scripton" / "yesman" / "multi_agent_branches.json"
 
     def _load_branch_metadata(self) -> None:
         """Load branch metadata from file"""

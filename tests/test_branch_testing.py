@@ -73,7 +73,7 @@ class TestBranchTestManager:
         """Create branch test manager for testing"""
         return BranchTestManager(
             repo_path=str(temp_repo),
-            results_dir=str(temp_repo / ".yesman" / "test_results"),
+            results_dir=str(temp_repo / ".scripton" / "yesman" / "test_results"),
         )
 
     def test_test_suite_creation(self):

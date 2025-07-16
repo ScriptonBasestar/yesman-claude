@@ -41,7 +41,7 @@ class BatchProcessor:
         self.max_batch_time = max_batch_time
         self.max_file_size = max_file_size
         self.compression_enabled = compression_enabled
-        self.output_dir = output_dir or Path.home() / ".yesman" / "logs"
+        self.output_dir = output_dir or Path.home() / ".scripton" / "yesman" / "logs"
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)

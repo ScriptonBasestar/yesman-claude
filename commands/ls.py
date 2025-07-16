@@ -15,7 +15,7 @@ def ls():
     templates = tmux_manager.get_templates()
 
     if not templates:
-        click.echo("No session templates found in ~/.yesman/templates/")
+        click.echo("No session templates found in ~/.scripton/yesman/templates/")
         return
 
     for template_name in templates:

@@ -38,8 +38,8 @@ This comprehensive guide covers all aspects of using Yesman-Claude, from basic s
 1. **Create configuration**:
 
    ```bash
-   mkdir -p ~/.yesman
-   cp examples/global-yesman/* ~/.yesman/
+   mkdir -p ~/.scripton/yesman
+   cp examples/global-yesman/* ~/.scripton/yesman/
    ```
 
 1. **Test installation**:
@@ -179,9 +179,9 @@ uv run ./yesman.py browse
 
 ### Session Templates
 
-Templates are reusable session configurations stored in `~/.yesman/templates/`.
+Templates are reusable session configurations stored in `~/.scripton/yesman/templates/`.
 
-**Example template** (`~/.yesman/templates/django.yaml`):
+**Example template** (`~/.scripton/yesman/templates/django.yaml`):
 
 ```yaml
 session_name: "{{ session_name }}"
@@ -472,7 +472,7 @@ uv run ./yesman.py automate detect
 Define automated workflow chains:
 
 ```yaml
-# ~/.yesman/automation.yaml
+# ~/.scripton/yesman/automation.yaml
 workflows:
   test_and_build:
     triggers:
@@ -627,7 +627,7 @@ Monitor key performance indicators:
 1. Clear theme cache:
 
    ```bash
-   rm -rf ~/.yesman/cache/themes/
+   rm -rf ~/.scripton/yesman/cache/themes/
    ```
 
 1. Check theme file syntax:
@@ -670,7 +670,7 @@ export YESMAN_DEBUG=1
 uv run ./yesman.py dash tui
 
 # View debug logs
-tail -f ~/.yesman/logs/debug.log
+tail -f ~/.scripton/yesman/logs/debug.log
 ```
 
 ### Getting Help

@@ -125,10 +125,10 @@ Currently no formal linting is configured. Future plans include:
 
 ### Configuration Hierarchy
 
-1. Global config: `~/.yesman/yesman.yaml` (logging, default choices)
-1. Global projects: `~/.yesman/projects.yaml` (session definitions)
-1. Templates: `~/.yesman/templates/*.yaml` (reusable session templates)
-1. Local overrides: `./.yesman/*` (project-specific configs)
+1. Global config: `~/.scripton/yesman/yesman.yaml` (logging, default choices)
+1. Global projects: `~/.scripton/yesman/projects.yaml` (session definitions)
+1. Templates: `~/.scripton/yesman/templates/*.yaml` (reusable session templates)
+1. Local overrides: `./.scripton/yesman/*` (project-specific configs)
 
 Configuration merge modes:
 
@@ -221,7 +221,7 @@ Configuration merge modes:
 
 ### Important Implementation Details
 
-1. **Template Processing**: The `setup` command reads templates from `~/.yesman/templates/`, applies overrides from
+1. **Template Processing**: The `setup` command reads templates from `~/.scripton/yesman/templates/`, applies overrides from
    `projects.yaml`, and creates tmux sessions.
 
 1. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
@@ -362,7 +362,7 @@ Tauri Desktop App Stack (tauri-dashboard/ directory):
 
 - Uses tmuxp for declarative session configuration
 - Sessions defined in YAML templates with window/pane layouts
-- Supports both global (`~/.yesman/`) and local (`./.yesman/`) configurations
+- Supports both global (`~/.scripton/yesman/`) and local (`./.scripton/yesman/`) configurations
 - Templates can be overridden per-project in `projects.yaml`
 
 ### Monitoring and Control

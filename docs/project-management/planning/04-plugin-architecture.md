@@ -280,7 +280,7 @@ import venv
 import sys
 
 class PluginLoader:
-    def __init__(self, plugins_dir: str = "~/.yesman/plugins"):
+    def __init__(self, plugins_dir: str = "~/.scripton/yesman/plugins"):
         self.plugins_dir = Path(plugins_dir).expanduser()
         self.plugins_dir.mkdir(parents=True, exist_ok=True)
         self.loaded_plugins: Dict[str, 'LoadedPlugin'] = {}
@@ -638,7 +638,7 @@ class PluginMarketplace:
             await self._verify_package(package_path, plugin_id)
             
             # Extract to plugins directory
-            plugins_dir = Path("~/.yesman/plugins").expanduser()
+            plugins_dir = Path("~/.scripton/yesman/plugins").expanduser()
             
             with tarfile.open(package_path, 'r:gz') as tar:
                 # Security check - ensure no path traversal
@@ -675,7 +675,7 @@ class PluginMarketplace:
 class PluginRegistry:
     """Local registry of installed plugins"""
     
-    def __init__(self, registry_path: str = "~/.yesman/plugin_registry.json"):
+    def __init__(self, registry_path: str = "~/.scripton/yesman/plugin_registry.json"):
         self.registry_path = Path(registry_path).expanduser()
         self.registry = self._load_registry()
     

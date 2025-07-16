@@ -24,7 +24,7 @@ class LoggingSettings:
     """Logging configuration settings"""
 
     level: str = "INFO"
-    default_path: str = "~/tmp/logs/yesman/"
+    default_path: str = "~/.scripton/yesman/logs/"
     max_file_size: int = 10 * 1024 * 1024  # 10MB
     backup_count: int = 5
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -34,12 +34,12 @@ class LoggingSettings:
 class PathSettings:
     """Path configuration settings"""
 
-    home_dir: str = "~/.yesman"
-    templates_dir: str = "~/.yesman/templates"
-    logs_dir: str = "~/.yesman/logs"
-    cache_dir: str = "~/.yesman/cache"
-    projects_file: str = "~/.yesman/projects.yaml"
-    config_file: str = "~/.yesman/yesman.yaml"
+    home_dir: str = "~/.scripton/yesman"
+    templates_dir: str = "~/.scripton/yesman/templates"
+    logs_dir: str = "~/.scripton/yesman/logs"
+    cache_dir: str = "~/.scripton/yesman/cache"
+    projects_file: str = "~/.scripton/yesman/projects.yaml"
+    config_file: str = "~/.scripton/yesman/yesman.yaml"
 
 
 @dataclass

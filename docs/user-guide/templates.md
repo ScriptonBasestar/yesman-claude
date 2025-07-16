@@ -7,7 +7,7 @@ consistent development environments across different projects with minimal confi
 
 ## Template Structure
 
-Templates are YAML files stored in `~/.yesman/templates/` with the following structure:
+Templates are YAML files stored in `~/.scripton/yesman/templates/` with the following structure:
 
 ```yaml
 session_name: "{{ session_name }}"
@@ -138,14 +138,14 @@ windows:
 
 ### 1. Create a Template
 
-Place your template file in `~/.yesman/templates/`:
+Place your template file in `~/.scripton/yesman/templates/`:
 
 ```bash
 # Create templates directory if it doesn't exist
-mkdir -p ~/.yesman/templates
+mkdir -p ~/.scripton/yesman/templates
 
 # Create a new template
-cat > ~/.yesman/templates/myapp.yaml << EOF
+cat > ~/.scripton/yesman/templates/myapp.yaml << EOF
 session_name: "{{ session_name }}"
 start_directory: "{{ start_directory }}"
 windows:
@@ -235,7 +235,7 @@ windows:
 
 ## Troubleshooting
 
-1. **Template Not Found**: Ensure the template file exists in `~/.yesman/templates/`
+1. **Template Not Found**: Ensure the template file exists in `~/.scripton/yesman/templates/`
 1. **Variable Not Substituted**: Check that you're using the correct syntax: `{{ variable_name }}`
 1. **Commands Not Running**: Verify that commands are executable and dependencies are installed
 1. **Session Already Exists**: Use `yesman down` to remove existing sessions before recreating
