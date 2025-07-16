@@ -1,3 +1,19 @@
+---
+status: converted
+converted_at: 2025-07-16
+todo_files:
+  - /tasks/todo/phase-2/001-create-mixins.md
+  - /tasks/todo/phase-2/002-create-base-batch-processor.md
+  - /tasks/todo/phase-2/003-create-validation-utils.md
+  - /tasks/todo/phase-2/004-create-session-helpers.md
+  - /tasks/todo/phase-2/005-refactor-existing-modules.md
+  - /tasks/todo/phase-3/001-migrate-commands-to-basecommand.md
+  - /tasks/todo/phase-3/002-create-dependency-injection.md
+  - /tasks/todo/phase-3/003-centralize-configuration.md
+  - /tasks/todo/phase-3/004-standardize-error-handling.md
+  - /tasks/todo/phase-3/005-documentation-and-testing.md
+---
+
 # Code Structure Refactoring Plan
 
 ## Overview
