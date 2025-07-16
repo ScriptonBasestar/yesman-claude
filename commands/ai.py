@@ -1,5 +1,6 @@
 """AI learning system management commands"""
 
+import asyncio
 import time
 from pathlib import Path
 
@@ -11,143 +12,157 @@ from rich.text import Text
 
 from libs.ai.adaptive_response import AdaptiveResponse
 from libs.ai.response_analyzer import ResponseAnalyzer
+from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 
 
-@click.group()
-def ai():
-    """AI learning system management"""
-    pass
-
-
-@ai.command()
-def status():
+class AIStatusCommand(BaseCommand):
     """Show AI learning system status"""
-    console = Console()
 
-    try:
-        # Initialize AI components
-        # analyzer = ResponseAnalyzer()  # Not used in this function
-        adaptive = AdaptiveResponse()
+    def __init__(self):
+        super().__init__()
+        self.console = Console()
+        self.adaptive = None
 
-        # Get statistics
-        stats = adaptive.get_learning_statistics()
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        try:
+            self.adaptive = AdaptiveResponse()
+        except Exception as e:
+            raise CommandError(f"Failed to initialize AI components: {e}") from e
 
-        # Create status table
-        table = Table(title="🤖 AI Learning System Status", show_header=True)
-        table.add_column("Component", style="cyan", width=25)
-        table.add_column("Status", style="white", width=40)
+    def execute(self, **kwargs) -> dict:
+        """Execute the status command"""
+        try:
+            # Get statistics
+            stats = self.adaptive.get_learning_statistics()
 
-        # Basic info
-        table.add_row("Total Responses", str(stats.get("total_responses", 0)))
-        table.add_row("Learned Patterns", str(stats.get("total_patterns", 0)))
-        table.add_row("Recent Activity (7 days)", str(stats.get("recent_activity", 0)))
+            # Create status table
+            table = Table(title="🤖 AI Learning System Status", show_header=True)
+            table.add_column("Component", style="cyan", width=25)
+            table.add_column("Status", style="white", width=40)
 
-        # Configuration
-        config = stats.get("adaptive_config", {})
-        table.add_row(
-            "Auto-Response",
-            "✅ Enabled" if config.get("auto_response_enabled") else "❌ Disabled",
-        )
-        table.add_row(
-            "Learning",
-            "✅ Enabled" if config.get("learning_enabled") else "❌ Disabled",
-        )
-        table.add_row("Confidence Threshold", f"{config.get('min_confidence_threshold', 0.6):.2f}")
+            # Basic info
+            table.add_row("Total Responses", str(stats.get("total_responses", 0)))
+            table.add_row("Learned Patterns", str(stats.get("total_patterns", 0)))
+            table.add_row("Recent Activity (7 days)", str(stats.get("recent_activity", 0)))
 
-        # Runtime info
-        runtime = stats.get("runtime_info", {})
-        table.add_row("Response Queue", str(runtime.get("response_queue_size", 0)))
-        table.add_row("Cache Size", str(runtime.get("cache_size", 0)))
+            # Configuration
+            config = stats.get("adaptive_config", {})
+            table.add_row(
+                "Auto-Response",
+                "✅ Enabled" if config.get("auto_response_enabled") else "❌ Disabled",
+            )
+            table.add_row(
+                "Learning",
+                "✅ Enabled" if config.get("learning_enabled") else "❌ Disabled",
+            )
+            table.add_row("Confidence Threshold", f"{config.get('min_confidence_threshold', 0.6):.2f}")
 
-        console.print(table)
+            # Runtime info
+            runtime = stats.get("runtime_info", {})
+            table.add_row("Response Queue", str(runtime.get("response_queue_size", 0)))
+            table.add_row("Cache Size", str(runtime.get("cache_size", 0)))
 
-        # Response type distribution
-        if "response_types" in stats:
-            console.print("\\n📊 Response Type Distribution:")
-            types_table = Table(show_header=True)
-            types_table.add_column("Type", style="yellow")
-            types_table.add_column("Count", style="green", justify="right")
+            self.console.print(table)
 
-            for response_type, count in stats["response_types"].items():
-                types_table.add_row(response_type, str(count))
+            # Response type distribution
+            if "response_types" in stats:
+                self.console.print("\n📊 Response Type Distribution:")
+                types_table = Table(show_header=True)
+                types_table.add_column("Type", style="yellow")
+                types_table.add_column("Count", style="green", justify="right")
 
-            console.print(types_table)
+                for response_type, count in stats["response_types"].items():
+                    types_table.add_row(response_type, str(count))
 
-        # Project distribution
-        if "project_distribution" in stats:
-            console.print("\\n🏗️ Project Distribution:")
-            projects_table = Table(show_header=True)
-            projects_table.add_column("Project", style="blue")
-            projects_table.add_column("Responses", style="green", justify="right")
+                self.console.print(types_table)
 
-            for project, count in stats["project_distribution"].items():
-                projects_table.add_row(project, str(count))
+            # Project distribution
+            if "project_distribution" in stats:
+                self.console.print("\n🏗️ Project Distribution:")
+                projects_table = Table(show_header=True)
+                projects_table.add_column("Project", style="blue")
+                projects_table.add_column("Responses", style="green", justify="right")
 
-            console.print(projects_table)
+                for project, count in stats["project_distribution"].items():
+                    projects_table.add_row(project, str(count))
 
-    except Exception as e:
-        console.print(f"[red]Error getting AI status: {e}[/]")
+                self.console.print(projects_table)
+
+            return stats
+
+        except Exception as e:
+            raise CommandError(f"Error getting AI status: {e}") from e
 
 
-@ai.command()
-@click.option("--threshold", "-t", type=float, help="New confidence threshold (0.0-1.0)")
-@click.option(
-    "--auto-response/--no-auto-response",
-    default=None,
-    help="Enable/disable auto-response",
-)
-@click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
-def config(threshold, auto_response, learning):
+class AIConfigCommand(BaseCommand, ConfigCommandMixin):
     """Configure AI learning system settings"""
-    console = Console()
 
-    try:
-        adaptive = AdaptiveResponse()
+    def __init__(self):
+        super().__init__()
+        self.console = Console()
+        self.adaptive = None
 
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        try:
+            self.adaptive = AdaptiveResponse()
+        except Exception as e:
+            raise CommandError(f"Failed to initialize AI components: {e}") from e
+
+    def execute(self, threshold: float | None = None, auto_response: bool | None = None, learning: bool | None = None, **kwargs) -> dict:
+        """Execute the config command"""
         changes = []
 
         if threshold is not None:
             if 0.0 <= threshold <= 1.0:
-                adaptive.adjust_confidence_threshold(threshold)
+                self.adaptive.adjust_confidence_threshold(threshold)
                 changes.append(f"Confidence threshold set to {threshold:.2f}")
             else:
-                console.print("[red]Error: Threshold must be between 0.0 and 1.0[/]")
-                return
+                raise CommandError("Threshold must be between 0.0 and 1.0")
 
         if auto_response is not None:
-            adaptive.enable_auto_response(auto_response)
+            self.adaptive.enable_auto_response(auto_response)
             status = "enabled" if auto_response else "disabled"
             changes.append(f"Auto-response {status}")
 
         if learning is not None:
-            adaptive.enable_learning(learning)
+            self.adaptive.enable_learning(learning)
             status = "enabled" if learning else "disabled"
             changes.append(f"Learning {status}")
 
         if changes:
-            console.print("✅ Configuration updated:")
+            self.print_success("Configuration updated:")
             for change in changes:
-                console.print(f"  • {change}")
+                self.console.print(f"  • {change}")
         else:
-            console.print("ℹ️ No configuration changes specified")
+            self.print_info("No configuration changes specified")
 
-    except Exception as e:
-        console.print(f"[red]Error updating configuration: {e}[/]")
+        return {"changes": changes}
 
 
-@ai.command()
-@click.option("--limit", "-l", default=10, type=int, help="Number of recent responses to show")
-@click.option("--type", "-t", help="Filter by prompt type")
-@click.option("--project", "-p", help="Filter by project name")
-def history(limit, type, project):
+class AIHistoryCommand(BaseCommand):
     """Show AI response history"""
-    console = Console()
 
-    try:
-        analyzer = ResponseAnalyzer()
+    def __init__(self):
+        super().__init__()
+        self.console = Console()
+        self.analyzer = None
 
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        try:
+            self.analyzer = ResponseAnalyzer()
+        except Exception as e:
+            raise CommandError(f"Failed to initialize AI components: {e}") from e
+
+    def execute(self, limit: int = 10, type: str | None = None, project: str | None = None, **kwargs) -> dict:
+        """Execute the history command"""
         # Get filtered response history
-        history = analyzer.response_history[-limit:]
+        history = self.analyzer.response_history[-limit:]
 
         # Apply filters
         if type:
@@ -156,8 +171,8 @@ def history(limit, type, project):
             history = [r for r in history if r.project_name == project]
 
         if not history:
-            console.print("📭 No response history found")
-            return
+            self.console.print("📭 No response history found")
+            return {"history": []}
 
         # Create history table
         table = Table(title=f"📚 AI Response History (last {len(history)})", show_header=True)
@@ -181,93 +196,111 @@ def history(limit, type, project):
                 record.project_name or "global",
             )
 
-        console.print(table)
-
-    except Exception as e:
-        console.print(f"[red]Error retrieving history: {e}[/]")
+        self.console.print(table)
+        return {"history": history}
 
 
-@ai.command()
-@click.option("--output", "-o", help="Output file path for exported data")
-def export(output):
+class AIExportCommand(BaseCommand):
     """Export AI learning data"""
-    console = Console()
 
-    try:
-        adaptive = AdaptiveResponse()
+    def __init__(self):
+        super().__init__()
+        self.console = Console()
+        self.adaptive = None
 
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        try:
+            self.adaptive = AdaptiveResponse()
+        except Exception as e:
+            raise CommandError(f"Failed to initialize AI components: {e}") from e
+
+    def execute(self, output: str | None = None, **kwargs) -> dict:
+        """Execute the export command"""
         if not output:
             timestamp = int(time.time())
             output = f"yesman_ai_export_{timestamp}.json"
 
         output_path = Path(output)
 
-        if adaptive.export_learning_data(output_path):
-            console.print(f"✅ AI learning data exported to: {output_path}")
+        if self.adaptive.export_learning_data(output_path):
+            self.print_success(f"AI learning data exported to: {output_path}")
+            return {"output_path": str(output_path), "success": True}
         else:
-            console.print("[red]❌ Failed to export AI learning data[/]")
-
-    except Exception as e:
-        console.print(f"[red]Error exporting data: {e}[/]")
+            raise CommandError("Failed to export AI learning data") from None
 
 
-@ai.command()
-@click.option("--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)")
-def cleanup(days):
+class AICleanupCommand(BaseCommand):
     """Clean up old AI learning data"""
-    console = Console()
 
-    try:
-        analyzer = ResponseAnalyzer()
+    def __init__(self):
+        super().__init__()
+        self.console = Console()
+        self.analyzer = None
 
-        removed_count = analyzer.cleanup_old_data(days_to_keep=days)
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        try:
+            self.analyzer = ResponseAnalyzer()
+        except Exception as e:
+            raise CommandError(f"Failed to initialize AI components: {e}") from e
+
+    def execute(self, days: int = 30, **kwargs) -> dict:
+        """Execute the cleanup command"""
+        removed_count = self.analyzer.cleanup_old_data(days_to_keep=days)
 
         if removed_count > 0:
-            console.print(f"✅ Cleaned up {removed_count} old response records")
-            console.print(f"   Kept data from last {days} days")
+            self.print_success(f"Cleaned up {removed_count} old response records")
+            self.console.print(f"   Kept data from last {days} days")
         else:
-            console.print("ℹ️ No old data to clean up")
+            self.print_info("No old data to clean up")
 
-    except Exception as e:
-        console.print(f"[red]Error cleaning up data: {e}[/]")
+        return {"removed_count": removed_count, "days_kept": days}
 
 
-@ai.command()
-@click.argument("prompt_text")
-@click.option("--context", "-c", default="", help="Context for the prompt")
-@click.option("--project", "-p", help="Project name")
-def predict(prompt_text, context, project):
+class AIPredictCommand(BaseCommand):
     """Predict response for a given prompt"""
-    import asyncio
 
-    console = Console()
+    def __init__(self):
+        super().__init__()
+        self.console = Console()
+        self.adaptive = None
 
-    try:
-        adaptive = AdaptiveResponse()
+    def validate_preconditions(self) -> None:
+        """Validate command preconditions"""
+        super().validate_preconditions()
+        try:
+            self.adaptive = AdaptiveResponse()
+        except Exception as e:
+            raise CommandError(f"Failed to initialize AI components: {e}") from e
 
+    def execute(self, prompt_text: str, context: str = "", project: str | None = None, **kwargs) -> dict:
+        """Execute the predict command"""
         # Get prediction (run async function synchronously)
         should_respond, predicted_response, confidence = asyncio.run(
-            adaptive.should_auto_respond(prompt_text, context, project),
+            self.adaptive.should_auto_respond(prompt_text, context, project),
         )
 
         # Create prediction panel
         prediction_text = Text()
         prediction_text.append("Prompt: ", style="bold cyan")
-        prediction_text.append(f"{prompt_text}\\n", style="white")
+        prediction_text.append(f"{prompt_text}\n", style="white")
 
         if context:
             prediction_text.append("Context: ", style="bold yellow")
-            prediction_text.append(f"{context}\\n", style="dim")
+            prediction_text.append(f"{context}\n", style="dim")
 
         if project:
             prediction_text.append("Project: ", style="bold blue")
-            prediction_text.append(f"{project}\\n", style="dim")
+            prediction_text.append(f"{project}\n", style="dim")
 
-        prediction_text.append("\\nPredicted Response: ", style="bold green")
-        prediction_text.append(f"{predicted_response}\\n", style="green")
+        prediction_text.append("\nPredicted Response: ", style="bold green")
+        prediction_text.append(f"{predicted_response}\n", style="green")
 
         prediction_text.append("Confidence: ", style="bold magenta")
-        prediction_text.append(f"{confidence:.2%}\\n", style="magenta")
+        prediction_text.append(f"{confidence:.2%}\n", style="magenta")
 
         prediction_text.append("Auto-respond: ", style="bold")
         if should_respond:
@@ -276,10 +309,72 @@ def predict(prompt_text, context, project):
             prediction_text.append("❌ No", style="red")
 
         panel = Panel(prediction_text, title="🔮 AI Response Prediction", border_style="blue")
-        console.print(panel)
+        self.console.print(panel)
 
-    except Exception as e:
-        console.print(f"[red]Error making prediction: {e}[/]")
+        return {"should_respond": should_respond, "predicted_response": predicted_response, "confidence": confidence}
+
+
+@click.group()
+def ai():
+    """AI learning system management"""
+    pass
+
+
+@ai.command()
+def status():
+    """Show AI learning system status"""
+    command = AIStatusCommand()
+    command.run()
+
+
+@ai.command()
+@click.option("--threshold", "-t", type=float, help="New confidence threshold (0.0-1.0)")
+@click.option(
+    "--auto-response/--no-auto-response",
+    default=None,
+    help="Enable/disable auto-response",
+)
+@click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
+def config(threshold, auto_response, learning):
+    """Configure AI learning system settings"""
+    command = AIConfigCommand()
+    command.run(threshold=threshold, auto_response=auto_response, learning=learning)
+
+
+@ai.command()
+@click.option("--limit", "-l", default=10, type=int, help="Number of recent responses to show")
+@click.option("--type", "-t", help="Filter by prompt type")
+@click.option("--project", "-p", help="Filter by project name")
+def history(limit, type, project):
+    """Show AI response history"""
+    command = AIHistoryCommand()
+    command.run(limit=limit, type=type, project=project)
+
+
+@ai.command()
+@click.option("--output", "-o", help="Output file path for exported data")
+def export(output):
+    """Export AI learning data"""
+    command = AIExportCommand()
+    command.run(output=output)
+
+
+@ai.command()
+@click.option("--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)")
+def cleanup(days):
+    """Clean up old AI learning data"""
+    command = AICleanupCommand()
+    command.run(days=days)
+
+
+@ai.command()
+@click.argument("prompt_text")
+@click.option("--context", "-c", default="", help="Context for the prompt")
+@click.option("--project", "-p", help="Project name")
+def predict(prompt_text, context, project):
+    """Predict response for a given prompt"""
+    command = AIPredictCommand()
+    command.run(prompt_text=prompt_text, context=context, project=project)
 
 
 if __name__ == "__main__":
