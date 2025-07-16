@@ -11,6 +11,7 @@ from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.project_health import ProjectHealth
 from libs.yesman_config import YesmanConfig
+from api.shared import claude_manager
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,14 @@ async def get_sessions():
         # Convert SessionInfo objects to web-friendly format
         web_sessions = []
         for session in sessions:
+            # Get accurate controller status using ClaudeManager (same as individual controller status API)
+            try:
+                controller = claude_manager.get_controller(session.session_name)
+                actual_controller_status = "running" if controller.is_running else "stopped"
+            except Exception:
+                # Fallback to original status if controller lookup fails
+                actual_controller_status = session.controller_status
+            
             web_sessions.append(
                 {
                     "session_name": session.session_name,
@@ -42,7 +51,7 @@ async def get_sessions():
                     "template": session.template,
                     "status": session.status,
                     "exists": session.exists,
-                    "controller_status": session.controller_status,
+                    "controller_status": actual_controller_status,
                     "windows": [
                         {
                             "name": w.name,

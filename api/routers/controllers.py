@@ -8,13 +8,11 @@ from fastapi import APIRouter, HTTPException
 # 프로젝트 루트를 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from libs.core.claude_manager import ClaudeManager
+from api.shared import claude_manager
 
 router = APIRouter()
-# ClaudeManager는 싱글턴처럼 동작하며 여러 컨트롤러 인스턴스를 관리합니다.
-# 애플리케이션 전체에서 하나의 인스턴스를 공유해야 합니다.
-# (여기서는 간단하게 전역 변수로 생성했지만, 실제 프로덕션에서는 Depends 등으로 관리하는 것이 더 좋습니다.)
-cm = ClaudeManager()
+# Using shared ClaudeManager instance to ensure consistency across all API endpoints
+cm = claude_manager
 
 
 @router.get("/sessions/{session_name}/controller/status", response_model=str)
@@ -47,20 +45,31 @@ def start_controller(session_name: str):
         if not session_exists:
             raise HTTPException(
                 status_code=400,
-                detail=(f"Session '{session_name}' is not running. Please start the session first using 'yesman up' or the dashboard."),
+                detail=(f"❌ Session '{session_name}' is not running. Please start the session first using 'yesman up' or the dashboard."),
             )
 
-        # Try to start the controller
-        success = controller.start()
+        # Check if controller is already running
+        if controller.is_running:
+            raise HTTPException(
+                status_code=400,
+                detail=f"✅ Controller for session '{session_name}' is already running.",
+            )
 
-        if not success:
-            # Get more detailed error information
-            if not controller.claude_pane:
-                # List all panes in the session for debugging
-                pane_info = []
+        # Check if Claude pane exists before attempting to start
+        if not controller.claude_pane:
+            # Get detailed session information for debugging
+            pane_info = []
+            window_count = 0
+            total_panes = 0
+            
+            try:
                 if controller.session_manager.session:
                     for window in controller.session_manager.session.list_windows():
-                        for pane in window.list_panes():
+                        window_count += 1
+                        panes_in_window = window.list_panes()
+                        total_panes += len(panes_in_window)
+                        
+                        for pane in panes_in_window:
                             try:
                                 cmd = pane.cmd(
                                     "display-message",
@@ -68,36 +77,117 @@ def start_controller(session_name: str):
                                     "#{pane_current_command}",
                                 ).stdout[0]
                                 pane_info.append(
-                                    f"Window '{window.name}', Pane {pane.index}: {cmd}",
+                                    f"Window '{window.name}' Pane {pane.index}: {cmd}",
                                 )
                             except Exception:
                                 pane_info.append(
-                                    f"Window '{window.name}', Pane {pane.index}: <unknown>",
+                                    f"Window '{window.name}' Pane {pane.index}: <command unknown>",
                                 )
+                else:
+                    pane_info.append("❌ Could not access session information")
+            except Exception as e:
+                pane_info.append(f"❌ Error accessing session: {str(e)}")
 
+            detail_msg = (
+                f"❌ No Claude Code pane found in session '{session_name}'. "
+                f"Make sure Claude Code (claude) is running in one of the panes.\n\n"
+                f"📊 Session Info:\n"
+                f"• Windows: {window_count}\n"
+                f"• Total Panes: {total_panes}\n\n"
+                f"🔍 Current Panes:\n"
+            )
+
+            if pane_info:
+                detail_msg += "\n".join(f"  • {info}" for info in pane_info)
+            else:
+                detail_msg += "  • No panes found"
+
+            detail_msg += (
+                f"\n\n💡 To fix this:\n"
+                f"1. Open session: tmux attach -t {session_name}\n"
+                f"2. Start Claude Code in a pane: claude\n"
+                f"3. Try starting the controller again"
+            )
+
+            raise HTTPException(status_code=500, detail=detail_msg)
+
+        # Try to start the controller with detailed error handling
+        try:
+            success = controller.start()
+            
+            if not success:
+                # Get more specific error from the controller
+                error_details = []
+                
+                # Check session manager state
+                if not controller.session_manager.initialize_session():
+                    error_details.append("❌ Session manager failed to initialize")
+                
+                # Check if monitoring can start
+                if hasattr(controller, 'monitor'):
+                    try:
+                        monitor_status = controller.monitor.is_running
+                        error_details.append(f"📊 Monitor running: {monitor_status}")
+                    except Exception as e:
+                        error_details.append(f"❌ Monitor error: {str(e)}")
+                
                 detail_msg = (
-                    f"Controller failed to start. The session or pane may not "
-                    f"be ready. No Claude pane found in session "
-                    f"'{session_name}'. Make sure Claude Code (claude) is "
-                    "running in one of the panes. "
+                    f"❌ Controller failed to start for session '{session_name}'. "
+                    f"The system encountered an internal error.\n\n"
+                    f"🔍 Diagnostic Information:\n"
                 )
-
-                if pane_info:
-                    detail_msg += f"Current panes: {'; '.join(pane_info)}"
+                
+                if error_details:
+                    detail_msg += "\n".join(f"  • {info}" for info in error_details)
+                else:
+                    detail_msg += "  • No specific error information available"
+                
+                detail_msg += (
+                    f"\n\n💡 Troubleshooting Steps:\n"
+                    f"1. Check if Claude Code is responsive in the session\n"
+                    f"2. Restart the session: yesman down {session_name} && yesman up {session_name}\n"
+                    f"3. Check logs: yesman logs {session_name}\n"
+                    f"4. Try restarting the API server"
+                )
 
                 raise HTTPException(status_code=500, detail=detail_msg)
-            else:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Controller failed to start for unknown reason.",
-                )
+                
+        except Exception as start_error:
+            # Detailed error information for start failures
+            detail_msg = (
+                f"❌ Controller start failed for session '{session_name}': {str(start_error)}\n\n"
+                f"🔍 Error Type: {type(start_error).__name__}\n"
+                f"📊 Session Status: {'Running' if session_exists else 'Not Running'}\n"
+                f"🔧 Claude Pane: {'Found' if controller.claude_pane else 'Not Found'}\n\n"
+                f"💡 Common Solutions:\n"
+                f"1. Ensure Claude Code is running: tmux attach -t {session_name}\n"
+                f"2. Check if claude command is available in the pane\n"
+                f"3. Try restarting the session\n"
+                f"4. Check system logs for more details"
+            )
+            
+            raise HTTPException(status_code=500, detail=detail_msg)
+            
         return
+        
     except HTTPException:
         raise
     except Exception as e:
+        # Catch-all for unexpected errors
+        detail_msg = (
+            f"❌ Unexpected error starting controller for session '{session_name}': {str(e)}\n\n"
+            f"🔍 Error Type: {type(e).__name__}\n"
+            f"📍 This is likely a system-level issue.\n\n"
+            f"💡 Please try:\n"
+            f"1. Restart the API server\n"
+            f"2. Check system logs\n"
+            f"3. Verify tmux is running properly\n"
+            f"4. Report this error if it persists"
+        )
+        
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to start controller: {str(e)}",
+            detail=detail_msg,
         )
 
 
@@ -116,17 +206,38 @@ def stop_controller(session_name: str):
             # 컨트롤러가 이미 중지되어 있을 수 있으므로 상태 확인
             if not controller.is_running:
                 return  # 이미 중지됨 - 성공으로 처리
+            
+            detail_msg = (
+                f"❌ Controller failed to stop gracefully for session '{session_name}'.\n\n"
+                f"🔍 The controller may be in an inconsistent state.\n\n"
+                f"💡 Troubleshooting Steps:\n"
+                f"1. Try stopping again in a few seconds\n"
+                f"2. Check if the tmux session still exists\n"
+                f"3. Force restart the session if necessary\n"
+                f"4. Restart the API server if the issue persists"
+            )
+            
             raise HTTPException(
                 status_code=500,
-                detail="Controller failed to stop gracefully.",
+                detail=detail_msg,
             )
         return
     except HTTPException:
         raise
     except Exception as e:
+        detail_msg = (
+            f"❌ Failed to stop controller for session '{session_name}': {str(e)}\n\n"
+            f"🔍 Error Type: {type(e).__name__}\n\n"
+            f"💡 This might be caused by:\n"
+            f"1. Session no longer exists\n"
+            f"2. Controller is already stopped\n"
+            f"3. System-level issue\n\n"
+            f"🔧 Usually this error can be ignored if the session is being torn down."
+        )
+        
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to stop controller: {str(e)}",
+            detail=detail_msg,
         )
 
 
@@ -135,17 +246,56 @@ def restart_claude_pane(session_name: str):
     """Claude가 실행 중인 pane을 재시작합니다."""
     try:
         controller = cm.get_controller(session_name)
+        
+        # Check if Claude pane exists
+        if not controller.claude_pane:
+            detail_msg = (
+                f"❌ Cannot restart Claude pane for session '{session_name}' - no Claude pane found.\n\n"
+                f"🔍 Make sure Claude Code is running in the session.\n\n"
+                f"💡 To fix this:\n"
+                f"1. Open session: tmux attach -t {session_name}\n"
+                f"2. Start Claude Code in a pane: claude\n"
+                f"3. Try the restart again"
+            )
+            
+            raise HTTPException(
+                status_code=400,
+                detail=detail_msg,
+            )
+        
         success = controller.restart_claude_pane()
         if not success:
+            detail_msg = (
+                f"❌ Failed to restart Claude pane for session '{session_name}'.\n\n"
+                f"🔍 The pane restart operation failed.\n\n"
+                f"💡 Troubleshooting Steps:\n"
+                f"1. Check if Claude Code is responsive in the session\n"
+                f"2. Manually restart Claude Code: tmux attach -t {session_name}\n"
+                f"3. Try stopping and starting the controller instead\n"
+                f"4. Check session logs for more details"
+            )
+            
             raise HTTPException(
                 status_code=500,
-                detail="Failed to restart Claude pane.",
+                detail=detail_msg,
             )
         return
+    except HTTPException:
+        raise
     except Exception as e:
+        detail_msg = (
+            f"❌ Failed to restart Claude pane for session '{session_name}': {str(e)}\n\n"
+            f"🔍 Error Type: {type(e).__name__}\n\n"
+            f"💡 This might be caused by:\n"
+            f"1. Session no longer exists\n"
+            f"2. Claude pane is not responsive\n"
+            f"3. System-level tmux issue\n\n"
+            f"🔧 Try manually restarting the session if this persists."
+        )
+        
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to restart Claude pane: {str(e)}",
+            detail=detail_msg,
         )
 
 
