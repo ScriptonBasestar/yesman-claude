@@ -19,7 +19,179 @@ import click
 # Add libs to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from libs.core.base_command import BaseCommand, CommandError
 from libs.task_runner import TaskRunner
+
+
+class TaskRunnerNextCommand(BaseCommand):
+    """Process the next available task"""
+
+    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:
+        """Execute the next command"""
+        try:
+            runner = TaskRunner()
+            success = runner.process_next_task(directory)
+
+            if success:
+                self.print_success("✅ Task processed successfully")
+                return {"success": True, "task_processed": True}
+            else:
+                self.print_info("ℹ️ No more tasks to process")
+                return {"success": True, "task_processed": False}
+
+        except Exception as e:
+            raise CommandError(f"Error processing task: {e}") from e
+
+
+class TaskRunnerRunCommand(BaseCommand):
+    """Run task processor continuously"""
+
+    def execute(self, directory: str | None = None, max_iterations: int = 100, dry_run: bool = False, **kwargs) -> dict:
+        """Execute the run command"""
+        try:
+            runner = TaskRunner()
+
+            if dry_run:
+                self.print_info("🔍 DRY RUN MODE - No changes will be made")
+
+                # Show what tasks would be processed
+                todo_files = runner.find_todo_files(directory)
+                self.print_info(f"\nFound {len(todo_files)} todo files:")
+
+                task_count = 0
+                for file_path in todo_files:
+                    from libs.task_runner import TodoFile
+
+                    todo_file = TodoFile(file_path)
+                    incomplete_tasks = [t for t in todo_file.tasks if not t.completed and not t.skipped]
+                    if incomplete_tasks:
+                        self.print_info(f"  📁 {file_path.relative_to(runner.todo_dir.parent)}: {len(incomplete_tasks)} tasks")
+                        task_count += len(incomplete_tasks)
+
+                self.print_info(f"\nTotal tasks to process: {task_count}")
+                return {"success": True, "dry_run": True, "task_count": task_count}
+
+            runner.run_continuously(directory, max_iterations)
+            return {"success": True, "directory": directory, "max_iterations": max_iterations}
+
+        except KeyboardInterrupt:
+            self.print_warning("\n⏹️ Task runner interrupted by user")
+            return {"success": True, "interrupted": True}
+        except Exception as e:
+            raise CommandError(f"Error running task processor: {e}") from e
+
+
+class TaskRunnerStatusCommand(BaseCommand):
+    """Show current task status"""
+
+    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:
+        """Execute the status command"""
+        try:
+            runner = TaskRunner()
+            todo_files = runner.find_todo_files(directory)
+
+            if not todo_files:
+                self.print_info("📭 No todo files found")
+                return {"success": True, "todo_files": 0}
+
+            total_files = len(todo_files)
+            total_tasks = 0
+            completed_tasks = 0
+            skipped_tasks = 0
+            completed_files = 0
+
+            self.print_info(f"📊 Task Status {'for ' + directory if directory else ''}")
+            self.print_info("=" * 50)
+
+            for file_path in todo_files:
+                from libs.task_runner import TodoFile
+
+                todo_file = TodoFile(file_path)
+
+                file_total = len(todo_file.tasks)
+                file_completed = sum(1 for t in todo_file.tasks if t.completed)
+                file_skipped = sum(1 for t in todo_file.tasks if t.skipped)
+
+                total_tasks += file_total
+                completed_tasks += file_completed
+                skipped_tasks += file_skipped
+
+                if todo_file.is_all_completed():
+                    completed_files += 1
+
+                # Show file status
+                relative_path = file_path.relative_to(runner.todo_dir.parent)
+                status_icon = "✅" if todo_file.is_all_completed() else "🔄" if file_completed > 0 else "📝"
+
+                if detailed:
+                    completion_pct = (file_completed / file_total * 100) if file_total > 0 else 0
+                    self.print_info(f"{status_icon} {relative_path}")
+                    self.print_info(f"   Tasks: {file_completed}/{file_total} completed ({completion_pct:.1f}%)")
+                    if file_skipped > 0:
+                        self.print_info(f"   Skipped: {file_skipped}")
+                    self.print_info("")
+                else:
+                    self.print_info(f"{status_icon} {relative_path}: {file_completed}/{file_total}")
+
+            # Summary
+            self.print_info("\n📈 Summary")
+            self.print_info("-" * 20)
+            self.print_info(f"Files: {completed_files}/{total_files} completed")
+            self.print_info(f"Tasks: {completed_tasks}/{total_tasks} completed")
+            if skipped_tasks > 0:
+                self.print_info(f"Skipped: {skipped_tasks} tasks")
+
+            # Show next task
+            result = runner.get_next_task(directory)
+            if result:
+                todo_file, next_task = result
+                relative_path = todo_file.file_path.relative_to(runner.todo_dir.parent)
+                self.print_info(f"\n🎯 Next task: {next_task.content}")
+                self.print_info(f"   File: {relative_path}")
+            else:
+                self.print_success("\n🎉 All tasks completed!")
+
+            return {
+                "success": True,
+                "total_files": total_files,
+                "completed_files": completed_files,
+                "total_tasks": total_tasks,
+                "completed_tasks": completed_tasks,
+                "skipped_tasks": skipped_tasks,
+            }
+
+        except Exception as e:
+            raise CommandError(f"Error getting status: {e}") from e
+
+
+class TaskRunnerAddCommand(BaseCommand):
+    """Add a new task to a todo file"""
+
+    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:
+        """Execute the add command"""
+        if not task or not file_path:
+            raise CommandError("Both --task and --file options are required")
+
+        try:
+            runner = TaskRunner()
+
+            # Resolve file path
+            file_path = runner.todo_dir / file_path if not file_path.startswith("/") else Path(file_path)
+
+            if not file_path.exists():
+                raise CommandError(f"File not found: {file_path}")
+
+            # Add task to file
+            with open(file_path, "a", encoding="utf-8") as f:
+                f.write(f"\n- [ ] {task}\n")
+
+            self.print_success(f"✅ Added task to {file_path.relative_to(runner.todo_dir.parent)}")
+            self.print_info(f"   Task: {task}")
+
+            return {"success": True, "task": task, "file_path": str(file_path)}
+
+        except Exception as e:
+            raise CommandError(f"Error adding task: {e}") from e
 
 
 @click.group()
@@ -52,18 +224,8 @@ def next(directory, verbose):
         yesman task-runner next -d phase3         # Process next task in phase3/ only
         yesman task-runner next -v               # Verbose output
     """
-    runner = TaskRunner()
-
-    try:
-        success = runner.process_next_task(directory)
-        if success:
-            click.echo("✅ Task processed successfully")
-        else:
-            click.echo("ℹ️ No more tasks to process")
-
-    except Exception as e:
-        click.echo(f"❌ Error processing task: {e}", err=True)
-        sys.exit(1)
+    command = TaskRunnerNextCommand()
+    command.run(directory=directory, verbose=verbose)
 
 
 @task_runner.command()
@@ -97,36 +259,8 @@ def run(directory, max_iterations, dry_run):
         yesman task-runner run -m 50              # Limit to 50 iterations
         yesman task-runner run --dry-run          # Preview without changes
     """
-    runner = TaskRunner()
-
-    if dry_run:
-        click.echo("🔍 DRY RUN MODE - No changes will be made")
-        # Show what tasks would be processed
-        todo_files = runner.find_todo_files(directory)
-        click.echo(f"\nFound {len(todo_files)} todo files:")
-
-        task_count = 0
-        for file_path in todo_files:
-            from libs.task_runner import TodoFile
-
-            todo_file = TodoFile(file_path)
-            incomplete_tasks = [t for t in todo_file.tasks if not t.completed and not t.skipped]
-            if incomplete_tasks:
-                click.echo(f"  📁 {file_path.relative_to(runner.todo_dir.parent)}: {len(incomplete_tasks)} tasks")
-                task_count += len(incomplete_tasks)
-
-        click.echo(f"\nTotal tasks to process: {task_count}")
-        return
-
-    try:
-        runner.run_continuously(directory, max_iterations)
-
-    except KeyboardInterrupt:
-        click.echo("\n⏹️ Task runner interrupted by user")
-        sys.exit(0)
-    except Exception as e:
-        click.echo(f"❌ Error running task processor: {e}", err=True)
-        sys.exit(1)
+    command = TaskRunnerRunCommand()
+    command.run(directory=directory, max_iterations=max_iterations, dry_run=dry_run)
 
 
 @task_runner.command()
@@ -143,75 +277,8 @@ def status(directory, detailed):
         yesman task-runner status -d phase3       # Phase3 status only
         yesman task-runner status --detailed      # Detailed breakdown
     """
-    runner = TaskRunner()
-
-    try:
-        todo_files = runner.find_todo_files(directory)
-
-        if not todo_files:
-            click.echo("📭 No todo files found")
-            return
-
-        total_files = len(todo_files)
-        total_tasks = 0
-        completed_tasks = 0
-        skipped_tasks = 0
-        completed_files = 0
-
-        click.echo(f"📊 Task Status {'for ' + directory if directory else ''}")
-        click.echo("=" * 50)
-
-        for file_path in todo_files:
-            from libs.task_runner import TodoFile
-
-            todo_file = TodoFile(file_path)
-
-            file_total = len(todo_file.tasks)
-            file_completed = sum(1 for t in todo_file.tasks if t.completed)
-            file_skipped = sum(1 for t in todo_file.tasks if t.skipped)
-
-            total_tasks += file_total
-            completed_tasks += file_completed
-            skipped_tasks += file_skipped
-
-            if todo_file.is_all_completed():
-                completed_files += 1
-
-            # Show file status
-            relative_path = file_path.relative_to(runner.todo_dir.parent)
-            status_icon = "✅" if todo_file.is_all_completed() else "🔄" if file_completed > 0 else "📝"
-
-            if detailed:
-                completion_pct = (file_completed / file_total * 100) if file_total > 0 else 0
-                click.echo(f"{status_icon} {relative_path}")
-                click.echo(f"   Tasks: {file_completed}/{file_total} completed ({completion_pct:.1f}%)")
-                if file_skipped > 0:
-                    click.echo(f"   Skipped: {file_skipped}")
-                click.echo()
-            else:
-                click.echo(f"{status_icon} {relative_path}: {file_completed}/{file_total}")
-
-        # Summary
-        click.echo("\n📈 Summary")
-        click.echo("-" * 20)
-        click.echo(f"Files: {completed_files}/{total_files} completed")
-        click.echo(f"Tasks: {completed_tasks}/{total_tasks} completed")
-        if skipped_tasks > 0:
-            click.echo(f"Skipped: {skipped_tasks} tasks")
-
-        # Show next task
-        result = runner.get_next_task(directory)
-        if result:
-            todo_file, next_task = result
-            relative_path = todo_file.file_path.relative_to(runner.todo_dir.parent)
-            click.echo(f"\n🎯 Next task: {next_task.content}")
-            click.echo(f"   File: {relative_path}")
-        else:
-            click.echo("\n🎉 All tasks completed!")
-
-    except Exception as e:
-        click.echo(f"❌ Error getting status: {e}", err=True)
-        sys.exit(1)
+    command = TaskRunnerStatusCommand()
+    command.run(directory=directory, detailed=detailed)
 
 
 @task_runner.command()
@@ -226,30 +293,8 @@ def add(task, file_path):
         yesman task-runner add -t "Implement feature X" -f phase3/01-base-renderer.md
         yesman task-runner add -t "Write tests" -f phase4/01-cli-integration.md
     """
-    if not task or not file_path:
-        click.echo("❌ Both --task and --file options are required", err=True)
-        sys.exit(1)
-
-    runner = TaskRunner()
-
-    # Resolve file path
-    file_path = runner.todo_dir / file_path if not file_path.startswith("/") else Path(file_path)
-
-    if not file_path.exists():
-        click.echo(f"❌ File not found: {file_path}", err=True)
-        sys.exit(1)
-
-    try:
-        # Add task to file
-        with open(file_path, "a", encoding="utf-8") as f:
-            f.write(f"\n- [ ] {task}\n")
-
-        click.echo(f"✅ Added task to {file_path.relative_to(runner.todo_dir.parent)}")
-        click.echo(f"   Task: {task}")
-
-    except Exception as e:
-        click.echo(f"❌ Error adding task: {e}", err=True)
-        sys.exit(1)
+    command = TaskRunnerAddCommand()
+    command.run(task=task, file_path=file_path)
 
 
 if __name__ == "__main__":

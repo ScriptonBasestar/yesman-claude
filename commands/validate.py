@@ -8,8 +8,108 @@ from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
 
-from libs.tmux_manager import TmuxManager
-from libs.yesman_config import YesmanConfig
+from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
+
+
+class ValidateCommand(BaseCommand, SessionCommandMixin):
+    """Check if all directories in projects.yaml exist (or only for a specific session)."""
+
+    def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:
+        """Execute the validate command"""
+        try:
+            console = Console()
+            sessions = self.tmux_manager.load_projects().get("sessions", {})
+
+            if not sessions:
+                console.print("[red]❌ No sessions defined in projects.yaml[/red]")
+                return {"success": False, "error": "no_sessions_defined"}
+
+            if session_name:
+                if session_name not in sessions:
+                    console.print(f"[red]❌ Session '{session_name}' not defined in projects.yaml[/red]")
+                    return {"success": False, "error": "session_not_defined"}
+                sessions = {session_name: sessions[session_name]}
+
+            # Show progress for multiple sessions
+            if len(sessions) > 1:
+                console.print(f"[blue]🔍 Validating {len(sessions)} sessions...[/blue]\n")
+
+            missing = []
+            valid_count = 0
+
+            # Process sessions with progress tracking for multiple sessions
+            sessions_to_process = list(sessions.items())
+            iterator = track(sessions_to_process, description="Validating sessions...") if len(sessions) > 3 else sessions_to_process
+
+            for s_name, sess_conf in iterator:
+                try:
+                    # 템플릿이 적용된 최종 설정을 가져오기
+                    final_config = self.tmux_manager.get_session_config(s_name, sess_conf)
+                    session_missing = []
+
+                    # 세션 시작 디렉토리 검사
+                    start_dir = final_config.get("start_directory", os.getcwd())
+                    expanded_dir = os.path.expanduser(start_dir)
+                    if not os.path.exists(expanded_dir):
+                        session_missing.append(("session", "Session Root", expanded_dir))
+
+                    # 윈도우별 start_directory 검사
+                    windows = final_config.get("windows", [])
+                    for i, window in enumerate(windows):
+                        window_start_dir = window.get("start_directory")
+                        if window_start_dir:
+                            if not os.path.isabs(window_start_dir):
+                                # 상대 경로인 경우 세션의 시작 디렉토리를 기준으로 함
+                                base_dir = expanded_dir
+                                window_start_dir = os.path.join(base_dir, window_start_dir)
+                            expanded_window_dir = os.path.expanduser(window_start_dir)
+                            if not os.path.exists(expanded_window_dir):
+                                window_name = window.get("window_name", f"window_{i}")
+                                session_missing.append(("window", window_name, expanded_window_dir))
+
+                        # 팬별 start_directory 검사 (팬이 있는 경우)
+                        panes = window.get("panes", [])
+                        for j, pane in enumerate(panes):
+                            if isinstance(pane, dict) and "start_directory" in pane:
+                                pane_start_dir = pane["start_directory"]
+                                if not os.path.isabs(pane_start_dir):
+                                    base_dir = expanded_dir
+                                    pane_start_dir = os.path.join(base_dir, pane_start_dir)
+                                expanded_pane_dir = os.path.expanduser(pane_start_dir)
+                                if not os.path.exists(expanded_pane_dir):
+                                    window_name = window.get("window_name", f"window_{i}")
+                                    session_missing.append(("pane", f"{window_name}/pane_{j}", expanded_pane_dir))
+
+                    # Store results for this session
+                    if session_missing:
+                        missing.append((s_name, session_missing))
+                    else:
+                        valid_count += 1
+
+                except Exception as e:
+                    console.print(f"[yellow]⚠️  Error processing session '{s_name}': {e}[/yellow]")
+                    continue
+
+            # Display results based on format
+            if not missing:
+                _display_success(console, valid_count, len(sessions))
+            elif format == "table":
+                _display_table_format(console, missing, valid_count, len(sessions))
+            elif format == "tree":
+                _display_tree_format(console, missing, valid_count, len(sessions))
+            else:
+                _display_simple_format(console, missing, valid_count, len(sessions))
+
+            return {
+                "success": True,
+                "total_sessions": len(sessions),
+                "valid_sessions": valid_count,
+                "invalid_sessions": len(missing),
+                "missing_directories": missing,
+            }
+
+        except Exception as e:
+            raise CommandError(f"Error validating directories: {e}") from e
 
 
 @click.command()
@@ -23,90 +123,8 @@ from libs.yesman_config import YesmanConfig
 )
 def validate(session_name, format):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
-    console = Console()
-    config = YesmanConfig()
-    tmux_manager = TmuxManager(config)
-    sessions = tmux_manager.load_projects().get("sessions", {})
-
-    if not sessions:
-        console.print("[red]❌ No sessions defined in projects.yaml[/red]")
-        return
-
-    if session_name:
-        if session_name not in sessions:
-            console.print(f"[red]❌ Session '{session_name}' not defined in projects.yaml[/red]")
-            return
-        sessions = {session_name: sessions[session_name]}
-
-    # Show progress for multiple sessions
-    if len(sessions) > 1:
-        console.print(f"[blue]🔍 Validating {len(sessions)} sessions...[/blue]\n")
-
-    missing = []
-    valid_count = 0
-
-    # Process sessions with progress tracking for multiple sessions
-    sessions_to_process = list(sessions.items())
-    iterator = track(sessions_to_process, description="Validating sessions...") if len(sessions) > 3 else sessions_to_process
-
-    for s_name, sess_conf in iterator:
-        try:
-            # 템플릿이 적용된 최종 설정을 가져오기
-            final_config = tmux_manager.get_session_config(s_name, sess_conf)
-            session_missing = []
-
-            # 세션 시작 디렉토리 검사
-            start_dir = final_config.get("start_directory", os.getcwd())
-            expanded_dir = os.path.expanduser(start_dir)
-            if not os.path.exists(expanded_dir):
-                session_missing.append(("session", "Session Root", expanded_dir))
-
-            # 윈도우별 start_directory 검사
-            windows = final_config.get("windows", [])
-            for i, window in enumerate(windows):
-                window_start_dir = window.get("start_directory")
-                if window_start_dir:
-                    if not os.path.isabs(window_start_dir):
-                        # 상대 경로인 경우 세션의 시작 디렉토리를 기준으로 함
-                        base_dir = expanded_dir
-                        window_start_dir = os.path.join(base_dir, window_start_dir)
-                    expanded_window_dir = os.path.expanduser(window_start_dir)
-                    if not os.path.exists(expanded_window_dir):
-                        window_name = window.get("window_name", f"window_{i}")
-                        session_missing.append(("window", window_name, expanded_window_dir))
-
-                # 팬별 start_directory 검사 (팬이 있는 경우)
-                panes = window.get("panes", [])
-                for j, pane in enumerate(panes):
-                    if isinstance(pane, dict) and "start_directory" in pane:
-                        pane_start_dir = pane["start_directory"]
-                        if not os.path.isabs(pane_start_dir):
-                            base_dir = expanded_dir
-                            pane_start_dir = os.path.join(base_dir, pane_start_dir)
-                        expanded_pane_dir = os.path.expanduser(pane_start_dir)
-                        if not os.path.exists(expanded_pane_dir):
-                            window_name = window.get("window_name", f"window_{i}")
-                            session_missing.append(("pane", f"{window_name}/pane_{j}", expanded_pane_dir))
-
-            # Store results for this session
-            if session_missing:
-                missing.append((s_name, session_missing))
-            else:
-                valid_count += 1
-
-        except Exception as e:
-            console.print(f"[yellow]⚠️  Error processing session '{s_name}': {e}[/yellow]")
-            continue
-
-    # Display results based on format
-    if not missing:
-        _display_success(console, valid_count, len(sessions))
-    elif format == "table":
-        _display_table_format(console, missing, valid_count, len(sessions))
-    elif format == "tree":
-        _display_tree_format(console, missing, valid_count, len(sessions))
-    else:
-        _display_simple_format(console, missing, valid_count, len(sessions))
+    command = ValidateCommand()
+    command.run(session_name=session_name, format=format)
 
 
 def _display_success(console: Console, valid_count: int, total_count: int):

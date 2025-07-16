@@ -9,25 +9,24 @@ from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 
+from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets import ActivityHeatmapGenerator, GitActivityWidget, ProgressTracker, ProjectHealth, SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
-from libs.tmux_manager import TmuxManager
-from libs.yesman_config import YesmanConfig
 
 
 class StatusDashboard:
     """Comprehensive status dashboard"""
 
-    def __init__(self, project_path: str = ".", update_interval: float = 5.0):
+    def __init__(self, project_path: str = ".", update_interval: float = 5.0, config=None, tmux_manager=None):
         self.console = Console()
         self.project_path = Path(project_path).resolve()
         self.project_name = self.project_path.name
         self.update_interval = update_interval
 
-        # Initialize components
-        self.config = YesmanConfig()
-        self.tmux_manager = TmuxManager(self.config)
+        # Use provided dependencies or create defaults
+        self.config = config
+        self.tmux_manager = tmux_manager
 
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
@@ -236,6 +235,52 @@ class StatusDashboard:
             self.console.print()
 
 
+class StatusCommand(BaseCommand, SessionCommandMixin):
+    """Comprehensive project status dashboard"""
+
+    def execute(self, project_path: str = ".", interactive: bool = False, update_interval: float = 5.0, detailed: bool = False, **kwargs) -> dict:
+        """Execute the status command"""
+        try:
+            dashboard = StatusDashboard(project_path, update_interval, self.config, self.tmux_manager)
+
+            if interactive:
+                self.print_info("Starting interactive project status dashboard...")
+                self.print_info("Press Ctrl+C to exit")
+                dashboard.run_interactive()
+                return {"success": True, "mode": "interactive", "project_path": project_path}
+            elif detailed:
+                dashboard.render_detailed_view()
+                return {"success": True, "mode": "detailed", "project_path": project_path}
+            else:
+                # Quick status overview
+                dashboard.update_data()
+
+                console = Console()
+
+                # Quick summary
+                console.print(f"🎯 Project: {dashboard.project_name}", style="bold cyan")
+                console.print()
+
+                # Compact status from each widget
+                health_status = dashboard.project_health.render_compact_status(dashboard.project_name)
+                git_status = dashboard.git_activity.render_compact_status()
+                progress_status = dashboard.progress_tracker.render_compact_progress()
+
+                console.print("📊 Quick Status:")
+                console.print(f"  Health: {health_status}")
+                console.print(f"  Git: {git_status}")
+                console.print(f"  Progress: {progress_status}")
+
+                console.print("\n💡 Use --interactive for live dashboard or --detailed for full view")
+                return {"success": True, "mode": "quick", "project_path": project_path}
+
+        except KeyboardInterrupt:
+            self.print_warning("\nStatus dashboard stopped.")
+            return {"success": True, "stopped_by_user": True}
+        except Exception as e:
+            raise CommandError(f"Error running status dashboard: {e}") from e
+
+
 @click.command()
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 @click.option("--interactive", "-i", is_flag=True, help="Run interactive dashboard")
@@ -249,39 +294,5 @@ class StatusDashboard:
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
 def status(project_path, interactive, update_interval, detailed):
     """Comprehensive project status dashboard"""
-
-    try:
-        dashboard = StatusDashboard(project_path, update_interval)
-
-        if interactive:
-            click.echo("Starting interactive project status dashboard...")
-            click.echo("Press Ctrl+C to exit")
-            dashboard.run_interactive()
-        elif detailed:
-            dashboard.render_detailed_view()
-        else:
-            # Quick status overview
-            dashboard.update_data()
-
-            console = Console()
-
-            # Quick summary
-            console.print(f"🎯 Project: {dashboard.project_name}", style="bold cyan")
-            console.print()
-
-            # Compact status from each widget
-            health_status = dashboard.project_health.render_compact_status(dashboard.project_name)
-            git_status = dashboard.git_activity.render_compact_status()
-            progress_status = dashboard.progress_tracker.render_compact_progress()
-
-            console.print("📊 Quick Status:")
-            console.print(f"  Health: {health_status}")
-            console.print(f"  Git: {git_status}")
-            console.print(f"  Progress: {progress_status}")
-
-            console.print("\\n💡 Use --interactive for live dashboard or --detailed for full view")
-
-    except KeyboardInterrupt:
-        click.echo("\\nStatus dashboard stopped.")
-    except Exception as e:
-        click.echo(f"Error: {e}", err=True)
+    command = StatusCommand()
+    command.run(project_path=project_path, interactive=interactive, update_interval=update_interval, detailed=detailed)
