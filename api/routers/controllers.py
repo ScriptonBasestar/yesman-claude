@@ -106,13 +106,23 @@ def stop_controller(session_name: str):
     """지정된 세션의 컨트롤러를 중지합니다."""
     try:
         controller = cm.get_controller(session_name)
+        
+        # 이미 중지되어 있는 경우도 성공으로 처리
+        if not controller.is_running:
+            return
+            
         success = controller.stop()
         if not success:
+            # 컨트롤러가 이미 중지되어 있을 수 있으므로 상태 확인
+            if not controller.is_running:
+                return  # 이미 중지됨 - 성공으로 처리
             raise HTTPException(
                 status_code=500,
                 detail="Controller failed to stop gracefully.",
             )
         return
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -136,4 +146,128 @@ def restart_claude_pane(session_name: str):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to restart Claude pane: {str(e)}",
+        )
+
+
+@router.post("/controllers/start-all", status_code=200)
+def start_all_controllers():
+    """모든 활성 세션의 컨트롤러를 시작합니다."""
+    try:
+        from libs.core.session_manager import SessionManager
+        
+        session_manager = SessionManager()
+        sessions = session_manager.get_all_sessions()
+        
+        # 실행 중인 세션들만 필터링
+        running_sessions = [s for s in sessions if s.status == "running"]
+        
+        if not running_sessions:
+            return {
+                "message": "No running sessions found to start controllers.",
+                "started": 0,
+                "errors": []
+            }
+        
+        started_count = 0
+        errors = []
+        
+        for session in running_sessions:
+            try:
+                controller = cm.get_controller(session.session_name)
+                if not controller.is_running:
+                    success = controller.start()
+                    if success:
+                        started_count += 1
+                    else:
+                        errors.append(f"Failed to start controller for session '{session.session_name}'")
+                else:
+                    # 이미 실행 중인 경우도 성공으로 카운트
+                    started_count += 1
+            except Exception as e:
+                errors.append(f"Error starting controller for session '{session.session_name}': {str(e)}")
+        
+        if errors and started_count == 0:
+            # 모든 요청이 실패한 경우
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to start any controllers. Errors: {'; '.join(errors)}"
+            )
+        
+        return {
+            "message": f"Started {started_count} controller(s) out of {len(running_sessions)} session(s).",
+            "started": started_count,
+            "total_sessions": len(running_sessions),
+            "errors": errors
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to start all controllers: {str(e)}"
+        )
+
+
+@router.post("/controllers/stop-all", status_code=200)
+def stop_all_controllers():
+    """모든 활성 세션의 컨트롤러를 중지합니다."""
+    try:
+        from libs.core.session_manager import SessionManager
+        
+        session_manager = SessionManager()
+        sessions = session_manager.get_all_sessions()
+        
+        # 실행 중인 세션들만 필터링
+        running_sessions = [s for s in sessions if s.status == "running"]
+        
+        if not running_sessions:
+            return {
+                "message": "No running sessions found to stop controllers.",
+                "stopped": 0,
+                "errors": []
+            }
+        
+        stopped_count = 0
+        errors = []
+        
+        for session in running_sessions:
+            try:
+                controller = cm.get_controller(session.session_name)
+                if controller.is_running:
+                    success = controller.stop()
+                    if success:
+                        stopped_count += 1
+                    else:
+                        # 중지 실패 후 상태 재확인
+                        if not controller.is_running:
+                            stopped_count += 1  # 실제로는 중지됨
+                        else:
+                            errors.append(f"Failed to stop controller for session '{session.session_name}'")
+                else:
+                    # 이미 중지된 경우도 성공으로 카운트
+                    stopped_count += 1
+            except Exception as e:
+                errors.append(f"Error stopping controller for session '{session.session_name}': {str(e)}")
+        
+        if errors and stopped_count == 0:
+            # 모든 요청이 실패한 경우
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to stop any controllers. Errors: {'; '.join(errors)}"
+            )
+        
+        return {
+            "message": f"Stopped {stopped_count} controller(s) out of {len(running_sessions)} session(s).",
+            "stopped": stopped_count,
+            "total_sessions": len(running_sessions),
+            "errors": errors
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to stop all controllers: {str(e)}"
         )

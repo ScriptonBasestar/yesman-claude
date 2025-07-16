@@ -12,7 +12,14 @@ export default defineConfig(({ mode }) => ({
 	server: {
 		port: 5173,
 		strictPort: true,
-		host: "localhost"
+		host: "localhost",
+		// Proxy API requests to the backend server
+		proxy: {
+			'/api': {
+				target: 'http://localhost:8080',
+				changeOrigin: true
+			}
+		}
 	},
 	// Prevent vite from obscuring rust errors
 	clearScreen: false,

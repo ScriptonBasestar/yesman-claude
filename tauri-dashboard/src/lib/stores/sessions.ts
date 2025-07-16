@@ -320,7 +320,7 @@ export async function createTmuxSession(projectName: string): Promise<void> {
     showNotification('info', 'Creating Session', `Creating session for project: ${projectName}`);
     await pythonBridge.create_session({ project_name: projectName });
     showNotification('success', 'Session Created', `Session for ${projectName} created successfully`);
-    setTimeout(refreshSessions, 1000);
+    setTimeout(refreshSessions, 1500);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     showNotification('error', 'Error', `Failed to create session: ${errorMessage}`);
@@ -333,8 +333,11 @@ export async function createTmuxSession(projectName: string): Promise<void> {
  */
 export async function getAvailableProjects(): Promise<string[]> {
   try {
-    const config = await pythonBridge.get_app_config();
-    return Object.keys(config?.sessions || {});
+    const response = await fetch('/api/config/projects');
+    if (!response.ok) {
+      throw new Error('Failed to fetch projects');
+    }
+    return await response.json();
   } catch (err) {
     console.error('Failed to get available projects:', err);
     return [];
@@ -346,33 +349,30 @@ export async function setupAllSessions(): Promise<void> {
   try {
     showNotification('info', 'Setup Sessions', 'Setting up all sessions from configuration...');
 
-    // projects.yaml에서 모든 프로젝트 가져오기
-    const availableProjects = await getAvailableProjects();
+    // Use the dedicated setup-all endpoint
+    const response = await fetch('/api/sessions/setup-all', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
 
-    if (availableProjects.length === 0) {
-      showNotification('warning', 'No Projects', 'No projects found in configuration.');
+    if (response.status === 404) {
+      showNotification('warning', 'No Projects', 'No projects found in projects.yaml configuration.');
       return;
-    }
-
-    // 모든 프로젝트에 대해 세션 생성
-    const results = await Promise.allSettled(
-      availableProjects.map(project => pythonBridge.create_session({ project_name: project }))
-    );
-
-    // 성공/실패 카운트
-    const succeeded = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
-
-    if (failed === 0) {
-      showNotification('success', 'Setup Complete', `Successfully created ${succeeded} sessions.`);
-    } else if (succeeded === 0) {
-      showNotification('error', 'Setup Failed', `Failed to create all sessions.`);
+    } else if (response.status === 207) {
+      // Multi-status: 일부 성공, 일부 실패
+      const errorText = await response.text();
+      showNotification('warning', 'Partial Success', errorText);
+    } else if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to setup sessions: ${errorText}`);
     } else {
-      showNotification('warning', 'Partial Success', `Created ${succeeded} sessions, ${failed} failed.`);
+      showNotification('success', 'Setup Complete', 'All sessions have been created successfully.');
     }
 
     // 세션 목록 새로고침
-    setTimeout(refreshSessions, 1000);
+    setTimeout(refreshSessions, 1500);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     showNotification('error', 'Setup Error', `Failed to setup sessions: ${errorMessage}`);
@@ -389,11 +389,22 @@ export async function teardownAllSessions(): Promise<void> {
 
   showNotification('info', 'Teardown', `Tearing down ${sessionsToTeardown.length} sessions...`);
   try {
-    // 7. 새로운 로직으로 구현
-    await Promise.all(sessionsToTeardown.map(s => pythonBridge.delete_session(s.session_name)));
+    // Use the dedicated teardown-all endpoint
+    const response = await fetch('/api/sessions/teardown-all', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to teardown sessions: ${errorText}`);
+    }
+
     showNotification('success', 'Success', 'All sessions have been torn down.');
     clearSessionSelection();
-    setTimeout(refreshSessions, 1000);
+    setTimeout(refreshSessions, 1500);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     showNotification('error', 'Error', `Failed to teardown all sessions: ${errorMessage}`);
@@ -401,20 +412,32 @@ export async function teardownAllSessions(): Promise<void> {
   }
 }
 
-// 8. start/stopAllControllers 구현
+// 8. start/stopAllControllers 구현 - 새로운 bulk API 사용
 export async function startAllControllers(): Promise<void> {
-  const selected = get(selectedSessions);
-  const sessionsToStart = selected.length > 0 ? get(sessions).filter(s => selected.includes(s.session_name)) : get(sessions);
-
-  if (sessionsToStart.length === 0) {
-    showNotification('info', 'Info', 'No sessions selected to start controllers.');
-    return;
-  }
-
-  showNotification('info', 'Starting All', `Starting controllers for ${sessionsToStart.length} sessions...`);
   try {
-    await Promise.all(sessionsToStart.map(s => pythonBridge.start_claude(s.session_name)));
-    showNotification('success', 'Success', 'All selected controllers started.');
+    showNotification('info', 'Starting All', 'Starting all controllers...');
+    
+    const response = await fetch('/api/controllers/start-all', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to start controllers: ${errorText}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.errors && result.errors.length > 0) {
+      showNotification('warning', 'Partial Success', 
+        `Started ${result.started}/${result.total_sessions} controllers. Errors: ${result.errors.join('; ')}`);
+    } else {
+      showNotification('success', 'Success', result.message);
+    }
+    
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -424,24 +447,36 @@ export async function startAllControllers(): Promise<void> {
 }
 
 export async function stopAllControllers(): Promise<void> {
-    const selected = get(selectedSessions);
-    const sessionsToStop = selected.length > 0 ? get(sessions).filter(s => selected.includes(s.session_name)) : get(sessions);
+  try {
+    showNotification('info', 'Stopping All', 'Stopping all controllers...');
+    
+    const response = await fetch('/api/controllers/stop-all', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
 
-    if (sessionsToStop.length === 0) {
-      showNotification('info', 'Info', 'No sessions selected to stop controllers.');
-      return;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to stop controllers: ${errorText}`);
     }
 
-    showNotification('info', 'Stopping All', `Stopping controllers for ${sessionsToStop.length} sessions...`);
-    try {
-      await Promise.all(sessionsToStop.map(s => pythonBridge.stop_claude(s.session_name)));
-      showNotification('success', 'Success', 'All selected controllers stopped.');
-      setTimeout(refreshSessions, 1000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      showNotification('error', 'Error', `Failed to stop all controllers: ${errorMessage}`);
-      throw err;
+    const result = await response.json();
+    
+    if (result.errors && result.errors.length > 0) {
+      showNotification('warning', 'Partial Success', 
+        `Stopped ${result.stopped}/${result.total_sessions} controllers. Errors: ${result.errors.join('; ')}`);
+    } else {
+      showNotification('success', 'Success', result.message);
     }
+    
+    setTimeout(refreshSessions, 1000);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    showNotification('error', 'Error', `Failed to stop all controllers: ${errorMessage}`);
+    throw err;
+  }
 }
 
 /**

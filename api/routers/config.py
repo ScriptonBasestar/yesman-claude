@@ -45,3 +45,17 @@ def save_app_config(config: AppConfig):
         return
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}")
+
+
+@router.get("/config/projects", response_model=list[str])
+def get_available_projects():
+    """projects.yaml에 정의된 모든 프로젝트 목록을 반환합니다."""
+    try:
+        # TmuxManager 임포트
+        from libs.tmux_manager import TmuxManager
+        
+        tm = TmuxManager(config_manager)
+        projects = tm.load_projects().get("sessions", {})
+        return list(projects.keys())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get projects: {str(e)}")

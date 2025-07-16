@@ -36,11 +36,30 @@ app.include_router(websocket_router.router, tags=["websocket"])
 app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="fonts")
 
 # Mount SvelteKit assets
-
 sveltekit_build_path = "tauri-dashboard/build"
 if os.path.exists(sveltekit_build_path):
-    # Mount SvelteKit static assets
-    app.mount("/_app", StaticFiles(directory="tauri-dashboard/build/_app"), name="app-assets")
+    # Mount SvelteKit static assets with cache control headers
+    from fastapi import Response
+    from fastapi.staticfiles import StaticFiles
+    
+    class CacheControlStaticFiles(StaticFiles):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+        
+        async def get_response(self, path: str, scope):
+            response = await super().get_response(path, scope)
+            if hasattr(response, 'headers'):
+                # Add cache-busting headers for JavaScript files
+                if path.endswith('.js'):
+                    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                    response.headers["Pragma"] = "no-cache"
+                    response.headers["Expires"] = "0"
+                # Cache assets with hash in filename for longer
+                elif any(path.endswith(ext) for ext in ['.css', '.png', '.jpg', '.svg', '.woff', '.woff2']):
+                    response.headers["Cache-Control"] = "public, max-age=31536000"
+            return response
+    
+    app.mount("/_app", CacheControlStaticFiles(directory="tauri-dashboard/build/_app"), name="app-assets")
 
 
 # Health check endpoint
@@ -93,8 +112,12 @@ if os.path.exists(sveltekit_build_path):
 
             raise HTTPException(status_code=404, detail="Not found")
 
-        # For SPA, always serve index.html
-        return FileResponse("tauri-dashboard/build/index.html")
+        # For SPA, always serve index.html with cache-busting headers
+        response = FileResponse("tauri-dashboard/build/index.html")
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
 
 # Startup event

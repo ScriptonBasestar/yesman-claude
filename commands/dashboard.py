@@ -225,7 +225,58 @@ def launch_web_dashboard(
                 click.echo(f"🌐 FastAPI server starting at {dashboard_url}")
                 click.echo("📊 Dashboard will be available at the URL above")
 
-                if not detach:
+                if dev:
+                    # 개발 모드에서는 Vite 개발 서버도 함께 실행
+                    click.echo("🚀 Starting Vite dev server for hot module replacement...")
+                    vite_process = subprocess.Popen(
+                        ["npm", "run", "dev"],
+                        cwd=Path(__file__).parent.parent / "tauri-dashboard",
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+                    
+                    # Vite 서버가 시작될 때까지 대기
+                    def wait_for_vite_server():
+                        import socket
+                        for i in range(20):  # 최대 20초 대기
+                            try:
+                                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                result = sock.connect_ex(('localhost', 5173))
+                                sock.close()
+                                if result == 0:  # 포트가 열려있음
+                                    return True
+                                time.sleep(1)
+                            except:
+                                time.sleep(1)
+                        return False
+                    
+                    vite_ready = wait_for_vite_server()
+                    if vite_ready:
+                        click.echo("✅ Vite server is ready!")
+                    else:
+                        click.echo("⚠️  Vite server may not be ready yet...")
+                    
+                    click.echo("📝 Development mode:")
+                    click.echo(f"  - API Server: http://{host}:{port}")
+                    click.echo(f"  - Frontend (Vite): http://localhost:5173")
+                    click.echo("  - Changes will be reflected automatically!")
+                    
+                    if not detach:
+                        # 개발 모드에서는 Vite 서버로 연결 (서버가 준비된 후)
+                        if vite_ready:
+                            click.echo("🔗 Opening browser to Vite dev server...")
+                            webbrowser.open("http://localhost:5173")
+                        else:
+                            click.echo()
+                            click.echo("=" * 60)
+                            click.echo("⚠️  VITE SERVER NOT READY - MANUAL ACTION REQUIRED")
+                            click.echo("=" * 60)
+                            click.echo("🔗 Please manually open: http://localhost:5173")
+                            click.echo("   (Wait a few seconds if the page doesn't load)")
+                            click.echo("=" * 60)
+                            click.echo()
+
+                if not detach and not dev:
                     # Open browser after a short delay in a separate thread
                     def open_browser():
                         time.sleep(2)  # Wait for server to start
@@ -240,7 +291,11 @@ def launch_web_dashboard(
 
                     threading.Thread(target=open_browser, daemon=True).start()
 
-                uvicorn.run("api.main:app", host=host, port=port, reload=dev)
+                try:
+                    uvicorn.run("api.main:app", host=host, port=port, reload=dev)
+                finally:
+                    if dev and 'vite_process' in locals():
+                        vite_process.terminate()
 
             except ImportError:
                 click.echo(

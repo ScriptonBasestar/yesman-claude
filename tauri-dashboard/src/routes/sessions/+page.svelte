@@ -93,8 +93,8 @@
 
       if (response.ok) {
         showNotification('success', 'Session Started', `Session "${session}" has been started successfully.`);
-        // 세션 목록 새로고침
-        refreshSessions();
+        // 세션 목록 새로고침 - 세션이 완전히 시작될 때까지 약간의 지연 필요
+        setTimeout(() => refreshSessions(), 1500);
       } else {
         const errorText = await response.text();
         showNotification('error', 'Start Failed', `Failed to start session: ${errorText}`);
@@ -102,6 +102,28 @@
     } catch (error) {
       console.error('Failed to start session:', error);
       showNotification('error', 'Start Failed', `Failed to start session: ${error}`);
+    }
+  }
+
+  async function handleStopSession(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      // 세션 중지 API 호출
+      const response = await fetch(`/api/sessions/${session}/stop`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        showNotification('success', 'Session Stopped', `Session "${session}" has been stopped successfully.`);
+        // 세션 목록 새로고침
+        setTimeout(() => refreshSessions(), 1000);
+      } else {
+        const errorText = await response.text();
+        showNotification('error', 'Stop Failed', `Failed to stop session: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Failed to stop session:', error);
+      showNotification('error', 'Stop Failed', `Failed to stop session: ${error}`);
     }
   }
 
@@ -272,6 +294,7 @@
             on:attachSession={handleAttachSession}
             on:viewDetails={handleViewDetails}
             on:startSession={handleStartSession}
+            on:stopSession={handleStopSession}
           />
         {/each}
       </div>
@@ -286,10 +309,11 @@
       <h3 class="font-bold text-lg mb-4">Create New Session</h3>
 
       <div class="form-control mb-4">
-        <label class="label">
+        <label for="project-select" class="label">
           <span class="label-text">Select Project</span>
         </label>
         <select
+          id="project-select"
           class="select select-bordered w-full"
           bind:value={selectedProject}
           disabled={isCreatingSession}
@@ -298,9 +322,9 @@
             <option value={project}>{project}</option>
           {/each}
         </select>
-        <label class="label">
+        <div class="label">
           <span class="label-text-alt">Choose from projects.yaml configuration</span>
-        </label>
+        </div>
       </div>
 
       <div class="modal-action">

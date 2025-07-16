@@ -63,7 +63,7 @@
 <div class="toast-container fixed top-4 right-4 z-50 space-y-2">
   {#each $notifications.slice(0, 5) as notification (notification.id)}
     <div
-      class="alert {getNotificationStyle(notification.type).class} shadow-lg max-w-sm"
+      class="alert {getNotificationStyle(notification.type).class} shadow-lg max-w-sm relative pr-14"
       in:fly={{ x: 300, duration: 300 }}
       out:fade={{ duration: 200 }}
     >
@@ -85,14 +85,14 @@
             {formatTime(notification.timestamp)}
           </div>
         </div>
-
-        <button
-          class="btn btn-ghost btn-xs"
-          on:click={() => handleDismiss(notification.id)}
-        >
-          ✕
-        </button>
       </div>
+
+      <button
+        class="toast-close-btn"
+        on:click={() => handleDismiss(notification.id)}
+      >
+        ✕
+      </button>
     </div>
   {/each}
 
@@ -138,7 +138,7 @@
             </button>
           {/if}
           <button
-            class="btn btn-ghost btn-sm"
+            class="toast-close-btn"
             on:click={() => dispatch('closePanel')}
           >
             ✕
@@ -157,7 +157,7 @@
       {#if hasNotifications}
         {#each $notifications as notification (notification.id)}
           <div
-            class="notification-item p-3 rounded-lg border border-base-content/10"
+            class="notification-item p-3 rounded-lg border border-base-content/10 relative pr-14"
             class:bg-base-200={!notification.read}
             class:bg-base-100={notification.read}
           >
@@ -179,14 +179,14 @@
                   {formatTime(notification.timestamp)}
                 </div>
               </div>
-
-              <button
-                class="btn btn-ghost btn-xs"
-                on:click={() => handleDismiss(notification.id)}
-              >
-                ✕
-              </button>
             </div>
+
+            <button
+              class="toast-close-btn"
+              on:click={() => handleDismiss(notification.id)}
+            >
+              ✕
+            </button>
           </div>
         {/each}
       {:else}

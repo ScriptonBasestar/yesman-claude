@@ -86,7 +86,16 @@ def setup_tmux_session(project_name: str):
             "session_name",
             project_name,
         )
-        tm.create_session(session_name_for_creation, project_config)
+        
+        # tmux_manager가 기대하는 형식으로 config 준비
+        session_config = project_config.get("override", {}).copy()
+        session_config["session_name"] = session_name_for_creation
+        
+        # template_name이 있으면 추가
+        if "template_name" in project_config:
+            session_config["template_name"] = project_config["template_name"]
+            
+        tm.create_session(session_name_for_creation, session_config)
         return
     except Exception as e:
         # libtmux가 세션을 생성할 때 발생하는 예외를 그대로 전달
@@ -138,7 +147,16 @@ def start_session(session_name: str):
             "session_name",
             project_name,
         )
-        tm.create_session(session_name_for_creation, project_config)
+        
+        # tmux_manager가 기대하는 형식으로 config 준비
+        session_config = project_config.get("override", {}).copy()
+        session_config["session_name"] = session_name_for_creation
+        
+        # template_name이 있으면 추가
+        if "template_name" in project_config:
+            session_config["template_name"] = project_config["template_name"]
+            
+        tm.create_session(session_name_for_creation, session_config)
         return
 
     except HTTPException:
@@ -147,6 +165,83 @@ def start_session(session_name: str):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to start session: {str(e)}",
+        )
+
+
+@router.post("/sessions/setup-all", status_code=204)
+def setup_all_sessions():
+    """projects.yaml에 정의된 모든 세션을 생성합니다."""
+    try:
+        projects = tm.load_projects().get("sessions", {})
+        
+        if not projects:
+            raise HTTPException(
+                status_code=404,
+                detail="No projects found in projects.yaml",
+            )
+        
+        server = libtmux.Server()
+        created_count = 0
+        skipped_count = 0
+        errors = []
+        
+        for project_name, project_config in projects.items():
+            session_name = project_config.get("override", {}).get("session_name", project_name)
+            
+            # 이미 존재하는 세션은 건너뛰기
+            if server.sessions.filter(session_name=session_name):
+                skipped_count += 1
+                continue
+            
+            try:
+                # tmux_manager가 기대하는 형식으로 config 준비
+                session_config = project_config.get("override", {}).copy()
+                session_config["session_name"] = session_name
+                
+                # template_name이 있으면 추가
+                if "template_name" in project_config:
+                    session_config["template_name"] = project_config["template_name"]
+                
+                tm.create_session(session_name, session_config)
+                created_count += 1
+            except Exception as e:
+                errors.append(f"{project_name}: {str(e)}")
+        
+        # 결과 메시지 생성
+        if errors:
+            detail = f"Created {created_count} sessions, skipped {skipped_count} existing sessions. Errors: {'; '.join(errors)}"
+            raise HTTPException(status_code=207, detail=detail)  # 207 Multi-Status
+        
+        return
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/sessions/{session_name}/stop", status_code=204)
+def stop_session(session_name: str):
+    """지정된 세션을 중지합니다."""
+    try:
+        server = libtmux.Server()
+        session = server.find_where({"session_name": session_name})
+        
+        if not session:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Session '{session_name}' not found",
+            )
+        
+        # 세션 종료
+        session.kill_session()
+        return
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to stop session: {str(e)}",
         )
 
 

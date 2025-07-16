@@ -120,6 +120,10 @@
   function handleStartSession() {
     dispatch('startSession', { session: session.session_name });
   }
+
+  function handleStopSession() {
+    dispatch('stopSession', { session: session.session_name });
+  }
 </script>
 
 <div class="session-card card bg-base-100 shadow-lg border border-base-content/10 hover:shadow-xl transition-shadow">
@@ -289,6 +293,15 @@
           title={!isSessionRunning ? 'Session must be running to restart controller' : 'Restart Claude controller'}
         >
           🔄 Restart
+        </button>
+
+        <button
+          class="btn btn-error btn-outline btn-sm"
+          on:click={handleStopSession}
+          disabled={!isSessionRunning}
+          title={isSessionRunning ? 'Stop tmux session' : 'Session is not running'}
+        >
+          ⏹️ Stop
         </button>
 
         <button
