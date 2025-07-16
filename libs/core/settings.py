@@ -260,6 +260,8 @@ class ContentLimits:
     MAX_SESSION_NAME_LENGTH = 64
     MAX_WINDOW_NAME_LENGTH = 32
     MAX_COMMAND_LENGTH = 1024
+    MAX_WINDOWS_PER_SESSION = 10
+    MAX_PANES_PER_WINDOW = 4
 
 
 # Validation patterns
