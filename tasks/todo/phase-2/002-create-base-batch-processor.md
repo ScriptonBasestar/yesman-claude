@@ -62,10 +62,10 @@ class BaseBatchProcessor[T]:
 
 ### 검증 조건
 
-- [ ] Generic 타입이 올바르게 동작함
-- [ ] Thread-safe 동작 보장
-- [ ] flush 메커니즘이 정상 작동함
-- [ ] 통계 수집이 정확함
+- [x] Generic 타입이 올바르게 동작함
+- [x] Thread-safe 동작 보장
+- [x] flush 메커니즘이 정상 작동함
+- [x] 통계 수집이 정확함
 
 ### 리팩토링 대상
 
