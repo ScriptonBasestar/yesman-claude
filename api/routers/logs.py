@@ -11,7 +11,7 @@ from pydantic import BaseModel
 # 프로젝트 루트를 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from libs.yesman_config import YesmanConfig
+from libs.core.services import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +25,13 @@ class LogEntry(BaseModel):
 
 
 router = APIRouter()
-config = YesmanConfig()
 
 
 @router.get("/sessions/{session_name}/logs", response_model=list[str])
 def get_session_logs(session_name: str, limit: int = 100):
     """특정 세션의 최근 로그를 조회합니다."""
     try:
+        config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
         # 세션 이름에 유효하지 않은 문자가 있을 수 있으므로 정제합니다.
         safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
@@ -106,6 +106,7 @@ def get_logs(
 ):
     """Get parsed log entries with optional filtering"""
     try:
+        config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
         log_files = [
             Path(log_path_str).expanduser() / "yesman.log",
@@ -154,6 +155,7 @@ def get_logs(
 def get_log_sources():
     """Get available log sources"""
     try:
+        config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
         log_files = [
             Path(log_path_str).expanduser() / "yesman.log",

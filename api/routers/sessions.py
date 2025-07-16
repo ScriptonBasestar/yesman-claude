@@ -10,65 +10,13 @@ from fastapi import APIRouter, HTTPException, status
 
 from api import models
 from libs.core.error_handling import ErrorCategory, YesmanError
+from libs.core.services import get_session_manager, get_tmux_manager
 from libs.core.session_manager import SessionManager
 from libs.core.types import SessionAPIData
 from libs.tmux_manager import TmuxManager
-from libs.yesman_config import YesmanConfig
 
 # Set up logger
 logger = logging.getLogger("yesman.api.sessions")
-
-# Singleton instances
-_config_instance: YesmanConfig | None = None
-_tmux_manager_instance: TmuxManager | None = None
-_session_manager_instance: SessionManager | None = None
-
-
-# Dependency injection functions
-def get_config() -> YesmanConfig:
-    """Get YesmanConfig singleton instance"""
-    global _config_instance  # noqa: PLW0603
-    if _config_instance is None:
-        try:
-            _config_instance = YesmanConfig()
-        except Exception as e:
-            logger.error(f"Failed to load configuration: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Configuration loading failed",
-            )
-    return _config_instance
-
-
-def get_tmux_manager() -> TmuxManager:
-    """Get TmuxManager singleton instance"""
-    global _tmux_manager_instance  # noqa: PLW0603
-    if _tmux_manager_instance is None:
-        try:
-            config = get_config()
-            _tmux_manager_instance = TmuxManager(config)
-        except Exception as e:
-            logger.error(f"Failed to initialize TmuxManager: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="TmuxManager initialization failed",
-            )
-    return _tmux_manager_instance
-
-
-def get_session_manager() -> SessionManager:
-    """Get SessionManager singleton instance"""
-    global _session_manager_instance  # noqa: PLW0603
-    if _session_manager_instance is None:
-        try:
-            _session_manager_instance = SessionManager()
-        except Exception as e:
-            logger.error(f"Failed to initialize SessionManager: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="SessionManager initialization failed",
-            )
-    return _session_manager_instance
 
 
 class SessionService:

@@ -14,6 +14,7 @@ import click
 from ..tmux_manager import TmuxManager
 from ..yesman_config import YesmanConfig
 from .claude_manager import ClaudeManager
+from .services import get_config, get_tmux_manager, initialize_services
 from .settings import settings
 
 
@@ -39,15 +40,18 @@ class BaseCommand(ABC):
         Initialize base command with dependency injection support
 
         Args:
-            config: YesmanConfig instance (will be created if None)
-            tmux_manager: TmuxManager instance (will be created if None)
+            config: YesmanConfig instance (will use DI container if None)
+            tmux_manager: TmuxManager instance (will use DI container if None)
             claude_manager: ClaudeManager instance (will be created if None)
         """
         self.logger = self._setup_logger()
 
-        # Initialize dependencies
-        self.config = config or self._create_config()
-        self.tmux_manager = tmux_manager or self._create_tmux_manager()
+        # Ensure services are initialized
+        initialize_services()
+
+        # Initialize dependencies - use DI container if not provided
+        self.config = config or self._resolve_config()
+        self.tmux_manager = tmux_manager or self._resolve_tmux_manager()
         self.claude_manager = claude_manager or self._create_claude_manager()
 
         # Ensure required directories exist
@@ -67,8 +71,24 @@ class BaseCommand(ABC):
         logger.setLevel(getattr(logging, settings.logging.level))
         return logger
 
+    def _resolve_config(self) -> YesmanConfig:
+        """Resolve YesmanConfig from DI container with error handling"""
+        try:
+            return get_config()
+        except Exception as e:
+            self.logger.error(f"Failed to resolve configuration from DI container: {e}")
+            raise CommandError(f"Configuration error: {e}") from e
+
+    def _resolve_tmux_manager(self) -> TmuxManager:
+        """Resolve TmuxManager from DI container with error handling"""
+        try:
+            return get_tmux_manager()
+        except Exception as e:
+            self.logger.error(f"Failed to resolve tmux manager from DI container: {e}")
+            raise CommandError(f"Tmux manager error: {e}") from e
+
     def _create_config(self) -> YesmanConfig:
-        """Create YesmanConfig instance with error handling"""
+        """Create YesmanConfig instance with error handling (fallback method)"""
         try:
             return YesmanConfig()
         except Exception as e:
@@ -76,7 +96,7 @@ class BaseCommand(ABC):
             raise CommandError(f"Configuration error: {e}") from e
 
     def _create_tmux_manager(self) -> TmuxManager:
-        """Create TmuxManager instance with error handling"""
+        """Create TmuxManager instance with error handling (fallback method)"""
         try:
             return TmuxManager(self.config)
         except Exception as e:
