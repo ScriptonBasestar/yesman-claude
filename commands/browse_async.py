@@ -1,6 +1,6 @@
-"""Interactive session browser command"""
+"""Async Interactive session browser command with enhanced performance"""
 
-import threading
+import asyncio
 import time
 
 import click
@@ -8,16 +8,16 @@ from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 
-from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
-from libs.core.progress_indicators import with_startup_progress
+from libs.core.async_base_command import AsyncMonitoringCommand, CommandError
+from libs.core.base_command import SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 
-class InteractiveBrowser:
-    """Interactive session browser with live updates"""
+class AsyncInteractiveBrowser:
+    """Async interactive session browser with live updates"""
 
     def __init__(self, tmux_manager, config, update_interval: float = 2.0):
         self.console = Console()
@@ -34,19 +34,19 @@ class InteractiveBrowser:
 
         self.update_interval = update_interval
         self.running = False
-        self.update_thread: threading.Thread | None = None
         self.progress_data = None
+        self._update_task: asyncio.Task | None = None
 
-    def update_data(self):
-        """Update session data and activity metrics"""
+    async def update_data(self) -> None:
+        """Async update of session data and activity metrics"""
         try:
             # Get session information using cached method
-            sessions_list = self.tmux_manager.get_cached_sessions_list()
+            sessions_list = await self._get_sessions_async()
             detailed_sessions = []
 
             for session_info in sessions_list:
                 session_name = session_info["session_name"]
-                detailed_info = self.tmux_manager.get_session_info(session_name)
+                detailed_info = await self._get_session_info_async(session_name)
                 detailed_sessions.append(detailed_info)
 
                 # Calculate and record activity
@@ -57,10 +57,26 @@ class InteractiveBrowser:
             self.session_browser.update_sessions(detailed_sessions)
 
             # Update progress data
-            self.progress_data = self.session_manager.get_progress_overview()
+            self.progress_data = await self._get_progress_overview_async()
 
         except Exception as e:
             self.console.print(f"[red]Error updating session data: {e}[/]")
+
+    async def _get_sessions_async(self):
+        """Async wrapper for getting sessions list"""
+        # Run blocking operation in thread pool
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
+
+    async def _get_session_info_async(self, session_name: str):
+        """Async wrapper for getting session info"""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
+
+    async def _get_progress_overview_async(self):
+        """Async wrapper for getting progress overview"""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.session_manager.get_progress_overview)
 
     def _calculate_session_activity(self, session_info: dict) -> float:
         """Calculate activity level for a session"""
@@ -114,13 +130,16 @@ class InteractiveBrowser:
 
         return layout
 
-    def update_layout(self, layout: Layout):
-        """Update layout content"""
-        # Header
-        header_text = f"🚀 Yesman Session Browser - {time.strftime('%H:%M:%S')}"
-        cache_stats = self.tmux_manager.get_cache_stats()
+    async def update_layout(self, layout: Layout):
+        """Async update layout content"""
+        # Header with async cache stats
+        header_text = f"🚀 Yesman Session Browser (Async) - {time.strftime('%H:%M:%S')}"
+
+        # Get cache stats asynchronously
+        loop = asyncio.get_event_loop()
+        cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
         header_text += f" | Cache: {cache_stats.get('hit_rate', 0):.1%} hit rate"
-        layout["header"].update(self.console.render_str(header_text, style="bold blue"))
+        layout["header"].update(self.console.render_str(header_text, style="bold green"))
 
         # Main session browser
         browser_content, status_bar = self.session_browser.render()
@@ -140,22 +159,21 @@ class InteractiveBrowser:
         # Footer
         layout["footer"].update(status_bar)
 
-    def background_updater(self):
-        """Background thread for updating data"""
+    async def start_background_updates(self):
+        """Start background data updates using async pattern"""
         while self.running:
-            self.update_data()
-            time.sleep(self.update_interval)
+            await self.update_data()
+            await asyncio.sleep(self.update_interval)
 
-    def start(self):
-        """Start the interactive browser"""
+    async def start(self):
+        """Start the async interactive browser"""
         self.running = True
 
         # Initial data load
-        self.update_data()
+        await self.update_data()
 
-        # Start background update thread
-        self.update_thread = threading.Thread(target=self.background_updater, daemon=True)
-        self.update_thread.start()
+        # Start background update task
+        self._update_task = asyncio.create_task(self.start_background_updates())
 
         # Create layout
         layout = self.create_layout()
@@ -163,24 +181,27 @@ class InteractiveBrowser:
         try:
             with Live(layout, console=self.console, refresh_per_second=10):
                 while self.running:
-                    self.update_layout(layout)
+                    await self.update_layout(layout)
 
-                    # Handle keyboard input (basic implementation)
-                    # In a real implementation, you'd use a library like keyboard or blessed
-                    time.sleep(0.1)
+                    # Small async sleep instead of blocking
+                    await asyncio.sleep(0.1)
 
         except KeyboardInterrupt:
-            self.stop()
+            await self.stop()
 
-    def stop(self):
-        """Stop the browser"""
+    async def stop(self):
+        """Stop the browser gracefully"""
         self.running = False
-        if self.update_thread:
-            self.update_thread.join(timeout=1.0)
+        if self._update_task:
+            self._update_task.cancel()
+            try:
+                await self._update_task
+            except asyncio.CancelledError:
+                pass
 
 
-class BrowseCommand(BaseCommand, SessionCommandMixin):
-    """Interactive session browser with activity monitoring"""
+class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
+    """Async interactive session browser with enhanced performance"""
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions"""
@@ -189,24 +210,37 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
         if not self._is_tmux_available():
             raise CommandError("tmux is not available or not properly installed")
 
-    def execute(self, update_interval: float = 2.0, **kwargs) -> dict:
-        """Execute the browse command"""
+    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:
+        """Execute the async browse command"""
         try:
-            with with_startup_progress("🔧 Initializing session browser...") as update:
-                update("📊 Loading session data...")
-                browser = InteractiveBrowser(self.tmux_manager, self.config, update_interval)
-                update("🚀 Starting interactive browser...")
+            browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)
 
+            self.print_info("🚀 Starting async interactive session browser...")
+            self.print_info("⚡ Enhanced with async performance optimizations")
             self.print_info("Press Ctrl+C to exit")
-            browser.start()
 
-            return {"success": True}
+            await browser.start()
+
+            return {"success": True, "mode": "async"}
 
         except KeyboardInterrupt:
-            self.print_info("\nSession browser stopped.")
-            return {"success": True, "stopped_by_user": True}
+            self.print_info("\n📊 Async session browser stopped.")
+            return {"success": True, "stopped_by_user": True, "mode": "async"}
         except Exception as e:
-            raise CommandError(f"Error during browsing: {e}") from e
+            raise CommandError(f"Error during async browsing: {e}") from e
+
+    async def update_monitoring_data(self) -> None:
+        """Implement monitoring data updates"""
+        # This could be used for additional monitoring metrics
+        # For now, the browser handles its own updates
+        pass
+
+
+# Keep backward compatibility with sync version
+class BrowseCommand(AsyncBrowseCommand):
+    """Backward compatible browse command that uses async under the hood"""
+
+    pass
 
 
 @click.command()
@@ -217,7 +251,35 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
     type=float,
     help="Update interval in seconds (default: 2.0)",
 )
-def browse(update_interval):
-    """Interactive session browser with activity monitoring"""
-    command = BrowseCommand()
+@click.option(
+    "--async-mode/--sync-mode",
+    default=True,
+    help="Use async mode for better performance (default: enabled)",
+)
+def browse(update_interval, async_mode):
+    """Interactive session browser with async performance optimizations"""
+    if async_mode:
+        command = AsyncBrowseCommand()
+        command.print_info("🔥 Running in async mode for optimal performance")
+    else:
+        # Fallback to original implementation if needed
+        from commands.browse import BrowseCommand as SyncBrowseCommand
+
+        command = SyncBrowseCommand()
+        command.print_warning("⚠️  Running in sync mode (consider using --async-mode)")
+
+    command.run(update_interval=update_interval)
+
+
+@click.command()
+@click.option(
+    "--update-interval",
+    "-i",
+    default=2.0,
+    type=float,
+    help="Update interval in seconds (default: 2.0)",
+)
+def browse_async(update_interval):
+    """Async interactive session browser (explicit async version)"""
+    command = AsyncBrowseCommand()
     command.run(update_interval=update_interval)

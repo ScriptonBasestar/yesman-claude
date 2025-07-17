@@ -8,6 +8,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 from libs.automation.automation_manager import AutomationManager
@@ -275,13 +276,21 @@ class AutomateDetectCommand(BaseCommand):
             project_path = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path)
 
-            self.console.print(f"🔍 Running context detection for {project_path.name}...")
+            # Add progress indicator for context detection
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[bold yellow]{task.description}"),
+                TimeElapsedColumn(),
+                transient=True,
+            ) as progress:
+                detection_task = progress.add_task(f"🔍 Running context detection for {project_path.name}...", total=None)
 
-            async def run_detection():
-                contexts = await automation_manager.context_detector.detect_all_contexts()
-                return contexts
+                async def run_detection():
+                    contexts = await automation_manager.context_detector.detect_all_contexts()
+                    return contexts
 
-            contexts = asyncio.run(run_detection())
+                contexts = asyncio.run(run_detection())
+                progress.update(detection_task, description="✅ Context detection completed")
 
             if not contexts:
                 self.print_info("No contexts detected")

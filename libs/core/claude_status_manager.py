@@ -4,10 +4,12 @@ import datetime
 import logging
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ..utils import ensure_log_directory, get_default_log_path
-from ..yesman_config import YesmanConfig
+
+if TYPE_CHECKING:
+    pass
 
 
 class ClaudeStatusManager:
@@ -61,6 +63,9 @@ class ClaudeStatusManager:
     def save_capture_to_file(self, content: str, pane_id: str | None = None) -> str:
         """Save captured content to file and return file path"""
         try:
+            # Import here to avoid circular import
+            from ..yesman_config import YesmanConfig
+
             config = YesmanConfig()
             log_base = config.get("log_path", str(get_default_log_path()))
             log_path = ensure_log_directory(Path(log_base))

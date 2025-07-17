@@ -5,8 +5,8 @@ Improved setup command using refactored session setup logic
 
 import click
 
-from libs.core.base_command import BaseCommand, ConfigCommandMixin, SessionCommandMixin
-from libs.core.error_handling import CommandError
+from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin, SessionCommandMixin
+from libs.core.progress_indicators import with_startup_progress
 from libs.core.session_setup import SessionSetupService
 
 
@@ -23,10 +23,13 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
         Returns:
             Dictionary with setup results
         """
-        setup_service = SessionSetupService(self.tmux_manager)
+        with with_startup_progress("🔧 Initializing session setup...") as update:
+            setup_service = SessionSetupService(self.tmux_manager)
+            update("🚀 Setting up tmux sessions...")
 
-        # Set up sessions
-        successful_count, failed_count = setup_service.setup_sessions(session_name)
+            # Set up sessions
+            successful_count, failed_count = setup_service.setup_sessions(session_name)
+            update("✅ Session setup completed")
 
         # Prepare result
         result = {

@@ -8,6 +8,7 @@ from typing import Any
 
 import click
 import yaml
+from rich.progress import track
 
 from .base_command import CommandError
 from .settings import settings
@@ -292,7 +293,9 @@ class SessionSetupService:
         successful_count = 0
         failed_count = 0
 
-        for session_name, session_conf in sessions.items():
+        # Use progress bar for session setup
+        session_items = list(sessions.items())
+        for session_name, session_conf in track(session_items, description="🔧 Setting up sessions...", style="bold blue"):
             try:
                 if self._setup_single_session(session_name, session_conf):
                     successful_count += 1

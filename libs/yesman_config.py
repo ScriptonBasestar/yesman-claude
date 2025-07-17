@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from .core.config_loader import ConfigLoader, DictSource, create_default_loader
+from .core.config_loader import ConfigLoader, DictSource, create_cached_config_loader, create_default_loader
 from .core.config_schema import YesmanConfigSchema
 from .utils import ensure_log_directory
 
@@ -154,7 +154,33 @@ class YesmanConfig:
         """Get typed configuration schema"""
         return self._config_schema
 
+    def get_cache_stats(self) -> dict[str, Any] | None:
+        """Get cache statistics if using cached loader"""
+        if hasattr(self._loader, "get_cache_stats"):
+            return self._loader.get_cache_stats()
+        return None
+
+    def invalidate_cache(self) -> None:
+        """Invalidate configuration cache if using cached loader"""
+        if hasattr(self._loader, "invalidate_cache"):
+            self._loader.invalidate_cache()
+
     def __repr__(self) -> str:
         """String representation"""
         sources = self._loader.get_config_sources_info()
-        return f"YesmanConfig(sources={len(sources)}, mode={self._config_schema.mode})"
+        cache_info = " (cached)" if hasattr(self._loader, "get_cache_stats") else ""
+        return f"YesmanConfig(sources={len(sources)}, mode={self._config_schema.mode}){cache_info}"
+
+
+def create_cached_yesman_config(cache_ttl: float = 300.0) -> YesmanConfig:
+    """
+    Create a YesmanConfig instance with caching enabled
+
+    Args:
+        cache_ttl: Cache time-to-live in seconds (default: 5 minutes)
+
+    Returns:
+        YesmanConfig instance with caching enabled
+    """
+    cached_loader = create_cached_config_loader(cache_ttl=cache_ttl)
+    return YesmanConfig(config_loader=cached_loader)

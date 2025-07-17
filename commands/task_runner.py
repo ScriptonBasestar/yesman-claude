@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 import click
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
 
 # Add libs to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -59,7 +60,8 @@ class TaskRunnerRunCommand(BaseCommand):
                 self.print_info(f"\nFound {len(todo_files)} todo files:")
 
                 task_count = 0
-                for file_path in todo_files:
+                # Use progress bar for file analysis
+                for file_path in track(todo_files, description="📁 Analyzing todo files...", style="bold cyan"):
                     from libs.task_runner import TodoFile
 
                     todo_file = TodoFile(file_path)
@@ -71,7 +73,17 @@ class TaskRunnerRunCommand(BaseCommand):
                 self.print_info(f"\nTotal tasks to process: {task_count}")
                 return {"success": True, "dry_run": True, "task_count": task_count}
 
-            runner.run_continuously(directory, max_iterations)
+            # Add progress indicator for continuous processing
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[bold green]{task.description}"),
+                TimeElapsedColumn(),
+                transient=True,
+            ) as progress:
+                task_id = progress.add_task("🔄 Running task processor continuously...", total=None)
+                runner.run_continuously(directory, max_iterations)
+                progress.update(task_id, description="✅ Task processing completed")
+
             return {"success": True, "directory": directory, "max_iterations": max_iterations}
 
         except KeyboardInterrupt:

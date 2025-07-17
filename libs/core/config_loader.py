@@ -1,4 +1,4 @@
-"""Centralized configuration loader with multiple source support"""
+"""Centralized configuration loader with multiple source support and caching"""
 
 import os
 from abc import ABC, abstractmethod
@@ -30,6 +30,7 @@ class YamlFileSource(ConfigSource):
 
     def __init__(self, path: Path | str):
         self.path = Path(path).expanduser()
+        self.file_path = self.path  # For cache compatibility
 
     def load(self) -> dict[str, Any]:
         """Load configuration from YAML file"""
@@ -42,6 +43,14 @@ class YamlFileSource(ConfigSource):
     def exists(self) -> bool:
         """Check if file exists"""
         return self.path.exists() and self.path.is_file()
+
+    def get_cache_key(self) -> str:
+        """Generate cache key based on file path and modification time"""
+        if not self.path.exists():
+            return f"file:{self.path}:missing"
+
+        mtime = self.path.stat().st_mtime
+        return f"file:{self.path}:mtime:{mtime}"
 
 
 class EnvironmentSource(ConfigSource):
@@ -102,6 +111,17 @@ class EnvironmentSource(ConfigSource):
         # Return as string
         return value
 
+    def get_cache_key(self) -> str:
+        """Generate cache key based on relevant environment variables"""
+        import hashlib
+        import json
+
+        env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
+
+        env_json = json.dumps(env_vars, sort_keys=True)
+        env_hash = hashlib.md5(env_json.encode()).hexdigest()[:8]
+        return f"env:{self.prefix}:{env_hash}"
+
 
 class DictSource(ConfigSource):
     """Dictionary configuration source (for programmatic config)"""
@@ -117,6 +137,15 @@ class DictSource(ConfigSource):
         """Dict source always exists"""
         return True
 
+    def get_cache_key(self) -> str:
+        """Generate cache key based on dictionary content"""
+        import hashlib
+        import json
+
+        content_json = json.dumps(self.config, sort_keys=True)
+        content_hash = hashlib.md5(content_json.encode()).hexdigest()[:8]
+        return f"dict:{content_hash}"
+
 
 class ConfigLoader:
     """Centralized configuration loader with validation"""
@@ -124,6 +153,11 @@ class ConfigLoader:
     def __init__(self):
         self._sources: list[ConfigSource] = []
         self._cached_config: YesmanConfigSchema | None = None
+
+    @property
+    def sources(self) -> list[ConfigSource]:
+        """Get list of configuration sources"""
+        return self._sources.copy()
 
     def add_source(self, source: ConfigSource) -> None:
         """Add a configuration source"""
@@ -233,3 +267,20 @@ def create_default_loader() -> ConfigLoader:
     loader.add_source(EnvironmentSource())
 
     return loader
+
+
+def create_cached_config_loader(cache_ttl: float = 300.0):
+    """
+    Create a cached configuration loader with default sources
+
+    Args:
+        cache_ttl: Cache time-to-live in seconds (default: 5 minutes)
+
+    Returns:
+        CachedConfigLoader instance with all standard sources
+    """
+    # Import here to avoid circular imports
+    from .config_cache import CachedConfigLoader
+
+    base_loader = create_default_loader()
+    return CachedConfigLoader(base_loader, cache_ttl=cache_ttl)

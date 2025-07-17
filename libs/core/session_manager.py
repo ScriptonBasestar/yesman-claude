@@ -18,8 +18,6 @@ except ImportError:
     PSUTIL_AVAILABLE = False
     psutil = None
 
-from libs.yesman_config import YesmanConfig
-
 from ..utils import ensure_log_directory
 from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
 from .progress_tracker import ProgressAnalyzer
@@ -29,6 +27,9 @@ class SessionManager:
     """Manages tmux session information for dashboard"""
 
     def __init__(self):
+        # Import here to avoid circular import
+        from libs.yesman_config import YesmanConfig
+
         self.config = YesmanConfig()
         # Lazy import to avoid circular dependency
         from libs.tmux_manager import TmuxManager
