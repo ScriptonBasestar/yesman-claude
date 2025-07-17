@@ -1,18 +1,88 @@
-"""Multi-agent system for parallel branch-based development automation"""
+"""Multi-agent system for parallel branch-based development automation."""
 
 from .agent_pool import AgentPool
-from .auto_resolver import AutoResolutionMode, AutoResolutionResult, AutoResolver, ResolutionOutcome
-from .branch_info_protocol import BranchInfo, BranchInfoProtocol, BranchInfoType, BranchSyncEvent, SyncStrategy
+from .auto_resolver import (
+    AutoResolutionMode,
+    AutoResolutionResult,
+    AutoResolver,
+    ResolutionOutcome,
+)
+from .branch_info_protocol import (
+    BranchInfo,
+    BranchInfoProtocol,
+    BranchInfoType,
+    BranchSyncEvent,
+    SyncStrategy,
+)
 from .branch_manager import BranchManager
-from .code_review_engine import CodeReview, CodeReviewEngine, QualityMetric, QualityMetrics, ReviewFinding, ReviewSeverity, ReviewStatus, ReviewSummary, ReviewType
-from .collaboration_engine import CollaborationEngine, CollaborationMessage, CollaborationMode, CollaborationSession, MessagePriority, MessageType, SharedKnowledge
-from .conflict_prediction import ConflictPattern, ConflictPredictor, ConflictVector, PredictionConfidence, PredictionResult
-from .conflict_prevention import ConflictPreventionSystem, PreventionAction, PreventionMeasure, PreventionResult, PreventionStrategy
-from .conflict_resolution import ConflictInfo, ConflictResolutionEngine, ConflictSeverity, ConflictType, ResolutionResult, ResolutionStrategy
-from .dependency_propagation import ChangeImpact, DependencyChange, DependencyNode, DependencyPropagationSystem, DependencyType, PropagationResult, PropagationStrategy
+from .code_review_engine import (
+    CodeReview,
+    CodeReviewEngine,
+    QualityMetric,
+    QualityMetrics,
+    ReviewFinding,
+    ReviewSeverity,
+    ReviewStatus,
+    ReviewSummary,
+    ReviewType,
+)
+from .collaboration_engine import (
+    CollaborationEngine,
+    CollaborationMessage,
+    CollaborationMode,
+    CollaborationSession,
+    MessagePriority,
+    MessageType,
+    SharedKnowledge,
+)
+from .conflict_prediction import (
+    ConflictPattern,
+    ConflictPredictor,
+    ConflictVector,
+    PredictionConfidence,
+    PredictionResult,
+)
+from .conflict_prevention import (
+    ConflictPreventionSystem,
+    PreventionAction,
+    PreventionMeasure,
+    PreventionResult,
+    PreventionStrategy,
+)
+from .conflict_resolution import (
+    ConflictInfo,
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
+    ResolutionResult,
+    ResolutionStrategy,
+)
+from .dependency_propagation import (
+    ChangeImpact,
+    DependencyChange,
+    DependencyNode,
+    DependencyPropagationSystem,
+    DependencyType,
+    PropagationResult,
+    PropagationStrategy,
+)
 from .graph import DirectedGraph
-from .semantic_analyzer import ClassDefinition, FunctionSignature, SemanticAnalyzer, SemanticConflict, SemanticConflictType, SemanticContext, SymbolVisibility
-from .semantic_merger import ConflictResolutionRule, MergeResolution, MergeResult, MergeStrategy, SemanticMerger
+from .semantic_analyzer import (
+    ClassDefinition,
+    FunctionSignature,
+    SemanticAnalyzer,
+    SemanticConflict,
+    SemanticConflictType,
+    SemanticContext,
+    SymbolVisibility,
+)
+from .semantic_merger import (
+    ConflictResolutionRule,
+    MergeResolution,
+    MergeResult,
+    MergeStrategy,
+    SemanticMerger,
+)
 from .task_analyzer import CodeDependency, TaskAnalyzer, TaskDefinition
 from .task_scheduler import AgentCapability, TaskScheduler
 from .types import Agent, AgentState, Task, TaskStatus

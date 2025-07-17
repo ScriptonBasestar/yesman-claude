@@ -15,7 +15,7 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
 
     def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:
-        """Execute the validate command"""
+        """Execute the validate command."""
         try:
             console = Console()
             sessions = self.tmux_manager.load_projects().get("sessions", {})
@@ -78,7 +78,13 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
                                 expanded_pane_dir = os.path.expanduser(pane_start_dir)
                                 if not os.path.exists(expanded_pane_dir):
                                     window_name = window.get("window_name", f"window_{i}")
-                                    session_missing.append(("pane", f"{window_name}/pane_{j}", expanded_pane_dir))
+                                    session_missing.append(
+                                        (
+                                            "pane",
+                                            f"{window_name}/pane_{j}",
+                                            expanded_pane_dir,
+                                        )
+                                    )
 
                     # Store results for this session
                     if session_missing:
@@ -128,7 +134,7 @@ def validate(session_name, format):
 
 
 def _display_success(console: Console, valid_count: int, total_count: int):
-    """Display success message when all directories exist"""
+    """Display success message when all directories exist."""
     success_panel = Panel(
         Text("✅ All directories exist!", style="bold green"),
         title="[green]Validation Complete[/green]",
@@ -140,7 +146,7 @@ def _display_success(console: Console, valid_count: int, total_count: int):
 
 
 def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int):
-    """Display results in table format"""
+    """Display results in table format."""
     table = Table(
         title="[red]Directory Validation Results[/red]",
         caption=f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]",
@@ -180,7 +186,7 @@ def _display_table_format(console: Console, missing: list, valid_count: int, tot
 
 
 def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int):
-    """Display results in tree format"""
+    """Display results in tree format."""
     console.print("\n[red bold]❌ Directory Validation Issues[/red bold]")
     console.print(f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n")
 
@@ -216,7 +222,7 @@ def _display_tree_format(console: Console, missing: list, valid_count: int, tota
 
 
 def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int):
-    """Display results in simple format"""
+    """Display results in simple format."""
     console.print("[red bold]❌ Missing Directories Found[/red bold]\n")
 
     for session_name, session_missing in missing:
@@ -239,7 +245,7 @@ def _display_simple_format(console: Console, missing: list, valid_count: int, to
 
 
 def _shorten_path(path: str, max_length: int = 60) -> str:
-    """Shorten path for better display"""
+    """Shorten path for better display."""
     if len(path) <= max_length:
         return path
 

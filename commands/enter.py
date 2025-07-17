@@ -1,4 +1,4 @@
-"""Enter (attach to) a tmux session command"""
+"""Enter (attach to) a tmux session command."""
 
 import subprocess
 import sys
@@ -11,14 +11,14 @@ from libs.ui.session_selector import show_session_selector
 
 
 class EnterCommand(BaseCommand, SessionCommandMixin):
-    """Enter (attach to) a tmux session"""
+    """Enter (attach to) a tmux session."""
 
     def __init__(self):
         super().__init__()
         self.server = libtmux.Server()
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions"""
+        """Validate command preconditions."""
         super().validate_preconditions()
 
         # Check if running in interactive terminal
@@ -26,7 +26,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             raise CommandError("Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts")
 
     def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:
-        """Execute the enter command"""
+        """Execute the enter command."""
         if list_sessions:
             # Show available sessions
             self.tmux_manager.list_running_sessions()
@@ -53,7 +53,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         return {"action": "attached", "session": actual_session_name, "success": True}
 
     def _select_session(self) -> str | None:
-        """Select a session from running sessions"""
+        """Select a session from running sessions."""
         # Get all running sessions
         running_sessions = []
         projects = self.tmux_manager.load_projects().get("sessions", {})
@@ -104,7 +104,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
                 return None
 
     def _resolve_session_name(self, session_name: str) -> str | None:
-        """Resolve session name from project name if needed"""
+        """Resolve session name from project name if needed."""
         # Check if the session exists directly
         if self.server.find_where({"session_name": session_name}):
             return session_name
@@ -123,7 +123,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         return None
 
     def _attach_to_session(self, session_name: str) -> None:
-        """Attach to the specified tmux session"""
+        """Attach to the specified tmux session."""
         # Check if we're already in a tmux session
         if "TMUX" in subprocess.os.environ:
             # Switch to the session
@@ -137,6 +137,6 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 @click.argument("session_name", required=False)
 @click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
 def enter(session_name, list_sessions):
-    """Enter (attach to) a tmux session"""
+    """Enter (attach to) a tmux session."""
     command = EnterCommand()
     command.run(session_name=session_name, list_sessions=list_sessions)

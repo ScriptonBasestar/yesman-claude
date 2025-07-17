@@ -1,6 +1,4 @@
-"""
-Tests for Widget Models and Data Adapter
-"""
+"""Tests for Widget Models and Data Adapter."""
 
 from datetime import datetime
 
@@ -25,10 +23,10 @@ from libs.dashboard.renderers.widget_models import (
 
 
 class TestWidgetModels:
-    """Test cases for widget data models"""
+    """Test cases for widget data models."""
 
     def test_session_data_creation(self):
-        """Test SessionData model creation"""
+        """Test SessionData model creation."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -52,7 +50,7 @@ class TestWidgetModels:
         assert session.claude_active is True
 
     def test_session_data_to_dict(self):
-        """Test SessionData to_dict conversion"""
+        """Test SessionData to_dict conversion."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window")
 
@@ -73,7 +71,7 @@ class TestWidgetModels:
         assert data["windows"][0]["name"] == "test-window"
 
     def test_session_data_from_dict(self):
-        """Test SessionData from_dict creation"""
+        """Test SessionData from_dict creation."""
         now = datetime.now()
         data = {
             "name": "test-session",
@@ -95,7 +93,7 @@ class TestWidgetModels:
         assert session.claude_active is True
 
     def test_health_data_creation(self):
-        """Test HealthData model creation"""
+        """Test HealthData model creation."""
         now = datetime.now()
         category = HealthCategoryData(
             category="build",
@@ -119,7 +117,7 @@ class TestWidgetModels:
         assert health.project_path == "/test/project"
 
     def test_health_level_from_score(self):
-        """Test HealthLevel.from_score method"""
+        """Test HealthLevel.from_score method."""
         assert HealthLevel.from_score(95) == HealthLevel.EXCELLENT
         assert HealthLevel.from_score(80) == HealthLevel.GOOD
         assert HealthLevel.from_score(60) == HealthLevel.WARNING
@@ -127,7 +125,7 @@ class TestWidgetModels:
         assert HealthLevel.from_score(-1) == HealthLevel.UNKNOWN
 
     def test_activity_data_creation(self):
-        """Test ActivityData model creation"""
+        """Test ActivityData model creation."""
         now = datetime.now()
         entry = ActivityEntry(
             timestamp=now,
@@ -149,7 +147,7 @@ class TestWidgetModels:
         assert activity.activity_rate == 100.0
 
     def test_progress_data_creation(self):
-        """Test ProgressData model creation"""
+        """Test ProgressData model creation."""
         now = datetime.now()
 
         progress = ProgressData(
@@ -168,7 +166,7 @@ class TestWidgetModels:
         assert progress.commands_executed == 10
 
     def test_metric_card_data(self):
-        """Test MetricCardData model"""
+        """Test MetricCardData model."""
         metric = MetricCardData(
             title="CPU Usage",
             value=75.5,
@@ -185,7 +183,7 @@ class TestWidgetModels:
         assert metric.color == "warning"
 
     def test_status_indicator_data(self):
-        """Test StatusIndicatorData model"""
+        """Test StatusIndicatorData model."""
         status = StatusIndicatorData(
             status="running",
             label="Service Active",
@@ -200,7 +198,7 @@ class TestWidgetModels:
         assert status.pulse is True
 
     def test_chart_data_creation(self):
-        """Test ChartData model creation"""
+        """Test ChartData model creation."""
         now = datetime.now()
         points = [
             ChartDataPoint(x=now, y=10),
@@ -223,14 +221,14 @@ class TestWidgetModels:
 
 
 class TestWidgetDataAdapter:
-    """Test cases for WidgetDataAdapter"""
+    """Test cases for WidgetDataAdapter."""
 
     def setup_method(self):
-        """Setup test adapter"""
+        """Setup test adapter."""
         self.adapter = WidgetDataAdapter()
 
     def test_adapt_session_data_dict(self):
-        """Test adapting session data from dictionary"""
+        """Test adapting session data from dictionary."""
         raw_data = {
             "name": "test-session",
             "id": "session-123",
@@ -255,7 +253,7 @@ class TestWidgetDataAdapter:
         assert session.windows[0].name == "window1"
 
     def test_adapt_session_data_list(self):
-        """Test adapting multiple session data"""
+        """Test adapting multiple session data."""
         raw_data = [
             {"name": "session1", "id": "1", "status": "active"},
             {"name": "session2", "id": "2", "status": "idle"},
@@ -271,7 +269,7 @@ class TestWidgetDataAdapter:
         assert sessions[1].status == SessionStatus.IDLE
 
     def test_adapt_session_data_error_handling(self):
-        """Test session data adaptation error handling"""
+        """Test session data adaptation error handling."""
         # Test with invalid data
         raw_data = {
             "name": "test-session",
@@ -288,7 +286,7 @@ class TestWidgetDataAdapter:
         assert session.status in [SessionStatus.IDLE, SessionStatus.ERROR]
 
     def test_adapt_health_data(self):
-        """Test adapting health data"""
+        """Test adapting health data."""
         raw_data = {
             "overall_score": 85,
             "categories": {
@@ -317,7 +315,7 @@ class TestWidgetDataAdapter:
         assert health.project_path == "/test/project"
 
     def test_adapt_activity_data(self):
-        """Test adapting activity data"""
+        """Test adapting activity data."""
         raw_data = {
             "activities": [
                 {
@@ -347,7 +345,7 @@ class TestWidgetDataAdapter:
         assert activity.active_days == 1
 
     def test_adapt_progress_data(self):
-        """Test adapting progress data"""
+        """Test adapting progress data."""
         raw_data = {
             "phase": "implementing",
             "phase_progress": 75.0,
@@ -379,7 +377,7 @@ class TestWidgetDataAdapter:
         assert progress.todos_completed == 7
 
     def test_adapt_metric_card_data(self):
-        """Test adapting metric card data"""
+        """Test adapting metric card data."""
         raw_data = {
             "title": "Response Time",
             "value": 150,
@@ -399,7 +397,7 @@ class TestWidgetDataAdapter:
         assert metric.color == "success"
 
     def test_adapt_chart_data(self):
-        """Test adapting chart data"""
+        """Test adapting chart data."""
         raw_data = {
             "title": "CPU Usage Over Time",
             "type": "line",
@@ -424,7 +422,7 @@ class TestWidgetDataAdapter:
         assert chart.y_label == "CPU %"
 
     def test_parse_timestamp_formats(self):
-        """Test timestamp parsing with various formats"""
+        """Test timestamp parsing with various formats."""
         adapter = self.adapter
 
         # Test datetime object
@@ -461,7 +459,7 @@ class TestWidgetDataAdapter:
         assert adapter._parse_timestamp("invalid") is None
 
     def test_parse_enums(self):
-        """Test enum parsing methods"""
+        """Test enum parsing methods."""
         adapter = self.adapter
 
         # Test session status parsing
@@ -483,10 +481,10 @@ class TestWidgetDataAdapter:
 
 
 class TestModelSerialization:
-    """Test model serialization and deserialization"""
+    """Test model serialization and deserialization."""
 
     def test_session_data_roundtrip(self):
-        """Test SessionData serialization roundtrip"""
+        """Test SessionData serialization roundtrip."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True)
 
@@ -511,7 +509,7 @@ class TestModelSerialization:
         assert restored.windows[0].name == original.windows[0].name
 
     def test_health_data_roundtrip(self):
-        """Test HealthData serialization roundtrip"""
+        """Test HealthData serialization roundtrip."""
         now = datetime.now()
         category = HealthCategoryData(
             category="build",
@@ -538,7 +536,7 @@ class TestModelSerialization:
         assert restored.categories[0].score == original.categories[0].score
 
     def test_activity_data_roundtrip(self):
-        """Test ActivityData serialization roundtrip"""
+        """Test ActivityData serialization roundtrip."""
         now = datetime.now()
         entry = ActivityEntry(
             timestamp=now,

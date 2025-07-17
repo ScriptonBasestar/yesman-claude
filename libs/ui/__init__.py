@@ -1,1 +1,1 @@
-"""UI components for Yesman"""
+"""UI components for Yesman."""

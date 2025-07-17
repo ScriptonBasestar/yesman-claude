@@ -1,4 +1,4 @@
-"""Semantic analysis and merging commands"""
+"""Semantic analysis and merging commands."""
 
 import asyncio
 import logging
@@ -11,10 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzeSemanticConflictsCommand(BaseCommand):
-    """Analyze AST-based semantic conflicts"""
+    """Analyze AST-based semantic conflicts."""
 
-    def execute(self, files: list[str], language: str = "python", repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the analyze semantic conflicts command"""
+    def execute(
+        self,
+        files: list[str],
+        language: str = "python",
+        repo_path: str | None = None,
+        **kwargs,
+    ) -> dict:
+        """Execute the analyze semantic conflicts command."""
         try:
             self.print_info(f"🧠 Analyzing semantic conflicts in {len(files)} files...")
             self.print_info(f"   Language: {language}")
@@ -26,7 +32,12 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 
                 if not conflicts:
                     self.print_success("✅ No semantic conflicts detected")
-                    return {"success": True, "files": files, "language": language, "conflicts": []}
+                    return {
+                        "success": True,
+                        "files": files,
+                        "language": language,
+                        "conflicts": [],
+                    }
 
                 self.print_info(f"⚠️  Found {len(conflicts)} semantic conflicts:")
                 self.print_info("=" * 60)
@@ -46,7 +57,12 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                     self.print_info(f"   Suggestion: {conflict.suggestion}")
                     self.print_info("")
 
-                return {"success": True, "files": files, "language": language, "conflicts": conflicts}
+                return {
+                    "success": True,
+                    "files": files,
+                    "language": language,
+                    "conflicts": conflicts,
+                }
 
             return asyncio.run(run_analysis())
 
@@ -55,10 +71,10 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 
 
 class SemanticSummaryCommand(BaseCommand):
-    """Show semantic analysis summary"""
+    """Show semantic analysis summary."""
 
     def execute(self, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the semantic summary command"""
+        """Execute the semantic summary command."""
         try:
             self.print_info("🧠 Semantic Analysis Summary")
             self.print_info("=" * 40)
@@ -78,10 +94,10 @@ class SemanticSummaryCommand(BaseCommand):
 
 
 class FunctionDiffCommand(BaseCommand):
-    """Show function-level differences"""
+    """Show function-level differences."""
 
     def execute(self, file1: str, file2: str, language: str = "python", **kwargs) -> dict:
-        """Execute the function diff command"""
+        """Execute the function diff command."""
         try:
             self.print_info(f"🔍 Function-level diff: {file1} vs {file2}")
 
@@ -104,10 +120,17 @@ class FunctionDiffCommand(BaseCommand):
 
 
 class SemanticMergeCommand(BaseCommand):
-    """Perform semantic merging of code"""
+    """Perform semantic merging of code."""
 
-    def execute(self, source_file: str, target_file: str, language: str = "python", strategy: str = "auto", **kwargs) -> dict:
-        """Execute the semantic merge command"""
+    def execute(
+        self,
+        source_file: str,
+        target_file: str,
+        language: str = "python",
+        strategy: str = "auto",
+        **kwargs,
+    ) -> dict:
+        """Execute the semantic merge command."""
         try:
             self.print_info(f"🔀 Semantic merge: {source_file} → {target_file}")
             self.print_info(f"   Strategy: {strategy}")

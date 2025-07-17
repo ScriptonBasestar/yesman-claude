@@ -1,4 +1,4 @@
-"""Dashboard widgets for session visualization and interaction"""
+"""Dashboard widgets for session visualization and interaction."""
 
 from .activity_heatmap import ActivityHeatmapGenerator
 from .agent_monitor import AgentMonitor

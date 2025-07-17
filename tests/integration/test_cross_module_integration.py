@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Cross-Module Integration Tests
+"""Cross-Module Integration Tests.
 
 Tests integration across all major system modules including CLI, automation,
 AI learning, session management, and dashboard coordination.
@@ -12,14 +11,19 @@ from commands.setup import SetupCommand
 from commands.status import StatusCommand
 from libs.ai.learning_engine import LearningEngine
 
-from .test_framework import AsyncIntegrationTestBase, CommandTestRunner, MockClaudeEnvironment, PerformanceMonitor
+from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 
 class TestFullSystemIntegration(AsyncIntegrationTestBase):
-    """Test complete system integration across all modules"""
+    """Test complete system integration across all modules."""
 
     def setup_method(self):
-        """Setup for full system integration tests"""
+        """Setup for full system integration tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
@@ -29,7 +33,7 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         self._setup_comprehensive_responses()
 
     def _setup_comprehensive_responses(self):
-        """Setup mock Claude responses for comprehensive testing"""
+        """Setup mock Claude responses for comprehensive testing."""
         responses = {
             "develop web application": "I'll help you develop a web application. Let me set up the project structure...",
             "test the application": "Running comprehensive tests... All tests passed successfully!",
@@ -45,7 +49,7 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
             self.mock_claude.add_mock_response(prompt, response)
 
     async def test_complete_development_workflow(self):
-        """Test complete development workflow across all system modules"""
+        """Test complete development workflow across all system modules."""
         # Phase 1: Project Setup and Session Management
         project_name = "full-system-project"
         project_dir = self.test_dir / project_name
@@ -93,7 +97,12 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
 
         for interaction in development_interactions:
             response = self.mock_claude.simulate_interaction(interaction["prompt"])
-            await learning_engine.record_interaction(prompt=interaction["prompt"], response=response, context=interaction["context"], session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=interaction["prompt"],
+                response=response,
+                context=interaction["context"],
+                session_id=session_name,
+            )
 
         learning_duration = self.performance_monitor.end_timing("ai_learning")
 
@@ -116,7 +125,12 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         # Phase 5: Status Integration with All Modules
         self.performance_monitor.start_timing("status_integration")
 
-        status_result = self.command_runner.run_command(StatusCommand, detailed=True, include_automation=True, include_ai_metrics=True)
+        status_result = self.command_runner.run_command(
+            StatusCommand,
+            detailed=True,
+            include_automation=True,
+            include_ai_metrics=True,
+        )
 
         status_duration = self.performance_monitor.end_timing("status_integration")
 
@@ -131,7 +145,13 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         # Phase 6: Monitoring Integration
         self.performance_monitor.start_timing("monitoring_integration")
 
-        monitor_result = self.command_runner.run_command(AutomateMonitorCommand, project_path=str(project_dir), duration=2, enable_ai_insights=True, session_integration=session_name)
+        monitor_result = self.command_runner.run_command(
+            AutomateMonitorCommand,
+            project_path=str(project_dir),
+            duration=2,
+            enable_ai_insights=True,
+            session_integration=session_name,
+        )
 
         monitoring_duration = self.performance_monitor.end_timing("monitoring_integration")
 
@@ -144,7 +164,7 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         assert total_workflow_time < 45.0, f"Complete workflow took {total_workflow_time:.2f}s, should be < 45s"
 
     def _create_comprehensive_project(self, project_dir):
-        """Create a comprehensive project with multiple contexts"""
+        """Create a comprehensive project with multiple contexts."""
         # Python web application
         (project_dir / "app.py").write_text("""
 from flask import Flask, jsonify
@@ -393,7 +413,7 @@ This project demonstrates a comprehensive web application with multiple technolo
 """)
 
     async def test_cross_module_data_flow(self):
-        """Test data flow and communication between modules"""
+        """Test data flow and communication between modules."""
         # Setup project and session
         project_dir = self.test_dir / "data_flow_project"
         project_dir.mkdir()
@@ -414,12 +434,21 @@ This project demonstrates a comprehensive web application with multiple technolo
         assert setup_result["success"] is True
 
         # Automation should be aware of session context
-        detect_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir), session_context=session_name)
+        detect_result = self.command_runner.run_command(
+            AutomateDetectCommand,
+            project_path=str(project_dir),
+            session_context=session_name,
+        )
         assert detect_result["success"] is True
 
         # Test 2: Automation → AI Learning data flow
         for context in detect_result.get("contexts", [])[:3]:  # Limit for testing
-            await learning_engine.record_context_detection(project_path=str(project_dir), detected_context=context, accuracy_feedback=1.0, session_id=session_name)
+            await learning_engine.record_context_detection(
+                project_path=str(project_dir),
+                detected_context=context,
+                accuracy_feedback=1.0,
+                session_id=session_name,
+            )
 
         # AI should learn from automation data
         patterns = await learning_engine.detect_patterns()
@@ -432,7 +461,12 @@ This project demonstrates a comprehensive web application with multiple technolo
             assert prediction.get("confidence", 0) > 0
 
         # Test 4: Cross-module status integration
-        status_result = self.command_runner.run_command(StatusCommand, session_name=session_name, include_ai_metrics=True, include_automation=True)
+        status_result = self.command_runner.run_command(
+            StatusCommand,
+            session_name=session_name,
+            include_ai_metrics=True,
+            include_automation=True,
+        )
 
         assert status_result["success"] is True
 
@@ -441,7 +475,7 @@ This project demonstrates a comprehensive web application with multiple technolo
         assert session_name in [s["name"] for s in status_result.get("sessions", [])]
 
     async def test_error_propagation_and_recovery(self):
-        """Test error handling and recovery across modules"""
+        """Test error handling and recovery across modules."""
         # Create problematic project
         project_dir = self.test_dir / "error_test_project"
         project_dir.mkdir()
@@ -472,7 +506,12 @@ This project demonstrates a comprehensive web application with multiple technolo
         learning_engine = LearningEngine(config=self.get_test_config(), session_name=session_name)
 
         # Record interaction with error context
-        await learning_engine.record_interaction(prompt="fix this broken code", response="I see syntax errors in your code. Let me help fix them.", context="error_handling", session_id=session_name)
+        await learning_engine.record_interaction(
+            prompt="fix this broken code",
+            response="I see syntax errors in your code. Let me help fix them.",
+            context="error_handling",
+            session_id=session_name,
+        )
 
         patterns = await learning_engine.detect_patterns()
         # Should work despite error context
@@ -488,7 +527,7 @@ This project demonstrates a comprehensive web application with multiple technolo
         assert status_result["success"] is True
 
     async def test_performance_under_concurrent_load(self):
-        """Test system performance under concurrent operations"""
+        """Test system performance under concurrent operations."""
         # Create multiple projects and sessions
         project_count = 5
         projects = []
@@ -534,7 +573,12 @@ This project demonstrates a comprehensive web application with multiple technolo
 
         # Record interactions for all sessions
         for i, session_name in enumerate(sessions):
-            await learning_engine.record_interaction(prompt=f"develop project {i}", response=f"Developing project {i} with Python...", context="development", session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=f"develop project {i}",
+                response=f"Developing project {i} with Python...",
+                context="development",
+                session_id=session_name,
+            )
 
         ai_learning_duration = self.performance_monitor.end_timing("concurrent_ai_learning")
 

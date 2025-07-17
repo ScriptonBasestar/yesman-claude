@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Session setup logic extracted from setup command - Refactored version.
-"""
+"""Session setup logic extracted from setup command - Refactored version."""
 
 import os
 from typing import Any
@@ -26,8 +24,7 @@ class SessionValidator:
         self.validation_errors = []
 
     def validate_session_config(self, session_name: str, config_dict: dict[str, Any]) -> bool:
-        """
-        Validate session configuration.
+        """Validate session configuration.
 
         Args:
             session_name: Name of the session
@@ -185,8 +182,7 @@ class SessionConfigBuilder:
         self.tmux_manager = tmux_manager
 
     def build_session_config(self, session_name: str, session_conf: dict[str, Any]) -> dict[str, Any]:
-        """
-        Build complete session configuration.
+        """Build complete session configuration.
 
         Args:
             session_name: Name of the session
@@ -216,8 +212,7 @@ class SessionConfigBuilder:
         return config_dict
 
     def _load_template(self, template_name: str | None) -> dict[str, Any]:
-        """
-        Load template configuration.
+        """Load template configuration.
 
         Args:
             template_name: Name of the template to load
@@ -254,8 +249,7 @@ class SessionSetupService:
         self.validator = SessionValidator()
 
     def setup_sessions(self, session_filter: str | None = None) -> tuple[int, int]:
-        """
-        Set up tmux sessions.
+        """Set up tmux sessions.
 
         Args:
             session_filter: Optional filter to set up only specific session
@@ -305,8 +299,7 @@ class SessionSetupService:
         return all_sessions
 
     def _setup_single_session(self, session_name: str, session_conf: dict[str, Any]) -> bool:
-        """
-        Set up a single tmux session.
+        """Set up a single tmux session.
 
         Args:
             session_name: Name of the session

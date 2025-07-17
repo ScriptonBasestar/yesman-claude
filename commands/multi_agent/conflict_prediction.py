@@ -1,4 +1,4 @@
-"""Conflict prediction and analysis commands"""
+"""Conflict prediction and analysis commands."""
 
 import asyncio
 import logging
@@ -13,10 +13,18 @@ logger = logging.getLogger(__name__)
 
 
 class PredictConflictsCommand(BaseCommand):
-    """Predict potential conflicts between branches"""
+    """Predict potential conflicts between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, time_horizon: int = 7, min_confidence: float = 0.3, limit: int = 10, **kwargs) -> dict:
-        """Execute the predict conflicts command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        time_horizon: int = 7,
+        min_confidence: float = 0.3,
+        limit: int = 10,
+        **kwargs,
+    ) -> dict:
+        """Execute the predict conflicts command."""
         try:
             self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
             self.print_info(f"   Time horizon: {time_horizon} days")
@@ -42,7 +50,11 @@ class PredictConflictsCommand(BaseCommand):
                         "branches": branches,
                         "repo_path": repo_path,
                         "predictions": [],
-                        "parameters": {"time_horizon": time_horizon, "min_confidence": min_confidence, "limit": limit},
+                        "parameters": {
+                            "time_horizon": time_horizon,
+                            "min_confidence": min_confidence,
+                            "limit": limit,
+                        },
                     }
 
                 # Filter and limit results
@@ -74,7 +86,11 @@ class PredictConflictsCommand(BaseCommand):
                     "repo_path": repo_path,
                     "predictions": filtered_predictions,
                     "count": len(filtered_predictions),
-                    "parameters": {"time_horizon": time_horizon, "min_confidence": min_confidence, "limit": limit},
+                    "parameters": {
+                        "time_horizon": time_horizon,
+                        "min_confidence": min_confidence,
+                        "limit": limit,
+                    },
                 }
 
             return asyncio.run(run_prediction())
@@ -84,10 +100,10 @@ class PredictConflictsCommand(BaseCommand):
 
 
 class PredictionSummaryCommand(BaseCommand):
-    """Show prediction summary and statistics"""
+    """Show prediction summary and statistics."""
 
     def execute(self, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the prediction summary command"""
+        """Execute the prediction summary command."""
         try:
             self.print_info("🔮 Conflict Prediction Summary")
             self.print_info("=" * 40)
@@ -119,10 +135,10 @@ class PredictionSummaryCommand(BaseCommand):
 
 
 class AnalyzeConflictPatternsCommand(BaseCommand):
-    """Analyze detailed conflict patterns and trends"""
+    """Analyze detailed conflict patterns and trends."""
 
     def execute(self, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the analyze conflict patterns command"""
+        """Execute the analyze conflict patterns command."""
         try:
             self.print_info("📈 Analyzing conflict patterns...")
 

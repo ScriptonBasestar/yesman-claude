@@ -1,4 +1,4 @@
-"""Multi-agent system commands - Modular Architecture
+"""Multi-agent system commands - Modular Architecture.
 
 This file has been refactored from a monolithic 3,434-line file into a modular
 architecture for better maintainability, development velocity, and code organization.
@@ -27,12 +27,60 @@ Benefits of this refactoring:
 
 # Import the main CLI group from the modular structure
 # Import all command classes for backward compatibility
-from commands.multi_agent import *
-from commands.multi_agent.cli import multi_agent
+from commands.multi_agent.agent_pool import (
+    AddTaskCommand,
+    ListTasksCommand,
+    MonitorAgentsCommand,
+    StartAgentsCommand,
+    StatusCommand,
+    StopAgentsCommand,
+)
+from commands.multi_agent.batch_operations import (
+    AutoResolveCommand,
+    BatchMergeCommand,
+    PreventConflictsCommand,
+)
+from commands.multi_agent.cli import multi_agent as multi_agent_cli
+from commands.multi_agent.code_review import (
+    QualityCheckCommand,
+    ReviewApproveCommand,
+    ReviewInitiateCommand,
+    ReviewRejectCommand,
+    ReviewStatusCommand,
+    ReviewSummaryCommand,
+)
+from commands.multi_agent.collaboration import (
+    BranchInfoCommand,
+    CollaborateCommand,
+    SendMessageCommand,
+    ShareKnowledgeCommand,
+)
+from commands.multi_agent.conflict_prediction import (
+    AnalyzeConflictPatternsCommand,
+    PredictConflictsCommand,
+    PredictionSummaryCommand,
+)
+from commands.multi_agent.conflict_resolution import (
+    ConflictSummaryCommand,
+    DetectConflictsCommand,
+    ResolveConflictCommand,
+)
+from commands.multi_agent.dependency_tracking import (
+    DependencyImpactCommand,
+    DependencyPropagateCommand,
+    DependencyStatusCommand,
+    DependencyTrackCommand,
+)
+from commands.multi_agent.semantic_analysis import (
+    AnalyzeSemanticConflictsCommand,
+    FunctionDiffCommand,
+    SemanticMergeCommand,
+    SemanticSummaryCommand,
+)
 
 # Export the CLI group and classes
 __all__ = [
-    "multi_agent",
+    "multi_agent_cli",
     # Agent Pool Management
     "StartAgentsCommand",
     "MonitorAgentsCommand",

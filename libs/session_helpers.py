@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Session helper utilities for tmux session management.
+"""Session helper utilities for tmux session management.
 
 This module provides common functions for working with tmux sessions,
 windows, and panes across the Yesman-Claude project.
@@ -56,8 +55,7 @@ class SessionConfigurationError(YesmanError):
 
 
 def get_tmux_server() -> libtmux.Server:
-    """
-    Get or create a tmux server instance.
+    """Get or create a tmux server instance.
 
     Returns:
         libtmux.Server: The tmux server instance
@@ -76,8 +74,7 @@ def get_tmux_server() -> libtmux.Server:
 
 
 def check_session_exists(session_name: str, server: libtmux.Server | None = None) -> bool:
-    """
-    Check if a tmux session exists.
+    """Check if a tmux session exists.
 
     Args:
         session_name: Name of the session to check
@@ -97,7 +94,7 @@ def check_session_exists(session_name: str, server: libtmux.Server | None = None
 
 @dataclass
 class PaneInfo:
-    """Information about a tmux pane"""
+    """Information about a tmux pane."""
 
     pane_id: str
     pane_index: int
@@ -111,7 +108,7 @@ class PaneInfo:
 
 @dataclass
 class WindowInfo:
-    """Information about a tmux window"""
+    """Information about a tmux window."""
 
     window_id: str
     window_index: int
@@ -123,7 +120,7 @@ class WindowInfo:
 
 @dataclass
 class SessionInfo:
-    """Information about a tmux session"""
+    """Information about a tmux session."""
 
     session_name: str
     session_id: str
@@ -136,8 +133,7 @@ class SessionInfo:
 
 
 def get_session_info(session_name: str, server: libtmux.Server | None = None) -> SessionInfo:
-    """
-    Get detailed information about a tmux session.
+    """Get detailed information about a tmux session.
 
     Args:
         session_name: Name of the session
@@ -209,8 +205,7 @@ def create_session_windows(
     start_directory: str | None = None,
     server: libtmux.Server | None = None,
 ) -> libtmux.Session:
-    """
-    Create windows for a session from configuration.
+    """Create windows for a session from configuration.
 
     Args:
         session_name: Name of the session
@@ -295,8 +290,7 @@ def get_active_pane(
     window_name: str | None = None,
     server: libtmux.Server | None = None,
 ) -> PaneInfo:
-    """
-    Get the active pane in a window.
+    """Get the active pane in a window.
 
     Args:
         session_name: Name of the session
@@ -360,8 +354,7 @@ def send_keys_to_pane(
     server: libtmux.Server | None = None,
     enter: bool = True,
 ) -> None:
-    """
-    Send keys to a specific pane.
+    """Send keys to a specific pane.
 
     Args:
         session_name: Name of the session
@@ -424,8 +417,7 @@ def send_keys_to_pane(
 
 
 def list_session_windows(session_name: str, server: libtmux.Server | None = None) -> list[WindowInfo]:
-    """
-    List all windows in a session.
+    """List all windows in a session.
 
     Args:
         session_name: Name of the session
@@ -442,8 +434,7 @@ def list_session_windows(session_name: str, server: libtmux.Server | None = None
 
 
 def merge_template_override(template_config: dict[str, Any], override_config: dict[str, Any]) -> dict[str, Any]:
-    """
-    Merge template configuration with override configuration.
+    """Merge template configuration with override configuration.
 
     Override values take precedence over template values.
 
@@ -472,8 +463,7 @@ def merge_template_override(template_config: dict[str, Any], override_config: di
 
 
 def expand_and_validate_directory(directory: str, create_if_missing: bool = False) -> Path:
-    """
-    Expand user paths and validate directory existence.
+    """Expand user paths and validate directory existence.
 
     Args:
         directory: Directory path (may contain ~ or environment variables)
@@ -518,9 +508,12 @@ def expand_and_validate_directory(directory: str, create_if_missing: bool = Fals
         ) from e
 
 
-def get_session_by_project(project_name: str, projects_config: dict[str, Any], server: libtmux.Server | None = None) -> SessionInfo | None:
-    """
-    Get session information by project name.
+def get_session_by_project(
+    project_name: str,
+    projects_config: dict[str, Any],
+    server: libtmux.Server | None = None,
+) -> SessionInfo | None:
+    """Get session information by project name.
 
     Args:
         project_name: Name of the project

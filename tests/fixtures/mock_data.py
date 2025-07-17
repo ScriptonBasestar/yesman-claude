@@ -1,6 +1,5 @@
-"""
-공통 Mock 데이터 정의
-테스트에서 재사용 가능한 mock 객체들을 중앙화
+"""공통 Mock 데이터 정의
+테스트에서 재사용 가능한 mock 객체들을 중앙화.
 
 Updated: Enhanced with factory system integration for better mock management
 """
@@ -11,7 +10,7 @@ from typing import Any
 
 # Tmux 관련 Mock
 class MockTmuxSession:
-    """Tmux 세션 Mock 객체"""
+    """Tmux 세션 Mock 객체."""
 
     def __init__(self, name="test-session", windows=None):
         self.name = name
@@ -29,7 +28,7 @@ class MockTmuxSession:
 
 
 class MockTmuxWindow:
-    """Tmux 윈도우 Mock 객체"""
+    """Tmux 윈도우 Mock 객체."""
 
     def __init__(self, name="test-window"):
         self.name = name
@@ -40,7 +39,7 @@ class MockTmuxWindow:
 
 
 class MockTmuxPane:
-    """Tmux 패인 Mock 객체"""
+    """Tmux 패인 Mock 객체."""
 
     def __init__(self, index=0, content=""):
         self.index = index
@@ -52,7 +51,7 @@ class MockTmuxPane:
 
 # Claude 관련 Mock
 class MockClaudeProcess:
-    """Claude 프로세스 Mock 객체"""
+    """Claude 프로세스 Mock 객체."""
 
     def __init__(self, pid=12345, status="running"):
         self.pid = pid
@@ -111,9 +110,8 @@ MOCK_API_RESPONSES = {
 
 # Factory Integration - Bridge between old and new systems
 def get_factory_mock(mock_type: str, **kwargs) -> Any:
-    """
-    Bridge function to get factory-created mocks
-    Provides backward compatibility while encouraging factory usage
+    """Bridge function to get factory-created mocks
+    Provides backward compatibility while encouraging factory usage.
 
     Args:
         mock_type: Type of mock to create ('session_manager', 'claude_manager', etc.)
@@ -142,23 +140,23 @@ def get_factory_mock(mock_type: str, **kwargs) -> Any:
 
 # Enhanced mock classes with factory integration
 class EnhancedMockTmuxSession(MockTmuxSession):
-    """Enhanced TmuxSession mock that integrates with factory system"""
+    """Enhanced TmuxSession mock that integrates with factory system."""
 
     @classmethod
     def from_factory(cls, name: str = "test-session", **kwargs):
-        """Create enhanced mock using factory system"""
+        """Create enhanced mock using factory system."""
         return get_factory_mock("tmux_session", name=name, **kwargs)
 
     @classmethod
     def with_windows(cls, name: str = "test-session", window_count: int = 2):
-        """Create mock with specified number of windows"""
+        """Create mock with specified number of windows."""
         windows = [MockTmuxWindow(f"window-{i}") for i in range(window_count)]
         return cls.from_factory(name=name, windows=windows)
 
 
 # Convenience functions for common mock patterns
 def create_mock_session_with_controller(**kwargs) -> dict[str, Any]:
-    """Create a complete mock session with controller for integration tests"""
+    """Create a complete mock session with controller for integration tests."""
     session_mock = get_factory_mock("session_manager", **kwargs)
     claude_mock = get_factory_mock("claude_manager", **kwargs)
 
@@ -170,7 +168,7 @@ def create_mock_session_with_controller(**kwargs) -> dict[str, Any]:
 
 
 def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
-    """Create standard API test mocks"""
+    """Create standard API test mocks."""
     if success:
         return {
             "response": get_factory_mock(

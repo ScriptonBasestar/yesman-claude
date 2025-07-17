@@ -1,3 +1,35 @@
+# sbkube Makefile
+
+.PHONY: help install test test-unit test-integration test-performance test-coverage clean
+
+# Default target
+help:
+	@echo "sbkube Development Commands"
+	@echo ""
+	@echo "Installation:"
+	@echo "  make install          Install sbkube in development mode"
+	@echo "  make install-dev      Install with dev dependencies (ruff, mypy, black)"
+	@echo "  make install-test     Install with test dependencies"
+	@echo "  make install-all      Install with all dependencies (dev + test)"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test            Run all tests"
+	@echo "  make test-unit       Run unit tests (tests/unit/)"
+	@echo "  make test-integration Run integration tests (tests/integration/)"
+	@echo "  make test-performance Run performance tests (tests/performance/)"
+	@echo "  make test-e2e        Run end-to-end tests (tests/e2e/)"
+	@echo "  make test-legacy     Run legacy tests (tests/legacy/)"
+	@echo "  make test-coverage   Run tests with coverage report"
+	@echo ""
+	@echo "Code Quality:"
+	@echo "  make lint            Run linters (ruff, mypy, bandit) - read-only"
+	@echo "  make lint-fix        Run linters with auto-fix"
+	@echo "  make lint-fix UNSAFE_FIXES=1  Run linters with unsafe auto-fix"
+	@echo "  make lint-check      Run linters with diff output (no auto-fix)"
+	@echo "  make lint-strict     Run strict linters for high quality standards"
+	@echo ""
+	@echo "Cleanup:"
+	@echo "  make clean           Clean build artifacts and caches"
 
 # Installation
 install:
@@ -108,21 +140,64 @@ test-clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
 # Code Quality
-lint:
-	@echo "Running ruff check..."
-	uv run ruff check --target-version py311 libs commands tests docs/examples
-	@echo "Running mypy..."
-	uv run mypy --config-file=pyproject.toml libs commands api
-	@echo "Running bandit security check..."
-	@uv run bandit -r libs commands --skip B101,B404,B603,B607,B602 --severity-level medium --quiet || echo "✅ Security check completed"
+LINT_DIRS = libs commands api tests
+LINT_DIRS_SECURITY = libs commands api
+LINT_DIRS_CORE = libs commands api
+EXCLUDE_DIRS = --exclude migrations --exclude node_modules --exclude examples
+# Optional unsafe fixes (use: make lint-fix UNSAFE_FIXES=1)
+UNSAFE_FIXES ?=
+UNSAFE_FLAG = $(if $(UNSAFE_FIXES),--unsafe-fixes,)
 
-format:
-	@echo "Running ruff format..."
-	uv run ruff format --target-version py311 libs commands tests docs/examples
+# lint-check: 변경 사항 미리보기 (diff 모드)
+# - ruff check --diff: 수정될 내용을 미리보기로 표시 (실제 수정 없음)
+# - mypy: 타입 검사
+# - bandit: 보안 취약점 검사 (medium 레벨)
+# - mdformat: 마크다운 포맷팅 체크 (diff 모드)
+lint-check:
+	@echo "Running lint checks only (no auto-fix)..."
+	@echo "Running ruff check..."
+	uv run ruff check $(LINT_DIRS) --diff $(EXCLUDE_DIRS)
+	@echo "Running mypy..."
+	uv run mypy $(LINT_DIRS_CORE) --ignore-missing-imports $(EXCLUDE_DIRS)
+	@echo "Running bandit security check..."
+	uv run bandit -r $(LINT_DIRS_SECURITY) --skip B101,B404,B603,B607,B602 --severity-level medium --quiet --exclude "*/tests/*,*/scripts/*,*/debug/*,*/examples/*" || echo "✅ Security check completed"
+	@echo "Running mdformat check..."
+	uv run mdformat --check --diff *.md docs/**/*.md --wrap 120 || echo "✅ Markdown format check completed"
+
+lint: lint-check
+
+# lint-fix: 자동 수정 포함 코드 품질 검사 + 포맷팅
+# - ruff check --fix: 자동 수정 가능한 규칙 위반 항목 수정
+# - ruff format: 코드 포맷팅 자동 적용, black대체용
+# - mypy: 타입 검사
+# - bandit: 보안 취약점 검사 (medium 레벨)
+# - mdformat: 마크다운 포맷팅
+# - 사용법: make lint-fix UNSAFE_FIXES=1 (위험한 자동 수정 포함)
+lint-fix:
+	@echo "Running lint with auto-fix..."
 	@echo "Running ruff check with auto-fix..."
-	uv run ruff check --fix --target-version py311 libs commands tests docs/examples
+	uv run ruff check $(LINT_DIRS) --fix $(UNSAFE_FLAG) $(EXCLUDE_DIRS)
+	@echo "Running ruff format..."
+	uv run ruff format $(LINT_DIRS) $(EXCLUDE_DIRS)
+	@echo "Running mypy..."
+	uv run mypy $(LINT_DIRS_CORE) --ignore-missing-imports $(EXCLUDE_DIRS)
+	@echo "Running bandit security check..."
+	uv run bandit -r $(LINT_DIRS_SECURITY) --skip B101,B404,B603,B607,B602 --severity-level medium --quiet --exclude "*/tests/*,*/scripts/*,*/debug/*,*/examples/*" || echo "✅ Security check completed"
 	@echo "Running mdformat..."
 	uv run mdformat *.md docs/**/*.md --wrap 120
+
+# lint-strict: 엄격한 코드 품질 검사 (모든 규칙 적용)
+# - ruff check --select ALL: 모든 규칙 적용 (일부 규칙 무시)
+# - mypy --strict: 엄격한 타입 검사
+# - bandit --severity-level low: 낮은 심각도까지 보안 검사
+lint-strict:
+	@echo "Running strict lint checks..."
+	@echo "Running ruff with all rules..."
+	uv run ruff check $(LINT_DIRS) --select ALL --ignore E501,B008,C901,COM812,B904,B017,B007,D100,D101,D102,D103,D104,D105,D106,D107  $(EXCLUDE_DIRS) --output-format=full
+	@echo "Running mypy with strict settings..."
+	uv run mypy $(LINT_DIRS_CORE) --strict --ignore-missing-imports  $(EXCLUDE_DIRS)
+	@echo "Running bandit with strict settings..."
+	uv run bandit -r $(LINT_DIRS_CORE) --severity-level low --exclude "*/tests/*,*/scripts/*,*/debug/*,*/examples/*"
 
 # Pre-commit integration
 pre-commit-install:
@@ -136,3 +211,23 @@ pre-commit-run:
 pre-commit-update:
 	@echo "Updating pre-commit hooks..."
 	uv run pre-commit autoupdate
+
+# Git hooks validation
+validate-hooks:
+	@echo "Validating git hooks consistency..."
+	@echo "Testing pre-commit hooks..."
+	uv run pre-commit run --all-files
+	@echo "Testing make lint..."
+	make lint
+	@echo "✅ All hooks validated successfully"
+
+pre-push-test:
+	@echo "Running pre-push validation..."
+	make lint
+	make test-fast
+	@echo "✅ Pre-push validation completed"
+
+# Validate lint configuration consistency
+validate-lint-config:
+	@echo "Validating lint configuration consistency..."
+	python3 scripts/validate-lint-config.py

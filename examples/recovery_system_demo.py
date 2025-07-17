@@ -170,7 +170,9 @@ async def demo_recovery_system():
         print("   1. Enable recovery: agent_pool.enable_recovery_system()")
         print("   2. Create snapshots: await agent_pool.create_operation_snapshot()")
         print("   3. Execute with protection: await agent_pool.execute_with_recovery()")
-        print("   4. Manual rollback: await agent_pool.rollback_to_snapshot(snapshot_id)")
+        print(
+            "   4. Manual rollback: await agent_pool.rollback_to_snapshot(snapshot_id)"
+        )
         print("   5. Monitor status: agent_pool.get_recovery_status()")
 
         print("\n   🚀 Integration points:")

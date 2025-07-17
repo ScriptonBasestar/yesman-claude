@@ -1,6 +1,4 @@
-"""
-Test for error handling and edge cases
-"""
+"""Test for error handling and edge cases."""
 
 import os
 import shutil
@@ -10,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 
 class TestErrorHandling(unittest.TestCase):
-    """Test error handling and edge cases across the application"""
+    """Test error handling and edge cases across the application."""
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
@@ -21,7 +19,7 @@ class TestErrorHandling(unittest.TestCase):
     # --- Input Validation Tests ---
 
     def test_empty_string_inputs(self):
-        """Test handling of empty string inputs"""
+        """Test handling of empty string inputs."""
         from libs.core.prompt_detector import ClaudePromptDetector
 
         detector = ClaudePromptDetector()
@@ -29,7 +27,7 @@ class TestErrorHandling(unittest.TestCase):
         assert result is None, "Empty string should return None"
 
     def test_none_inputs(self):
-        """Test handling of None inputs"""
+        """Test handling of None inputs."""
         from libs.core.content_collector import ContentCollector
 
         collector = ContentCollector()
@@ -38,7 +36,7 @@ class TestErrorHandling(unittest.TestCase):
         assert result == "" or result is None
 
     def test_invalid_session_names(self):
-        """Test handling of invalid session names"""
+        """Test handling of invalid session names."""
         from libs.core.session_manager import SessionManager
 
         manager = SessionManager()
@@ -60,7 +58,7 @@ class TestErrorHandling(unittest.TestCase):
     # --- File System Error Tests ---
 
     def test_missing_config_file(self):
-        """Test handling of missing configuration files"""
+        """Test handling of missing configuration files."""
         from libs.yesman_config import YesmanConfig
 
         # Try to load non-existent config
@@ -70,7 +68,7 @@ class TestErrorHandling(unittest.TestCase):
         assert config.get("log_level") is not None
 
     def test_permission_denied_error(self):
-        """Test handling of permission denied errors"""
+        """Test handling of permission denied errors."""
         # Create a read-only file
         readonly_file = os.path.join(self.temp_dir, "readonly.txt")
         with open(readonly_file, "w") as f:
@@ -87,7 +85,7 @@ class TestErrorHandling(unittest.TestCase):
         os.chmod(readonly_file, 0o644)
 
     def test_disk_full_simulation(self):
-        """Test handling of disk full errors with current RenderCache"""
+        """Test handling of disk full errors with current RenderCache."""
         from libs.dashboard.renderers.optimizations import RenderCache
 
         # Test with RenderCache (current cache implementation)
@@ -109,7 +107,7 @@ class TestErrorHandling(unittest.TestCase):
 
     @patch("requests.get")
     def test_network_timeout(self, mock_get):
-        """Test handling of network timeouts"""
+        """Test handling of network timeouts."""
         # Mock the non-existent APIClient
         with patch("libs.api.client.APIClient") as MockAPIClient:
             mock_client = MagicMock()
@@ -126,7 +124,7 @@ class TestErrorHandling(unittest.TestCase):
 
     @patch("websocket.WebSocket")
     def test_websocket_disconnection(self, mock_ws):
-        """Test handling of WebSocket disconnections"""
+        """Test handling of WebSocket disconnections."""
         # Mock the non-existent WebSocketClient
         with patch("libs.api.websocket_client.WebSocketClient") as MockWebSocketClient:
             mock_client = MagicMock()
@@ -150,7 +148,7 @@ class TestErrorHandling(unittest.TestCase):
 
     @patch("libtmux.Server")
     def test_tmux_not_running(self, mock_server):
-        """Test handling when tmux server is not running"""
+        """Test handling when tmux server is not running."""
         from libs.tmux_manager import TmuxManager
 
         # Simulate tmux not running
@@ -162,7 +160,7 @@ class TestErrorHandling(unittest.TestCase):
         assert sessions == [], "Should return empty list when tmux not running"
 
     def test_tmux_session_not_found(self):
-        """Test handling of non-existent tmux session"""
+        """Test handling of non-existent tmux session."""
         from libs.core.session_manager import SessionManager
 
         manager = SessionManager()
@@ -173,7 +171,7 @@ class TestErrorHandling(unittest.TestCase):
     # --- Race Condition Tests ---
 
     def test_concurrent_cache_access(self):
-        """Test handling of concurrent cache access with RenderCache"""
+        """Test handling of concurrent cache access with RenderCache."""
         import threading
 
         from libs.dashboard.renderers.optimizations import RenderCache
@@ -203,7 +201,7 @@ class TestErrorHandling(unittest.TestCase):
     # --- Resource Limit Tests ---
 
     def test_memory_limit_handling(self):
-        """Test handling of memory limits with RenderCache"""
+        """Test handling of memory limits with RenderCache."""
         from libs.dashboard.renderers.optimizations import RenderCache
 
         cache = RenderCache(max_size=10, ttl=60)  # Very small cache
@@ -218,7 +216,7 @@ class TestErrorHandling(unittest.TestCase):
         assert stats is not None  # Cache should remain functional
 
     def test_file_handle_limit(self):
-        """Test handling of file handle limits"""
+        """Test handling of file handle limits."""
         # Mock the non-existent FileHandlePool class
         with patch("libs.utils.file_utils.FileHandlePool") as MockFileHandlePool:
             mock_pool = MagicMock()
@@ -240,7 +238,7 @@ class TestErrorHandling(unittest.TestCase):
     # --- Data Corruption Tests ---
 
     def test_corrupted_cache_data(self):
-        """Test handling of corrupted cache data with RenderCache"""
+        """Test handling of corrupted cache data with RenderCache."""
         from libs.dashboard.renderers.optimizations import RenderCache
 
         cache = RenderCache(max_size=10, ttl=60)
@@ -265,7 +263,7 @@ class TestErrorHandling(unittest.TestCase):
                 pass
 
     def test_partial_data_handling(self):
-        """Test handling of partial/incomplete data"""
+        """Test handling of partial/incomplete data."""
         from libs.core.prompt_detector import ClaudePromptDetector
 
         detector = ClaudePromptDetector()

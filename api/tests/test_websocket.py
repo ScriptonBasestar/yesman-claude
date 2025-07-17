@@ -1,4 +1,4 @@
-"""WebSocket connection test script"""
+"""WebSocket connection test script."""
 
 import asyncio
 import json
@@ -8,7 +8,7 @@ import websockets
 
 
 async def test_websocket_connection(uri: str, channel: str):
-    """Test WebSocket connection to a specific channel"""
+    """Test WebSocket connection to a specific channel."""
     print(f"\n🔌 Connecting to {uri} (channel: {channel})...")
 
     try:
@@ -104,7 +104,7 @@ async def test_websocket_connection(uri: str, channel: str):
 
 
 async def test_multiple_connections():
-    """Test multiple simultaneous WebSocket connections"""
+    """Test multiple simultaneous WebSocket connections."""
     base_url = "ws://localhost:8000/ws"
 
     channels = [
@@ -125,7 +125,7 @@ async def test_multiple_connections():
 
 
 async def stress_test_connections(num_connections: int = 10):
-    """Stress test with multiple dashboard connections"""
+    """Stress test with multiple dashboard connections."""
     print(f"\n🔥 Stress testing with {num_connections} connections...")
 
     uri = "ws://localhost:8000/ws/dashboard"
@@ -158,7 +158,7 @@ async def stress_test_connections(num_connections: int = 10):
 
 
 async def main():
-    """Run all WebSocket tests"""
+    """Run all WebSocket tests."""
     print("🚀 Starting WebSocket tests...")
     print("=" * 50)
 

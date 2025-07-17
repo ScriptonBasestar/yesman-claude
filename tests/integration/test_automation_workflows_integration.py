@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Automation Workflows Integration Tests
+"""Automation Workflows Integration Tests.
 
 Tests the complete automation system including context detection,
 workflow execution, and real-time monitoring across components.
@@ -9,16 +8,26 @@ workflow execution, and real-time monitoring across components.
 import asyncio
 import time
 
-from commands.automate import AutomateConfigCommand, AutomateDetectCommand, AutomateMonitorCommand, AutomateWorkflowCommand
+from commands.automate import (
+    AutomateConfigCommand,
+    AutomateDetectCommand,
+    AutomateMonitorCommand,
+    AutomateWorkflowCommand,
+)
 
-from .test_framework import AsyncIntegrationTestBase, CommandTestRunner, MockClaudeEnvironment, PerformanceMonitor
+from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 
 class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
-    """Test complete automation workflow integration"""
+    """Test complete automation workflow integration."""
 
     def setup_method(self):
-        """Setup for automation workflow tests"""
+        """Setup for automation workflow tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
@@ -28,15 +37,21 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         self._setup_automation_responses()
 
     def _setup_automation_responses(self):
-        """Setup mock Claude responses for automation scenarios"""
-        self.mock_claude.add_mock_response("setup development environment", "I'll help set up your development environment. Detecting project type...")
+        """Setup mock Claude responses for automation scenarios."""
+        self.mock_claude.add_mock_response(
+            "setup development environment",
+            "I'll help set up your development environment. Detecting project type...",
+        )
 
         self.mock_claude.add_mock_response("run tests", "Running test suite... All tests passed successfully!")
 
-        self.mock_claude.add_mock_response("deploy application", "Deploying to staging environment... Deployment completed successfully!")
+        self.mock_claude.add_mock_response(
+            "deploy application",
+            "Deploying to staging environment... Deployment completed successfully!",
+        )
 
     def test_end_to_end_automation_workflow(self):
-        """Test complete end-to-end automation workflow"""
+        """Test complete end-to-end automation workflow."""
         # Step 1: Create test project with various contexts
         project_dir = self.test_dir / "automation_project"
         project_dir.mkdir()
@@ -72,14 +87,23 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         assert "git" in context_types
 
         # Step 3: Configure automation for detected contexts
-        config_result = self.command_runner.run_command(AutomateConfigCommand, project_path=str(project_dir), enable_contexts=["python", "docker"], auto_workflow=True)
+        config_result = self.command_runner.run_command(
+            AutomateConfigCommand,
+            project_path=str(project_dir),
+            enable_contexts=["python", "docker"],
+            auto_workflow=True,
+        )
 
         assert config_result["success"] is True
 
         # Step 4: Execute automated workflow
         self.performance_monitor.start_timing("workflow_execution")
 
-        workflow_result = self.command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="development_setup")
+        workflow_result = self.command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="development_setup",
+        )
 
         workflow_duration = self.performance_monitor.end_timing("workflow_execution")
 
@@ -106,11 +130,15 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         assert monitoring_duration < 5.0, f"Monitoring setup took {monitoring_duration:.2f}s, should be < 5s"
 
     def test_multi_project_automation_coordination(self):
-        """Test automation coordination across multiple projects"""
+        """Test automation coordination across multiple projects."""
         # Create multiple projects with different contexts
         projects = {
             "python_api": {
-                "files": {"requirements.txt": "fastapi==0.68.0", "main.py": "from fastapi import FastAPI\napp = FastAPI()", "test_main.py": "def test_api(): pass"},
+                "files": {
+                    "requirements.txt": "fastapi==0.68.0",
+                    "main.py": "from fastapi import FastAPI\napp = FastAPI()",
+                    "test_main.py": "def test_api(): pass",
+                },
                 "expected_contexts": ["python", "api"],
             },
             "react_frontend": {
@@ -122,7 +150,11 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
                 "expected_contexts": ["javascript", "react"],
             },
             "docker_service": {
-                "files": {"Dockerfile": "FROM nginx:alpine", "docker-compose.yml": "version: '3.8'\nservices:\n  web:\n    build: .", "nginx.conf": "server { listen 80; }"},
+                "files": {
+                    "Dockerfile": "FROM nginx:alpine",
+                    "docker-compose.yml": "version: '3.8'\nservices:\n  web:\n    build: .",
+                    "nginx.conf": "server { listen 80; }",
+                },
                 "expected_contexts": ["docker", "nginx"],
             },
         }
@@ -146,7 +178,10 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
             assert detect_result["success"] is True
             detected_contexts = detect_result.get("contexts", [])
 
-            project_results[project_name] = {"detected_contexts": detected_contexts, "expected_contexts": project_config["expected_contexts"]}
+            project_results[project_name] = {
+                "detected_contexts": detected_contexts,
+                "expected_contexts": project_config["expected_contexts"],
+            }
 
         # Verify each project detected appropriate contexts
         for project_name, results in project_results.items():
@@ -164,7 +199,7 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         assert len(monitored_projects) == len(projects)
 
     def test_automation_error_recovery(self):
-        """Test automation system error recovery and resilience"""
+        """Test automation system error recovery and resilience."""
         project_dir = self.test_dir / "error_recovery_project"
         project_dir.mkdir()
 
@@ -179,7 +214,12 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         assert detect_result["success"] is True
 
         # Test workflow execution with error handling
-        workflow_result = self.command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="validation_check", continue_on_error=True)
+        workflow_result = self.command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="validation_check",
+            continue_on_error=True,
+        )
 
         # Should handle errors gracefully
         assert workflow_result["success"] is True
@@ -192,17 +232,21 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         (project_dir / "broken_script.py").unlink()
 
         # Test recovery workflow
-        recovery_result = self.command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="validation_check")
+        recovery_result = self.command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="validation_check",
+        )
 
         assert recovery_result["success"] is True
         assert len(recovery_result.get("errors", [])) == 0  # Should have no errors now
 
 
 class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
-    """Test real-time monitoring and reactive automation"""
+    """Test real-time monitoring and reactive automation."""
 
     async def test_file_change_detection_workflow(self):
-        """Test that file changes trigger appropriate automation workflows"""
+        """Test that file changes trigger appropriate automation workflows."""
         project_dir = self.test_dir / "monitoring_project"
         project_dir.mkdir()
 
@@ -245,7 +289,7 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         assert True  # Placeholder - actual verification would depend on monitoring implementation
 
     async def _run_async_monitor(self, command_runner, project_path):
-        """Helper to run monitoring in async context"""
+        """Helper to run monitoring in async context."""
         # This would be the actual async monitoring implementation
         # For now, we simulate it
         start_time = time.time()
@@ -253,7 +297,7 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
             await asyncio.sleep(0.1)
 
     def test_performance_based_workflow_optimization(self):
-        """Test that workflows optimize based on performance metrics"""
+        """Test that workflows optimize based on performance metrics."""
         project_dir = self.test_dir / "performance_project"
         project_dir.mkdir()
 
@@ -267,7 +311,12 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         # Run initial workflow and measure performance
         performance_monitor.start_timing("initial_workflow")
 
-        initial_result = command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="test_execution", optimization_level="none")
+        initial_result = command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="test_execution",
+            optimization_level="none",
+        )
 
         initial_duration = performance_monitor.end_timing("initial_workflow")
 
@@ -276,7 +325,12 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         # Run optimized workflow
         performance_monitor.start_timing("optimized_workflow")
 
-        optimized_result = command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="test_execution", optimization_level="performance")
+        optimized_result = command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="test_execution",
+            optimization_level="performance",
+        )
 
         optimized_duration = performance_monitor.end_timing("optimized_workflow")
 
@@ -289,10 +343,10 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
 
 
 class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
-    """Test integration between automation system and AI learning"""
+    """Test integration between automation system and AI learning."""
 
     async def test_ai_guided_workflow_adaptation(self):
-        """Test that AI learning guides workflow adaptation"""
+        """Test that AI learning guides workflow adaptation."""
         project_dir = self.test_dir / "ai_guided_project"
         project_dir.mkdir()
 
@@ -303,7 +357,12 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
         command_runner = CommandTestRunner(self)
 
         # Initial workflow execution with learning enabled
-        initial_result = command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="api_development", enable_learning=True)
+        initial_result = command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="api_development",
+            enable_learning=True,
+        )
 
         assert initial_result["success"] is True
 
@@ -312,7 +371,12 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
         (project_dir / "requirements.txt").write_text("requests==2.25.1\nsqlite3")
 
         # Second workflow execution - should adapt based on learning
-        adapted_result = command_runner.run_command(AutomateWorkflowCommand, project_path=str(project_dir), workflow_name="api_development", enable_learning=True)
+        adapted_result = command_runner.run_command(
+            AutomateWorkflowCommand,
+            project_path=str(project_dir),
+            workflow_name="api_development",
+            enable_learning=True,
+        )
 
         assert adapted_result["success"] is True
 
@@ -325,7 +389,7 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
         assert any("database" in name.lower() for name in step_names)
 
     def test_predictive_automation_suggestions(self):
-        """Test AI-powered predictive automation suggestions"""
+        """Test AI-powered predictive automation suggestions."""
         project_dir = self.test_dir / "predictive_project"
         project_dir.mkdir()
 
@@ -338,7 +402,12 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
         command_runner = CommandTestRunner(self)
 
         # Request automation suggestions
-        suggestions_result = command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir), suggest_workflows=True, enable_predictions=True)
+        suggestions_result = command_runner.run_command(
+            AutomateDetectCommand,
+            project_path=str(project_dir),
+            suggest_workflows=True,
+            enable_predictions=True,
+        )
 
         assert suggestions_result["success"] is True
 

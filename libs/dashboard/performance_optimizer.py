@@ -1,5 +1,4 @@
-"""
-Performance Optimizer
+"""Performance Optimizer.
 
 Comprehensive performance monitoring and optimization system for dashboard interfaces
 with automatic tuning, metrics collection, and intelligent resource management.
@@ -26,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class OptimizationLevel(Enum):
-    """Performance optimization levels"""
+    """Performance optimization levels."""
 
     NONE = "none"
     LOW = "low"
@@ -36,7 +35,7 @@ class OptimizationLevel(Enum):
 
 
 class PerformanceThreshold(Enum):
-    """Performance threshold indicators"""
+    """Performance threshold indicators."""
 
     EXCELLENT = "excellent"  # <30% CPU, <40% Memory
     GOOD = "good"  # <50% CPU, <60% Memory
@@ -46,7 +45,7 @@ class PerformanceThreshold(Enum):
 
 @dataclass
 class PerformanceMetrics:
-    """Comprehensive performance metrics data"""
+    """Comprehensive performance metrics data."""
 
     # System metrics
     cpu_usage: float = 0.0
@@ -71,7 +70,7 @@ class PerformanceMetrics:
     timestamp: datetime = field(default_factory=datetime.now)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return {
             "cpu_usage": self.cpu_usage,
             "memory_usage": self.memory_usage,
@@ -90,7 +89,7 @@ class PerformanceMetrics:
         }
 
     def get_threshold_level(self) -> PerformanceThreshold:
-        """Get performance threshold level based on metrics"""
+        """Get performance threshold level based on metrics."""
         if self.cpu_usage >= 70 or self.memory_usage >= 80:
             return PerformanceThreshold.CRITICAL
         elif self.cpu_usage >= 50 or self.memory_usage >= 60:
@@ -103,7 +102,7 @@ class PerformanceMetrics:
 
 @dataclass
 class OptimizationStrategy:
-    """Optimization strategy configuration"""
+    """Optimization strategy configuration."""
 
     name: str
     level: OptimizationLevel
@@ -123,12 +122,12 @@ class OptimizationStrategy:
     max_update_interval: float = 10.0
 
     def should_optimize(self, metrics: PerformanceMetrics) -> bool:
-        """Check if optimization should be applied"""
+        """Check if optimization should be applied."""
         return metrics.cpu_usage > self.cpu_threshold or metrics.memory_usage > self.memory_threshold
 
 
 class PerformanceProfiler:
-    """Performance profiling and measurement utilities"""
+    """Performance profiling and measurement utilities."""
 
     def __init__(self):
         self.measurements: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=100))
@@ -137,7 +136,7 @@ class PerformanceProfiler:
 
     @contextmanager
     def measure(self, operation_name: str):
-        """Context manager for measuring operation time"""
+        """Context manager for measuring operation time."""
         start_time = time.perf_counter()
         try:
             yield
@@ -149,7 +148,7 @@ class PerformanceProfiler:
                 self.measurements[operation_name].append(duration)
 
     def measure_function(self, operation_name: str | None = None):
-        """Decorator for measuring function execution time"""
+        """Decorator for measuring function execution time."""
 
         def decorator(func: Callable) -> Callable:
             name = operation_name or f"{func.__module__}.{func.__name__}"
@@ -164,7 +163,7 @@ class PerformanceProfiler:
         return decorator
 
     def get_stats(self, operation_name: str) -> dict[str, float]:
-        """Get statistics for an operation"""
+        """Get statistics for an operation."""
         with self.lock:
             measurements = list(self.measurements[operation_name])
 
@@ -186,14 +185,13 @@ class PerformanceProfiler:
         }
 
     def get_all_stats(self) -> dict[str, dict[str, float]]:
-        """Get statistics for all operations"""
+        """Get statistics for all operations."""
         with self.lock:
             return {name: self.get_stats(name) for name in self.measurements}
 
 
 class PerformanceOptimizer:
-    """
-    Main performance optimization system
+    """Main performance optimization system.
 
     Monitors system and application performance, automatically applies
     optimizations, and provides detailed performance reports.
@@ -216,8 +214,7 @@ class PerformanceOptimizer:
         cls._instance = None
 
     def __init__(self, monitoring_interval: float = 1.0):
-        """
-        Initialize performance optimizer
+        """Initialize performance optimizer.
 
         Args:
             monitoring_interval: Interval between performance measurements in seconds
@@ -254,7 +251,7 @@ class PerformanceOptimizer:
     def _create_optimization_strategies(
         self,
     ) -> dict[OptimizationLevel, OptimizationStrategy]:
-        """Create built-in optimization strategies"""
+        """Create built-in optimization strategies."""
         return {
             OptimizationLevel.NONE: OptimizationStrategy(
                 name="No Optimization",
@@ -317,7 +314,7 @@ class PerformanceOptimizer:
         }
 
     def start_monitoring(self) -> bool:
-        """Start performance monitoring"""
+        """Start performance monitoring."""
         if self.monitoring:
             logger.warning("Performance monitoring already running")
             return False
@@ -330,7 +327,7 @@ class PerformanceOptimizer:
         return True
 
     def stop_monitoring(self) -> bool:
-        """Stop performance monitoring"""
+        """Stop performance monitoring."""
         if not self.monitoring:
             logger.warning("Performance monitoring not running")
             return False
@@ -344,7 +341,7 @@ class PerformanceOptimizer:
         return True
 
     def _monitor_loop(self) -> None:
-        """Main monitoring loop"""
+        """Main monitoring loop."""
         logger.debug("Performance monitoring loop started")
 
         while self.monitoring:
@@ -378,7 +375,7 @@ class PerformanceOptimizer:
         logger.debug("Performance monitoring loop stopped")
 
     def _collect_metrics(self) -> PerformanceMetrics:
-        """Collect current performance metrics"""
+        """Collect current performance metrics."""
         try:
             # System metrics
             cpu_usage = self.process.cpu_percent()
@@ -416,7 +413,7 @@ class PerformanceOptimizer:
             return PerformanceMetrics()
 
     def _get_cache_stats(self) -> dict[str, Any]:
-        """Get cache statistics (placeholder for actual cache integration)"""
+        """Get cache statistics (placeholder for actual cache integration)."""
         # This would integrate with actual cache systems
         return {
             "hit_rate": 0.85,  # Mock data
@@ -425,17 +422,17 @@ class PerformanceOptimizer:
         }
 
     def _get_widget_count(self) -> int:
-        """Get current widget count (placeholder for actual integration)"""
+        """Get current widget count (placeholder for actual integration)."""
         # This would integrate with dashboard widget system
         return 25  # Mock data
 
     def _get_active_connections(self) -> int:
-        """Get active connection count (placeholder for actual integration)"""
+        """Get active connection count (placeholder for actual integration)."""
         # This would integrate with web server or connection manager
         return 3  # Mock data
 
     def _check_optimization_needs(self, metrics: PerformanceMetrics) -> None:
-        """Check if optimization is needed and apply if necessary"""
+        """Check if optimization is needed and apply if necessary."""
         threshold_level = metrics.get_threshold_level()
 
         # Determine needed optimization level
@@ -453,7 +450,7 @@ class PerformanceOptimizer:
             self._apply_optimization(needed_level)
 
     def _apply_optimization(self, level: OptimizationLevel) -> None:
-        """Apply optimization strategy"""
+        """Apply optimization strategy."""
         if level not in self.optimization_strategies:
             logger.error(f"Unknown optimization level: {level}")
             return
@@ -498,49 +495,49 @@ class PerformanceOptimizer:
         logger.info(f"Optimization applied: {previous_level.value} -> {level.value}")
 
     def _optimize_update_frequency(self, strategy: OptimizationStrategy) -> None:
-        """Optimize update frequency based on strategy"""
+        """Optimize update frequency based on strategy."""
         new_interval = min(strategy.min_update_interval, strategy.max_update_interval)
         self.monitoring_interval = new_interval
         logger.debug(f"Update frequency optimized: {new_interval}s interval")
 
     def _optimize_caching(self, strategy: OptimizationStrategy) -> None:
-        """Optimize caching behavior"""
+        """Optimize caching behavior."""
         # This would integrate with actual cache systems
         logger.debug("Caching optimization applied")
 
     def _optimize_widget_count(self, strategy: OptimizationStrategy) -> None:
-        """Optimize widget count"""
+        """Optimize widget count."""
         # This would integrate with widget management system
         logger.debug(f"Widget count limited to: {strategy.max_widget_count}")
 
     def _optimize_animations(self, strategy: OptimizationStrategy) -> None:
-        """Optimize animations"""
+        """Optimize animations."""
         # This would integrate with animation system
         logger.debug("Animations disabled for performance")
 
     def _force_garbage_collection(self) -> None:
-        """Force garbage collection"""
+        """Force garbage collection."""
         collected = gc.collect()
         logger.debug(f"Garbage collection forced: {collected} objects collected")
 
     def measure_render_time(self, func: Callable) -> Callable:
-        """Decorator to measure render time"""
+        """Decorator to measure render time."""
         return self.profiler.measure_function("render")(func)
 
     def get_current_metrics(self) -> PerformanceMetrics:
-        """Get current performance metrics"""
+        """Get current performance metrics."""
         with self.lock:
             return self.current_metrics
 
     def get_metrics_history(self, duration_minutes: int = 5) -> list[PerformanceMetrics]:
-        """Get metrics history for specified duration"""
+        """Get metrics history for specified duration."""
         cutoff_time = datetime.now() - timedelta(minutes=duration_minutes)
 
         with self.lock:
             return [metrics for metrics in self.metrics_history if metrics.timestamp >= cutoff_time]
 
     def get_performance_report(self) -> dict[str, Any]:
-        """Generate comprehensive performance report"""
+        """Generate comprehensive performance report."""
         current = self.get_current_metrics()
         history = self.get_metrics_history(5)
         profiler_stats = self.profiler.get_all_stats()
@@ -575,7 +572,7 @@ class PerformanceOptimizer:
         }
 
     def _generate_recommendations(self, current: PerformanceMetrics, history: list[PerformanceMetrics]) -> list[str]:
-        """Generate performance recommendations"""
+        """Generate performance recommendations."""
         recommendations = []
 
         # CPU recommendations
@@ -608,33 +605,31 @@ class PerformanceOptimizer:
         return recommendations
 
     def add_optimization_callback(self, callback: Callable[[OptimizationLevel], None]) -> None:
-        """Add callback for optimization level changes"""
+        """Add callback for optimization level changes."""
         self.optimization_callbacks.append(callback)
 
     def add_metrics_callback(self, callback: Callable[[PerformanceMetrics], None]) -> None:
-        """Add callback for metrics updates"""
+        """Add callback for metrics updates."""
         self.metrics_callbacks.append(callback)
 
     def set_optimization_level(self, level: OptimizationLevel) -> None:
-        """Manually set optimization level"""
+        """Manually set optimization level."""
         self._apply_optimization(level)
 
     def reset_optimizations(self) -> None:
-        """Reset all optimizations to default"""
+        """Reset all optimizations to default."""
         self._apply_optimization(OptimizationLevel.NONE)
 
 
 class AsyncPerformanceOptimizer:
-    """
-    Asynchronous version of performance optimizer
+    """Asynchronous version of performance optimizer.
 
     Provides non-blocking performance monitoring with rate limiting
     and concurrent optimization strategies.
     """
 
     def __init__(self, monitoring_interval: float = 1.0, max_concurrent_tasks: int = 10):
-        """
-        Initialize async performance optimizer
+        """Initialize async performance optimizer.
 
         Args:
             monitoring_interval: Interval between measurements
@@ -650,7 +645,7 @@ class AsyncPerformanceOptimizer:
         self.rate_limit_window = 60.0  # 1 minute
 
     async def start_monitoring(self) -> bool:
-        """Start async performance monitoring"""
+        """Start async performance monitoring."""
         if self.monitoring_task and not self.monitoring_task.done():
             logger.warning("Async monitoring already running")
             return False
@@ -660,7 +655,7 @@ class AsyncPerformanceOptimizer:
         return True
 
     async def stop_monitoring(self) -> bool:
-        """Stop async performance monitoring"""
+        """Stop async performance monitoring."""
         if not self.monitoring_task or self.monitoring_task.done():
             logger.warning("Async monitoring not running")
             return False
@@ -674,7 +669,7 @@ class AsyncPerformanceOptimizer:
         return True
 
     async def _async_monitor_loop(self) -> None:
-        """Async monitoring loop"""
+        """Async monitoring loop."""
         while True:
             try:
                 async with self.semaphore:
@@ -702,7 +697,7 @@ class AsyncPerformanceOptimizer:
                 await asyncio.sleep(self.monitoring_interval)
 
     def _should_update_metrics(self) -> bool:
-        """Check if metrics should be updated based on rate limiting"""
+        """Check if metrics should be updated based on rate limiting."""
         current_time = time.time()
         last_update = self.rate_limiter.get("metrics_update", 0)
 
@@ -713,7 +708,7 @@ class AsyncPerformanceOptimizer:
         return False
 
     async def _async_check_optimization(self, metrics: PerformanceMetrics) -> None:
-        """Async optimization checking"""
+        """Async optimization checking."""
         threshold_level = metrics.get_threshold_level()
 
         # Rate limit optimization applications
@@ -728,7 +723,7 @@ class AsyncPerformanceOptimizer:
             await self._apply_async_optimization(OptimizationLevel.AGGRESSIVE)
 
     async def _apply_async_optimization(self, level: OptimizationLevel) -> None:
-        """Apply optimization asynchronously"""
+        """Apply optimization asynchronously."""
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
             None,
@@ -737,7 +732,7 @@ class AsyncPerformanceOptimizer:
         )
 
     async def get_performance_report(self) -> dict[str, Any]:
-        """Get async performance report"""
+        """Get async performance report."""
         # For simplicity, delegate to sync implementation for now
         with self.lock:
             history = list(self.metrics_history)
@@ -746,10 +741,10 @@ class AsyncPerformanceOptimizer:
 
 
 def get_performance_optimizer() -> PerformanceOptimizer:
-    """Get the global performance optimizer instance"""
+    """Get the global performance optimizer instance."""
     return PerformanceOptimizer.get_instance()
 
 
 def reset_performance_optimizer() -> None:
-    """Reset the global performance optimizer"""
+    """Reset the global performance optimizer."""
     PerformanceOptimizer.reset_instance()

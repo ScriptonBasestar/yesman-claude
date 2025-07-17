@@ -1,4 +1,4 @@
-"""Tests for CollaborationEngine multi-agent coordination system"""
+"""Tests for CollaborationEngine multi-agent coordination system."""
 
 from collections import deque
 from datetime import datetime, timedelta
@@ -8,17 +8,25 @@ import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.collaboration_engine import CollaborationEngine, CollaborationMessage, CollaborationMode, CollaborationSession, MessagePriority, MessageType, SharedKnowledge
+from libs.multi_agent.collaboration_engine import (
+    CollaborationEngine,
+    CollaborationMessage,
+    CollaborationMode,
+    CollaborationSession,
+    MessagePriority,
+    MessageType,
+    SharedKnowledge,
+)
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 from libs.multi_agent.types import AgentState
 
 
 class TestCollaborationMessage:
-    """Test cases for CollaborationMessage"""
+    """Test cases for CollaborationMessage."""
 
     def test_init(self):
-        """Test CollaborationMessage initialization"""
+        """Test CollaborationMessage initialization."""
         message = CollaborationMessage(
             message_id="test-msg-1",
             sender_id="agent-1",
@@ -42,7 +50,7 @@ class TestCollaborationMessage:
         assert isinstance(message.created_at, datetime)
 
     def test_is_expired(self):
-        """Test message expiration check"""
+        """Test message expiration check."""
         # Non-expiring message
         message1 = CollaborationMessage(
             message_id="test-1",
@@ -83,10 +91,10 @@ class TestCollaborationMessage:
 
 
 class TestSharedKnowledge:
-    """Test cases for SharedKnowledge"""
+    """Test cases for SharedKnowledge."""
 
     def test_init(self):
-        """Test SharedKnowledge initialization"""
+        """Test SharedKnowledge initialization."""
         knowledge = SharedKnowledge(
             knowledge_id="know-1",
             contributor_id="agent-1",
@@ -108,10 +116,10 @@ class TestSharedKnowledge:
 
 
 class TestCollaborationSession:
-    """Test cases for CollaborationSession"""
+    """Test cases for CollaborationSession."""
 
     def test_init(self):
-        """Test CollaborationSession initialization"""
+        """Test CollaborationSession initialization."""
         session = CollaborationSession(
             session_id="session-1",
             participant_ids=["agent-1", "agent-2", "agent-3"],
@@ -132,11 +140,11 @@ class TestCollaborationSession:
 
 
 class TestCollaborationEngine:
-    """Test cases for CollaborationEngine"""
+    """Test cases for CollaborationEngine."""
 
     @pytest.fixture
     def mock_agent_pool(self):
-        """Create mock agent pool"""
+        """Create mock agent pool."""
         pool = Mock(spec=AgentPool)
         pool.agents = {
             "agent-1": Mock(id="agent-1", state=AgentState.IDLE),
@@ -147,17 +155,17 @@ class TestCollaborationEngine:
 
     @pytest.fixture
     def mock_branch_manager(self):
-        """Create mock branch manager"""
+        """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
     def mock_conflict_engine(self):
-        """Create mock conflict resolution engine"""
+        """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
     def mock_semantic_analyzer(self):
-        """Create mock semantic analyzer"""
+        """Create mock semantic analyzer."""
         return Mock(spec=SemanticAnalyzer)
 
     @pytest.fixture
@@ -168,7 +176,7 @@ class TestCollaborationEngine:
         mock_conflict_engine,
         mock_semantic_analyzer,
     ):
-        """Create CollaborationEngine instance"""
+        """Create CollaborationEngine instance."""
         return CollaborationEngine(
             agent_pool=mock_agent_pool,
             branch_manager=mock_branch_manager,
@@ -184,7 +192,7 @@ class TestCollaborationEngine:
         mock_conflict_engine,
         mock_semantic_analyzer,
     ):
-        """Test CollaborationEngine initialization"""
+        """Test CollaborationEngine initialization."""
         assert engine.agent_pool == mock_agent_pool
         assert engine.branch_manager == mock_branch_manager
         assert engine.conflict_engine == mock_conflict_engine
@@ -205,7 +213,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_start_stop(self, engine):
-        """Test starting and stopping the engine"""
+        """Test starting and stopping the engine."""
         # Start engine
         await engine.start()
         assert engine._running is True
@@ -218,7 +226,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_send_message_unicast(self, engine):
-        """Test sending a unicast message"""
+        """Test sending a unicast message."""
         message_id = await engine.send_message(
             sender_id="agent-1",
             recipient_id="agent-2",
@@ -246,7 +254,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_send_message_broadcast(self, engine):
-        """Test sending a broadcast message"""
+        """Test sending a broadcast message."""
         message_id = await engine.send_message(
             sender_id="agent-1",
             recipient_id=None,  # Broadcast
@@ -263,7 +271,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_receive_messages(self, engine):
-        """Test receiving messages for an agent"""
+        """Test receiving messages for an agent."""
         # Queue some messages
         await engine.send_message(
             sender_id="agent-1",
@@ -312,7 +320,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_acknowledge_message(self, engine):
-        """Test message acknowledgment"""
+        """Test message acknowledgment."""
         message_id = await engine.send_message(
             sender_id="agent-1",
             recipient_id="agent-2",
@@ -334,7 +342,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_share_knowledge(self, engine):
-        """Test knowledge sharing"""
+        """Test knowledge sharing."""
         knowledge_id = await engine.share_knowledge(
             contributor_id="agent-1",
             knowledge_type="function_signature",
@@ -370,7 +378,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_access_knowledge_by_id(self, engine):
-        """Test accessing specific knowledge by ID"""
+        """Test accessing specific knowledge by ID."""
         # Share some knowledge
         knowledge_id = await engine.share_knowledge(
             contributor_id="agent-1",
@@ -388,7 +396,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_access_knowledge_by_tags(self, engine):
-        """Test accessing knowledge by tags"""
+        """Test accessing knowledge by tags."""
         # Share multiple knowledge items
         await engine.share_knowledge(
             contributor_id="agent-1",
@@ -428,7 +436,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_access_knowledge_by_type(self, engine):
-        """Test accessing knowledge by type"""
+        """Test accessing knowledge by type."""
         # Share different types of knowledge
         await engine.share_knowledge(
             contributor_id="agent-1",
@@ -457,7 +465,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_create_collaboration_session(self, engine):
-        """Test creating a collaboration session"""
+        """Test creating a collaboration session."""
         session_id = await engine.create_collaboration_session(
             initiator_id="agent-1",
             participant_ids=["agent-1", "agent-2"],
@@ -487,7 +495,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_update_session_context(self, engine):
-        """Test updating collaboration session context"""
+        """Test updating collaboration session context."""
         # Create session
         session_id = await engine.create_collaboration_session(
             initiator_id="agent-1",
@@ -513,7 +521,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_add_session_decision(self, engine):
-        """Test adding decisions to a session"""
+        """Test adding decisions to a session."""
         # Create session
         session_id = await engine.create_collaboration_session(
             initiator_id="agent-1",
@@ -538,7 +546,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_end_collaboration_session(self, engine):
-        """Test ending a collaboration session"""
+        """Test ending a collaboration session."""
         # Create session
         session_id = await engine.create_collaboration_session(
             initiator_id="agent-1",
@@ -563,7 +571,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_track_dependency_change(self, engine):
-        """Test tracking dependency changes"""
+        """Test tracking dependency changes."""
         await engine.track_dependency_change(
             file_path="module/api.py",
             changed_by="agent-1",
@@ -590,7 +598,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_request_help(self, engine):
-        """Test help request functionality"""
+        """Test help request functionality."""
         # Setup agent with expertise
         engine.agent_pool.agents["agent-3"].expertise = ["algorithms", "optimization"]
 
@@ -613,7 +621,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_initiate_code_review(self, engine):
-        """Test code review initiation"""
+        """Test code review initiation."""
         reviewers = await engine.initiate_code_review(
             author_id="agent-1",
             branch_name="feature-xyz",
@@ -632,7 +640,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_prevent_conflict_collaboratively(self, engine):
-        """Test collaborative conflict prevention"""
+        """Test collaborative conflict prevention."""
         # Setup agents with branches
         engine.agent_pool.agents["agent-1"].current_branch = "feature-a"
         engine.agent_pool.agents["agent-2"].current_branch = "feature-b"
@@ -662,7 +670,7 @@ class TestCollaborationEngine:
         assert len(engine.shared_knowledge) > 0  # Knowledge was shared
 
     def test_get_collaboration_summary(self, engine):
-        """Test getting collaboration summary"""
+        """Test getting collaboration summary."""
         # Add some test data
         engine.collaboration_stats["messages_sent"] = 50
         engine.collaboration_stats["messages_delivered"] = 45
@@ -691,7 +699,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_message_expiration_handling(self, engine):
-        """Test that expired messages are not delivered"""
+        """Test that expired messages are not delivered."""
         # Send an already expired message
         await engine.send_message(
             sender_id="agent-1",
@@ -708,7 +716,7 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     async def test_background_tasks_message_processor(self, engine):
-        """Test message processor background task"""
+        """Test message processor background task."""
         # Add expired acknowledgment
         expired_msg = CollaborationMessage(
             message_id="expired-1",
@@ -733,7 +741,7 @@ class TestCollaborationEngine:
         assert "expired-1" not in engine.pending_acknowledgments
 
     def test_count_knowledge_by_type(self, engine):
-        """Test knowledge counting by type"""
+        """Test knowledge counting by type."""
         engine.shared_knowledge = {
             "k1": Mock(knowledge_type="pattern"),
             "k2": Mock(knowledge_type="pattern"),

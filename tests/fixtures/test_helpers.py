@@ -1,6 +1,5 @@
-"""
-테스트 헬퍼 함수 및 유틸리티
-테스트에서 자주 사용되는 공통 함수들을 제공
+"""테스트 헬퍼 함수 및 유틸리티
+테스트에서 자주 사용되는 공통 함수들을 제공.
 """
 
 import json
@@ -15,7 +14,7 @@ import yaml
 
 @contextmanager
 def temp_directory():
-    """임시 디렉토리 생성 컨텍스트 매니저"""
+    """임시 디렉토리 생성 컨텍스트 매니저."""
     temp_dir = tempfile.mkdtemp()
     try:
         yield temp_dir
@@ -25,7 +24,7 @@ def temp_directory():
 
 @contextmanager
 def temp_file(content="", suffix=".txt"):
-    """임시 파일 생성 컨텍스트 매니저"""
+    """임시 파일 생성 컨텍스트 매니저."""
     fd, path = tempfile.mkstemp(suffix=suffix)
     try:
         with os.fdopen(fd, "w") as f:
@@ -36,7 +35,7 @@ def temp_file(content="", suffix=".txt"):
 
 
 def create_test_config(config_dict, format="yaml"):
-    """테스트용 설정 파일 생성"""
+    """테스트용 설정 파일 생성."""
     with temp_file(suffix=f".{format}") as config_path:
         with open(config_path, "w") as f:
             if format == "yaml":
@@ -47,7 +46,7 @@ def create_test_config(config_dict, format="yaml"):
 
 
 def create_mock_tmux_session(session_name="test-session"):
-    """Mock tmux 세션 생성 헬퍼"""
+    """Mock tmux 세션 생성 헬퍼."""
     from .mock_data import MockTmuxPane, MockTmuxSession
 
     session = MockTmuxSession(session_name)
@@ -60,13 +59,13 @@ def create_mock_tmux_session(session_name="test-session"):
 
 
 def assert_files_equal(file1, file2):
-    """두 파일의 내용이 동일한지 확인"""
+    """두 파일의 내용이 동일한지 확인."""
     with open(file1) as f1, open(file2) as f2:
         assert f1.read() == f2.read(), f"Files {file1} and {file2} are not equal"
 
 
 def create_test_project_structure(base_dir):
-    """테스트용 프로젝트 구조 생성"""
+    """테스트용 프로젝트 구조 생성."""
     project_structure = {
         "src": {
             "__init__.py": "",
@@ -94,7 +93,7 @@ def create_test_project_structure(base_dir):
 
 
 class CaptureOutput:
-    """stdout/stderr 캡처 헬퍼 클래스"""
+    """stdout/stderr 캡처 헬퍼 클래스."""
 
     def __init__(self):
         self.stdout = []
@@ -118,7 +117,7 @@ class CaptureOutput:
 
 
 def wait_for_condition(condition_func, timeout=5, interval=0.1):
-    """조건이 만족될 때까지 대기"""
+    """조건이 만족될 때까지 대기."""
     import time
 
     start_time = time.time()
@@ -132,7 +131,7 @@ def wait_for_condition(condition_func, timeout=5, interval=0.1):
 
 
 def generate_test_data(data_type, count=10):
-    """테스트 데이터 생성기"""
+    """테스트 데이터 생성기."""
     if data_type == "sessions":
         return [
             {

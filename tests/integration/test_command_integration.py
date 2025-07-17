@@ -1,4 +1,4 @@
-"""Integration tests for CLI commands"""
+"""Integration tests for CLI commands."""
 
 import os
 import subprocess
@@ -14,11 +14,17 @@ from libs.core.services import register_test_services
 
 
 class TestCommandLineInterface:
-    """Test CLI integration"""
+    """Test CLI integration."""
 
     def test_yesman_help(self):
-        """Test that yesman --help works"""
-        result = subprocess.run(["python", "-m", "yesman", "--help"], check=False, capture_output=True, text=True, cwd=os.getcwd())
+        """Test that yesman --help works."""
+        result = subprocess.run(
+            ["python", "-m", "yesman", "--help"],
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd(),
+        )
 
         assert result.returncode == 0
         assert "Usage:" in result.stdout
@@ -26,14 +32,20 @@ class TestCommandLineInterface:
 
     @pytest.mark.skip(reason="Requires tmux setup")
     def test_yesman_show_command(self):
-        """Test yesman show command"""
-        result = subprocess.run(["python", "-m", "yesman", "show"], check=False, capture_output=True, text=True, timeout=10)
+        """Test yesman show command."""
+        result = subprocess.run(
+            ["python", "-m", "yesman", "show"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
 
         # Should either show sessions or indicate no sessions
         assert result.returncode == 0 or "No active sessions" in result.stdout
 
     def test_yesman_validate_command(self):
-        """Test yesman validate command"""
+        """Test yesman validate command."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create a temporary config file
             config_path = Path(temp_dir) / "test_config.yaml"
@@ -46,18 +58,25 @@ tmux:
 """)
 
             # Run validate command
-            result = subprocess.run(["python", "-m", "yesman", "validate"], check=False, capture_output=True, text=True, timeout=10, env={**os.environ, "YESMAN_CONFIG_PATH": str(config_path)})
+            result = subprocess.run(
+                ["python", "-m", "yesman", "validate"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                env={**os.environ, "YESMAN_CONFIG_PATH": str(config_path)},
+            )
 
             # Should complete successfully
             assert result.returncode == 0
 
 
 class TestCommandExecution:
-    """Test command execution without CLI"""
+    """Test command execution without CLI."""
 
     @pytest.fixture(autouse=True)
     def setup_test_services(self):
-        """Setup test services before each test"""
+        """Setup test services before each test."""
         mock_config = MagicMock()
         mock_config.get.return_value = "test_value"
         mock_config.schema.logging.level = "INFO"
@@ -70,7 +89,7 @@ class TestCommandExecution:
         register_test_services(config=mock_config, tmux_manager=mock_tmux)
 
     def test_show_command_execution(self):
-        """Test ShowCommand execution"""
+        """Test ShowCommand execution."""
         command = ShowCommand()
 
         # Should not raise exception
@@ -80,7 +99,7 @@ class TestCommandExecution:
         assert isinstance(result, dict)
 
     def test_validate_command_execution(self):
-        """Test ValidateCommand execution"""
+        """Test ValidateCommand execution."""
         command = ValidateCommand()
 
         # Mock configuration validation
@@ -93,7 +112,7 @@ class TestCommandExecution:
             assert "validation" in result["message"].lower()
 
     def test_command_error_handling(self):
-        """Test command error handling"""
+        """Test command error handling."""
         from commands.show import ShowCommand
         from libs.core.error_handling import SessionError
 
@@ -112,10 +131,10 @@ class TestCommandExecution:
 
 
 class TestConfigurationIntegration:
-    """Test configuration integration"""
+    """Test configuration integration."""
 
     def test_environment_variable_override(self):
-        """Test that environment variables override config"""
+        """Test that environment variables override config."""
         from libs.core.config_loader import ConfigLoader, EnvironmentSource
         from libs.yesman_config import YesmanConfig
 
@@ -130,7 +149,7 @@ class TestConfigurationIntegration:
             assert config.get("tmux.mouse") is False
 
     def test_config_file_loading(self):
-        """Test configuration file loading"""
+        """Test configuration file loading."""
         from libs.core.config_loader import ConfigLoader, YamlFileSource
         from libs.yesman_config import YesmanConfig
 
@@ -159,16 +178,20 @@ custom:
 
 
 class TestErrorHandlingIntegration:
-    """Test error handling integration"""
+    """Test error handling integration."""
 
     def test_command_error_propagation(self):
-        """Test that errors propagate correctly through command execution"""
+        """Test that errors propagate correctly through command execution."""
         from libs.core.base_command import BaseCommand
         from libs.core.error_handling import ValidationError
 
         class TestCommand(BaseCommand):
             def execute(self, **kwargs):
-                raise ValidationError("Test validation error", field_name="test_field", recovery_hint="Fix the test field")
+                raise ValidationError(
+                    "Test validation error",
+                    field_name="test_field",
+                    recovery_hint="Fix the test field",
+                )
 
         command = TestCommand()
 
@@ -181,7 +204,7 @@ class TestErrorHandlingIntegration:
         assert error.recovery_hint == "Fix the test field"
 
     def test_error_serialization(self):
-        """Test error serialization for API responses"""
+        """Test error serialization for API responses."""
         from libs.core.error_handling import ConfigurationError
 
         error = ConfigurationError("Config file not found", config_file="/missing/config.yaml")
@@ -196,10 +219,10 @@ class TestErrorHandlingIntegration:
 
 
 class TestDependencyInjectionIntegration:
-    """Test DI container integration"""
+    """Test DI container integration."""
 
     def test_service_resolution(self):
-        """Test that services are resolved correctly"""
+        """Test that services are resolved correctly."""
         from libs.core.services import get_config, get_tmux_manager
 
         # Services should be resolvable
@@ -214,7 +237,7 @@ class TestDependencyInjectionIntegration:
         assert config is config2
 
     def test_service_mocking_for_tests(self):
-        """Test that services can be mocked for testing"""
+        """Test that services can be mocked for testing."""
         from libs.core.services import get_config, register_test_services
 
         mock_config = MagicMock()
@@ -227,10 +250,10 @@ class TestDependencyInjectionIntegration:
 
 
 class TestPerformanceIntegration:
-    """Test performance aspects"""
+    """Test performance aspects."""
 
     def test_command_execution_time(self):
-        """Test that commands execute within reasonable time"""
+        """Test that commands execute within reasonable time."""
         import time
 
         from commands.show import ShowCommand
@@ -248,7 +271,7 @@ class TestPerformanceIntegration:
         assert result is not None
 
     def test_config_loading_performance(self):
-        """Test configuration loading performance"""
+        """Test configuration loading performance."""
         import time
 
         from libs.yesman_config import YesmanConfig
@@ -265,11 +288,11 @@ class TestPerformanceIntegration:
 
 
 class TestRealWorldScenarios:
-    """Test real-world usage scenarios"""
+    """Test real-world usage scenarios."""
 
     @pytest.mark.skip(reason="Requires tmux and session setup")
     def test_full_session_workflow(self):
-        """Test complete session creation and management workflow"""
+        """Test complete session creation and management workflow."""
         # This would test:
         # 1. Creating a new session
         # 2. Verifying it exists
@@ -280,7 +303,7 @@ class TestRealWorldScenarios:
         pass
 
     def test_error_recovery_scenario(self):
-        """Test error recovery scenarios"""
+        """Test error recovery scenarios."""
         from commands.show import ShowCommand
         from libs.core.error_handling import SessionError
 
@@ -288,7 +311,10 @@ class TestRealWorldScenarios:
 
         # Simulate tmux not available
         with patch.object(command, "tmux_manager") as mock_tmux:
-            mock_tmux.list_running_sessions.side_effect = SessionError("tmux server not found", recovery_hint="Start tmux server with 'tmux new-session'")
+            mock_tmux.list_running_sessions.side_effect = SessionError(
+                "tmux server not found",
+                recovery_hint="Start tmux server with 'tmux new-session'",
+            )
 
             with pytest.raises(SessionError) as exc_info:
                 command.execute()

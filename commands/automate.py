@@ -1,4 +1,4 @@
-"""Context-aware automation and workflow management commands"""
+"""Context-aware automation and workflow management commands."""
 
 import asyncio
 import json
@@ -17,14 +17,14 @@ from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 
 
 class AutomateStatusCommand(BaseCommand):
-    """Show automation system status"""
+    """Show automation system status."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
     def execute(self, project_path: str = ".", **kwargs) -> dict:
-        """Execute the status command"""
+        """Execute the status command."""
         try:
             project_path = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path)
@@ -114,7 +114,7 @@ class AutomateStatusCommand(BaseCommand):
             raise CommandError(f"Error getting automation status: {e}") from e
 
     def _format_duration(self, seconds: float) -> str:
-        """Format duration in human readable format"""
+        """Format duration in human readable format."""
         if seconds < 60:
             return f"{int(seconds)}s"
         elif seconds < 3600:
@@ -126,14 +126,14 @@ class AutomateStatusCommand(BaseCommand):
 
 
 class AutomateMonitorCommand(BaseCommand):
-    """Start context monitoring and automation"""
+    """Start context monitoring and automation."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
     def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict:
-        """Execute the monitor command"""
+        """Execute the monitor command."""
         try:
             project_path = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path)
@@ -177,14 +177,20 @@ class AutomateMonitorCommand(BaseCommand):
 
 
 class AutomateTriggerCommand(BaseCommand):
-    """Manually trigger automation for a specific context"""
+    """Manually trigger automation for a specific context."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", context_type: str = None, description: str = "Manual trigger", **kwargs) -> dict:
-        """Execute the trigger command"""
+    def execute(
+        self,
+        project_path: str = ".",
+        context_type: str = None,
+        description: str = "Manual trigger",
+        **kwargs,
+    ) -> dict:
+        """Execute the trigger command."""
         if not context_type:
             raise CommandError("Context type is required")
 
@@ -224,14 +230,14 @@ class AutomateTriggerCommand(BaseCommand):
 
 
 class AutomateExecuteCommand(BaseCommand):
-    """Execute a specific workflow chain"""
+    """Execute a specific workflow chain."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
     def execute(self, workflow_name: str, project_path: str = ".", **kwargs) -> dict:
-        """Execute the workflow command"""
+        """Execute the workflow command."""
         try:
             project_path = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path)
@@ -239,7 +245,10 @@ class AutomateExecuteCommand(BaseCommand):
             self.console.print(f"⚡ Executing workflow: {workflow_name}")
 
             async def run_workflow():
-                success, results = await automation_manager.workflow_engine.execute_chain(
+                (
+                    success,
+                    results,
+                ) = await automation_manager.workflow_engine.execute_chain(
                     workflow_name,
                     {},
                 )
@@ -264,14 +273,14 @@ class AutomateExecuteCommand(BaseCommand):
 
 
 class AutomateDetectCommand(BaseCommand):
-    """Run context detection once and show results"""
+    """Run context detection once and show results."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
     def execute(self, project_path: str = ".", **kwargs) -> dict:
-        """Execute the detect command"""
+        """Execute the detect command."""
         try:
             project_path = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path)
@@ -283,7 +292,10 @@ class AutomateDetectCommand(BaseCommand):
                 TimeElapsedColumn(),
                 transient=True,
             ) as progress:
-                detection_task = progress.add_task(f"🔍 Running context detection for {project_path.name}...", total=None)
+                detection_task = progress.add_task(
+                    f"🔍 Running context detection for {project_path.name}...",
+                    total=None,
+                )
 
                 async def run_detection():
                     contexts = await automation_manager.context_detector.detect_all_contexts()
@@ -330,14 +342,14 @@ class AutomateDetectCommand(BaseCommand):
 
 
 class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
-    """Generate workflow configuration template"""
+    """Generate workflow configuration template."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
     def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict:
-        """Execute the config command"""
+        """Execute the config command."""
         try:
             # Generate sample workflow configuration
             sample_config = {
@@ -415,14 +427,14 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
 
 @click.group()
 def automate():
-    """Context-aware automation and workflow management"""
+    """Context-aware automation and workflow management."""
     pass
 
 
 @automate.command()
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 def status(project_path):
-    """Show automation system status"""
+    """Show automation system status."""
     command = AutomateStatusCommand()
     command.run(project_path=project_path)
 
@@ -431,7 +443,7 @@ def status(project_path):
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 @click.option("--interval", "-i", default=10, type=int, help="Detection interval in seconds")
 def monitor(project_path, interval):
-    """Start context monitoring and automation"""
+    """Start context monitoring and automation."""
     command = AutomateMonitorCommand()
     command.run(project_path=project_path, interval=interval)
 
@@ -447,7 +459,7 @@ def monitor(project_path, interval):
 )
 @click.option("--description", "-d", default="Manual trigger", help="Context description")
 def trigger(project_path, context_type, description):
-    """Manually trigger automation for a specific context"""
+    """Manually trigger automation for a specific context."""
     command = AutomateTriggerCommand()
     command.run(project_path=project_path, context_type=context_type, description=description)
 
@@ -456,7 +468,7 @@ def trigger(project_path, context_type, description):
 @click.argument("workflow_name")
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 def execute(workflow_name, project_path):
-    """Execute a specific workflow chain"""
+    """Execute a specific workflow chain."""
     command = AutomateExecuteCommand()
     command.run(workflow_name=workflow_name, project_path=project_path)
 
@@ -464,7 +476,7 @@ def execute(workflow_name, project_path):
 @automate.command()
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 def detect(project_path):
-    """Run context detection once and show results"""
+    """Run context detection once and show results."""
     command = AutomateDetectCommand()
     command.run(project_path=project_path)
 
@@ -473,7 +485,7 @@ def detect(project_path):
 @click.option("--project-path", "-p", default=".", help="Project directory path")
 @click.option("--output", "-o", help="Output file for workflow configuration")
 def config(project_path, output):
-    """Generate workflow configuration template"""
+    """Generate workflow configuration template."""
     command = AutomateConfigCommand()
     command.run(project_path=project_path, output=output)
 

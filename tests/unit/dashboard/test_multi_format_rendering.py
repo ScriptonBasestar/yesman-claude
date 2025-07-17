@@ -1,12 +1,16 @@
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
-from libs.dashboard.renderers.widget_models import HealthData, SessionData, SessionStatus
+from libs.dashboard.renderers.widget_models import (
+    HealthData,
+    SessionData,
+    SessionStatus,
+)
 
 
 class TestMultiFormatRendering:
-    """Tests for multi-format rendering across all interfaces"""
+    """Tests for multi-format rendering across all interfaces."""
 
     def test_multi_format_rendering(self):
-        """Test 2: Multi-format rendering across all interfaces"""
+        """Test 2: Multi-format rendering across all interfaces."""
         factory = RendererFactory()
 
         # Test data

@@ -1,4 +1,4 @@
-"""Test branch testing integration system"""
+"""Test branch testing integration system."""
 
 import json
 import subprocess
@@ -10,15 +10,21 @@ from unittest.mock import patch
 import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.branch_test_manager import BranchTestManager, TestResult, TestStatus, TestSuite, TestType
+from libs.multi_agent.branch_test_manager import (
+    BranchTestManager,
+    TestResult,
+    TestStatus,
+    TestSuite,
+    TestType,
+)
 
 
 class TestBranchTestManager:
-    """Test branch testing functionality"""
+    """Test branch testing functionality."""
 
     @pytest.fixture
     def temp_repo(self):
-        """Create temporary repository for testing"""
+        """Create temporary repository for testing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_path = Path(tmpdir)
 
@@ -70,14 +76,14 @@ class TestBranchTestManager:
 
     @pytest.fixture
     def branch_test_manager(self, temp_repo):
-        """Create branch test manager for testing"""
+        """Create branch test manager for testing."""
         return BranchTestManager(
             repo_path=str(temp_repo),
             results_dir=str(temp_repo / ".scripton" / "yesman" / "test_results"),
         )
 
     def test_test_suite_creation(self):
-        """Test TestSuite dataclass creation"""
+        """Test TestSuite dataclass creation."""
         suite = TestSuite(
             name="unit_tests",
             test_type=TestType.UNIT,
@@ -92,7 +98,7 @@ class TestBranchTestManager:
         assert suite.timeout == 300
 
     def test_test_result_serialization(self):
-        """Test TestResult serialization/deserialization"""
+        """Test TestResult serialization/deserialization."""
         result = TestResult(
             test_id="test-123",
             test_type=TestType.UNIT,
@@ -119,7 +125,7 @@ class TestBranchTestManager:
         assert restored.coverage == result.coverage
 
     def test_default_configuration_creation(self, branch_test_manager):
-        """Test creation of default test configuration"""
+        """Test creation of default test configuration."""
         # Should have default test suites
         assert len(branch_test_manager.test_suites) > 0
         assert "unit_tests" in branch_test_manager.test_suites
@@ -130,7 +136,7 @@ class TestBranchTestManager:
         assert config_file.exists()
 
     def test_test_suite_configuration(self, branch_test_manager):
-        """Test configuring custom test suites"""
+        """Test configuring custom test suites."""
         branch_test_manager.configure_test_suite(
             name="custom_test",
             test_type=TestType.INTEGRATION,
@@ -148,7 +154,7 @@ class TestBranchTestManager:
 
     @pytest.mark.asyncio
     async def test_single_test_execution(self, branch_test_manager):
-        """Test execution of a single test suite"""
+        """Test execution of a single test suite."""
         # Configure a simple test that should pass
         branch_test_manager.configure_test_suite(
             name="simple_test",
@@ -176,7 +182,7 @@ class TestBranchTestManager:
 
     @pytest.mark.asyncio
     async def test_failed_test_execution(self, branch_test_manager):
-        """Test execution of a failing test"""
+        """Test execution of a failing test."""
         # Configure a test that should fail
         branch_test_manager.configure_test_suite(
             name="failing_test",
@@ -202,7 +208,7 @@ class TestBranchTestManager:
 
     @pytest.mark.asyncio
     async def test_timeout_handling(self, branch_test_manager):
-        """Test handling of test timeouts"""
+        """Test handling of test timeouts."""
         # Configure a test that should timeout
         branch_test_manager.configure_test_suite(
             name="timeout_test",
@@ -227,7 +233,7 @@ class TestBranchTestManager:
 
     @pytest.mark.asyncio
     async def test_all_tests_execution(self, branch_test_manager):
-        """Test execution of all test suites"""
+        """Test execution of all test suites."""
         # Configure multiple test suites
         branch_test_manager.configure_test_suite(
             name="critical_test",
@@ -267,7 +273,7 @@ class TestBranchTestManager:
 
     @pytest.mark.asyncio
     async def test_critical_test_failure_stops_execution(self, branch_test_manager):
-        """Test that critical test failure stops remaining tests"""
+        """Test that critical test failure stops remaining tests."""
         # Configure critical test that fails
         branch_test_manager.configure_test_suite(
             name="critical_failing",
@@ -299,7 +305,7 @@ class TestBranchTestManager:
         assert results[0].status == TestStatus.FAILED
 
     def test_branch_test_summary(self, branch_test_manager):
-        """Test branch test summary generation"""
+        """Test branch test summary generation."""
         branch_name = "test-branch"
 
         # Add some test results
@@ -331,7 +337,7 @@ class TestBranchTestManager:
         assert summary["status"] == "failed"  # Overall status should be failed
 
     def test_results_persistence(self, branch_test_manager):
-        """Test that test results are persisted to disk"""
+        """Test that test results are persisted to disk."""
         branch_name = "test-branch"
 
         result = TestResult(
@@ -358,7 +364,7 @@ class TestBranchTestManager:
         assert data[0]["test_id"] == "test-persist"
 
     def test_auto_testing_configuration(self, branch_test_manager):
-        """Test auto-testing configuration"""
+        """Test auto-testing configuration."""
         # Initially disabled
         assert not branch_test_manager.auto_testing_enabled
 
@@ -375,17 +381,17 @@ class TestBranchTestManager:
 
 
 class TestAgentPoolTestIntegration:
-    """Test AgentPool integration with branch testing"""
+    """Test AgentPool integration with branch testing."""
 
     @pytest.fixture
     def agent_pool(self):
-        """Create agent pool for testing"""
+        """Create agent pool for testing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pool = AgentPool(max_agents=2, work_dir=tmpdir)
             yield pool
 
     def test_branch_testing_enablement(self, agent_pool):
-        """Test enabling branch testing in agent pool"""
+        """Test enabling branch testing in agent pool."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_branch_testing(repo_path=tmpdir)
 
@@ -393,7 +399,7 @@ class TestAgentPoolTestIntegration:
             assert agent_pool.branch_test_manager is not None
 
     def test_test_task_creation(self, agent_pool):
-        """Test creation of test tasks"""
+        """Test creation of test tasks."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_branch_testing(repo_path=tmpdir)
 
@@ -411,7 +417,7 @@ class TestAgentPoolTestIntegration:
 
     @pytest.mark.asyncio
     async def test_auto_test_branch(self, agent_pool):
-        """Test automatic test task creation for a branch"""
+        """Test automatic test task creation for a branch."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_branch_testing(repo_path=tmpdir)
 
@@ -440,7 +446,7 @@ class TestAgentPoolTestIntegration:
             assert len(agent_pool.tasks) == 2
 
     def test_branch_test_status_retrieval(self, agent_pool):
-        """Test retrieving branch test status"""
+        """Test retrieving branch test status."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_branch_testing(repo_path=tmpdir)
 
@@ -464,7 +470,7 @@ class TestAgentPoolTestIntegration:
             assert status["status"] == "passed"
 
     def test_error_handling_when_testing_disabled(self, agent_pool):
-        """Test error handling when branch testing is not enabled"""
+        """Test error handling when branch testing is not enabled."""
         # Don't enable branch testing
 
         with pytest.raises(RuntimeError, match="Branch testing is not enabled"):
@@ -474,7 +480,7 @@ class TestAgentPoolTestIntegration:
         assert "error" in status
 
     def test_test_task_metadata(self, agent_pool):
-        """Test that test tasks have proper metadata"""
+        """Test that test tasks have proper metadata."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_branch_testing(repo_path=tmpdir)
 

@@ -1,11 +1,13 @@
-"""
-Tests for Rendering Optimizations and Caching
-"""
+"""Tests for Rendering Optimizations and Caching."""
 
 import threading
 import time
 
-from libs.dashboard.renderers.base_renderer import BaseRenderer, RenderFormat, WidgetType
+from libs.dashboard.renderers.base_renderer import (
+    BaseRenderer,
+    RenderFormat,
+    WidgetType,
+)
 from libs.dashboard.renderers.optimizations import (
     BatchRenderer,
     CacheStats,
@@ -26,7 +28,7 @@ from libs.dashboard.renderers.widget_models import MetricCardData
 
 
 class MockRenderer(BaseRenderer):
-    """Mock renderer for testing"""
+    """Mock renderer for testing."""
 
     def __init__(self, render_format=RenderFormat.TUI, delay=0.0):
         super().__init__(render_format)
@@ -54,21 +56,21 @@ class MockRenderer(BaseRenderer):
 
 
 class TestRenderCache:
-    """Test cases for RenderCache"""
+    """Test cases for RenderCache."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         self.cache = RenderCache(max_size=3)
 
     def test_cache_initialization(self):
-        """Test cache initialization"""
+        """Test cache initialization."""
         assert self.cache.max_size == 3
         assert self.cache.ttl is None
         assert self.cache.get_size() == 0
         assert isinstance(self.cache.stats, CacheStats)
 
     def test_cache_key_generation(self):
-        """Test cache key generation"""
+        """Test cache key generation."""
         metric = MetricCardData(title="Test", value=100)
 
         key1 = self.cache._generate_cache_key(
@@ -103,7 +105,7 @@ class TestRenderCache:
         assert len(key1) == 32  # MD5 hex length
 
     def test_cache_set_get(self):
-        """Test basic cache set and get operations"""
+        """Test basic cache set and get operations."""
         key = "test-key"
         value = "test-value"
 
@@ -116,7 +118,7 @@ class TestRenderCache:
         assert self.cache.get_size() == 1
 
     def test_cache_lru_eviction(self):
-        """Test LRU eviction when cache is full"""
+        """Test LRU eviction when cache is full."""
         # Fill cache to capacity
         for i in range(3):
             self.cache.set(f"key-{i}", f"value-{i}")
@@ -136,7 +138,7 @@ class TestRenderCache:
         assert self.cache.get("key-3") == "value-3"  # New item
 
     def test_cache_ttl_expiry(self):
-        """Test TTL-based cache expiry"""
+        """Test TTL-based cache expiry."""
         cache_with_ttl = RenderCache(max_size=10, ttl=0.1)  # 100ms TTL
 
         cache_with_ttl.set("key", "value")
@@ -148,7 +150,7 @@ class TestRenderCache:
         assert cache_with_ttl.get("key") is None
 
     def test_cache_stats(self):
-        """Test cache statistics tracking"""
+        """Test cache statistics tracking."""
         # Initially no stats
         stats = self.cache.get_stats()
         assert stats.hits == 0
@@ -171,7 +173,7 @@ class TestRenderCache:
         assert stats.hit_rate == 0.5
 
     def test_cache_invalidation(self):
-        """Test cache invalidation"""
+        """Test cache invalidation."""
         self.cache.set("key", "value")
         assert self.cache.get("key") == "value"
 
@@ -183,7 +185,7 @@ class TestRenderCache:
         assert self.cache.invalidate("nonexistent") is False
 
     def test_cache_clear(self):
-        """Test cache clearing"""
+        """Test cache clearing."""
         for i in range(3):
             self.cache.set(f"key-{i}", f"value-{i}")
 
@@ -197,7 +199,7 @@ class TestRenderCache:
         assert stats.misses == 0
 
     def test_cache_thread_safety(self):
-        """Test cache thread safety"""
+        """Test cache thread safety."""
         results = []
         errors = []
 
@@ -232,15 +234,15 @@ class TestRenderCache:
 
 
 class TestCachedDecorators:
-    """Test cases for caching decorators"""
+    """Test cases for caching decorators."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         self.cache = RenderCache(max_size=10)
         self.renderer = MockRenderer()
 
     def test_cached_render_decorator(self):
-        """Test cached_render decorator"""
+        """Test cached_render decorator."""
 
         @cached_render(self.cache)
         def mock_render(self, widget_type, data, options=None):
@@ -262,7 +264,7 @@ class TestCachedDecorators:
         assert self.renderer.render_count == 1  # Function called only once
 
     def test_cached_layout_decorator(self):
-        """Test cached_layout decorator"""
+        """Test cached_layout decorator."""
 
         @cached_layout(self.cache)
         def mock_render_layout(self, widgets, layout_config=None):
@@ -293,15 +295,15 @@ class TestCachedDecorators:
 
 
 class TestLazyRenderer:
-    """Test cases for LazyRenderer"""
+    """Test cases for LazyRenderer."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         self.renderer = MockRenderer(delay=0.01)  # Small delay to test timing
         self.metric = MetricCardData(title="Test", value=100)
 
     def test_lazy_renderer_initialization(self):
-        """Test lazy renderer initialization"""
+        """Test lazy renderer initialization."""
         lazy = LazyRenderer(
             self.renderer,
             WidgetType.METRIC_CARD,
@@ -316,7 +318,7 @@ class TestLazyRenderer:
         assert not lazy.is_rendered()
 
     def test_lazy_rendering_deferred(self):
-        """Test that rendering is deferred until needed"""
+        """Test that rendering is deferred until needed."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
 
         # No rendering should have occurred yet
@@ -331,7 +333,7 @@ class TestLazyRenderer:
         assert result == "mock-metric_card-1"
 
     def test_lazy_rendering_cached(self):
-        """Test that lazy rendering caches result"""
+        """Test that lazy rendering caches result."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
 
         # Multiple calls should only render once
@@ -342,7 +344,7 @@ class TestLazyRenderer:
         assert self.renderer.render_count == 1
 
     def test_lazy_renderer_string_conversion(self):
-        """Test string conversion triggers rendering"""
+        """Test string conversion triggers rendering."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
 
         assert not lazy.is_rendered()
@@ -355,7 +357,7 @@ class TestLazyRenderer:
         assert "mock-metric_card-1" in string_result
 
     def test_lazy_renderer_thread_safety(self):
-        """Test lazy renderer thread safety"""
+        """Test lazy renderer thread safety."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
         results = []
 
@@ -377,21 +379,21 @@ class TestLazyRenderer:
 
 
 class TestBatchRenderer:
-    """Test cases for BatchRenderer"""
+    """Test cases for BatchRenderer."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         self.base_renderer = MockRenderer(delay=0.01)
         self.batch_renderer = BatchRenderer(self.base_renderer, max_workers=2)
 
     def test_batch_renderer_initialization(self):
-        """Test batch renderer initialization"""
+        """Test batch renderer initialization."""
         assert self.batch_renderer.renderer is self.base_renderer
         assert self.batch_renderer.max_workers == 2
         assert isinstance(self.batch_renderer._batch_cache, RenderCache)
 
     def test_batch_sequential_rendering(self):
-        """Test sequential batch rendering"""
+        """Test sequential batch rendering."""
         requests = [
             (WidgetType.METRIC_CARD, MetricCardData(title="Test1", value=100), None),
             (WidgetType.METRIC_CARD, MetricCardData(title="Test2", value=200), None),
@@ -405,7 +407,7 @@ class TestBatchRenderer:
         assert self.base_renderer.render_count == 3
 
     def test_batch_parallel_rendering(self):
-        """Test parallel batch rendering"""
+        """Test parallel batch rendering."""
         requests = [
             (WidgetType.METRIC_CARD, MetricCardData(title="Test1", value=100), None),
             (WidgetType.METRIC_CARD, MetricCardData(title="Test2", value=200), None),
@@ -426,12 +428,12 @@ class TestBatchRenderer:
         assert parallel_time < sequential_time * 0.8  # Allow some overhead
 
     def test_batch_empty_requests(self):
-        """Test batch rendering with empty requests"""
+        """Test batch rendering with empty requests."""
         results = self.batch_renderer.render_batch([])
         assert results == []
 
     def test_batch_lazy_rendering(self):
-        """Test lazy batch rendering"""
+        """Test lazy batch rendering."""
         requests = [
             (WidgetType.METRIC_CARD, MetricCardData(title="Test1", value=100), None),
             (WidgetType.METRIC_CARD, MetricCardData(title="Test2", value=200), None),
@@ -450,19 +452,19 @@ class TestBatchRenderer:
 
 
 class TestPerformanceProfiler:
-    """Test cases for PerformanceProfiler"""
+    """Test cases for PerformanceProfiler."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         self.profiler = PerformanceProfiler()
 
     def test_profiler_initialization(self):
-        """Test profiler initialization"""
+        """Test profiler initialization."""
         assert isinstance(self.profiler.metrics, dict)
         assert len(self.profiler.metrics) == 0
 
     def test_timing_context(self):
-        """Test timing context manager"""
+        """Test timing context manager."""
         with self.profiler.time_operation("test_op"):
             time.sleep(0.01)
 
@@ -473,7 +475,7 @@ class TestPerformanceProfiler:
         assert stats["avg"] >= 0.01
 
     def test_manual_timing_recording(self):
-        """Test manual timing recording"""
+        """Test manual timing recording."""
         self.profiler.record_time("manual_op", 0.05)
         self.profiler.record_time("manual_op", 0.03)
 
@@ -484,7 +486,7 @@ class TestPerformanceProfiler:
         assert stats["avg"] == 0.04
 
     def test_nonexistent_operation_stats(self):
-        """Test stats for non-existent operation"""
+        """Test stats for non-existent operation."""
         stats = self.profiler.get_stats("nonexistent")
         assert stats["count"] == 0
         assert stats["min"] == 0
@@ -492,7 +494,7 @@ class TestPerformanceProfiler:
         assert stats["avg"] == 0
 
     def test_profiler_clear(self):
-        """Test profiler clearing"""
+        """Test profiler clearing."""
         self.profiler.record_time("test_op", 0.01)
         assert len(self.profiler.metrics) == 1
 
@@ -500,7 +502,7 @@ class TestPerformanceProfiler:
         assert len(self.profiler.metrics) == 0
 
     def test_profile_render_decorator(self):
-        """Test profile_render decorator"""
+        """Test profile_render decorator."""
 
         @profile_render("decorated_op")
         def test_function():
@@ -516,21 +518,21 @@ class TestPerformanceProfiler:
 
 
 class TestOptimizationIntegration:
-    """Integration tests for optimization features"""
+    """Integration tests for optimization features."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         clear_all_caches()
         clear_performance_stats()
         self.renderer = TUIRenderer()
 
     def teardown_method(self):
-        """Cleanup after each test"""
+        """Cleanup after each test."""
         clear_all_caches()
         clear_performance_stats()
 
     def test_cache_performance_improvement(self):
-        """Test that caching improves performance"""
+        """Test that caching improves performance."""
         metric = MetricCardData(title="Performance Test", value=75.5, suffix="%")
 
         # Use a mock renderer with built-in delay tracking
@@ -559,7 +561,7 @@ class TestOptimizationIntegration:
         assert mock_renderer.render_count == 1
 
     def test_lazy_vs_eager_rendering(self):
-        """Test performance difference between lazy and eager rendering"""
+        """Test performance difference between lazy and eager rendering."""
         metric = MetricCardData(title="Lazy Test", value=100)
 
         # Eager rendering
@@ -580,7 +582,7 @@ class TestOptimizationIntegration:
         assert eager_result == lazy_result
 
     def test_batch_vs_individual_rendering(self):
-        """Test batch rendering performance"""
+        """Test batch rendering performance."""
         metrics = [MetricCardData(title=f"Metric {i}", value=i * 10) for i in range(5)]
 
         batch_renderer = BatchRenderer(self.renderer, max_workers=3)
@@ -608,7 +610,7 @@ class TestOptimizationIntegration:
         assert all("Performance Test" in str(result) or "Metric" in str(result) for result in batch_results)
 
     def test_global_cache_utilities(self):
-        """Test global cache utility functions"""
+        """Test global cache utility functions."""
         # Initially empty stats
         stats = get_cache_stats()
         assert "widget_cache" in stats
@@ -635,7 +637,7 @@ class TestOptimizationIntegration:
         assert cleared_stats["widget_cache"].total_requests == 0
 
     def test_global_performance_utilities(self):
-        """Test global performance utility functions"""
+        """Test global performance utility functions."""
         # Initially empty
         stats = get_performance_stats()
         assert isinstance(stats, dict)

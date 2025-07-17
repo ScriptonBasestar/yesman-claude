@@ -10,7 +10,7 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
     """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
 
     def execute(self, session_name: str | None = None, **kwargs) -> dict:
-        """Execute the teardown command"""
+        """Execute the teardown command."""
         try:
             sessions = self.tmux_manager.load_projects().get("sessions", {})
             if not sessions:
@@ -64,7 +64,7 @@ def teardown(session_name):
 @click.command()
 @click.argument("session_name", required=False)
 def down(session_name):
-    """Alias for 'teardown' command"""
+    """Alias for 'teardown' command."""
     command = TeardownCommand()
     command.run(session_name=session_name)
 

@@ -1,4 +1,4 @@
-"""Data models for dashboard"""
+"""Data models for dashboard."""
 
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -7,7 +7,7 @@ from typing import Any
 
 
 class TaskPhase(Enum):
-    """Phases of a Claude task execution"""
+    """Phases of a Claude task execution."""
 
     STARTING = "starting"
     ANALYZING = "analyzing"
@@ -20,7 +20,7 @@ class TaskPhase(Enum):
 
 @dataclass
 class TaskProgress:
-    """Progress tracking for a Claude task"""
+    """Progress tracking for a Claude task."""
 
     phase: TaskPhase = TaskPhase.IDLE
     phase_progress: float = 0.0  # 0-100% progress within current phase
@@ -48,14 +48,14 @@ class TaskProgress:
     todos_completed: int = 0
 
     def update_phase(self, new_phase: TaskPhase):
-        """Update to a new phase"""
+        """Update to a new phase."""
         self.phase = new_phase
         self.phase_start_time = datetime.now()
         self.phase_progress = 0.0
         self._recalculate_overall_progress()
 
     def _recalculate_overall_progress(self):
-        """Recalculate overall progress based on phase"""
+        """Recalculate overall progress based on phase."""
         phase_weights = {
             TaskPhase.STARTING: 0.1,
             TaskPhase.ANALYZING: 0.2,
@@ -81,7 +81,7 @@ class TaskProgress:
         self.overall_progress = round(min(100.0, base_progress * 100), 1)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return {
             "phase": self.phase.value,
             "phase_progress": self.phase_progress,
@@ -103,7 +103,7 @@ class TaskProgress:
 
 @dataclass
 class SessionProgress:
-    """Overall progress tracking for a session"""
+    """Overall progress tracking for a session."""
 
     session_name: str
     tasks: list[TaskProgress] = field(default_factory=list)
@@ -117,13 +117,13 @@ class SessionProgress:
     last_update_time: datetime | None = None
 
     def get_current_task(self) -> TaskProgress | None:
-        """Get the current task progress"""
+        """Get the current task progress."""
         if 0 <= self.current_task_index < len(self.tasks):
             return self.tasks[self.current_task_index]
         return None
 
     def add_task(self) -> TaskProgress:
-        """Add a new task and make it current"""
+        """Add a new task and make it current."""
         task = TaskProgress()
         task.start_time = datetime.now()
         self.tasks.append(task)
@@ -133,7 +133,7 @@ class SessionProgress:
         return task
 
     def calculate_overall_progress(self) -> float:
-        """Calculate overall session progress"""
+        """Calculate overall session progress."""
         if not self.tasks:
             return 0.0
 
@@ -141,14 +141,14 @@ class SessionProgress:
         return total_progress / len(self.tasks)
 
     def update_aggregates(self):
-        """Update aggregate metrics from all tasks"""
+        """Update aggregate metrics from all tasks."""
         self.total_files_changed = sum(task.files_created + task.files_modified for task in self.tasks)
         self.total_commands = sum(task.commands_executed for task in self.tasks)
         self.total_todos_completed = sum(task.todos_completed for task in self.tasks)
         self.last_update_time = datetime.now()
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return {
             "session_name": self.session_name,
             "current_task_index": self.current_task_index,
@@ -164,7 +164,7 @@ class SessionProgress:
 
 @dataclass
 class PaneInfo:
-    """Information about a tmux pane with detailed metrics"""
+    """Information about a tmux pane with detailed metrics."""
 
     id: str
     command: str
@@ -191,7 +191,7 @@ class PaneInfo:
             self.last_activity = datetime.now()
 
     def update_activity(self, new_output: str = None):
-        """Update activity tracking"""
+        """Update activity tracking."""
         self.last_activity = datetime.now()
         self.idle_time = 0.0
         if new_output:
@@ -199,7 +199,7 @@ class PaneInfo:
             self.output_lines += 1
 
     def calculate_idle_time(self) -> float:
-        """Calculate current idle time in seconds"""
+        """Calculate current idle time in seconds."""
         if self.last_activity:
             self.idle_time = (datetime.now() - self.last_activity).total_seconds()
         return self.idle_time
@@ -207,7 +207,7 @@ class PaneInfo:
 
 @dataclass
 class WindowInfo:
-    """Information about a tmux window"""
+    """Information about a tmux window."""
 
     name: str
     index: str
@@ -216,7 +216,7 @@ class WindowInfo:
 
 @dataclass
 class SessionInfo:
-    """Information about a tmux session"""
+    """Information about a tmux session."""
 
     project_name: str
     session_name: str
@@ -228,7 +228,7 @@ class SessionInfo:
     progress: SessionProgress | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for compatibility"""
+        """Convert to dictionary for compatibility."""
         return {
             "project_name": self.project_name,
             "session_name": self.session_name,
@@ -269,7 +269,7 @@ class SessionInfo:
 
 @dataclass
 class DashboardStats:
-    """Dashboard statistics"""
+    """Dashboard statistics."""
 
     total_sessions: int
     running_sessions: int
@@ -277,7 +277,7 @@ class DashboardStats:
 
     @classmethod
     def from_sessions(cls, sessions: list[SessionInfo]) -> "DashboardStats":
-        """Create stats from session list"""
+        """Create stats from session list."""
         total = len(sessions)
         running = sum(1 for s in sessions if s.status == "running")
         controllers = sum(1 for s in sessions if s.controller_status == "running")

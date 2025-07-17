@@ -1,4 +1,4 @@
-"""Core modules for Yesman Claude
+"""Core modules for Yesman Claude.
 
 This module provides core functionality shared between different dashboard implementations.
 """

@@ -1,4 +1,4 @@
-"""Progress tracking for Claude sessions"""
+"""Progress tracking for Claude sessions."""
 
 import re
 
@@ -6,7 +6,7 @@ from .models import SessionProgress, TaskPhase, TaskProgress
 
 
 class ProgressAnalyzer:
-    """Analyzes pane output to determine task progress"""
+    """Analyzes pane output to determine task progress."""
 
     # Phase detection patterns
     PHASE_PATTERNS = {
@@ -59,7 +59,7 @@ class ProgressAnalyzer:
         self.session_progress: dict[str, SessionProgress] = {}
 
     def analyze_pane_output(self, session_name: str, pane_output: list[str]) -> SessionProgress | None:
-        """Analyze pane output to determine progress"""
+        """Analyze pane output to determine progress."""
         if not pane_output:
             return None
 
@@ -97,7 +97,7 @@ class ProgressAnalyzer:
         return progress
 
     def _detect_phase(self, output_text: str, current_phase: TaskPhase) -> TaskPhase:
-        """Detect the current phase from output"""
+        """Detect the current phase from output."""
         # Check for phase transitions
         for phase, patterns in self.PHASE_PATTERNS.items():
             for pattern in patterns:
@@ -112,7 +112,7 @@ class ProgressAnalyzer:
         return current_phase
 
     def _analyze_file_activity(self, output_lines: list[str], task: TaskProgress):
-        """Analyze file-related activity"""
+        """Analyze file-related activity."""
         for line in output_lines:
             # Check for file creation
             match = re.search(self.FILE_ACTIVITY_PATTERNS["created"], line, re.IGNORECASE)
@@ -126,7 +126,7 @@ class ProgressAnalyzer:
                 task.files_modified += 1
 
     def _analyze_command_activity(self, output_lines: list[str], task: TaskProgress):
-        """Analyze command execution activity"""
+        """Analyze command execution activity."""
         for i, line in enumerate(output_lines):
             # Check for command execution
             if re.search(self.COMMAND_PATTERNS["executing"], line):
@@ -142,7 +142,7 @@ class ProgressAnalyzer:
                         break
 
     def _analyze_todo_activity(self, output_lines: list[str], task: TaskProgress):
-        """Analyze TODO-related activity"""
+        """Analyze TODO-related activity."""
         for line in output_lines:
             # Check for TODO identification
             if re.search(self.TODO_PATTERNS["identified"], line, re.IGNORECASE):
@@ -153,7 +153,7 @@ class ProgressAnalyzer:
                 task.todos_completed += 1
 
     def _update_phase_progress(self, task: TaskProgress):
-        """Update phase progress based on activity indicators"""
+        """Update phase progress based on activity indicators."""
         if task.phase == TaskPhase.STARTING:
             # Starting phase is quick
             task.phase_progress = min(100.0, task.phase_progress + 50.0)
@@ -184,14 +184,14 @@ class ProgressAnalyzer:
         task._recalculate_overall_progress()
 
     def get_session_progress(self, session_name: str) -> SessionProgress | None:
-        """Get progress for a specific session"""
+        """Get progress for a specific session."""
         return self.session_progress.get(session_name)
 
     def get_all_progress(self) -> dict[str, SessionProgress]:
-        """Get progress for all sessions"""
+        """Get progress for all sessions."""
         return self.session_progress.copy()
 
     def reset_session_progress(self, session_name: str):
-        """Reset progress for a specific session"""
+        """Reset progress for a specific session."""
         if session_name in self.session_progress:
             del self.session_progress[session_name]

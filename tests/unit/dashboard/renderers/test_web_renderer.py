@@ -1,6 +1,4 @@
-"""
-Tests for Web Renderer
-"""
+"""Tests for Web Renderer."""
 
 import json
 from datetime import datetime
@@ -29,21 +27,21 @@ from libs.dashboard.renderers.widget_models import (
 
 
 class TestWebRenderer:
-    """Test cases for Web renderer"""
+    """Test cases for Web renderer."""
 
     def setup_method(self):
-        """Setup test renderer"""
+        """Setup test renderer."""
         self.renderer = WebRenderer()
 
     def test_renderer_initialization(self):
-        """Test Web renderer initialization"""
+        """Test Web renderer initialization."""
         assert self.renderer.format_type == RenderFormat.WEB
         assert self.renderer.component_id_counter == 0
         assert "success" in self.renderer._color_classes
         assert "active" in self.renderer._status_classes
 
     def test_component_id_generation(self):
-        """Test unique component ID generation"""
+        """Test unique component ID generation."""
         id1 = self.renderer._generate_component_id()
         id2 = self.renderer._generate_component_id()
 
@@ -53,7 +51,7 @@ class TestWebRenderer:
         assert self.renderer.component_id_counter == 2
 
     def test_health_color_class_mapping(self):
-        """Test health level to CSS class mapping"""
+        """Test health level to CSS class mapping."""
         assert self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"
         assert self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"
         assert self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"
@@ -61,7 +59,7 @@ class TestWebRenderer:
         assert self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"
 
     def test_supports_feature(self):
-        """Test feature support checking"""
+        """Test feature support checking."""
         assert self.renderer.supports_feature("html") is True
         assert self.renderer.supports_feature("css") is True
         assert self.renderer.supports_feature("javascript") is True
@@ -72,7 +70,7 @@ class TestWebRenderer:
         assert self.renderer.supports_feature("nonexistent") is False
 
     def test_embed_widget_data(self):
-        """Test JavaScript data embedding"""
+        """Test JavaScript data embedding."""
         component_id = "test-widget-123"
         test_data = {"type": "test", "value": 42, "name": "test widget"}
 
@@ -87,7 +85,7 @@ class TestWebRenderer:
         assert "</script>" in result
 
     def test_render_session_browser_table(self):
-        """Test session browser table view rendering"""
+        """Test session browser table view rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -119,7 +117,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_session_browser_cards(self):
-        """Test session browser cards view rendering"""
+        """Test session browser cards view rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -147,7 +145,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_session_browser_list(self):
-        """Test session browser list view rendering"""
+        """Test session browser list view rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -176,7 +174,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_health_meter(self):
-        """Test health meter rendering"""
+        """Test health meter rendering."""
         now = datetime.now()
         category = HealthCategoryData(
             category="build",
@@ -207,7 +205,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_activity_heatmap(self):
-        """Test activity heatmap rendering"""
+        """Test activity heatmap rendering."""
         now = datetime.now()
         entry = ActivityEntry(
             timestamp=now,
@@ -241,7 +239,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_progress_tracker(self):
-        """Test progress tracker rendering"""
+        """Test progress tracker rendering."""
         now = datetime.now()
 
         progress = ProgressData(
@@ -276,7 +274,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_log_viewer(self):
-        """Test log viewer rendering"""
+        """Test log viewer rendering."""
         logs = [
             {
                 "timestamp": "2023-01-01T10:00:00",
@@ -313,7 +311,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_metric_card(self):
-        """Test metric card rendering"""
+        """Test metric card rendering."""
         metric = MetricCardData(
             title="CPU Usage",
             value=75.5,
@@ -340,7 +338,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_status_indicator(self):
-        """Test status indicator rendering"""
+        """Test status indicator rendering."""
         status = StatusIndicatorData(
             status="running",
             label="Service Active",
@@ -364,7 +362,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_chart(self):
-        """Test chart rendering"""
+        """Test chart rendering."""
         now = datetime.now()
         points = [
             ChartDataPoint(x=now, y=10),
@@ -394,7 +392,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_table(self):
-        """Test generic table rendering"""
+        """Test generic table rendering."""
         table_data = {
             "headers": ["Name", "Status", "Count"],
             "rows": [
@@ -423,7 +421,7 @@ class TestWebRenderer:
         assert "window.widgetData" in result
 
     def test_render_generic_widget(self):
-        """Test generic widget fallback rendering"""
+        """Test generic widget fallback rendering."""
         result = self.renderer._render_generic_widget(
             WidgetType.METRIC_CARD,
             {"test": "data"},
@@ -438,7 +436,7 @@ class TestWebRenderer:
         assert "test-component-123" in result
 
     def test_render_error_widget(self):
-        """Test error widget rendering"""
+        """Test error widget rendering."""
         result = self.renderer._render_error_widget(
             "Test error message",
             "error-component-123",
@@ -452,7 +450,7 @@ class TestWebRenderer:
         assert "❌" in result
 
     def test_render_layout_vertical(self):
-        """Test vertical layout rendering"""
+        """Test vertical layout rendering."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -473,7 +471,7 @@ class TestWebRenderer:
         assert "Test 2" in result
 
     def test_render_layout_flex(self):
-        """Test flex layout rendering"""
+        """Test flex layout rendering."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -496,7 +494,7 @@ class TestWebRenderer:
         assert "Test 2" in result
 
     def test_render_layout_grid(self):
-        """Test grid layout rendering"""
+        """Test grid layout rendering."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -526,7 +524,7 @@ class TestWebRenderer:
         assert "Test 4" in result
 
     def test_render_container_with_border(self):
-        """Test container rendering with border"""
+        """Test container rendering with border."""
         content = "<p>Test content</p>"
 
         result = self.renderer.render_container(
@@ -548,7 +546,7 @@ class TestWebRenderer:
         assert "p-6" in result
 
     def test_render_container_without_border(self):
-        """Test container rendering without border"""
+        """Test container rendering without border."""
         content = "<p>Test content</p>"
 
         result = self.renderer.render_container(
@@ -561,7 +559,7 @@ class TestWebRenderer:
         assert "border" not in result
 
     def test_html_escaping(self):
-        """Test HTML escaping for security"""
+        """Test HTML escaping for security."""
         malicious_data = MetricCardData(
             title="<script>alert('xss')</script>",
             value=100,
@@ -584,7 +582,7 @@ class TestWebRenderer:
         assert "&lt;img src=x onerror=alert(&#x27;xss&#x27;)&gt;" in result
 
     def test_error_handling_invalid_data(self):
-        """Test error handling with invalid data"""
+        """Test error handling with invalid data."""
         # Test with invalid health data
         result = self.renderer.render_widget(
             WidgetType.HEALTH_METER,
@@ -606,7 +604,7 @@ class TestWebRenderer:
         assert "session-browser" in result
 
     def test_activity_heatmap_heat_levels(self):
-        """Test different activity heat levels"""
+        """Test different activity heat levels."""
         # High activity
         high_activity = ActivityData(
             entries=[],
@@ -660,7 +658,7 @@ class TestWebRenderer:
         assert "text-blue-600" in result
 
     def test_metric_card_trend_indicators(self):
-        """Test metric card trend indicators"""
+        """Test metric card trend indicators."""
         # Positive trend
         positive_metric = MetricCardData(
             title="Test",
@@ -701,7 +699,7 @@ class TestWebRenderer:
         assert "↗️" not in result and "↘️" not in result and "➡️" not in result
 
     def test_javascript_data_validity(self):
-        """Test that embedded JavaScript data is valid JSON"""
+        """Test that embedded JavaScript data is valid JSON."""
         session = SessionData(
             name="test-session",
             id="session-123",
@@ -741,14 +739,14 @@ class TestWebRenderer:
 
 
 class TestWebRendererIntegration:
-    """Integration tests for Web renderer"""
+    """Integration tests for Web renderer."""
 
     def setup_method(self):
-        """Setup test environment"""
+        """Setup test environment."""
         self.renderer = WebRenderer()
 
     def test_full_dashboard_rendering(self):
-        """Test rendering a complete dashboard"""
+        """Test rendering a complete dashboard."""
         now = datetime.now()
 
         # Create sample data
@@ -829,7 +827,7 @@ class TestWebRendererIntegration:
         assert "window.widgetData" in progress_result
 
     def test_responsive_layout_rendering(self):
-        """Test responsive layout with multiple breakpoints"""
+        """Test responsive layout with multiple breakpoints."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -871,7 +869,7 @@ class TestWebRendererIntegration:
         assert "flex-1" in flex_result
 
     def test_accessibility_attributes(self):
-        """Test that rendered HTML includes accessibility attributes"""
+        """Test that rendered HTML includes accessibility attributes."""
         metric = MetricCardData(
             title="Response Time",
             value=150,

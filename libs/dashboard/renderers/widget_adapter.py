@@ -1,6 +1,5 @@
-"""
-Widget Data Adapter
-Converts raw data from various sources into standardized widget models
+"""Widget Data Adapter
+Converts raw data from various sources into standardized widget models.
 """
 
 import logging
@@ -29,8 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class WidgetDataAdapter:
-    """
-    Adapter class for converting raw data into widget model instances
+    """Adapter class for converting raw data into widget model instances.
 
     This class handles the transformation of various data formats (API responses,
     database records, configuration files) into the standardized widget models
@@ -38,12 +36,11 @@ class WidgetDataAdapter:
     """
 
     def __init__(self):
-        """Initialize the adapter"""
+        """Initialize the adapter."""
         self.logger = logging.getLogger("yesman.dashboard.widget_adapter")
 
     def adapt_session_data(self, raw_data: dict[str, Any] | list[dict[str, Any]]) -> SessionData | list[SessionData]:
-        """
-        Convert raw session data to SessionData model(s)
+        """Convert raw session data to SessionData model(s).
 
         Args:
             raw_data: Raw session data from tmux or API
@@ -57,7 +54,7 @@ class WidgetDataAdapter:
         return self._adapt_single_session(raw_data)
 
     def _adapt_single_session(self, data: dict[str, Any]) -> SessionData:
-        """Convert single session data"""
+        """Convert single session data."""
         try:
             # Parse session status
             status_str = data.get("status", "idle").lower()
@@ -126,8 +123,7 @@ class WidgetDataAdapter:
             )
 
     def adapt_health_data(self, raw_data: dict[str, Any]) -> HealthData:
-        """
-        Convert raw health data to HealthData model
+        """Convert raw health data to HealthData model.
 
         Args:
             raw_data: Raw health data from health calculator
@@ -204,8 +200,7 @@ class WidgetDataAdapter:
             )
 
     def adapt_activity_data(self, raw_data: dict[str, Any]) -> ActivityData:
-        """
-        Convert raw activity data to ActivityData model
+        """Convert raw activity data to ActivityData model.
 
         Args:
             raw_data: Raw activity data from git or file system
@@ -263,8 +258,7 @@ class WidgetDataAdapter:
             )
 
     def adapt_progress_data(self, raw_data: dict[str, Any]) -> ProgressData:
-        """
-        Convert raw progress data to ProgressData model
+        """Convert raw progress data to ProgressData model.
 
         Args:
             raw_data: Raw progress data from task tracker
@@ -324,7 +318,7 @@ class WidgetDataAdapter:
             )
 
     def adapt_metric_card_data(self, raw_data: dict[str, Any]) -> MetricCardData:
-        """Convert raw data to MetricCardData model"""
+        """Convert raw data to MetricCardData model."""
         return MetricCardData(
             title=raw_data.get("title", ""),
             value=raw_data.get("value", 0),
@@ -337,7 +331,7 @@ class WidgetDataAdapter:
         )
 
     def adapt_status_indicator_data(self, raw_data: dict[str, Any]) -> StatusIndicatorData:
-        """Convert raw data to StatusIndicatorData model"""
+        """Convert raw data to StatusIndicatorData model."""
         return StatusIndicatorData(
             status=raw_data.get("status", "unknown"),
             label=raw_data.get("label", ""),
@@ -348,7 +342,7 @@ class WidgetDataAdapter:
         )
 
     def adapt_chart_data(self, raw_data: dict[str, Any]) -> ChartData:
-        """Convert raw data to ChartData model"""
+        """Convert raw data to ChartData model."""
         # Parse data points
         data_points = []
         raw_points = raw_data.get("data", []) or raw_data.get("data_points", [])
@@ -392,7 +386,7 @@ class WidgetDataAdapter:
     # Helper methods
 
     def _parse_timestamp(self, timestamp: Any) -> datetime | None:
-        """Parse various timestamp formats to datetime"""
+        """Parse various timestamp formats to datetime."""
         if timestamp is None:
             return None
 
@@ -433,7 +427,7 @@ class WidgetDataAdapter:
         return None
 
     def _parse_session_status(self, status_str: str) -> SessionStatus:
-        """Parse session status string"""
+        """Parse session status string."""
         status_mapping = {
             "active": SessionStatus.ACTIVE,
             "running": SessionStatus.ACTIVE,
@@ -447,7 +441,7 @@ class WidgetDataAdapter:
         return status_mapping.get(status_str.lower(), SessionStatus.IDLE)
 
     def _parse_activity_type(self, type_str: str) -> ActivityType:
-        """Parse activity type string"""
+        """Parse activity type string."""
         type_mapping = {
             "file_created": ActivityType.FILE_CREATED,
             "file_modified": ActivityType.FILE_MODIFIED,
@@ -469,7 +463,7 @@ class WidgetDataAdapter:
         return type_mapping.get(type_str.lower(), ActivityType.FILE_MODIFIED)
 
     def _parse_progress_phase(self, phase_str: str) -> ProgressPhase:
-        """Parse progress phase string"""
+        """Parse progress phase string."""
         phase_mapping = {
             "starting": ProgressPhase.STARTING,
             "analyzing": ProgressPhase.ANALYZING,
@@ -491,20 +485,20 @@ adapter = WidgetDataAdapter()
 def adapt_session_data(
     raw_data: dict[str, Any] | list[dict[str, Any]],
 ) -> SessionData | list[SessionData]:
-    """Convenience function for session data adaptation"""
+    """Convenience function for session data adaptation."""
     return adapter.adapt_session_data(raw_data)
 
 
 def adapt_health_data(raw_data: dict[str, Any]) -> HealthData:
-    """Convenience function for health data adaptation"""
+    """Convenience function for health data adaptation."""
     return adapter.adapt_health_data(raw_data)
 
 
 def adapt_activity_data(raw_data: dict[str, Any]) -> ActivityData:
-    """Convenience function for activity data adaptation"""
+    """Convenience function for activity data adaptation."""
     return adapter.adapt_activity_data(raw_data)
 
 
 def adapt_progress_data(raw_data: dict[str, Any]) -> ProgressData:
-    """Convenience function for progress data adaptation"""
+    """Convenience function for progress data adaptation."""
     return adapter.adapt_progress_data(raw_data)

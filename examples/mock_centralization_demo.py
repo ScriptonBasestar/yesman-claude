@@ -46,7 +46,9 @@ def demo_old_vs_new_patterns():
     print("@patch('commands.setup.SessionManager')")
     print("def test_setup_session(self, mock_session_manager):")
     print("    # One line replaces 10+ lines of setup")
-    print("    mock_manager_instance = ManagerMockFactory.create_session_manager_mock()")
+    print(
+        "    mock_manager_instance = ManagerMockFactory.create_session_manager_mock()"
+    )
     print("    mock_session_manager.return_value = mock_manager_instance")
     print("    # ... test code ...")
     print("```")
@@ -105,7 +107,11 @@ def demo_customization_options():
     mock_claude = ManagerMockFactory.create_claude_manager_mock(
         controller_count=3,
         get_controller_result=mock_controller,
-        controllers_status={"session1": "running", "session2": "error", "session3": "stopped"},
+        controllers_status={
+            "session1": "running",
+            "session2": "error",
+            "session3": "stopped",
+        },
     )
 
     print(f"   Controller count: {mock_claude.get_controller_count.return_value}")
@@ -200,7 +206,9 @@ def demo_priority_targets():
     print("Priority | Mock Object    | Uses | Files | Impact")
     print("---------|----------------|------|-------|--------")
     for obj, uses, files, priority in targets:
-        print(f"{priority:8} | {obj:14} | {uses:4} | {files:5} | {'🔥' if priority == 'HIGH' else '🔸' if priority == 'MEDIUM' else '🔹'}")
+        print(
+            f"{priority:8} | {obj:14} | {uses:4} | {files:5} | {'🔥' if priority == 'HIGH' else '🔸' if priority == 'MEDIUM' else '🔹'}"
+        )
 
     print("\nRecommended migration order:")
     print("1. SessionManager - Highest impact (20 duplications)")

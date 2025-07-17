@@ -1,4 +1,4 @@
-"""Tests for AgentPool class"""
+"""Tests for AgentPool class."""
 
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -10,23 +10,23 @@ from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 
 
 class TestAgentPool:
-    """Test cases for AgentPool"""
+    """Test cases for AgentPool."""
 
     @pytest.fixture
     def work_dir(self, tmp_path):
-        """Create temporary work directory"""
+        """Create temporary work directory."""
         work_path = tmp_path / "agent_work"
         work_path.mkdir()
         return work_path
 
     @pytest.fixture
     def agent_pool(self, work_dir):
-        """Create AgentPool instance"""
+        """Create AgentPool instance."""
         return AgentPool(max_agents=2, work_dir=str(work_dir))
 
     @pytest.fixture
     def sample_task(self):
-        """Create a sample task"""
+        """Create a sample task."""
         return Task(
             task_id="test-task-1",
             title="Test Task",
@@ -37,7 +37,7 @@ class TestAgentPool:
         )
 
     def test_init(self, agent_pool, work_dir):
-        """Test AgentPool initialization"""
+        """Test AgentPool initialization."""
         assert agent_pool.max_agents == 2
         assert agent_pool.work_dir == work_dir
         assert agent_pool.agents == {}
@@ -46,7 +46,7 @@ class TestAgentPool:
         assert work_dir.exists()
 
     def test_add_task(self, agent_pool, sample_task):
-        """Test adding a task to the pool"""
+        """Test adding a task to the pool."""
         agent_pool.add_task(sample_task)
 
         assert sample_task.task_id in agent_pool.tasks
@@ -54,7 +54,7 @@ class TestAgentPool:
         assert agent_pool.task_queue.qsize() == 1
 
     def test_create_task(self, agent_pool):
-        """Test creating and adding a task"""
+        """Test creating and adding a task."""
         task = agent_pool.create_task(
             title="New Task",
             command=["ls", "-la"],
@@ -70,7 +70,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_create_agent(self, agent_pool):
-        """Test creating a new agent"""
+        """Test creating a new agent."""
         agent = await agent_pool._create_agent()
 
         assert agent.agent_id.startswith("agent-")
@@ -80,7 +80,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_get_available_agent(self, agent_pool):
-        """Test getting available agent"""
+        """Test getting available agent."""
         # No agents initially
         agent = await agent_pool._get_available_agent()
         assert agent is not None  # Should create new agent
@@ -105,7 +105,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_assign_task_to_agent(self, agent_pool, sample_task):
-        """Test assigning a task to an agent"""
+        """Test assigning a task to an agent."""
         agent = await agent_pool._create_agent()
 
         await agent_pool._assign_task_to_agent(agent, sample_task)
@@ -120,7 +120,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_execute_task_success(self, agent_pool):
-        """Test successful task execution"""
+        """Test successful task execution."""
         agent = await agent_pool._create_agent()
         task = Task(
             task_id="success-task",
@@ -157,7 +157,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_execute_task_failure(self, agent_pool):
-        """Test failed task execution"""
+        """Test failed task execution."""
         agent = await agent_pool._create_agent()
         task = Task(
             task_id="fail-task",
@@ -188,7 +188,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_execute_task_timeout(self, agent_pool):
-        """Test task timeout handling"""
+        """Test task timeout handling."""
         agent = await agent_pool._create_agent()
         task = Task(
             task_id="timeout-task",
@@ -211,7 +211,7 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     async def test_terminate_agent(self, agent_pool):
-        """Test agent termination"""
+        """Test agent termination."""
         agent = await agent_pool._create_agent()
 
         # Mock process
@@ -228,7 +228,7 @@ class TestAgentPool:
         mock_process.terminate.assert_called_once()
 
     def test_get_agent_status(self, agent_pool):
-        """Test getting agent status"""
+        """Test getting agent status."""
         # Non-existent agent
         status = agent_pool.get_agent_status("non-existent")
         assert status is None
@@ -243,7 +243,7 @@ class TestAgentPool:
         assert status["state"] == AgentState.IDLE.value
 
     def test_get_task_status(self, agent_pool, sample_task):
-        """Test getting task status"""
+        """Test getting task status."""
         # Non-existent task
         status = agent_pool.get_task_status("non-existent")
         assert status is None
@@ -257,7 +257,7 @@ class TestAgentPool:
         assert status["status"] == TaskStatus.PENDING.value
 
     def test_list_agents(self, agent_pool):
-        """Test listing agents"""
+        """Test listing agents."""
         # Empty list initially
         agents = agent_pool.list_agents()
         assert agents == []
@@ -274,7 +274,7 @@ class TestAgentPool:
         assert any(a["agent_id"] == "agent-2" for a in agents)
 
     def test_list_tasks(self, agent_pool):
-        """Test listing tasks"""
+        """Test listing tasks."""
         # Empty list initially
         tasks = agent_pool.list_tasks()
         assert tasks == []
@@ -310,7 +310,7 @@ class TestAgentPool:
         assert completed_tasks[0]["task_id"] == "task-2"
 
     def test_get_pool_statistics(self, agent_pool):
-        """Test getting pool statistics"""
+        """Test getting pool statistics."""
         stats = agent_pool.get_pool_statistics()
 
         assert stats["max_agents"] == 2
@@ -338,7 +338,7 @@ class TestAgentPool:
         assert stats["failed_tasks"] == 2
 
     def test_state_persistence(self, agent_pool, work_dir):
-        """Test saving and loading state"""
+        """Test saving and loading state."""
         # Add some data
         agent = Agent(agent_id="test-agent", completed_tasks=3)
         agent_pool.agents["test-agent"] = agent
@@ -369,7 +369,7 @@ class TestAgentPool:
         assert "completed-1" in new_pool.completed_tasks
 
     def test_task_serialization(self):
-        """Test task to/from dict conversion"""
+        """Test task to/from dict conversion."""
         task = Task(
             task_id="test",
             title="Test Task",
@@ -393,7 +393,7 @@ class TestAgentPool:
         assert task2.metadata == task.metadata
 
     def test_agent_serialization(self):
-        """Test agent to/from dict conversion"""
+        """Test agent to/from dict conversion."""
         agent = Agent(
             agent_id="test-agent",
             state=AgentState.WORKING,
@@ -415,7 +415,7 @@ class TestAgentPool:
         assert agent2.completed_tasks == agent.completed_tasks
 
     def test_event_callbacks(self, agent_pool):
-        """Test event callback registration"""
+        """Test event callback registration."""
         task_started_cb = AsyncMock()
         task_completed_cb = AsyncMock()
         task_failed_cb = AsyncMock()

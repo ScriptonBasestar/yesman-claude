@@ -1,6 +1,5 @@
-"""
-TUI Renderer
-Rich-based terminal user interface renderer for dashboard widgets
+"""TUI Renderer
+Rich-based terminal user interface renderer for dashboard widgets.
 """
 
 from datetime import datetime
@@ -18,20 +17,29 @@ from rich.text import Text
 from rich.tree import Tree
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
-from .widget_models import ActivityData, ChartData, HealthData, HealthLevel, MetricCardData, ProgressData, ProgressPhase, SessionData, SessionStatus, StatusIndicatorData
+from .widget_models import (
+    ActivityData,
+    ChartData,
+    HealthData,
+    HealthLevel,
+    MetricCardData,
+    ProgressData,
+    ProgressPhase,
+    SessionData,
+    SessionStatus,
+    StatusIndicatorData,
+)
 
 
 class TUIRenderer(BaseRenderer):
-    """
-    Terminal User Interface renderer using Rich library
+    """Terminal User Interface renderer using Rich library.
 
     Provides rich terminal-based rendering of dashboard widgets
     with colors, progress bars, tables, trees, and panels.
     """
 
     def __init__(self, console: Console | None = None, theme: dict[str, Any] | None = None):
-        """
-        Initialize TUI renderer
+        """Initialize TUI renderer.
 
         Args:
             console: Rich Console instance (creates new if None)
@@ -62,8 +70,7 @@ class TUIRenderer(BaseRenderer):
         data: Any,
         options: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Render a single widget using Rich components
+        """Render a single widget using Rich components.
 
         Args:
             widget_type: Type of widget to render
@@ -102,8 +109,7 @@ class TUIRenderer(BaseRenderer):
         widgets: list[dict[str, Any]],
         layout_config: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Render a layout containing multiple widgets
+        """Render a layout containing multiple widgets.
 
         Args:
             widgets: List of widget configurations
@@ -132,8 +138,7 @@ class TUIRenderer(BaseRenderer):
             return self._render_vertical_layout(rendered_widgets, layout_config)
 
     def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
-        """
-        Render a container wrapping content
+        """Render a container wrapping content.
 
         Args:
             content: Content to wrap
@@ -168,7 +173,7 @@ class TUIRenderer(BaseRenderer):
     # Widget-specific renderers
 
     def _render_session_browser(self, data: SessionData | list[SessionData], options: dict[str, Any]) -> str:
-        """Render session browser widget"""
+        """Render session browser widget."""
         view_mode = options.get("view_mode", "table")
 
         if isinstance(data, SessionData):
@@ -187,7 +192,7 @@ class TUIRenderer(BaseRenderer):
             return self._render_session_table(sessions, options)
 
     def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
-        """Render sessions as table"""
+        """Render sessions as table."""
         table = Table(title="Active Sessions", box=ROUNDED)
 
         # Add columns
@@ -235,7 +240,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_session_tree(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
-        """Render sessions as tree"""
+        """Render sessions as tree."""
         tree = Tree("📂 Sessions", style="bold blue")
 
         for session in sessions:
@@ -268,7 +273,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
-        """Render sessions as cards"""
+        """Render sessions as cards."""
         cards = []
 
         for session in sessions:
@@ -309,7 +314,7 @@ class TUIRenderer(BaseRenderer):
             return "No sessions found"
 
     def _render_health_meter(self, data: HealthData, options: dict[str, Any]) -> str:
-        """Render health meter widget"""
+        """Render health meter widget."""
         if not isinstance(data, HealthData):
             return "Invalid health data"
 
@@ -354,7 +359,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any]) -> str:
-        """Render activity heatmap as ASCII art"""
+        """Render activity heatmap as ASCII art."""
         if not isinstance(data, ActivityData):
             return "Invalid activity data"
 
@@ -398,7 +403,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any]) -> str:
-        """Render progress tracker widget"""
+        """Render progress tracker widget."""
         if not isinstance(data, ProgressData):
             return "Invalid progress data"
 
@@ -469,7 +474,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_log_viewer(self, data: dict[str, Any], options: dict[str, Any]) -> str:
-        """Render log viewer widget"""
+        """Render log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 10)
 
@@ -507,7 +512,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_metric_card(self, data: MetricCardData, options: dict[str, Any]) -> str:
-        """Render metric card widget"""
+        """Render metric card widget."""
         if not isinstance(data, MetricCardData):
             return "Invalid metric data"
 
@@ -549,7 +554,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str, Any]) -> str:
-        """Render status indicator widget"""
+        """Render status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             return "Invalid status data"
 
@@ -578,7 +583,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_chart(self, data: ChartData, options: dict[str, Any]) -> str:
-        """Render chart as ASCII representation"""
+        """Render chart as ASCII representation."""
         if not isinstance(data, ChartData):
             return "Invalid chart data"
 
@@ -619,7 +624,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_table(self, data: dict[str, Any], options: dict[str, Any]) -> str:
-        """Render generic table"""
+        """Render generic table."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
 
@@ -641,7 +646,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_generic_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any]) -> str:
-        """Render generic widget fallback"""
+        """Render generic widget fallback."""
         content = Text()
         content.append(f"Widget Type: {widget_type.value}\n", style="bold")
         content.append(f"Data: {str(data)[:200]}\n", style="dim")
@@ -660,7 +665,7 @@ class TUIRenderer(BaseRenderer):
     # Layout renderers
 
     def _render_vertical_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
-        """Render widgets in vertical layout"""
+        """Render widgets in vertical layout."""
         result = []
         spacing = config.get("spacing", 1)
 
@@ -672,7 +677,7 @@ class TUIRenderer(BaseRenderer):
         return "".join(result)
 
     def _render_horizontal_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
-        """Render widgets in horizontal layout"""
+        """Render widgets in horizontal layout."""
         if not widgets:
             return ""
 
@@ -689,7 +694,7 @@ class TUIRenderer(BaseRenderer):
         return capture.get()
 
     def _render_grid_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
-        """Render widgets in grid layout"""
+        """Render widgets in grid layout."""
         cols = config.get("columns", 2)
 
         # Group widgets into rows
@@ -712,12 +717,12 @@ class TUIRenderer(BaseRenderer):
     # Helper methods
 
     def _get_status_color(self, status: str) -> str:
-        """Get color for status"""
+        """Get color for status."""
         color_theme = self.get_status_color(status)
         return self._color_map.get(color_theme.value, "white")
 
     def _get_health_color(self, health_level: HealthLevel) -> str:
-        """Get color for health level"""
+        """Get color for health level."""
         color_mapping = {
             HealthLevel.EXCELLENT: "green",
             HealthLevel.GOOD: "blue",
@@ -728,7 +733,7 @@ class TUIRenderer(BaseRenderer):
         return color_mapping.get(health_level, "white")
 
     def supports_feature(self, feature: str) -> bool:
-        """Check if feature is supported"""
+        """Check if feature is supported."""
         features = {
             "color": self.supports_color,
             "unicode": True,  # Rich handles this

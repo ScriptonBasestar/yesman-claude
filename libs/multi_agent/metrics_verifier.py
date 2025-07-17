@@ -1,4 +1,4 @@
-"""Success metrics verification system for multi-agent operations"""
+"""Success metrics verification system for multi-agent operations."""
 
 import asyncio
 import json
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class PerformanceMetrics:
-    """Performance metrics for multi-agent operations"""
+    """Performance metrics for multi-agent operations."""
 
     # Speed improvement metrics
     single_agent_time: float = 0.0
@@ -45,7 +45,7 @@ class PerformanceMetrics:
     resource_usage: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization"""
+        """Convert to dictionary for serialization."""
         return {
             "single_agent_time": self.single_agent_time,
             "multi_agent_time": self.multi_agent_time,
@@ -67,7 +67,7 @@ class PerformanceMetrics:
 
 @dataclass
 class SuccessCriteria:
-    """Success criteria for multi-agent system"""
+    """Success criteria for multi-agent system."""
 
     # Target metrics from TODO requirements
     min_speed_improvement: float = 2.0  # 2-3x speed improvement
@@ -77,7 +77,7 @@ class SuccessCriteria:
     min_quality_maintenance: float = 0.0  # No quality degradation
 
     def check_compliance(self, metrics: PerformanceMetrics) -> dict[str, bool]:
-        """Check if metrics meet success criteria"""
+        """Check if metrics meet success criteria."""
         results = {
             "speed_improvement": (self.min_speed_improvement <= metrics.speed_improvement_ratio <= self.max_speed_improvement),
             "conflict_resolution": metrics.conflict_resolution_rate >= self.min_conflict_resolution_rate,
@@ -90,11 +90,10 @@ class SuccessCriteria:
 
 
 class MetricsVerifier:
-    """Comprehensive metrics verification system"""
+    """Comprehensive metrics verification system."""
 
     def __init__(self, work_dir: str = ".scripton/yesman"):
-        """
-        Initialize metrics verifier
+        """Initialize metrics verifier.
 
         Args:
             work_dir: Directory for storing metrics data
@@ -121,7 +120,7 @@ class MetricsVerifier:
         self._load_metrics()
 
     def _load_metrics(self) -> None:
-        """Load existing metrics from disk"""
+        """Load existing metrics from disk."""
         if self.metrics_file.exists():
             try:
                 with open(self.metrics_file) as f:
@@ -141,7 +140,7 @@ class MetricsVerifier:
                 logger.error(f"Failed to load metrics: {e}")
 
     def _save_metrics(self) -> None:
-        """Save current metrics to disk"""
+        """Save current metrics to disk."""
         try:
             data = {
                 "current_metrics": self.current_metrics.to_dict(),
@@ -162,8 +161,7 @@ class MetricsVerifier:
         benchmark_tasks: list[dict[str, Any]],
         iterations: int = 3,
     ) -> float:
-        """
-        Measure single-agent performance baseline
+        """Measure single-agent performance baseline.
 
         Args:
             agent_pool: Agent pool to use (will be limited to 1 agent)
@@ -237,8 +235,7 @@ class MetricsVerifier:
         benchmark_tasks: list[dict[str, Any]],
         iterations: int = 3,
     ) -> float:
-        """
-        Measure multi-agent performance
+        """Measure multi-agent performance.
 
         Args:
             agent_pool: Agent pool to use (with multiple agents)
@@ -307,7 +304,7 @@ class MetricsVerifier:
         total_conflicts: int,
         auto_resolved: int,
     ) -> None:
-        """Track conflict resolution metrics"""
+        """Track conflict resolution metrics."""
         self.current_metrics.total_conflicts += total_conflicts
         self.current_metrics.auto_resolved_conflicts += auto_resolved
 
@@ -324,7 +321,7 @@ class MetricsVerifier:
         total_attempts: int,
         successful: int,
     ) -> None:
-        """Track branch merge success metrics"""
+        """Track branch merge success metrics."""
         self.current_metrics.total_merge_attempts += total_attempts
         self.current_metrics.successful_merges += successful
 
@@ -341,7 +338,7 @@ class MetricsVerifier:
         initial_score: float,
         final_score: float,
     ) -> None:
-        """Track code quality metrics"""
+        """Track code quality metrics."""
         self.current_metrics.initial_quality_score = initial_score
         self.current_metrics.final_quality_score = final_score
         self.current_metrics.quality_improvement = final_score - initial_score
@@ -352,7 +349,7 @@ class MetricsVerifier:
         self._save_metrics()
 
     def verify_success_criteria(self) -> dict[str, Any]:
-        """Verify if system meets all success criteria"""
+        """Verify if system meets all success criteria."""
         compliance = self.success_criteria.check_compliance(self.current_metrics)
 
         results = {
@@ -377,7 +374,7 @@ class MetricsVerifier:
         return results
 
     def generate_performance_report(self) -> str:
-        """Generate detailed performance report"""
+        """Generate detailed performance report."""
         verification = self.verify_success_criteria()
         metrics = self.current_metrics
         compliance = verification["compliance"]
@@ -431,7 +428,7 @@ class MetricsVerifier:
         return "\n".join(report_lines)
 
     def get_benchmark_tasks(self) -> list[dict[str, Any]]:
-        """Get standard benchmark tasks for performance testing"""
+        """Get standard benchmark tasks for performance testing."""
         return [
             {
                 "id": "file_analysis",
@@ -495,8 +492,7 @@ async def run_comprehensive_verification(
     agent_pool: AgentPool,
     work_dir: str = ".scripton/yesman",
 ) -> dict[str, Any]:
-    """
-    Run comprehensive metrics verification
+    """Run comprehensive metrics verification.
 
     Args:
         agent_pool: Configured agent pool for testing

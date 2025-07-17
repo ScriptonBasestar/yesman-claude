@@ -1,4 +1,4 @@
-"""Tests for TaskAnalyzer class"""
+"""Tests for TaskAnalyzer class."""
 
 import json
 
@@ -9,11 +9,11 @@ from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition
 
 
 class TestTaskAnalyzer:
-    """Test cases for TaskAnalyzer"""
+    """Test cases for TaskAnalyzer."""
 
     @pytest.fixture
     def test_repo(self, tmp_path):
-        """Create a test repository structure"""
+        """Create a test repository structure."""
         # Create test files
         (tmp_path / "libs").mkdir()
         (tmp_path / "libs" / "__init__.py").write_text("")
@@ -62,17 +62,17 @@ if __name__ == "__main__":
 
     @pytest.fixture
     def analyzer(self, test_repo):
-        """Create TaskAnalyzer instance"""
+        """Create TaskAnalyzer instance."""
         return TaskAnalyzer(repo_path=str(test_repo))
 
     def test_init(self, analyzer, test_repo):
-        """Test TaskAnalyzer initialization"""
+        """Test TaskAnalyzer initialization."""
         assert analyzer.repo_path == test_repo
         assert analyzer.file_dependencies == {}
         assert isinstance(analyzer.task_graph, DirectedGraph)
 
     def test_analyze_file_dependencies(self, analyzer):
-        """Test analyzing file dependencies"""
+        """Test analyzing file dependencies."""
         deps = analyzer.analyze_file_dependencies("libs/module_a.py")
 
         assert len(deps) == 3
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         assert "helper_function" in local_import.symbols
 
     def test_find_related_files(self, analyzer):
-        """Test finding related files"""
+        """Test finding related files."""
         # Find files related to module_b
         related = analyzer.find_related_files("libs/module_b.py", depth=2)
 
@@ -112,20 +112,20 @@ if __name__ == "__main__":
         assert "main.py" in related
 
     def test_file_to_module_conversion(self, analyzer):
-        """Test file path to module name conversion"""
+        """Test file path to module name conversion."""
         assert analyzer._file_to_module("libs/module_a.py") == "libs.module_a"
         assert analyzer._file_to_module("libs/__init__.py") == "libs"
         assert analyzer._file_to_module("main.py") == "main"
 
     def test_module_to_file_conversion(self, analyzer):
-        """Test module name to file path conversion"""
+        """Test module name to file path conversion."""
         assert analyzer._module_to_file("libs.module_a") == "libs/module_a.py"
         assert analyzer._module_to_file("libs") == "libs/__init__.py"
         assert analyzer._module_to_file("main") == "main.py"
         assert analyzer._module_to_file("nonexistent.module") is None
 
     def test_create_task_from_files(self, analyzer):
-        """Test creating task from files"""
+        """Test creating task from files."""
         task = analyzer.create_task_from_files(
             task_id="task1",
             title="Refactor module_b",
@@ -149,7 +149,7 @@ if __name__ == "__main__":
         assert "task1" in analyzer.task_graph.nodes_iter()
 
     def test_analyze_task_dependencies(self, analyzer):
-        """Test analyzing dependencies between tasks"""
+        """Test analyzing dependencies between tasks."""
         tasks = [
             TaskDefinition(
                 task_id="task1",
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         assert graph.has_edge("task2", "task3")
 
     def test_get_execution_order(self, analyzer):
-        """Test getting execution order"""
+        """Test getting execution order."""
         tasks = [
             TaskDefinition(task_id="A", title="Task A", file_paths=["a.py"]),
             TaskDefinition(
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         assert layers[2] == ["D"]
 
     def test_get_execution_order_with_cycle(self, analyzer):
-        """Test execution order with dependency cycle"""
+        """Test execution order with dependency cycle."""
         tasks = [
             TaskDefinition(
                 task_id="A",
@@ -257,7 +257,7 @@ if __name__ == "__main__":
         assert set(all_tasks) == {"A", "B", "C"}
 
     def test_estimate_parallel_time(self, analyzer):
-        """Test estimating parallel execution time"""
+        """Test estimating parallel execution time."""
         tasks = [
             TaskDefinition(
                 task_id="A",
@@ -304,7 +304,7 @@ if __name__ == "__main__":
         assert time_1_agent == 8.0
 
     def test_export_dependency_graph(self, analyzer, tmp_path):
-        """Test exporting dependency graph"""
+        """Test exporting dependency graph."""
         tasks = [
             TaskDefinition(task_id="task1", title="Task 1", file_paths=["file1.py"]),
             TaskDefinition(
@@ -337,7 +337,7 @@ if __name__ == "__main__":
         assert dep["target"] == "task2"
 
     def test_task_definition_serialization(self):
-        """Test TaskDefinition to/from dict"""
+        """Test TaskDefinition to/from dict."""
         task = TaskDefinition(
             task_id="test",
             title="Test Task",

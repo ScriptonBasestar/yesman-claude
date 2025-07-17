@@ -1,4 +1,4 @@
-"""TODO progress tracking and visualization widget"""
+"""TODO progress tracking and visualization widget."""
 
 import re
 import time
@@ -14,7 +14,7 @@ from rich.text import Text
 
 
 class TodoStatus(Enum):
-    """TODO item status"""
+    """TODO item status."""
 
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
@@ -24,7 +24,7 @@ class TodoStatus(Enum):
 
 @dataclass
 class TodoItem:
-    """Individual TODO item"""
+    """Individual TODO item."""
 
     id: str
     content: str
@@ -40,7 +40,7 @@ class TodoItem:
 
 @dataclass
 class ProgressStats:
-    """Progress tracking statistics"""
+    """Progress tracking statistics."""
 
     total_items: int
     completed_items: int
@@ -52,14 +52,14 @@ class ProgressStats:
 
 
 class ProgressTracker:
-    """TODO progress tracking and visualization"""
+    """TODO progress tracking and visualization."""
 
     def __init__(self, console: Console | None = None):
         self.console = console or Console()
         self.todos: list[TodoItem] = []
 
     def load_todos_from_file(self, file_path: str) -> bool:
-        """Load TODO items from markdown file"""
+        """Load TODO items from markdown file."""
         try:
             path = Path(file_path)
             if not path.exists():
@@ -73,14 +73,14 @@ class ProgressTracker:
             return False
 
     def load_todos_from_api(self, api_endpoint: str) -> bool:
-        """Load TODO items from API (placeholder for future implementation)"""
+        """Load TODO items from API (placeholder for future implementation)."""
         # This would integrate with the yesman todo system when available
         # For now, return empty list
         self.todos = []
         return True
 
     def _parse_markdown_todos(self, content: str) -> list[TodoItem]:
-        """Parse TODO items from markdown content"""
+        """Parse TODO items from markdown content."""
         todos = []
         current_time = time.time()
 
@@ -136,7 +136,7 @@ class ProgressTracker:
         return todos
 
     def _extract_project_from_text(self, text: str) -> str | None:
-        """Extract project name from TODO text"""
+        """Extract project name from TODO text."""
         # Look for patterns like "IMPROVE-001:", "Fix:", etc.
         project_patterns = [
             r"^([A-Z]+-\\d+):",  # IMPROVE-001:
@@ -152,7 +152,7 @@ class ProgressTracker:
         return None
 
     def _extract_category_from_text(self, text: str) -> str | None:
-        """Extract category from TODO text"""
+        """Extract category from TODO text."""
         categories = {
             "performance": ["performance", "optimization", "cache", "speed"],
             "ui": ["ui", "interface", "dashboard", "visualization"],
@@ -171,8 +171,7 @@ class ProgressTracker:
         return "general"
 
     def calculate_progress_stats(self) -> ProgressStats:
-        """Calculate progress statistics"""
-
+        """Calculate progress statistics."""
         total = len(self.todos)
         if total == 0:
             return ProgressStats(0, 0, 0, 0, 0.0, 0.0)
@@ -216,7 +215,7 @@ class ProgressTracker:
         )
 
     def render_progress_overview(self) -> Panel:
-        """Render progress overview panel"""
+        """Render progress overview panel."""
         stats = self.calculate_progress_stats()
 
         if stats.total_items == 0:
@@ -260,7 +259,7 @@ class ProgressTracker:
         return Panel(content, title="📊 Progress Overview", border_style="green")
 
     def render_todo_list(self, status_filter: TodoStatus | None = None, limit: int = 10) -> Panel:
-        """Render TODO list with optional filtering"""
+        """Render TODO list with optional filtering."""
         todos = self.todos
 
         if status_filter:
@@ -317,7 +316,7 @@ class ProgressTracker:
         return Panel(table, title=title, border_style="blue")
 
     def render_category_breakdown(self) -> Panel:
-        """Render TODO breakdown by category"""
+        """Render TODO breakdown by category."""
         if not self.todos:
             return Panel(Text("No data available", style="dim"), title="📊 Category Breakdown")
 
@@ -356,7 +355,7 @@ class ProgressTracker:
         return Panel(table, title="📊 Category Breakdown", border_style="cyan")
 
     def render_compact_progress(self) -> Text:
-        """Render compact progress for status bars"""
+        """Render compact progress for status bars."""
         stats = self.calculate_progress_stats()
 
         if stats.total_items == 0:
@@ -373,7 +372,7 @@ class ProgressTracker:
         return text
 
     def get_progress_data(self) -> dict[str, Any]:
-        """Get progress data for external use"""
+        """Get progress data for external use."""
         stats = self.calculate_progress_stats()
 
         # Category breakdown

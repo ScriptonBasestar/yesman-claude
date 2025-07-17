@@ -1,4 +1,4 @@
-"""Abstract base classes and interfaces for the yesman-claude system"""
+"""Abstract base classes and interfaces for the yesman-claude system."""
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
@@ -10,7 +10,7 @@ from .models import PromptInfo, SessionInfo
 
 
 class ControllerState(Enum):
-    """Controller states"""
+    """Controller states."""
 
     READY = "ready"
     RUNNING = "running"
@@ -19,7 +19,7 @@ class ControllerState(Enum):
 
 
 class CacheStrategy(Enum):
-    """Cache invalidation strategies"""
+    """Cache invalidation strategies."""
 
     TIME_BASED = "time_based"
     CONTENT_CHANGE = "content_change"
@@ -29,7 +29,7 @@ class CacheStrategy(Enum):
 
 @dataclass
 class PluginMetadata:
-    """Plugin metadata information"""
+    """Plugin metadata information."""
 
     name: str
     version: str
@@ -40,388 +40,388 @@ class PluginMetadata:
 
 
 class ISessionManager(ABC):
-    """Interface for session management"""
+    """Interface for session management."""
 
     @abstractmethod
     def get_all_sessions(self) -> list[SessionInfo]:
-        """Get all available sessions"""
+        """Get all available sessions."""
         pass
 
     @abstractmethod
     def get_session(self, session_name: str) -> SessionInfo | None:
-        """Get a specific session by name"""
+        """Get a specific session by name."""
         pass
 
     @abstractmethod
     def invalidate_cache(self, session_name: str | None = None) -> None:
-        """Invalidate session cache"""
+        """Invalidate session cache."""
         pass
 
     @abstractmethod
     def get_cache_stats(self) -> dict[str, Any]:
-        """Get cache statistics"""
+        """Get cache statistics."""
         pass
 
 
 class IController(ABC):
-    """Interface for Claude controllers"""
+    """Interface for Claude controllers."""
 
     @property
     @abstractmethod
     def is_running(self) -> bool:
-        """Check if controller is running"""
+        """Check if controller is running."""
         pass
 
     @property
     @abstractmethod
     def selected_model(self) -> str:
-        """Get selected model"""
+        """Get selected model."""
         pass
 
     @property
     @abstractmethod
     def is_auto_next_enabled(self) -> bool:
-        """Check if auto next is enabled"""
+        """Check if auto next is enabled."""
         pass
 
     @abstractmethod
     def start(self) -> bool:
-        """Start the controller"""
+        """Start the controller."""
         pass
 
     @abstractmethod
     def stop(self) -> bool:
-        """Stop the controller"""
+        """Stop the controller."""
         pass
 
     @abstractmethod
     def restart_claude_pane(self) -> bool:
-        """Restart Claude pane"""
+        """Restart Claude pane."""
         pass
 
     @abstractmethod
     def set_model(self, model: str) -> bool:
-        """Set the model"""
+        """Set the model."""
         pass
 
     @abstractmethod
     def set_auto_next(self, enabled: bool) -> bool:
-        """Set auto next setting"""
+        """Set auto next setting."""
         pass
 
     @abstractmethod
     def is_waiting_for_input(self) -> bool:
-        """Check if waiting for input"""
+        """Check if waiting for input."""
         pass
 
     @abstractmethod
     def get_current_prompt(self) -> PromptInfo | None:
-        """Get current prompt information"""
+        """Get current prompt information."""
         pass
 
     @abstractmethod
     def send_input(self, response: str) -> bool:
-        """Send input response"""
+        """Send input response."""
         pass
 
     @abstractmethod
     def clear_prompt_state(self) -> None:
-        """Clear prompt state"""
+        """Clear prompt state."""
         pass
 
     @abstractmethod
     def get_collection_stats(self) -> dict[str, Any]:
-        """Get collection statistics"""
+        """Get collection statistics."""
         pass
 
 
 class IControllerManager(ABC):
-    """Interface for controller management"""
+    """Interface for controller management."""
 
     @abstractmethod
     def get_controller(self, session_name: str) -> IController | None:
-        """Get controller for session"""
+        """Get controller for session."""
         pass
 
     @abstractmethod
     def create_controller(self, session_name: str, **kwargs) -> IController:
-        """Create a new controller"""
+        """Create a new controller."""
         pass
 
     @abstractmethod
     def remove_controller(self, session_name: str) -> bool:
-        """Remove a controller"""
+        """Remove a controller."""
         pass
 
     @abstractmethod
     def list_controllers(self) -> list[str]:
-        """List all controller names"""
+        """List all controller names."""
         pass
 
 
 class ICache(ABC):
-    """Interface for caching systems"""
+    """Interface for caching systems."""
 
     @abstractmethod
     def get(self, key: str, ttl: float | None = None) -> Any | None:
-        """Get cached value"""
+        """Get cached value."""
         pass
 
     @abstractmethod
     def put(self, key: str, value: Any, ttl: float | None = None) -> bool:
-        """Store value in cache"""
+        """Store value in cache."""
         pass
 
     @abstractmethod
     def invalidate(self, key: str) -> bool:
-        """Invalidate specific cache entry"""
+        """Invalidate specific cache entry."""
         pass
 
     @abstractmethod
     def clear(self) -> int:
-        """Clear all cache entries"""
+        """Clear all cache entries."""
         pass
 
     @abstractmethod
     def get_stats(self) -> dict[str, Any]:
-        """Get cache statistics"""
+        """Get cache statistics."""
         pass
 
 
 class ICacheAnalytics(ABC):
-    """Interface for cache analytics"""
+    """Interface for cache analytics."""
 
     @abstractmethod
     def get_cache_health_report(self) -> dict[str, Any]:
-        """Generate comprehensive cache health report"""
+        """Generate comprehensive cache health report."""
         pass
 
     @abstractmethod
     def get_visual_status_summary(self) -> dict[str, Any]:
-        """Get cache status summary for visualization"""
+        """Get cache status summary for visualization."""
         pass
 
     @abstractmethod
     def export_stats_json(self) -> str:
-        """Export cache statistics as JSON"""
+        """Export cache statistics as JSON."""
         pass
 
 
 class IPromptDetector(ABC):
-    """Interface for prompt detection"""
+    """Interface for prompt detection."""
 
     @abstractmethod
     def detect_prompts(self, content: str, context: dict[str, Any] | None = None) -> list[PromptInfo]:
-        """Detect prompts in content"""
+        """Detect prompts in content."""
         pass
 
     @abstractmethod
     def load_patterns(self, pattern_dir: str) -> bool:
-        """Load detection patterns"""
+        """Load detection patterns."""
         pass
 
     @abstractmethod
     def get_supported_types(self) -> list[str]:
-        """Get supported prompt types"""
+        """Get supported prompt types."""
         pass
 
 
 class IPatternLoader(ABC):
-    """Interface for pattern loading"""
+    """Interface for pattern loading."""
 
     @abstractmethod
     def load_pattern(self, pattern_type: str) -> dict[str, Any]:
-        """Load a specific pattern"""
+        """Load a specific pattern."""
         pass
 
     @abstractmethod
     def get_available_patterns(self) -> list[str]:
-        """Get list of available patterns"""
+        """Get list of available patterns."""
         pass
 
     @abstractmethod
     def reload_patterns(self) -> bool:
-        """Reload all patterns"""
+        """Reload all patterns."""
         pass
 
 
 class IPlugin(ABC):
-    """Base interface for plugins"""
+    """Base interface for plugins."""
 
     @property
     @abstractmethod
     def metadata(self) -> PluginMetadata:
-        """Get plugin metadata"""
+        """Get plugin metadata."""
         pass
 
     @abstractmethod
     def initialize(self, config: dict[str, Any]) -> bool:
-        """Initialize the plugin"""
+        """Initialize the plugin."""
         pass
 
     @abstractmethod
     def cleanup(self) -> bool:
-        """Cleanup plugin resources"""
+        """Cleanup plugin resources."""
         pass
 
     @abstractmethod
     def is_enabled(self) -> bool:
-        """Check if plugin is enabled"""
+        """Check if plugin is enabled."""
         pass
 
 
 class IControllerPlugin(IPlugin):
-    """Interface for controller plugins"""
+    """Interface for controller plugins."""
 
     @abstractmethod
     def on_controller_start(self, session_name: str, controller: IController) -> None:
-        """Called when controller starts"""
+        """Called when controller starts."""
         pass
 
     @abstractmethod
     def on_controller_stop(self, session_name: str, controller: IController) -> None:
-        """Called when controller stops"""
+        """Called when controller stops."""
         pass
 
     @abstractmethod
     def on_prompt_detected(self, session_name: str, prompt: PromptInfo) -> str | None:
-        """Called when prompt is detected, return response or None"""
+        """Called when prompt is detected, return response or None."""
         pass
 
 
 class ISessionPlugin(IPlugin):
-    """Interface for session plugins"""
+    """Interface for session plugins."""
 
     @abstractmethod
     def on_session_created(self, session: SessionInfo) -> None:
-        """Called when session is created"""
+        """Called when session is created."""
         pass
 
     @abstractmethod
     def on_session_destroyed(self, session_name: str) -> None:
-        """Called when session is destroyed"""
+        """Called when session is destroyed."""
         pass
 
     @abstractmethod
     def on_session_status_changed(self, session: SessionInfo, old_status: str) -> None:
-        """Called when session status changes"""
+        """Called when session status changes."""
         pass
 
 
 class ICachePlugin(IPlugin):
-    """Interface for cache plugins"""
+    """Interface for cache plugins."""
 
     @abstractmethod
     def on_cache_hit(self, key: str, value: Any) -> None:
-        """Called on cache hit"""
+        """Called on cache hit."""
         pass
 
     @abstractmethod
     def on_cache_miss(self, key: str) -> None:
-        """Called on cache miss"""
+        """Called on cache miss."""
         pass
 
     @abstractmethod
     def on_cache_eviction(self, key: str, reason: str) -> None:
-        """Called on cache eviction"""
+        """Called on cache eviction."""
         pass
 
 
 class IPluginManager(ABC):
-    """Interface for plugin management"""
+    """Interface for plugin management."""
 
     @abstractmethod
     def load_plugin(self, plugin_path: str) -> bool:
-        """Load a plugin from path"""
+        """Load a plugin from path."""
         pass
 
     @abstractmethod
     def unload_plugin(self, plugin_name: str) -> bool:
-        """Unload a plugin"""
+        """Unload a plugin."""
         pass
 
     @abstractmethod
     def get_plugin(self, plugin_name: str) -> IPlugin | None:
-        """Get a loaded plugin"""
+        """Get a loaded plugin."""
         pass
 
     @abstractmethod
     def list_plugins(self) -> list[PluginMetadata]:
-        """List all loaded plugins"""
+        """List all loaded plugins."""
         pass
 
     @abstractmethod
     def enable_plugin(self, plugin_name: str) -> bool:
-        """Enable a plugin"""
+        """Enable a plugin."""
         pass
 
     @abstractmethod
     def disable_plugin(self, plugin_name: str) -> bool:
-        """Disable a plugin"""
+        """Disable a plugin."""
         pass
 
     @abstractmethod
     def get_plugins_by_type(self, plugin_type: type) -> list[IPlugin]:
-        """Get plugins of specific type"""
+        """Get plugins of specific type."""
         pass
 
 
 class IEventBus(ABC):
-    """Interface for event bus system"""
+    """Interface for event bus system."""
 
     @abstractmethod
     def subscribe(self, event_type: str, handler: Callable[[dict[str, Any]], None]) -> str:
-        """Subscribe to events, returns subscription ID"""
+        """Subscribe to events, returns subscription ID."""
         pass
 
     @abstractmethod
     def unsubscribe(self, subscription_id: str) -> bool:
-        """Unsubscribe from events"""
+        """Unsubscribe from events."""
         pass
 
     @abstractmethod
     def publish(self, event_type: str, data: dict[str, Any]) -> None:
-        """Publish an event"""
+        """Publish an event."""
         pass
 
     @abstractmethod
     def get_event_types(self) -> list[str]:
-        """Get available event types"""
+        """Get available event types."""
         pass
 
 
 class IConfigManager(ABC):
-    """Interface for configuration management"""
+    """Interface for configuration management."""
 
     @abstractmethod
     def get_config(self, key: str, default: Any = None) -> Any:
-        """Get configuration value"""
+        """Get configuration value."""
         pass
 
     @abstractmethod
     def set_config(self, key: str, value: Any) -> bool:
-        """Set configuration value"""
+        """Set configuration value."""
         pass
 
     @abstractmethod
     def reload_config(self) -> bool:
-        """Reload configuration"""
+        """Reload configuration."""
         pass
 
     @abstractmethod
     def get_all_config(self) -> dict[str, Any]:
-        """Get all configuration"""
+        """Get all configuration."""
         pass
 
     @abstractmethod
     def validate_config(self) -> list[str]:
-        """Validate configuration, return list of errors"""
+        """Validate configuration, return list of errors."""
         pass
 
 
 # Event types for the event bus
 class EventTypes:
-    """Standard event types"""
+    """Standard event types."""
 
     CONTROLLER_STARTED = "controller.started"
     CONTROLLER_STOPPED = "controller.stopped"

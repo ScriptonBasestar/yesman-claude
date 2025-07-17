@@ -1,6 +1,4 @@
-"""
-Tests for Renderer Factory
-"""
+"""Tests for Renderer Factory."""
 
 import threading
 import time
@@ -9,16 +7,34 @@ from datetime import datetime
 
 import pytest
 
-from libs.dashboard.renderers.base_renderer import BaseRenderer, RenderFormat, WidgetType
-from libs.dashboard.renderers.renderer_factory import RendererFactory, RendererFactoryError, UnsupportedFormatError, create_renderer, get_renderer, render_all_formats, render_formats, render_widget
+from libs.dashboard.renderers.base_renderer import (
+    BaseRenderer,
+    RenderFormat,
+    WidgetType,
+)
+from libs.dashboard.renderers.renderer_factory import (
+    RendererFactory,
+    RendererFactoryError,
+    UnsupportedFormatError,
+    create_renderer,
+    get_renderer,
+    render_all_formats,
+    render_formats,
+    render_widget,
+)
 from libs.dashboard.renderers.tauri_renderer import TauriRenderer
 from libs.dashboard.renderers.tui_renderer import TUIRenderer
 from libs.dashboard.renderers.web_renderer import WebRenderer
-from libs.dashboard.renderers.widget_models import MetricCardData, SessionData, SessionStatus, WindowData
+from libs.dashboard.renderers.widget_models import (
+    MetricCardData,
+    SessionData,
+    SessionStatus,
+    WindowData,
+)
 
 
 class MockRenderer(BaseRenderer):
-    """Mock renderer for testing"""
+    """Mock renderer for testing."""
 
     def __init__(self, should_fail=False):
         super().__init__(RenderFormat.TUI)
@@ -42,19 +58,19 @@ class MockRenderer(BaseRenderer):
 
 
 class TestRendererFactory:
-    """Test cases for RendererFactory"""
+    """Test cases for RendererFactory."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         # Reset factory state
         RendererFactory.reset()
 
     def teardown_method(self):
-        """Cleanup after each test"""
+        """Cleanup after each test."""
         RendererFactory.reset()
 
     def test_factory_initialization(self):
-        """Test factory initialization"""
+        """Test factory initialization."""
         assert not RendererFactory._initialized
 
         RendererFactory.initialize()
@@ -66,14 +82,14 @@ class TestRendererFactory:
         assert RenderFormat.TAURI in RendererFactory._renderer_classes
 
     def test_double_initialization(self):
-        """Test that double initialization is safe"""
+        """Test that double initialization is safe."""
         RendererFactory.initialize()
         RendererFactory.initialize()  # Should not raise
 
         assert RendererFactory._initialized
 
     def test_supported_formats(self):
-        """Test getting supported formats"""
+        """Test getting supported formats."""
         formats = RendererFactory.get_supported_formats()
 
         assert len(formats) == 3
@@ -82,13 +98,13 @@ class TestRendererFactory:
         assert RenderFormat.TAURI in formats
 
     def test_format_support_check(self):
-        """Test checking if format is supported"""
+        """Test checking if format is supported."""
         assert RendererFactory.is_format_supported(RenderFormat.TUI)
         assert RendererFactory.is_format_supported(RenderFormat.WEB)
         assert RendererFactory.is_format_supported(RenderFormat.TAURI)
 
     def test_create_renderer(self):
-        """Test creating renderer instances"""
+        """Test creating renderer instances."""
         tui_renderer = RendererFactory.create(RenderFormat.TUI)
         web_renderer = RendererFactory.create(RenderFormat.WEB)
         tauri_renderer = RendererFactory.create(RenderFormat.TAURI)
@@ -102,7 +118,7 @@ class TestRendererFactory:
         assert tui_renderer is not tui_renderer2
 
     def test_create_unsupported_format(self):
-        """Test creating renderer with unsupported format"""
+        """Test creating renderer with unsupported format."""
         # Create fake enum value
         fake_format = type("FakeFormat", (), {"value": "fake"})()
 
@@ -110,7 +126,7 @@ class TestRendererFactory:
             RendererFactory.create(fake_format)
 
     def test_singleton_renderer(self):
-        """Test singleton renderer instances"""
+        """Test singleton renderer instances."""
         renderer1 = RendererFactory.get_singleton(RenderFormat.TUI)
         renderer2 = RendererFactory.get_singleton(RenderFormat.TUI)
 
@@ -123,7 +139,7 @@ class TestRendererFactory:
         assert isinstance(web_renderer, WebRenderer)
 
     def test_register_custom_renderer(self):
-        """Test registering custom renderer"""
+        """Test registering custom renderer."""
         # Create fake format
         custom_format = type("CustomFormat", (), {"value": "custom"})()
 
@@ -137,7 +153,7 @@ class TestRendererFactory:
         assert isinstance(renderer, MockRenderer)
 
     def test_render_universal_single_format(self):
-        """Test universal rendering with single format"""
+        """Test universal rendering with single format."""
         metric = MetricCardData(title="Test", value=100)
 
         result = RendererFactory.render_universal(
@@ -150,7 +166,7 @@ class TestRendererFactory:
         assert "Test" in result
 
     def test_render_universal_all_formats(self):
-        """Test universal rendering with all formats"""
+        """Test universal rendering with all formats."""
         metric = MetricCardData(title="Test", value=100)
 
         results = RendererFactory.render_universal(
@@ -170,7 +186,7 @@ class TestRendererFactory:
         assert isinstance(results[RenderFormat.TAURI], dict)
 
     def test_render_parallel(self):
-        """Test parallel rendering"""
+        """Test parallel rendering."""
         metric = MetricCardData(title="Test", value=100)
 
         results = RendererFactory.render_parallel(
@@ -186,7 +202,7 @@ class TestRendererFactory:
         assert RenderFormat.TAURI in results
 
     def test_render_parallel_specific_formats(self):
-        """Test parallel rendering with specific formats"""
+        """Test parallel rendering with specific formats."""
         metric = MetricCardData(title="Test", value=100)
         formats = [RenderFormat.TUI, RenderFormat.WEB]
 
@@ -202,7 +218,7 @@ class TestRendererFactory:
         assert RenderFormat.TAURI not in results
 
     def test_thread_safety(self):
-        """Test thread safety of factory operations"""
+        """Test thread safety of factory operations."""
         results = []
         errors = []
 
@@ -231,7 +247,7 @@ class TestRendererFactory:
         assert all("Thread Test" in result for result in results)
 
     def test_error_handling_render_failure(self):
-        """Test error handling when rendering fails"""
+        """Test error handling when rendering fails."""
         # Register failing renderer
         failing_format = type("FailingFormat", (), {"value": "failing"})()
         RendererFactory.register_renderer(failing_format, lambda: MockRenderer(should_fail=True))
@@ -244,7 +260,7 @@ class TestRendererFactory:
             )
 
     def test_error_handling_all_formats_fail(self):
-        """Test error handling when all formats fail"""
+        """Test error handling when all formats fail."""
         # Replace all renderers with failing ones
         original_classes = RendererFactory._renderer_classes.copy()
 
@@ -261,7 +277,7 @@ class TestRendererFactory:
             RendererFactory._renderer_classes = original_classes
 
     def test_clear_instances(self):
-        """Test clearing singleton instances"""
+        """Test clearing singleton instances."""
         renderer1 = RendererFactory.get_singleton(RenderFormat.TUI)
         assert len(RendererFactory._instances) == 1
 
@@ -272,7 +288,7 @@ class TestRendererFactory:
         assert renderer1 is not renderer2
 
     def test_reset_factory(self):
-        """Test resetting factory state"""
+        """Test resetting factory state."""
         RendererFactory.initialize()
         RendererFactory.get_singleton(RenderFormat.TUI)
 
@@ -286,18 +302,18 @@ class TestRendererFactory:
 
 
 class TestConvenienceFunctions:
-    """Test convenience functions"""
+    """Test convenience functions."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         RendererFactory.reset()
 
     def teardown_method(self):
-        """Cleanup after each test"""
+        """Cleanup after each test."""
         RendererFactory.reset()
 
     def test_render_widget_function(self):
-        """Test render_widget convenience function"""
+        """Test render_widget convenience function."""
         metric = MetricCardData(title="Test", value=100)
 
         result = render_widget(
@@ -310,7 +326,7 @@ class TestConvenienceFunctions:
         assert "Test" in result
 
     def test_render_all_formats_function(self):
-        """Test render_all_formats convenience function"""
+        """Test render_all_formats convenience function."""
         metric = MetricCardData(title="Test", value=100)
 
         results = render_all_formats(WidgetType.METRIC_CARD, metric)
@@ -320,7 +336,7 @@ class TestConvenienceFunctions:
         assert all(fmt in results for fmt in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI])
 
     def test_render_formats_function(self):
-        """Test render_formats convenience function"""
+        """Test render_formats convenience function."""
         metric = MetricCardData(title="Test", value=100)
         formats = [RenderFormat.TUI, RenderFormat.WEB]
 
@@ -333,13 +349,13 @@ class TestConvenienceFunctions:
         assert len(results_par) == 2
 
     def test_create_renderer_function(self):
-        """Test create_renderer convenience function"""
+        """Test create_renderer convenience function."""
         renderer = create_renderer(RenderFormat.TUI)
 
         assert isinstance(renderer, TUIRenderer)
 
     def test_get_renderer_function(self):
-        """Test get_renderer convenience function"""
+        """Test get_renderer convenience function."""
         renderer1 = get_renderer(RenderFormat.TUI)
         renderer2 = get_renderer(RenderFormat.TUI)
 
@@ -348,18 +364,18 @@ class TestConvenienceFunctions:
 
 
 class TestRendererFactoryIntegration:
-    """Integration tests for RendererFactory"""
+    """Integration tests for RendererFactory."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         RendererFactory.reset()
 
     def teardown_method(self):
-        """Cleanup after each test"""
+        """Cleanup after each test."""
         RendererFactory.reset()
 
     def test_full_workflow(self):
-        """Test complete rendering workflow"""
+        """Test complete rendering workflow."""
         # Create sample data
         session = SessionData(
             name="test-session",
@@ -391,7 +407,7 @@ class TestRendererFactoryIntegration:
         assert factory_result["data"]["sessions"][0]["name"] == "test-session"
 
     def test_multiple_widget_rendering(self):
-        """Test rendering multiple different widgets"""
+        """Test rendering multiple different widgets."""
         session = SessionData(
             name="test-session",
             id="session-123",
@@ -415,7 +431,7 @@ class TestRendererFactoryIntegration:
             assert fmt in metric_results
 
     def test_performance_comparison(self):
-        """Test performance between sequential and parallel rendering"""
+        """Test performance between sequential and parallel rendering."""
         metric = MetricCardData(title="Performance Test", value=100)
         formats = list(RendererFactory.get_supported_formats())
 
@@ -438,7 +454,7 @@ class TestRendererFactoryIntegration:
         assert all(result is not None for result in results_par.values())
 
     def test_stress_testing(self):
-        """Test factory under stress conditions"""
+        """Test factory under stress conditions."""
         metrics = [MetricCardData(title=f"Metric {i}", value=i * 10) for i in range(50)]
 
         results = []

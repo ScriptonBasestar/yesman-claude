@@ -1,27 +1,27 @@
-"""Simple directed graph implementation for task dependencies"""
+"""Simple directed graph implementation for task dependencies."""
 
 from collections import defaultdict, deque
 from typing import Any
 
 
 class DirectedGraph:
-    """Simple directed graph implementation"""
+    """Simple directed graph implementation."""
 
     def __init__(self):
-        """Initialize empty graph"""
+        """Initialize empty graph."""
         self.nodes: dict[str, dict[str, Any]] = {}
         self.edges: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
         self.reverse_edges: dict[str, set[str]] = defaultdict(set)
 
     def add_node(self, node_id: str, **attrs) -> None:
-        """Add a node with attributes"""
+        """Add a node with attributes."""
         if node_id not in self.nodes:
             self.nodes[node_id] = attrs
         else:
             self.nodes[node_id].update(attrs)
 
     def add_edge(self, source: str, target: str, **attrs) -> None:
-        """Add an edge with attributes"""
+        """Add an edge with attributes."""
         # Ensure nodes exist
         if source not in self.nodes:
             self.add_node(source)
@@ -33,21 +33,21 @@ class DirectedGraph:
         self.reverse_edges[target].add(source)
 
     def remove_edge(self, source: str, target: str) -> None:
-        """Remove an edge"""
+        """Remove an edge."""
         if source in self.edges and target in self.edges[source]:
             del self.edges[source][target]
             self.reverse_edges[target].discard(source)
 
     def has_edge(self, source: str, target: str) -> bool:
-        """Check if edge exists"""
+        """Check if edge exists."""
         return source in self.edges and target in self.edges[source]
 
     def nodes_iter(self) -> list[str]:
-        """Iterate over nodes"""
+        """Iterate over nodes."""
         return list(self.nodes.keys())
 
     def edges_iter(self, data: bool = False) -> list[tuple[str, str] | tuple[str, str, dict[str, Any]]]:
-        """Iterate over edges"""
+        """Iterate over edges."""
         result: list[tuple[str, str] | tuple[str, str, dict[str, Any]]] = []
         for source, targets in self.edges.items():
             for target, attrs in targets.items():
@@ -58,21 +58,21 @@ class DirectedGraph:
         return result
 
     def predecessors(self, node: str) -> list[str]:
-        """Get predecessor nodes"""
+        """Get predecessor nodes."""
         return list(self.reverse_edges.get(node, set()))
 
     def successors(self, node: str) -> list[str]:
-        """Get successor nodes"""
+        """Get successor nodes."""
         return list(self.edges.get(node, {}).keys())
 
     def clear(self) -> None:
-        """Clear the graph"""
+        """Clear the graph."""
         self.nodes.clear()
         self.edges.clear()
         self.reverse_edges.clear()
 
     def is_directed_acyclic_graph(self) -> bool:
-        """Check if graph is a DAG"""
+        """Check if graph is a DAG."""
         # Use DFS to detect cycles
         visited = set()
         rec_stack = set()
@@ -94,7 +94,7 @@ class DirectedGraph:
         return all(not (node not in visited and has_cycle(node)) for node in self.nodes)
 
     def simple_cycles(self) -> list[list[str]]:
-        """Find simple cycles in the graph"""
+        """Find simple cycles in the graph."""
         cycles = []
         visited = set()
         rec_stack: list[str] = []
@@ -140,7 +140,7 @@ class DirectedGraph:
         return unique_cycles
 
     def topological_sort(self) -> list[str]:
-        """Return nodes in topological order"""
+        """Return nodes in topological order."""
         if not self.is_directed_acyclic_graph():
             raise ValueError("Graph contains cycles")
 

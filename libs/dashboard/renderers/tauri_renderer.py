@@ -1,6 +1,5 @@
-"""
-Tauri Renderer
-JSON-based renderer for Tauri desktop application integration
+"""Tauri Renderer
+JSON-based renderer for Tauri desktop application integration.
 """
 
 import uuid
@@ -8,20 +7,28 @@ from datetime import datetime
 from typing import Any
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
-from .widget_models import ActivityData, ChartData, HealthData, HealthLevel, MetricCardData, ProgressData, ProgressPhase, SessionData, StatusIndicatorData
+from .widget_models import (
+    ActivityData,
+    ChartData,
+    HealthData,
+    HealthLevel,
+    MetricCardData,
+    ProgressData,
+    ProgressPhase,
+    SessionData,
+    StatusIndicatorData,
+)
 
 
 class TauriRenderer(BaseRenderer):
-    """
-    Tauri renderer for generating JSON data structures
+    """Tauri renderer for generating JSON data structures.
 
     Generates JSON objects that the Tauri desktop application can consume
     to render native UI components with chart data and interactive elements.
     """
 
     def __init__(self, theme: dict[str, Any] | None = None):
-        """
-        Initialize Tauri renderer
+        """Initialize Tauri renderer.
 
         Args:
             theme: Theme configuration for styling
@@ -69,8 +76,7 @@ class TauriRenderer(BaseRenderer):
         data: Any,
         options: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Render a single widget as JSON structure
+        """Render a single widget as JSON structure.
 
         Args:
             widget_type: Type of widget to render
@@ -127,8 +133,7 @@ class TauriRenderer(BaseRenderer):
         widgets: list[dict[str, Any]],
         layout_config: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Render a layout containing multiple widgets
+        """Render a layout containing multiple widgets.
 
         Args:
             widgets: List of widget configurations
@@ -169,8 +174,7 @@ class TauriRenderer(BaseRenderer):
         content: dict[str, Any] | list[dict[str, Any]],
         container_config: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Render a container wrapping content
+        """Render a container wrapping content.
 
         Args:
             content: Content to wrap (widget or layout)
@@ -209,7 +213,7 @@ class TauriRenderer(BaseRenderer):
         data: SessionData | list[SessionData],
         options: dict[str, Any],
     ):
-        """Process session browser widget"""
+        """Process session browser widget."""
         view_mode = options.get("view_mode", "table")
 
         if isinstance(data, SessionData):
@@ -272,7 +276,7 @@ class TauriRenderer(BaseRenderer):
         ]
 
     def _process_health_meter(self, widget_json: dict[str, Any], data: HealthData, options: dict[str, Any]):
-        """Process health meter widget"""
+        """Process health meter widget."""
         if not isinstance(data, HealthData):
             widget_json["data"] = {"error": "Invalid health data"}
             return
@@ -339,7 +343,7 @@ class TauriRenderer(BaseRenderer):
         )
 
     def _process_activity_heatmap(self, widget_json: dict[str, Any], data: ActivityData, options: dict[str, Any]):
-        """Process activity heatmap widget"""
+        """Process activity heatmap widget."""
         if not isinstance(data, ActivityData):
             widget_json["data"] = {"error": "Invalid activity data"}
             return
@@ -393,7 +397,7 @@ class TauriRenderer(BaseRenderer):
         )
 
     def _process_progress_tracker(self, widget_json: dict[str, Any], data: ProgressData, options: dict[str, Any]):
-        """Process progress tracker widget"""
+        """Process progress tracker widget."""
         if not isinstance(data, ProgressData):
             widget_json["data"] = {"error": "Invalid progress data"}
             return
@@ -434,7 +438,7 @@ class TauriRenderer(BaseRenderer):
         widget_json["style"].update(self._style_classes.get(phase_color, self._style_classes["neutral"]))
 
     def _process_log_viewer(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]):
-        """Process log viewer widget"""
+        """Process log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 100)
 
@@ -490,7 +494,7 @@ class TauriRenderer(BaseRenderer):
         ]
 
     def _process_metric_card(self, widget_json: dict[str, Any], data: MetricCardData, options: dict[str, Any]):
-        """Process metric card widget"""
+        """Process metric card widget."""
         if not isinstance(data, MetricCardData):
             widget_json["data"] = {"error": "Invalid metric data"}
             return
@@ -542,7 +546,7 @@ class TauriRenderer(BaseRenderer):
         data: StatusIndicatorData,
         options: dict[str, Any],
     ):
-        """Process status indicator widget"""
+        """Process status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             widget_json["data"] = {"error": "Invalid status data"}
             return
@@ -568,7 +572,7 @@ class TauriRenderer(BaseRenderer):
         widget_json["style"].update(self._style_classes.get(data.color, self._style_classes["neutral"]))
 
     def _process_chart(self, widget_json: dict[str, Any], data: ChartData, options: dict[str, Any]):
-        """Process chart widget"""
+        """Process chart widget."""
         if not isinstance(data, ChartData):
             widget_json["data"] = {"error": "Invalid chart data"}
             return
@@ -617,7 +621,7 @@ class TauriRenderer(BaseRenderer):
         }
 
     def _process_table(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]):
-        """Process table widget"""
+        """Process table widget."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
 
@@ -650,7 +654,7 @@ class TauriRenderer(BaseRenderer):
         data: Any,
         options: dict[str, Any],
     ):
-        """Process generic widget fallback"""
+        """Process generic widget fallback."""
         widget_json["data"] = {
             "raw_data": str(data)[:500],  # Limit size
             "data_type": type(data).__name__,
@@ -662,12 +666,12 @@ class TauriRenderer(BaseRenderer):
     # Helper methods
 
     def _generate_widget_id(self) -> str:
-        """Generate unique widget ID"""
+        """Generate unique widget ID."""
         self.widget_id_counter += 1
         return f"tauri-widget-{self.widget_id_counter}-{uuid.uuid4().hex[:8]}"
 
     def _get_default_style(self) -> dict[str, Any]:
-        """Get default widget style"""
+        """Get default widget style."""
         return {
             "background": "surface",
             "border": True,
@@ -679,7 +683,7 @@ class TauriRenderer(BaseRenderer):
         }
 
     def _get_container_style(self, config: dict[str, Any]) -> dict[str, Any]:
-        """Get container style based on configuration"""
+        """Get container style based on configuration."""
         style = self._get_default_style()
 
         if config.get("style"):
@@ -697,7 +701,7 @@ class TauriRenderer(BaseRenderer):
         return style
 
     def _get_health_color(self, health_level: HealthLevel) -> str:
-        """Get color for health level"""
+        """Get color for health level."""
         color_mapping = {
             HealthLevel.EXCELLENT: "#10b981",
             HealthLevel.GOOD: "#3b82f6",
@@ -708,7 +712,7 @@ class TauriRenderer(BaseRenderer):
         return color_mapping.get(health_level, "#6b7280")
 
     def _get_phase_emoji(self, phase: ProgressPhase) -> str:
-        """Get emoji for progress phase"""
+        """Get emoji for progress phase."""
         phase_emojis = {
             ProgressPhase.STARTING: "🚀",
             ProgressPhase.ANALYZING: "🔍",
@@ -722,7 +726,7 @@ class TauriRenderer(BaseRenderer):
         return phase_emojis.get(phase, "❓")
 
     def _get_log_level_color(self, level: str) -> str:
-        """Get color for log level"""
+        """Get color for log level."""
         level_colors = {
             "ERROR": "#ef4444",
             "WARNING": "#f59e0b",
@@ -732,7 +736,7 @@ class TauriRenderer(BaseRenderer):
         return level_colors.get(level.upper(), "#6b7280")
 
     def _count_log_levels(self, logs: list[dict[str, Any]]) -> dict[str, int]:
-        """Count log entries by level"""
+        """Count log entries by level."""
         counts = {"ERROR": 0, "WARNING": 0, "INFO": 0, "DEBUG": 0}
         for log in logs:
             level = log.get("level", "INFO").upper()
@@ -741,7 +745,7 @@ class TauriRenderer(BaseRenderer):
         return counts
 
     def supports_feature(self, feature: str) -> bool:
-        """Check if feature is supported"""
+        """Check if feature is supported."""
         features = {
             "json": True,
             "charts": True,

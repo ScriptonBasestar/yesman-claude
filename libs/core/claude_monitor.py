@@ -1,4 +1,4 @@
-"""Claude monitoring and auto-response system"""
+"""Claude monitoring and auto-response system."""
 
 import asyncio
 import logging
@@ -14,7 +14,7 @@ from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 
 
 class ClaudeMonitor:
-    """Handles Claude monitoring and auto-response logic"""
+    """Handles Claude monitoring and auto-response logic."""
 
     def __init__(self, session_manager, process_controller, status_manager):
         self.session_manager = session_manager
@@ -68,28 +68,28 @@ class ClaudeMonitor:
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
 
     def set_auto_next(self, enabled: bool):
-        """Enable or disable auto-next responses"""
+        """Enable or disable auto-next responses."""
         self.is_auto_next_enabled = enabled
         status = "enabled" if enabled else "disabled"
         self.status_manager.update_status(f"[cyan]Auto next {status}[/]")
 
     def set_mode_yn(self, mode: str, response: str):
-        """Set manual override for Y/N prompts"""
+        """Set manual override for Y/N prompts."""
         self.yn_mode = mode
         self.yn_response = response
 
     def set_mode_12(self, mode: str, response: str):
-        """Set manual override for 1/2 prompts"""
+        """Set manual override for 1/2 prompts."""
         self.mode12 = mode
         self.mode12_response = response
 
     def set_mode_123(self, mode: str, response: str):
-        """Set manual override for 1/2/3 prompts"""
+        """Set manual override for 1/2/3 prompts."""
         self.mode123 = mode
         self.mode123_response = response
 
     def start_monitoring(self) -> bool:
-        """Start the monitoring loop"""
+        """Start the monitoring loop."""
         if not self.session_manager.get_claude_pane():
             self.status_manager.update_status("[red]Cannot start: No Claude pane in session[/]")
             return False
@@ -115,7 +115,7 @@ class ClaudeMonitor:
             return False
 
     def stop_monitoring(self) -> bool:
-        """Stop the monitoring loop"""
+        """Stop the monitoring loop."""
         if not self.is_running:
             self.status_manager.update_status("[yellow]Claude monitor not running[/]")
             return False
@@ -134,7 +134,7 @@ class ClaudeMonitor:
         return True
 
     def _run_monitor_loop(self):
-        """Run the monitor loop in its own thread with event loop"""
+        """Run the monitor loop in its own thread with event loop."""
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
 
@@ -147,7 +147,7 @@ class ClaudeMonitor:
             self.is_running = False
 
     async def _monitor_loop(self):
-        """Main monitoring loop that runs in background"""
+        """Main monitoring loop that runs in background."""
         if not self.session_manager.get_claude_pane():
             self.logger.error(f"Cannot start monitoring: no Claude pane for {self.session_name}")
             self.is_running = False
@@ -180,7 +180,11 @@ class ClaudeMonitor:
                         # Try adaptive AI-powered response first if auto_next is enabled
                         if self.is_auto_next_enabled:
                             context = f"session:{self.session_name}, type:{prompt_info.type.value}"
-                            should_respond, ai_response, confidence = await self.adaptive_response.should_auto_respond(
+                            (
+                                should_respond,
+                                ai_response,
+                                confidence,
+                            ) = await self.adaptive_response.should_auto_respond(
                                 prompt_info.question,
                                 context,
                                 self.session_name,
@@ -286,7 +290,7 @@ class ClaudeMonitor:
             self.status_manager.update_status("[red]Claude monitor stopped[/]")
 
     def _check_for_prompt(self, content: str) -> PromptInfo | None:
-        """Check if content contains a prompt waiting for input"""
+        """Check if content contains a prompt waiting for input."""
         prompt_info = self.prompt_detector.detect_prompt(content)
 
         if prompt_info:
@@ -300,12 +304,12 @@ class ClaudeMonitor:
         return prompt_info
 
     def _clear_prompt_state(self) -> None:
-        """Clear the current prompt state"""
+        """Clear the current prompt state."""
         self.current_prompt = None
         self.waiting_for_input = False
 
     def _auto_respond_to_selection(self, prompt_info: PromptInfo) -> bool:
-        """Auto-respond to selection prompts based on patterns and manual overrides"""
+        """Auto-respond to selection prompts based on patterns and manual overrides."""
         if not self.is_auto_next_enabled:
             self.logger.debug("Auto-response disabled, skipping")
             return False
@@ -328,7 +332,7 @@ class ClaudeMonitor:
         return False
 
     def _handle_numbered_selection(self, prompt_info: PromptInfo) -> bool:
-        """Handle numbered selection prompts (1, 2, 3 options)"""
+        """Handle numbered selection prompts (1, 2, 3 options)."""
         opts_count = prompt_info.metadata.get("option_count", len(prompt_info.options))
 
         # Check manual overrides
@@ -346,7 +350,7 @@ class ClaudeMonitor:
         return True
 
     def _handle_binary_choice(self, prompt_info: PromptInfo) -> bool:
-        """Handle binary choice prompts (y/n)"""
+        """Handle binary choice prompts (y/n)."""
         # Check manual override
         if self.yn_mode == "Manual":
             response = self.yn_response.lower() if isinstance(self.yn_response, str) else str(self.yn_response)
@@ -360,7 +364,7 @@ class ClaudeMonitor:
         return True
 
     def _handle_binary_selection(self, prompt_info: PromptInfo) -> bool:
-        """Handle binary selection prompts ([1] [2])"""
+        """Handle binary selection prompts ([1] [2])."""
         # Check manual override
         if self.mode12 == "Manual":
             response = self.mode12_response
@@ -374,7 +378,7 @@ class ClaudeMonitor:
         return True
 
     def _handle_login_redirect(self, prompt_info: PromptInfo) -> bool:
-        """Handle login redirect prompts"""
+        """Handle login redirect prompts."""
         question = prompt_info.question.lower()
 
         if "continue" in question or "press enter" in question:
@@ -388,23 +392,23 @@ class ClaudeMonitor:
 
     # Public interface methods
     def is_waiting_for_input(self) -> bool:
-        """Check if Claude is currently waiting for user input"""
+        """Check if Claude is currently waiting for user input."""
         return self.waiting_for_input
 
     def get_current_prompt(self) -> PromptInfo | None:
-        """Get the current prompt information"""
+        """Get the current prompt information."""
         return self.current_prompt
 
     def get_collection_stats(self) -> dict:
-        """Get content collection statistics"""
+        """Get content collection statistics."""
         return self.content_collector.get_collection_stats()
 
     def cleanup_old_collections(self, days_to_keep: int = 7) -> int:
-        """Clean up old collection files"""
+        """Clean up old collection files."""
         return self.content_collector.cleanup_old_files(days_to_keep)
 
     def _get_legacy_response(self, prompt_info: PromptInfo) -> str:
-        """Get response that would be used by legacy auto-response system"""
+        """Get response that would be used by legacy auto-response system."""
         try:
             if prompt_info.type == PromptType.NUMBERED_SELECTION:
                 opts_count = prompt_info.metadata.get("option_count", len(prompt_info.options))
@@ -439,29 +443,29 @@ class ClaudeMonitor:
 
     # Adaptive response management methods
     def get_adaptive_statistics(self) -> dict:
-        """Get statistics from the adaptive response system"""
+        """Get statistics from the adaptive response system."""
         return self.adaptive_response.get_learning_statistics()
 
     def set_adaptive_confidence_threshold(self, threshold: float):
-        """Adjust the confidence threshold for adaptive responses"""
+        """Adjust the confidence threshold for adaptive responses."""
         self.adaptive_response.adjust_confidence_threshold(threshold)
 
     def enable_adaptive_response(self, enabled: bool = True):
-        """Enable or disable adaptive response functionality"""
+        """Enable or disable adaptive response functionality."""
         self.adaptive_response.enable_auto_response(enabled)
 
     def enable_adaptive_learning(self, enabled: bool = True):
-        """Enable or disable adaptive learning functionality"""
+        """Enable or disable adaptive learning functionality."""
         self.adaptive_response.enable_learning(enabled)
 
     def export_adaptive_data(self, output_path: str) -> bool:
-        """Export adaptive learning data for analysis"""
+        """Export adaptive learning data for analysis."""
         from pathlib import Path
 
         return self.adaptive_response.export_learning_data(Path(output_path))
 
     def learn_from_user_input(self, prompt_text: str, user_response: str, context: str = ""):
-        """Learn from manual user input for future improvements"""
+        """Learn from manual user input for future improvements."""
         self.adaptive_response.learn_from_manual_response(
             prompt_text,
             user_response,
@@ -471,23 +475,23 @@ class ClaudeMonitor:
 
     # Context-aware automation methods
     async def start_automation_monitoring(self, monitor_interval: int = 10) -> bool:
-        """Start context-aware automation monitoring"""
+        """Start context-aware automation monitoring."""
         return await self.automation_manager.start_monitoring(monitor_interval)
 
     async def stop_automation_monitoring(self) -> bool:
-        """Stop context-aware automation monitoring"""
+        """Stop context-aware automation monitoring."""
         return await self.automation_manager.stop_monitoring()
 
     def get_automation_status(self) -> dict:
-        """Get automation system status"""
+        """Get automation system status."""
         return self.automation_manager.get_automation_status()
 
     def register_automation_workflow(self, workflow):
-        """Register a custom automation workflow"""
+        """Register a custom automation workflow."""
         self.automation_manager.register_custom_workflow(workflow)
 
     async def test_automation(self, context_type_name: str) -> dict:
-        """Test automation with simulated context"""
+        """Test automation with simulated context."""
         from ..automation.context_detector import ContextType
 
         try:
@@ -497,25 +501,25 @@ class ClaudeMonitor:
             return {"error": f"Invalid context type: {context_type_name}"}
 
     def get_automation_execution_history(self, limit: int = 10) -> list:
-        """Get recent automation execution history"""
+        """Get recent automation execution history."""
         return self.automation_manager.get_execution_history(limit)
 
     def save_automation_config(self) -> None:
-        """Save automation configuration"""
+        """Save automation configuration."""
         self.automation_manager.save_automation_config()
 
     def load_automation_config(self) -> None:
-        """Load automation configuration"""
+        """Load automation configuration."""
         self.automation_manager.load_automation_config()
 
     # Project health monitoring methods
     async def calculate_project_health(self, force_refresh: bool = False) -> dict:
-        """Calculate comprehensive project health"""
+        """Calculate comprehensive project health."""
         health = await self.health_calculator.calculate_health(force_refresh)
         return health.to_dict()
 
     def get_health_summary(self) -> dict:
-        """Get a quick health summary"""
+        """Get a quick health summary."""
         # This would be cached from last calculation
         try:
             # For now, return a default summary - in real implementation this would use cached data
@@ -532,7 +536,7 @@ class ClaudeMonitor:
 
     # Asynchronous logging methods
     async def _start_async_logging(self):
-        """Start the async logging system"""
+        """Start the async logging system."""
         if self.async_logger:
             return
 
@@ -552,14 +556,14 @@ class ClaudeMonitor:
         self.logger.info("Async logging system started")
 
     async def _stop_async_logging(self):
-        """Stop the async logging system"""
+        """Stop the async logging system."""
         if self.async_logger:
             await self.async_logger.stop()
             self.async_logger = None
             self.logger.info("Async logging system stopped")
 
     def _async_log(self, level: LogLevel, message: str, **kwargs):
-        """Log message to async logger (safe for sync contexts)"""
+        """Log message to async logger (safe for sync contexts)."""
         if self.async_logger:
             self.async_logger.log(level, message, **kwargs)
         else:
@@ -567,7 +571,7 @@ class ClaudeMonitor:
             self.logger.log(level.level_value, message)
 
     async def start_async_monitoring(self) -> bool:
-        """Start monitoring with async logging enabled"""
+        """Start monitoring with async logging enabled."""
         try:
             await self._start_async_logging()
             result = self.start_monitoring()
@@ -583,7 +587,7 @@ class ClaudeMonitor:
             return False
 
     async def stop_async_monitoring(self) -> bool:
-        """Stop monitoring and async logging"""
+        """Stop monitoring and async logging."""
         try:
             result = self.stop_monitoring()
             await self._stop_async_logging()
@@ -593,13 +597,13 @@ class ClaudeMonitor:
             return False
 
     def get_async_logging_stats(self) -> dict:
-        """Get async logging statistics"""
+        """Get async logging statistics."""
         if self.async_logger:
             return self.async_logger.get_statistics()
         else:
             return {"error": "Async logging not enabled"}
 
     async def flush_async_logs(self):
-        """Force flush all pending async logs"""
+        """Force flush all pending async logs."""
         if self.async_logger:
             await self.async_logger.flush()

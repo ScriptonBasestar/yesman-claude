@@ -1,4 +1,4 @@
-"""Agent pool management for multi-agent development system"""
+"""Agent pool management for multi-agent development system."""
 
 import asyncio
 import contextlib
@@ -23,11 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class AgentPool:
-    """Manages a pool of agents for parallel task execution"""
+    """Manages a pool of agents for parallel task execution."""
 
     def __init__(self, max_agents: int = 3, work_dir: str | None = None):
-        """
-        Initialize agent pool
+        """Initialize agent pool.
 
         Args:
             max_agents: Maximum number of concurrent agents
@@ -75,11 +74,11 @@ class AgentPool:
         self._load_state()
 
     def _get_state_file(self) -> Path:
-        """Get path to state file"""
+        """Get path to state file."""
         return self.work_dir / "pool_state.json"
 
     def _load_state(self) -> None:
-        """Load agent pool state from disk"""
+        """Load agent pool state from disk."""
         state_file = self._get_state_file()
 
         if state_file.exists():
@@ -111,7 +110,7 @@ class AgentPool:
                 logger.error(f"Failed to load agent pool state: {e}")
 
     def _save_state(self) -> None:
-        """Save agent pool state to disk"""
+        """Save agent pool state to disk."""
         state_file = self._get_state_file()
 
         try:
@@ -129,7 +128,7 @@ class AgentPool:
             logger.error(f"Failed to save agent pool state: {e}")
 
     async def start(self) -> None:
-        """Start the agent pool"""
+        """Start the agent pool."""
         if self._running:
             logger.warning("Agent pool is already running")
             return
@@ -152,7 +151,7 @@ class AgentPool:
         logger.info("Agent pool started")
 
     async def stop(self) -> None:
-        """Stop the agent pool"""
+        """Stop the agent pool."""
         if not self._running:
             return
 
@@ -175,7 +174,7 @@ class AgentPool:
         logger.info("Agent pool stopped")
 
     def add_task(self, task: Task) -> None:
-        """Add a task to the queue"""
+        """Add a task to the queue."""
         self.tasks[task.task_id] = task
 
         if self.intelligent_scheduling:
@@ -197,7 +196,7 @@ class AgentPool:
         description: str = "",
         **kwargs,
     ) -> Task:
-        """Create and add a task"""
+        """Create and add a task."""
         task = Task(
             task_id=str(uuid.uuid4()),
             title=title,
@@ -211,7 +210,7 @@ class AgentPool:
         return task
 
     async def _task_dispatcher(self) -> None:
-        """Dispatch tasks to available agents"""
+        """Dispatch tasks to available agents."""
         while self._running:
             try:
                 if self.intelligent_scheduling:
@@ -226,7 +225,7 @@ class AgentPool:
                 await asyncio.sleep(1)
 
     async def _intelligent_dispatch(self) -> None:
-        """Intelligent task dispatching using the scheduler"""
+        """Intelligent task dispatching using the scheduler."""
         # Get all available agents
         available_agents = [agent for agent in self.agents.values() if agent.state == AgentState.IDLE]
 
@@ -246,7 +245,7 @@ class AgentPool:
             await self._assign_task_to_agent(agent, task)
 
     async def _simple_dispatch(self) -> None:
-        """Simple task dispatching (original logic)"""
+        """Simple task dispatching (original logic)."""
         try:
             # Wait for task or shutdown
             task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
@@ -265,7 +264,7 @@ class AgentPool:
             pass
 
     async def _get_available_agent(self) -> Agent | None:
-        """Get an available agent or create a new one"""
+        """Get an available agent or create a new one."""
         # Look for idle agents
         for agent in self.agents.values():
             if agent.state == AgentState.IDLE:
@@ -278,7 +277,7 @@ class AgentPool:
         return None
 
     async def _create_agent(self) -> Agent:
-        """Create a new agent"""
+        """Create a new agent."""
         agent_id = f"agent-{len(self.agents) + 1}-{int(time.time())}"
 
         agent = Agent(agent_id=agent_id)
@@ -292,7 +291,7 @@ class AgentPool:
         return agent
 
     async def _assign_task_to_agent(self, agent: Agent, task: Task) -> None:
-        """Assign a task to an agent"""
+        """Assign a task to an agent."""
         # Update task
         task.status = TaskStatus.ASSIGNED
         task.assigned_agent = agent.agent_id
@@ -308,7 +307,7 @@ class AgentPool:
         asyncio.create_task(self._execute_task(agent, task))
 
     async def _execute_task(self, agent: Agent, task: Task) -> None:
-        """Execute a task on an agent"""
+        """Execute a task on an agent."""
         try:
             task.status = TaskStatus.RUNNING
             task.start_time = datetime.now()
@@ -443,7 +442,7 @@ class AgentPool:
             self._save_state()
 
     async def _agent_monitor(self) -> None:
-        """Monitor agent health and status"""
+        """Monitor agent health and status."""
         while self._running:
             try:
                 current_time = datetime.now()
@@ -470,7 +469,7 @@ class AgentPool:
                 await asyncio.sleep(30)
 
     async def _terminate_agent(self, agent_id: str) -> None:
-        """Terminate an agent"""
+        """Terminate an agent."""
         agent = self.agents.get(agent_id)
         if not agent:
             return
@@ -492,7 +491,7 @@ class AgentPool:
         logger.info(f"Terminated agent {agent_id}")
 
     def get_agent_status(self, agent_id: str) -> dict[str, Any] | None:
-        """Get status of a specific agent"""
+        """Get status of a specific agent."""
         agent = self.agents.get(agent_id)
         if not agent:
             return None
@@ -500,7 +499,7 @@ class AgentPool:
         return agent.to_dict()
 
     def get_task_status(self, task_id: str) -> dict[str, Any] | None:
-        """Get status of a specific task"""
+        """Get status of a specific task."""
         task = self.tasks.get(task_id)
         if not task:
             return None
@@ -508,11 +507,11 @@ class AgentPool:
         return task.to_dict()
 
     def list_agents(self) -> list[dict[str, Any]]:
-        """List all agents and their status"""
+        """List all agents and their status."""
         return [agent.to_dict() for agent in self.agents.values()]
 
     def list_tasks(self, status: TaskStatus | None = None) -> list[dict[str, Any]]:
-        """List tasks, optionally filtered by status"""
+        """List tasks, optionally filtered by status."""
         tasks = self.tasks.values()
 
         if status:
@@ -521,7 +520,7 @@ class AgentPool:
         return [task.to_dict() for task in tasks]
 
     def get_pool_statistics(self) -> dict[str, Any]:
-        """Get pool statistics"""
+        """Get pool statistics."""
         active_agents = len(
             [a for a in self.agents.values() if a.state != AgentState.TERMINATED],
         )
@@ -556,26 +555,26 @@ class AgentPool:
 
     # Event callback registration
     def on_task_started(self, callback: Callable[[Task], Awaitable[None]]) -> None:
-        """Register callback for task started events"""
+        """Register callback for task started events."""
         self.task_started_callbacks.append(callback)
 
     def on_task_completed(self, callback: Callable[[Task], Awaitable[None]]) -> None:
-        """Register callback for task completed events"""
+        """Register callback for task completed events."""
         self.task_completed_callbacks.append(callback)
 
     def on_task_failed(self, callback: Callable[[Task], Awaitable[None]]) -> None:
-        """Register callback for task failed events"""
+        """Register callback for task failed events."""
         self.task_failed_callbacks.append(callback)
 
     def on_agent_error(
         self,
         callback: Callable[[Agent, Exception], Awaitable[None]],
     ) -> None:
-        """Register callback for agent error events"""
+        """Register callback for agent error events."""
         self.agent_error_callbacks.append(callback)
 
     def get_scheduling_metrics(self) -> dict[str, Any]:
-        """Get intelligent scheduling metrics"""
+        """Get intelligent scheduling metrics."""
         if self.intelligent_scheduling:
             return self.scheduler.get_scheduling_metrics()
         else:
@@ -585,7 +584,7 @@ class AgentPool:
             }
 
     def set_intelligent_scheduling(self, enabled: bool) -> None:
-        """Enable or disable intelligent scheduling"""
+        """Enable or disable intelligent scheduling."""
         self.intelligent_scheduling = enabled
 
         if enabled:
@@ -600,13 +599,13 @@ class AgentPool:
         agent_id: str,
         capability: "AgentCapability",
     ) -> None:
-        """Update an agent's capability profile"""
+        """Update an agent's capability profile."""
         if self.intelligent_scheduling and agent_id in self.agents:
             self.scheduler.agent_capabilities[agent_id] = capability
             logger.info(f"Updated capability for agent {agent_id}")
 
     def rebalance_workload(self) -> list[tuple[str, str]]:
-        """Trigger workload rebalancing"""
+        """Trigger workload rebalancing."""
         if self.intelligent_scheduling:
             rebalancing_actions = self.scheduler.rebalance_tasks()
 
@@ -618,7 +617,7 @@ class AgentPool:
         return []
 
     def _execute_rebalancing(self, from_agent_id: str, to_agent_id: str) -> None:
-        """Execute task rebalancing between two agents"""
+        """Execute task rebalancing between two agents."""
         try:
             # Update agent loads immediately to prevent over-rebalancing
             from_agent = self.agents.get(from_agent_id)
@@ -647,7 +646,7 @@ class AgentPool:
             logger.error(f"Error executing rebalancing: {e}")
 
     def enable_auto_rebalancing(self, interval_seconds: int = 300) -> None:
-        """Enable automatic workload rebalancing"""
+        """Enable automatic workload rebalancing."""
         if not self.intelligent_scheduling:
             logger.warning("Cannot enable auto-rebalancing without intelligent scheduling")
             return
@@ -660,7 +659,7 @@ class AgentPool:
         logger.info(f"Auto-rebalancing enabled with {interval_seconds}s interval")
 
     async def _auto_rebalancing_loop(self) -> None:
-        """Automatic rebalancing loop"""
+        """Automatic rebalancing loop."""
         while self._running and getattr(self, "_auto_rebalancing_enabled", False):
             try:
                 # Check if rebalancing is needed
@@ -682,7 +681,7 @@ class AgentPool:
                 await asyncio.sleep(60)  # Wait before retrying
 
     def enable_branch_testing(self, repo_path: str = None, results_dir: str = None) -> None:
-        """Enable automatic branch testing integration"""
+        """Enable automatic branch testing integration."""
         try:
             from .branch_test_manager import BranchTestManager
 
@@ -709,8 +708,7 @@ class AgentPool:
         priority: int = 7,
         timeout: int = 600,
     ) -> Task:
-        """
-        Create a test task for a specific branch
+        """Create a test task for a specific branch.
 
         Args:
             branch_name: Name of the branch to test
@@ -770,8 +768,7 @@ class AgentPool:
         return task
 
     async def auto_test_branch(self, branch_name: str) -> list[str]:
-        """
-        Automatically create and schedule test tasks for a branch
+        """Automatically create and schedule test tasks for a branch.
 
         Args:
             branch_name: Name of the branch to test
@@ -820,7 +817,7 @@ class AgentPool:
         return task_ids
 
     def get_branch_test_status(self, branch_name: str) -> dict[str, Any]:
-        """Get test status summary for a branch"""
+        """Get test status summary for a branch."""
         if not self._test_integration_enabled or not self.branch_test_manager:
             return {"error": "Branch testing not enabled"}
 
@@ -831,7 +828,7 @@ class AgentPool:
             return {"error": str(e)}
 
     def get_all_branch_test_status(self) -> dict[str, dict[str, Any]]:
-        """Get test status for all active branches"""
+        """Get test status for all active branches."""
         if not self._test_integration_enabled or not self.branch_test_manager:
             return {"error": "Branch testing not enabled"}
 
@@ -842,7 +839,7 @@ class AgentPool:
             return {"error": str(e)}
 
     def enable_recovery_system(self, work_dir: str = None, max_snapshots: int = 50) -> None:
-        """Enable automatic rollback and error recovery system"""
+        """Enable automatic rollback and error recovery system."""
         try:
             from .recovery_engine import RecoveryEngine
 
@@ -865,7 +862,7 @@ class AgentPool:
             self._recovery_enabled = False
 
     def _setup_recovery_callbacks(self) -> None:
-        """Setup callbacks for automatic recovery"""
+        """Setup callbacks for automatic recovery."""
         if not self.recovery_engine:
             return
 
@@ -917,8 +914,7 @@ class AgentPool:
         files_to_backup: list[str] = None,
         context: dict[str, Any] = None,
     ) -> str | None:
-        """
-        Create a snapshot before a critical operation
+        """Create a snapshot before a critical operation.
 
         Args:
             operation_type: Type of operation (for recovery strategy selection)
@@ -964,8 +960,7 @@ class AgentPool:
             return None
 
     async def rollback_to_snapshot(self, snapshot_id: str) -> bool:
-        """
-        Manually rollback to a specific snapshot
+        """Manually rollback to a specific snapshot.
 
         Args:
             snapshot_id: ID of the snapshot to rollback to
@@ -996,7 +991,7 @@ class AgentPool:
             return False
 
     def get_recovery_status(self) -> dict[str, Any]:
-        """Get status and metrics of the recovery system"""
+        """Get status and metrics of the recovery system."""
         if not self._recovery_enabled or not self.recovery_engine:
             return {"recovery_enabled": False}
 
@@ -1016,7 +1011,7 @@ class AgentPool:
             return {"recovery_enabled": True, "error": str(e)}
 
     def list_recovery_snapshots(self) -> list[dict[str, Any]]:
-        """List available recovery snapshots"""
+        """List available recovery snapshots."""
         if not self._recovery_enabled or not self.recovery_engine:
             return []
 
@@ -1052,8 +1047,7 @@ class AgentPool:
         max_retries: int = 3,
         context: dict[str, Any] = None,
     ) -> tuple[bool, Any]:
-        """
-        Execute an operation with automatic snapshot and recovery
+        """Execute an operation with automatic snapshot and recovery.
 
         Args:
             operation_func: Async function to execute

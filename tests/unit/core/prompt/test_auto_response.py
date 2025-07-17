@@ -1,4 +1,4 @@
-"""Test auto response functionality"""
+"""Test auto response functionality."""
 
 import unittest
 from unittest.mock import patch
@@ -12,7 +12,7 @@ class TestAutoResponse(unittest.TestCase):
             self.controller = DashboardController("test_session")
 
     def test_detect_claude_edit_prompt(self):
-        """Test detection of Claude edit confirmation prompts"""
+        """Test detection of Claude edit confirmation prompts."""
         content = """
 Do you want to make this edit to VideoProcessingService.kt?
 ❯ 1. Yes
@@ -26,7 +26,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         self.assertEqual(prompt_info["count"], 3)
 
     def test_detect_claude_suggestion_prompt(self):
-        """Test detection of Claude suggestion prompts"""
+        """Test detection of Claude suggestion prompts."""
         content = "Would you like me to continue with the implementation?"
 
         prompt_info = self.controller.detect_prompt_type(content)
@@ -35,7 +35,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         self.assertEqual(prompt_info.get("context"), "claude_suggestion")
 
     def test_detect_various_numbered_formats(self):
-        """Test detection of different numbered selection formats"""
+        """Test detection of different numbered selection formats."""
         test_cases = [
             # [1] format
             "[1] Yes\n[2] No",
@@ -55,7 +55,7 @@ Do you want to make this edit to VideoProcessingService.kt?
                 self.assertGreaterEqual(prompt_info["count"], 2)
 
     def test_detect_claude_question_prompts(self):
-        """Test detection of various Claude question formats"""
+        """Test detection of various Claude question formats."""
         test_cases = [
             "Do you want to make this edit?",
             "Should I continue with the changes?",
@@ -75,7 +75,7 @@ Do you want to make this edit to VideoProcessingService.kt?
                 self.assertEqual(prompt_info.get("context"), "claude_suggestion")
 
     def test_auto_respond_numbered_selection(self):
-        """Test auto response for numbered selections"""
+        """Test auto response for numbered selections."""
         prompt_info = {
             "type": "numbered",
             "options": [("1", "Yes"), ("2", "No")],
@@ -86,7 +86,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         self.assertEqual(response, "1")
 
     def test_auto_respond_claude_suggestion(self):
-        """Test auto response for Claude suggestions"""
+        """Test auto response for Claude suggestions."""
         prompt_info = {
             "type": "yn",
             "context": "claude_suggestion",
@@ -96,14 +96,14 @@ Do you want to make this edit to VideoProcessingService.kt?
         self.assertEqual(response, "yes")
 
     def test_no_detection_for_regular_text(self):
-        """Test that regular text doesn't trigger detection"""
+        """Test that regular text doesn't trigger detection."""
         content = "This is just regular text without any prompts or questions."
 
         prompt_info = self.controller.detect_prompt_type(content)
         self.assertIsNone(prompt_info)
 
     def test_single_numbered_item_not_detected(self):
-        """Test that single numbered items are not detected as selections"""
+        """Test that single numbered items are not detected as selections."""
         content = "1. This is just a list item"
 
         prompt_info = self.controller.detect_prompt_type(content)

@@ -1,6 +1,5 @@
-"""
-Rendering Optimizations and Caching
-Performance optimization system for dashboard renderers
+"""Rendering Optimizations and Caching
+Performance optimization system for dashboard renderers.
 """
 
 import hashlib
@@ -19,7 +18,7 @@ from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 
 @dataclass
 class CacheStats:
-    """Cache performance statistics"""
+    """Cache performance statistics."""
 
     hits: int = 0
     misses: int = 0
@@ -28,7 +27,7 @@ class CacheStats:
     hit_rate: float = 0.0
 
     def update_hit_rate(self):
-        """Update hit rate calculation"""
+        """Update hit rate calculation."""
         if self.total_requests > 0:
             self.hit_rate = self.hits / self.total_requests
         else:
@@ -36,16 +35,14 @@ class CacheStats:
 
 
 class RenderCache:
-    """
-    Thread-safe LRU cache for rendered output
+    """Thread-safe LRU cache for rendered output.
 
     Provides efficient caching of render results with configurable size limits,
     automatic eviction, and performance tracking.
     """
 
     def __init__(self, max_size: int = 1000, ttl: float | None = None):
-        """
-        Initialize render cache
+        """Initialize render cache.
 
         Args:
             max_size: Maximum number of cached items
@@ -64,8 +61,7 @@ class RenderCache:
         options: dict[str, Any] | None = None,
         renderer_format: RenderFormat | None = None,
     ) -> str:
-        """
-        Generate consistent cache key from render parameters
+        """Generate consistent cache key from render parameters.
 
         Args:
             widget_type: Type of widget being rendered
@@ -111,8 +107,7 @@ class RenderCache:
             return hashlib.sha256(str(key_components).encode()).hexdigest()
 
     def get(self, cache_key: str) -> Any | None:
-        """
-        Get cached result
+        """Get cached result.
 
         Args:
             cache_key: Cache key to lookup
@@ -146,8 +141,7 @@ class RenderCache:
             return cache_entry["result"]
 
     def set(self, cache_key: str, result: Any) -> None:
-        """
-        Store result in cache
+        """Store result in cache.
 
         Args:
             cache_key: Cache key
@@ -168,8 +162,7 @@ class RenderCache:
             self._cache.move_to_end(cache_key)
 
     def invalidate(self, cache_key: str) -> bool:
-        """
-        Remove specific entry from cache
+        """Remove specific entry from cache.
 
         Args:
             cache_key: Key to remove
@@ -184,13 +177,13 @@ class RenderCache:
             return False
 
     def clear(self) -> None:
-        """Clear all cached entries"""
+        """Clear all cached entries."""
         with self._lock:
             self._cache.clear()
             self.stats = CacheStats()
 
     def get_stats(self) -> CacheStats:
-        """Get cache performance statistics"""
+        """Get cache performance statistics."""
         with self._lock:
             return CacheStats(
                 hits=self.stats.hits,
@@ -201,7 +194,7 @@ class RenderCache:
             )
 
     def get_size(self) -> int:
-        """Get current cache size"""
+        """Get current cache size."""
         with self._lock:
             return len(self._cache)
 
@@ -212,8 +205,7 @@ _layout_cache = RenderCache(max_size=100, ttl=600)  # 10 minute TTL
 
 
 def cached_render(cache: RenderCache | None = None):
-    """
-    Decorator for caching render method results
+    """Decorator for caching render method results.
 
     Args:
         cache: Cache instance to use (default: global widget cache)
@@ -249,8 +241,7 @@ def cached_render(cache: RenderCache | None = None):
 
 
 def cached_layout(cache: RenderCache | None = None):
-    """
-    Decorator for caching layout method results
+    """Decorator for caching layout method results.
 
     Args:
         cache: Cache instance to use (default: global layout cache)
@@ -302,8 +293,7 @@ def cached_layout(cache: RenderCache | None = None):
 
 
 class LazyRenderer:
-    """
-    Lazy rendering wrapper that defers actual rendering until needed
+    """Lazy rendering wrapper that defers actual rendering until needed.
 
     Useful for scenarios where render results might not be immediately consumed,
     reducing unnecessary computation.
@@ -316,8 +306,7 @@ class LazyRenderer:
         data: Any,
         options: dict[str, Any] | None = None,
     ):
-        """
-        Initialize lazy renderer
+        """Initialize lazy renderer.
 
         Args:
             renderer: Renderer instance to use
@@ -334,8 +323,7 @@ class LazyRenderer:
         self._lock = threading.Lock()
 
     def render(self) -> Any:
-        """
-        Perform actual rendering (called automatically when needed)
+        """Perform actual rendering (called automatically when needed).
 
         Returns:
             Rendered result
@@ -353,30 +341,28 @@ class LazyRenderer:
         return self._result
 
     def __repr__(self) -> str:
-        """String representation"""
+        """String representation."""
         status = "rendered" if self._rendered else "pending"
         return f"LazyRenderer({self.widget_type.value}, {status})"
 
     def __str__(self) -> str:
-        """Get rendered result as string"""
+        """Get rendered result as string."""
         return str(self.render())
 
     def is_rendered(self) -> bool:
-        """Check if rendering has been performed"""
+        """Check if rendering has been performed."""
         return self._rendered
 
 
 class BatchRenderer:
-    """
-    Batch renderer for efficiently processing multiple widgets
+    """Batch renderer for efficiently processing multiple widgets.
 
     Optimizes rendering by grouping operations, reusing resources,
     and potentially parallelizing work.
     """
 
     def __init__(self, renderer: BaseRenderer, max_workers: int = 4):
-        """
-        Initialize batch renderer
+        """Initialize batch renderer.
 
         Args:
             renderer: Base renderer to use
@@ -391,8 +377,7 @@ class BatchRenderer:
         render_requests: list[tuple[WidgetType, Any, dict[str, Any] | None]],
         parallel: bool = True,
     ) -> list[Any]:
-        """
-        Render multiple widgets in batch
+        """Render multiple widgets in batch.
 
         Args:
             render_requests: List of (widget_type, data, options) tuples
@@ -410,7 +395,7 @@ class BatchRenderer:
             return self._render_sequential(render_requests)
 
     def _render_sequential(self, render_requests: list[tuple]) -> list[Any]:
-        """Render requests sequentially"""
+        """Render requests sequentially."""
         results = []
         for widget_type, data, options in render_requests:
             result = self.renderer.render_widget(widget_type, data, options or {})
@@ -418,7 +403,7 @@ class BatchRenderer:
         return results
 
     def _render_parallel(self, render_requests: list[tuple]) -> list[Any]:
-        """Render requests in parallel"""
+        """Render requests in parallel."""
         results = [None] * len(render_requests)
 
         def render_single(
@@ -448,8 +433,7 @@ class BatchRenderer:
         self,
         render_requests: list[tuple[WidgetType, Any, dict[str, Any] | None]],
     ) -> list[LazyRenderer]:
-        """
-        Create lazy renderers for batch processing
+        """Create lazy renderers for batch processing.
 
         Args:
             render_requests: List of render request tuples
@@ -461,8 +445,7 @@ class BatchRenderer:
 
 
 class PerformanceProfiler:
-    """
-    Performance profiler for renderer operations
+    """Performance profiler for renderer operations.
 
     Tracks timing, memory usage, and other performance metrics
     for optimization purposes.
@@ -473,8 +456,7 @@ class PerformanceProfiler:
         self._lock = threading.Lock()
 
     def time_operation(self, operation_name: str):
-        """
-        Context manager for timing operations
+        """Context manager for timing operations.
 
         Args:
             operation_name: Name of operation being timed
@@ -482,8 +464,7 @@ class PerformanceProfiler:
         return TimingContext(self, operation_name)
 
     def record_time(self, operation_name: str, duration: float) -> None:
-        """
-        Record timing data
+        """Record timing data.
 
         Args:
             operation_name: Name of operation
@@ -495,8 +476,7 @@ class PerformanceProfiler:
             self.metrics[operation_name].append(duration)
 
     def get_stats(self, operation_name: str) -> dict[str, float]:
-        """
-        Get statistics for an operation
+        """Get statistics for an operation.
 
         Args:
             operation_name: Name of operation
@@ -517,17 +497,17 @@ class PerformanceProfiler:
             }
 
     def get_all_stats(self) -> dict[str, dict[str, float]]:
-        """Get statistics for all tracked operations"""
+        """Get statistics for all tracked operations."""
         return {name: self.get_stats(name) for name in self.metrics}
 
     def clear(self) -> None:
-        """Clear all metrics"""
+        """Clear all metrics."""
         with self._lock:
             self.metrics.clear()
 
 
 class TimingContext:
-    """Context manager for timing operations"""
+    """Context manager for timing operations."""
 
     def __init__(self, profiler: PerformanceProfiler, operation_name: str):
         self.profiler = profiler
@@ -549,8 +529,7 @@ global_profiler = PerformanceProfiler()
 
 
 def profile_render(operation_name: str | None = None):
-    """
-    Decorator for profiling render operations
+    """Decorator for profiling render operations.
 
     Args:
         operation_name: Name for the operation (defaults to function name)
@@ -572,7 +551,7 @@ def profile_render(operation_name: str | None = None):
 
 
 def get_cache_stats() -> dict[str, CacheStats]:
-    """Get statistics for all caches"""
+    """Get statistics for all caches."""
     return {
         "widget_cache": _widget_cache.get_stats(),
         "layout_cache": _layout_cache.get_stats(),
@@ -580,16 +559,16 @@ def get_cache_stats() -> dict[str, CacheStats]:
 
 
 def clear_all_caches() -> None:
-    """Clear all global caches"""
+    """Clear all global caches."""
     _widget_cache.clear()
     _layout_cache.clear()
 
 
 def get_performance_stats() -> dict[str, dict[str, float]]:
-    """Get all performance statistics"""
+    """Get all performance statistics."""
     return global_profiler.get_all_stats()
 
 
 def clear_performance_stats() -> None:
-    """Clear all performance statistics"""
+    """Clear all performance statistics."""
     global_profiler.clear()

@@ -1,4 +1,4 @@
-"""Configuration schemas using Pydantic for type safety and validation"""
+"""Configuration schemas using Pydantic for type safety and validation."""
 
 from pathlib import Path
 from typing import Any
@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class TmuxConfig(BaseModel):
-    """Tmux-specific configuration settings"""
+    """Tmux-specific configuration settings."""
 
     default_shell: str = "/bin/bash"
     base_index: int = 0
@@ -18,7 +18,7 @@ class TmuxConfig(BaseModel):
 
 
 class LoggingConfig(BaseModel):
-    """Logging configuration settings"""
+    """Logging configuration settings."""
 
     level: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -30,12 +30,12 @@ class LoggingConfig(BaseModel):
     @field_validator("level")
     @classmethod
     def uppercase_level(cls, v: str) -> str:
-        """Ensure log level is uppercase"""
+        """Ensure log level is uppercase."""
         return v.upper()
 
 
 class SessionConfig(BaseModel):
-    """Session management configuration"""
+    """Session management configuration."""
 
     sessions_dir: str = "sessions"
     templates_dir: str = "templates"
@@ -45,7 +45,7 @@ class SessionConfig(BaseModel):
 
 
 class AIConfig(BaseModel):
-    """AI/LLM configuration settings"""
+    """AI/LLM configuration settings."""
 
     provider: str = Field(default="anthropic", pattern="^(anthropic|openai|local)$")
     model: str = "claude-3-opus-20240229"
@@ -56,7 +56,7 @@ class AIConfig(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    """Database configuration (optional)"""
+    """Database configuration (optional)."""
 
     enabled: bool = False
     url: str = "sqlite:///~/.scripton/yesman/yesman.db"
@@ -65,7 +65,7 @@ class DatabaseConfig(BaseModel):
 
 
 class YesmanConfigSchema(BaseModel):
-    """Main configuration schema for Yesman"""
+    """Main configuration schema for Yesman."""
 
     # Core settings
     mode: str = Field(default="merge", pattern="^(merge|isolated|local)$")
@@ -89,11 +89,11 @@ class YesmanConfigSchema(BaseModel):
     @field_validator("root_dir")
     @classmethod
     def expand_path(cls, v: str) -> str:
-        """Expand user home directory in paths"""
+        """Expand user home directory in paths."""
         return str(Path(v).expanduser())
 
     def model_post_init(self, __context: Any) -> None:
-        """Post-initialization validation and setup"""
+        """Post-initialization validation and setup."""
         # Expand paths in nested configs
         if self.logging.log_path:
             self.logging.log_path = str(Path(self.logging.log_path).expanduser())
@@ -104,7 +104,7 @@ class YesmanConfigSchema(BaseModel):
             self.database.url = f"sqlite:///{Path(db_path).expanduser()}"
 
     class Config:
-        """Pydantic config"""
+        """Pydantic config."""
 
         validate_assignment = True
         extra = "forbid"  # Don't allow extra fields in main config

@@ -29,7 +29,9 @@ def get_controller_status(claude_manager, session_name):
         model = controller.selected_model
         waiting = "⏳ YES" if controller.is_waiting_for_input() else "✅ NO"
 
-        return f"{status} | Auto-Next: {auto_next} | Model: {model} | Waiting: {waiting}"
+        return (
+            f"{status} | Auto-Next: {auto_next} | Model: {model} | Waiting: {waiting}"
+        )
     except Exception as e:
         return f"❌ Error: {e}"
 
@@ -119,7 +121,9 @@ def monitor_logs(session_name, follow=True):
                     last_position = current_size
             # 로그 파일이 없으면 주기적으로 알림
             elif current_time - last_status_check >= status_check_interval:
-                print(f"⚠️  [{time.strftime('%H:%M:%S')}] Log file not found: {controller_log}")
+                print(
+                    f"⚠️  [{time.strftime('%H:%M:%S')}] Log file not found: {controller_log}"
+                )
 
             time.sleep(0.5)  # 0.5초마다 체크
 
@@ -143,7 +147,9 @@ def list_sessions():
 
         for session in sessions:
             status_icon = "🟢" if session.status == "running" else "🔴"
-            print(f"{status_icon} {session.session_name} ({session.project_name}) - {session.status}")
+            print(
+                f"{status_icon} {session.session_name} ({session.project_name}) - {session.status}"
+            )
 
         print()
         print("💡 Usage: python debug_controller.py <session_name>")
@@ -153,10 +159,19 @@ def list_sessions():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Yesman Controller Real-time Log Viewer")
+    parser = argparse.ArgumentParser(
+        description="Yesman Controller Real-time Log Viewer"
+    )
     parser.add_argument("session_name", nargs="?", help="Session name to monitor")
-    parser.add_argument("--list", "-l", action="store_true", help="List available sessions")
-    parser.add_argument("--once", "-o", action="store_true", help="Check status once and show recent logs")
+    parser.add_argument(
+        "--list", "-l", action="store_true", help="List available sessions"
+    )
+    parser.add_argument(
+        "--once",
+        "-o",
+        action="store_true",
+        help="Check status once and show recent logs",
+    )
 
     args = parser.parse_args()
 
@@ -167,7 +182,9 @@ def main():
         return
 
     if not args.session_name:
-        print("❌ Please provide a session name or use --list to see available sessions")
+        print(
+            "❌ Please provide a session name or use --list to see available sessions"
+        )
         print()
         list_sessions()
         return

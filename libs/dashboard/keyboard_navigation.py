@@ -1,5 +1,4 @@
-"""
-Keyboard Navigation System
+"""Keyboard Navigation System.
 
 Universal keyboard navigation manager for all dashboard interfaces
 with context-aware bindings, focus management, and accessibility support.
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class KeyModifier(Enum):
-    """Keyboard modifier keys"""
+    """Keyboard modifier keys."""
 
     CTRL = "ctrl"
     SHIFT = "shift"
@@ -28,7 +27,7 @@ class KeyModifier(Enum):
 
 
 class NavigationContext(Enum):
-    """Navigation contexts for different interface states"""
+    """Navigation contexts for different interface states."""
 
     GLOBAL = "global"
     DASHBOARD = "dashboard"
@@ -44,8 +43,7 @@ class NavigationContext(Enum):
 
 @dataclass
 class KeyBinding:
-    """
-    Represents a keyboard binding configuration
+    """Represents a keyboard binding configuration.
 
     Defines how key combinations map to actions with context support
     """
@@ -59,7 +57,7 @@ class KeyBinding:
     priority: int = 0  # Higher priority takes precedence
 
     def __post_init__(self):
-        """Validate and normalize key binding"""
+        """Validate and normalize key binding."""
         if not self.key:
             raise ValueError("Key cannot be empty")
 
@@ -71,7 +69,7 @@ class KeyBinding:
 
     @property
     def key_combination(self) -> str:
-        """Get normalized key combination string"""
+        """Get normalized key combination string."""
         parts = []
 
         # Add modifiers in standard order
@@ -88,11 +86,11 @@ class KeyBinding:
         return "+".join(parts)
 
     def matches(self, key: str, modifiers: list[KeyModifier]) -> bool:
-        """Check if this binding matches the given key combination"""
+        """Check if this binding matches the given key combination."""
         return self.key.lower() == key.lower() and set(self.modifiers) == set(modifiers) and self.enabled
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization"""
+        """Convert to dictionary for serialization."""
         return {
             "key": self.key,
             "modifiers": [mod.value for mod in self.modifiers],
@@ -105,7 +103,7 @@ class KeyBinding:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "KeyBinding":
-        """Create KeyBinding from dictionary"""
+        """Create KeyBinding from dictionary."""
         return cls(
             key=data["key"],
             modifiers=[KeyModifier(mod) for mod in data.get("modifiers", [])],
@@ -119,7 +117,7 @@ class KeyBinding:
 
 @dataclass
 class FocusableElement:
-    """Represents an element that can receive focus"""
+    """Represents an element that can receive focus."""
 
     element_id: str
     element_type: str  # button, input, link, etc.
@@ -128,7 +126,7 @@ class FocusableElement:
     context: NavigationContext | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return {
             "element_id": self.element_id,
             "element_type": self.element_type,
@@ -139,8 +137,7 @@ class FocusableElement:
 
 
 class KeyboardNavigationManager:
-    """
-    Universal keyboard navigation manager
+    """Universal keyboard navigation manager.
 
     Provides consistent keyboard navigation across all dashboard interfaces
     with context-aware bindings, focus management, and accessibility support.
@@ -149,7 +146,7 @@ class KeyboardNavigationManager:
     _instance: Optional["KeyboardNavigationManager"] = None
 
     def __init__(self):
-        """Initialize keyboard navigation manager"""
+        """Initialize keyboard navigation manager."""
         if KeyboardNavigationManager._instance is not None:
             raise RuntimeError("KeyboardNavigationManager is a singleton, use get_instance()")
         self.bindings: dict[str, list[KeyBinding]] = {}
@@ -164,7 +161,7 @@ class KeyboardNavigationManager:
         self._setup_default_bindings()
 
     def _setup_default_bindings(self) -> None:
-        """Setup default keyboard bindings"""
+        """Setup default keyboard bindings."""
         # Global navigation
         self.register_binding("tab", [], "focus_next", "Next element", NavigationContext.GLOBAL)
         self.register_binding(
@@ -217,7 +214,7 @@ class KeyboardNavigationManager:
         self._setup_default_actions()
 
     def _setup_default_actions(self) -> None:
-        """Setup default action handlers"""
+        """Setup default action handlers."""
         self.register_action("focus_next", self.focus_next)
         self.register_action("focus_prev", self.focus_prev)
         self.register_action("activate", self.activate_element)
@@ -260,8 +257,7 @@ class KeyboardNavigationManager:
         context: NavigationContext | None = None,
         priority: int = 0,
     ) -> None:
-        """
-        Register a keyboard binding
+        """Register a keyboard binding.
 
         Args:
             key: Key name (e.g., 'a', 'enter', 'arrowup')
@@ -296,8 +292,7 @@ class KeyboardNavigationManager:
         modifiers: list[KeyModifier],
         context: NavigationContext | None = None,
     ) -> bool:
-        """
-        Unregister a keyboard binding
+        """Unregister a keyboard binding.
 
         Args:
             key: Key name
@@ -330,8 +325,7 @@ class KeyboardNavigationManager:
         return removed_count > 0
 
     def register_action(self, action_name: str, handler: Callable) -> None:
-        """
-        Register an action handler
+        """Register an action handler.
 
         Args:
             action_name: Name of the action
@@ -341,8 +335,7 @@ class KeyboardNavigationManager:
         logger.debug(f"Registered action: {action_name}")
 
     def unregister_action(self, action_name: str) -> bool:
-        """
-        Unregister an action handler
+        """Unregister an action handler.
 
         Args:
             action_name: Name of the action to remove
@@ -362,8 +355,7 @@ class KeyboardNavigationManager:
         modifiers: list[KeyModifier],
         context: NavigationContext | None = None,
     ) -> bool:
-        """
-        Handle a keyboard event
+        """Handle a keyboard event.
 
         Args:
             key: Key that was pressed
@@ -409,8 +401,7 @@ class KeyboardNavigationManager:
         return self.execute_action(best_binding.action)
 
     def execute_action(self, action_name: str, *args, **kwargs) -> bool:
-        """
-        Execute a registered action
+        """Execute a registered action.
 
         Args:
             action_name: Name of the action to execute
@@ -440,7 +431,7 @@ class KeyboardNavigationManager:
             return False
 
     def set_context(self, context: NavigationContext) -> None:
-        """Set the current navigation context"""
+        """Set the current navigation context."""
         self.current_context = context
         logger.debug(f"Navigation context changed to: {context}")
 
@@ -451,8 +442,7 @@ class KeyboardNavigationManager:
         tab_index: int = 0,
         context: NavigationContext | None = None,
     ) -> None:
-        """
-        Add a focusable element to the navigation system
+        """Add a focusable element to the navigation system.
 
         Args:
             element_id: Unique identifier for the element
@@ -478,8 +468,7 @@ class KeyboardNavigationManager:
         logger.debug(f"Added focusable element: {element_id}")
 
     def remove_focusable_element(self, element_id: str) -> bool:
-        """
-        Remove a focusable element
+        """Remove a focusable element.
 
         Args:
             element_id: ID of element to remove
@@ -501,7 +490,7 @@ class KeyboardNavigationManager:
         return False
 
     def focus_next(self) -> bool:
-        """Focus the next element in tab order"""
+        """Focus the next element in tab order."""
         if not self.focusable_elements:
             return False
 
@@ -524,7 +513,7 @@ class KeyboardNavigationManager:
         return False
 
     def focus_prev(self) -> bool:
-        """Focus the previous element in tab order"""
+        """Focus the previous element in tab order."""
         if not self.focusable_elements:
             return False
 
@@ -547,8 +536,7 @@ class KeyboardNavigationManager:
         return False
 
     def focus_element(self, element_id: str) -> bool:
-        """
-        Focus a specific element by ID
+        """Focus a specific element by ID.
 
         Args:
             element_id: ID of element to focus
@@ -565,12 +553,12 @@ class KeyboardNavigationManager:
         return False
 
     def _focus_element(self, element: FocusableElement) -> None:
-        """Internal method to focus an element"""
+        """Internal method to focus an element."""
         logger.debug(f"Focusing element: {element.element_id}")
         # This would be implemented by subclasses or interface-specific handlers
 
     def get_current_focus(self) -> FocusableElement | None:
-        """Get the currently focused element"""
+        """Get the currently focused element."""
         if 0 <= self.current_focus_index < len(self.focusable_elements):
             return self.focusable_elements[self.current_focus_index]
         return None
@@ -578,59 +566,59 @@ class KeyboardNavigationManager:
     # Default action implementations
 
     def activate_element(self) -> None:
-        """Activate the currently focused element"""
+        """Activate the currently focused element."""
         element = self.get_current_focus()
         if element:
             logger.debug(f"Activating element: {element.element_id}")
 
     def cancel_action(self) -> None:
-        """Handle cancel/escape action"""
+        """Handle cancel/escape action."""
         logger.debug("Cancel action triggered")
 
     def refresh_action(self) -> None:
-        """Handle refresh action"""
+        """Handle refresh action."""
         logger.debug("Refresh action triggered")
 
     def find_action(self) -> None:
-        """Handle find action"""
+        """Handle find action."""
         logger.debug("Find action triggered")
 
     def navigate_direction(self, direction: str) -> None:
-        """Handle directional navigation"""
+        """Handle directional navigation."""
         logger.debug(f"Navigate {direction}")
 
     # Vim mode methods
 
     def enable_vim_mode(self) -> None:
-        """Enable Vim-style keyboard navigation"""
+        """Enable Vim-style keyboard navigation."""
         self.vim_mode_enabled = True
         self.vim_mode = NavigationContext.VIM_NORMAL
         logger.debug("Vim mode enabled")
 
     def disable_vim_mode(self) -> None:
-        """Disable Vim-style keyboard navigation"""
+        """Disable Vim-style keyboard navigation."""
         self.vim_mode_enabled = False
         logger.debug("Vim mode disabled")
 
     def vim_command_mode(self) -> None:
-        """Enter Vim command mode"""
+        """Enter Vim command mode."""
         if self.vim_mode_enabled:
             logger.debug("Vim command mode")
 
     def vim_insert_mode(self) -> None:
-        """Enter Vim insert mode"""
+        """Enter Vim insert mode."""
         if self.vim_mode_enabled:
             self.vim_mode = NavigationContext.VIM_INSERT
             logger.debug("Vim insert mode")
 
     def vim_visual_mode(self) -> None:
-        """Enter Vim visual mode"""
+        """Enter Vim visual mode."""
         if self.vim_mode_enabled:
             self.vim_mode = NavigationContext.VIM_VISUAL
             logger.debug("Vim visual mode")
 
     def vim_normal_mode(self) -> None:
-        """Enter Vim normal mode"""
+        """Enter Vim normal mode."""
         if self.vim_mode_enabled:
             self.vim_mode = NavigationContext.VIM_NORMAL
             logger.debug("Vim normal mode")
@@ -638,21 +626,21 @@ class KeyboardNavigationManager:
     # Serialization methods
 
     def export_bindings(self) -> dict[str, Any]:
-        """Export all key bindings to dictionary"""
+        """Export all key bindings to dictionary."""
         exported = {}
         for key_combo, bindings in self.bindings.items():
             exported[key_combo] = [binding.to_dict() for binding in bindings]
         return exported
 
     def import_bindings(self, bindings_data: dict[str, Any]) -> None:
-        """Import key bindings from dictionary"""
+        """Import key bindings from dictionary."""
         self.bindings.clear()
 
         for key_combo, binding_list in bindings_data.items():
             self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in binding_list]
 
     def get_help_text(self, context: NavigationContext | None = None) -> list[str]:
-        """Get help text for current context"""
+        """Get help text for current context."""
         help_lines = []
         processed_actions = set()
 
@@ -669,10 +657,10 @@ class KeyboardNavigationManager:
 
 # Global convenience functions for singleton access
 def get_keyboard_manager() -> KeyboardNavigationManager:
-    """Get the global keyboard navigation manager instance"""
+    """Get the global keyboard navigation manager instance."""
     return KeyboardNavigationManager.get_instance()
 
 
 def reset_keyboard_manager() -> None:
-    """Reset the global keyboard navigation manager instance"""
+    """Reset the global keyboard navigation manager instance."""
     KeyboardNavigationManager.reset_instance()

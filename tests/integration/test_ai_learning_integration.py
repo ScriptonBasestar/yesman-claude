@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-AI Learning System Integration Tests
+"""AI Learning System Integration Tests.
 
 Tests the AI learning system's integration with session interactions,
 pattern detection, and prediction accuracy across real workflows.
@@ -9,14 +8,19 @@ pattern detection, and prediction accuracy across real workflows.
 from commands.automate import AutomateDetectCommand
 from libs.ai.learning_engine import LearningEngine
 
-from .test_framework import AsyncIntegrationTestBase, CommandTestRunner, MockClaudeEnvironment, PerformanceMonitor
+from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 
 class TestAILearningIntegration(AsyncIntegrationTestBase):
-    """Test AI learning system integration with real session interactions"""
+    """Test AI learning system integration with real session interactions."""
 
     def setup_method(self):
-        """Setup for AI learning tests"""
+        """Setup for AI learning tests."""
         super().setup_method()
         self.mock_claude = MockClaudeEnvironment(self.test_dir)
         self.command_runner = CommandTestRunner(self)
@@ -26,21 +30,30 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         self._setup_claude_responses()
 
     def _setup_claude_responses(self):
-        """Setup mock Claude responses for different learning scenarios"""
+        """Setup mock Claude responses for different learning scenarios."""
         # Code-related responses
         self.mock_claude.add_mock_response("write a function", "def example_function():\n    return 'Hello World'")
 
-        self.mock_claude.add_mock_response("fix this bug", "The issue is in line 42. Try changing the variable assignment.")
+        self.mock_claude.add_mock_response(
+            "fix this bug",
+            "The issue is in line 42. Try changing the variable assignment.",
+        )
 
-        self.mock_claude.add_mock_response("explain this code", "This code implements a sorting algorithm using quicksort.")
+        self.mock_claude.add_mock_response(
+            "explain this code",
+            "This code implements a sorting algorithm using quicksort.",
+        )
 
         # Project management responses
         self.mock_claude.add_mock_response("create a task", "I'll help you create a task. What's the task description?")
 
-        self.mock_claude.add_mock_response("project status", "Here's your project status: 5 completed tasks, 3 in progress.")
+        self.mock_claude.add_mock_response(
+            "project status",
+            "Here's your project status: 5 completed tasks, 3 in progress.",
+        )
 
     async def test_learning_from_session_interactions(self):
-        """Test that AI learns patterns from session interactions"""
+        """Test that AI learns patterns from session interactions."""
         # Create test session for learning
         session_name = "ai-learning-session"
         self.create_test_session(session_name)
@@ -66,7 +79,12 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
             claude_response = self.mock_claude.simulate_interaction(interaction["prompt"])
 
             # Record interaction in learning engine
-            await learning_engine.record_interaction(prompt=interaction["prompt"], response=claude_response, context=interaction["context"], session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=interaction["prompt"],
+                response=claude_response,
+                context=interaction["context"],
+                session_id=session_name,
+            )
 
         learning_duration = self.performance_monitor.end_timing("learning_phase")
 
@@ -93,7 +111,7 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         assert detection_duration < 2.0, f"Pattern detection took {detection_duration:.2f}s, should be < 2s"
 
     async def test_prediction_accuracy_improvement(self):
-        """Test that prediction accuracy improves with more data"""
+        """Test that prediction accuracy improves with more data."""
         session_name = "prediction-accuracy-session"
         self.create_test_session(session_name)
 
@@ -107,7 +125,12 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
 
         for interaction in initial_interactions:
             response = self.mock_claude.simulate_interaction(interaction["prompt"])
-            await learning_engine.record_interaction(prompt=interaction["prompt"], response=response, context=interaction["context"], session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=interaction["prompt"],
+                response=response,
+                context=interaction["context"],
+                session_id=session_name,
+            )
 
         # Test initial prediction accuracy
         test_prompt = "create a password reset function"
@@ -123,7 +146,12 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
 
         for interaction in extended_interactions:
             response = self.mock_claude.simulate_interaction(interaction["prompt"])
-            await learning_engine.record_interaction(prompt=interaction["prompt"], response=response, context=interaction["context"], session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=interaction["prompt"],
+                response=response,
+                context=interaction["context"],
+                session_id=session_name,
+            )
 
         # Test improved prediction accuracy
         improved_prediction = await learning_engine.predict_response_context(test_prompt)
@@ -139,7 +167,7 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         assert improved_confidence > 0.7, f"Final confidence {improved_confidence} should be > 0.7"
 
     async def test_cross_session_learning(self):
-        """Test that learning transfers across multiple sessions"""
+        """Test that learning transfers across multiple sessions."""
         # Create multiple sessions
         sessions = ["session-1", "session-2", "session-3"]
         for session in sessions:
@@ -154,7 +182,10 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
                 {"prompt": "create database models", "context": "web_development"},
             ],
             "session-2": [
-                {"prompt": "implement API authentication", "context": "web_development"},
+                {
+                    "prompt": "implement API authentication",
+                    "context": "web_development",
+                },
                 {"prompt": "add error handling to API", "context": "web_development"},
             ],
             "session-3": [
@@ -167,7 +198,12 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         for session, interactions in session_interactions.items():
             for interaction in interactions:
                 response = self.mock_claude.simulate_interaction(interaction["prompt"])
-                await learning_engine.record_interaction(prompt=interaction["prompt"], response=response, context=interaction["context"], session_id=session)
+                await learning_engine.record_interaction(
+                    prompt=interaction["prompt"],
+                    response=response,
+                    context=interaction["context"],
+                    session_id=session,
+                )
 
         # Test cross-session pattern detection
         global_patterns = await learning_engine.detect_patterns(session_id=None)  # All sessions
@@ -185,16 +221,16 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
 
 
 class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
-    """Test integration between AI learning and automation workflows"""
+    """Test integration between AI learning and automation workflows."""
 
     def setup_method(self):
-        """Setup for automation learning tests"""
+        """Setup for automation learning tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
 
     async def test_context_detection_learning(self):
-        """Test that AI learns to better detect contexts for automation"""
+        """Test that AI learns to better detect contexts for automation."""
         # Create test project directory with various file types
         project_dir = self.test_dir / "test_project"
         project_dir.mkdir()
@@ -251,7 +287,7 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
         assert improved_duration < 3.0, f"Improved detection took {improved_duration:.2f}s, should be < 3s"
 
     async def test_workflow_optimization_learning(self):
-        """Test that AI learns to optimize automation workflows"""
+        """Test that AI learns to optimize automation workflows."""
         project_dir = self.test_dir / "workflow_project"
         project_dir.mkdir()
 
@@ -267,8 +303,18 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
 
         # Simulate workflow execution and learning
         workflow_executions = [
-            {"context": "python_project", "workflow": "run_tests", "execution_time": 2.5, "success": True},
-            {"context": "python_project", "workflow": "run_linting", "execution_time": 1.8, "success": True},
+            {
+                "context": "python_project",
+                "workflow": "run_tests",
+                "execution_time": 2.5,
+                "success": True,
+            },
+            {
+                "context": "python_project",
+                "workflow": "run_linting",
+                "execution_time": 1.8,
+                "success": True,
+            },
             {
                 "context": "python_project",
                 "workflow": "run_tests",
@@ -300,10 +346,10 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
 
 
 class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
-    """Test that AI learning data persists correctly across sessions"""
+    """Test that AI learning data persists correctly across sessions."""
 
     async def test_learning_data_persistence(self):
-        """Test that learned patterns persist across system restarts"""
+        """Test that learned patterns persist across system restarts."""
         session_name = "persistence-test-session"
         self.create_test_session(session_name)
 
@@ -318,7 +364,12 @@ class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
         ]
 
         for data in training_data:
-            await learning_engine_1.record_interaction(prompt=data["prompt"], response=f"Executing {data['prompt']}...", context=data["context"], session_id=session_name)
+            await learning_engine_1.record_interaction(
+                prompt=data["prompt"],
+                response=f"Executing {data['prompt']}...",
+                context=data["context"],
+                session_id=session_name,
+            )
 
         # Save learned patterns
         patterns_1 = await learning_engine_1.detect_patterns()
@@ -344,7 +395,7 @@ class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
         assert prediction.get("confidence", 0.0) > 0.5, "Low confidence from persisted patterns"
 
     async def test_incremental_learning_persistence(self):
-        """Test that incremental learning updates are persisted correctly"""
+        """Test that incremental learning updates are persisted correctly."""
         session_name = "incremental-learning-session"
         self.create_test_session(session_name)
 
@@ -357,7 +408,12 @@ class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
         ]
 
         for data in initial_batch:
-            await learning_engine.record_interaction(prompt=data["prompt"], response=f"Creating {data['prompt']}...", context=data["context"], session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=data["prompt"],
+                response=f"Creating {data['prompt']}...",
+                context=data["context"],
+                session_id=session_name,
+            )
 
         initial_patterns = await learning_engine.detect_patterns()
         initial_count = len(initial_patterns)
@@ -370,7 +426,12 @@ class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
         ]
 
         for data in incremental_batch:
-            await learning_engine.record_interaction(prompt=data["prompt"], response=f"Executing {data['prompt']}...", context=data["context"], session_id=session_name)
+            await learning_engine.record_interaction(
+                prompt=data["prompt"],
+                response=f"Executing {data['prompt']}...",
+                context=data["context"],
+                session_id=session_name,
+            )
 
         # Detect patterns after incremental learning
         updated_patterns = await learning_engine.detect_patterns()

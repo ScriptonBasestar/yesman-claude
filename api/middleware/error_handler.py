@@ -1,4 +1,4 @@
-"""Global error handler middleware for FastAPI"""
+"""Global error handler middleware for FastAPI."""
 
 import traceback
 import uuid
@@ -22,7 +22,7 @@ from libs.core.error_handling import TimeoutError as YesmanTimeoutError
 
 
 def error_to_status_code(error: YesmanError) -> int:
-    """Map YesmanError to HTTP status code"""
+    """Map YesmanError to HTTP status code."""
     # Map by error type
     if isinstance(error, ValidationError):
         return status.HTTP_400_BAD_REQUEST
@@ -49,7 +49,7 @@ def error_to_status_code(error: YesmanError) -> int:
 
 
 async def global_error_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Global error handler for all exceptions"""
+    """Global error handler for all exceptions."""
     # Generate request ID if not present
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
 
@@ -115,7 +115,7 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
                     "message": "An unexpected error occurred",
                     "category": "system",
                     "severity": "high",
-                    "recovery_hint": "Please try again later or contact support if the problem persists",
+                    "recovery_hint": ("Please try again later or contact support if the problem persists"),
                     "request_id": request_id,
                 }
             },
@@ -123,7 +123,7 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
 
 
 async def add_request_id_middleware(request: Request, call_next):
-    """Middleware to add request ID to all requests"""
+    """Middleware to add request ID to all requests."""
     # Generate or extract request ID
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     request.state.request_id = request_id
@@ -147,7 +147,7 @@ def create_error_response(
     context: dict[str, Any] | None = None,
     request_id: str | None = None,
 ) -> JSONResponse:
-    """Helper function to create standardized error responses"""
+    """Helper function to create standardized error responses."""
     error_data = {
         "code": code,
         "message": message,

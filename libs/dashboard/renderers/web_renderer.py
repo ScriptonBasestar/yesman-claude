@@ -1,6 +1,5 @@
-"""
-Web Renderer
-HTML/JavaScript generator for dashboard widgets
+"""Web Renderer
+HTML/JavaScript generator for dashboard widgets.
 """
 
 import html
@@ -10,20 +9,28 @@ from datetime import datetime
 from typing import Any
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
-from .widget_models import ActivityData, ChartData, HealthData, HealthLevel, MetricCardData, ProgressData, ProgressPhase, SessionData, StatusIndicatorData
+from .widget_models import (
+    ActivityData,
+    ChartData,
+    HealthData,
+    HealthLevel,
+    MetricCardData,
+    ProgressData,
+    ProgressPhase,
+    SessionData,
+    StatusIndicatorData,
+)
 
 
 class WebRenderer(BaseRenderer):
-    """
-    Web renderer for generating HTML/CSS/JavaScript output
+    """Web renderer for generating HTML/CSS/JavaScript output.
 
     Generates responsive HTML components with Tailwind CSS classes
     and JavaScript data binding for interactive dashboard widgets.
     """
 
     def __init__(self, theme: dict[str, Any] | None = None):
-        """
-        Initialize web renderer
+        """Initialize web renderer.
 
         Args:
             theme: Theme configuration for styling
@@ -56,8 +63,7 @@ class WebRenderer(BaseRenderer):
         data: Any,
         options: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Render a single widget as HTML
+        """Render a single widget as HTML.
 
         Args:
             widget_type: Type of widget to render
@@ -97,8 +103,7 @@ class WebRenderer(BaseRenderer):
         widgets: list[dict[str, Any]],
         layout_config: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Render a layout containing multiple widgets
+        """Render a layout containing multiple widgets.
 
         Args:
             widgets: List of widget configurations
@@ -129,8 +134,7 @@ class WebRenderer(BaseRenderer):
             return self._render_vertical_layout(rendered_widgets, layout_config)
 
     def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
-        """
-        Render a container wrapping content
+        """Render a container wrapping content.
 
         Args:
             content: Content to wrap
@@ -177,7 +181,7 @@ class WebRenderer(BaseRenderer):
         options: dict[str, Any],
         component_id: str,
     ) -> str:
-        """Render session browser widget"""
+        """Render session browser widget."""
         view_mode = options.get("view_mode", "table")
 
         if isinstance(data, SessionData):
@@ -196,7 +200,7 @@ class WebRenderer(BaseRenderer):
             return self._render_session_table(sessions, options, component_id)
 
     def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
-        """Render sessions as table"""
+        """Render sessions as table."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-table overflow-hidden">',
             '<div class="bg-white shadow rounded-lg">',
@@ -282,7 +286,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
-        """Render sessions as cards"""
+        """Render sessions as cards."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-cards">',
             '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">',
@@ -346,7 +350,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_session_list(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
-        """Render sessions as list"""
+        """Render sessions as list."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-list">',
             '<div class="bg-white shadow overflow-hidden sm:rounded-md">',
@@ -406,7 +410,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_health_meter(self, data: HealthData, options: dict[str, Any], component_id: str) -> str:
-        """Render health meter widget"""
+        """Render health meter widget."""
         if not isinstance(data, HealthData):
             return self._render_error_widget("Invalid health data", component_id)
 
@@ -467,7 +471,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any], component_id: str) -> str:
-        """Render activity heatmap widget"""
+        """Render activity heatmap widget."""
         if not isinstance(data, ActivityData):
             return self._render_error_widget("Invalid activity data", component_id)
 
@@ -521,7 +525,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any], component_id: str) -> str:
-        """Render progress tracker widget"""
+        """Render progress tracker widget."""
         if not isinstance(data, ProgressData):
             return self._render_error_widget("Invalid progress data", component_id)
 
@@ -589,7 +593,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_log_viewer(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:
-        """Render log viewer widget"""
+        """Render log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 10)
 
@@ -653,7 +657,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_metric_card(self, data: MetricCardData, options: dict[str, Any], component_id: str) -> str:
-        """Render metric card widget"""
+        """Render metric card widget."""
         if not isinstance(data, MetricCardData):
             return self._render_error_widget("Invalid metric data", component_id)
 
@@ -741,7 +745,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str, Any], component_id: str) -> str:
-        """Render status indicator widget"""
+        """Render status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             return self._render_error_widget("Invalid status data", component_id)
 
@@ -782,7 +786,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_chart(self, data: ChartData, options: dict[str, Any], component_id: str) -> str:
-        """Render chart widget"""
+        """Render chart widget."""
         if not isinstance(data, ChartData):
             return self._render_error_widget("Invalid chart data", component_id)
 
@@ -811,7 +815,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_table(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:
-        """Render generic table"""
+        """Render generic table."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
 
@@ -885,7 +889,7 @@ class WebRenderer(BaseRenderer):
         options: dict[str, Any],
         component_id: str,
     ) -> str:
-        """Render generic widget fallback"""
+        """Render generic widget fallback."""
         html_parts = [
             f'<div id="{component_id}" class="generic-widget bg-yellow-50 border border-yellow-200 rounded-lg p-4">',
             f'<h4 class="text-lg font-medium text-yellow-800">🔧 {widget_type.value.replace("_", " ").title()}</h4>',
@@ -897,7 +901,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_error_widget(self, error_message: str, component_id: str) -> str:
-        """Render error widget"""
+        """Render error widget."""
         return f"""
         <div id="{component_id}" class="error-widget bg-red-50 border border-red-200 rounded-lg p-4">
             <div class="flex">
@@ -915,7 +919,7 @@ class WebRenderer(BaseRenderer):
     # Layout renderers
 
     def _render_vertical_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
-        """Render widgets in vertical layout"""
+        """Render widgets in vertical layout."""
         spacing = config.get("spacing", "space-y-4")
         css_classes = ["dashboard-layout-vertical", spacing]
 
@@ -926,7 +930,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_flex_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
-        """Render widgets in flex layout"""
+        """Render widgets in flex layout."""
         direction = config.get("direction", "row")
         gap = config.get("gap", "gap-4")
 
@@ -943,7 +947,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     def _render_grid_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
-        """Render widgets in grid layout"""
+        """Render widgets in grid layout."""
         columns = config.get("columns", 2)
         gap = config.get("gap", "gap-4")
 
@@ -959,12 +963,12 @@ class WebRenderer(BaseRenderer):
     # Helper methods
 
     def _generate_component_id(self) -> str:
-        """Generate unique component ID"""
+        """Generate unique component ID."""
         self.component_id_counter += 1
         return f"widget-{self.component_id_counter}-{uuid.uuid4().hex[:8]}"
 
     def _get_health_color_class(self, health_level: HealthLevel) -> str:
-        """Get Tailwind color class for health level"""
+        """Get Tailwind color class for health level."""
         color_mapping = {
             HealthLevel.EXCELLENT: "green-600",
             HealthLevel.GOOD: "blue-600",
@@ -975,7 +979,7 @@ class WebRenderer(BaseRenderer):
         return color_mapping.get(health_level, "gray-600")
 
     def _embed_widget_data(self, component_id: str, data: dict[str, Any]) -> str:
-        """Embed JavaScript data for widget"""
+        """Embed JavaScript data for widget."""
         json_data = json.dumps(data, default=str, ensure_ascii=False)
 
         return f"""
@@ -990,7 +994,7 @@ class WebRenderer(BaseRenderer):
         """
 
     def supports_feature(self, feature: str) -> bool:
-        """Check if feature is supported"""
+        """Check if feature is supported."""
         features = {
             "html": True,
             "css": True,

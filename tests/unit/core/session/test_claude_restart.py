@@ -1,4 +1,4 @@
-"""Test claude restart functionality"""
+"""Test claude restart functionality."""
 
 import unittest
 from unittest.mock import Mock, patch
@@ -20,7 +20,7 @@ class TestClaudeRestart(unittest.TestCase):
             self.controller.claude_pane = self.mock_pane
 
     def test_terminate_claude_process_success(self):
-        """Test successful claude process termination"""
+        """Test successful claude process termination."""
         # Mock command output showing claude is running, then not running
         cmd_outputs = ["claude", "bash"]
         self.mock_pane.cmd.return_value.stdout = [cmd_outputs.pop(0)]
@@ -36,7 +36,7 @@ class TestClaudeRestart(unittest.TestCase):
         self.assertGreaterEqual(len(clear_calls), 2)
 
     def test_terminate_claude_process_with_exception(self):
-        """Test claude process termination with command check exception"""
+        """Test claude process termination with command check exception."""
         # Mock cmd to raise exception (simulating terminated process)
         self.mock_pane.cmd.side_effect = Exception("Process not found")
 
@@ -47,7 +47,7 @@ class TestClaudeRestart(unittest.TestCase):
         self.assertGreater(self.mock_pane.send_keys.call_count, 0)
 
     def test_restart_claude_pane_success(self):
-        """Test successful claude pane restart"""
+        """Test successful claude pane restart."""
         self.controller.selected_model = "sonnet"
 
         # Mock successful termination
@@ -62,14 +62,14 @@ class TestClaudeRestart(unittest.TestCase):
             self.assertGreater(len(claude_calls), 0)
 
     def test_restart_claude_pane_no_pane(self):
-        """Test restart with no claude pane"""
+        """Test restart with no claude pane."""
         self.controller.claude_pane = None
 
         result = self.controller.restart_claude_pane()
         self.assertFalse(result)
 
     def test_restart_claude_pane_with_exception(self):
-        """Test restart with exception during termination"""
+        """Test restart with exception during termination."""
         with patch.object(
             self.controller,
             "_terminate_claude_process",

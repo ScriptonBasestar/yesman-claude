@@ -4,11 +4,11 @@ from libs.dashboard import ThemeManager, ThemeMode
 
 
 class TestThemeSwitching:
-    """Tests for theme switching and CSS generation"""
+    """Tests for theme switching and CSS generation."""
 
     @pytest.fixture
     def theme_manager(self):
-        """Create ThemeManager instance"""
+        """Create ThemeManager instance."""
         import tempfile
         from pathlib import Path
 
@@ -16,7 +16,7 @@ class TestThemeSwitching:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     def test_theme_switching(self, theme_manager):
-        """Test 3: Theme switching and CSS generation"""
+        """Test 3: Theme switching and CSS generation."""
         # Test built-in themes
         themes = theme_manager.get_all_themes()
         assert len(themes) >= 3

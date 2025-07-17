@@ -1,6 +1,4 @@
-"""
-Tests for TUI Renderer
-"""
+"""Tests for TUI Renderer."""
 
 from datetime import datetime
 from io import StringIO
@@ -29,17 +27,17 @@ from libs.dashboard.renderers.widget_models import (
 
 
 class TestTUIRenderer:
-    """Test cases for TUI renderer"""
+    """Test cases for TUI renderer."""
 
     def setup_method(self):
-        """Setup test renderer"""
+        """Setup test renderer."""
         # Use StringIO to capture output for testing
         self.string_io = StringIO()
         self.console = Console(file=self.string_io, width=80, height=24, force_terminal=True)
         self.renderer = TUIRenderer(console=self.console)
 
     def test_renderer_initialization(self):
-        """Test TUI renderer initialization"""
+        """Test TUI renderer initialization."""
         assert self.renderer.format_type == RenderFormat.TUI
         assert self.renderer.console is not None
         assert self.renderer.supports_color
@@ -47,14 +45,14 @@ class TestTUIRenderer:
         assert self.renderer.terminal_height == 24
 
     def test_color_mapping(self):
-        """Test color mapping functionality"""
+        """Test color mapping functionality."""
         assert self.renderer._color_map["success"] == "green"
         assert self.renderer._color_map["warning"] == "yellow"
         assert self.renderer._color_map["error"] == "red"
         assert self.renderer._color_map["info"] == "blue"
 
     def test_get_status_color(self):
-        """Test status color retrieval"""
+        """Test status color retrieval."""
         color = self.renderer._get_status_color("active")
         assert color in ["green", "blue", "cyan", "white"]  # Valid color options
 
@@ -62,7 +60,7 @@ class TestTUIRenderer:
         assert color in ["red", "yellow", "white"]
 
     def test_get_health_color(self):
-        """Test health level color mapping"""
+        """Test health level color mapping."""
         assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "green"
         assert self.renderer._get_health_color(HealthLevel.GOOD) == "blue"
         assert self.renderer._get_health_color(HealthLevel.WARNING) == "yellow"
@@ -70,7 +68,7 @@ class TestTUIRenderer:
         assert self.renderer._get_health_color(HealthLevel.UNKNOWN) == "dim"
 
     def test_supports_feature(self):
-        """Test feature support checking"""
+        """Test feature support checking."""
         assert self.renderer.supports_feature("color") is True
         assert self.renderer.supports_feature("unicode") is True
         assert self.renderer.supports_feature("progress") is True
@@ -80,7 +78,7 @@ class TestTUIRenderer:
         assert self.renderer.supports_feature("nonexistent") is False
 
     def test_render_session_browser_table(self):
-        """Test session browser table view rendering"""
+        """Test session browser table view rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -107,7 +105,7 @@ class TestTUIRenderer:
         assert "🤖" in result  # Claude active indicator
 
     def test_render_session_browser_tree(self):
-        """Test session browser tree view rendering"""
+        """Test session browser tree view rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -133,7 +131,7 @@ class TestTUIRenderer:
         assert "🟢" in result  # Active status emoji
 
     def test_render_session_browser_cards(self):
-        """Test session browser cards view rendering"""
+        """Test session browser cards view rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
@@ -160,7 +158,7 @@ class TestTUIRenderer:
         assert "Claude:" in result
 
     def test_render_health_meter(self):
-        """Test health meter rendering"""
+        """Test health meter rendering."""
         now = datetime.now()
         category = HealthCategoryData(
             category="build",
@@ -188,7 +186,7 @@ class TestTUIRenderer:
         assert "Build:" in result
 
     def test_render_activity_heatmap(self):
-        """Test activity heatmap rendering"""
+        """Test activity heatmap rendering."""
         now = datetime.now()
         entry = ActivityEntry(
             timestamp=now,
@@ -220,7 +218,7 @@ class TestTUIRenderer:
         assert "🔥" in result  # Heat indicator
 
     def test_render_progress_tracker(self):
-        """Test progress tracker rendering"""
+        """Test progress tracker rendering."""
         now = datetime.now()
 
         progress = ProgressData(
@@ -252,7 +250,7 @@ class TestTUIRenderer:
         assert "Commands: 20" in result
 
     def test_render_log_viewer(self):
-        """Test log viewer rendering"""
+        """Test log viewer rendering."""
         logs = [
             {
                 "timestamp": "2023-01-01T10:00:00",
@@ -287,7 +285,7 @@ class TestTUIRenderer:
         assert "ERROR:" in result
 
     def test_render_metric_card(self):
-        """Test metric card rendering"""
+        """Test metric card rendering."""
         metric = MetricCardData(
             title="CPU Usage",
             value=75.5,
@@ -312,7 +310,7 @@ class TestTUIRenderer:
         assert "vs last hour" in result
 
     def test_render_status_indicator(self):
-        """Test status indicator rendering"""
+        """Test status indicator rendering."""
         status = StatusIndicatorData(
             status="running",
             label="Service Active",
@@ -334,7 +332,7 @@ class TestTUIRenderer:
         assert "⟳" in result  # Pulse indicator
 
     def test_render_chart(self):
-        """Test chart rendering"""
+        """Test chart rendering."""
         now = datetime.now()
         points = [
             ChartDataPoint(x=now, y=10),
@@ -363,7 +361,7 @@ class TestTUIRenderer:
         assert "░" in result  # Empty bar character
 
     def test_render_table(self):
-        """Test generic table rendering"""
+        """Test generic table rendering."""
         table_data = {
             "headers": ["Name", "Status", "Count"],
             "rows": [
@@ -387,7 +385,7 @@ class TestTUIRenderer:
         assert "Active" in result
 
     def test_render_generic_widget(self):
-        """Test generic widget fallback rendering"""
+        """Test generic widget fallback rendering."""
         result = self.renderer._render_generic_widget(
             WidgetType.METRIC_CARD,
             {"test": "data"},
@@ -399,7 +397,7 @@ class TestTUIRenderer:
         assert "Data:" in result
 
     def test_render_layout_vertical(self):
-        """Test vertical layout rendering"""
+        """Test vertical layout rendering."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -418,7 +416,7 @@ class TestTUIRenderer:
         assert "Test 2" in result
 
     def test_render_layout_horizontal(self):
-        """Test horizontal layout rendering"""
+        """Test horizontal layout rendering."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -437,7 +435,7 @@ class TestTUIRenderer:
         assert "Test 2" in result
 
     def test_render_layout_grid(self):
-        """Test grid layout rendering"""
+        """Test grid layout rendering."""
         widgets = [
             {
                 "type": WidgetType.METRIC_CARD,
@@ -464,7 +462,7 @@ class TestTUIRenderer:
         assert "Test 4" in result
 
     def test_render_container_with_border(self):
-        """Test container rendering with border"""
+        """Test container rendering with border."""
         content = "Test content"
 
         result = self.renderer.render_container(
@@ -482,7 +480,7 @@ class TestTUIRenderer:
         assert "Test content" in result
 
     def test_render_container_without_border(self):
-        """Test container rendering without border"""
+        """Test container rendering without border."""
         content = "Test content"
 
         result = self.renderer.render_container(
@@ -493,7 +491,7 @@ class TestTUIRenderer:
         assert result == content
 
     def test_error_handling_invalid_data(self):
-        """Test error handling with invalid data"""
+        """Test error handling with invalid data."""
         # Test with invalid health data
         result = self.renderer.render_widget(
             WidgetType.HEALTH_METER,
@@ -513,7 +511,7 @@ class TestTUIRenderer:
         assert isinstance(result, str)
 
     def test_empty_session_list(self):
-        """Test rendering empty session list"""
+        """Test rendering empty session list."""
         result = self.renderer.render_widget(
             WidgetType.SESSION_BROWSER,
             [],
@@ -523,7 +521,7 @@ class TestTUIRenderer:
         assert result == "No sessions found"
 
     def test_activity_heatmap_heat_levels(self):
-        """Test different activity heat levels"""
+        """Test different activity heat levels."""
         # High activity
         high_activity = ActivityData(
             entries=[],
@@ -573,7 +571,7 @@ class TestTUIRenderer:
         assert "❄️" in result
 
     def test_progress_phase_emojis(self):
-        """Test different progress phase emojis"""
+        """Test different progress phase emojis."""
         phases_and_emojis = [
             (ProgressPhase.STARTING, "🚀"),
             (ProgressPhase.ANALYZING, "🔍"),
@@ -596,7 +594,7 @@ class TestTUIRenderer:
             assert emoji in result
 
     def test_metric_card_trend_indicators(self):
-        """Test metric card trend indicators"""
+        """Test metric card trend indicators."""
         # Positive trend
         positive_metric = MetricCardData(
             title="Test",
@@ -635,15 +633,15 @@ class TestTUIRenderer:
 
 
 class TestTUIRendererIntegration:
-    """Integration tests for TUI renderer"""
+    """Integration tests for TUI renderer."""
 
     def setup_method(self):
-        """Setup test environment"""
+        """Setup test environment."""
         self.console = Console(width=120, height=30, force_terminal=True)
         self.renderer = TUIRenderer(console=self.console)
 
     def test_full_dashboard_rendering(self):
-        """Test rendering a complete dashboard"""
+        """Test rendering a complete dashboard."""
         now = datetime.now()
 
         # Create sample data

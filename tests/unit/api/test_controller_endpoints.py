@@ -1,6 +1,4 @@
-"""
-Test for FastAPI controller endpoints
-"""
+"""Test for FastAPI controller endpoints."""
 
 import unittest
 from unittest.mock import MagicMock, patch
@@ -17,7 +15,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_start_controller(self, mock_claude_manager):
-        """Test POST /api/controllers/{session_name}/start"""
+        """Test POST /api/controllers/{session_name}/start."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_controller = MagicMock()
@@ -38,7 +36,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_stop_controller(self, mock_claude_manager):
-        """Test POST /api/controllers/{session_name}/stop"""
+        """Test POST /api/controllers/{session_name}/stop."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_controller = MagicMock()
@@ -57,7 +55,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_restart_controller(self, mock_claude_manager):
-        """Test POST /api/controllers/{session_name}/restart"""
+        """Test POST /api/controllers/{session_name}/restart."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_controller = MagicMock()
@@ -78,7 +76,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_get_controller_status(self, mock_claude_manager):
-        """Test GET /api/controllers/{session_name}/status"""
+        """Test GET /api/controllers/{session_name}/status."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_controller = MagicMock()
@@ -103,7 +101,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_controller_not_found(self, mock_claude_manager):
-        """Test controller operations on non-existent session"""
+        """Test controller operations on non-existent session."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_controller.return_value = None
@@ -119,7 +117,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_enable_auto_response(self, mock_claude_manager):
-        """Test PUT /api/controllers/{session_name}/auto-response"""
+        """Test PUT /api/controllers/{session_name}/auto-response."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_controller = MagicMock()
@@ -144,7 +142,7 @@ class TestControllerEndpoints(unittest.TestCase):
 
     @patch("api.routes.controllers.ClaudeManager")
     def test_controller_error_handling(self, mock_claude_manager):
-        """Test controller error handling"""
+        """Test controller error handling."""
         # Setup mock to raise exception
         mock_manager_instance = MagicMock()
         mock_controller = MagicMock()

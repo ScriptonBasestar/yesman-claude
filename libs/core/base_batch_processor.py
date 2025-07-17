@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Generic base batch processor for handling items in batches.
+"""Generic base batch processor for handling items in batches.
 
 This module provides a thread-safe, async-compatible base class for
 batch processing various types of items with configurable size and time limits.
@@ -39,8 +38,7 @@ class BatchStatistics:
 
 
 class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
-    """
-    Generic base class for batch processing.
+    """Generic base class for batch processing.
 
     Type Parameters:
         T: The type of items to be batched
@@ -61,8 +59,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         flush_interval: float = 1.0,
         max_pending_batches: int = 1000,
     ):
-        """
-        Initialize the batch processor.
+        """Initialize the batch processor.
 
         Args:
             batch_size: Maximum number of items per batch
@@ -87,8 +84,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
 
     @abstractmethod
     def create_batch(self, items: list[T]) -> B:
-        """
-        Create a batch container from a list of items.
+        """Create a batch container from a list of items.
 
         Args:
             items: List of items to batch
@@ -100,8 +96,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
 
     @abstractmethod
     async def process_batch(self, batch: B) -> None:
-        """
-        Process a single batch.
+        """Process a single batch.
 
         This method should implement the actual batch processing logic.
 
@@ -114,8 +109,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         raise NotImplementedError
 
     def add(self, item: T) -> None:
-        """
-        Add an item to the pending queue.
+        """Add an item to the pending queue.
 
         Thread-safe method to add items for batching.
 
@@ -131,8 +125,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
                 self._flush_pending_items()
 
     def _flush_pending_items(self) -> None:
-        """
-        Flush pending items to a batch.
+        """Flush pending items to a batch.
 
         Must be called while holding the lock.
         """
@@ -232,8 +225,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
                 await asyncio.sleep(1.0)  # Back off on error
 
     def get_statistics(self) -> dict[str, Any]:
-        """
-        Get current batch processor statistics.
+        """Get current batch processor statistics.
 
         Returns:
             Dictionary containing processing statistics
@@ -261,8 +253,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         }
 
     async def wait_for_pending(self, timeout: float = 30.0) -> bool:
-        """
-        Wait for all pending items and batches to be processed.
+        """Wait for all pending items and batches to be processed.
 
         Args:
             timeout: Maximum time to wait in seconds

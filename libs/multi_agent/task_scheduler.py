@@ -1,4 +1,4 @@
-"""Intelligent task scheduling and distribution algorithms for multi-agent system"""
+"""Intelligent task scheduling and distribution algorithms for multi-agent system."""
 
 import heapq
 import logging
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class AgentCapability:
-    """Represents an agent's capabilities and performance metrics"""
+    """Represents an agent's capabilities and performance metrics."""
 
     agent_id: str
     processing_power: float = 1.0  # Relative processing speed multiplier
@@ -26,7 +26,7 @@ class AgentCapability:
     current_load: float = 0.0  # Current workload (0.0-1.0)
 
     def get_efficiency_score(self, task: Task) -> float:
-        """Calculate efficiency score for this agent handling a specific task"""
+        """Calculate efficiency score for this agent handling a specific task."""
         # Base efficiency from processing power and success rate
         base_efficiency = self.processing_power * self.success_rate
 
@@ -53,7 +53,7 @@ class AgentCapability:
 
 @dataclass
 class PriorityTask:
-    """Task wrapper for priority queue"""
+    """Task wrapper for priority queue."""
 
     priority_score: float
     task: Task
@@ -64,10 +64,10 @@ class PriorityTask:
 
 
 class TaskScheduler:
-    """Intelligent task scheduler with priority and complexity-based distribution"""
+    """Intelligent task scheduler with priority and complexity-based distribution."""
 
     def __init__(self):
-        """Initialize the task scheduler"""
+        """Initialize the task scheduler."""
         self.agent_capabilities: dict[str, AgentCapability] = {}
         self.priority_queue: list[PriorityTask] = []
         self.task_history: dict[str, list[Task]] = {}  # agent_id -> task history
@@ -93,7 +93,7 @@ class TaskScheduler:
         agent: Agent,
         capabilities: AgentCapability | None = None,
     ) -> None:
-        """Register an agent with the scheduler"""
+        """Register an agent with the scheduler."""
         if capabilities is None:
             capabilities = AgentCapability(agent_id=agent.agent_id)
 
@@ -103,7 +103,7 @@ class TaskScheduler:
         logger.info(f"Registered agent {agent.agent_id} with scheduler")
 
     def add_task(self, task: Task) -> None:
-        """Add a task to the priority queue"""
+        """Add a task to the priority queue."""
         priority_score = self._calculate_priority_score(task)
         priority_task = PriorityTask(priority_score=priority_score, task=task)
 
@@ -113,7 +113,7 @@ class TaskScheduler:
         )
 
     def get_next_task_for_agent(self, agent: Agent) -> Task | None:
-        """Get the best next task for a specific agent"""
+        """Get the best next task for a specific agent."""
         if not self.priority_queue:
             return None
 
@@ -140,7 +140,7 @@ class TaskScheduler:
         self,
         available_agents: list[Agent],
     ) -> list[tuple[Agent, Task]]:
-        """Get optimal task assignments for multiple agents"""
+        """Get optimal task assignments for multiple agents."""
         assignments = []
 
         # Create a copy of the priority queue for manipulation
@@ -205,7 +205,7 @@ class TaskScheduler:
         success: bool,
         execution_time: float,
     ) -> None:
-        """Update agent performance metrics based on task completion"""
+        """Update agent performance metrics based on task completion."""
         capability = self.agent_capabilities.get(agent_id)
         if not capability:
             return
@@ -240,7 +240,7 @@ class TaskScheduler:
         )
 
     def _calculate_priority_score(self, task: Task) -> float:
-        """Calculate priority score for a task"""
+        """Calculate priority score for a task."""
         # Base priority from task priority field (1-10)
         priority_score = task.priority / 10.0 * self.priority_weight
 
@@ -266,7 +266,7 @@ class TaskScheduler:
         self,
         agent_capability: AgentCapability,
     ) -> int | None:
-        """Find the best task index for a specific agent"""
+        """Find the best task index for a specific agent."""
         if not self.priority_queue:
             return None
 
@@ -293,7 +293,7 @@ class TaskScheduler:
         return best_index
 
     def _get_agent_total_score(self, agent: Agent) -> float:
-        """Get total capability score for an agent"""
+        """Get total capability score for an agent."""
         capability = self.agent_capabilities.get(agent.agent_id)
         if not capability:
             return 0.5
@@ -301,7 +301,7 @@ class TaskScheduler:
         return capability.processing_power * 0.4 + capability.success_rate * 0.4 + (1.0 - capability.current_load) * 0.2
 
     def _are_dependencies_met(self, task: Task) -> bool:
-        """Check if task dependencies are satisfied"""
+        """Check if task dependencies are satisfied."""
         if not task.dependencies:
             return True
 
@@ -314,7 +314,7 @@ class TaskScheduler:
         task: Task,
         agent_capability: AgentCapability,
     ) -> float:
-        """Estimate how long a task will take for a specific agent"""
+        """Estimate how long a task will take for a specific agent."""
         base_time = self._estimate_base_task_time(task)
 
         # Adjust for agent's processing power and specializations
@@ -328,7 +328,7 @@ class TaskScheduler:
         return base_time * agent_multiplier
 
     def _estimate_base_task_time(self, task: Task) -> float:
-        """Estimate base time for a task"""
+        """Estimate base time for a task."""
         # Simple heuristic based on complexity and command type
         base_time = task.complexity * 60.0  # Base: complexity * 60 seconds
 
@@ -345,13 +345,13 @@ class TaskScheduler:
         return base_time
 
     def update_agent_load(self, agent_id: str, load: float) -> None:
-        """Update current load for an agent"""
+        """Update current load for an agent."""
         capability = self.agent_capabilities.get(agent_id)
         if capability:
             capability.current_load = max(0.0, min(1.0, load))
 
     def get_scheduling_metrics(self) -> dict[str, Any]:
-        """Get current scheduling performance metrics"""
+        """Get current scheduling performance metrics."""
         if not self.agent_capabilities:
             return self.scheduling_metrics
 
@@ -382,7 +382,7 @@ class TaskScheduler:
         return self.scheduling_metrics.copy()
 
     def rebalance_tasks(self) -> list[tuple[str, str]]:
-        """Rebalance workload between agents by adjusting task assignment preferences"""
+        """Rebalance workload between agents by adjusting task assignment preferences."""
         rebalancing_actions = []
 
         # Find overloaded and underloaded agents
@@ -433,7 +433,7 @@ class TaskScheduler:
         return rebalancing_actions
 
     def _adjust_assignment_preferences(self, overloaded_agent_id: str, underloaded_agent_id: str) -> None:
-        """Adjust task assignment preferences to favor underloaded agents"""
+        """Adjust task assignment preferences to favor underloaded agents."""
         overloaded_cap = self.agent_capabilities.get(overloaded_agent_id)
         underloaded_cap = self.agent_capabilities.get(underloaded_agent_id)
 
@@ -447,7 +447,7 @@ class TaskScheduler:
         logger.debug(f"Adjusted assignment preferences: {overloaded_agent_id} penalty, {underloaded_agent_id} boost")
 
     def reset_assignment_preferences(self, agent_id: str) -> None:
-        """Reset assignment preferences for an agent to baseline values"""
+        """Reset assignment preferences for an agent to baseline values."""
         capability = self.agent_capabilities.get(agent_id)
         if not capability:
             return
@@ -463,7 +463,7 @@ class TaskScheduler:
         logger.debug(f"Reset assignment preferences for agent {agent_id}")
 
     def _estimate_task_load(self, task: Task, agent_capability: AgentCapability) -> float:
-        """Estimate the load a task represents for an agent"""
+        """Estimate the load a task represents for an agent."""
         estimated_time = self._estimate_task_time(task, agent_capability)
         # Convert to load factor (assuming 8-hour workday)
         return estimated_time / (8 * 3600.0)

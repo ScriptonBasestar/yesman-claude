@@ -1,4 +1,4 @@
-"""Async comprehensive project status dashboard command with performance optimizations"""
+"""Async comprehensive project status dashboard command with performance optimizations."""
 
 import asyncio
 import time
@@ -24,7 +24,7 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 
 class AsyncStatusDashboard:
-    """Async comprehensive status dashboard with performance optimizations"""
+    """Async comprehensive status dashboard with performance optimizations."""
 
     def __init__(
         self,
@@ -66,7 +66,7 @@ class AsyncStatusDashboard:
         self._load_todo_data()
 
     def _load_todo_data(self):
-        """Load TODO data from various sources"""
+        """Load TODO data from various sources."""
         # Try to load from common TODO file locations
         todo_files = [
             self.project_path / "TODO.md",
@@ -80,7 +80,7 @@ class AsyncStatusDashboard:
                 break
 
     async def update_data(self):
-        """Async update of all dashboard data with caching"""
+        """Async update of all dashboard data with caching."""
         current_time = time.time()
 
         # Check if cache is still valid
@@ -104,7 +104,7 @@ class AsyncStatusDashboard:
             self.console.print(f"[red]Error updating data: {e}[/]")
 
     async def _update_session_data(self):
-        """Async update of session data"""
+        """Async update of session data."""
         # Get session information using cached method
         loop = asyncio.get_event_loop()
         sessions_list = await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
@@ -137,12 +137,12 @@ class AsyncStatusDashboard:
         self._data_cache["sessions"] = detailed_sessions
 
     async def _get_session_detail_async(self, session_name: str):
-        """Async wrapper for getting session details"""
+        """Async wrapper for getting session details."""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
 
     async def _update_project_health(self):
-        """Async update of project health"""
+        """Async update of project health."""
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
             None,
@@ -152,13 +152,13 @@ class AsyncStatusDashboard:
         )
 
     async def _update_progress_data(self):
-        """Async update of progress data"""
+        """Async update of progress data."""
         loop = asyncio.get_event_loop()
         progress_data = await loop.run_in_executor(None, self.session_manager.get_progress_overview)
         self._data_cache["progress_data"] = progress_data
 
     def _calculate_session_activity(self, session_info: dict) -> float:
-        """Calculate activity level for a session"""
+        """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
 
@@ -181,7 +181,7 @@ class AsyncStatusDashboard:
         return min(activity, 1.0)
 
     def create_layout(self) -> Layout:
-        """Create the dashboard layout"""
+        """Create the dashboard layout."""
         layout = Layout()
 
         # Main layout structure
@@ -213,7 +213,7 @@ class AsyncStatusDashboard:
         return layout
 
     async def update_layout(self, layout: Layout):
-        """Async update layout with current data"""
+        """Async update layout with current data."""
         # Header with performance indicators
         loop = asyncio.get_event_loop()
         cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
@@ -250,14 +250,19 @@ class AsyncStatusDashboard:
                 )
             )
         else:
-            layout["session_progress"].update(Panel("[dim]Loading session progress...[/dim]", title="🎯 Session Progress"))
+            layout["session_progress"].update(
+                Panel(
+                    "[dim]Loading session progress...[/dim]",
+                    title="🎯 Session Progress",
+                )
+            )
 
         # Footer with performance stats
         footer_text = f"💡 Async Mode | Update Interval: {self.update_interval}s | Cache TTL: {self._cache_ttl}s | Sessions: {len(self._data_cache['sessions'])}"
         layout["footer"].update(Panel(footer_text, style="dim"))
 
     async def run_interactive(self):
-        """Run the interactive dashboard"""
+        """Run the interactive dashboard."""
         # Initial data load
         await self.update_data()
 
@@ -274,7 +279,7 @@ class AsyncStatusDashboard:
             self.console.print("\n[yellow]📊 Async dashboard stopped[/]")
 
     def render_detailed_view(self):
-        """Render detailed static view (sync operation)"""
+        """Render detailed static view (sync operation)."""
         # Synchronous version for detailed output
         layout = self.create_layout()
 
@@ -286,10 +291,10 @@ class AsyncStatusDashboard:
 
 
 class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
-    """Async comprehensive project status dashboard"""
+    """Async comprehensive project status dashboard."""
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions"""
+        """Validate command preconditions."""
         super().validate_preconditions()
 
     async def execute_async(
@@ -299,7 +304,7 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         interactive: bool = False,
         **kwargs,
     ) -> dict:
-        """Execute the async status command"""
+        """Execute the async status command."""
         try:
             dashboard = AsyncStatusDashboard(
                 project_path=project_path,
@@ -327,14 +332,14 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
             raise CommandError(f"Error in async status dashboard: {e}") from e
 
     async def update_monitoring_data(self) -> None:
-        """Implement monitoring data updates"""
+        """Implement monitoring data updates."""
         # Dashboard handles its own monitoring
         pass
 
 
 # Backward compatibility
 class StatusCommand(AsyncStatusCommand):
-    """Backward compatible status command using async implementation"""
+    """Backward compatible status command using async implementation."""
 
     pass
 
@@ -364,7 +369,7 @@ class StatusCommand(AsyncStatusCommand):
     help="Use async mode for better performance (default: enabled)",
 )
 def status(project_path, update_interval, interactive, async_mode):
-    """Comprehensive project status dashboard with async optimizations"""
+    """Comprehensive project status dashboard with async optimizations."""
     if async_mode:
         command = AsyncStatusCommand()
         if interactive:
@@ -403,7 +408,7 @@ def status(project_path, update_interval, interactive, async_mode):
     help="Run in interactive mode with live updates (default: interactive)",
 )
 def status_async(project_path, update_interval, interactive):
-    """Async comprehensive project status dashboard (explicit async version)"""
+    """Async comprehensive project status dashboard (explicit async version)."""
     command = AsyncStatusCommand()
     command.run(
         project_path=project_path,

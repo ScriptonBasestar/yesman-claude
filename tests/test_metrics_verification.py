@@ -1,4 +1,4 @@
-"""Test metrics verification and success criteria validation"""
+"""Test metrics verification and success criteria validation."""
 
 import json
 import tempfile
@@ -7,14 +7,18 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.metrics_verifier import MetricsVerifier, PerformanceMetrics, SuccessCriteria
+from libs.multi_agent.metrics_verifier import (
+    MetricsVerifier,
+    PerformanceMetrics,
+    SuccessCriteria,
+)
 
 
 class TestPerformanceMetrics:
-    """Test performance metrics data structure"""
+    """Test performance metrics data structure."""
 
     def test_metrics_initialization(self):
-        """Test metrics initialization with default values"""
+        """Test metrics initialization with default values."""
         metrics = PerformanceMetrics()
 
         assert metrics.single_agent_time == 0.0
@@ -33,7 +37,7 @@ class TestPerformanceMetrics:
         assert len(metrics.agent_utilization_rates) == 0
 
     def test_metrics_serialization(self):
-        """Test metrics to_dict serialization"""
+        """Test metrics to_dict serialization."""
         metrics = PerformanceMetrics(
             single_agent_time=10.0,
             multi_agent_time=4.0,
@@ -54,10 +58,10 @@ class TestPerformanceMetrics:
 
 
 class TestSuccessCriteria:
-    """Test success criteria validation"""
+    """Test success criteria validation."""
 
     def test_criteria_initialization(self):
-        """Test success criteria initialization"""
+        """Test success criteria initialization."""
         criteria = SuccessCriteria()
 
         assert criteria.min_speed_improvement == 2.0
@@ -67,7 +71,7 @@ class TestSuccessCriteria:
         assert criteria.min_quality_maintenance == 0.0
 
     def test_successful_compliance_check(self):
-        """Test compliance check with passing metrics"""
+        """Test compliance check with passing metrics."""
         criteria = SuccessCriteria()
         metrics = PerformanceMetrics(
             speed_improvement_ratio=2.5,  # Within 2-3x range
@@ -85,7 +89,7 @@ class TestSuccessCriteria:
         assert compliance["overall_success"] is True
 
     def test_failing_compliance_check(self):
-        """Test compliance check with failing metrics"""
+        """Test compliance check with failing metrics."""
         criteria = SuccessCriteria()
         metrics = PerformanceMetrics(
             speed_improvement_ratio=1.5,  # Below 2x minimum
@@ -103,7 +107,7 @@ class TestSuccessCriteria:
         assert compliance["overall_success"] is False
 
     def test_edge_case_compliance(self):
-        """Test compliance check with edge case values"""
+        """Test compliance check with edge case values."""
         criteria = SuccessCriteria()
         metrics = PerformanceMetrics(
             speed_improvement_ratio=2.0,  # Exactly at minimum
@@ -122,21 +126,21 @@ class TestSuccessCriteria:
 
 
 class TestMetricsVerifier:
-    """Test metrics verifier functionality"""
+    """Test metrics verifier functionality."""
 
     @pytest.fixture
     def temp_work_dir(self):
-        """Create temporary work directory"""
+        """Create temporary work directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
             yield tmpdir
 
     @pytest.fixture
     def metrics_verifier(self, temp_work_dir):
-        """Create metrics verifier for testing"""
+        """Create metrics verifier for testing."""
         return MetricsVerifier(work_dir=temp_work_dir)
 
     def test_verifier_initialization(self, metrics_verifier):
-        """Test metrics verifier initialization"""
+        """Test metrics verifier initialization."""
         assert metrics_verifier.work_dir.exists()
         assert metrics_verifier.metrics_file.exists() or True  # May not exist initially
         assert isinstance(metrics_verifier.current_metrics, PerformanceMetrics)
@@ -145,7 +149,7 @@ class TestMetricsVerifier:
         assert metrics_verifier.multi_agent_benchmarks == []
 
     def test_conflict_resolution_tracking(self, metrics_verifier):
-        """Test conflict resolution metric tracking"""
+        """Test conflict resolution metric tracking."""
         # Track multiple conflict resolution events
         metrics_verifier.track_conflict_resolution(10, 8)
         metrics_verifier.track_conflict_resolution(5, 4)
@@ -157,7 +161,7 @@ class TestMetricsVerifier:
         assert abs(metrics.conflict_resolution_rate - (19 / 23)) < 0.001
 
     def test_merge_success_tracking(self, metrics_verifier):
-        """Test merge success metric tracking"""
+        """Test merge success metric tracking."""
         # Track multiple merge events
         metrics_verifier.track_merge_success(20, 20)
         metrics_verifier.track_merge_success(15, 14)
@@ -169,7 +173,7 @@ class TestMetricsVerifier:
         assert abs(metrics.merge_success_rate - (44 / 45)) < 0.001
 
     def test_code_quality_tracking(self, metrics_verifier):
-        """Test code quality metric tracking"""
+        """Test code quality metric tracking."""
         metrics_verifier.track_code_quality(initial_score=8.0, final_score=8.5)
 
         metrics = metrics_verifier.current_metrics
@@ -178,7 +182,7 @@ class TestMetricsVerifier:
         assert metrics.quality_improvement == 0.5
 
     def test_metrics_persistence(self, metrics_verifier):
-        """Test metrics persistence to disk"""
+        """Test metrics persistence to disk."""
         # Set some metrics
         metrics_verifier.track_conflict_resolution(10, 8)
         metrics_verifier.track_merge_success(5, 5)
@@ -199,7 +203,7 @@ class TestMetricsVerifier:
         assert data["current_metrics"]["successful_merges"] == 5
 
     def test_benchmark_tasks_generation(self, metrics_verifier):
-        """Test benchmark task generation"""
+        """Test benchmark task generation."""
         tasks = metrics_verifier.get_benchmark_tasks()
 
         assert len(tasks) > 0
@@ -216,7 +220,7 @@ class TestMetricsVerifier:
         assert "test_run" in task_ids
 
     def test_single_agent_performance_tracking(self, metrics_verifier):
-        """Test single-agent performance tracking (simplified)"""
+        """Test single-agent performance tracking (simplified)."""
         # Directly set single agent time
         metrics_verifier.current_metrics.single_agent_time = 10.0
         metrics_verifier.single_agent_benchmarks.append(10.0)
@@ -225,7 +229,7 @@ class TestMetricsVerifier:
         assert len(metrics_verifier.single_agent_benchmarks) == 1
 
     def test_multi_agent_performance_tracking(self, metrics_verifier):
-        """Test multi-agent performance tracking (simplified)"""
+        """Test multi-agent performance tracking (simplified)."""
         # Set baseline first
         metrics_verifier.current_metrics.single_agent_time = 10.0
 
@@ -239,7 +243,7 @@ class TestMetricsVerifier:
         assert len(metrics_verifier.multi_agent_benchmarks) == 1
 
     def test_success_criteria_verification(self, metrics_verifier):
-        """Test complete success criteria verification"""
+        """Test complete success criteria verification."""
         # Set up metrics that should pass all criteria
         metrics_verifier.current_metrics.speed_improvement_ratio = 2.5
         metrics_verifier.track_conflict_resolution(20, 17)  # 85%
@@ -262,7 +266,7 @@ class TestMetricsVerifier:
         assert compliance["quality_maintenance"] is True
 
     def test_performance_report_generation(self, metrics_verifier):
-        """Test performance report generation"""
+        """Test performance report generation."""
         # Set up some metrics
         metrics_verifier.current_metrics.speed_improvement_ratio = 2.2
         metrics_verifier.current_metrics.single_agent_time = 10.0
@@ -290,11 +294,11 @@ class TestMetricsVerifier:
 
 
 class TestComprehensiveVerification:
-    """Test comprehensive verification functionality"""
+    """Test comprehensive verification functionality."""
 
     @pytest.fixture
     def mock_agent_pool(self):
-        """Create mock agent pool for testing"""
+        """Create mock agent pool for testing."""
         pool = Mock(spec=AgentPool)
         pool.max_agents = 3
         pool.add_task = AsyncMock()
@@ -306,7 +310,7 @@ class TestComprehensiveVerification:
 
     @pytest.mark.asyncio
     async def test_comprehensive_verification_flow(self, mock_agent_pool):
-        """Test complete verification flow"""
+        """Test complete verification flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Mock time.time to return predictable results
             time_values = [
@@ -344,7 +348,7 @@ class TestComprehensiveVerification:
                 assert results["compliance"]["quality_maintenance"] is True
 
     def test_metrics_file_creation(self):
-        """Test that metrics files are created properly"""
+        """Test that metrics files are created properly."""
         with tempfile.TemporaryDirectory() as tmpdir:
             verifier = MetricsVerifier(work_dir=tmpdir)
 
@@ -361,7 +365,7 @@ class TestComprehensiveVerification:
             assert verification_file.exists()
 
     def test_edge_case_zero_division(self):
-        """Test handling of edge cases like zero division"""
+        """Test handling of edge cases like zero division."""
         with tempfile.TemporaryDirectory() as tmpdir:
             verifier = MetricsVerifier(work_dir=tmpdir)
 

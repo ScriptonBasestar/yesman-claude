@@ -9,11 +9,11 @@ repos:
       # Linting (replaces flake8)
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --target-version=py311]
-        exclude: ^(migrations/|node_modules/)
+        exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
       # Formatting (replaces black)
       - id: ruff-format
         args: [--target-version=py311]
-        exclude: ^(migrations/|node_modules/)
+        exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -63,6 +63,22 @@ repos:
         exclude: ^(tests/|scripts/|debug/|docs/examples/|test_style_violation\.py)
         pass_filenames: false
         files: ^(libs/|commands/)
+
+  # Pre-push specific hooks
+  - repo: local
+    hooks:
+      - id: lint-check
+        name: Run lint checks
+        entry: make lint
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+      - id: test-fast
+        name: Run fast tests
+        entry: make test-fast
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
 
 # Global configuration
 default_install_hook_types: [pre-commit, pre-push]

@@ -4,11 +4,11 @@ from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
 
 
 class TestPerformanceThemeIntegration:
-    """Tests for performance optimization affecting theme rendering"""
+    """Tests for performance optimization affecting theme rendering."""
 
     @pytest.fixture
     def performance_optimizer(self):
-        """Create PerformanceOptimizer instance"""
+        """Create PerformanceOptimizer instance."""
         optimizer = PerformanceOptimizer()
         yield optimizer
         # Cleanup
@@ -17,7 +17,7 @@ class TestPerformanceThemeIntegration:
 
     @pytest.fixture
     def theme_manager(self):
-        """Create ThemeManager instance"""
+        """Create ThemeManager instance."""
         import tempfile
         from pathlib import Path
 
@@ -25,7 +25,7 @@ class TestPerformanceThemeIntegration:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     def test_performance_theme_integration(self, performance_optimizer, theme_manager):
-        """Test 9: Performance optimization affects theme rendering"""
+        """Test 9: Performance optimization affects theme rendering."""
         # Set aggressive optimization
         performance_optimizer.set_optimization_level(OptimizationLevel.AGGRESSIVE)
 

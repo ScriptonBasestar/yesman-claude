@@ -5,11 +5,11 @@ from libs.dashboard.keyboard_navigation import KeyModifier
 
 
 class TestKeyboardThemeIntegration:
-    """Tests for keyboard navigation with theme switching"""
+    """Tests for keyboard navigation with theme switching."""
 
     @pytest.fixture
     def keyboard_manager(self):
-        """Create KeyboardNavigationManager instance"""
+        """Create KeyboardNavigationManager instance."""
         manager = KeyboardNavigationManager()
         yield manager
         # Cleanup
@@ -18,7 +18,7 @@ class TestKeyboardThemeIntegration:
 
     @pytest.fixture
     def theme_manager(self):
-        """Create ThemeManager instance"""
+        """Create ThemeManager instance."""
         import tempfile
         from pathlib import Path
 
@@ -26,7 +26,7 @@ class TestKeyboardThemeIntegration:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     def test_keyboard_theme_integration(self, keyboard_manager, theme_manager):
-        """Test 10: Keyboard navigation with theme switching"""
+        """Test 10: Keyboard navigation with theme switching."""
 
         # Register theme switching action
         def switch_to_dark():

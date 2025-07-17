@@ -1,4 +1,4 @@
-"""Session management for dashboard"""
+"""Session management for dashboard."""
 
 import logging
 import os
@@ -24,7 +24,7 @@ from .progress_tracker import ProgressAnalyzer
 
 
 class SessionManager:
-    """Manages tmux session information for dashboard"""
+    """Manages tmux session information for dashboard."""
 
     def __init__(self):
         # Import here to avoid circular import
@@ -44,7 +44,7 @@ class SessionManager:
         self.logger.info("SessionManager initialized")
 
     def _setup_logger(self) -> logging.Logger:
-        """Setup logger with file-only output"""
+        """Setup logger with file-only output."""
         logger = logging.getLogger("yesman.dashboard.session_manager")
         logger.setLevel(logging.INFO)
         logger.propagate = False
@@ -62,7 +62,7 @@ class SessionManager:
         return logger
 
     def get_all_sessions(self) -> list[SessionInfo]:
-        """Get information about all yesman sessions"""
+        """Get information about all yesman sessions."""
         sessions_info = []
 
         try:
@@ -81,7 +81,7 @@ class SessionManager:
             return []
 
     def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
-        """Get information for a single session with mode-aware caching"""
+        """Get information for a single session with mode-aware caching."""
 
         def compute_session_info():
             override = project_conf.get("override", {})
@@ -155,7 +155,7 @@ class SessionManager:
         return compute_session_info()
 
     def _get_window_info(self, window) -> WindowInfo:
-        """Get information for a single window with detailed pane metrics"""
+        """Get information for a single window with detailed pane metrics."""
         panes = []
 
         for pane in window.list_panes():
@@ -184,7 +184,7 @@ class SessionManager:
         )
 
     def _get_detailed_pane_info(self, pane) -> PaneInfo:
-        """Get detailed information for a single pane including metrics"""
+        """Get detailed information for a single pane including metrics."""
         try:
             # Get basic pane information
             cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
@@ -297,7 +297,7 @@ class SessionManager:
             )
 
     def _analyze_current_task(self, cmdline: list[str], command: str) -> str:
-        """Analyze command line to determine current task"""
+        """Analyze command line to determine current task."""
         if not cmdline:
             return command
 
@@ -345,8 +345,7 @@ class SessionManager:
             return f"Running {main_cmd}"
 
     def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
-        """
-        Attach to a specific tmux pane
+        """Attach to a specific tmux pane.
 
         Args:
             session_name: Name of the tmux session
@@ -406,7 +405,7 @@ class SessionManager:
             }
 
     def get_progress_overview(self) -> dict[str, Any]:
-        """Get progress overview for all sessions"""
+        """Get progress overview for all sessions."""
         sessions = self.get_all_sessions()
 
         # Collect progress data
@@ -465,8 +464,7 @@ class SessionManager:
         }
 
     def create_terminal_script(self, attach_command: str, script_path: str = None) -> str:
-        """
-        Create a terminal script for pane attachment
+        """Create a terminal script for pane attachment.
 
         Args:
             attach_command: The tmux attach command
@@ -502,8 +500,7 @@ echo "Attaching to tmux pane..."
             raise
 
     def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
-        """
-        Execute pane attachment with error handling
+        """Execute pane attachment with error handling.
 
         Args:
             session_name: Name of the tmux session
@@ -542,3 +539,9 @@ echo "Attaching to tmux pane..."
                 "error": f"Execution failed: {str(e)}",
                 "action": "error",
             }
+
+    def _cleanup_cache(self) -> None:
+        """Clean up stale cached session data."""
+        # This is a placeholder method to satisfy the API contract
+        # The actual SessionManager doesn't use caching currently
+        pass

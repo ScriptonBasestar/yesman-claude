@@ -1,4 +1,4 @@
-"""Automated conflict resolution system integrating semantic analysis and intelligent merging"""
+"""Automated conflict resolution system integrating semantic analysis and intelligent merging."""
 
 import logging
 from collections import defaultdict
@@ -10,7 +10,11 @@ from typing import Any
 
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
-from .conflict_resolution import ConflictResolutionEngine, ConflictSeverity, ResolutionStrategy
+from .conflict_resolution import (
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ResolutionStrategy,
+)
 from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType
 from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
 
@@ -18,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class AutoResolutionMode(Enum):
-    """Modes for automatic conflict resolution"""
+    """Modes for automatic conflict resolution."""
 
     CONSERVATIVE = "conservative"  # Only resolve low-risk conflicts
     BALANCED = "balanced"  # Resolve medium-risk conflicts with high confidence
@@ -27,7 +31,7 @@ class AutoResolutionMode(Enum):
 
 
 class ResolutionOutcome(Enum):
-    """Outcomes of auto-resolution attempts"""
+    """Outcomes of auto-resolution attempts."""
 
     FULLY_RESOLVED = "fully_resolved"
     PARTIALLY_RESOLVED = "partially_resolved"
@@ -38,7 +42,7 @@ class ResolutionOutcome(Enum):
 
 @dataclass
 class AutoResolutionResult:
-    """Result of automatic conflict resolution session"""
+    """Result of automatic conflict resolution session."""
 
     session_id: str
     branch1: str
@@ -68,7 +72,7 @@ class AutoResolutionResult:
 
 
 class AutoResolver:
-    """Comprehensive automatic conflict resolution system"""
+    """Comprehensive automatic conflict resolution system."""
 
     def __init__(
         self,
@@ -79,8 +83,7 @@ class AutoResolver:
         branch_manager: BranchManager,
         repo_path: str | None = None,
     ):
-        """
-        Initialize the auto resolver
+        """Initialize the auto resolver.
 
         Args:
             semantic_analyzer: For analyzing code semantics
@@ -137,8 +140,7 @@ class AutoResolver:
         mode: AutoResolutionMode | None = None,
         file_filter: list[str] | None = None,
     ) -> AutoResolutionResult:
-        """
-        Automatically resolve conflicts between two branches
+        """Automatically resolve conflicts between two branches.
 
         Args:
             branch1: First branch name
@@ -269,8 +271,7 @@ class AutoResolver:
         branches: list[str],
         prevention_mode: AutoResolutionMode = AutoResolutionMode.PREDICTIVE,
     ) -> dict[str, Any]:
-        """
-        Use prediction to prevent conflicts before they occur
+        """Use prediction to prevent conflicts before they occur.
 
         Args:
             branches: List of branches to analyze
@@ -336,8 +337,7 @@ class AutoResolver:
         conflicts: list[SemanticConflict],
         mode: AutoResolutionMode,
     ) -> tuple[list[SemanticConflict], list[SemanticConflict]]:
-        """Assess which conflicts can be auto-resolved based on mode and risk"""
-
+        """Assess which conflicts can be auto-resolved based on mode and risk."""
         threshold = self.confidence_thresholds[mode]
         resolvable = []
         escalated = []
@@ -375,7 +375,7 @@ class AutoResolver:
         return resolvable, escalated
 
     def _calculate_conflict_risk(self, conflict: SemanticConflict) -> float:
-        """Calculate risk score for a semantic conflict"""
+        """Calculate risk score for a semantic conflict."""
         base_risk = self.severity_risk_mapping.get(conflict.severity, 0.5)
 
         # Adjust based on conflict type
@@ -406,8 +406,7 @@ class AutoResolver:
         conflicts: list[SemanticConflict],
         mode: AutoResolutionMode,
     ) -> list[MergeResult]:
-        """Perform batch resolution of conflicts using semantic merger"""
-
+        """Perform batch resolution of conflicts using semantic merger."""
         logger.info(f"Performing batch resolution of {len(conflicts)} conflicts")
 
         # Use semantic merger to auto-resolve conflicts
@@ -431,8 +430,7 @@ class AutoResolver:
         self,
         merge_results: list[MergeResult],
     ) -> list[MergeResult]:
-        """Validate merge results before application"""
-
+        """Validate merge results before application."""
         logger.info(f"Validating {len(merge_results)} merge results")
         validated = []
 
@@ -445,8 +443,7 @@ class AutoResolver:
         return validated
 
     async def _validate_single_merge_result(self, result: MergeResult) -> bool:
-        """Validate a single merge result"""
-
+        """Validate a single merge result."""
         # Check semantic integrity
         if not result.semantic_integrity:
             return False
@@ -472,8 +469,7 @@ class AutoResolver:
         merge_results: list[MergeResult],
         target_branch: str,
     ) -> list[MergeResult]:
-        """Apply validated merge results to target branch"""
-
+        """Apply validated merge results to target branch."""
         logger.info(f"Applying {len(merge_results)} merge results to {target_branch}")
         applied = []
 
@@ -494,8 +490,7 @@ class AutoResolver:
         result: MergeResult,
         target_branch: str,
     ) -> bool:
-        """Apply a single merge result to the target branch"""
-
+        """Apply a single merge result to the target branch."""
         try:
             # This would write the merged content to the file in the target branch
             # For now, just simulate success
@@ -520,8 +515,7 @@ class AutoResolver:
         escalated_conflicts: list[SemanticConflict],
         applied_results: list[MergeResult],
     ) -> ResolutionOutcome:
-        """Determine the overall outcome of the resolution session"""
-
+        """Determine the overall outcome of the resolution session."""
         total_conflicts = len(all_conflicts)
         resolved_conflicts = len(applied_results)
         escalated_count = len(escalated_conflicts)
@@ -542,8 +536,7 @@ class AutoResolver:
         self,
         applied_results: list[MergeResult],
     ) -> float:
-        """Calculate overall confidence score for the resolution session"""
-
+        """Calculate overall confidence score for the resolution session."""
         if not applied_results:
             return 0.0
 
@@ -554,8 +547,7 @@ class AutoResolver:
         self,
         predictions: list[PredictionResult],
     ) -> list[dict[str, Any]]:
-        """Generate strategies to prevent predicted conflicts"""
-
+        """Generate strategies to prevent predicted conflicts."""
         strategies = []
 
         for prediction in predictions:
@@ -585,8 +577,7 @@ class AutoResolver:
         predictions: list[PredictionResult],
         strategies: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
-        """Apply automated preventive measures"""
-
+        """Apply automated preventive measures."""
         applied_measures = []
 
         for strategy in strategies:
@@ -617,15 +608,13 @@ class AutoResolver:
         measure: str,
         strategy: dict[str, Any],
     ) -> bool:
-        """Apply a specific preventive measure"""
-
+        """Apply a specific preventive measure."""
         # This would implement actual preventive measures
         # For now, just simulate success for certain measures
         return measure in ["standardize_import_order", "add_import_sorting_hooks"]
 
     def _update_resolution_stats(self, result: AutoResolutionResult):
-        """Update resolution statistics"""
-
+        """Update resolution statistics."""
         self.resolution_stats["total_sessions"] += 1
 
         if result.outcome in [
@@ -657,8 +646,7 @@ class AutoResolver:
         result: AutoResolutionResult,
         conflicts: list[SemanticConflict],
     ):
-        """Learn from resolution results to improve future performance"""
-
+        """Learn from resolution results to improve future performance."""
         # Record successful patterns
         if result.outcome in [
             ResolutionOutcome.FULLY_RESOLVED,
@@ -688,8 +676,7 @@ class AutoResolver:
                 )
 
     def get_resolution_summary(self) -> dict[str, Any]:
-        """Get comprehensive summary of auto-resolution performance"""
-
+        """Get comprehensive summary of auto-resolution performance."""
         return {
             "performance_stats": self.resolution_stats.copy(),
             "success_patterns": dict(self.success_patterns),
@@ -711,8 +698,7 @@ class AutoResolver:
         }
 
     def _analyze_mode_performance(self) -> dict[str, Any]:
-        """Analyze performance by resolution mode"""
-
+        """Analyze performance by resolution mode."""
         mode_stats = defaultdict(
             lambda: {
                 "sessions": 0,
@@ -745,8 +731,7 @@ class AutoResolver:
         return dict(mode_stats)
 
     def _generate_performance_recommendations(self) -> list[str]:
-        """Generate recommendations based on performance analysis"""
-
+        """Generate recommendations based on performance analysis."""
         recommendations = []
 
         # Analyze success rates

@@ -133,7 +133,11 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
             # Save learned patterns
             with open(self.patterns_file, "w", encoding="utf-8") as f:
-                json.dump({k: asdict(v) for k, v in self.learned_patterns.items()}, f, indent=2)
+                json.dump(
+                    {k: asdict(v) for k, v in self.learned_patterns.items()},
+                    f,
+                    indent=2,
+                )
 
         except Exception as e:
             logger.error(f"Failed to save data: {e}")
@@ -243,7 +247,10 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                     confidence = most_common[1] / total_responses
 
                     # Adjust confidence based on recency
-                    age_factor = max(0.5, 1.0 - (time.time() - pattern.last_updated) / (30 * 24 * 3600))
+                    age_factor = max(
+                        0.5,
+                        1.0 - (time.time() - pattern.last_updated) / (30 * 24 * 3600),
+                    )
                     confidence *= age_factor
 
                     if confidence > best_confidence:

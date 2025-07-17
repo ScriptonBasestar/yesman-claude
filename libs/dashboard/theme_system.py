@@ -1,5 +1,4 @@
-"""
-Theme System
+"""Theme System.
 
 Unified theme management system for all dashboard interfaces
 providing consistent colors, typography, spacing, and visual design.
@@ -19,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ThemeMode(Enum):
-    """Theme mode enumeration"""
+    """Theme mode enumeration."""
 
     LIGHT = "light"
     DARK = "dark"
@@ -30,7 +29,7 @@ class ThemeMode(Enum):
 
 @dataclass
 class ColorPalette:
-    """Color palette definition for themes"""
+    """Color palette definition for themes."""
 
     # Primary colors
     primary: str = "#3b82f6"  # Blue
@@ -64,16 +63,16 @@ class ColorPalette:
     highlight: str = "#fbbf24"  # Amber
 
     def to_dict(self) -> dict[str, str]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "ColorPalette":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(**data)
 
     def adjust_opacity(self, color: str, opacity: float) -> str:
-        """Add opacity to a color (simplified - would need color parsing in production)"""
+        """Add opacity to a color (simplified - would need color parsing in production)."""
         if color.startswith("#") and len(color) == 7:
             # Convert hex to RGB and add alpha
             r = int(color[1:3], 16)
@@ -85,7 +84,7 @@ class ColorPalette:
 
 @dataclass
 class Typography:
-    """Typography settings for themes"""
+    """Typography settings for themes."""
 
     # Font families
     font_family_primary: str = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
@@ -114,18 +113,18 @@ class Typography:
     line_height_relaxed: str = "1.75"
 
     def to_dict(self) -> dict[str, str]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "Typography":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(**data)
 
 
 @dataclass
 class Spacing:
-    """Spacing settings for themes"""
+    """Spacing settings for themes."""
 
     # Base spacing unit (in rem)
     base_unit: str = "0.25rem"  # 4px
@@ -157,18 +156,18 @@ class Spacing:
     radius_full: str = "9999px"
 
     def to_dict(self) -> dict[str, str]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "Spacing":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(**data)
 
 
 @dataclass
 class Theme:
-    """Complete theme definition"""
+    """Complete theme definition."""
 
     name: str
     mode: ThemeMode
@@ -181,7 +180,7 @@ class Theme:
     version: str = "1.0.0"
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return {
             "name": self.name,
             "mode": self.mode.value,
@@ -196,7 +195,7 @@ class Theme:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Theme":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(
             name=data["name"],
             mode=ThemeMode(data["mode"]),
@@ -211,11 +210,11 @@ class Theme:
 
 
 class SystemThemeDetector:
-    """Detects system theme preferences across platforms"""
+    """Detects system theme preferences across platforms."""
 
     @staticmethod
     def get_system_theme() -> ThemeMode:
-        """Get system theme preference"""
+        """Get system theme preference."""
         try:
             system = platform.system()
 
@@ -235,7 +234,7 @@ class SystemThemeDetector:
 
     @staticmethod
     def _get_macos_theme() -> ThemeMode:
-        """Get macOS theme preference"""
+        """Get macOS theme preference."""
         try:
             result = subprocess.run(
                 ["defaults", "read", "-g", "AppleInterfaceStyle"],
@@ -259,7 +258,7 @@ class SystemThemeDetector:
 
     @staticmethod
     def _get_windows_theme() -> ThemeMode:
-        """Get Windows theme preference"""
+        """Get Windows theme preference."""
         try:
             import winreg
 
@@ -283,7 +282,7 @@ class SystemThemeDetector:
 
     @staticmethod
     def _get_linux_theme() -> ThemeMode:
-        """Get Linux theme preference"""
+        """Get Linux theme preference."""
         try:
             # Check various Linux desktop environment settings
 
@@ -322,7 +321,7 @@ class SystemThemeDetector:
 
 
 class ThemeManager:
-    """Manages all themes for the dashboard"""
+    """Manages all themes for the dashboard."""
 
     _instance: Optional["ThemeManager"] = None
 
@@ -339,8 +338,7 @@ class ThemeManager:
         cls._instance = None
 
     def __init__(self, config_dir: Path | None = None):
-        """
-        Initialize the theme manager
+        """Initialize the theme manager.
 
         Args:
             config_dir: Directory for storing user themes
@@ -368,7 +366,7 @@ class ThemeManager:
         self.update_from_system()
 
     def _create_builtin_themes(self) -> dict[str, Theme]:
-        """Create built-in themes"""
+        """Create built-in themes."""
         themes = {}
 
         # Default Light Theme
@@ -440,19 +438,18 @@ class ThemeManager:
         return themes
 
     def get_all_themes(self) -> dict[str, Theme]:
-        """Get all available themes (built-in + user)"""
+        """Get all available themes (built-in + user)."""
         all_themes = self.built_in_themes.copy()
         all_themes.update(self.user_themes)
         return all_themes
 
     def get_theme(self, name: str) -> Theme | None:
-        """Get theme by name"""
+        """Get theme by name."""
         all_themes = self.get_all_themes()
         return all_themes.get(name)
 
     def set_theme(self, theme: str | Theme) -> bool:
-        """
-        Set current theme
+        """Set current theme.
 
         Args:
             theme: Theme name or Theme object
@@ -474,8 +471,7 @@ class ThemeManager:
         return True
 
     def set_mode(self, mode: ThemeMode) -> bool:
-        """
-        Set theme mode (auto-selects appropriate theme)
+        """Set theme mode (auto-selects appropriate theme).
 
         Args:
             mode: Theme mode to set
@@ -502,7 +498,7 @@ class ThemeManager:
         return False
 
     def update_from_system(self) -> bool:
-        """Update theme from system preference"""
+        """Update theme from system preference."""
         if not self.auto_theme_enabled:
             return False
 
@@ -514,8 +510,7 @@ class ThemeManager:
             return self.set_theme("default_light")
 
     def save_theme(self, name: str, theme: Theme) -> bool:
-        """
-        Save user theme to disk
+        """Save user theme to disk.
 
         Args:
             name: Theme name (used as filename)
@@ -539,8 +534,7 @@ class ThemeManager:
             return False
 
     def load_theme(self, name: str) -> Theme | None:
-        """
-        Load user theme from disk
+        """Load user theme from disk.
 
         Args:
             name: Theme name to load
@@ -567,7 +561,7 @@ class ThemeManager:
             return None
 
     def load_user_themes(self) -> None:
-        """Load all user themes from config directory"""
+        """Load all user themes from config directory."""
         try:
             for theme_file in self.config_dir.glob("*.json"):
                 theme_name = theme_file.stem
@@ -577,8 +571,7 @@ class ThemeManager:
             logger.error(f"Error loading user themes: {e}")
 
     def delete_theme(self, name: str) -> bool:
-        """
-        Delete user theme
+        """Delete user theme.
 
         Args:
             name: Theme name to delete
@@ -608,8 +601,7 @@ class ThemeManager:
             return False
 
     def export_css(self, theme: Theme | None = None) -> str:
-        """
-        Export theme as CSS variables
+        """Export theme as CSS variables.
 
         Args:
             theme: Theme to export (uses current if None)
@@ -653,8 +645,7 @@ class ThemeManager:
         return "\n".join(css_lines)
 
     def export_rich_theme(self, theme: Theme | None = None) -> dict[str, str]:
-        """
-        Export theme for Rich library
+        """Export theme for Rich library.
 
         Args:
             theme: Theme to export (uses current if None)
@@ -698,7 +689,7 @@ class ThemeManager:
         }
 
     def export_textual_css(self, theme: Theme | None = None) -> str:
-        """Export theme as CSS for Textual TUI framework"""
+        """Export theme as CSS for Textual TUI framework."""
         theme = theme or self.current_theme
         if not theme:
             return ""
@@ -722,10 +713,10 @@ class ThemeManager:
 
 
 def get_theme_manager() -> ThemeManager:
-    """Get the global theme manager instance"""
+    """Get the global theme manager instance."""
     return ThemeManager.get_instance()
 
 
 def reset_theme_manager() -> None:
-    """Reset the global theme manager"""
+    """Reset the global theme manager."""
     ThemeManager.reset_instance()

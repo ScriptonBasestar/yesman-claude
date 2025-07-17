@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Yesman configuration management using centralized config loader"""
+"""Yesman configuration management using centralized config loader."""
 
 import logging
 from pathlib import Path
@@ -7,20 +7,25 @@ from typing import Any
 
 import yaml
 
-from .core.config_loader import ConfigLoader, DictSource, create_cached_config_loader, create_default_loader
+from .core.config_loader import (
+    ConfigLoader,
+    DictSource,
+    create_cached_config_loader,
+    create_default_loader,
+)
 from .core.config_schema import YesmanConfigSchema
 from .utils import ensure_log_directory
 
 
 class YesmanConfig:
-    """Main configuration class for Yesman
+    """Main configuration class for Yesman.
 
     This class provides backward compatibility while using the new
     centralized configuration management system.
     """
 
     def __init__(self, config_loader: ConfigLoader | None = None):
-        """Initialize YesmanConfig
+        """Initialize YesmanConfig.
 
         Args:
             config_loader: Optional custom config loader. If not provided,
@@ -51,7 +56,7 @@ class YesmanConfig:
         self.logger.info("Yesman configuration loaded successfully")
 
     def _setup_logging(self):
-        """Setup logging based on configuration"""
+        """Setup logging based on configuration."""
         log_config = self._config_schema.logging
         log_path = ensure_log_directory(Path(log_config.log_path))
         log_file = log_path / "yesman.log"
@@ -70,7 +75,7 @@ class YesmanConfig:
         )
 
     def _ensure_directories(self):
-        """Create necessary directories"""
+        """Create necessary directories."""
         directories = [
             self.root_dir,
             self.root_dir / self._config_schema.session.sessions_dir,
@@ -82,7 +87,7 @@ class YesmanConfig:
             directory.mkdir(parents=True, exist_ok=True)
 
     def get(self, key: str, default: Any = None) -> Any:
-        """Get configuration value by key (backward compatibility)
+        """Get configuration value by key (backward compatibility).
 
         Supports dot notation for nested values (e.g., 'tmux.default_shell')
         """
@@ -99,7 +104,7 @@ class YesmanConfig:
         return value
 
     def save(self, new_config_data: dict[str, Any]):
-        """Save configuration updates to local file"""
+        """Save configuration updates to local file."""
         # Load current local config
         current_local_cfg: dict[str, Any] = {}
         if self.local_path.exists():
@@ -123,25 +128,25 @@ class YesmanConfig:
         self.config = self._config_schema.model_dump()
 
     def get_sessions_dir(self) -> Path:
-        """Get sessions directory path"""
+        """Get sessions directory path."""
         return self.root_dir / self._config_schema.session.sessions_dir
 
     def get_templates_dir(self) -> Path:
-        """Get templates directory path"""
+        """Get templates directory path."""
         return self.root_dir / self._config_schema.session.templates_dir
 
     def get_projects_file(self) -> Path:
-        """Get projects file path"""
+        """Get projects file path."""
         return self.get_sessions_dir() / self._config_schema.session.projects_file
 
     def reload(self):
-        """Reload configuration from all sources"""
+        """Reload configuration from all sources."""
         self._config_schema = self._loader.reload()
         self.config = self._config_schema.model_dump()
         self.logger.info("Configuration reloaded")
 
     def validate(self) -> bool:
-        """Validate current configuration"""
+        """Validate current configuration."""
         try:
             self._loader.validate(self.config)
             return True
@@ -151,30 +156,29 @@ class YesmanConfig:
 
     @property
     def schema(self) -> YesmanConfigSchema:
-        """Get typed configuration schema"""
+        """Get typed configuration schema."""
         return self._config_schema
 
     def get_cache_stats(self) -> dict[str, Any] | None:
-        """Get cache statistics if using cached loader"""
+        """Get cache statistics if using cached loader."""
         if hasattr(self._loader, "get_cache_stats"):
             return self._loader.get_cache_stats()
         return None
 
     def invalidate_cache(self) -> None:
-        """Invalidate configuration cache if using cached loader"""
+        """Invalidate configuration cache if using cached loader."""
         if hasattr(self._loader, "invalidate_cache"):
             self._loader.invalidate_cache()
 
     def __repr__(self) -> str:
-        """String representation"""
+        """String representation."""
         sources = self._loader.get_config_sources_info()
         cache_info = " (cached)" if hasattr(self._loader, "get_cache_stats") else ""
         return f"YesmanConfig(sources={len(sources)}, mode={self._config_schema.mode}){cache_info}"
 
 
 def create_cached_yesman_config(cache_ttl: float = 300.0) -> YesmanConfig:
-    """
-    Create a YesmanConfig instance with caching enabled
+    """Create a YesmanConfig instance with caching enabled.
 
     Args:
         cache_ttl: Cache time-to-live in seconds (default: 5 minutes)

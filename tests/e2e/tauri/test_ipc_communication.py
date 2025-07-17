@@ -1,6 +1,5 @@
-"""
-Test stub for Tauri IPC communication
-NOTE: These are placeholder tests that require Tauri test environment setup
+"""Test stub for Tauri IPC communication
+NOTE: These are placeholder tests that require Tauri test environment setup.
 """
 
 import unittest
@@ -8,8 +7,7 @@ from unittest.mock import MagicMock
 
 
 class TestTauriIPCCommunication(unittest.TestCase):
-    """
-    Test Tauri IPC (Inter-Process Communication) between frontend and backend
+    """Test Tauri IPC (Inter-Process Communication) between frontend and backend.
 
     These tests require:
     1. Tauri test harness setup
@@ -23,7 +21,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         self.mock_invoke = MagicMock()
 
     def test_invoke_get_sessions(self):
-        """Test IPC invoke for getting session list"""
+        """Test IPC invoke for getting session list."""
         # Simulate Tauri invoke
         expected_response = {
             "sessions": [
@@ -42,7 +40,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         assert len(response["sessions"]) == 2
 
     def test_invoke_create_session(self):
-        """Test IPC invoke for creating a new session"""
+        """Test IPC invoke for creating a new session."""
         # Simulate Tauri invoke with parameters
         params = {
             "name": "new-session",
@@ -59,7 +57,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         assert response["success"] is True
 
     def test_event_listening(self):
-        """Test IPC event listening from backend to frontend"""
+        """Test IPC event listening from backend to frontend."""
         # Simulate Tauri event emission
         event_data = {
             "type": "session_status_changed",
@@ -80,7 +78,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         event_handler.assert_called_once_with(event_data)
 
     def test_error_handling_in_ipc(self):
-        """Test IPC error handling"""
+        """Test IPC error handling."""
         # Simulate Tauri invoke error
         self.mock_invoke.side_effect = Exception("Backend error")
 
@@ -91,7 +89,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         assert "Backend error" in str(context.exception)
 
     def test_file_dialog_ipc(self):
-        """Test file dialog IPC communication"""
+        """Test file dialog IPC communication."""
         # Simulate file selection dialog
         expected_path = "/home/user/project.yaml"
         self.mock_invoke.return_value = {"path": expected_path}
@@ -103,7 +101,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         assert response["path"] == expected_path
 
     def test_window_controls_ipc(self):
-        """Test window control IPC commands"""
+        """Test window control IPC commands."""
         # Test minimize
         self.mock_invoke.return_value = {"success": True}
         response = self.mock_invoke("window_minimize")
@@ -118,7 +116,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
         assert response["success"] is True
 
     def test_system_tray_ipc(self):
-        """Test system tray IPC communication"""
+        """Test system tray IPC communication."""
         # Simulate system tray menu click
         menu_event = {
             "id": "show_dashboard",
@@ -132,7 +130,7 @@ class TestTauriIPCCommunication(unittest.TestCase):
 
     @unittest.skip("Requires actual Tauri environment")
     def test_real_ipc_roundtrip(self):
-        """Test real IPC roundtrip communication"""
+        """Test real IPC roundtrip communication."""
         # This test would require actual Tauri runtime
         # Example implementation:
         # from tauri_test import TauriTestApp
@@ -148,10 +146,10 @@ class TestTauriIPCCommunication(unittest.TestCase):
 
 
 class TestTauriIPCPerformance(unittest.TestCase):
-    """Test IPC performance and limits"""
+    """Test IPC performance and limits."""
 
     def test_large_payload_handling(self):
-        """Test handling of large IPC payloads"""
+        """Test handling of large IPC payloads."""
         # Create large payload (1MB)
         large_data = {"data": "x" * 1024 * 1024}
 
@@ -162,7 +160,7 @@ class TestTauriIPCPerformance(unittest.TestCase):
         assert response["received"] > 1024 * 1024
 
     def test_concurrent_ipc_calls(self):
-        """Test concurrent IPC calls"""
+        """Test concurrent IPC calls."""
         import threading
 
         mock_invoke = MagicMock()

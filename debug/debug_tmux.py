@@ -24,7 +24,9 @@ def main():
 
             try:
                 # Test 1: Try the current method
-                cmd_result = pane.cmd("display-message", "-p", "#{pane_current_command}")
+                cmd_result = pane.cmd(
+                    "display-message", "-p", "#{pane_current_command}"
+                )
                 print(f"    cmd result: {cmd_result}")
                 print(f"    stdout: {cmd_result.stdout}")
                 if cmd_result.stdout:
@@ -47,7 +49,9 @@ def main():
             try:
                 # Test 3: Capture content
                 content_result = pane.cmd("capture-pane", "-p")
-                content = "\n".join(content_result.stdout) if content_result.stdout else ""
+                content = (
+                    "\n".join(content_result.stdout) if content_result.stdout else ""
+                )
                 print(f"    content length: {len(content)}")
                 print(f"    content preview: {repr(content[:100])}")
 

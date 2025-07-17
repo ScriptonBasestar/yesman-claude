@@ -1,4 +1,4 @@
-"""Branch management system for multi-agent parallel development"""
+"""Branch management system for multi-agent parallel development."""
 
 import json
 import logging
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class BranchInfo:
-    """Information about a git branch"""
+    """Information about a git branch."""
 
     name: str
     base_branch: str
@@ -28,24 +28,23 @@ class BranchInfo:
             self.metadata = {}
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization"""
+        """Convert to dictionary for serialization."""
         data = asdict(self)
         data["created_at"] = self.created_at.isoformat()
         return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "BranchInfo":
-        """Create from dictionary"""
+        """Create from dictionary."""
         data["created_at"] = datetime.fromisoformat(data["created_at"])
         return cls(**data)
 
 
 class BranchManager:
-    """Manages git branches for multi-agent parallel development"""
+    """Manages git branches for multi-agent parallel development."""
 
     def __init__(self, repo_path: str = ".", branch_prefix: str = "feat/multi-agent"):
-        """
-        Initialize branch manager
+        """Initialize branch manager.
 
         Args:
             repo_path: Path to git repository
@@ -61,7 +60,7 @@ class BranchManager:
         args: list[str],
         check: bool = True,
     ) -> subprocess.CompletedProcess:
-        """Run a git command and return result"""
+        """Run a git command and return result."""
         cmd = ["git"] + args
         logger.debug(f"Running git command: {' '.join(cmd)}")
 
@@ -83,21 +82,21 @@ class BranchManager:
             raise
 
     def _get_current_branch(self) -> str:
-        """Get current branch name"""
+        """Get current branch name."""
         result = self._run_git_command(["branch", "--show-current"])
         return result.stdout.strip()
 
     def _branch_exists(self, branch_name: str) -> bool:
-        """Check if branch exists"""
+        """Check if branch exists."""
         result = self._run_git_command(["branch", "--list", branch_name], check=False)
         return bool(result.stdout.strip())
 
     def _get_branch_metadata_file(self) -> Path:
-        """Get path to branch metadata file"""
+        """Get path to branch metadata file."""
         return self.repo_path / ".scripton" / "yesman" / "multi_agent_branches.json"
 
     def _load_branch_metadata(self) -> None:
-        """Load branch metadata from file"""
+        """Load branch metadata from file."""
         metadata_file = self._get_branch_metadata_file()
 
         if metadata_file.exists():
@@ -113,7 +112,7 @@ class BranchManager:
             self.branches = {}
 
     def _save_branch_metadata(self) -> None:
-        """Save branch metadata to file"""
+        """Save branch metadata to file."""
         metadata_file = self._get_branch_metadata_file()
         metadata_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -132,8 +131,7 @@ class BranchManager:
         issue_name: str,
         base_branch: str = "develop",
     ) -> str:
-        """
-        Create a feature branch for an issue
+        """Create a feature branch for an issue.
 
         Args:
             issue_name: Name/ID of the issue
@@ -180,7 +178,7 @@ class BranchManager:
         return branch_name
 
     def list_active_branches(self) -> list[BranchInfo]:
-        """List all active multi-agent branches"""
+        """List all active multi-agent branches."""
         active_branches = []
 
         # Get all branches
@@ -210,7 +208,7 @@ class BranchManager:
         return active_branches
 
     def get_branch_status(self, branch_name: str) -> dict[str, Any]:
-        """Get detailed status of a branch"""
+        """Get detailed status of a branch."""
         if not self._branch_exists(branch_name):
             raise ValueError(f"Branch '{branch_name}' does not exist")
 
@@ -271,7 +269,7 @@ class BranchManager:
         }
 
     def switch_branch(self, branch_name: str) -> bool:
-        """Switch to a specific branch"""
+        """Switch to a specific branch."""
         if not self._branch_exists(branch_name):
             logger.error(f"Branch '{branch_name}' does not exist")
             return False
@@ -289,7 +287,7 @@ class BranchManager:
         branch_name: str,
         metadata: dict[str, Any],
     ) -> None:
-        """Update metadata for a branch"""
+        """Update metadata for a branch."""
         if branch_name not in self.branches:
             logger.warning(f"Branch '{branch_name}' not in metadata, creating entry")
             self.branches[branch_name] = BranchInfo(
@@ -302,14 +300,14 @@ class BranchManager:
         self._save_branch_metadata()
 
     def mark_branch_merged(self, branch_name: str) -> None:
-        """Mark a branch as merged"""
+        """Mark a branch as merged."""
         if branch_name in self.branches:
             self.branches[branch_name].status = "merged"
             self._save_branch_metadata()
             logger.info(f"Marked branch '{branch_name}' as merged")
 
     def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:
-        """Clean up merged branches"""
+        """Clean up merged branches."""
         cleaned = []
 
         for branch_name, info in self.branches.items():
@@ -345,7 +343,7 @@ class BranchManager:
         branch_name: str,
         target_branch: str = None,
     ) -> dict[str, Any]:
-        """Check for potential conflicts with target branch"""
+        """Check for potential conflicts with target branch."""
         if not self._branch_exists(branch_name):
             raise ValueError(f"Branch '{branch_name}' does not exist")
 

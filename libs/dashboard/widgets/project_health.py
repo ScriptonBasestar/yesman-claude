@@ -1,4 +1,4 @@
-"""Project health calculator widget"""
+"""Project health calculator widget."""
 
 import logging
 import os
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProjectHealth:
-    """Calculates project health metrics across multiple categories"""
+    """Calculates project health metrics across multiple categories."""
 
     def __init__(self, project_path: str = "."):
         self.project_path = project_path
@@ -25,7 +25,7 @@ class ProjectHealth:
         ]
 
     def calculate_health(self) -> dict[str, Any]:
-        """Calculate overall project health score"""
+        """Calculate overall project health score."""
         try:
             scores = {}
 
@@ -64,7 +64,7 @@ class ProjectHealth:
             }
 
     def _check_build_health(self) -> int:
-        """Check if project builds successfully"""
+        """Check if project builds successfully."""
         try:
             # Check for common build files
             build_files = ["Makefile", "build.py", "setup.py", "pyproject.toml"]
@@ -78,7 +78,7 @@ class ProjectHealth:
             return 50
 
     def _check_test_health(self) -> int:
-        """Check test coverage and presence"""
+        """Check test coverage and presence."""
         try:
             # Check for test directories/files
             test_indicators = ["tests/", "test_", "pytest", "unittest"]
@@ -92,7 +92,7 @@ class ProjectHealth:
             return 50
 
     def _check_dependencies_health(self) -> int:
-        """Check dependency management"""
+        """Check dependency management."""
         try:
             # Check for dependency files
             dep_files = ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"]
@@ -106,7 +106,7 @@ class ProjectHealth:
             return 50
 
     def _check_security_health(self) -> int:
-        """Check security aspects"""
+        """Check security aspects."""
         try:
             # Basic security checks
             has_gitignore = os.path.exists(".gitignore")
@@ -123,12 +123,12 @@ class ProjectHealth:
             return 80
 
     def _check_performance_health(self) -> int:
-        """Check performance indicators"""
+        """Check performance indicators."""
         # Basic performance score
         return 65
 
     def _check_code_quality_health(self) -> int:
-        """Check code quality"""
+        """Check code quality."""
         try:
             # Check for linting/formatting config
             quality_files = [
@@ -147,7 +147,7 @@ class ProjectHealth:
             return 50
 
     def _check_git_health(self) -> int:
-        """Check git repository health"""
+        """Check git repository health."""
         try:
             if os.path.exists(".git"):
                 # Check for recent commits
@@ -171,7 +171,7 @@ class ProjectHealth:
             return 50
 
     def _check_documentation_health(self) -> int:
-        """Check documentation coverage"""
+        """Check documentation coverage."""
         try:
             # Check for documentation files
             doc_files = ["README.md", "README.rst", "docs/", "CHANGELOG.md"]
@@ -185,7 +185,7 @@ class ProjectHealth:
             return 50
 
     def _generate_suggestions(self, scores: dict[str, Any]) -> list[str]:
-        """Generate improvement suggestions based on scores"""
+        """Generate improvement suggestions based on scores."""
         suggestions = []
 
         if scores.get("test_score", 0) < 70:

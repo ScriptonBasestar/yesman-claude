@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Status command - Refactored version using base command and mixins.
-"""
+"""Status command - Refactored version using base command and mixins."""
 
 from typing import Any
 
@@ -29,8 +27,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         }
 
     def execute(self, session_name: str | None = None) -> dict[str, Any]:
-        """
-        Execute the status command.
+        """Execute the status command.
 
         Args:
             session_name: Optional specific session to check

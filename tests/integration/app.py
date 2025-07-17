@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""
-Simple test application for yesman-claude integration testing
-"""
+"""Simple test application for yesman-claude integration testing."""
 
 
 def main():
-    """Main function that needs some improvements"""
+    """Main function that needs some improvements."""
     # TODO: Add logging functionality
     print("Hello, World!")
 

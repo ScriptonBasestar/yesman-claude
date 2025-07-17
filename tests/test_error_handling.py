@@ -1,4 +1,4 @@
-"""Tests for centralized error handling system"""
+"""Tests for centralized error handling system."""
 
 from fastapi import status
 
@@ -16,10 +16,10 @@ from libs.core.error_handling import (
 
 
 class TestYesmanError:
-    """Test YesmanError base class"""
+    """Test YesmanError base class."""
 
     def test_basic_error_creation(self):
-        """Test basic error creation"""
+        """Test basic error creation."""
         error = YesmanError("Test error")
 
         assert error.message == "Test error"
@@ -28,19 +28,33 @@ class TestYesmanError:
         assert error.error_code.startswith("UNKNOWN_")
 
     def test_error_with_context(self):
-        """Test error with context"""
-        context = ErrorContext(operation="test_operation", component="test_component", session_name="test_session")
+        """Test error with context."""
+        context = ErrorContext(
+            operation="test_operation",
+            component="test_component",
+            session_name="test_session",
+        )
 
-        error = YesmanError("Test error", category=ErrorCategory.SYSTEM, context=context, recovery_hint="Try restarting the service")
+        error = YesmanError(
+            "Test error",
+            category=ErrorCategory.SYSTEM,
+            context=context,
+            recovery_hint="Try restarting the service",
+        )
 
         assert error.context.operation == "test_operation"
         assert error.recovery_hint == "Try restarting the service"
 
     def test_error_to_dict(self):
-        """Test error serialization"""
+        """Test error serialization."""
         context = ErrorContext(operation="test_operation", component="test_component")
 
-        error = YesmanError("Test error", category=ErrorCategory.VALIDATION, context=context, recovery_hint="Check your input")
+        error = YesmanError(
+            "Test error",
+            category=ErrorCategory.VALIDATION,
+            context=context,
+            recovery_hint="Check your input",
+        )
 
         error_dict = error.to_dict()
 
@@ -51,10 +65,10 @@ class TestYesmanError:
 
 
 class TestSpecificErrors:
-    """Test specific error types"""
+    """Test specific error types."""
 
     def test_configuration_error(self):
-        """Test ConfigurationError"""
+        """Test ConfigurationError."""
         error = ConfigurationError("Invalid config file", config_file="/path/to/config.yaml")
 
         assert error.category == ErrorCategory.CONFIGURATION
@@ -62,7 +76,7 @@ class TestSpecificErrors:
         assert "configuration" in error.recovery_hint.lower()
 
     def test_session_error(self):
-        """Test SessionError"""
+        """Test SessionError."""
         error = SessionError("Session not found", session_name="my-session")
 
         assert error.category == ErrorCategory.SYSTEM
@@ -70,7 +84,7 @@ class TestSpecificErrors:
         assert "my-session" in error.recovery_hint
 
     def test_validation_error(self):
-        """Test ValidationError"""
+        """Test ValidationError."""
         error = ValidationError("Invalid field value", field_name="email")
 
         assert error.category == ErrorCategory.VALIDATION
@@ -79,10 +93,10 @@ class TestSpecificErrors:
 
 
 class TestErrorHandler:
-    """Test ErrorHandler class"""
+    """Test ErrorHandler class."""
 
     def test_error_stats_tracking(self):
-        """Test error statistics tracking"""
+        """Test error statistics tracking."""
         handler = ErrorHandler()
 
         # Create some errors
@@ -100,7 +114,7 @@ class TestErrorHandler:
         assert stats["by_category"]["system"] == 1
 
     def test_error_context_creation(self):
-        """Test automatic context creation for non-YesmanError"""
+        """Test automatic context creation for non-YesmanError."""
         handler = ErrorHandler()
 
         # Create a regular exception
@@ -115,10 +129,10 @@ class TestErrorHandler:
 
 
 class TestAPIErrorHandling:
-    """Test API error handling middleware"""
+    """Test API error handling middleware."""
 
     def test_error_to_status_code_mapping(self):
-        """Test error to HTTP status code mapping"""
+        """Test error to HTTP status code mapping."""
         # Test validation error
         validation_error = ValidationError("Invalid input")
         assert error_to_status_code(validation_error) == status.HTTP_400_BAD_REQUEST
@@ -132,8 +146,15 @@ class TestAPIErrorHandling:
         assert error_to_status_code(session_error) == status.HTTP_404_NOT_FOUND
 
     def test_error_response_creation(self):
-        """Test standardized error response creation"""
-        response = create_error_response(code="TEST_ERROR", message="Test error message", status_code=400, recovery_hint="Try again", context={"field": "value"}, request_id="test-123")
+        """Test standardized error response creation."""
+        response = create_error_response(
+            code="TEST_ERROR",
+            message="Test error message",
+            status_code=400,
+            recovery_hint="Try again",
+            context={"field": "value"},
+            request_id="test-123",
+        )
 
         assert response.status_code == 400
 
@@ -150,10 +171,10 @@ class TestAPIErrorHandling:
 
 
 class TestErrorRecoveryHints:
-    """Test error recovery hints"""
+    """Test error recovery hints."""
 
     def test_default_recovery_hints(self):
-        """Test that specific errors have appropriate recovery hints"""
+        """Test that specific errors have appropriate recovery hints."""
         # Configuration error
         config_error = ConfigurationError("Missing required field")
         assert "validate" in config_error.recovery_hint.lower()
@@ -168,7 +189,7 @@ class TestErrorRecoveryHints:
         assert "port" in validation_error.recovery_hint
 
     def test_custom_recovery_hints(self):
-        """Test custom recovery hints override defaults"""
+        """Test custom recovery hints override defaults."""
         custom_hint = "Custom recovery instructions"
         error = ConfigurationError("Config error", recovery_hint=custom_hint)
 
@@ -176,10 +197,10 @@ class TestErrorRecoveryHints:
 
 
 class TestErrorCodes:
-    """Test error code generation"""
+    """Test error code generation."""
 
     def test_error_code_generation(self):
-        """Test that error codes are generated consistently"""
+        """Test that error codes are generated consistently."""
         error1 = YesmanError("Same message", category=ErrorCategory.VALIDATION)
         error2 = YesmanError("Same message", category=ErrorCategory.VALIDATION)
 
@@ -191,7 +212,7 @@ class TestErrorCodes:
         assert error1.error_code != error3.error_code
 
     def test_custom_error_codes(self):
-        """Test custom error codes"""
+        """Test custom error codes."""
         custom_code = "CUSTOM_ERROR_123"
         error = YesmanError("Test", error_code=custom_code)
 
@@ -199,10 +220,10 @@ class TestErrorCodes:
 
 
 class TestIntegrationScenarios:
-    """Test real-world integration scenarios"""
+    """Test real-world integration scenarios."""
 
     def test_command_error_flow(self):
-        """Test error flow from command to API response"""
+        """Test error flow from command to API response."""
         # Simulate a command raising a SessionError
         session_error = SessionError("Session 'myproject' not found", session_name="myproject")
 
@@ -216,7 +237,7 @@ class TestIntegrationScenarios:
         assert error_dict["context"]["session_name"] == "myproject"
 
     def test_validation_error_with_multiple_fields(self):
-        """Test validation error with complex context"""
+        """Test validation error with complex context."""
         error = ValidationError("Multiple validation errors", field_name="config.tmux.port")
 
         error_dict = error.to_dict()

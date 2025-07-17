@@ -2,10 +2,10 @@ from libs.dashboard.renderers.optimizations import RenderCache
 
 
 class TestCacheIntegration:
-    """Tests for cache integration across components"""
+    """Tests for cache integration across components."""
 
     def test_cache_integration(self):
-        """Test 12: Cache integration across components"""
+        """Test 12: Cache integration across components."""
         cache = RenderCache(max_size=100, ttl=60.0)
 
         # Test cache with different data

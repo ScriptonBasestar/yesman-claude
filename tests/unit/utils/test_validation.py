@@ -125,7 +125,15 @@ class TestValidationFunctions:
 
     def test_validate_log_level_valid(self):
         """Test valid log levels."""
-        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "debug", "info"]
+        valid_levels = [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+            "debug",
+            "info",
+        ]
         for level in valid_levels:
             valid, error = validate_log_level(level)
             assert valid is True, f"'{level}' should be valid"

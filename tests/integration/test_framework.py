@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Integration Test Framework for Yesman-Claude
+"""Integration Test Framework for Yesman-Claude.
 
 Provides base classes, utilities, and fixtures for comprehensive integration testing
 across CLI, API, dashboard, and multi-agent components.
@@ -21,10 +20,10 @@ from libs.yesman_config import YesmanConfig
 
 
 class IntegrationTestBase:
-    """Base class for integration tests with common setup and utilities"""
+    """Base class for integration tests with common setup and utilities."""
 
     def setup_method(self):
-        """Setup for each test method"""
+        """Setup for each test method."""
         # Create temporary test environment
         self.test_dir = Path(tempfile.mkdtemp(prefix="yesman_test_"))
         self.test_config_dir = self.test_dir / ".scripton" / "yesman"
@@ -43,7 +42,7 @@ class IntegrationTestBase:
         self.created_processes = []
 
     def teardown_method(self):
-        """Cleanup after each test method"""
+        """Cleanup after each test method."""
         # Stop any created processes
         for process in self.created_processes:
             if hasattr(process, "terminate"):
@@ -64,25 +63,46 @@ class IntegrationTestBase:
             shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def _create_test_config(self) -> dict[str, Any]:
-        """Create test configuration"""
+        """Create test configuration."""
         return {
             "mode": "test",
             "root_dir": str(self.test_dir),
-            "logging": {"level": "DEBUG", "log_path": str(self.test_dir / "logs"), "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"},
-            "session": {"sessions_dir": "sessions", "templates_dir": "templates", "projects_file": "projects.yaml", "default_shell": "/bin/bash"},
-            "tmux": {"default_shell": "/bin/bash", "session_prefix": "yesman-test", "base_index": 1},
-            "ai": {"learning_enabled": True, "prediction_threshold": 0.7, "pattern_history_limit": 1000},
-            "automation": {"enabled": True, "context_detection_interval": 5, "workflow_timeout": 30},
+            "logging": {
+                "level": "DEBUG",
+                "log_path": str(self.test_dir / "logs"),
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            },
+            "session": {
+                "sessions_dir": "sessions",
+                "templates_dir": "templates",
+                "projects_file": "projects.yaml",
+                "default_shell": "/bin/bash",
+            },
+            "tmux": {
+                "default_shell": "/bin/bash",
+                "session_prefix": "yesman-test",
+                "base_index": 1,
+            },
+            "ai": {
+                "learning_enabled": True,
+                "prediction_threshold": 0.7,
+                "pattern_history_limit": 1000,
+            },
+            "automation": {
+                "enabled": True,
+                "context_detection_interval": 5,
+                "workflow_timeout": 30,
+            },
         }
 
     def _write_test_config(self):
-        """Write test configuration to file"""
+        """Write test configuration to file."""
         config_file = self.test_config_dir / "yesman.yaml"
         with open(config_file, "w") as f:
             yaml.dump(self.test_config, f, default_flow_style=False)
 
     def get_test_config(self) -> YesmanConfig:
-        """Get YesmanConfig instance for testing"""
+        """Get YesmanConfig instance for testing."""
         if not self.config:
             # Set environment to use test directory
             os.environ["YESMAN_TEST_CONFIG"] = str(self.test_config_dir / "yesman.yaml")
@@ -90,15 +110,25 @@ class IntegrationTestBase:
         return self.config
 
     def get_session_manager(self) -> SessionManager:
-        """Get SessionManager instance for testing"""
+        """Get SessionManager instance for testing."""
         if not self.session_manager:
             config = self.get_test_config()
             self.session_manager = SessionManager()
         return self.session_manager
 
     def create_test_session(self, session_name: str, **kwargs) -> dict[str, Any]:
-        """Create a test session with specified configuration"""
-        config = {"name": session_name, "start_directory": str(self.test_dir), "windows": [{"window_name": "main", "panes": [{"shell_command": ["echo", "test session"]}]}], **kwargs}
+        """Create a test session with specified configuration."""
+        config = {
+            "name": session_name,
+            "start_directory": str(self.test_dir),
+            "windows": [
+                {
+                    "window_name": "main",
+                    "panes": [{"shell_command": ["echo", "test session"]}],
+                }
+            ],
+            **kwargs,
+        }
 
         # Add to projects file
         projects_file = self.test_config_dir.parent / "sessions" / "projects.yaml"
@@ -119,7 +149,7 @@ class IntegrationTestBase:
         return config
 
     def wait_for_condition(self, condition_func, timeout: float = 5.0, interval: float = 0.1) -> bool:
-        """Wait for a condition to become true"""
+        """Wait for a condition to become true."""
         start_time = time.time()
         while time.time() - start_time < timeout:
             if condition_func():
@@ -128,14 +158,14 @@ class IntegrationTestBase:
         return False
 
     def assert_session_exists(self, session_name: str):
-        """Assert that a session exists"""
+        """Assert that a session exists."""
         session_manager = self.get_session_manager()
         sessions = session_manager.list_sessions()
         session_names = [s.get("name") for s in sessions]
         assert session_name in session_names, f"Session {session_name} not found in {session_names}"
 
     def assert_session_state(self, session_name: str, expected_state: str):
-        """Assert that a session is in the expected state"""
+        """Assert that a session is in the expected state."""
         session_manager = self.get_session_manager()
         session_info = session_manager.get_session_info(session_name)
         assert session_info is not None, f"Session {session_name} not found"
@@ -143,22 +173,22 @@ class IntegrationTestBase:
 
 
 class AsyncIntegrationTestBase(IntegrationTestBase):
-    """Base class for async integration tests"""
+    """Base class for async integration tests."""
 
     def setup_method(self):
-        """Setup for async tests"""
+        """Setup for async tests."""
         super().setup_method()
         self.event_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.event_loop)
 
     def teardown_method(self):
-        """Cleanup for async tests"""
+        """Cleanup for async tests."""
         if hasattr(self, "event_loop") and self.event_loop:
             self.event_loop.close()
         super().teardown_method()
 
     async def async_wait_for_condition(self, condition_func, timeout: float = 5.0, interval: float = 0.1) -> bool:
-        """Async version of wait_for_condition"""
+        """Async version of wait_for_condition."""
         start_time = time.time()
         while time.time() - start_time < timeout:
             if await condition_func() if asyncio.iscoroutinefunction(condition_func) else condition_func():
@@ -168,7 +198,7 @@ class AsyncIntegrationTestBase(IntegrationTestBase):
 
 
 class MockClaudeEnvironment:
-    """Mock Claude environment for testing without actual Claude processes"""
+    """Mock Claude environment for testing without actual Claude processes."""
 
     def __init__(self, test_dir: Path):
         self.test_dir = test_dir
@@ -176,11 +206,11 @@ class MockClaudeEnvironment:
         self.interaction_history = []
 
     def add_mock_response(self, prompt_pattern: str, response: str):
-        """Add a mock response for a prompt pattern"""
+        """Add a mock response for a prompt pattern."""
         self.mock_responses[prompt_pattern] = response
 
     def simulate_interaction(self, prompt: str) -> str:
-        """Simulate Claude interaction"""
+        """Simulate Claude interaction."""
         # Find matching response
         for pattern, response in self.mock_responses.items():
             if pattern.lower() in prompt.lower():
@@ -193,21 +223,21 @@ class MockClaudeEnvironment:
         return default_response
 
     def get_interaction_count(self) -> int:
-        """Get total number of interactions"""
+        """Get total number of interactions."""
         return len(self.interaction_history)
 
     def clear_history(self):
-        """Clear interaction history"""
+        """Clear interaction history."""
         self.interaction_history.clear()
 
 
 class IntegrationTestFixtures:
-    """Collection of test fixtures for integration testing"""
+    """Collection of test fixtures for integration testing."""
 
     @staticmethod
     @pytest.fixture
     def test_environment():
-        """Provide clean test environment"""
+        """Provide clean test environment."""
         base = IntegrationTestBase()
         base.setup_method()
         yield base
@@ -216,7 +246,7 @@ class IntegrationTestFixtures:
     @staticmethod
     @pytest.fixture
     def async_test_environment():
-        """Provide clean async test environment"""
+        """Provide clean async test environment."""
         base = AsyncIntegrationTestBase()
         base.setup_method()
         yield base
@@ -225,7 +255,7 @@ class IntegrationTestFixtures:
     @staticmethod
     @pytest.fixture
     def mock_claude():
-        """Provide mock Claude environment"""
+        """Provide mock Claude environment."""
         test_dir = Path(tempfile.mkdtemp(prefix="claude_mock_"))
         mock_env = MockClaudeEnvironment(test_dir)
 
@@ -244,14 +274,14 @@ class IntegrationTestFixtures:
 
 
 class CommandTestRunner:
-    """Utility for running and testing CLI commands in integration tests"""
+    """Utility for running and testing CLI commands in integration tests."""
 
     def __init__(self, test_base: IntegrationTestBase):
         self.test_base = test_base
         self.command_results = []
 
     def run_command(self, command_class: type, **kwargs) -> dict[str, Any]:
-        """Run a command and capture results"""
+        """Run a command and capture results."""
         command = command_class()
 
         # Setup command with test environment
@@ -259,19 +289,33 @@ class CommandTestRunner:
 
         try:
             result = command.execute(**kwargs)
-            self.command_results.append({"command": command_class.__name__, "kwargs": kwargs, "result": result, "success": True, "error": None})
+            self.command_results.append(
+                {
+                    "command": command_class.__name__,
+                    "kwargs": kwargs,
+                    "result": result,
+                    "success": True,
+                    "error": None,
+                }
+            )
             return result
         except Exception as e:
-            error_result = {"command": command_class.__name__, "kwargs": kwargs, "result": None, "success": False, "error": str(e)}
+            error_result = {
+                "command": command_class.__name__,
+                "kwargs": kwargs,
+                "result": None,
+                "success": False,
+                "error": str(e),
+            }
             self.command_results.append(error_result)
             raise
 
     def get_command_history(self) -> list[dict[str, Any]]:
-        """Get history of executed commands"""
+        """Get history of executed commands."""
         return self.command_results.copy()
 
     def assert_command_succeeded(self, command_class: type):
-        """Assert that the most recent command of given type succeeded"""
+        """Assert that the most recent command of given type succeeded."""
         matching_results = [r for r in self.command_results if r["command"] == command_class.__name__]
         assert matching_results, f"No {command_class.__name__} command found in history"
 
@@ -280,18 +324,18 @@ class CommandTestRunner:
 
 
 class PerformanceMonitor:
-    """Monitor performance metrics during integration tests"""
+    """Monitor performance metrics during integration tests."""
 
     def __init__(self):
         self.metrics = {}
         self.start_times = {}
 
     def start_timing(self, operation: str):
-        """Start timing an operation"""
+        """Start timing an operation."""
         self.start_times[operation] = time.time()
 
     def end_timing(self, operation: str) -> float:
-        """End timing an operation and return duration"""
+        """End timing an operation and return duration."""
         if operation not in self.start_times:
             raise ValueError(f"No start time recorded for operation: {operation}")
 
@@ -305,16 +349,23 @@ class PerformanceMonitor:
         return duration
 
     def get_average_time(self, operation: str) -> float:
-        """Get average time for an operation"""
+        """Get average time for an operation."""
         if operation not in self.metrics or not self.metrics[operation]:
             return 0.0
         return sum(self.metrics[operation]) / len(self.metrics[operation])
 
     def assert_performance_threshold(self, operation: str, max_time: float):
-        """Assert that operation average time is below threshold"""
+        """Assert that operation average time is below threshold."""
         avg_time = self.get_average_time(operation)
         assert avg_time <= max_time, f"Operation {operation} average time {avg_time:.3f}s exceeds threshold {max_time}s"
 
 
 # Export main classes for easy importing
-__all__ = ["IntegrationTestBase", "AsyncIntegrationTestBase", "MockClaudeEnvironment", "IntegrationTestFixtures", "CommandTestRunner", "PerformanceMonitor"]
+__all__ = [
+    "IntegrationTestBase",
+    "AsyncIntegrationTestBase",
+    "MockClaudeEnvironment",
+    "IntegrationTestFixtures",
+    "CommandTestRunner",
+    "PerformanceMonitor",
+]

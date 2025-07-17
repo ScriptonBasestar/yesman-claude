@@ -1,6 +1,4 @@
-"""
-Test for setup command - Migrated to use centralized mock factories
-"""
+"""Test for setup command - Migrated to use centralized mock factories."""
 
 from unittest.mock import patch
 
@@ -11,14 +9,14 @@ from tests.fixtures.mock_factories import PatchContextFactory
 
 
 class TestSetupCommand:
-    """Migrated to pytest-style with centralized mocks - Fixed for actual setup command"""
+    """Migrated to pytest-style with centralized mocks - Fixed for actual setup command."""
 
     def setup_method(self):
         self.runner = CliRunner()
 
     @patch("commands.setup.YesmanConfig")
     def test_setup_creates_all_sessions(self, mock_config):
-        """Test setup command creates all sessions from projects.yaml"""
+        """Test setup command creates all sessions from projects.yaml."""
         projects = {
             "sessions": {
                 "project1": {"template_name": "template1"},
@@ -40,7 +38,7 @@ class TestSetupCommand:
 
     @patch("commands.setup.YesmanConfig")
     def test_setup_with_specific_project(self, mock_config):
-        """Test setup command with specific project name"""
+        """Test setup command with specific project name."""
         projects = {
             "sessions": {
                 "myproject": {"template_name": "my_template"},
@@ -60,7 +58,7 @@ class TestSetupCommand:
 
     @patch("commands.setup.YesmanConfig")
     def test_setup_handles_session_creation_failure(self, mock_config):
-        """Test setup handles session creation failure gracefully"""
+        """Test setup handles session creation failure gracefully."""
         projects = {
             "sessions": {
                 "existing": {"template_name": "my_template"},
@@ -80,7 +78,7 @@ class TestSetupCommand:
 
     @patch("commands.setup.YesmanConfig")
     def test_setup_with_nonexistent_project(self, mock_config):
-        """Test setup with nonexistent project name"""
+        """Test setup with nonexistent project name."""
         projects = {
             "sessions": {
                 "valid_project": {"template_name": "template1"},
@@ -100,7 +98,7 @@ class TestSetupCommand:
 
     @patch("commands.setup.YesmanConfig")
     def test_setup_no_projects_found(self, mock_config):
-        """Test setup when no projects are configured"""
+        """Test setup when no projects are configured."""
         projects = {"sessions": {}}  # Empty sessions
 
         with PatchContextFactory.patch_setup_tmux_manager(

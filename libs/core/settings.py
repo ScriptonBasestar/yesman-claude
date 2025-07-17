@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Central settings and configuration management
-"""
+"""Central settings and configuration management."""
 
 import os
 from dataclasses import dataclass
@@ -11,7 +9,7 @@ from typing import Any
 
 @dataclass
 class CacheSettings:
-    """Cache configuration settings"""
+    """Cache configuration settings."""
 
     ttl: float = 5.0
     max_entries: int = 100
@@ -21,7 +19,7 @@ class CacheSettings:
 
 @dataclass
 class LoggingSettings:
-    """Logging configuration settings"""
+    """Logging configuration settings."""
 
     level: str = "INFO"
     default_path: str = "~/.scripton/yesman/logs/"
@@ -32,7 +30,7 @@ class LoggingSettings:
 
 @dataclass
 class PathSettings:
-    """Path configuration settings"""
+    """Path configuration settings."""
 
     home_dir: str = "~/.scripton/yesman"
     templates_dir: str = "~/.scripton/yesman/templates"
@@ -44,7 +42,7 @@ class PathSettings:
 
 @dataclass
 class SessionSettings:
-    """Session management settings"""
+    """Session management settings."""
 
     default_timeout: int = 30
     max_windows_per_session: int = 10
@@ -55,7 +53,7 @@ class SessionSettings:
 
 @dataclass
 class MonitoringSettings:
-    """Monitoring and health check settings"""
+    """Monitoring and health check settings."""
 
     health_check_interval: int = 60  # seconds
     max_response_time: float = 1.0  # seconds
@@ -66,7 +64,7 @@ class MonitoringSettings:
 
 @dataclass
 class APISettings:
-    """API server settings"""
+    """API server settings."""
 
     host: str = "localhost"
     port: int = 8000
@@ -78,7 +76,7 @@ class APISettings:
 
 @dataclass
 class SecuritySettings:
-    """Security configuration"""
+    """Security configuration."""
 
     enable_auth: bool = False
     session_secret: str | None = None
@@ -88,7 +86,7 @@ class SecuritySettings:
 
 
 class AppSettings:
-    """Central application settings"""
+    """Central application settings."""
 
     def __init__(self):
         self.cache = CacheSettings()
@@ -106,7 +104,7 @@ class AppSettings:
         self._expand_paths()
 
     def _load_from_env(self):
-        """Load settings from environment variables"""
+        """Load settings from environment variables."""
         # Cache settings
         self.cache.ttl = float(os.getenv("YESMAN_CACHE_TTL", self.cache.ttl))
         self.cache.max_entries = int(os.getenv("YESMAN_CACHE_MAX_ENTRIES", self.cache.max_entries))
@@ -128,7 +126,7 @@ class AppSettings:
         self.api.debug = os.getenv("YESMAN_API_DEBUG", "false").lower() == "true"
 
     def _expand_paths(self):
-        """Expand user paths (~) to absolute paths"""
+        """Expand user paths (~) to absolute paths."""
         self.paths.home_dir = os.path.expanduser(self.paths.home_dir)
         self.paths.templates_dir = os.path.expanduser(self.paths.templates_dir)
         self.paths.logs_dir = os.path.expanduser(self.paths.logs_dir)
@@ -138,7 +136,7 @@ class AppSettings:
         self.logging.default_path = os.path.expanduser(self.logging.default_path)
 
     def ensure_directories(self):
-        """Create necessary directories if they don't exist"""
+        """Create necessary directories if they don't exist."""
         directories = [
             self.paths.home_dir,
             self.paths.templates_dir,
@@ -151,7 +149,7 @@ class AppSettings:
             Path(directory).mkdir(parents=True, exist_ok=True)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert settings to dictionary for serialization"""
+        """Convert settings to dictionary for serialization."""
         return {
             "cache": {
                 "ttl": self.cache.ttl,
@@ -211,7 +209,7 @@ settings = AppSettings()
 
 # Status constants
 class SessionStatus:
-    """Session status constants"""
+    """Session status constants."""
 
     RUNNING = "running"
     STOPPED = "stopped"
@@ -221,7 +219,7 @@ class SessionStatus:
 
 
 class ControllerStatus:
-    """Controller status constants"""
+    """Controller status constants."""
 
     IDLE = "idle"
     MONITORING = "monitoring"
@@ -231,7 +229,7 @@ class ControllerStatus:
 
 
 class LogLevel:
-    """Log level constants"""
+    """Log level constants."""
 
     DEBUG = "DEBUG"
     INFO = "INFO"
@@ -241,7 +239,7 @@ class LogLevel:
 
 
 class CacheKeys:
-    """Cache key prefixes"""
+    """Cache key prefixes."""
 
     SESSION_INFO = "session_info"
     SESSION_LIST = "session_list"
@@ -252,7 +250,7 @@ class CacheKeys:
 
 # Content limits
 class ContentLimits:
-    """Content size and line limits"""
+    """Content size and line limits."""
 
     MAX_PANE_LINES = 2000
     MAX_LOG_LINES = 50
@@ -266,7 +264,7 @@ class ContentLimits:
 
 # Validation patterns
 class ValidationPatterns:
-    """Common validation regex patterns"""
+    """Common validation regex patterns."""
 
     SESSION_NAME = r"^[a-zA-Z0-9_-]+$"
     WINDOW_NAME = r"^[a-zA-Z0-9_\-\s]+$"

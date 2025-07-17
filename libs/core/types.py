@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Type definitions and type hints for Yesman-Claude
-"""
+"""Type definitions and type hints for Yesman-Claude."""
 
 import time
 from collections.abc import Callable
@@ -26,7 +24,7 @@ HealthStatusType = Literal["healthy", "warning", "critical", "unknown"]
 
 # Configuration types
 class WindowConfig(TypedDict, total=False):
-    """Window configuration structure"""
+    """Window configuration structure."""
 
     window_name: str
     layout: str | None
@@ -35,7 +33,7 @@ class WindowConfig(TypedDict, total=False):
 
 
 class PaneConfig(TypedDict, total=False):
-    """Pane configuration structure"""
+    """Pane configuration structure."""
 
     shell_command: list[str]
     start_directory: str | None
@@ -43,7 +41,7 @@ class PaneConfig(TypedDict, total=False):
 
 
 class SessionConfig(TypedDict, total=False):
-    """Complete session configuration structure"""
+    """Complete session configuration structure."""
 
     session_name: str
     start_directory: str | None
@@ -53,14 +51,14 @@ class SessionConfig(TypedDict, total=False):
 
 
 class ProjectConfig(TypedDict, total=False):
-    """Project configuration structure"""
+    """Project configuration structure."""
 
     template_name: str | None
     override: SessionConfig
 
 
 class ProjectsConfig(TypedDict):
-    """Projects configuration file structure"""
+    """Projects configuration file structure."""
 
     sessions: dict[str, ProjectConfig]
 
@@ -68,7 +66,7 @@ class ProjectsConfig(TypedDict):
 # Runtime data types
 @dataclass
 class SessionInfo:
-    """Runtime session information"""
+    """Runtime session information."""
 
     session_name: str
     status: SessionStatusType
@@ -85,7 +83,7 @@ class SessionInfo:
 
 @dataclass
 class WindowInfo:
-    """Runtime window information"""
+    """Runtime window information."""
 
     window_name: str
     window_index: int
@@ -99,7 +97,7 @@ class WindowInfo:
 
 @dataclass
 class PaneInfo:
-    """Runtime pane information"""
+    """Runtime pane information."""
 
     pane_id: str
     pane_index: int
@@ -111,7 +109,7 @@ class PaneInfo:
 # Controller and monitoring types
 @dataclass
 class ControllerState:
-    """Controller state information"""
+    """Controller state information."""
 
     session_name: str
     status: ControllerStatusType
@@ -127,7 +125,7 @@ class ControllerState:
 
 @dataclass
 class PromptDetection:
-    """Detected prompt information"""
+    """Detected prompt information."""
 
     prompt_type: str
     confidence: float
@@ -138,7 +136,7 @@ class PromptDetection:
 
 @dataclass
 class AutoResponse:
-    """Auto-response action"""
+    """Auto-response action."""
 
     response_text: str
     confidence: float
@@ -153,7 +151,7 @@ class AutoResponse:
 
 # Health monitoring types
 class HealthCategory(Enum):
-    """Health check categories"""
+    """Health check categories."""
 
     BUILD = "build"
     TESTS = "tests"
@@ -167,7 +165,7 @@ class HealthCategory(Enum):
 
 @dataclass
 class HealthScore:
-    """Health score for a category"""
+    """Health score for a category."""
 
     category: HealthCategory
     score: float  # 0-100
@@ -182,7 +180,7 @@ class HealthScore:
 
 @dataclass
 class ProjectHealth:
-    """Overall project health"""
+    """Overall project health."""
 
     project_path: str
     overall_score: float
@@ -199,7 +197,7 @@ class ProjectHealth:
 
 @dataclass
 class HealthTrend:
-    """Health trend data point"""
+    """Health trend data point."""
 
     timestamp: float
     score: float
@@ -214,7 +212,7 @@ CacheTTL = float
 
 @dataclass
 class CacheEntry:
-    """Cache entry with metadata"""
+    """Cache entry with metadata."""
 
     key: CacheKey
     value: CacheValue
@@ -228,18 +226,18 @@ class CacheEntry:
             self.last_accessed = self.created_at
 
     def is_expired(self) -> bool:
-        """Check if cache entry is expired"""
+        """Check if cache entry is expired."""
         return time.time() > (self.created_at + self.ttl)
 
     def touch(self) -> None:
-        """Update access information"""
+        """Update access information."""
         self.access_count += 1
         self.last_accessed = time.time()
 
 
 # API types
 class APIResponse(TypedDict):
-    """Standard API response structure"""
+    """Standard API response structure."""
 
     success: bool
     data: Any | None
@@ -248,7 +246,7 @@ class APIResponse(TypedDict):
 
 
 class SessionAPIData(TypedDict):
-    """Session data for API responses"""
+    """Session data for API responses."""
 
     session_name: str
     status: SessionStatusType
@@ -258,7 +256,7 @@ class SessionAPIData(TypedDict):
 
 
 class ControllerAPIData(TypedDict):
-    """Controller data for API responses"""
+    """Controller data for API responses."""
 
     session_name: str
     status: ControllerStatusType
@@ -310,7 +308,7 @@ CommandTimeout = float | None
 # Statistics and metrics types
 @dataclass
 class PerformanceMetrics:
-    """Performance metrics data"""
+    """Performance metrics data."""
 
     operation_name: str
     start_time: float
@@ -320,13 +318,13 @@ class PerformanceMetrics:
 
     @property
     def duration(self) -> float:
-        """Get operation duration in seconds"""
+        """Get operation duration in seconds."""
         return self.end_time - self.start_time
 
 
 @dataclass
 class UsageStatistics:
-    """Usage statistics data"""
+    """Usage statistics data."""
 
     total_sessions_created: int = 0
     total_commands_executed: int = 0

@@ -81,8 +81,7 @@ class AsyncLogger(StatisticsProviderMixin):
         max_queue_size: int = 10000,
         thread_pool_size: int = 2,
     ):
-        """
-        Initialize async logger.
+        """Initialize async logger.
 
         Args:
             name: Logger name
@@ -157,7 +156,7 @@ class AsyncLogger(StatisticsProviderMixin):
                 "is_running": self._processing_task is not None and not self._processing_task.done(),
             }
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the async logger."""
         if self._processing_task and not self._processing_task.done():
             return
@@ -174,7 +173,7 @@ class AsyncLogger(StatisticsProviderMixin):
         # Log startup
         await self.info(f"AsyncLogger '{self.name}' started")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the async logger gracefully."""
         if not self._processing_task:
             return
@@ -204,7 +203,7 @@ class AsyncLogger(StatisticsProviderMixin):
         # Log shutdown
         self.fallback_logger.info(f"AsyncLogger '{self.name}' stopped")
 
-    async def _processing_loop(self):
+    async def _processing_loop(self) -> None:
         """Main processing loop for log entries."""
         try:
             while not self._stop_event.is_set():
@@ -233,7 +232,7 @@ class AsyncLogger(StatisticsProviderMixin):
         except Exception as e:
             self.fallback_logger.error(f"Fatal error in processing loop: {e}")
 
-    async def _process_entry(self, entry: LogEntry):
+    async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
         start_time = time.time()
 
@@ -329,27 +328,27 @@ class AsyncLogger(StatisticsProviderMixin):
             self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")
 
     # Convenience methods for different log levels
-    async def trace(self, message: str, **kwargs):
+    async def trace(self, message: str, **kwargs) -> None:
         """Log a trace message."""
         await self._log(LogLevel.TRACE, message, **kwargs)
 
-    async def debug(self, message: str, **kwargs):
+    async def debug(self, message: str, **kwargs) -> None:
         """Log a debug message."""
         await self._log(LogLevel.DEBUG, message, **kwargs)
 
-    async def info(self, message: str, **kwargs):
+    async def info(self, message: str, **kwargs) -> None:
         """Log an info message."""
         await self._log(LogLevel.INFO, message, **kwargs)
 
-    async def warning(self, message: str, **kwargs):
+    async def warning(self, message: str, **kwargs) -> None:
         """Log a warning message."""
         await self._log(LogLevel.WARNING, message, **kwargs)
 
-    async def error(self, message: str, exc_info: Exception | None = None, **kwargs):
+    async def error(self, message: str, exc_info: Exception | None = None, **kwargs) -> None:
         """Log an error message."""
         await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
 
-    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs):
+    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs) -> None:
         """Log a critical message."""
         await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 
@@ -357,7 +356,7 @@ class AsyncLogger(StatisticsProviderMixin):
         """Set minimum log level."""
         self.min_level = level
 
-    async def flush(self):
+    async def flush(self) -> None:
         """Flush any pending log entries."""
         # Wait for queue to empty
         while not self.log_queue.empty():
@@ -367,7 +366,7 @@ class AsyncLogger(StatisticsProviderMixin):
         if self.batch_processor:
             await self.batch_processor.wait_for_pending()
 
-    async def cleanup_old_logs(self, days_to_keep: int = 7):
+    async def cleanup_old_logs(self, days_to_keep: int = 7) -> None:
         """Clean up old log files if batch processing is enabled."""
         if self.batch_processor:
             return await self.batch_processor.cleanup_old_files(days_to_keep)

@@ -1,4 +1,4 @@
-"""Tests for task runner functionality"""
+"""Tests for task runner functionality."""
 
 import os
 import tempfile
@@ -11,17 +11,17 @@ from libs.task_runner import TaskRunner, TodoFile, TodoTask
 
 
 class TestTodoTask:
-    """Test TodoTask class"""
+    """Test TodoTask class."""
 
     def test_task_creation(self):
-        """Test creating todo tasks"""
+        """Test creating todo tasks."""
         task = TodoTask("Complete feature X", completed=False)
         assert task.content == "Complete feature X"
         assert not task.completed
         assert not task.skipped
 
     def test_task_str_representation(self):
-        """Test string representation of tasks"""
+        """Test string representation of tasks."""
         incomplete = TodoTask("Todo item")
         completed = TodoTask("Done item", completed=True)
         skipped = TodoTask("Skipped item", skipped=True)
@@ -32,10 +32,10 @@ class TestTodoTask:
 
 
 class TestTodoFile:
-    """Test TodoFile class"""
+    """Test TodoFile class."""
 
     def test_parse_todo_file(self):
-        """Test parsing todo markdown file"""
+        """Test parsing todo markdown file."""
         content = """# Test File
 
 ## Tasks
@@ -76,7 +76,7 @@ Regular text here.
                 os.unlink(f.name)
 
     def test_get_next_incomplete_task(self):
-        """Test finding next incomplete task"""
+        """Test finding next incomplete task."""
         content = """# Test
 - [x] Completed task
 - [ ] Next task
@@ -98,7 +98,7 @@ Regular text here.
                 os.unlink(f.name)
 
     def test_all_completed_check(self):
-        """Test checking if all tasks are completed"""
+        """Test checking if all tasks are completed."""
         all_done_content = """# Test
 - [x] Task 1
 - [x] Task 2
@@ -135,10 +135,10 @@ Regular text here.
 
 
 class TestTaskRunner:
-    """Test TaskRunner class"""
+    """Test TaskRunner class."""
 
     def test_analyze_task_dependencies(self):
-        """Test task dependency analysis"""
+        """Test task dependency analysis."""
         runner = TaskRunner("test/todo")
 
         # Simple task should not be broken down
@@ -153,7 +153,7 @@ class TestTaskRunner:
         assert "Analyze requirements" in subtasks[0]
 
     def test_find_todo_files(self):
-        """Test finding todo files"""
+        """Test finding todo files."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test directory structure
             todo_dir = Path(tmpdir) / "todo"
@@ -175,7 +175,7 @@ class TestTaskRunner:
 
     @patch("subprocess.run")
     def test_commit_changes(self, mock_run):
-        """Test committing changes"""
+        """Test committing changes."""
         mock_run.return_value.returncode = 0
 
         runner = TaskRunner("test/todo")
@@ -199,7 +199,7 @@ class TestTaskRunner:
 
     @patch("subprocess.run")
     def test_run_tests(self, mock_run):
-        """Test running tests"""
+        """Test running tests."""
         mock_run.return_value.returncode = 0
         mock_run.return_value.stdout = "All tests passed"
         mock_run.return_value.stderr = ""

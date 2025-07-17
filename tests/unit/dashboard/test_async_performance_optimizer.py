@@ -6,11 +6,11 @@ from libs.dashboard.performance_optimizer import AsyncPerformanceOptimizer
 
 
 class TestAsyncPerformanceOptimizer:
-    """Tests for async performance optimizer"""
+    """Tests for async performance optimizer."""
 
     @pytest.mark.asyncio
     async def test_async_performance_optimizer(self):
-        """Test 17: Async performance optimizer"""
+        """Test 17: Async performance optimizer."""
         async_optimizer = AsyncPerformanceOptimizer(monitoring_interval=0.1)
 
         # Start monitoring

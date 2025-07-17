@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Base command class with common functionality
-"""
+"""Base command class with common functionality."""
 
 import logging
 import sys
@@ -26,7 +24,7 @@ from .settings import settings
 
 
 class CommandError(YesmanError):
-    """Command-specific error"""
+    """Command-specific error."""
 
     def __init__(
         self,
@@ -45,7 +43,7 @@ class CommandError(YesmanError):
 
 
 class BaseCommand(ABC):
-    """Base class for all yesman commands"""
+    """Base class for all yesman commands."""
 
     def __init__(
         self,
@@ -53,8 +51,7 @@ class BaseCommand(ABC):
         tmux_manager: TmuxManager | None = None,
         claude_manager: ClaudeManager | None = None,
     ):
-        """
-        Initialize base command with dependency injection support
+        """Initialize base command with dependency injection support.
 
         Args:
             config: YesmanConfig instance (will use DI container if None)
@@ -75,7 +72,7 @@ class BaseCommand(ABC):
         settings.ensure_directories()
 
     def _setup_logger(self) -> logging.Logger:
-        """Set up logger for this command"""
+        """Set up logger for this command."""
         logger = logging.getLogger(f"yesman.{self.__class__.__name__.lower()}")
 
         if not logger.handlers:
@@ -89,7 +86,7 @@ class BaseCommand(ABC):
         return logger
 
     def _resolve_config(self) -> YesmanConfig:
-        """Resolve YesmanConfig from DI container with error handling"""
+        """Resolve YesmanConfig from DI container with error handling."""
         try:
             return get_config()
         except Exception as e:
@@ -105,7 +102,7 @@ class BaseCommand(ABC):
             ) from e
 
     def _resolve_tmux_manager(self) -> TmuxManager:
-        """Resolve TmuxManager from DI container with error handling"""
+        """Resolve TmuxManager from DI container with error handling."""
         try:
             return get_tmux_manager()
         except Exception as e:
@@ -113,7 +110,7 @@ class BaseCommand(ABC):
             raise CommandError(f"Tmux manager error: {e}") from e
 
     def _create_config(self) -> YesmanConfig:
-        """Create YesmanConfig instance with error handling (fallback method)"""
+        """Create YesmanConfig instance with error handling (fallback method)."""
         try:
             return YesmanConfig()
         except Exception as e:
@@ -121,7 +118,7 @@ class BaseCommand(ABC):
             raise CommandError(f"Configuration error: {e}") from e
 
     def _create_tmux_manager(self) -> TmuxManager:
-        """Create TmuxManager instance with error handling (fallback method)"""
+        """Create TmuxManager instance with error handling (fallback method)."""
         try:
             return TmuxManager(self.config)
         except Exception as e:
@@ -129,7 +126,7 @@ class BaseCommand(ABC):
             raise CommandError(f"Tmux manager error: {e}") from e
 
     def _create_claude_manager(self) -> ClaudeManager:
-        """Create ClaudeManager instance with error handling"""
+        """Create ClaudeManager instance with error handling."""
         try:
             return ClaudeManager()
         except Exception as e:
@@ -137,7 +134,7 @@ class BaseCommand(ABC):
             raise CommandError(f"Claude manager error: {e}") from e
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions (can be overridden)"""
+        """Validate command preconditions (can be overridden)."""
         # Check if tmux is available
         if not self._is_tmux_available():
             raise CommandError("tmux is not available or not properly installed")
@@ -150,13 +147,13 @@ class BaseCommand(ABC):
                 Path(path).mkdir(parents=True, exist_ok=True)
 
     def _is_tmux_available(self) -> bool:
-        """Check if tmux is available"""
+        """Check if tmux is available."""
         import shutil
 
         return shutil.which("tmux") is not None
 
     def handle_error(self, error: Exception, context_str: str = "") -> None:
-        """Standard error handling using centralized error handler"""
+        """Standard error handling using centralized error handler."""
         # Create error context if needed
         if not isinstance(error, YesmanError):
             context = ErrorContext(
@@ -168,17 +165,17 @@ class BaseCommand(ABC):
             error_handler.handle_error(error, exit_on_critical=True)
 
     def log_command_start(self, command_name: str, **kwargs) -> None:
-        """Log command start with parameters"""
+        """Log command start with parameters."""
         params = ", ".join(f"{k}={v}" for k, v in kwargs.items() if v is not None)
         self.logger.info(f"Starting command: {command_name}" + (f" with {params}" if params else ""))
 
     def log_command_end(self, command_name: str, success: bool = True) -> None:
-        """Log command completion"""
+        """Log command completion."""
         status = "completed successfully" if success else "failed"
         self.logger.info(f"Command {command_name} {status}")
 
     def confirm_action(self, message: str, default: bool = False) -> bool:
-        """Ask for user confirmation"""
+        """Ask for user confirmation."""
         try:
             return click.confirm(message, default=default)
         except click.Abort:
@@ -186,28 +183,28 @@ class BaseCommand(ABC):
             sys.exit(0)
 
     def print_success(self, message: str) -> None:
-        """Print success message with formatting"""
+        """Print success message with formatting."""
         click.echo(click.style(f"✅ {message}", fg="green"))
 
     def print_warning(self, message: str) -> None:
-        """Print warning message with formatting"""
+        """Print warning message with formatting."""
         click.echo(click.style(f"⚠️  {message}", fg="yellow"))
 
     def print_error(self, message: str) -> None:
-        """Print error message with formatting"""
+        """Print error message with formatting."""
         click.echo(click.style(f"❌ {message}", fg="red"))
 
     def print_info(self, message: str) -> None:
-        """Print info message with formatting"""
+        """Print info message with formatting."""
         click.echo(click.style(f"ℹ️  {message}", fg="blue"))
 
     @abstractmethod
     def execute(self, **kwargs) -> Any:
-        """Execute the command (must be implemented by subclasses)"""
+        """Execute the command (must be implemented by subclasses)."""
         pass
 
     def run(self, **kwargs) -> Any:
-        """Main execution wrapper with error handling"""
+        """Main execution wrapper with error handling."""
         command_name = self.__class__.__name__.replace("Command", "").lower()
 
         try:
@@ -228,14 +225,14 @@ class BaseCommand(ABC):
             self.handle_unexpected_error(e)
 
     def handle_success(self, result: Any) -> None:
-        """Handle successful command execution"""
+        """Handle successful command execution."""
         # Default implementation - can be overridden
         if result and isinstance(result, dict):
             if result.get("message"):
                 self.print_success(result["message"])
 
     def handle_yesman_error(self, error: YesmanError) -> None:
-        """Handle YesmanError with recovery hints"""
+        """Handle YesmanError with recovery hints."""
         self.print_error(error.message)
 
         if error.recovery_hint:
@@ -244,7 +241,7 @@ class BaseCommand(ABC):
         error_handler.handle_error(error, exit_on_critical=True)
 
     def handle_unexpected_error(self, error: Exception) -> None:
-        """Handle unexpected errors"""
+        """Handle unexpected errors."""
         self.print_error(f"Unexpected error: {error}")
 
         # Create context for unexpected error
@@ -257,10 +254,10 @@ class BaseCommand(ABC):
 
 
 class SessionCommandMixin:
-    """Mixin for commands that work with sessions"""
+    """Mixin for commands that work with sessions."""
 
     def get_session_list(self) -> list[str]:
-        """Get list of available sessions"""
+        """Get list of available sessions."""
         try:
             sessions = self.tmux_manager.get_all_sessions()
             return [session.get("session_name", "unknown") for session in sessions]
@@ -269,7 +266,7 @@ class SessionCommandMixin:
             return []
 
     def validate_session_name(self, session_name: str) -> None:
-        """Validate session name format"""
+        """Validate session name format."""
         if not session_name:
             raise CommandError("Session name cannot be empty")
 
@@ -284,7 +281,7 @@ class SessionCommandMixin:
             raise CommandError("Session name can only contain letters, numbers, underscores, and hyphens")
 
     def session_exists(self, session_name: str) -> bool:
-        """Check if session exists"""
+        """Check if session exists."""
         try:
             return session_name in self.get_session_list()
         except Exception:
@@ -292,10 +289,10 @@ class SessionCommandMixin:
 
 
 class ConfigCommandMixin:
-    """Mixin for commands that work with configuration"""
+    """Mixin for commands that work with configuration."""
 
     def load_projects_config(self) -> dict[str, Any]:
-        """Load projects configuration with error handling"""
+        """Load projects configuration with error handling."""
         try:
             import yaml
 
@@ -308,7 +305,7 @@ class ConfigCommandMixin:
             raise CommandError(f"Failed to load projects configuration: {e}") from e
 
     def save_projects_config(self, config: dict[str, Any]) -> None:
-        """Save projects configuration with error handling"""
+        """Save projects configuration with error handling."""
         try:
             import yaml
 
@@ -318,7 +315,7 @@ class ConfigCommandMixin:
             raise CommandError(f"Failed to save projects configuration: {e}") from e
 
     def backup_config(self, config_path: str) -> str:
-        """Create backup of configuration file"""
+        """Create backup of configuration file."""
         import shutil
         from datetime import datetime
 
@@ -333,10 +330,10 @@ class ConfigCommandMixin:
 
 
 class OutputFormatterMixin:
-    """Mixin for commands that need output formatting"""
+    """Mixin for commands that need output formatting."""
 
     def format_table(self, data: list[dict[str, Any]], headers: list[str]) -> str:
-        """Format data as table"""
+        """Format data as table."""
         if not data:
             return "No data to display"
 
@@ -364,13 +361,13 @@ class OutputFormatterMixin:
         return "\n".join(lines)
 
     def format_json(self, data: Any, indent: int = 2) -> str:
-        """Format data as JSON"""
+        """Format data as JSON."""
         import json
 
         return json.dumps(data, indent=indent, default=str)
 
     def format_yaml(self, data: Any) -> str:
-        """Format data as YAML"""
+        """Format data as YAML."""
         import yaml
 
         return yaml.dump(data, default_flow_style=False)

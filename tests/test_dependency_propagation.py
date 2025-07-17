@@ -1,4 +1,4 @@
-"""Tests for DependencyPropagationSystem dependency change tracking and propagation"""
+"""Tests for DependencyPropagationSystem dependency change tracking and propagation."""
 
 import asyncio
 import tempfile
@@ -11,14 +11,22 @@ import pytest
 from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import CollaborationEngine
-from libs.multi_agent.dependency_propagation import ChangeImpact, DependencyChange, DependencyNode, DependencyPropagationSystem, DependencyType, PropagationResult, PropagationStrategy
+from libs.multi_agent.dependency_propagation import (
+    ChangeImpact,
+    DependencyChange,
+    DependencyNode,
+    DependencyPropagationSystem,
+    DependencyType,
+    PropagationResult,
+    PropagationStrategy,
+)
 
 
 class TestDependencyNode:
-    """Test cases for DependencyNode dataclass"""
+    """Test cases for DependencyNode dataclass."""
 
     def test_init(self):
-        """Test DependencyNode initialization"""
+        """Test DependencyNode initialization."""
         node = DependencyNode(
             file_path="src/main.py",
             module_name="src.main",
@@ -41,10 +49,10 @@ class TestDependencyNode:
 
 
 class TestDependencyChange:
-    """Test cases for DependencyChange dataclass"""
+    """Test cases for DependencyChange dataclass."""
 
     def test_init(self):
-        """Test DependencyChange initialization"""
+        """Test DependencyChange initialization."""
         change = DependencyChange(
             change_id="change-123",
             source_file="src/utils.py",
@@ -74,10 +82,10 @@ class TestDependencyChange:
 
 
 class TestPropagationResult:
-    """Test cases for PropagationResult dataclass"""
+    """Test cases for PropagationResult dataclass."""
 
     def test_init(self):
-        """Test PropagationResult initialization"""
+        """Test PropagationResult initialization."""
         result = PropagationResult(
             change_id="change-123",
             success=True,
@@ -99,11 +107,11 @@ class TestPropagationResult:
 
 
 class TestDependencyPropagationSystem:
-    """Test cases for DependencyPropagationSystem"""
+    """Test cases for DependencyPropagationSystem."""
 
     @pytest.fixture
     def temp_repo(self):
-        """Create temporary repository for testing"""
+        """Create temporary repository for testing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_path = Path(tmpdir)
 
@@ -154,14 +162,14 @@ def test_processor():
 
     @pytest.fixture
     def mock_collaboration_engine(self):
-        """Create mock collaboration engine"""
+        """Create mock collaboration engine."""
         engine = Mock(spec=CollaborationEngine)
         engine.send_message = AsyncMock(return_value="message-123")
         return engine
 
     @pytest.fixture
     def mock_branch_info_protocol(self):
-        """Create mock branch info protocol"""
+        """Create mock branch info protocol."""
         protocol = Mock(spec=BranchInfoProtocol)
         protocol.update_branch_info = AsyncMock()
         protocol.get_all_branches_info = AsyncMock(
@@ -177,7 +185,7 @@ def test_processor():
 
     @pytest.fixture
     def mock_branch_manager(self):
-        """Create mock branch manager"""
+        """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
@@ -188,7 +196,7 @@ def test_processor():
         mock_branch_manager,
         temp_repo,
     ):
-        """Create DependencyPropagationSystem instance"""
+        """Create DependencyPropagationSystem instance."""
         return DependencyPropagationSystem(
             collaboration_engine=mock_collaboration_engine,
             branch_info_protocol=mock_branch_info_protocol,
@@ -204,7 +212,7 @@ def test_processor():
         mock_branch_info_protocol,
         mock_branch_manager,
     ):
-        """Test DependencyPropagationSystem initialization"""
+        """Test DependencyPropagationSystem initialization."""
         assert propagation_system.collaboration_engine == mock_collaboration_engine
         assert propagation_system.branch_info_protocol == mock_branch_info_protocol
         assert propagation_system.branch_manager == mock_branch_manager
@@ -218,7 +226,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_start_stop(self, propagation_system):
-        """Test starting and stopping the system"""
+        """Test starting and stopping the system."""
         # Start system
         await propagation_system.start()
         assert propagation_system._running is True
@@ -231,7 +239,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_track_dependency_change(self, propagation_system):
-        """Test tracking a dependency change"""
+        """Test tracking a dependency change."""
         change_id = await propagation_system.track_dependency_change(
             file_path="src/utils.py",
             changed_by="agent-1",
@@ -260,7 +268,7 @@ def test_processor():
         self,
         propagation_system,
     ):
-        """Test auto-detection of change impact level"""
+        """Test auto-detection of change impact level."""
         # Breaking change keywords
         change_id = await propagation_system.track_dependency_change(
             file_path="src/utils.py",
@@ -296,7 +304,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_build_dependency_graph(self, propagation_system):
-        """Test building dependency graph from source files"""
+        """Test building dependency graph from source files."""
         dependency_graph = await propagation_system.build_dependency_graph()
 
         assert len(dependency_graph) > 0
@@ -315,7 +323,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_get_dependency_impact_report(self, propagation_system):
-        """Test getting dependency impact report"""
+        """Test getting dependency impact report."""
         # Build dependency graph first
         await propagation_system.build_dependency_graph()
 
@@ -341,7 +349,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_propagate_changes_to_branches(self, propagation_system):
-        """Test propagating changes to target branches"""
+        """Test propagating changes to target branches."""
         # Track some changes first
         change_id1 = await propagation_system.track_dependency_change(
             file_path="src/utils.py",
@@ -372,7 +380,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_get_pending_changes(self, propagation_system):
-        """Test getting pending changes"""
+        """Test getting pending changes."""
         # Track some changes
         await propagation_system.track_dependency_change(
             file_path="src/utils.py",
@@ -409,7 +417,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_analyze_change_impact_detection(self, propagation_system):
-        """Test impact level detection logic"""
+        """Test impact level detection logic."""
         # Test breaking change detection
         impact = await propagation_system._analyze_change_impact(
             "src/utils.py",
@@ -460,7 +468,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_find_affected_files(self, propagation_system):
-        """Test finding files affected by changes"""
+        """Test finding files affected by changes."""
         # Build dependency graph first
         await propagation_system.build_dependency_graph()
 
@@ -476,7 +484,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_find_affected_branches(self, propagation_system):
-        """Test finding branches affected by file changes"""
+        """Test finding branches affected by file changes."""
         affected_files = ["src/main.py", "src/utils.py"]
 
         affected_branches = await propagation_system._find_affected_branches(
@@ -488,7 +496,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_calculate_indirect_dependents(self, propagation_system):
-        """Test calculating indirect dependent count"""
+        """Test calculating indirect dependent count."""
         # Build dependency graph
         await propagation_system.build_dependency_graph()
 
@@ -500,7 +508,7 @@ def test_processor():
             assert count >= 0
 
     def test_calculate_complexity_score(self, propagation_system):
-        """Test complexity score calculation"""
+        """Test complexity score calculation."""
         node = DependencyNode(
             file_path="test.py",
             module_name="test",
@@ -525,7 +533,7 @@ def test_processor():
         assert score == 10.0  # Should be capped
 
     def test_calculate_risk_level(self, propagation_system):
-        """Test risk level calculation"""
+        """Test risk level calculation."""
         # High risk: high complexity or high impact
         assert propagation_system._calculate_risk_level(8.0, 5) == "high"
         assert propagation_system._calculate_risk_level(5.0, 15) == "high"
@@ -538,7 +546,7 @@ def test_processor():
         assert propagation_system._calculate_risk_level(2.0, 2) == "low"
 
     def test_get_propagation_summary(self, propagation_system):
-        """Test getting propagation system summary"""
+        """Test getting propagation system summary."""
         summary = propagation_system.get_propagation_summary()
 
         assert "statistics" in summary
@@ -555,7 +563,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_propagation_stats_tracking(self, propagation_system):
-        """Test that statistics are properly tracked"""
+        """Test that statistics are properly tracked."""
         initial_stats = propagation_system.propagation_stats.copy()
 
         # Track a change
@@ -572,7 +580,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_immediate_propagation_for_critical_changes(self, propagation_system):
-        """Test that critical changes trigger immediate propagation"""
+        """Test that critical changes trigger immediate propagation."""
         # Start the system to enable processing
         await propagation_system.start()
 
@@ -596,7 +604,7 @@ def test_processor():
 
     @pytest.mark.asyncio
     async def test_notification_to_affected_agents(self, propagation_system):
-        """Test that affected agents are notified of changes"""
+        """Test that affected agents are notified of changes."""
         await propagation_system.start()
 
         # Track a change that affects multiple branches

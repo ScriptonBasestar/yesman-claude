@@ -1,4 +1,4 @@
-"""Rollback mechanism and error recovery system for multi-agent operations"""
+"""Rollback mechanism and error recovery system for multi-agent operations."""
 
 import asyncio
 import contextlib
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class RecoveryAction(Enum):
-    """Types of recovery actions"""
+    """Types of recovery actions."""
 
     RETRY = "retry"
     ROLLBACK = "rollback"
@@ -32,7 +32,7 @@ class RecoveryAction(Enum):
 
 
 class OperationType(Enum):
-    """Types of operations that can be rolled back"""
+    """Types of operations that can be rolled back."""
 
     TASK_EXECUTION = "task_execution"
     BRANCH_OPERATION = "branch_operation"
@@ -44,7 +44,7 @@ class OperationType(Enum):
 
 @dataclass
 class OperationSnapshot:
-    """Snapshot of system state before an operation"""
+    """Snapshot of system state before an operation."""
 
     snapshot_id: str
     operation_type: OperationType
@@ -62,7 +62,7 @@ class OperationSnapshot:
     rollback_instructions: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization"""
+        """Convert to dictionary for serialization."""
         return {
             "snapshot_id": self.snapshot_id,
             "operation_type": self.operation_type.value,
@@ -78,7 +78,7 @@ class OperationSnapshot:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "OperationSnapshot":
-        """Create from dictionary"""
+        """Create from dictionary."""
         data["operation_type"] = OperationType(data["operation_type"])
         data["timestamp"] = datetime.fromisoformat(data["timestamp"])
         return cls(**data)
@@ -86,7 +86,7 @@ class OperationSnapshot:
 
 @dataclass
 class RecoveryStrategy:
-    """Strategy for recovering from specific types of errors"""
+    """Strategy for recovering from specific types of errors."""
 
     error_pattern: str  # Regex pattern to match error messages
     max_retries: int = 3
@@ -97,7 +97,7 @@ class RecoveryStrategy:
 
 
 class RecoveryEngine:
-    """Comprehensive rollback and error recovery system"""
+    """Comprehensive rollback and error recovery system."""
 
     def __init__(
         self,
@@ -105,8 +105,7 @@ class RecoveryEngine:
         max_snapshots: int = 50,
         auto_cleanup_hours: int = 24,
     ):
-        """
-        Initialize recovery engine
+        """Initialize recovery engine.
 
         Args:
             work_dir: Directory for storing snapshots and recovery data
@@ -147,11 +146,11 @@ class RecoveryEngine:
         self._setup_default_strategies()
 
     def _get_state_file(self) -> Path:
-        """Get path to recovery state file"""
+        """Get path to recovery state file."""
         return self.work_dir / "recovery_state.json"
 
     def _load_state(self) -> None:
-        """Load recovery engine state"""
+        """Load recovery engine state."""
         state_file = self._get_state_file()
 
         if state_file.exists():
@@ -188,7 +187,7 @@ class RecoveryEngine:
             logger.warning(f"Failed to load snapshot files: {e}")
 
     def _save_state(self) -> None:
-        """Save recovery engine state"""
+        """Save recovery engine state."""
         state_file = self._get_state_file()
 
         try:
@@ -207,8 +206,7 @@ class RecoveryEngine:
             logger.error(f"Failed to save recovery state: {e}")
 
     def _setup_default_strategies(self) -> None:
-        """Setup default recovery strategies"""
-
+        """Setup default recovery strategies."""
         # Task execution failures
         self.register_recovery_strategy(
             name="task_timeout",
@@ -268,8 +266,7 @@ class RecoveryEngine:
         escalation_threshold: int = 5,
         custom_handler: Callable | None = None,
     ) -> None:
-        """Register a recovery strategy"""
-
+        """Register a recovery strategy."""
         if recovery_actions is None:
             recovery_actions = [RecoveryAction.RETRY, RecoveryAction.ROLLBACK]
 
@@ -294,8 +291,7 @@ class RecoveryEngine:
         files_to_backup: list[str] = None,
         operation_context: dict[str, Any] = None,
     ) -> str:
-        """
-        Create a snapshot before a critical operation
+        """Create a snapshot before a critical operation.
 
         Args:
             operation_type: Type of operation being performed
@@ -370,7 +366,7 @@ class RecoveryEngine:
             raise
 
     async def _backup_file(self, snapshot_id: str, file_path: str) -> str | None:
-        """Backup a file for potential rollback"""
+        """Backup a file for potential rollback."""
         try:
             source_path = Path(file_path)
             if not source_path.exists():
@@ -393,8 +389,7 @@ class RecoveryEngine:
         branch_manager=None,
         restore_files: bool = True,
     ) -> bool:
-        """
-        Rollback to a previous snapshot
+        """Rollback to a previous snapshot.
 
         Args:
             snapshot_id: ID of snapshot to rollback to
@@ -444,8 +439,7 @@ class RecoveryEngine:
             return False
 
     async def _restore_agent_states(self, agent_pool, agent_states: dict[str, dict[str, Any]]) -> None:
-        """Restore agent states from snapshot"""
-
+        """Restore agent states from snapshot."""
         for agent_id, agent_data in agent_states.items():
             try:
                 if agent_id in agent_pool.agents:
@@ -474,8 +468,7 @@ class RecoveryEngine:
                 logger.warning(f"Failed to restore agent {agent_id}: {e}")
 
     async def _restore_task_states(self, agent_pool, task_states: dict[str, dict[str, Any]]) -> None:
-        """Restore task states from snapshot"""
-
+        """Restore task states from snapshot."""
         # Clear current tasks and restore from snapshot
         agent_pool.tasks.clear()
 
@@ -496,7 +489,7 @@ class RecoveryEngine:
                 logger.warning(f"Failed to restore task {task_id}: {e}")
 
     async def _restore_branch_state(self, branch_manager, branch_state: dict[str, Any]) -> None:
-        """Restore branch state from snapshot"""
+        """Restore branch state from snapshot."""
         try:
             current_branch = branch_state.get("current_branch")
             if current_branch:
@@ -522,7 +515,7 @@ class RecoveryEngine:
             logger.warning(f"Failed to restore branch state: {e}")
 
     async def _restore_files(self, file_states: dict[str, str]) -> None:
-        """Restore files from backup"""
+        """Restore files from backup."""
         for original_path, backup_path in file_states.items():
             try:
                 if Path(backup_path).exists():
@@ -534,7 +527,7 @@ class RecoveryEngine:
                 logger.warning(f"Failed to restore file {original_path}: {e}")
 
     async def _execute_rollback_instruction(self, instruction: dict[str, Any]) -> None:
-        """Execute a custom rollback instruction"""
+        """Execute a custom rollback instruction."""
         try:
             instruction_type = instruction.get("type")
 
@@ -573,8 +566,7 @@ class RecoveryEngine:
         agent_pool=None,
         branch_manager=None,
     ) -> bool:
-        """
-        Handle an operation failure with automatic recovery
+        """Handle an operation failure with automatic recovery.
 
         Args:
             operation_id: ID of the failed operation
@@ -665,7 +657,7 @@ class RecoveryEngine:
             self._save_state()
 
     def _find_recovery_strategy(self, error_message: str) -> RecoveryStrategy | None:
-        """Find the best matching recovery strategy for an error"""
+        """Find the best matching recovery strategy for an error."""
         import re
 
         # Try to find a specific match first
@@ -685,8 +677,7 @@ class RecoveryEngine:
         agent_pool=None,
         branch_manager=None,
     ) -> bool:
-        """Execute a specific recovery action"""
-
+        """Execute a specific recovery action."""
         try:
             if action == RecoveryAction.RETRY:
                 # Retry logic should be handled by the caller
@@ -758,7 +749,7 @@ class RecoveryEngine:
         exception: Exception,
         context: dict[str, Any],
     ) -> None:
-        """Escalate a failure to higher level handling"""
+        """Escalate a failure to higher level handling."""
         escalation_data = {
             "operation_id": operation_id,
             "error": str(exception),
@@ -789,7 +780,7 @@ class RecoveryEngine:
         logger.critical(f"Escalated failure for operation {operation_id}: {exception}")
 
     async def _cleanup_old_snapshots(self) -> None:
-        """Clean up old snapshots to prevent disk space issues"""
+        """Clean up old snapshots to prevent disk space issues."""
         try:
             current_time = datetime.now()
             cutoff_time = current_time - timedelta(hours=self.auto_cleanup_hours)
@@ -823,7 +814,7 @@ class RecoveryEngine:
             logger.error(f"Failed to cleanup old snapshots: {e}")
 
     async def _remove_snapshot(self, snapshot_id: str) -> None:
-        """Remove a snapshot and its associated backups"""
+        """Remove a snapshot and its associated backups."""
         try:
             # Remove from memory
             if snapshot_id in self.snapshots:
@@ -843,16 +834,16 @@ class RecoveryEngine:
             logger.warning(f"Failed to remove snapshot {snapshot_id}: {e}")
 
     def start_operation(self, operation_id: str, snapshot_id: str) -> None:
-        """Register that an operation is starting with a snapshot"""
+        """Register that an operation is starting with a snapshot."""
         self.active_operations[operation_id] = snapshot_id
 
     def complete_operation(self, operation_id: str) -> None:
-        """Mark an operation as completed successfully"""
+        """Mark an operation as completed successfully."""
         if operation_id in self.active_operations:
             del self.active_operations[operation_id]
 
     def get_recovery_metrics(self) -> dict[str, Any]:
-        """Get recovery and rollback metrics"""
+        """Get recovery and rollback metrics."""
         return {
             **self.recovery_metrics,
             "active_operations": len(self.active_operations),
@@ -862,7 +853,7 @@ class RecoveryEngine:
         }
 
     def _calculate_disk_usage(self) -> float:
-        """Calculate disk usage of recovery system in MB"""
+        """Calculate disk usage of recovery system in MB."""
         try:
             total_size = 0
             for file_path in self.work_dir.rglob("*"):
@@ -873,11 +864,11 @@ class RecoveryEngine:
             return 0.0
 
     def get_recent_operations(self, limit: int = 20) -> list[dict[str, Any]]:
-        """Get recent operation history"""
+        """Get recent operation history."""
         return self.operation_history[-limit:]
 
     def get_snapshot_info(self, snapshot_id: str) -> dict[str, Any] | None:
-        """Get information about a specific snapshot"""
+        """Get information about a specific snapshot."""
         if snapshot_id in self.snapshots:
             return self.snapshots[snapshot_id].to_dict()
         return None
@@ -888,6 +879,6 @@ class RecoveryEngine:
         agent_pool=None,
         branch_manager=None,
     ) -> bool:
-        """Manually trigger a rollback to a specific snapshot"""
+        """Manually trigger a rollback to a specific snapshot."""
         logger.info(f"Manual rollback requested to snapshot {snapshot_id}")
         return await self.rollback_operation(snapshot_id, agent_pool, branch_manager)

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Centralized error handling and exception management
-"""
+"""Centralized error handling and exception management."""
 
 import logging
 import sys
@@ -11,7 +9,7 @@ from typing import Any
 
 
 class ErrorCategory(Enum):
-    """Categories of errors for better classification"""
+    """Categories of errors for better classification."""
 
     CONFIGURATION = "configuration"
     VALIDATION = "validation"
@@ -25,7 +23,7 @@ class ErrorCategory(Enum):
 
 
 class ErrorSeverity(Enum):
-    """Error severity levels"""
+    """Error severity levels."""
 
     LOW = "low"
     MEDIUM = "medium"
@@ -35,7 +33,7 @@ class ErrorSeverity(Enum):
 
 @dataclass
 class ErrorContext:
-    """Context information for errors"""
+    """Context information for errors."""
 
     operation: str
     component: str
@@ -46,7 +44,7 @@ class ErrorContext:
 
 
 class YesmanError(Exception):
-    """Base exception class for all Yesman errors"""
+    """Base exception class for all Yesman errors."""
 
     def __init__(
         self,
@@ -70,7 +68,7 @@ class YesmanError(Exception):
         super().__init__(message)
 
     def _generate_error_code(self) -> str:
-        """Generate error code from category and message"""
+        """Generate error code from category and message."""
         # Create a simple error code from category and hash of message
         import hashlib
 
@@ -78,7 +76,7 @@ class YesmanError(Exception):
         return f"{self.category.value.upper()}_{msg_hash}"
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert error to dictionary for logging/serialization"""
+        """Convert error to dictionary for logging/serialization."""
         result = {
             "code": self.error_code,
             "message": self.message,
@@ -111,7 +109,7 @@ class YesmanError(Exception):
 
 
 class ConfigurationError(YesmanError):
-    """Configuration-related errors"""
+    """Configuration-related errors."""
 
     def __init__(self, message: str, config_file: str | None = None, **kwargs):
         context = ErrorContext(
@@ -133,7 +131,7 @@ class ConfigurationError(YesmanError):
 
 
 class ValidationError(YesmanError):
-    """Validation-related errors"""
+    """Validation-related errors."""
 
     def __init__(self, message: str, field_name: str | None = None, **kwargs):
         context = ErrorContext(
@@ -158,7 +156,7 @@ class ValidationError(YesmanError):
 
 
 class SessionError(YesmanError):
-    """Session management related errors"""
+    """Session management related errors."""
 
     def __init__(self, message: str, session_name: str | None = None, **kwargs):
         context = ErrorContext(
@@ -183,7 +181,7 @@ class SessionError(YesmanError):
 
 
 class NetworkError(YesmanError):
-    """Network-related errors"""
+    """Network-related errors."""
 
     def __init__(self, message: str, endpoint: str | None = None, **kwargs):
         context = ErrorContext(
@@ -200,7 +198,7 @@ class NetworkError(YesmanError):
 
 
 class PermissionError(YesmanError):
-    """Permission-related errors"""
+    """Permission-related errors."""
 
     def __init__(self, message: str, resource_path: str | None = None, **kwargs):
         context = ErrorContext(
@@ -217,7 +215,7 @@ class PermissionError(YesmanError):
 
 
 class TimeoutError(YesmanError):
-    """Timeout-related errors"""
+    """Timeout-related errors."""
 
     def __init__(self, message: str, timeout_duration: float | None = None, **kwargs):
         context = ErrorContext(
@@ -234,7 +232,7 @@ class TimeoutError(YesmanError):
 
 
 class ErrorHandler:
-    """Centralized error handling and reporting"""
+    """Centralized error handling and reporting."""
 
     def __init__(self, logger_name: str = "yesman.error_handler"):
         self.logger = logging.getLogger(logger_name)
@@ -252,8 +250,7 @@ class ErrorHandler:
         log_traceback: bool = True,
         exit_on_critical: bool = True,
     ) -> None:
-        """
-        Handle an error with logging and optional exit
+        """Handle an error with logging and optional exit.
 
         Args:
             error: The error to handle
@@ -275,7 +272,7 @@ class ErrorHandler:
             self._handle_critical_error(yesman_error)
 
     def _update_error_stats(self, error: YesmanError) -> None:
-        """Update error statistics"""
+        """Update error statistics."""
         self.error_stats["total_errors"] += 1
 
         # By category
@@ -292,7 +289,7 @@ class ErrorHandler:
             self.error_stats["by_component"][component] = self.error_stats["by_component"].get(component, 0) + 1
 
     def _log_error(self, error: YesmanError, log_traceback: bool) -> None:
-        """Log error with appropriate level"""
+        """Log error with appropriate level."""
         # Determine log level
         level_map = {
             ErrorSeverity.LOW: logging.WARNING,
@@ -332,7 +329,7 @@ class ErrorHandler:
             self.logger.debug("Full traceback:", exc_info=error.cause)
 
     def _handle_critical_error(self, error: YesmanError) -> None:
-        """Handle critical errors"""
+        """Handle critical errors."""
         self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")
 
         # Print user-friendly error message
@@ -343,11 +340,11 @@ class ErrorHandler:
         sys.exit(error.exit_code)
 
     def get_error_summary(self) -> dict[str, Any]:
-        """Get error statistics summary"""
+        """Get error statistics summary."""
         return self.error_stats.copy()
 
     def reset_stats(self) -> None:
-        """Reset error statistics"""
+        """Reset error statistics."""
         self.error_stats = {
             "total_errors": 0,
             "by_category": {},
@@ -361,7 +358,7 @@ error_handler = ErrorHandler()
 
 
 def handle_exceptions(func):
-    """Decorator for automatic exception handling"""
+    """Decorator for automatic exception handling."""
 
     def wrapper(*args, **kwargs):
         try:
@@ -387,8 +384,7 @@ def safe_execute(
     error_category: ErrorCategory = ErrorCategory.UNKNOWN,
     **kwargs,
 ) -> Any:
-    """
-    Safely execute a function with error handling
+    """Safely execute a function with error handling.
 
     Args:
         operation: Description of the operation

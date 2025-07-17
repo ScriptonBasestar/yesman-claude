@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-"""
-Improved setup command using refactored session setup logic
-"""
+"""Improved setup command using refactored session setup logic."""
 
 import click
 
-from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin, SessionCommandMixin
+from libs.core.base_command import (
+    BaseCommand,
+    CommandError,
+    ConfigCommandMixin,
+    SessionCommandMixin,
+)
 from libs.core.progress_indicators import with_startup_progress
 from libs.core.session_setup import SessionSetupService
 
 
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
-    """Create all tmux sessions defined in projects.yaml"""
+    """Create all tmux sessions defined in projects.yaml."""
 
     def execute(self, session_name: str | None = None) -> dict:
-        """
-        Execute the setup command
+        """Execute the setup command.
 
         Args:
             session_name: Optional session name to set up only that session
@@ -55,7 +57,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
         return result
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions"""
+        """Validate command preconditions."""
         super().validate_preconditions()
 
         # Check if projects.yaml exists
@@ -77,8 +79,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     help="Force recreation of existing sessions without prompting",
 )
 def setup(session_name: str | None, dry_run: bool, force: bool):
-    """
-    Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
+    """Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
 
     Args:
         session_name: Optional session name to set up only that session

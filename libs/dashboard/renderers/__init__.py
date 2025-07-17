@@ -1,6 +1,5 @@
-"""
-Dashboard Renderers Package
-Multi-format rendering system for Yesman Claude dashboard
+"""Dashboard Renderers Package
+Multi-format rendering system for Yesman Claude dashboard.
 """
 
 from .base_renderer import BaseRenderer, RenderFormat, ThemeColor, WidgetType

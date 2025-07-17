@@ -1,4 +1,4 @@
-"""Service registration and DI container setup"""
+"""Service registration and DI container setup."""
 
 from libs.core.container import container
 from libs.core.session_manager import SessionManager
@@ -7,8 +7,7 @@ from libs.yesman_config import YesmanConfig
 
 
 def register_core_services() -> None:
-    """Register all core services with the DI container"""
-
+    """Register all core services with the DI container."""
     # Register YesmanConfig as a singleton factory
     container.register_factory(YesmanConfig, lambda: YesmanConfig())
 
@@ -20,7 +19,7 @@ def register_core_services() -> None:
 
 
 def register_test_services(config: YesmanConfig | None = None, tmux_manager: TmuxManager | None = None) -> None:
-    """Register mock services for testing
+    """Register mock services for testing.
 
     Args:
         config: Optional mock config instance
@@ -45,27 +44,27 @@ def register_test_services(config: YesmanConfig | None = None, tmux_manager: Tmu
 
 
 def get_config() -> YesmanConfig:
-    """Convenience function to get YesmanConfig from container"""
+    """Convenience function to get YesmanConfig from container."""
     return container.resolve(YesmanConfig)
 
 
 def get_tmux_manager() -> TmuxManager:
-    """Convenience function to get TmuxManager from container"""
+    """Convenience function to get TmuxManager from container."""
     return container.resolve(TmuxManager)
 
 
 def get_session_manager() -> SessionManager:
-    """Convenience function to get SessionManager from container"""
+    """Convenience function to get SessionManager from container."""
     return container.resolve(SessionManager)
 
 
 def is_container_initialized() -> bool:
-    """Check if the container has been initialized with core services"""
+    """Check if the container has been initialized with core services."""
     return container.is_registered(YesmanConfig) and container.is_registered(TmuxManager) and container.is_registered(SessionManager)
 
 
 def initialize_services() -> None:
-    """Initialize services if not already done"""
+    """Initialize services if not already done."""
     if not is_container_initialized():
         register_core_services()
 

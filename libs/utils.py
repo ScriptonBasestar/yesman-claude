@@ -1,4 +1,4 @@
-"""Utility functions for yesman"""
+"""Utility functions for yesman."""
 
 import logging
 import os
@@ -6,8 +6,7 @@ from pathlib import Path
 
 
 def ensure_log_directory(log_path: Path) -> Path:
-    """
-    Ensure log directory exists with proper permissions.
+    """Ensure log directory exists with proper permissions.
 
     Args:
         log_path: Path to the log directory

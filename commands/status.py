@@ -1,4 +1,4 @@
-"""Comprehensive project status dashboard command"""
+"""Comprehensive project status dashboard command."""
 
 import time
 from pathlib import Path
@@ -11,14 +11,26 @@ from rich.panel import Panel
 
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.session_manager import SessionManager
-from libs.dashboard.widgets import ActivityHeatmapGenerator, GitActivityWidget, ProgressTracker, ProjectHealth, SessionBrowser
+from libs.dashboard.widgets import (
+    ActivityHeatmapGenerator,
+    GitActivityWidget,
+    ProgressTracker,
+    ProjectHealth,
+    SessionBrowser,
+)
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 
 class StatusDashboard:
-    """Comprehensive status dashboard"""
+    """Comprehensive status dashboard."""
 
-    def __init__(self, project_path: str = ".", update_interval: float = 5.0, config=None, tmux_manager=None):
+    def __init__(
+        self,
+        project_path: str = ".",
+        update_interval: float = 5.0,
+        config=None,
+        tmux_manager=None,
+    ):
         self.console = Console()
         self.project_path = Path(project_path).resolve()
         self.project_name = self.project_path.name
@@ -44,7 +56,7 @@ class StatusDashboard:
         self.progress_data = None
 
     def _load_todo_data(self):
-        """Load TODO data from various sources"""
+        """Load TODO data from various sources."""
         # Try to load from common TODO file locations
         todo_files = [
             self.project_path / "TODO.md",
@@ -58,7 +70,7 @@ class StatusDashboard:
                 break
 
     def update_data(self):
-        """Update all dashboard data"""
+        """Update all dashboard data."""
         try:
             # Update session data
             sessions_list = self.tmux_manager.get_cached_sessions_list()
@@ -88,7 +100,7 @@ class StatusDashboard:
             self.console.print(f"[red]Error updating data: {e}[/]")
 
     def _calculate_session_activity(self, session_info: dict) -> float:
-        """Calculate activity level for a session"""
+        """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
 
@@ -111,7 +123,7 @@ class StatusDashboard:
         return min(activity, 1.0)
 
     def create_layout(self) -> Layout:
-        """Create the dashboard layout"""
+        """Create the dashboard layout."""
         layout = Layout()
 
         # Main layout structure
@@ -143,9 +155,10 @@ class StatusDashboard:
         return layout
 
     def update_layout(self, layout: Layout):
-        """Update layout with current data"""
+        """Update layout with current data."""
         # Header
-        header_text = f"🚀 Yesman Project Dashboard - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache Hit Rate: {self.tmux_manager.get_cache_stats().get('hit_rate', 0):.1%}"
+        cache_hit_rate = self.tmux_manager.get_cache_stats().get("hit_rate", 0)
+        header_text = f"🚀 Yesman Project Dashboard - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache Hit Rate: {cache_hit_rate:.1%}"
         layout["header"].update(Panel(header_text, style="bold blue"))
 
         # Sessions
@@ -187,7 +200,7 @@ class StatusDashboard:
         layout["footer"].update(Panel(footer_text, style="dim"))
 
     def run_interactive(self):
-        """Run interactive dashboard"""
+        """Run interactive dashboard."""
         layout = self.create_layout()
 
         try:
@@ -201,7 +214,7 @@ class StatusDashboard:
             self.console.print("\\n[yellow]Dashboard stopped[/]")
 
     def render_detailed_view(self):
-        """Render detailed view with all components"""
+        """Render detailed view with all components."""
         self.update_data()
 
         # Create detailed panels
@@ -236,10 +249,17 @@ class StatusDashboard:
 
 
 class StatusCommand(BaseCommand, SessionCommandMixin):
-    """Comprehensive project status dashboard"""
+    """Comprehensive project status dashboard."""
 
-    def execute(self, project_path: str = ".", interactive: bool = False, update_interval: float = 5.0, detailed: bool = False, **kwargs) -> dict:
-        """Execute the status command"""
+    def execute(
+        self,
+        project_path: str = ".",
+        interactive: bool = False,
+        update_interval: float = 5.0,
+        detailed: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the status command."""
         try:
             dashboard = StatusDashboard(project_path, update_interval, self.config, self.tmux_manager)
 
@@ -247,10 +267,18 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
                 self.print_info("Starting interactive project status dashboard...")
                 self.print_info("Press Ctrl+C to exit")
                 dashboard.run_interactive()
-                return {"success": True, "mode": "interactive", "project_path": project_path}
+                return {
+                    "success": True,
+                    "mode": "interactive",
+                    "project_path": project_path,
+                }
             elif detailed:
                 dashboard.render_detailed_view()
-                return {"success": True, "mode": "detailed", "project_path": project_path}
+                return {
+                    "success": True,
+                    "mode": "detailed",
+                    "project_path": project_path,
+                }
             else:
                 # Quick status overview
                 dashboard.update_data()
@@ -293,6 +321,11 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
 )
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
 def status(project_path, interactive, update_interval, detailed):
-    """Comprehensive project status dashboard"""
+    """Comprehensive project status dashboard."""
     command = StatusCommand()
-    command.run(project_path=project_path, interactive=interactive, update_interval=update_interval, detailed=detailed)
+    command.run(
+        project_path=project_path,
+        interactive=interactive,
+        update_interval=update_interval,
+        detailed=detailed,
+    )

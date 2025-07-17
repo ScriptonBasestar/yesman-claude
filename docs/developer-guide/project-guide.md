@@ -221,8 +221,8 @@ Configuration merge modes:
 
 ### Important Implementation Details
 
-1. **Template Processing**: The `setup` command reads templates from `~/.scripton/yesman/templates/`, applies overrides from
-   `projects.yaml`, and creates tmux sessions.
+1. **Template Processing**: The `setup` command reads templates from `~/.scripton/yesman/templates/`, applies overrides
+   from `projects.yaml`, and creates tmux sessions.
 
 1. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 

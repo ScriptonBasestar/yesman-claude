@@ -3,8 +3,8 @@
 line-length = 200
 indent-width = 4
 
-# Assume Python 3.8+
-target-version = "py38"
+# Assume Python 3.11+
+target-version = "py311"
 
 # Exclude directories
 exclude = [
@@ -58,6 +58,10 @@ select = [
     "SIM",
     # pyupgrade
     "UP",
+    # pep8-naming
+    "N",
+    # pydocstyle (docstring linting)
+    "D",
 ]
 
 ignore = [
@@ -81,6 +85,9 @@ ignore = [
     "E402",
     "F841",
     "PLC0415", "B007",
+    # pydocstyle conflicts
+    "D203", # one-blank-line-before-class (conflicts with D211)
+    "D213", # multi-line-summary-second-line (conflicts with D212)
 ]
 
 # Allow unused variables when underscore-prefixed.
@@ -105,6 +112,9 @@ line-ending = "auto"
 
 [lint.isort]
 known-first-party = ["libs", "commands", "api"]
+
+[lint.pydocstyle]
+convention = "google"
 
 [lint.per-file-ignores]
 # API tests can use assertions and other test patterns

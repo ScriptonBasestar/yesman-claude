@@ -1,4 +1,4 @@
-"""Shared types for multi-agent system"""
+"""Shared types for multi-agent system."""
 
 import subprocess
 from dataclasses import dataclass, field
@@ -8,7 +8,7 @@ from typing import Any
 
 
 class AgentState(Enum):
-    """Agent states"""
+    """Agent states."""
 
     IDLE = "idle"
     WORKING = "working"
@@ -18,7 +18,7 @@ class AgentState(Enum):
 
 
 class TaskStatus(Enum):
-    """Task execution status"""
+    """Task execution status."""
 
     PENDING = "pending"
     ASSIGNED = "assigned"
@@ -30,7 +30,7 @@ class TaskStatus(Enum):
 
 @dataclass
 class Task:
-    """Represents a task to be executed by an agent"""
+    """Represents a task to be executed by an agent."""
 
     task_id: str
     title: str
@@ -54,7 +54,7 @@ class Task:
     exit_code: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         from dataclasses import asdict
 
         data = asdict(self)
@@ -69,7 +69,7 @@ class Task:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Task":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Convert status back to enum
         if "status" in data:
             data["status"] = TaskStatus(data["status"])
@@ -83,7 +83,7 @@ class Task:
 
 @dataclass
 class Agent:
-    """Represents an agent that can execute tasks"""
+    """Represents an agent that can execute tasks."""
 
     agent_id: str
     state: AgentState = AgentState.IDLE
@@ -99,7 +99,7 @@ class Agent:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary (excluding process)"""
+        """Convert to dictionary (excluding process)."""
         from dataclasses import asdict
 
         data = asdict(self)
@@ -113,7 +113,7 @@ class Agent:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Agent":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Convert state back to enum
         if "state" in data:
             data["state"] = AgentState(data["state"])

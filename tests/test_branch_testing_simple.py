@@ -1,4 +1,4 @@
-"""Simple test for branch testing integration without git dependency"""
+"""Simple test for branch testing integration without git dependency."""
 
 import tempfile
 from unittest.mock import Mock
@@ -10,7 +10,7 @@ from libs.multi_agent.branch_test_manager import BranchTestManager, TestSuite, T
 
 
 def test_agent_pool_test_integration():
-    """Test AgentPool test integration without git dependency"""
+    """Test AgentPool test integration without git dependency."""
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create agent pool
         agent_pool = AgentPool(max_agents=2, work_dir=tmpdir)
@@ -53,7 +53,7 @@ def test_agent_pool_test_integration():
 
 @pytest.mark.asyncio
 async def test_auto_test_branch_creation():
-    """Test automatic test task creation"""
+    """Test automatic test task creation."""
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create agent pool
         agent_pool = AgentPool(max_agents=2, work_dir=tmpdir)
@@ -97,7 +97,7 @@ async def test_auto_test_branch_creation():
 
 
 def test_branch_test_status_retrieval():
-    """Test retrieving branch test status"""
+    """Test retrieving branch test status."""
     with tempfile.TemporaryDirectory() as tmpdir:
         agent_pool = AgentPool(max_agents=2, work_dir=tmpdir)
 
@@ -124,7 +124,7 @@ def test_branch_test_status_retrieval():
 
 
 def test_error_handling_when_testing_disabled():
-    """Test error handling when branch testing is not enabled"""
+    """Test error handling when branch testing is not enabled."""
     with tempfile.TemporaryDirectory() as tmpdir:
         agent_pool = AgentPool(max_agents=2, work_dir=tmpdir)
         # Don't enable branch testing

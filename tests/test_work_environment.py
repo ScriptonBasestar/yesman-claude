@@ -1,4 +1,4 @@
-"""Tests for WorkEnvironmentManager"""
+"""Tests for WorkEnvironmentManager."""
 
 import os
 from pathlib import Path
@@ -10,11 +10,11 @@ from libs.multi_agent.work_environment import WorkEnvironment, WorkEnvironmentMa
 
 
 class TestWorkEnvironmentManager:
-    """Test cases for WorkEnvironmentManager"""
+    """Test cases for WorkEnvironmentManager."""
 
     @pytest.fixture
     def temp_repo(self, tmp_path):
-        """Create a temporary git repository"""
+        """Create a temporary git repository."""
         repo_path = tmp_path / "test_repo"
         repo_path.mkdir()
 
@@ -44,25 +44,25 @@ class TestWorkEnvironmentManager:
 
     @pytest.fixture
     def work_dir(self, tmp_path):
-        """Create a temporary work directory"""
+        """Create a temporary work directory."""
         work_path = tmp_path / "work"
         work_path.mkdir()
         return work_path
 
     @pytest.fixture
     def manager(self, temp_repo, work_dir):
-        """Create WorkEnvironmentManager instance"""
+        """Create WorkEnvironmentManager instance."""
         return WorkEnvironmentManager(repo_path=str(temp_repo), work_dir=str(work_dir))
 
     def test_init(self, manager, temp_repo, work_dir):
-        """Test WorkEnvironmentManager initialization"""
+        """Test WorkEnvironmentManager initialization."""
         assert manager.repo_path == temp_repo
         assert manager.work_dir == work_dir
         assert manager.environments == {}
         assert manager.work_dir.exists()
 
     def test_create_work_environment(self, manager):
-        """Test creating a work environment"""
+        """Test creating a work environment."""
         with patch.object(manager, "_create_worktree") as mock_worktree:
             with patch.object(manager, "_create_venv") as mock_venv:
                 with patch.object(manager, "_setup_environment") as mock_setup:
@@ -88,7 +88,7 @@ class TestWorkEnvironmentManager:
                     assert "test-branch" in manager.environments
 
     def test_create_work_environment_custom_config(self, manager):
-        """Test creating environment with custom configuration"""
+        """Test creating environment with custom configuration."""
         config = {
             "python_version": "3.12",
             "install_deps": False,
@@ -109,7 +109,7 @@ class TestWorkEnvironmentManager:
                     assert env.config["env_vars"]["FOO"] == "bar"
 
     def test_create_worktree(self, manager):
-        """Test creating a git worktree"""
+        """Test creating a git worktree."""
         with patch.object(manager, "_run_command") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
 
@@ -127,7 +127,7 @@ class TestWorkEnvironmentManager:
             assert "feature/test" in cmd
 
     def test_create_venv(self, manager):
-        """Test creating a virtual environment"""
+        """Test creating a virtual environment."""
         worktree_path = manager.work_dir / "worktrees" / "test"
         worktree_path.mkdir(parents=True)
 
@@ -149,7 +149,7 @@ class TestWorkEnvironmentManager:
                 mock_install.assert_called_once_with(expected_path, worktree_path)
 
     def test_install_dependencies(self, manager):
-        """Test installing dependencies"""
+        """Test installing dependencies."""
         venv_path = manager.work_dir / "venvs" / "test"
         venv_path.mkdir(parents=True)
 
@@ -179,7 +179,7 @@ class TestWorkEnvironmentManager:
             assert "--upgrade" in pip_upgrade_call
 
     def test_setup_environment(self, manager):
-        """Test setting up environment"""
+        """Test setting up environment."""
         env = WorkEnvironment(
             branch_name="test",
             worktree_path=manager.work_dir / "worktrees" / "test",
@@ -197,7 +197,7 @@ class TestWorkEnvironmentManager:
                     mock_setup.assert_called_once_with(env)
 
     def test_activate_environment(self, manager):
-        """Test activating an environment"""
+        """Test activating an environment."""
         env = WorkEnvironment(
             branch_name="test",
             worktree_path=Path("/tmp/worktree"),
@@ -219,7 +219,7 @@ class TestWorkEnvironmentManager:
         assert env.status == "active"
 
     def test_work_in_environment_context(self, manager):
-        """Test work_in_environment context manager"""
+        """Test work_in_environment context manager."""
         env = WorkEnvironment(
             branch_name="test",
             worktree_path=manager.work_dir / "worktree",
@@ -246,7 +246,7 @@ class TestWorkEnvironmentManager:
         assert os.environ.get("YESMAN_BRANCH") != "test"
 
     def test_terminate_environment(self, manager):
-        """Test terminating an environment"""
+        """Test terminating an environment."""
         env = WorkEnvironment(
             branch_name="test",
             worktree_path=manager.work_dir / "worktrees" / "test",
@@ -280,7 +280,7 @@ class TestWorkEnvironmentManager:
             assert "test" not in manager.environments
 
     def test_list_environments(self, manager):
-        """Test listing environments"""
+        """Test listing environments."""
         env1 = WorkEnvironment(
             branch_name="branch1",
             worktree_path=Path("/tmp/wt1"),
@@ -302,7 +302,7 @@ class TestWorkEnvironmentManager:
         assert env2 in envs
 
     def test_environment_persistence(self, manager):
-        """Test saving and loading environments"""
+        """Test saving and loading environments."""
         env = WorkEnvironment(
             branch_name="test",
             worktree_path=manager.work_dir / "worktrees" / "test",

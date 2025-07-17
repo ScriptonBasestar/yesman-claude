@@ -1,4 +1,4 @@
-"""Task analysis and dependency graph generation for multi-agent development"""
+"""Task analysis and dependency graph generation for multi-agent development."""
 
 import ast
 import json
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class CodeDependency:
-    """Represents a code dependency"""
+    """Represents a code dependency."""
 
     source_file: str
     imported_module: str
@@ -23,13 +23,13 @@ class CodeDependency:
     symbols: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
 
 @dataclass
 class TaskDefinition:
-    """Definition of a development task"""
+    """Definition of a development task."""
 
     task_id: str
     title: str
@@ -41,21 +41,20 @@ class TaskDefinition:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TaskDefinition":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(**data)
 
 
 class TaskAnalyzer:
-    """Analyzes tasks and generates dependency graphs"""
+    """Analyzes tasks and generates dependency graphs."""
 
     def __init__(self, repo_path: str = "."):
-        """
-        Initialize task analyzer
+        """Initialize task analyzer.
 
         Args:
             repo_path: Path to repository
@@ -66,8 +65,7 @@ class TaskAnalyzer:
         self._python_files_cache: list[Path] | None = None
 
     def analyze_file_dependencies(self, file_path: str) -> list[CodeDependency]:
-        """
-        Analyze dependencies of a Python file
+        """Analyze dependencies of a Python file.
 
         Args:
             file_path: Path to Python file
@@ -122,8 +120,7 @@ class TaskAnalyzer:
         return dependencies
 
     def find_related_files(self, file_path: str, depth: int = 2) -> set[str]:
-        """
-        Find files related to a given file through dependencies
+        """Find files related to a given file through dependencies.
 
         Args:
             file_path: Starting file path
@@ -172,7 +169,7 @@ class TaskAnalyzer:
         return related
 
     def _get_python_files(self) -> list[Path]:
-        """Get all Python files in repository"""
+        """Get all Python files in repository."""
         if self._python_files_cache is None:
             self._python_files_cache = []
 
@@ -199,7 +196,7 @@ class TaskAnalyzer:
         return self._python_files_cache
 
     def _file_to_module(self, file_path: str) -> str:
-        """Convert file path to module name"""
+        """Convert file path to module name."""
         # Remove .py extension and convert path to module
         path = Path(file_path)
         if path.suffix == ".py":
@@ -215,7 +212,7 @@ class TaskAnalyzer:
         return module
 
     def _module_to_file(self, module_name: str) -> str | None:
-        """Convert module name to file path"""
+        """Convert module name to file path."""
         # Try different possibilities
         candidates = [
             module_name.replace(".", "/") + ".py",
@@ -230,7 +227,7 @@ class TaskAnalyzer:
         return None
 
     def _matches_module(self, imported: str, module: str) -> bool:
-        """Check if imported module matches target module"""
+        """Check if imported module matches target module."""
         # Exact match
         if imported == module:
             return True
@@ -250,8 +247,7 @@ class TaskAnalyzer:
         description: str = "",
         **kwargs,
     ) -> TaskDefinition:
-        """
-        Create a task definition from file paths
+        """Create a task definition from file paths.
 
         Args:
             task_id: Unique task identifier
@@ -283,8 +279,7 @@ class TaskAnalyzer:
         return task
 
     def analyze_task_dependencies(self, tasks: list[TaskDefinition]) -> DirectedGraph:
-        """
-        Analyze dependencies between tasks based on file overlaps
+        """Analyze dependencies between tasks based on file overlaps.
 
         Args:
             tasks: List of task definitions
@@ -342,8 +337,7 @@ class TaskAnalyzer:
         return self.task_graph
 
     def get_execution_order(self, tasks: list[TaskDefinition]) -> list[list[str]]:
-        """
-        Get optimal execution order for tasks
+        """Get optimal execution order for tasks.
 
         Args:
             tasks: List of task definitions
@@ -392,8 +386,7 @@ class TaskAnalyzer:
         tasks: list[TaskDefinition],
         max_agents: int = 3,
     ) -> float:
-        """
-        Estimate time to complete tasks with parallel execution
+        """Estimate time to complete tasks with parallel execution.
 
         Args:
             tasks: List of task definitions
@@ -427,7 +420,7 @@ class TaskAnalyzer:
         return total_time
 
     def export_dependency_graph(self, output_path: str) -> None:
-        """Export dependency graph to JSON format"""
+        """Export dependency graph to JSON format."""
         data = {"tasks": {}, "dependencies": []}
 
         # Export tasks

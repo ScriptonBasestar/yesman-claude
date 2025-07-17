@@ -71,8 +71,17 @@ class DashboardRunCommand(BaseCommand):
         super().__init__()
         self.env = DashboardEnvironment()
 
-    def execute(self, interface: str = "auto", host: str = "localhost", port: int = 8080, theme: str | None = None, dev: bool = False, detach: bool = False, **kwargs) -> dict:
-        """Execute the dashboard run command"""
+    def execute(
+        self,
+        interface: str = "auto",
+        host: str = "localhost",
+        port: int = 8080,
+        theme: str | None = None,
+        dev: bool = False,
+        detach: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the dashboard run command."""
         # Auto-detect interface if needed
         if interface == "auto":
             interface = self.env.get_recommended_interface()
@@ -431,7 +440,7 @@ class DashboardListCommand(BaseCommand):
         self.env = DashboardEnvironment()
 
     def execute(self, **kwargs) -> dict:
-        """Execute the list command"""
+        """Execute the list command."""
         self.print_info("📋 Available Dashboard Interfaces:\n")
 
         deps = check_dependencies("tauri")
@@ -474,7 +483,7 @@ class DashboardBuildCommand(BaseCommand):
     """Build dashboard for production deployment."""
 
     def execute(self, interface: str = "tauri", **kwargs) -> dict:
-        """Execute the build command"""
+        """Execute the build command."""
         self.print_info(f"🔨 Building {interface} dashboard for production...")
 
         if interface == "tauri":

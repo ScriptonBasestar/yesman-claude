@@ -1,6 +1,5 @@
-"""
-Widget Data Models
-Common data models used across all renderers for consistent data representation
+"""Widget Data Models
+Common data models used across all renderers for consistent data representation.
 """
 
 from dataclasses import asdict, dataclass, field
@@ -10,7 +9,7 @@ from typing import Any
 
 
 class SessionStatus(Enum):
-    """Session status enumeration"""
+    """Session status enumeration."""
 
     ACTIVE = "active"
     IDLE = "idle"
@@ -21,7 +20,7 @@ class SessionStatus(Enum):
 
 
 class HealthLevel(Enum):
-    """Health level enumeration with score ranges"""
+    """Health level enumeration with score ranges."""
 
     EXCELLENT = (90, 100, "excellent", "🟢")
     GOOD = (70, 89, "good", "🟡")
@@ -37,7 +36,7 @@ class HealthLevel(Enum):
 
     @classmethod
     def from_score(cls, score: int) -> "HealthLevel":
-        """Get health level from numeric score"""
+        """Get health level from numeric score."""
         if score < 0:
             return cls.UNKNOWN
         for level in [cls.EXCELLENT, cls.GOOD, cls.WARNING, cls.CRITICAL]:
@@ -47,7 +46,7 @@ class HealthLevel(Enum):
 
 
 class ActivityType(Enum):
-    """Activity type enumeration"""
+    """Activity type enumeration."""
 
     FILE_CREATED = "file_created"
     FILE_MODIFIED = "file_modified"
@@ -61,7 +60,7 @@ class ActivityType(Enum):
 
 
 class ProgressPhase(Enum):
-    """Progress phase enumeration"""
+    """Progress phase enumeration."""
 
     STARTING = "starting"
     ANALYZING = "analyzing"
@@ -75,7 +74,7 @@ class ProgressPhase(Enum):
 
 @dataclass
 class WindowData:
-    """Window information within a session"""
+    """Window information within a session."""
 
     id: str
     name: str
@@ -87,7 +86,7 @@ class WindowData:
 
 @dataclass
 class SessionData:
-    """Session information model"""
+    """Session information model."""
 
     name: str
     id: str
@@ -104,7 +103,7 @@ class SessionData:
     memory_usage: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         data = asdict(self)
         data["status"] = self.status.value
         data["created_at"] = self.created_at.isoformat() if self.created_at else None
@@ -123,7 +122,7 @@ class SessionData:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "SessionData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Parse datetime fields
         created_at = None
         if data.get("created_at"):
@@ -167,7 +166,7 @@ class SessionData:
 
 @dataclass
 class HealthCategoryData:
-    """Health data for a specific category"""
+    """Health data for a specific category."""
 
     category: str
     score: int
@@ -179,7 +178,7 @@ class HealthCategoryData:
 
 @dataclass
 class HealthData:
-    """Health information model"""
+    """Health information model."""
 
     overall_score: int
     overall_level: HealthLevel
@@ -189,7 +188,7 @@ class HealthData:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         data = asdict(self)
         data["overall_level"] = {
             "label": self.overall_level.label,
@@ -216,7 +215,7 @@ class HealthData:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "HealthData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Parse datetime
         last_updated = None
         if data.get("last_updated"):
@@ -257,7 +256,7 @@ class HealthData:
 
 @dataclass
 class ActivityEntry:
-    """Single activity entry"""
+    """Single activity entry."""
 
     timestamp: datetime
     activity_type: ActivityType
@@ -268,7 +267,7 @@ class ActivityEntry:
 
 @dataclass
 class ActivityData:
-    """Activity information model"""
+    """Activity information model."""
 
     entries: list[ActivityEntry] = field(default_factory=list)
     total_activities: int = 0
@@ -281,7 +280,7 @@ class ActivityData:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         data = asdict(self)
 
         # Convert entries
@@ -296,7 +295,7 @@ class ActivityData:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ActivityData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Parse entries
         entries = []
         for entry_data in data.get("entries", []):
@@ -328,7 +327,7 @@ class ActivityData:
 
 @dataclass
 class ProgressData:
-    """Progress information model"""
+    """Progress information model."""
 
     phase: ProgressPhase
     phase_progress: float = 0.0  # 0-100% progress within current phase
@@ -358,7 +357,7 @@ class ProgressData:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         data = asdict(self)
         data["phase"] = self.phase.value
         data["start_time"] = self.start_time.isoformat() if self.start_time else None
@@ -367,7 +366,7 @@ class ProgressData:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ProgressData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Parse datetime fields
         start_time = None
         if data.get("start_time"):
@@ -403,7 +402,7 @@ class ProgressData:
 
 @dataclass
 class MetricCardData:
-    """Metric card display data"""
+    """Metric card display data."""
 
     title: str
     value: str | int | float
@@ -415,18 +414,18 @@ class MetricCardData:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "MetricCardData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(**data)
 
 
 @dataclass
 class StatusIndicatorData:
-    """Status indicator display data"""
+    """Status indicator display data."""
 
     status: str
     label: str = ""
@@ -436,18 +435,18 @@ class StatusIndicatorData:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "StatusIndicatorData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         return cls(**data)
 
 
 @dataclass
 class ChartDataPoint:
-    """Single chart data point"""
+    """Single chart data point."""
 
     x: str | int | float | datetime
     y: int | float
@@ -457,7 +456,7 @@ class ChartDataPoint:
 
 @dataclass
 class ChartData:
-    """Chart display data"""
+    """Chart display data."""
 
     title: str
     chart_type: str = "line"  # line, bar, pie, area
@@ -468,7 +467,7 @@ class ChartData:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary"""
+        """Convert to dictionary."""
         data = asdict(self)
 
         # Convert data points
@@ -483,7 +482,7 @@ class ChartData:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ChartData":
-        """Create from dictionary"""
+        """Create from dictionary."""
         # Parse data points
         data_points = []
         for point_data in data.get("data_points", []):

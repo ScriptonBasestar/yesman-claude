@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Improved ls command using base command class
-"""
+"""Improved ls command using base command class."""
 
 from typing import Any
 
@@ -11,11 +9,10 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 
 
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
-    """List all available projects and templates"""
+    """List all available projects and templates."""
 
     def execute(self, output_format: str = "table") -> dict[str, Any]:
-        """
-        Execute the ls command
+        """Execute the ls command.
 
         Args:
             output_format: Output format (table, json, yaml)
@@ -40,7 +37,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
         return result
 
     def _get_templates(self) -> list[str]:
-        """Get available session templates"""
+        """Get available session templates."""
         try:
             return self.tmux_manager.get_templates()
         except Exception as e:
@@ -48,7 +45,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
             return []
 
     def _get_projects(self) -> list[dict[str, Any]]:
-        """Get configured projects with details"""
+        """Get configured projects with details."""
         try:
             projects_config = self.load_projects_config()
             sessions = projects_config.get("sessions", {})
@@ -76,7 +73,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
             return []
 
     def _get_project_status(self, session_name: str) -> str:
-        """Get the current status of a project session"""
+        """Get the current status of a project session."""
         try:
             if self.session_exists(session_name):
                 return "running"
@@ -86,7 +83,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
             return "unknown"
 
     def _display_output(self, data: dict[str, Any], output_format: str) -> None:
-        """Display output in specified format"""
+        """Display output in specified format."""
         if output_format == "json":
             click.echo(self.format_json(data))
             return
@@ -98,7 +95,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
         self._display_table_format(data)
 
     def _display_table_format(self, data: dict[str, Any]) -> None:
-        """Display output in table format"""
+        """Display output in table format."""
         templates = data["templates"]
         projects = data["projects"]
 
@@ -131,7 +128,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
     help="Output format",
 )
 def ls(output_format: str):
-    """List all available projects and templates"""
+    """List all available projects and templates."""
     command = LsCommand()
     command.run(output_format=output_format)
 

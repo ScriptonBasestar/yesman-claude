@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test full automation workflow"""
+"""Test full automation workflow."""
 
 import time
 

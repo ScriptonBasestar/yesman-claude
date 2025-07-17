@@ -1,4 +1,4 @@
-"""Tests for SemanticMerger automatic conflict resolution"""
+"""Tests for SemanticMerger automatic conflict resolution."""
 
 import tempfile
 from pathlib import Path
@@ -7,16 +7,31 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ConflictSeverity
-from libs.multi_agent.semantic_analyzer import FunctionSignature, SemanticAnalyzer, SemanticConflict, SemanticConflictType, SemanticContext
-from libs.multi_agent.semantic_merger import ConflictResolutionRule, MergeResolution, MergeResult, MergeStrategy, SemanticMerger
+from libs.multi_agent.conflict_resolution import (
+    ConflictResolutionEngine,
+    ConflictSeverity,
+)
+from libs.multi_agent.semantic_analyzer import (
+    FunctionSignature,
+    SemanticAnalyzer,
+    SemanticConflict,
+    SemanticConflictType,
+    SemanticContext,
+)
+from libs.multi_agent.semantic_merger import (
+    ConflictResolutionRule,
+    MergeResolution,
+    MergeResult,
+    MergeStrategy,
+    SemanticMerger,
+)
 
 
 class TestMergeResult:
-    """Test cases for MergeResult"""
+    """Test cases for MergeResult."""
 
     def test_init(self):
-        """Test MergeResult initialization"""
+        """Test MergeResult initialization."""
         result = MergeResult(
             merge_id="test-merge",
             file_path="test.py",
@@ -39,10 +54,10 @@ class TestMergeResult:
 
 
 class TestConflictResolutionRule:
-    """Test cases for ConflictResolutionRule"""
+    """Test cases for ConflictResolutionRule."""
 
     def test_init(self):
-        """Test ConflictResolutionRule initialization"""
+        """Test ConflictResolutionRule initialization."""
         rule = ConflictResolutionRule(
             rule_id="test-rule",
             pattern="import.*",
@@ -62,11 +77,11 @@ class TestConflictResolutionRule:
 
 
 class TestSemanticMerger:
-    """Test cases for SemanticMerger"""
+    """Test cases for SemanticMerger."""
 
     @pytest.fixture
     def mock_semantic_analyzer(self):
-        """Create mock semantic analyzer"""
+        """Create mock semantic analyzer."""
         analyzer = Mock(spec=SemanticAnalyzer)
         analyzer._extract_semantic_context = Mock()
         analyzer._analyze_file_semantic_conflicts = AsyncMock(return_value=[])
@@ -75,17 +90,17 @@ class TestSemanticMerger:
 
     @pytest.fixture
     def mock_conflict_engine(self):
-        """Create mock conflict resolution engine"""
+        """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
     def mock_branch_manager(self):
-        """Create mock branch manager"""
+        """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
     def temp_repo(self):
-        """Create temporary repository"""
+        """Create temporary repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
@@ -97,7 +112,7 @@ class TestSemanticMerger:
         mock_branch_manager,
         temp_repo,
     ):
-        """Create SemanticMerger instance"""
+        """Create SemanticMerger instance."""
         return SemanticMerger(
             semantic_analyzer=mock_semantic_analyzer,
             conflict_engine=mock_conflict_engine,
@@ -113,7 +128,7 @@ class TestSemanticMerger:
         mock_branch_manager,
         temp_repo,
     ):
-        """Test SemanticMerger initialization"""
+        """Test SemanticMerger initialization."""
         assert merger.semantic_analyzer == mock_semantic_analyzer
         assert merger.conflict_engine == mock_conflict_engine
         assert merger.branch_manager == mock_branch_manager
@@ -127,7 +142,7 @@ class TestSemanticMerger:
         assert len(merger.resolution_rules) > 0
 
     def test_initialize_resolution_rules(self, merger):
-        """Test default resolution rules initialization"""
+        """Test default resolution rules initialization."""
         rules = merger._initialize_resolution_rules()
 
         assert len(rules) > 0
@@ -140,7 +155,7 @@ class TestSemanticMerger:
         assert import_rule.resolution_strategy == MergeStrategy.SEMANTIC_UNION
 
     def test_validate_ast_integrity(self, merger):
-        """Test AST integrity validation"""
+        """Test AST integrity validation."""
         valid_code = """
 def test_function():
     return True
@@ -158,7 +173,7 @@ def test_function(
         assert merger._validate_ast_integrity(invalid_code) is False
 
     def test_calculate_diff_stats(self, merger):
-        """Test diff statistics calculation"""
+        """Test diff statistics calculation."""
         content1 = "line1\nline2\nline3"
         content2 = "line1\nline2_modified\nline3\nline4"
         merged = "line1\nline2_modified\nline3\nline4\nline5"
@@ -172,7 +187,7 @@ def test_function(
         assert stats["lines_removed"] == 0
 
     def test_select_optimal_strategy(self, merger):
-        """Test optimal strategy selection"""
+        """Test optimal strategy selection."""
         # Function signature conflicts
         conflicts1 = [
             SemanticConflict(
@@ -225,7 +240,7 @@ def test_function(
         assert strategy3 == MergeStrategy.AST_BASED_MERGE
 
     def test_prefer_branch_merge(self, merger):
-        """Test prefer branch merge strategy"""
+        """Test prefer branch merge strategy."""
         conflicts = [
             SemanticConflict(
                 conflict_id="test-conflict",
@@ -266,7 +281,7 @@ def test_function(
         assert result2.strategy_used == MergeStrategy.PREFER_SECOND
 
     def test_conflict_resolved_by_merge(self, merger):
-        """Test conflict resolution detection"""
+        """Test conflict resolution detection."""
         conflict = SemanticConflict(
             conflict_id="test-conflict",
             conflict_type=SemanticConflictType.FUNCTION_SIGNATURE_CHANGE,
@@ -301,7 +316,7 @@ def test_function(
         assert merger._conflict_resolved_by_merge(conflict, failed_result) is False
 
     def test_update_merge_stats(self, merger):
-        """Test merge statistics updates"""
+        """Test merge statistics updates."""
         # Initial stats
         assert merger.merge_stats["total_merges"] == 0
         assert merger.merge_stats["successful_merges"] == 0
@@ -343,7 +358,7 @@ def test_function(
         assert merger.merge_stats["average_confidence"] == 0.7  # (0.8 + 0.6) / 2
 
     def test_extract_functions_with_content(self, merger):
-        """Test function content extraction"""
+        """Test function content extraction."""
         code = """
 import os
 
@@ -369,7 +384,7 @@ class TestClass:
         assert "def function2(x, y):" in functions["function2"]
 
     def test_extract_non_function_content(self, merger):
-        """Test non-function content extraction"""
+        """Test non-function content extraction."""
         code = """
 import os
 from typing import List
@@ -393,7 +408,7 @@ def function2():
         assert "def function1():" not in non_func_content
 
     def test_find_function_conflict(self, merger):
-        """Test finding function-specific conflicts"""
+        """Test finding function-specific conflicts."""
         conflicts = [
             SemanticConflict(
                 conflict_id="import-conflict",
@@ -427,7 +442,7 @@ def function2():
         assert not_found is None
 
     def test_merge_function_definitions(self, merger):
-        """Test merging function definitions"""
+        """Test merging function definitions."""
         func1 = "def test_func(x):\n    return x"
         func2 = "def test_func(x, y=None):\n    return x + (y or 0)"
 
@@ -450,7 +465,7 @@ def function2():
 
     @pytest.mark.asyncio
     async def test_resolve_individual_conflict(self, merger):
-        """Test individual conflict resolution"""
+        """Test individual conflict resolution."""
         # Create semantic contexts
         context1 = SemanticContext(file_path="test.py")
         context1.functions["test_func"] = FunctionSignature(
@@ -495,7 +510,7 @@ def function2():
 
     @pytest.mark.asyncio
     async def test_perform_semantic_merge_success(self, merger):
-        """Test successful semantic merge"""
+        """Test successful semantic merge."""
         # Mock file contents
         content1 = "def test_func(x):\n    return x"
         content2 = "def test_func(x, y=0):\n    return x + y"
@@ -518,7 +533,7 @@ def function2():
 
     @pytest.mark.asyncio
     async def test_perform_semantic_merge_missing_content(self, merger):
-        """Test semantic merge with missing file content"""
+        """Test semantic merge with missing file content."""
         merger.semantic_analyzer._get_file_content.side_effect = [None, "content2"]
 
         result = await merger.perform_semantic_merge("test.py", "branch1", "branch2")
@@ -530,7 +545,7 @@ def function2():
 
     @pytest.mark.asyncio
     async def test_batch_merge_files(self, merger):
-        """Test batch merging of multiple files"""
+        """Test batch merging of multiple files."""
         file_paths = ["file1.py", "file2.py", "file3.py"]
 
         # Mock successful merges
@@ -553,7 +568,7 @@ def function2():
 
     @pytest.mark.asyncio
     async def test_auto_resolve_conflicts(self, merger):
-        """Test automatic conflict resolution"""
+        """Test automatic conflict resolution."""
         conflicts = [
             SemanticConflict(
                 conflict_id="conflict-1",
@@ -598,7 +613,7 @@ def function2():
         assert "conflict-2" in results[0].conflicts_resolved
 
     def test_get_merge_summary(self, merger):
-        """Test merge summary generation"""
+        """Test merge summary generation."""
         # Add some test data
         merger.merge_stats["total_merges"] = 10
         merger.merge_stats["successful_merges"] = 8

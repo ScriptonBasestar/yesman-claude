@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Common mixin classes for shared functionality across the Yesman-Claude project.
+"""Common mixin classes for shared functionality across the Yesman-Claude project.
 
 These mixins provide standardized interfaces for common patterns:
 - Statistics collection and reporting
@@ -17,8 +16,7 @@ class StatisticsProviderMixin(ABC):
 
     @abstractmethod
     def get_statistics(self) -> dict[str, Any]:
-        """
-        Get statistics information from the implementing class.
+        """Get statistics information from the implementing class.
 
         Returns:
             dict[str, Any]: Dictionary containing statistics data.
@@ -41,8 +39,7 @@ class StatusManagerMixin(ABC):
 
     @abstractmethod
     def update_status(self, status: str) -> None:
-        """
-        Update the current status.
+        """Update the current status.
 
         Args:
             status: The new status to set. Common values include:
@@ -55,8 +52,7 @@ class StatusManagerMixin(ABC):
 
     @abstractmethod
     def update_activity(self, activity: str) -> None:
-        """
-        Update the current activity description.
+        """Update the current activity description.
 
         Args:
             activity: Description of the current activity being performed.
@@ -74,8 +70,7 @@ class LayoutManagerMixin(ABC):
 
     @abstractmethod
     def create_layout(self) -> Any:
-        """
-        Create and return a layout object.
+        """Create and return a layout object.
 
         Returns:
             Any: The layout object. Type depends on the UI framework being used.
@@ -86,8 +81,7 @@ class LayoutManagerMixin(ABC):
 
     @abstractmethod
     def update_layout(self, layout: Any) -> None:
-        """
-        Update an existing layout with new configuration or content.
+        """Update an existing layout with new configuration or content.
 
         Args:
             layout: The layout object to update. Type should match what

@@ -1,6 +1,4 @@
-"""
-Test for ls command
-"""
+"""Test for ls command."""
 
 import unittest
 from unittest.mock import MagicMock, patch
@@ -16,7 +14,7 @@ class TestLsCommand(unittest.TestCase):
 
     @patch("commands.ls.TmuxManager")
     def test_ls_shows_templates(self, mock_tmux_manager):
-        """Test that ls command shows available templates"""
+        """Test that ls command shows available templates."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.list_templates.return_value = [
@@ -36,7 +34,7 @@ class TestLsCommand(unittest.TestCase):
 
     @patch("commands.ls.TmuxManager")
     def test_ls_shows_running_sessions(self, mock_tmux_manager):
-        """Test that ls command shows running sessions"""
+        """Test that ls command shows running sessions."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.list_sessions.return_value = [
@@ -56,7 +54,7 @@ class TestLsCommand(unittest.TestCase):
 
     @patch("commands.ls.TmuxManager")
     def test_ls_handles_no_templates(self, mock_tmux_manager):
-        """Test ls command when no templates exist"""
+        """Test ls command when no templates exist."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.list_templates.return_value = []
@@ -72,7 +70,7 @@ class TestLsCommand(unittest.TestCase):
 
     @patch("commands.ls.TmuxManager")
     def test_ls_handles_tmux_error(self, mock_tmux_manager):
-        """Test ls command handles tmux errors gracefully"""
+        """Test ls command handles tmux errors gracefully."""
         # Setup mock to raise exception
         mock_tmux_manager.side_effect = Exception("Tmux not found")
 

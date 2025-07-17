@@ -7,11 +7,11 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 
 
 class TestConcurrentRendering:
-    """Tests for concurrent rendering operations"""
+    """Tests for concurrent rendering operations."""
 
     @pytest.mark.asyncio
     async def test_concurrent_rendering(self):
-        """Test 7: Concurrent rendering operations"""
+        """Test 7: Concurrent rendering operations."""
         factory = RendererFactory()
 
         # Test data
@@ -22,7 +22,7 @@ class TestConcurrentRendering:
         )
 
         async def render_widget_async(format_type, widget_type, data):
-            """Async wrapper for rendering"""
+            """Async wrapper for rendering."""
             renderer = factory.create_renderer(format_type)
             return renderer.render_widget(widget_type, data)
 

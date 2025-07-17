@@ -1,6 +1,5 @@
-"""
-Renderer Factory
-Factory pattern for creating and managing dashboard renderers
+"""Renderer Factory
+Factory pattern for creating and managing dashboard renderers.
 """
 
 import threading
@@ -15,26 +14,25 @@ from .web_renderer import WebRenderer
 
 
 class RendererFactoryError(Exception):
-    """Base exception for renderer factory errors"""
+    """Base exception for renderer factory errors."""
 
     pass
 
 
 class UnsupportedFormatError(RendererFactoryError):
-    """Raised when unsupported format is requested"""
+    """Raised when unsupported format is requested."""
 
     pass
 
 
 class RendererInitializationError(RendererFactoryError):
-    """Raised when renderer initialization fails"""
+    """Raised when renderer initialization fails."""
 
     pass
 
 
 class RendererFactory:
-    """
-    Factory for creating and managing dashboard renderers
+    """Factory for creating and managing dashboard renderers.
 
     Provides centralized creation, registration, and management of renderers
     with support for multiple output formats and thread-safe operations.
@@ -54,7 +52,7 @@ class RendererFactory:
 
     @classmethod
     def initialize(cls) -> None:
-        """Initialize the factory and register all renderers"""
+        """Initialize the factory and register all renderers."""
         with cls._lock:
             if cls._initialized:
                 return
@@ -67,7 +65,7 @@ class RendererFactory:
 
     @classmethod
     def register_all(cls) -> None:
-        """Register all available renderers in the global registry"""
+        """Register all available renderers in the global registry."""
         registry = RendererRegistry()
 
         for render_format, renderer_class in cls._renderer_classes.items():
@@ -81,8 +79,7 @@ class RendererFactory:
 
     @classmethod
     def register_renderer(cls, render_format: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
-        """
-        Register a new renderer class
+        """Register a new renderer class.
 
         Args:
             render_format: Format this renderer handles
@@ -103,8 +100,7 @@ class RendererFactory:
 
     @classmethod
     def create(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
-        """
-        Create a renderer instance for the specified format
+        """Create a renderer instance for the specified format.
 
         Args:
             render_format: Output format for rendering
@@ -135,8 +131,7 @@ class RendererFactory:
 
     @classmethod
     def get_singleton(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
-        """
-        Get or create a singleton renderer instance
+        """Get or create a singleton renderer instance.
 
         Args:
             render_format: Output format for rendering
@@ -158,8 +153,7 @@ class RendererFactory:
         render_format: RenderFormat | None = None,
         options: dict[str, Any] | None = None,
     ) -> Any | dict[RenderFormat, Any]:
-        """
-        Universal rendering method with format selection
+        """Universal rendering method with format selection.
 
         Args:
             widget_type: Type of widget to render
@@ -210,8 +204,7 @@ class RendererFactory:
         options: dict[str, Any] | None = None,
         max_workers: int = 3,
     ) -> dict[RenderFormat, Any]:
-        """
-        Render widget with multiple formats in parallel
+        """Render widget with multiple formats in parallel.
 
         Args:
             widget_type: Type of widget to render
@@ -256,23 +249,23 @@ class RendererFactory:
 
     @classmethod
     def get_supported_formats(cls) -> list[RenderFormat]:
-        """Get list of supported render formats"""
+        """Get list of supported render formats."""
         return list(cls._renderer_classes.keys())
 
     @classmethod
     def is_format_supported(cls, render_format: RenderFormat) -> bool:
-        """Check if a render format is supported"""
+        """Check if a render format is supported."""
         return render_format in cls._renderer_classes
 
     @classmethod
     def clear_instances(cls) -> None:
-        """Clear all singleton instances (useful for testing)"""
+        """Clear all singleton instances (useful for testing)."""
         with cls._lock:
             cls._instances.clear()
 
     @classmethod
     def reset(cls) -> None:
-        """Reset factory to uninitialized state (useful for testing)"""
+        """Reset factory to uninitialized state (useful for testing)."""
         with cls._lock:
             cls._instances.clear()
             cls._initialized = False
@@ -287,8 +280,7 @@ def render_widget(
     render_format: RenderFormat,
     options: dict[str, Any] | None = None,
 ) -> Any:
-    """
-    Render a single widget with specified format
+    """Render a single widget with specified format.
 
     Args:
         widget_type: Type of widget to render
@@ -307,8 +299,7 @@ def render_all_formats(
     data: Any,
     options: dict[str, Any] | None = None,
 ) -> dict[RenderFormat, Any]:
-    """
-    Render a widget with all available formats
+    """Render a widget with all available formats.
 
     Args:
         widget_type: Type of widget to render
@@ -328,8 +319,7 @@ def render_formats(
     options: dict[str, Any] | None = None,
     parallel: bool = False,
 ) -> dict[RenderFormat, Any]:
-    """
-    Render a widget with specific formats
+    """Render a widget with specific formats.
 
     Args:
         widget_type: Type of widget to render
@@ -351,8 +341,7 @@ def render_formats(
 
 
 def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
-    """
-    Create a new renderer instance
+    """Create a new renderer instance.
 
     Args:
         render_format: Format for the renderer
@@ -365,8 +354,7 @@ def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
 
 
 def get_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
-    """
-    Get singleton renderer instance
+    """Get singleton renderer instance.
 
     Args:
         render_format: Format for the renderer

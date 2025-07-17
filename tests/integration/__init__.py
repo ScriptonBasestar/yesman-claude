@@ -1,1 +1,1 @@
-"""Integration tests for Yesman Claude"""
+"""Integration tests for Yesman Claude."""

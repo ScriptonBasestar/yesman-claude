@@ -1,5 +1,4 @@
-"""
-Tests for DashboardLauncher
+"""Tests for DashboardLauncher.
 
 Comprehensive testing of dashboard interface detection, dependency checking,
 and environment analysis.
@@ -19,11 +18,11 @@ from libs.dashboard.dashboard_launcher import DashboardLauncher, InterfaceInfo
 
 
 class TestDashboardLauncher:
-    """Test suite for DashboardLauncher functionality"""
+    """Test suite for DashboardLauncher functionality."""
 
     @pytest.fixture
     def temp_project_root(self):
-        """Create a temporary project directory structure"""
+        """Create a temporary project directory structure."""
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
 
@@ -40,11 +39,11 @@ class TestDashboardLauncher:
 
     @pytest.fixture
     def launcher(self, temp_project_root):
-        """Create DashboardLauncher instance with temp project root"""
+        """Create DashboardLauncher instance with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
     def test_init_with_project_root(self, temp_project_root):
-        """Test launcher initialization with explicit project root"""
+        """Test launcher initialization with explicit project root."""
         launcher = DashboardLauncher(project_root=temp_project_root)
 
         assert launcher.project_root == temp_project_root
@@ -52,7 +51,7 @@ class TestDashboardLauncher:
         assert launcher.api_path == temp_project_root / "api"
 
     def test_init_without_project_root(self):
-        """Test launcher initialization with auto-detected project root"""
+        """Test launcher initialization with auto-detected project root."""
         launcher = DashboardLauncher()
 
         # Should auto-detect from current file location
@@ -60,7 +59,7 @@ class TestDashboardLauncher:
         assert launcher.project_root == expected_root
 
     def test_interface_configs_structure(self, launcher):
-        """Test that interface configurations are properly structured"""
+        """Test that interface configurations are properly structured."""
         configs = launcher._interface_configs
 
         # Check all expected interfaces exist
@@ -79,97 +78,97 @@ class TestDashboardLauncher:
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     def test_is_gui_available_macos(self, mock_platform, launcher):
-        """Test GUI detection on macOS"""
+        """Test GUI detection on macOS."""
         mock_platform.return_value = "Darwin"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     def test_is_gui_available_windows(self, mock_platform, launcher):
-        """Test GUI detection on Windows"""
+        """Test GUI detection on Windows."""
         mock_platform.return_value = "Windows"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {"DISPLAY": ":0"})
     def test_is_gui_available_linux_with_display(self, mock_platform, launcher):
-        """Test GUI detection on Linux with DISPLAY"""
+        """Test GUI detection on Linux with DISPLAY."""
         mock_platform.return_value = "Linux"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {"WAYLAND_DISPLAY": "wayland-0"})
     def test_is_gui_available_linux_with_wayland(self, mock_platform, launcher):
-        """Test GUI detection on Linux with Wayland"""
+        """Test GUI detection on Linux with Wayland."""
         mock_platform.return_value = "Linux"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {}, clear=True)
     def test_is_gui_available_linux_without_display(self, mock_platform, launcher):
-        """Test GUI detection on Linux without display"""
+        """Test GUI detection on Linux without display."""
         mock_platform.return_value = "Linux"
         assert launcher._is_gui_available() is False
 
     @patch.dict(os.environ, {"SSH_CLIENT": "192.168.1.1 12345"})
     def test_is_ssh_session_with_ssh_client(self, launcher):
-        """Test SSH detection with SSH_CLIENT"""
+        """Test SSH detection with SSH_CLIENT."""
         assert launcher._is_ssh_session() is True
 
     @patch.dict(os.environ, {"SSH_TTY": "/dev/pts/0"})
     def test_is_ssh_session_with_ssh_tty(self, launcher):
-        """Test SSH detection with SSH_TTY"""
+        """Test SSH detection with SSH_TTY."""
         assert launcher._is_ssh_session() is True
 
     @patch.dict(os.environ, {}, clear=True)
     def test_is_ssh_session_without_ssh(self, launcher):
-        """Test SSH detection without SSH environment"""
+        """Test SSH detection without SSH environment."""
         assert launcher._is_ssh_session() is False
 
     @patch("sys.stdout.isatty")
     @patch.dict(os.environ, {"TERM": "xterm-256color"})
     def test_is_terminal_capable_with_tty(self, mock_isatty, launcher):
-        """Test terminal capability with TTY"""
+        """Test terminal capability with TTY."""
         mock_isatty.return_value = True
         assert launcher._is_terminal_capable() is True
 
     @patch("sys.stdout.isatty")
     @patch.dict(os.environ, {"TERM": "dumb"})
     def test_is_terminal_capable_with_dumb_term(self, mock_isatty, launcher):
-        """Test terminal capability with dumb terminal"""
+        """Test terminal capability with dumb terminal."""
         mock_isatty.return_value = True
         assert launcher._is_terminal_capable() is False
 
     @patch("sys.stdout.isatty")
     def test_is_terminal_capable_without_tty(self, mock_isatty, launcher):
-        """Test terminal capability without TTY"""
+        """Test terminal capability without TTY."""
         mock_isatty.return_value = False
         assert launcher._is_terminal_capable() is False
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     def test_is_node_available_with_both(self, mock_which, launcher):
-        """Test Node.js availability with both node and npm"""
+        """Test Node.js availability with both node and npm."""
         mock_which.side_effect = lambda cmd: ("/usr/bin/" + cmd if cmd in ["node", "npm"] else None)
         assert launcher._is_node_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     def test_is_node_available_missing_node(self, mock_which, launcher):
-        """Test Node.js availability with missing node"""
+        """Test Node.js availability with missing node."""
         mock_which.side_effect = lambda cmd: "/usr/bin/npm" if cmd == "npm" else None
         assert launcher._is_node_available() is False
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     def test_is_node_available_missing_npm(self, mock_which, launcher):
-        """Test Node.js availability with missing npm"""
+        """Test Node.js availability with missing npm."""
         mock_which.side_effect = lambda cmd: "/usr/bin/node" if cmd == "node" else None
         assert launcher._is_node_available() is False
 
     def test_is_tauri_available_with_complete_setup(self, launcher):
-        """Test Tauri availability with complete setup"""
+        """Test Tauri availability with complete setup."""
         with patch.object(launcher, "_is_node_available", return_value=True):
             assert launcher._is_tauri_available() is True
 
     def test_is_tauri_available_missing_directory(self, temp_project_root):
-        """Test Tauri availability with missing directory"""
+        """Test Tauri availability with missing directory."""
         # Remove the tauri directory
         shutil.rmtree(temp_project_root / "tauri-dashboard")
 
@@ -177,27 +176,27 @@ class TestDashboardLauncher:
         assert launcher._is_tauri_available() is False
 
     def test_is_tauri_available_missing_package_json(self, launcher):
-        """Test Tauri availability with missing package.json"""
+        """Test Tauri availability with missing package.json."""
         # Remove package.json
         (launcher.tauri_path / "package.json").unlink()
 
         assert launcher._is_tauri_available() is False
 
     def test_is_tauri_available_missing_node(self, launcher):
-        """Test Tauri availability with missing Node.js"""
+        """Test Tauri availability with missing Node.js."""
         with patch.object(launcher, "_is_node_available", return_value=False):
             assert launcher._is_tauri_available() is False
 
     def test_is_python_package_available_existing(self, launcher):
-        """Test Python package availability for existing package"""
+        """Test Python package availability for existing package."""
         assert launcher._is_python_package_available("sys") is True
 
     def test_is_python_package_available_missing(self, launcher):
-        """Test Python package availability for missing package"""
+        """Test Python package availability for missing package."""
         assert launcher._is_python_package_available("nonexistent_package_12345") is False
 
     def test_get_interface_info_valid(self, launcher):
-        """Test getting interface info for valid interface"""
+        """Test getting interface info for valid interface."""
         info = launcher.get_interface_info("tui")
 
         assert isinstance(info, InterfaceInfo)
@@ -205,12 +204,12 @@ class TestDashboardLauncher:
         assert "rich" in info.requirements
 
     def test_get_interface_info_invalid(self, launcher):
-        """Test getting interface info for invalid interface"""
+        """Test getting interface info for invalid interface."""
         with pytest.raises(ValueError, match="Unknown interface: invalid"):
             launcher.get_interface_info("invalid")
 
     def test_get_available_interfaces(self, launcher):
-        """Test getting all available interfaces"""
+        """Test getting all available interfaces."""
         interfaces = launcher.get_available_interfaces()
 
         assert len(interfaces) == 3
@@ -223,7 +222,7 @@ class TestDashboardLauncher:
 
     @patch.object(DashboardLauncher, "_is_ssh_session")
     def test_detect_best_interface_ssh(self, mock_ssh, launcher):
-        """Test interface detection in SSH environment"""
+        """Test interface detection in SSH environment."""
         mock_ssh.return_value = True
 
         result = launcher.detect_best_interface()
@@ -232,7 +231,7 @@ class TestDashboardLauncher:
     @patch.object(DashboardLauncher, "_is_ssh_session")
     @patch.object(DashboardLauncher, "_is_gui_available")
     def test_detect_best_interface_gui_with_tauri(self, mock_gui, mock_ssh, launcher):
-        """Test interface detection with GUI and Tauri available"""
+        """Test interface detection with GUI and Tauri available."""
         mock_ssh.return_value = False
         mock_gui.return_value = True
 
@@ -246,7 +245,7 @@ class TestDashboardLauncher:
     @patch.object(DashboardLauncher, "_is_gui_available")
     @patch.object(DashboardLauncher, "_is_terminal_capable")
     def test_detect_best_interface_gui_without_tauri_no_terminal(self, mock_term, mock_gui, mock_ssh, launcher):
-        """Test interface detection with GUI but no Tauri and no terminal capability"""
+        """Test interface detection with GUI but no Tauri and no terminal capability."""
         mock_ssh.return_value = False
         mock_gui.return_value = True
         mock_term.return_value = False
@@ -260,7 +259,7 @@ class TestDashboardLauncher:
     @patch.object(DashboardLauncher, "_is_ssh_session")
     @patch.object(DashboardLauncher, "_is_terminal_capable")
     def test_detect_best_interface_terminal_capable(self, mock_term, mock_ssh, launcher):
-        """Test interface detection with terminal capability"""
+        """Test interface detection with terminal capability."""
         mock_ssh.return_value = False
         mock_term.return_value = True
 
@@ -270,7 +269,7 @@ class TestDashboardLauncher:
     @patch.object(DashboardLauncher, "_is_ssh_session")
     @patch.object(DashboardLauncher, "_is_terminal_capable")
     def test_detect_best_interface_fallback_to_web(self, mock_term, mock_ssh, launcher):
-        """Test interface detection fallback to web"""
+        """Test interface detection fallback to web."""
         mock_ssh.return_value = False
         mock_term.return_value = False
 
@@ -278,7 +277,7 @@ class TestDashboardLauncher:
         assert result == "web"
 
     def test_check_system_requirements_structure(self, launcher):
-        """Test system requirements check structure"""
+        """Test system requirements check structure."""
         reqs = launcher.check_system_requirements()
 
         assert "tui" in reqs
@@ -295,7 +294,7 @@ class TestDashboardLauncher:
 
     @patch("subprocess.run")
     def test_check_requirement_node_success(self, mock_run, launcher):
-        """Test checking Node.js requirement successfully"""
+        """Test checking Node.js requirement successfully."""
         mock_run.return_value = MagicMock(stdout="v18.0.0\\n")
 
         with patch(
@@ -309,7 +308,7 @@ class TestDashboardLauncher:
 
     @patch("subprocess.run")
     def test_check_requirement_node_failure(self, mock_run, launcher):
-        """Test checking Node.js requirement with failure"""
+        """Test checking Node.js requirement with failure."""
         mock_run.side_effect = subprocess.CalledProcessError(1, ["node"])
 
         with patch(
@@ -322,7 +321,7 @@ class TestDashboardLauncher:
             assert "not working" in details
 
     def test_check_requirement_node_missing(self, launcher):
-        """Test checking Node.js requirement when missing"""
+        """Test checking Node.js requirement when missing."""
         with patch("libs.dashboard.dashboard_launcher.shutil.which", return_value=None):
             status, details = launcher._check_requirement("node")
 
@@ -330,7 +329,7 @@ class TestDashboardLauncher:
             assert "not installed" in details
 
     def test_check_requirement_python(self, launcher):
-        """Test checking Python requirement"""
+        """Test checking Python requirement."""
         status, details = launcher._check_requirement("python")
 
         assert status is True
@@ -338,7 +337,7 @@ class TestDashboardLauncher:
         assert sys.version.split()[0] in details
 
     def test_check_requirement_unknown(self, launcher):
-        """Test checking unknown requirement"""
+        """Test checking unknown requirement."""
         status, details = launcher._check_requirement("unknown_requirement")
 
         assert status is False
@@ -347,7 +346,7 @@ class TestDashboardLauncher:
     @patch("subprocess.run")
     @patch.object(DashboardLauncher, "_is_python_package_available")
     def test_install_dependencies_web_success(self, mock_available, mock_run, launcher):
-        """Test installing web dependencies successfully"""
+        """Test installing web dependencies successfully."""
         mock_available.side_effect = [False, False]  # fastapi and uvicorn not available
         mock_run.return_value = MagicMock()
 
@@ -357,7 +356,7 @@ class TestDashboardLauncher:
         assert mock_run.call_count == 2
 
     def test_install_dependencies_invalid_interface(self, launcher):
-        """Test installing dependencies for invalid interface"""
+        """Test installing dependencies for invalid interface."""
         result = launcher.install_dependencies("invalid")
         assert result is False
 
@@ -365,7 +364,7 @@ class TestDashboardLauncher:
     @patch.object(DashboardLauncher, "_is_node_available")
     @patch("os.chdir")
     def test_install_dependencies_tauri_success(self, mock_chdir, mock_node, mock_run, launcher):
-        """Test installing Tauri dependencies successfully"""
+        """Test installing Tauri dependencies successfully."""
         mock_node.return_value = True
         mock_run.return_value = MagicMock()
 
@@ -377,14 +376,14 @@ class TestDashboardLauncher:
 
     @patch.object(DashboardLauncher, "_is_node_available")
     def test_install_dependencies_tauri_no_node(self, mock_node, launcher):
-        """Test installing Tauri dependencies without Node.js"""
+        """Test installing Tauri dependencies without Node.js."""
         mock_node.return_value = False
 
         result = launcher.install_dependencies("tauri")
         assert result is False
 
     def test_install_dependencies_tauri_no_directory(self, temp_project_root):
-        """Test installing Tauri dependencies without Tauri directory"""
+        """Test installing Tauri dependencies without Tauri directory."""
         # Remove tauri directory
         shutil.rmtree(temp_project_root / "tauri-dashboard")
 
@@ -394,10 +393,10 @@ class TestDashboardLauncher:
 
 
 class TestInterfaceInfo:
-    """Test suite for InterfaceInfo dataclass"""
+    """Test suite for InterfaceInfo dataclass."""
 
     def test_interface_info_creation(self):
-        """Test creating InterfaceInfo instance"""
+        """Test creating InterfaceInfo instance."""
         info = InterfaceInfo(
             name="Test Interface",
             description="Test description",
@@ -415,7 +414,7 @@ class TestInterfaceInfo:
         assert info.priority == 2
 
     def test_interface_info_defaults(self):
-        """Test InterfaceInfo with default values"""
+        """Test InterfaceInfo with default values."""
         info = InterfaceInfo(
             name="Test Interface",
             description="Test description",

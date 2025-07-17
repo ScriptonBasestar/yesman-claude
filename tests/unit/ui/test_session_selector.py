@@ -1,6 +1,4 @@
-"""
-Test for session selector UI
-"""
+"""Test for session selector UI."""
 
 import unittest
 from unittest.mock import MagicMock, patch
@@ -18,7 +16,7 @@ class TestSessionSelector(unittest.TestCase):
 
     @patch("libs.ui.session_selector.libtmux.Server")
     def test_get_session_details(self, mock_server_class):
-        """Test getting session details from tmux"""
+        """Test getting session details from tmux."""
         # Mock tmux session
         mock_session = MagicMock()
         mock_session.windows = [MagicMock(name="window1"), MagicMock(name="window2")]
@@ -36,7 +34,7 @@ class TestSessionSelector(unittest.TestCase):
         self.assertEqual(details["clients"], 1)
 
     def test_create_display_no_filter(self):
-        """Test creating display without filter"""
+        """Test creating display without filter."""
         selector = SessionSelector(self.test_sessions)
 
         with patch.object(selector, "_get_session_details") as mock_get_details:
@@ -54,7 +52,7 @@ class TestSessionSelector(unittest.TestCase):
             self.assertEqual(filtered, self.test_sessions)
 
     def test_create_display_with_filter(self):
-        """Test creating display with search filter"""
+        """Test creating display with search filter."""
         selector = SessionSelector(self.test_sessions)
 
         with patch.object(selector, "_get_session_details") as mock_get_details:
@@ -75,7 +73,7 @@ class TestSessionSelector(unittest.TestCase):
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
     def test_select_session_quit(self, mock_console_class, mock_prompt):
-        """Test quitting the selector"""
+        """Test quitting the selector."""
         mock_prompt.return_value = "q"
 
         selector = SessionSelector(self.test_sessions)
@@ -86,7 +84,7 @@ class TestSessionSelector(unittest.TestCase):
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
     def test_select_session_valid_choice(self, mock_console_class, mock_prompt):
-        """Test selecting a valid session"""
+        """Test selecting a valid session."""
         mock_prompt.return_value = "2"  # Select second session
 
         selector = SessionSelector(self.test_sessions)

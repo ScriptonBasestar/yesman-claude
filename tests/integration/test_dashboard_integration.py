@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Dashboard Integration Tests
+"""Dashboard Integration Tests.
 
 Tests the real-time dashboard integration with CLI, API, and automation systems.
 Validates that dashboard updates reflect system state accurately across components.
@@ -16,14 +15,19 @@ from commands.automate import AutomateMonitorCommand
 from commands.setup import SetupCommand
 from commands.status import StatusCommand
 
-from .test_framework import AsyncIntegrationTestBase, CommandTestRunner, MockClaudeEnvironment, PerformanceMonitor
+from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 
 class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
-    """Test complete dashboard system integration"""
+    """Test complete dashboard system integration."""
 
     def setup_method(self):
-        """Setup for dashboard integration tests"""
+        """Setup for dashboard integration tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
@@ -34,7 +38,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         self.dashboard_client = None
 
     async def test_dashboard_session_state_sync(self):
-        """Test that dashboard reflects session state changes in real-time"""
+        """Test that dashboard reflects session state changes in real-time."""
         # Create test sessions
         session_names = ["dash-session-1", "dash-session-2"]
         for session_name in session_names:
@@ -84,7 +88,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_automation_monitoring(self):
-        """Test dashboard integration with automation monitoring"""
+        """Test dashboard integration with automation monitoring."""
         # Create project for automation monitoring
         project_dir = self.test_dir / "dashboard_automation_project"
         project_dir.mkdir()
@@ -98,7 +102,12 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         # Start automation monitoring
         self.performance_monitor.start_timing("automation_monitoring_dashboard")
 
-        monitor_result = self.command_runner.run_command(AutomateMonitorCommand, project_path=str(project_dir), duration=2, dashboard_integration=True)
+        monitor_result = self.command_runner.run_command(
+            AutomateMonitorCommand,
+            project_path=str(project_dir),
+            duration=2,
+            dashboard_integration=True,
+        )
 
         monitoring_duration = self.performance_monitor.end_timing("automation_monitoring_dashboard")
 
@@ -123,12 +132,15 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_performance_metrics(self):
-        """Test dashboard performance metrics collection and display"""
+        """Test dashboard performance metrics collection and display."""
         dashboard = await self._start_mock_dashboard()
 
         # Perform various operations to generate metrics
         operations = [
-            ("session_creation", lambda: self.command_runner.run_command(SetupCommand, session_name="perf-session")),
+            (
+                "session_creation",
+                lambda: self.command_runner.run_command(SetupCommand, session_name="perf-session"),
+            ),
             ("status_query", lambda: self.command_runner.run_command(StatusCommand)),
         ]
 
@@ -156,7 +168,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_real_time_updates(self):
-        """Test dashboard real-time update mechanism"""
+        """Test dashboard real-time update mechanism."""
         dashboard = await self._start_mock_dashboard()
 
         # Track update events
@@ -192,7 +204,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_websocket_performance(self):
-        """Test dashboard WebSocket performance under load"""
+        """Test dashboard WebSocket performance under load."""
         dashboard = await self._start_mock_dashboard()
 
         # Simulate multiple concurrent clients
@@ -242,14 +254,24 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def _start_mock_dashboard(self):
-        """Start mock dashboard for testing"""
+        """Start mock dashboard for testing."""
         # Create mock dashboard that simulates real behavior
         dashboard = Mock()
-        dashboard.get_current_state = AsyncMock(return_value={"sessions": [], "automation": {"monitored_projects": []}, "performance_metrics": {}})
+        dashboard.get_current_state = AsyncMock(
+            return_value={
+                "sessions": [],
+                "automation": {"monitored_projects": []},
+                "performance_metrics": {},
+            }
+        )
         dashboard.register_update_handler = Mock()
 
         # Track state changes
-        dashboard._state = {"sessions": [], "automation": {"monitored_projects": []}, "performance_metrics": {}}
+        dashboard._state = {
+            "sessions": [],
+            "automation": {"monitored_projects": []},
+            "performance_metrics": {},
+        }
 
         # Add helper methods for testing
         async def add_session(session_data):
@@ -274,13 +296,13 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         return dashboard
 
     async def _stop_mock_dashboard(self, dashboard):
-        """Stop mock dashboard"""
+        """Stop mock dashboard."""
         # Cleanup mock dashboard
         if hasattr(dashboard, "cleanup"):
             await dashboard.cleanup()
 
     async def _create_mock_websocket_client(self, dashboard, client_id):
-        """Create mock WebSocket client for testing"""
+        """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id
         client.received_updates = []
@@ -298,10 +320,10 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
 
 class TestDashboardDataConsistency(AsyncIntegrationTestBase):
-    """Test dashboard data consistency across different sources"""
+    """Test dashboard data consistency across different sources."""
 
     async def test_cli_dashboard_data_consistency(self):
-        """Test that CLI and dashboard show consistent data"""
+        """Test that CLI and dashboard show consistent data."""
         # Create test session
         session_name = "consistency-test-session"
         self.create_test_session(session_name)
@@ -341,7 +363,7 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def test_automation_dashboard_data_sync(self):
-        """Test automation data synchronization with dashboard"""
+        """Test automation data synchronization with dashboard."""
         project_dir = self.test_dir / "dashboard_sync_project"
         project_dir.mkdir()
 
@@ -370,9 +392,13 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def _start_mock_dashboard(self):
-        """Start mock dashboard - reuse from previous class"""
+        """Start mock dashboard - reuse from previous class."""
         dashboard = Mock()
-        dashboard._state = {"sessions": [], "automation": {"monitored_projects": []}, "performance_metrics": {}}
+        dashboard._state = {
+            "sessions": [],
+            "automation": {"monitored_projects": []},
+            "performance_metrics": {},
+        }
 
         async def get_state():
             return dashboard._state.copy()
@@ -381,15 +407,15 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         return dashboard
 
     async def _stop_mock_dashboard(self, dashboard):
-        """Stop mock dashboard - reuse from previous class"""
+        """Stop mock dashboard - reuse from previous class."""
         pass
 
 
 class TestDashboardErrorHandling(AsyncIntegrationTestBase):
-    """Test dashboard error handling and recovery"""
+    """Test dashboard error handling and recovery."""
 
     async def test_dashboard_connection_recovery(self):
-        """Test dashboard recovery from connection failures"""
+        """Test dashboard recovery from connection failures."""
         dashboard = await self._start_mock_dashboard()
 
         # Simulate connection failure
@@ -419,7 +445,7 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_graceful_degradation(self):
-        """Test dashboard graceful degradation under high load"""
+        """Test dashboard graceful degradation under high load."""
         dashboard = await self._start_mock_dashboard()
 
         # Simulate high load scenario
@@ -449,9 +475,13 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)
 
     async def _start_mock_dashboard(self):
-        """Start mock dashboard - reuse pattern"""
+        """Start mock dashboard - reuse pattern."""
         dashboard = Mock()
-        dashboard._state = {"sessions": [], "automation": {"monitored_projects": []}, "performance_metrics": {}}
+        dashboard._state = {
+            "sessions": [],
+            "automation": {"monitored_projects": []},
+            "performance_metrics": {},
+        }
 
         async def get_state():
             return dashboard._state.copy()
@@ -460,5 +490,5 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         return dashboard
 
     async def _stop_mock_dashboard(self, dashboard):
-        """Stop mock dashboard"""
+        """Stop mock dashboard."""
         pass

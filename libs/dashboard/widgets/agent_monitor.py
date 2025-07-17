@@ -1,4 +1,4 @@
-"""Real-time multi-agent monitoring dashboard widget"""
+"""Real-time multi-agent monitoring dashboard widget."""
 
 import asyncio
 import logging
@@ -52,7 +52,7 @@ except ImportError:
 
 
 class MonitorDisplayMode(Enum):
-    """Agent monitor display modes"""
+    """Agent monitor display modes."""
 
     OVERVIEW = "overview"
     DETAILED = "detailed"
@@ -62,7 +62,7 @@ class MonitorDisplayMode(Enum):
 
 @dataclass
 class AgentMetrics:
-    """Real-time agent performance metrics"""
+    """Real-time agent performance metrics."""
 
     agent_id: str
     current_task: str | None = None
@@ -76,7 +76,7 @@ class AgentMetrics:
 
     @property
     def efficiency_score(self) -> float:
-        """Calculate overall efficiency score"""
+        """Calculate overall efficiency score."""
         if self.tasks_completed == 0:
             return 0.5
         return self.success_rate * 0.6 + (1.0 - self.current_load) * 0.3 + min(1.0, self.tasks_completed / 10.0) * 0.1
@@ -84,7 +84,7 @@ class AgentMetrics:
 
 @dataclass
 class TaskMetrics:
-    """Task execution metrics"""
+    """Task execution metrics."""
 
     task_id: str
     title: str
@@ -96,7 +96,7 @@ class TaskMetrics:
 
 
 class AgentMonitor:
-    """Real-time multi-agent monitoring dashboard"""
+    """Real-time multi-agent monitoring dashboard."""
 
     def __init__(
         self,
@@ -136,7 +136,7 @@ class AgentMonitor:
         self.progress_display: Progress | None = None
 
     def update_metrics(self) -> None:
-        """Update all metrics from agent pool"""
+        """Update all metrics from agent pool."""
         if not self.agent_pool:
             return
 
@@ -207,7 +207,7 @@ class AgentMonitor:
             self.logger.error(f"Error updating metrics: {e}")
 
     def _calculate_task_progress(self, task_data: dict[str, Any]) -> float:
-        """Calculate task progress percentage"""
+        """Calculate task progress percentage."""
         status = task_data["status"]
         start_time = task_data.get("start_time")
 
@@ -227,7 +227,7 @@ class AgentMonitor:
             return 0.0
 
     def render_overview(self) -> Panel:
-        """Render overview dashboard"""
+        """Render overview dashboard."""
         layout = Layout()
 
         # System stats table
@@ -295,7 +295,7 @@ class AgentMonitor:
         )
 
     def render_detailed(self) -> Panel:
-        """Render detailed agent view"""
+        """Render detailed agent view."""
         if not self.selected_agent or self.selected_agent not in self.agent_metrics:
             return Panel("No agent selected", title="Detailed View")
 
@@ -338,7 +338,7 @@ class AgentMonitor:
         )
 
     def render_tasks(self) -> Panel:
-        """Render task status view"""
+        """Render task status view."""
         tasks_table = Table(
             title="Task Status",
             show_header=True,
@@ -380,7 +380,7 @@ class AgentMonitor:
         return Panel(tasks_table, title="Task Monitor", border_style="bright_green")
 
     def render_performance(self) -> Panel:
-        """Render performance analytics view"""
+        """Render performance analytics view."""
         perf_table = Table(
             title="Performance Analytics",
             show_header=True,
@@ -426,7 +426,7 @@ class AgentMonitor:
         )
 
     def render(self) -> Panel:
-        """Render the current view based on display mode"""
+        """Render the current view based on display mode."""
         if self.display_mode == MonitorDisplayMode.OVERVIEW:
             return self.render_overview()
         elif self.display_mode == MonitorDisplayMode.DETAILED:
@@ -439,18 +439,18 @@ class AgentMonitor:
             return Panel("Unknown display mode", title="Error")
 
     def set_display_mode(self, mode: MonitorDisplayMode) -> None:
-        """Change display mode"""
+        """Change display mode."""
         self.display_mode = mode
         self.logger.info(f"Display mode changed to: {mode.value}")
 
     def select_agent(self, agent_id: str) -> None:
-        """Select an agent for detailed view"""
+        """Select an agent for detailed view."""
         if agent_id in self.agent_metrics:
             self.selected_agent = agent_id
             self.set_display_mode(MonitorDisplayMode.DETAILED)
 
     def get_keyboard_help(self) -> str:
-        """Get keyboard shortcuts help text"""
+        """Get keyboard shortcuts help text."""
         return """
 Keyboard Shortcuts:
   1,2,3,4 - Switch view modes (Overview/Detailed/Tasks/Performance)
@@ -462,7 +462,7 @@ Keyboard Shortcuts:
         """.strip()
 
     async def start_monitoring(self, duration: float | None = None) -> None:
-        """Start real-time monitoring"""
+        """Start real-time monitoring."""
         start_time = time.time()
 
         try:
@@ -484,7 +484,7 @@ Keyboard Shortcuts:
 
 # Helper function for standalone usage
 def create_agent_monitor(agent_pool: AgentPool | None = None) -> AgentMonitor:
-    """Create and configure an agent monitor"""
+    """Create and configure an agent monitor."""
     return AgentMonitor(agent_pool=agent_pool)
 
 
@@ -493,6 +493,6 @@ async def run_agent_monitor(
     agent_pool: AgentPool | None = None,
     duration: float | None = None,
 ) -> None:
-    """Run the agent monitor as a standalone application"""
+    """Run the agent monitor as a standalone application."""
     monitor = create_agent_monitor(agent_pool)
     await monitor.start_monitoring(duration)

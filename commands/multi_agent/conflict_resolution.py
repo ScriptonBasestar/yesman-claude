@@ -1,4 +1,4 @@
-"""Conflict detection and resolution commands"""
+"""Conflict detection and resolution commands."""
 
 import asyncio
 import logging
@@ -13,10 +13,16 @@ logger = logging.getLogger(__name__)
 
 
 class DetectConflictsCommand(BaseCommand):
-    """Detect conflicts between branches"""
+    """Detect conflicts between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, auto_resolve: bool = False, **kwargs) -> dict:
-        """Execute the detect conflicts command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        auto_resolve: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the detect conflicts command."""
         try:
             # Create progress indicator for conflict detection
             with Progress(
@@ -25,7 +31,10 @@ class DetectConflictsCommand(BaseCommand):
                 TimeElapsedColumn(),
                 transient=True,
             ) as progress:
-                detection_task = progress.add_task(f"🔍 Detecting conflicts between branches: {', '.join(branches)}", total=None)
+                detection_task = progress.add_task(
+                    f"🔍 Detecting conflicts between branches: {', '.join(branches)}",
+                    total=None,
+                )
 
                 # Create conflict resolution engine
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -37,7 +46,13 @@ class DetectConflictsCommand(BaseCommand):
 
                     if not conflicts:
                         self.print_success("✅ No conflicts detected")
-                        return {"success": True, "branches": branches, "repo_path": repo_path, "conflicts": [], "auto_resolve_results": None}
+                        return {
+                            "success": True,
+                            "branches": branches,
+                            "repo_path": repo_path,
+                            "conflicts": [],
+                            "auto_resolve_results": None,
+                        }
 
                     self.print_info(f"⚠️  Found {len(conflicts)} potential conflicts:")
                     self.print_info("=" * 60)
@@ -72,9 +87,19 @@ class DetectConflictsCommand(BaseCommand):
                             self.print_error(f"❌ Failed to resolve: {failed}")
                             self.print_warning("🚨 Manual intervention required for remaining conflicts")
 
-                        auto_resolve_results = {"resolved": resolved, "failed": failed, "results": results}
+                        auto_resolve_results = {
+                            "resolved": resolved,
+                            "failed": failed,
+                            "results": results,
+                        }
 
-                    return {"success": True, "branches": branches, "repo_path": repo_path, "conflicts": conflicts, "auto_resolve_results": auto_resolve_results}
+                    return {
+                        "success": True,
+                        "branches": branches,
+                        "repo_path": repo_path,
+                        "conflicts": conflicts,
+                        "auto_resolve_results": auto_resolve_results,
+                    }
 
                 return asyncio.run(run_detection())
 
@@ -83,10 +108,16 @@ class DetectConflictsCommand(BaseCommand):
 
 
 class ResolveConflictCommand(BaseCommand):
-    """Resolve a specific conflict"""
+    """Resolve a specific conflict."""
 
-    def execute(self, conflict_id: str, strategy: str | None = None, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the resolve conflict command"""
+    def execute(
+        self,
+        conflict_id: str,
+        strategy: str | None = None,
+        repo_path: str | None = None,
+        **kwargs,
+    ) -> dict:
+        """Execute the resolve conflict command."""
         try:
             self.print_info(f"🔧 Resolving conflict: {conflict_id}")
 
@@ -102,7 +133,10 @@ class ResolveConflictCommand(BaseCommand):
 
                     resolution_strategy = ResolutionStrategy(strategy)
                 except ValueError as e:
-                    raise CommandError(f"Invalid strategy: {strategy}", recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis") from e
+                    raise CommandError(
+                        f"Invalid strategy: {strategy}",
+                        recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis",
+                    ) from e
 
             async def run_resolution():
                 result = await engine.resolve_conflict(conflict_id, resolution_strategy)
@@ -140,10 +174,10 @@ class ResolveConflictCommand(BaseCommand):
 
 
 class ConflictSummaryCommand(BaseCommand):
-    """Show conflict resolution summary and statistics"""
+    """Show conflict resolution summary and statistics."""
 
     def execute(self, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the conflict summary command"""
+        """Execute the conflict summary command."""
         try:
             self.print_info("📊 Conflict Resolution Summary")
             self.print_info("=" * 40)

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Progress indicator utilities for long-running commands
+"""Progress indicator utilities for long-running commands.
 
 Provides standardized progress indicators using Rich library
 for consistent user experience across all commands.
@@ -11,11 +10,18 @@ from contextlib import contextmanager
 from typing import Any
 
 from rich.console import Console
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    track,
+)
 
 
 class ProgressStyle:
-    """Standard progress indicator styles"""
+    """Standard progress indicator styles."""
 
     # Spinner styles for long-running operations without known duration
     STARTUP = "bold blue"
@@ -33,8 +39,7 @@ class ProgressStyle:
 
 @contextmanager
 def spinner_progress(description: str, style: str = ProgressStyle.PROCESSING) -> Iterator[Callable[[str], None]]:
-    """
-    Create a spinner progress indicator for indefinite operations
+    """Create a spinner progress indicator for indefinite operations.
 
     Args:
         description: Initial description text
@@ -66,8 +71,7 @@ def spinner_progress(description: str, style: str = ProgressStyle.PROCESSING) ->
 
 @contextmanager
 def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_PROCESSING) -> Iterator[Callable[[int, str | None], None]]:
-    """
-    Create a progress bar for operations with known total
+    """Create a progress bar for operations with known total.
 
     Args:
         description: Description text
@@ -103,8 +107,7 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
 
 
 def track_items(items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Iterator[Any]:
-    """
-    Track progress through a list of items with rich progress bar
+    """Track progress through a list of items with rich progress bar.
 
     Args:
         items: List of items to process
@@ -124,8 +127,7 @@ def track_items(items: list[Any], description: str, style: str = ProgressStyle.D
 
 @contextmanager
 def multi_stage_progress(stages: list[str], style: str = ProgressStyle.PROCESSING) -> Iterator[Callable[[int, str | None], None]]:
-    """
-    Create a multi-stage progress indicator
+    """Create a multi-stage progress indicator.
 
     Args:
         stages: List of stage descriptions
@@ -164,16 +166,14 @@ def multi_stage_progress(stages: list[str], style: str = ProgressStyle.PROCESSIN
 
 
 class ProgressManager:
-    """
-    High-level progress manager for complex operations
+    """High-level progress manager for complex operations.
 
     Provides easy-to-use methods for common progress patterns
     """
 
     @staticmethod
     def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str, Any]:
-        """
-        Execute a sequence of startup operations with progress tracking
+        """Execute a sequence of startup operations with progress tracking.
 
         Args:
             operations: List of (description, function) tuples
@@ -205,9 +205,13 @@ class ProgressManager:
         return results
 
     @staticmethod
-    def file_batch_operation(files: list[Any], operation: Callable[[Any], Any], description: str = "🔧 Processing files", style: str = ProgressStyle.FILE_OPERATIONS) -> list[Any]:
-        """
-        Process a batch of files with progress tracking
+    def file_batch_operation(
+        files: list[Any],
+        operation: Callable[[Any], Any],
+        description: str = "🔧 Processing files",
+        style: str = ProgressStyle.FILE_OPERATIONS,
+    ) -> list[Any]:
+        """Process a batch of files with progress tracking.
 
         Args:
             files: List of files to process
@@ -240,15 +244,15 @@ class ProgressManager:
 
 # Convenience functions for common patterns
 def with_startup_progress(description: str):
-    """Decorator for startup operations"""
+    """Decorator for startup operations."""
     return spinner_progress(description, ProgressStyle.STARTUP)
 
 
 def with_processing_progress(description: str):
-    """Decorator for processing operations"""
+    """Decorator for processing operations."""
     return spinner_progress(description, ProgressStyle.PROCESSING)
 
 
 def with_analysis_progress(description: str):
-    """Decorator for analysis operations"""
+    """Decorator for analysis operations."""
     return spinner_progress(description, ProgressStyle.ANALYZING)

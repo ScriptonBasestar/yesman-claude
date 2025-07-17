@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Session setup logic extracted from setup command
-"""
+"""Session setup logic extracted from setup command."""
 
 import os
 from typing import Any
@@ -15,14 +13,13 @@ from .settings import settings
 
 
 class SessionValidator:
-    """Validates session configuration"""
+    """Validates session configuration."""
 
     def __init__(self):
         self.validation_errors = []
 
     def validate_session_config(self, session_name: str, config_dict: dict[str, Any]) -> bool:
-        """
-        Validate session configuration
+        """Validate session configuration.
 
         Args:
             session_name: Name of the session
@@ -48,7 +45,7 @@ class SessionValidator:
         return len(self.validation_errors) == 0
 
     def _validate_session_name(self, session_name: str) -> bool:
-        """Validate session name format"""
+        """Validate session name format."""
         if not session_name:
             self.validation_errors.append("Session name cannot be empty")
             return False
@@ -72,7 +69,7 @@ class SessionValidator:
         return True
 
     def _validate_start_directory(self, session_name: str, config_dict: dict[str, Any]) -> bool:
-        """Validate and potentially create start directory"""
+        """Validate and potentially create start directory."""
         start_dir = config_dict.get("start_directory")
         if not start_dir:
             return True
@@ -107,7 +104,7 @@ class SessionValidator:
         return True
 
     def _validate_windows(self, session_name: str, config_dict: dict[str, Any]) -> bool:
-        """Validate window configurations"""
+        """Validate window configurations."""
         windows = config_dict.get("windows", [])
 
         if len(windows) > settings.sessions.max_windows_per_session:
@@ -125,7 +122,7 @@ class SessionValidator:
         window: dict[str, Any],
         config_dict: dict[str, Any],
     ) -> bool:
-        """Validate individual window configuration"""
+        """Validate individual window configuration."""
         window_name = window.get("window_name", f"window_{window_index}")
 
         # Validate window name
@@ -160,7 +157,7 @@ class SessionValidator:
         window_start_dir: str,
         config_dict: dict[str, Any],
     ) -> bool:
-        """Validate window start directory"""
+        """Validate window start directory."""
         # If relative path, make it relative to session start_directory
         if not os.path.isabs(window_start_dir):
             base_dir = config_dict.get("start_directory", os.getcwd())
@@ -195,19 +192,18 @@ class SessionValidator:
         return True
 
     def get_validation_errors(self) -> list[str]:
-        """Get list of validation errors"""
+        """Get list of validation errors."""
         return self.validation_errors.copy()
 
 
 class SessionConfigBuilder:
-    """Builds session configuration from template and overrides"""
+    """Builds session configuration from template and overrides."""
 
     def __init__(self, tmux_manager):
         self.tmux_manager = tmux_manager
 
     def build_session_config(self, session_name: str, session_conf: dict[str, Any]) -> dict[str, Any]:
-        """
-        Build complete session configuration
+        """Build complete session configuration.
 
         Args:
             session_name: Name of the session
@@ -237,8 +233,7 @@ class SessionConfigBuilder:
         return config_dict
 
     def _load_template(self, template_name: str | None) -> dict[str, Any]:
-        """
-        Load template configuration
+        """Load template configuration.
 
         Args:
             template_name: Name of the template to load
@@ -267,7 +262,7 @@ class SessionConfigBuilder:
 
 
 class SessionSetupService:
-    """Service for setting up tmux sessions"""
+    """Service for setting up tmux sessions."""
 
     def __init__(self, tmux_manager):
         self.tmux_manager = tmux_manager
@@ -275,8 +270,7 @@ class SessionSetupService:
         self.validator = SessionValidator()
 
     def setup_sessions(self, session_filter: str | None = None) -> tuple[int, int]:
-        """
-        Set up tmux sessions
+        """Set up tmux sessions.
 
         Args:
             session_filter: Optional filter to set up only specific session
@@ -314,7 +308,7 @@ class SessionSetupService:
         return successful_count, failed_count
 
     def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
-        """Load sessions configuration with optional filter"""
+        """Load sessions configuration with optional filter."""
         all_sessions = self.tmux_manager.load_projects().get("sessions", {})
 
         if not all_sessions:
@@ -328,8 +322,7 @@ class SessionSetupService:
         return all_sessions
 
     def _setup_single_session(self, session_name: str, session_conf: dict[str, Any]) -> bool:
-        """
-        Set up a single tmux session
+        """Set up a single tmux session.
 
         Args:
             session_name: Name of the session
@@ -372,7 +365,7 @@ class SessionSetupService:
             return False
 
     def _session_exists(self, session_name: str) -> bool:
-        """Check if session already exists"""
+        """Check if session already exists."""
         try:
             sessions = self.tmux_manager.get_all_sessions()
             return any(session.get("session_name") == session_name for session in sessions)
@@ -380,7 +373,7 @@ class SessionSetupService:
             return False
 
     def _kill_session(self, session_name: str) -> None:
-        """Kill existing session"""
+        """Kill existing session."""
         import subprocess
 
         try:
@@ -393,7 +386,7 @@ class SessionSetupService:
             raise CommandError(f"Failed to kill existing session: {e}") from e
 
     def _create_session(self, config_dict: dict[str, Any]) -> None:
-        """Create tmux session from configuration"""
+        """Create tmux session from configuration."""
         try:
             self.tmux_manager.create_session_from_config(config_dict)
         except Exception as e:

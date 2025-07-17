@@ -1,5 +1,4 @@
-"""
-Comprehensive Renderer System Integration Tests
+"""Comprehensive Renderer System Integration Tests
 Testing the complete renderer ecosystem with cross-format compatibility,
 performance benchmarks, and memory stability.
 """
@@ -13,7 +12,19 @@ from datetime import datetime
 import psutil
 import pytest
 
-from libs.dashboard.renderers import BatchRenderer, LazyRenderer, RenderCache, RendererFactory, RenderFormat, TUIRenderer, WebRenderer, WidgetType, clear_all_caches, render_all_formats, render_widget
+from libs.dashboard.renderers import (
+    BatchRenderer,
+    LazyRenderer,
+    RenderCache,
+    RendererFactory,
+    RenderFormat,
+    TUIRenderer,
+    WebRenderer,
+    WidgetType,
+    clear_all_caches,
+    render_all_formats,
+    render_widget,
+)
 from libs.dashboard.renderers.widget_models import (
     ActivityData,
     ActivityEntry,
@@ -34,22 +45,22 @@ from libs.dashboard.renderers.widget_models import (
 
 
 class TestRendererSystemIntegration:
-    """Integration tests for the complete renderer system"""
+    """Integration tests for the complete renderer system."""
 
     def setup_method(self):
-        """Setup for each test"""
+        """Setup for each test."""
         clear_all_caches()
         RendererFactory.reset()
         self.test_data = self._create_comprehensive_test_data()
 
     def teardown_method(self):
-        """Cleanup after each test"""
+        """Cleanup after each test."""
         clear_all_caches()
         RendererFactory.reset()
         gc.collect()
 
     def _create_comprehensive_test_data(self):
-        """Create comprehensive test data covering all widget types"""
+        """Create comprehensive test data covering all widget types."""
         now = datetime.now()
 
         return {
@@ -166,7 +177,7 @@ class TestRendererSystemIntegration:
         }
 
     def test_all_formats_render_all_widgets(self):
-        """Test that all formats can render all widget types"""
+        """Test that all formats can render all widget types."""
         widget_tests = [
             (WidgetType.SESSION_BROWSER, [self.test_data["session"]]),
             (WidgetType.HEALTH_METER, self.test_data["health"]),
@@ -203,7 +214,7 @@ class TestRendererSystemIntegration:
                     pytest.fail(f"Failed to render {widget_type.value} with {render_format.value}: {e}")
 
     def test_cross_format_consistency(self):
-        """Test that different formats produce consistent data structures"""
+        """Test that different formats produce consistent data structures."""
         metric = self.test_data["metric"]
 
         results = render_all_formats(WidgetType.METRIC_CARD, metric)
@@ -228,7 +239,7 @@ class TestRendererSystemIntegration:
         assert tauri_result["data"]["value"] == 92.5
 
     def test_data_transformation_pipeline(self):
-        """Test complete data transformation from models to rendered output"""
+        """Test complete data transformation from models to rendered output."""
         # Start with raw data
         raw_health_data = {
             "overall_score": 75,
@@ -254,8 +265,7 @@ class TestRendererSystemIntegration:
                 assert "build" in str(result).lower()
 
     def test_error_handling_scenarios(self):
-        """Test error handling across different scenarios"""
-
+        """Test error handling across different scenarios."""
         # Test with None data
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
             try:
@@ -292,8 +302,7 @@ class TestRendererSystemIntegration:
             assert result is not None
 
     def test_edge_cases_and_boundaries(self):
-        """Test edge cases and boundary conditions"""
-
+        """Test edge cases and boundary conditions."""
         # Empty collections
         empty_sessions = []
         empty_logs = {"logs": []}
@@ -335,7 +344,7 @@ class TestRendererSystemIntegration:
                 assert result["data"]["trend"] == -50.0
 
     def test_concurrent_rendering(self):
-        """Test concurrent rendering across multiple threads"""
+        """Test concurrent rendering across multiple threads."""
         results = []
         errors = []
 
@@ -393,10 +402,10 @@ class TestRendererSystemIntegration:
 
 
 class TestRendererPerformance:
-    """Performance and benchmark tests for renderer system"""
+    """Performance and benchmark tests for renderer system."""
 
     def setup_method(self):
-        """Setup for performance tests"""
+        """Setup for performance tests."""
         clear_all_caches()
         self.metric = MetricCardData(
             title="Performance Test",
@@ -405,11 +414,11 @@ class TestRendererPerformance:
         )
 
     def teardown_method(self):
-        """Cleanup after performance tests"""
+        """Cleanup after performance tests."""
         clear_all_caches()
 
     def test_single_widget_render_performance(self):
-        """Test single widget rendering performance"""
+        """Test single widget rendering performance."""
 
         def render_single():
             return render_widget(WidgetType.METRIC_CARD, self.metric, RenderFormat.TUI)
@@ -428,7 +437,7 @@ class TestRendererPerformance:
         assert avg_time < 0.05, f"Average render time {avg_time:.4f}s exceeds 50ms threshold"
 
     def test_multi_format_render_performance(self):
-        """Test multi-format rendering performance"""
+        """Test multi-format rendering performance."""
 
         def render_all():
             return render_all_formats(WidgetType.METRIC_CARD, self.metric)
@@ -447,7 +456,7 @@ class TestRendererPerformance:
         assert avg_time < 0.15, f"Average multi-format render time {avg_time:.4f}s exceeds 150ms threshold"
 
     def test_batch_rendering_performance(self):
-        """Test batch rendering performance vs individual rendering"""
+        """Test batch rendering performance vs individual rendering."""
         metrics = [MetricCardData(title=f"Batch Test {i}", value=i * 10) for i in range(20)]
 
         renderer = TUIRenderer()
@@ -476,7 +485,7 @@ class TestRendererPerformance:
         assert batch_time < individual_time * 2  # Allow some overhead
 
     def test_caching_performance_improvement(self):
-        """Test that caching significantly improves performance"""
+        """Test that caching significantly improves performance."""
         cache = RenderCache(max_size=100)
 
         # Create renderer with caching
@@ -510,26 +519,26 @@ class TestRendererPerformance:
 
 
 class TestRendererMemoryStability:
-    """Memory usage and stability tests"""
+    """Memory usage and stability tests."""
 
     def setup_method(self):
-        """Setup for memory tests"""
+        """Setup for memory tests."""
         clear_all_caches()
         gc.collect()
         self.initial_memory = self._get_memory_usage()
 
     def teardown_method(self):
-        """Cleanup for memory tests"""
+        """Cleanup for memory tests."""
         clear_all_caches()
         gc.collect()
 
     def _get_memory_usage(self):
-        """Get current memory usage in MB"""
+        """Get current memory usage in MB."""
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
 
     def test_memory_usage_large_dataset(self):
-        """Test memory usage with large datasets"""
+        """Test memory usage with large datasets."""
         initial_memory = self._get_memory_usage()
 
         # Create large dataset
@@ -578,7 +587,7 @@ class TestRendererMemoryStability:
         assert memory_after_cleanup < memory_increase * 0.5, f"Memory not properly released: {memory_after_cleanup:.2f}MB remaining"
 
     def test_cache_memory_limits(self):
-        """Test that cache respects memory limits"""
+        """Test that cache respects memory limits."""
         # Create small cache
         cache = RenderCache(max_size=10, ttl=None)
 
@@ -596,7 +605,7 @@ class TestRendererMemoryStability:
         assert stats.evictions > 0
 
     def test_memory_leak_prevention(self):
-        """Test for memory leaks in repeated rendering"""
+        """Test for memory leaks in repeated rendering."""
         initial_memory = self._get_memory_usage()
 
         # Perform many render operations
@@ -634,11 +643,10 @@ class TestRendererMemoryStability:
 
 
 class TestRendererCompatibility:
-    """Compatibility tests for different data formats and edge cases"""
+    """Compatibility tests for different data formats and edge cases."""
 
     def test_data_format_compatibility(self):
-        """Test compatibility with different data input formats"""
-
+        """Test compatibility with different data input formats."""
         # Test with dataclass instance
         metric_dataclass = MetricCardData(title="Dataclass Test", value=100)
         result1 = render_widget(WidgetType.METRIC_CARD, metric_dataclass, RenderFormat.TAURI)
@@ -669,8 +677,7 @@ class TestRendererCompatibility:
         assert len(result3["data"]["rows"]) == 3
 
     def test_unicode_and_special_characters(self):
-        """Test handling of unicode and special characters"""
-
+        """Test handling of unicode and special characters."""
         # Unicode characters
         unicode_metric = MetricCardData(
             title="测试 🚀 Тест",
@@ -702,8 +709,7 @@ class TestRendererCompatibility:
         assert "<script>" not in web_result or "&lt;script&gt;" in web_result
 
     def test_timezone_and_datetime_handling(self):
-        """Test handling of different datetime formats and timezones"""
-
+        """Test handling of different datetime formats and timezones."""
         # Different datetime objects
         now = datetime.now()
 
@@ -727,8 +733,7 @@ class TestRendererCompatibility:
                 assert isinstance(session_data["created_at"], str)
 
     def test_empty_and_null_data_handling(self):
-        """Test handling of empty and null data"""
-
+        """Test handling of empty and null data."""
         empty_data_tests = [
             # Empty strings
             (WidgetType.METRIC_CARD, MetricCardData(title="", value=0)),

@@ -1,4 +1,4 @@
-"""Collaboration engine for multi-agent branch development coordination"""
+"""Collaboration engine for multi-agent branch development coordination."""
 
 import asyncio
 import hashlib
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class CollaborationMode(Enum):
-    """Modes for agent collaboration"""
+    """Modes for agent collaboration."""
 
     ISOLATED = "isolated"  # Agents work independently
     COOPERATIVE = "cooperative"  # Agents share information
@@ -30,7 +30,7 @@ class CollaborationMode(Enum):
 
 
 class MessageType(Enum):
-    """Types of messages agents can exchange"""
+    """Types of messages agents can exchange."""
 
     STATUS_UPDATE = "status_update"
     DEPENDENCY_CHANGE = "dependency_change"
@@ -44,7 +44,7 @@ class MessageType(Enum):
 
 
 class MessagePriority(Enum):
-    """Priority levels for inter-agent messages"""
+    """Priority levels for inter-agent messages."""
 
     LOW = 1
     NORMAL = 2
@@ -55,7 +55,7 @@ class MessagePriority(Enum):
 
 @dataclass
 class CollaborationMessage:
-    """Message exchanged between agents"""
+    """Message exchanged between agents."""
 
     message_id: str
     sender_id: str
@@ -71,7 +71,7 @@ class CollaborationMessage:
     acknowledged: bool = False
 
     def is_expired(self) -> bool:
-        """Check if message has expired"""
+        """Check if message has expired."""
         if self.expires_at:
             return datetime.now() > self.expires_at
         return False
@@ -79,7 +79,7 @@ class CollaborationMessage:
 
 @dataclass
 class SharedKnowledge:
-    """Knowledge item shared between agents"""
+    """Knowledge item shared between agents."""
 
     knowledge_id: str
     contributor_id: str
@@ -94,7 +94,7 @@ class SharedKnowledge:
 
 @dataclass
 class CollaborationSession:
-    """Active collaboration session between agents"""
+    """Active collaboration session between agents."""
 
     session_id: str
     participant_ids: list[str]
@@ -108,7 +108,7 @@ class CollaborationSession:
 
 
 class CollaborationEngine:
-    """Engine for coordinating collaboration between multiple agents"""
+    """Engine for coordinating collaboration between multiple agents."""
 
     def __init__(
         self,
@@ -118,8 +118,7 @@ class CollaborationEngine:
         semantic_analyzer: SemanticAnalyzer | None = None,
         repo_path: str | None = None,
     ):
-        """
-        Initialize the collaboration engine
+        """Initialize the collaboration engine.
 
         Args:
             agent_pool: Pool of agents to coordinate
@@ -178,7 +177,7 @@ class CollaborationEngine:
         self._tasks = []
 
     async def start(self):
-        """Start the collaboration engine"""
+        """Start the collaboration engine."""
         self._running = True
         logger.info("Starting collaboration engine")
 
@@ -194,7 +193,7 @@ class CollaborationEngine:
             self._tasks.append(asyncio.create_task(self._auto_sync_loop()))
 
     async def stop(self):
-        """Stop the collaboration engine"""
+        """Stop the collaboration engine."""
         self._running = False
         logger.info("Stopping collaboration engine")
 
@@ -217,8 +216,7 @@ class CollaborationEngine:
         expires_in: timedelta | None = None,
         requires_ack: bool = False,
     ) -> str:
-        """
-        Send a message between agents
+        """Send a message between agents.
 
         Args:
             sender_id: ID of sending agent
@@ -278,8 +276,7 @@ class CollaborationEngine:
         agent_id: str,
         max_messages: int | None = None,
     ) -> list[CollaborationMessage]:
-        """
-        Receive messages for an agent
+        """Receive messages for an agent.
 
         Args:
             agent_id: ID of receiving agent
@@ -306,7 +303,7 @@ class CollaborationEngine:
         return messages
 
     async def acknowledge_message(self, agent_id: str, message_id: str):
-        """Acknowledge receipt of a message"""
+        """Acknowledge receipt of a message."""
         if message_id in self.pending_acknowledgments:
             message = self.pending_acknowledgments[message_id]
             if message.recipient_id == agent_id or message.recipient_id is None:
@@ -322,8 +319,7 @@ class CollaborationEngine:
         tags: list[str] | None = None,
         relevance_score: float = 1.0,
     ) -> str:
-        """
-        Share knowledge with other agents
+        """Share knowledge with other agents.
 
         Args:
             contributor_id: ID of contributing agent
@@ -381,8 +377,7 @@ class CollaborationEngine:
         knowledge_type: str | None = None,
         limit: int = 10,
     ) -> list[SharedKnowledge]:
-        """
-        Access shared knowledge
+        """Access shared knowledge.
 
         Args:
             agent_id: ID of requesting agent
@@ -449,8 +444,7 @@ class CollaborationEngine:
         purpose: str,
         initial_context: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Create a collaboration session between agents
+        """Create a collaboration session between agents.
 
         Args:
             initiator_id: ID of initiating agent
@@ -508,7 +502,7 @@ class CollaborationEngine:
         agent_id: str,
         context_update: dict[str, Any],
     ):
-        """Update shared context in a collaboration session"""
+        """Update shared context in a collaboration session."""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
 
@@ -541,7 +535,7 @@ class CollaborationEngine:
         agent_id: str,
         decision: dict[str, Any],
     ):
-        """Add a decision to a collaboration session"""
+        """Add a decision to a collaboration session."""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
 
@@ -562,7 +556,7 @@ class CollaborationEngine:
         session_id: str,
         outcomes: list[str] | None = None,
     ):
-        """End a collaboration session"""
+        """End a collaboration session."""
         if session_id not in self.active_sessions:
             raise ValueError(f"Session {session_id} not found")
 
@@ -590,8 +584,7 @@ class CollaborationEngine:
         change_details: dict[str, Any],
         affected_files: list[str] | None = None,
     ):
-        """
-        Track a dependency change that needs to be propagated
+        """Track a dependency change that needs to be propagated.
 
         Args:
             file_path: Changed file path
@@ -647,8 +640,7 @@ class CollaborationEngine:
         context: dict[str, Any] | None = None,
         expertise_needed: list[str] | None = None,
     ) -> str | None:
-        """
-        Request help from other agents
+        """Request help from other agents.
 
         Args:
             requester_id: ID of requesting agent
@@ -717,8 +709,7 @@ class CollaborationEngine:
         review_type: str = "standard",
         priority: MessagePriority = MessagePriority.NORMAL,
     ) -> list[str]:
-        """
-        Initiate code review by other agents
+        """Initiate code review by other agents.
 
         Args:
             author_id: ID of code author
@@ -773,8 +764,7 @@ class CollaborationEngine:
         branch2: str,
         potential_conflicts: list[ConflictInfo],
     ) -> int:
-        """
-        Collaborate to prevent potential conflicts
+        """Collaborate to prevent potential conflicts.
 
         Args:
             branch1: First branch
@@ -853,7 +843,7 @@ class CollaborationEngine:
     # Background tasks
 
     async def _message_processor(self):
-        """Process message queues and handle acknowledgments"""
+        """Process message queues and handle acknowledgments."""
         while self._running:
             try:
                 # Check for expired acknowledgments
@@ -883,7 +873,7 @@ class CollaborationEngine:
                 await asyncio.sleep(10)
 
     async def _dependency_monitor(self):
-        """Monitor and process dependency changes"""
+        """Monitor and process dependency changes."""
         while self._running:
             try:
                 # Process change propagation queue
@@ -907,7 +897,7 @@ class CollaborationEngine:
                 await asyncio.sleep(30)
 
     async def _knowledge_cleanup(self):
-        """Clean up old knowledge items"""
+        """Clean up old knowledge items."""
         while self._running:
             try:
                 cutoff_date = datetime.now() - timedelta(
@@ -940,7 +930,7 @@ class CollaborationEngine:
                 await asyncio.sleep(3600)
 
     async def _session_monitor(self):
-        """Monitor active collaboration sessions"""
+        """Monitor active collaboration sessions."""
         while self._running:
             try:
                 # Check for stale sessions
@@ -966,7 +956,7 @@ class CollaborationEngine:
                 await asyncio.sleep(60)
 
     async def _auto_sync_loop(self):
-        """Periodic synchronization between agents"""
+        """Periodic synchronization between agents."""
         while self._running:
             try:
                 # Find agents that need synchronization
@@ -1010,7 +1000,7 @@ class CollaborationEngine:
                 await asyncio.sleep(self.sync_interval)
 
     def get_collaboration_summary(self) -> dict[str, Any]:
-        """Get comprehensive summary of collaboration activities"""
+        """Get comprehensive summary of collaboration activities."""
         return {
             "statistics": self.collaboration_stats.copy(),
             "active_sessions": len(self.active_sessions),
@@ -1033,7 +1023,7 @@ class CollaborationEngine:
         }
 
     def _count_knowledge_by_type(self) -> dict[str, int]:
-        """Count knowledge items by type"""
+        """Count knowledge items by type."""
         counts = defaultdict(int)
         for knowledge in self.shared_knowledge.values():
             counts[knowledge.knowledge_type] += 1

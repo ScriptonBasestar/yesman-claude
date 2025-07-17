@@ -549,7 +549,6 @@ class WorkflowEngine:
 
     def _load_default_workflows(self) -> None:
         """Load default workflow configurations."""
-
         # Git commit → test → build workflow
         git_workflow = WorkflowChain(
             name="git_commit_validation",

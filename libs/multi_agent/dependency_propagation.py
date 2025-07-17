@@ -1,4 +1,4 @@
-"""Dependency change propagation system for multi-agent collaboration"""
+"""Dependency change propagation system for multi-agent collaboration."""
 
 import ast
 import asyncio
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class DependencyType(Enum):
-    """Types of dependencies that can be tracked"""
+    """Types of dependencies that can be tracked."""
 
     IMPORT = "import"  # Import statements
     FUNCTION_CALL = "function_call"  # Function calls
@@ -32,7 +32,7 @@ class DependencyType(Enum):
 
 
 class ChangeImpact(Enum):
-    """Impact levels of dependency changes"""
+    """Impact levels of dependency changes."""
 
     BREAKING = "breaking"  # Breaking changes requiring immediate action
     COMPATIBLE = "compatible"  # Backward compatible changes
@@ -43,7 +43,7 @@ class ChangeImpact(Enum):
 
 
 class PropagationStrategy(Enum):
-    """Strategies for propagating dependency changes"""
+    """Strategies for propagating dependency changes."""
 
     IMMEDIATE = "immediate"  # Propagate immediately
     BATCHED = "batched"  # Batch multiple changes
@@ -54,7 +54,7 @@ class PropagationStrategy(Enum):
 
 @dataclass
 class DependencyNode:
-    """Represents a node in the dependency graph"""
+    """Represents a node in the dependency graph."""
 
     file_path: str
     module_name: str
@@ -68,7 +68,7 @@ class DependencyNode:
 
 @dataclass
 class DependencyChange:
-    """Represents a dependency change event"""
+    """Represents a dependency change event."""
 
     change_id: str
     source_file: str
@@ -90,7 +90,7 @@ class DependencyChange:
 
 @dataclass
 class PropagationResult:
-    """Result of a propagation operation"""
+    """Result of a propagation operation."""
 
     change_id: str
     success: bool
@@ -103,7 +103,7 @@ class PropagationResult:
 
 
 class DependencyPropagationSystem:
-    """System for tracking and propagating dependency changes across branches"""
+    """System for tracking and propagating dependency changes across branches."""
 
     def __init__(
         self,
@@ -113,8 +113,7 @@ class DependencyPropagationSystem:
         repo_path: str | None = None,
         auto_propagate: bool = True,
     ):
-        """
-        Initialize the dependency propagation system
+        """Initialize the dependency propagation system.
 
         Args:
             collaboration_engine: Engine for agent collaboration
@@ -158,7 +157,7 @@ class DependencyPropagationSystem:
         self._analysis_task = None
 
     async def start(self):
-        """Start the dependency propagation system"""
+        """Start the dependency propagation system."""
         self._running = True
         logger.info("Starting dependency propagation system")
 
@@ -167,7 +166,7 @@ class DependencyPropagationSystem:
         self._analysis_task = asyncio.create_task(self._dependency_analysis_loop())
 
     async def stop(self):
-        """Stop the dependency propagation system"""
+        """Stop the dependency propagation system."""
         self._running = False
         logger.info("Stopping dependency propagation system")
 
@@ -191,8 +190,7 @@ class DependencyPropagationSystem:
         impact_level: ChangeImpact | None = None,
         propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE,
     ) -> str:
-        """
-        Track a new dependency change
+        """Track a new dependency change.
 
         Args:
             file_path: Path to the changed file
@@ -256,8 +254,7 @@ class DependencyPropagationSystem:
         self,
         file_paths: list[str] | None = None,
     ) -> dict[str, DependencyNode]:
-        """
-        Build or rebuild the dependency graph
+        """Build or rebuild the dependency graph.
 
         Args:
             file_paths: Specific files to analyze (None for all)
@@ -280,8 +277,7 @@ class DependencyPropagationSystem:
         return self.dependency_graph
 
     async def get_dependency_impact_report(self, file_path: str) -> dict[str, Any]:
-        """
-        Get comprehensive impact report for a file
+        """Get comprehensive impact report for a file.
 
         Args:
             file_path: File to analyze
@@ -328,8 +324,7 @@ class DependencyPropagationSystem:
         change_ids: list[str],
         target_branches: list[str] | None = None,
     ) -> list[PropagationResult]:
-        """
-        Propagate specific changes to target branches
+        """Propagate specific changes to target branches.
 
         Args:
             change_ids: IDs of changes to propagate
@@ -364,8 +359,7 @@ class DependencyPropagationSystem:
         agent_id: str | None = None,
         branch_name: str | None = None,
     ) -> list[DependencyChange]:
-        """
-        Get pending changes for review or action
+        """Get pending changes for review or action.
 
         Args:
             agent_id: Filter by agent (None for all)
@@ -392,7 +386,7 @@ class DependencyPropagationSystem:
     # Private methods
 
     async def _analyze_file_dependencies(self, file_path: str):
-        """Analyze dependencies for a single file"""
+        """Analyze dependencies for a single file."""
         full_path = self.repo_path / file_path
 
         if not full_path.exists() or full_path.suffix != ".py":
@@ -481,7 +475,7 @@ class DependencyPropagationSystem:
         file_path: str,
         dependencies: set[str],
     ):
-        """Update reverse dependency relationships"""
+        """Update reverse dependency relationships."""
         for dep in dependencies:
             # Find files that match this dependency
             matching_files = []
@@ -501,8 +495,7 @@ class DependencyPropagationSystem:
         change_type: DependencyType,
         change_details: dict[str, Any],
     ) -> ChangeImpact:
-        """Analyze the impact level of a change"""
-
+        """Analyze the impact level of a change."""
         # Breaking change indicators
         breaking_keywords = [
             "remove",
@@ -545,7 +538,7 @@ class DependencyPropagationSystem:
         change_type: DependencyType,
         change_details: dict[str, Any],
     ) -> list[str]:
-        """Find files affected by a dependency change"""
+        """Find files affected by a dependency change."""
         if file_path not in self.dependency_graph:
             await self._analyze_file_dependencies(file_path)
 
@@ -563,7 +556,7 @@ class DependencyPropagationSystem:
         return list(set(affected))
 
     async def _find_affected_branches(self, affected_files: list[str]) -> list[str]:
-        """Find branches that contain the affected files"""
+        """Find branches that contain the affected files."""
         affected_branches = set()
 
         # Get all branch info from the protocol
@@ -579,7 +572,7 @@ class DependencyPropagationSystem:
         return list(affected_branches)
 
     async def _calculate_indirect_dependents(self, file_path: str) -> int:
-        """Calculate number of indirect dependents"""
+        """Calculate number of indirect dependents."""
         visited = set()
         queue = deque([file_path])
         indirect_count = 0
@@ -601,7 +594,7 @@ class DependencyPropagationSystem:
         return indirect_count
 
     def _get_indirect_dependent_files(self, file_path: str) -> list[str]:
-        """Get list of indirect dependent files"""
+        """Get list of indirect dependent files."""
         visited = set()
         queue = deque([file_path])
         indirect_files = []
@@ -623,7 +616,7 @@ class DependencyPropagationSystem:
         return indirect_files
 
     def _calculate_complexity_score(self, node: DependencyNode) -> float:
-        """Calculate complexity score for a dependency node"""
+        """Calculate complexity score for a dependency node."""
         # Factors: number of dependencies, dependents, exports
         dependency_factor = len(node.dependencies) * 0.3
         dependent_factor = len(node.dependents) * 0.5
@@ -632,7 +625,7 @@ class DependencyPropagationSystem:
         return min(10.0, dependency_factor + dependent_factor + export_factor)
 
     def _calculate_risk_level(self, complexity_score: float, total_impact: int) -> str:
-        """Calculate risk level based on complexity and impact"""
+        """Calculate risk level based on complexity and impact."""
         if complexity_score > 7 or total_impact > 10:
             return "high"
         elif complexity_score > 4 or total_impact > 5:
@@ -644,7 +637,7 @@ class DependencyPropagationSystem:
         self,
         change: DependencyChange,
     ) -> PropagationResult:
-        """Process a single dependency change"""
+        """Process a single dependency change."""
         start_time = datetime.now()
 
         try:
@@ -699,7 +692,7 @@ class DependencyPropagationSystem:
             )
 
     async def _notify_affected_agents(self, change: DependencyChange):
-        """Notify agents affected by a dependency change"""
+        """Notify agents affected by a dependency change."""
         # Find agents working on affected branches
         affected_agents = set()
 
@@ -734,7 +727,7 @@ class DependencyPropagationSystem:
         change: DependencyChange,
         branches: list[str],
     ) -> PropagationResult:
-        """Propagate a specific change to target branches"""
+        """Propagate a specific change to target branches."""
         # This is a simplified implementation
         # In a real system, this would apply the actual changes to the branches
 
@@ -761,7 +754,7 @@ class DependencyPropagationSystem:
         )
 
     def _update_propagation_stats(self, processing_time: float, success: bool):
-        """Update propagation statistics"""
+        """Update propagation statistics."""
         # Update average processing time
         total_changes = self.propagation_stats["changes_propagated"]
         current_avg = self.propagation_stats["average_propagation_time"]
@@ -774,7 +767,7 @@ class DependencyPropagationSystem:
         self.propagation_stats["propagation_success_rate"] = successful / total_changes
 
     async def _propagation_loop(self):
-        """Background task for processing dependency changes"""
+        """Background task for processing dependency changes."""
         while self._running:
             try:
                 # Process pending changes
@@ -794,7 +787,7 @@ class DependencyPropagationSystem:
                 await asyncio.sleep(10)
 
     async def _dependency_analysis_loop(self):
-        """Background task for dependency analysis"""
+        """Background task for dependency analysis."""
         while self._running:
             try:
                 # Periodically rebuild dependency graph
@@ -806,7 +799,7 @@ class DependencyPropagationSystem:
                 await asyncio.sleep(3600)
 
     def get_propagation_summary(self) -> dict[str, Any]:
-        """Get comprehensive summary of propagation system"""
+        """Get comprehensive summary of propagation system."""
         return {
             "statistics": self.propagation_stats.copy(),
             "dependency_graph_size": len(self.dependency_graph),

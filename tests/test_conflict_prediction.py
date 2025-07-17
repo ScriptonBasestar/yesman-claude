@@ -1,4 +1,4 @@
-"""Tests for ConflictPredictor"""
+"""Tests for ConflictPredictor."""
 
 import tempfile
 from datetime import datetime, timedelta
@@ -8,15 +8,25 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_prediction import ConflictPattern, ConflictPredictor, ConflictVector, PredictionConfidence, PredictionResult
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ConflictSeverity, ConflictType
+from libs.multi_agent.conflict_prediction import (
+    ConflictPattern,
+    ConflictPredictor,
+    ConflictVector,
+    PredictionConfidence,
+    PredictionResult,
+)
+from libs.multi_agent.conflict_resolution import (
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
+)
 
 
 class TestConflictVector:
-    """Test cases for ConflictVector"""
+    """Test cases for ConflictVector."""
 
     def test_init(self):
-        """Test ConflictVector initialization"""
+        """Test ConflictVector initialization."""
         vector = ConflictVector(
             file_overlap_score=0.5,
             change_frequency_score=0.3,
@@ -35,10 +45,10 @@ class TestConflictVector:
 
 
 class TestPredictionResult:
-    """Test cases for PredictionResult"""
+    """Test cases for PredictionResult."""
 
     def test_init(self):
-        """Test PredictionResult initialization"""
+        """Test PredictionResult initialization."""
         result = PredictionResult(
             prediction_id="test-prediction",
             confidence=PredictionConfidence.HIGH,
@@ -65,27 +75,27 @@ class TestPredictionResult:
 
 
 class TestConflictPredictor:
-    """Test cases for ConflictPredictor"""
+    """Test cases for ConflictPredictor."""
 
     @pytest.fixture
     def mock_conflict_engine(self):
-        """Create mock conflict resolution engine"""
+        """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
     def mock_branch_manager(self):
-        """Create mock branch manager"""
+        """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
     def temp_repo(self):
-        """Create temporary repository"""
+        """Create temporary repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
     @pytest.fixture
     def predictor(self, mock_conflict_engine, mock_branch_manager, temp_repo):
-        """Create ConflictPredictor instance"""
+        """Create ConflictPredictor instance."""
         return ConflictPredictor(
             conflict_engine=mock_conflict_engine,
             branch_manager=mock_branch_manager,
@@ -99,7 +109,7 @@ class TestConflictPredictor:
         mock_branch_manager,
         temp_repo,
     ):
-        """Test ConflictPredictor initialization"""
+        """Test ConflictPredictor initialization."""
         assert predictor.conflict_engine == mock_conflict_engine
         assert predictor.branch_manager == mock_branch_manager
         assert predictor.repo_path == temp_repo
@@ -110,7 +120,7 @@ class TestConflictPredictor:
         assert predictor.max_predictions_per_run == 50
 
     def test_likelihood_to_confidence(self, predictor):
-        """Test likelihood to confidence conversion"""
+        """Test likelihood to confidence conversion."""
         assert predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
         assert predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH
         assert predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM
@@ -118,13 +128,13 @@ class TestConflictPredictor:
 
     @pytest.mark.asyncio
     async def test_predict_conflicts_empty_branches(self, predictor):
-        """Test conflict prediction with empty branch list"""
+        """Test conflict prediction with empty branch list."""
         predictions = await predictor.predict_conflicts([])
         assert predictions == []
 
     @pytest.mark.asyncio
     async def test_calculate_conflict_vector(self, predictor):
-        """Test conflict vector calculation"""
+        """Test conflict vector calculation."""
         # Mock the required methods
         predictor.conflict_engine._get_changed_files = AsyncMock(
             return_value={"file1.py": "M", "file2.py": "A"},
@@ -146,7 +156,7 @@ class TestConflictPredictor:
         assert vector.temporal_proximity_score == 0.3
 
     def test_extract_imports(self, predictor):
-        """Test import extraction from Python code"""
+        """Test import extraction from Python code."""
         code = """
 import os
 import sys
@@ -164,7 +174,7 @@ def test():
         assert "from pathlib import Path" in imports
 
     def test_extract_imports_with_syntax_error(self, predictor):
-        """Test import extraction with syntax errors"""
+        """Test import extraction with syntax errors."""
         code = """
 import os
 invalid syntax here !!!
@@ -178,7 +188,7 @@ from sys import path
         assert any("from sys import path" in imp for imp in imports)
 
     def test_imports_likely_to_conflict(self, predictor):
-        """Test import conflict likelihood detection"""
+        """Test import conflict likelihood detection."""
         imports1 = ["import os", "import sys", "from datetime import datetime"]
         imports2 = ["import os", "import json", "from datetime import date"]
 
@@ -212,7 +222,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_detect_import_conflicts(self, predictor):
-        """Test import conflict detection"""
+        """Test import conflict detection."""
         vector = ConflictVector(0.5, 0.3, 0.2, 0.4, 0.6, 0.1)
 
         # Mock the helper method
@@ -237,7 +247,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_detect_signature_drift(self, predictor):
-        """Test function signature drift detection"""
+        """Test function signature drift detection."""
         vector = ConflictVector(0.4, 0.3, 0.5, 0.2, 0.8, 0.1)
 
         # Mock function signatures
@@ -264,7 +274,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_detect_naming_collisions(self, predictor):
-        """Test naming collision detection"""
+        """Test naming collision detection."""
         vector = ConflictVector(0.3, 0.4, 0.6, 0.3, 0.5, 0.2)
 
         # Mock symbol definitions
@@ -284,7 +294,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_detect_version_conflicts(self, predictor):
-        """Test dependency version conflict detection"""
+        """Test dependency version conflict detection."""
         vector = ConflictVector(0.2, 0.3, 0.4, 0.7, 0.3, 0.5)
 
         # Mock dependency versions
@@ -305,7 +315,7 @@ from sys import path
             assert result.predicted_conflict_type == ConflictType.DEPENDENCY
 
     def test_calculate_version_distance(self, predictor):
-        """Test version distance calculation"""
+        """Test version distance calculation."""
         # Test same versions
         distance = predictor._calculate_version_distance("1.2.3", "1.2.3")
         assert distance == 0.0
@@ -321,7 +331,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_get_change_frequency(self, predictor):
-        """Test change frequency calculation"""
+        """Test change frequency calculation."""
         # Mock git command
         predictor.conflict_engine._run_git_command = AsyncMock(
             return_value=Mock(stdout="14\n"),  # 14 commits in last week
@@ -332,7 +342,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_calculate_branch_complexity(self, predictor):
-        """Test branch complexity calculation"""
+        """Test branch complexity calculation."""
         # Mock git command with diff stats
         predictor.conflict_engine._run_git_command = AsyncMock(
             return_value=Mock(
@@ -351,7 +361,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_get_python_files_with_imports(self, predictor):
-        """Test getting Python files with imports"""
+        """Test getting Python files with imports."""
         # Mock the required methods
         predictor.conflict_engine._get_python_files_changed = AsyncMock(
             return_value=["file1.py", "file2.py"],
@@ -374,7 +384,7 @@ from sys import path
 
     @pytest.mark.asyncio
     async def test_get_dependency_versions(self, predictor):
-        """Test dependency version extraction"""
+        """Test dependency version extraction."""
         # Mock requirements.txt content
         requirements_content = """
 requests==2.25.1
@@ -405,7 +415,7 @@ pytest = ">=6.0.0"
 
     @pytest.mark.asyncio
     async def test_apply_ml_scoring(self, predictor):
-        """Test ML scoring application"""
+        """Test ML scoring application."""
         # Create test predictions
         predictions = [
             PredictionResult(
@@ -447,7 +457,7 @@ pytest = ">=6.0.0"
             assert 0.0 <= prediction.likelihood_score <= 1.0
 
     def test_get_prediction_summary_empty(self, predictor):
-        """Test prediction summary with no predictions"""
+        """Test prediction summary with no predictions."""
         summary = predictor.get_prediction_summary()
 
         assert summary["total_predictions"] == 0
@@ -456,7 +466,7 @@ pytest = ">=6.0.0"
         assert "accuracy_metrics" in summary
 
     def test_get_prediction_summary_with_predictions(self, predictor):
-        """Test prediction summary with predictions"""
+        """Test prediction summary with predictions."""
         # Add test predictions
         prediction1 = PredictionResult(
             prediction_id="test1",
@@ -499,7 +509,7 @@ pytest = ">=6.0.0"
 
     @pytest.mark.asyncio
     async def test_predict_conflicts_integration(self, predictor):
-        """Test full conflict prediction integration"""
+        """Test full conflict prediction integration."""
         # Mock all required methods for a minimal integration test
         predictor._calculate_conflict_vector = AsyncMock(
             return_value=ConflictVector(0.5, 0.4, 0.6, 0.3, 0.7, 0.2),

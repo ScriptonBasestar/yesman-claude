@@ -15,7 +15,7 @@ class ActivityHeatmapGenerator:
         self.config = config
 
     def collect_session_activity(self, session_name: str, days: int = 7) -> dict[str, int]:
-        """tmux 세션의 활동 로그 수집 및 분석"""
+        """Tmux 세션의 활동 로그 수집 및 분석."""
         start_time_collect = datetime.now()
         try:
             log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
@@ -52,7 +52,7 @@ class ActivityHeatmapGenerator:
             return {}
 
     def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str, Any]:
-        """24x7 그리드 형태의 히트맵 데이터 생성"""
+        """24x7 그리드 형태의 히트맵 데이터 생성."""
         start_time_generate = datetime.now()
         heatmap_data = defaultdict(lambda: defaultdict(int))
 

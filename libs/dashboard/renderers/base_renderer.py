@@ -1,6 +1,5 @@
-"""
-Base Renderer Interface
-Abstract base class for all dashboard renderers
+"""Base Renderer Interface
+Abstract base class for all dashboard renderers.
 """
 
 import re
@@ -11,7 +10,7 @@ from typing import Any
 
 
 class RenderFormat(Enum):
-    """Supported rendering formats"""
+    """Supported rendering formats."""
 
     TUI = "tui"
     WEB = "web"
@@ -21,7 +20,7 @@ class RenderFormat(Enum):
 
 
 class WidgetType(Enum):
-    """Available widget types"""
+    """Available widget types."""
 
     SESSION_BROWSER = "session_browser"
     HEALTH_METER = "health_meter"
@@ -41,7 +40,7 @@ class WidgetType(Enum):
 
 
 class ThemeColor(Enum):
-    """Theme color palette"""
+    """Theme color palette."""
 
     PRIMARY = "primary"
     SECONDARY = "secondary"
@@ -54,16 +53,14 @@ class ThemeColor(Enum):
 
 
 class BaseRenderer(ABC):
-    """
-    Abstract base class for all dashboard renderers
+    """Abstract base class for all dashboard renderers.
 
     Provides common functionality and enforces consistent interface
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
     def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None):
-        """
-        Initialize base renderer
+        """Initialize base renderer.
 
         Args:
             format_type: The rendering format this renderer supports
@@ -80,8 +77,7 @@ class BaseRenderer(ABC):
         data: Any,
         options: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Render a single widget
+        """Render a single widget.
 
         Args:
             widget_type: Type of widget to render
@@ -99,8 +95,7 @@ class BaseRenderer(ABC):
         widgets: list[dict[str, Any]],
         layout_config: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Render a layout containing multiple widgets
+        """Render a layout containing multiple widgets.
 
         Args:
             widgets: List of widget configurations
@@ -113,8 +108,7 @@ class BaseRenderer(ABC):
 
     @abstractmethod
     def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
-        """
-        Render a container wrapping content
+        """Render a container wrapping content.
 
         Args:
             content: Content to wrap
@@ -128,8 +122,7 @@ class BaseRenderer(ABC):
     # Common utility methods
 
     def format_number(self, value: int | float, precision: int = 2, suffix: str = "") -> str:
-        """
-        Format a number with optional precision and suffix
+        """Format a number with optional precision and suffix.
 
         Args:
             value: Number to format
@@ -148,8 +141,7 @@ class BaseRenderer(ABC):
         return f"{value:,.{precision}f}{suffix}"
 
     def format_date(self, date: datetime | str, format_str: str = "%Y-%m-%d %H:%M") -> str:
-        """
-        Format a date/datetime object
+        """Format a date/datetime object.
 
         Args:
             date: Date to format
@@ -178,8 +170,7 @@ class BaseRenderer(ABC):
         return str(date)
 
     def format_percentage(self, value: int | float, precision: int = 1) -> str:
-        """
-        Format a percentage value
+        """Format a percentage value.
 
         Args:
             value: Percentage value (0-100)
@@ -194,8 +185,7 @@ class BaseRenderer(ABC):
         return f"{value:.{precision}f}%"
 
     def format_bytes(self, bytes_value: int) -> str:
-        """
-        Format bytes into human-readable format
+        """Format bytes into human-readable format.
 
         Args:
             bytes_value: Size in bytes
@@ -214,8 +204,7 @@ class BaseRenderer(ABC):
         return f"{bytes_value:.1f} PB"
 
     def format_duration(self, seconds: int | float) -> str:
-        """
-        Format duration in seconds to human-readable format
+        """Format duration in seconds to human-readable format.
 
         Args:
             seconds: Duration in seconds
@@ -236,8 +225,7 @@ class BaseRenderer(ABC):
             return f"{hours:.0f}h {minutes:.0f}m"
 
     def get_color(self, color_type: ThemeColor, variant: str = "default") -> str:
-        """
-        Get color value from theme
+        """Get color value from theme.
 
         Args:
             color_type: Type of color to retrieve
@@ -255,8 +243,7 @@ class BaseRenderer(ABC):
         return str(color_config)
 
     def truncate_text(self, text: str, max_length: int, suffix: str = "...") -> str:
-        """
-        Truncate text to maximum length
+        """Truncate text to maximum length.
 
         Args:
             text: Text to truncate
@@ -275,8 +262,7 @@ class BaseRenderer(ABC):
         return text[: max_length - len(suffix)] + suffix
 
     def sanitize_text(self, text: str) -> str:
-        """
-        Sanitize text for safe rendering
+        """Sanitize text for safe rendering.
 
         Args:
             text: Text to sanitize
@@ -293,8 +279,7 @@ class BaseRenderer(ABC):
         return text
 
     def get_status_color(self, status: str) -> ThemeColor:
-        """
-        Get appropriate color for status
+        """Get appropriate color for status.
 
         Args:
             status: Status string
@@ -316,8 +301,7 @@ class BaseRenderer(ABC):
             return ThemeColor.NEUTRAL
 
     def calculate_health_score(self, metrics: dict[str, int | float]) -> float:
-        """
-        Calculate overall health score from metrics
+        """Calculate overall health score from metrics.
 
         Args:
             metrics: Dictionary of metric values
@@ -358,8 +342,7 @@ class BaseRenderer(ABC):
         return total_score / total_weight if total_weight > 0 else 0.0
 
     def _get_default_theme(self) -> dict[str, Any]:
-        """
-        Get default theme configuration
+        """Get default theme configuration.
 
         Returns:
             Default theme dictionary
@@ -415,12 +398,11 @@ class BaseRenderer(ABC):
         }
 
     def clear_cache(self):
-        """Clear the internal cache"""
+        """Clear the internal cache."""
         self._cache.clear()
 
     def set_theme(self, theme: dict[str, Any]):
-        """
-        Set new theme configuration
+        """Set new theme configuration.
 
         Args:
             theme: New theme configuration

@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""
-Tests for the modular multi-agent system
-"""
+"""Tests for the modular multi-agent system."""
 
 
 # Test that all command classes can be imported from the modular structure
 def test_agent_pool_imports():
-    """Test agent pool command imports"""
-    from commands.multi_agent.agent_pool import AddTaskCommand, ListTasksCommand, MonitorAgentsCommand, StartAgentsCommand, StatusCommand, StopAgentsCommand
+    """Test agent pool command imports."""
+    from commands.multi_agent.agent_pool import (
+        AddTaskCommand,
+        ListTasksCommand,
+        MonitorAgentsCommand,
+        StartAgentsCommand,
+        StatusCommand,
+        StopAgentsCommand,
+    )
 
     # Verify classes are BaseCommand subclasses
     from libs.core.base_command import BaseCommand
@@ -21,8 +26,12 @@ def test_agent_pool_imports():
 
 
 def test_conflict_resolution_imports():
-    """Test conflict resolution command imports"""
-    from commands.multi_agent.conflict_resolution import ConflictSummaryCommand, DetectConflictsCommand, ResolveConflictCommand
+    """Test conflict resolution command imports."""
+    from commands.multi_agent.conflict_resolution import (
+        ConflictSummaryCommand,
+        DetectConflictsCommand,
+        ResolveConflictCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(DetectConflictsCommand, BaseCommand)
@@ -31,8 +40,12 @@ def test_conflict_resolution_imports():
 
 
 def test_conflict_prediction_imports():
-    """Test conflict prediction command imports"""
-    from commands.multi_agent.conflict_prediction import AnalyzeConflictPatternsCommand, PredictConflictsCommand, PredictionSummaryCommand
+    """Test conflict prediction command imports."""
+    from commands.multi_agent.conflict_prediction import (
+        AnalyzeConflictPatternsCommand,
+        PredictConflictsCommand,
+        PredictionSummaryCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(PredictConflictsCommand, BaseCommand)
@@ -41,8 +54,13 @@ def test_conflict_prediction_imports():
 
 
 def test_semantic_analysis_imports():
-    """Test semantic analysis command imports"""
-    from commands.multi_agent.semantic_analysis import AnalyzeSemanticConflictsCommand, FunctionDiffCommand, SemanticMergeCommand, SemanticSummaryCommand
+    """Test semantic analysis command imports."""
+    from commands.multi_agent.semantic_analysis import (
+        AnalyzeSemanticConflictsCommand,
+        FunctionDiffCommand,
+        SemanticMergeCommand,
+        SemanticSummaryCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(AnalyzeSemanticConflictsCommand, BaseCommand)
@@ -52,8 +70,12 @@ def test_semantic_analysis_imports():
 
 
 def test_batch_operations_imports():
-    """Test batch operations command imports"""
-    from commands.multi_agent.batch_operations import AutoResolveCommand, BatchMergeCommand, PreventConflictsCommand
+    """Test batch operations command imports."""
+    from commands.multi_agent.batch_operations import (
+        AutoResolveCommand,
+        BatchMergeCommand,
+        PreventConflictsCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(BatchMergeCommand, BaseCommand)
@@ -62,8 +84,13 @@ def test_batch_operations_imports():
 
 
 def test_collaboration_imports():
-    """Test collaboration command imports"""
-    from commands.multi_agent.collaboration import BranchInfoCommand, CollaborateCommand, SendMessageCommand, ShareKnowledgeCommand
+    """Test collaboration command imports."""
+    from commands.multi_agent.collaboration import (
+        BranchInfoCommand,
+        CollaborateCommand,
+        SendMessageCommand,
+        ShareKnowledgeCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(CollaborateCommand, BaseCommand)
@@ -73,8 +100,13 @@ def test_collaboration_imports():
 
 
 def test_dependency_tracking_imports():
-    """Test dependency tracking command imports"""
-    from commands.multi_agent.dependency_tracking import DependencyImpactCommand, DependencyPropagateCommand, DependencyStatusCommand, DependencyTrackCommand
+    """Test dependency tracking command imports."""
+    from commands.multi_agent.dependency_tracking import (
+        DependencyImpactCommand,
+        DependencyPropagateCommand,
+        DependencyStatusCommand,
+        DependencyTrackCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(DependencyTrackCommand, BaseCommand)
@@ -84,8 +116,15 @@ def test_dependency_tracking_imports():
 
 
 def test_code_review_imports():
-    """Test code review command imports"""
-    from commands.multi_agent.code_review import QualityCheckCommand, ReviewApproveCommand, ReviewInitiateCommand, ReviewRejectCommand, ReviewStatusCommand, ReviewSummaryCommand
+    """Test code review command imports."""
+    from commands.multi_agent.code_review import (
+        QualityCheckCommand,
+        ReviewApproveCommand,
+        ReviewInitiateCommand,
+        ReviewRejectCommand,
+        ReviewStatusCommand,
+        ReviewSummaryCommand,
+    )
     from libs.core.base_command import BaseCommand
 
     assert issubclass(ReviewInitiateCommand, BaseCommand)
@@ -97,7 +136,7 @@ def test_code_review_imports():
 
 
 def test_backward_compatibility():
-    """Test that the main multi_agent.py still exports all command classes"""
+    """Test that the main multi_agent.py still exports all command classes."""
     from commands.multi_agent import DetectConflictsCommand, StartAgentsCommand
 
     # Sample test to ensure backward compatibility works
@@ -108,7 +147,7 @@ def test_backward_compatibility():
 
 
 def test_cli_registration():
-    """Test that CLI commands are properly registered"""
+    """Test that CLI commands are properly registered."""
     import click
 
     from commands.multi_agent.cli import multi_agent
@@ -137,7 +176,7 @@ def test_cli_registration():
 
 
 def test_module_structure():
-    """Test the overall module structure"""
+    """Test the overall module structure."""
     import commands.multi_agent
 
     # Verify package structure
@@ -150,7 +189,7 @@ def test_module_structure():
 
 
 def test_file_organization():
-    """Test that files are properly organized"""
+    """Test that files are properly organized."""
     from pathlib import Path
 
     multi_agent_dir = Path("commands/multi_agent")
@@ -178,10 +217,10 @@ def test_file_organization():
 
 
 class TestCommandExecution:
-    """Test that commands can be instantiated and have execute methods"""
+    """Test that commands can be instantiated and have execute methods."""
 
     def test_agent_pool_commands_executable(self):
-        """Test that agent pool commands can be instantiated"""
+        """Test that agent pool commands can be instantiated."""
         from commands.multi_agent.agent_pool import StartAgentsCommand
 
         command = StartAgentsCommand()
@@ -189,7 +228,7 @@ class TestCommandExecution:
         assert callable(command.execute)
 
     def test_conflict_resolution_commands_executable(self):
-        """Test that conflict resolution commands can be instantiated"""
+        """Test that conflict resolution commands can be instantiated."""
         from commands.multi_agent.conflict_resolution import DetectConflictsCommand
 
         command = DetectConflictsCommand()
@@ -197,7 +236,7 @@ class TestCommandExecution:
         assert callable(command.execute)
 
     def test_semantic_analysis_commands_executable(self):
-        """Test that semantic analysis commands can be instantiated"""
+        """Test that semantic analysis commands can be instantiated."""
         from commands.multi_agent.semantic_analysis import FunctionDiffCommand
 
         command = FunctionDiffCommand()
@@ -206,10 +245,10 @@ class TestCommandExecution:
 
 
 class TestRefactoringBenefits:
-    """Test the benefits of the refactoring"""
+    """Test the benefits of the refactoring."""
 
     def test_reduced_file_sizes(self):
-        """Test that individual files are much smaller than original"""
+        """Test that individual files are much smaller than original."""
         import os
 
         # Original backup file
@@ -223,7 +262,12 @@ class TestRefactoringBenefits:
 
         multi_agent_dir = Path("commands/multi_agent")
 
-        module_files = ["agent_pool.py", "conflict_resolution.py", "semantic_analysis.py", "cli.py"]
+        module_files = [
+            "agent_pool.py",
+            "conflict_resolution.py",
+            "semantic_analysis.py",
+            "cli.py",
+        ]
 
         for file_name in module_files:
             file_path = multi_agent_dir / file_name
@@ -236,7 +280,7 @@ class TestRefactoringBenefits:
         assert main_size < backup_size / 10, "Main file should be much smaller after refactoring"
 
     def test_focused_responsibilities(self):
-        """Test that each module has focused responsibilities"""
+        """Test that each module has focused responsibilities."""
         # Agent pool module should only have agent-related commands
         from commands.multi_agent import agent_pool
 

@@ -37,8 +37,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
         compression_enabled: bool = True,
         output_dir: Path | None = None,
     ):
-        """
-        Initialize the batch processor.
+        """Initialize the batch processor.
 
         Args:
             max_batch_size: Maximum number of log entries per batch

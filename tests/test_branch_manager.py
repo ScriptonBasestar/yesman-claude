@@ -1,4 +1,4 @@
-"""Tests for BranchManager class"""
+"""Tests for BranchManager class."""
 
 import subprocess
 from datetime import datetime
@@ -10,11 +10,11 @@ from libs.multi_agent.branch_manager import BranchInfo, BranchManager
 
 
 class TestBranchManager:
-    """Test cases for BranchManager"""
+    """Test cases for BranchManager."""
 
     @pytest.fixture
     def mock_git_repo(self, tmp_path):
-        """Create a mock git repository"""
+        """Create a mock git repository."""
         repo_path = tmp_path / "test_repo"
         repo_path.mkdir()
 
@@ -39,27 +39,27 @@ class TestBranchManager:
 
     @pytest.fixture
     def branch_manager(self, mock_git_repo):
-        """Create BranchManager instance"""
+        """Create BranchManager instance."""
         return BranchManager(repo_path=str(mock_git_repo))
 
     def test_init(self, branch_manager, mock_git_repo):
-        """Test BranchManager initialization"""
+        """Test BranchManager initialization."""
         assert branch_manager.repo_path == mock_git_repo
         assert branch_manager.branch_prefix == "feat/multi-agent"
         assert branch_manager.branches == {}
 
     def test_get_current_branch(self, branch_manager):
-        """Test getting current branch"""
+        """Test getting current branch."""
         current = branch_manager._get_current_branch()
         assert current == "develop"
 
     def test_branch_exists(self, branch_manager):
-        """Test checking if branch exists"""
+        """Test checking if branch exists."""
         assert branch_manager._branch_exists("develop") is True
         assert branch_manager._branch_exists("nonexistent") is False
 
     def test_create_feature_branch(self, branch_manager):
-        """Test creating a feature branch"""
+        """Test creating a feature branch."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             # Mock responses
             mock_run.side_effect = [
@@ -84,7 +84,7 @@ class TestBranchManager:
             assert info.metadata["issue_name"] == "test-issue-123"
 
     def test_create_feature_branch_sanitization(self, branch_manager):
-        """Test branch name sanitization"""
+        """Test branch name sanitization."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.side_effect = [
                 MagicMock(stdout="develop\n"),
@@ -103,7 +103,7 @@ class TestBranchManager:
             assert "!" not in branch_name
 
     def test_list_active_branches(self, branch_manager):
-        """Test listing active branches"""
+        """Test listing active branches."""
         # Add some test branches to metadata
         branch1 = BranchInfo(
             name="feat/multi-agent/issue1",
@@ -131,7 +131,7 @@ class TestBranchManager:
             assert active[0].name == "feat/multi-agent/issue1"
 
     def test_get_branch_status(self, branch_manager):
-        """Test getting branch status"""
+        """Test getting branch status."""
         branch_info = BranchInfo(
             name="feat/multi-agent/test",
             base_branch="develop",
@@ -158,7 +158,7 @@ class TestBranchManager:
             assert status["last_commit"]["message"] == "Test commit"
 
     def test_switch_branch(self, branch_manager):
-        """Test switching branches"""
+        """Test switching branches."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.side_effect = [
                 MagicMock(stdout="develop\n"),  # branch exists
@@ -177,7 +177,7 @@ class TestBranchManager:
             assert result is False
 
     def test_update_branch_metadata(self, branch_manager):
-        """Test updating branch metadata"""
+        """Test updating branch metadata."""
         branch_name = "feat/multi-agent/test"
 
         # Update non-existent branch
@@ -191,7 +191,7 @@ class TestBranchManager:
         assert branch_manager.branches[branch_name].metadata["task"] == "implement feature"
 
     def test_mark_branch_merged(self, branch_manager):
-        """Test marking branch as merged"""
+        """Test marking branch as merged."""
         branch_info = BranchInfo(
             name="feat/multi-agent/test",
             base_branch="develop",
@@ -205,7 +205,7 @@ class TestBranchManager:
         assert branch_manager.branches[branch_info.name].status == "merged"
 
     def test_cleanup_merged_branches(self, branch_manager):
-        """Test cleaning up merged branches"""
+        """Test cleaning up merged branches."""
         # Add test branches
         branch1 = BranchInfo(
             name="feat/multi-agent/merged1",
@@ -237,7 +237,7 @@ class TestBranchManager:
                 assert branch2.name in branch_manager.branches
 
     def test_get_branch_conflicts(self, branch_manager):
-        """Test checking branch conflicts"""
+        """Test checking branch conflicts."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.side_effect = [
                 MagicMock(stdout="feat/multi-agent/test\n"),  # branch exists
@@ -257,7 +257,7 @@ class TestBranchManager:
             assert "file.py" in conflicts["conflicts"][0]
 
     def test_metadata_persistence(self, branch_manager, tmp_path):
-        """Test saving and loading branch metadata"""
+        """Test saving and loading branch metadata."""
         # Create test branch info
         branch_info = BranchInfo(
             name="feat/multi-agent/test",

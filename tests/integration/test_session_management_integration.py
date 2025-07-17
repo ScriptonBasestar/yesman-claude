@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Session Management Integration Tests
+"""Session Management Integration Tests.
 
 Tests the complete session lifecycle across CLI, API, and internal components.
 Validates that session operations work correctly end-to-end.
@@ -15,24 +14,33 @@ from .test_framework import CommandTestRunner, IntegrationTestBase, PerformanceM
 
 
 class TestSessionLifecycleIntegration(IntegrationTestBase):
-    """Test complete session lifecycle with all components"""
+    """Test complete session lifecycle with all components."""
 
     def setup_method(self):
-        """Setup for session lifecycle tests"""
+        """Setup for session lifecycle tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
 
     def test_complete_session_creation_workflow(self):
-        """Test end-to-end session creation workflow"""
+        """Test end-to-end session creation workflow."""
         # Step 1: Create test session configuration
         session_name = "test-integration-session"
         session_config = self.create_test_session(
             session_name,
             description="Integration test session",
             windows=[
-                {"window_name": "main", "panes": [{"shell_command": ["echo", "Hello World"]}, {"shell_command": ["pwd"]}]},
-                {"window_name": "secondary", "panes": [{"shell_command": ["ls", "-la"]}]},
+                {
+                    "window_name": "main",
+                    "panes": [
+                        {"shell_command": ["echo", "Hello World"]},
+                        {"shell_command": ["pwd"]},
+                    ],
+                },
+                {
+                    "window_name": "secondary",
+                    "panes": [{"shell_command": ["ls", "-la"]}],
+                },
             ],
         )
 
@@ -74,7 +82,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         self.performance_monitor.assert_performance_threshold("session_status", 2.0)
 
     def test_session_modification_propagation(self):
-        """Test that session modifications propagate correctly"""
+        """Test that session modifications propagate correctly."""
         session_name = "test-modification-session"
 
         # Create initial session
@@ -91,9 +99,15 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
             session_name,
             description="Modified integration test session",
             windows=[
-                {"window_name": "main", "panes": [{"shell_command": ["echo", "Modified"]}]},
+                {
+                    "window_name": "main",
+                    "panes": [{"shell_command": ["echo", "Modified"]}],
+                },
                 {"window_name": "new_window", "panes": [{"shell_command": ["date"]}]},
-                {"window_name": "third_window", "panes": [{"shell_command": ["whoami"]}]},
+                {
+                    "window_name": "third_window",
+                    "panes": [{"shell_command": ["whoami"]}],
+                },
             ],
         )
 
@@ -110,12 +124,21 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         assert updated_window_count == 3
 
     def test_multiple_session_coordination(self):
-        """Test coordination between multiple sessions"""
+        """Test coordination between multiple sessions."""
         session_names = ["multi-session-1", "multi-session-2", "multi-session-3"]
 
         # Create multiple sessions
         for i, session_name in enumerate(session_names):
-            self.create_test_session(session_name, description=f"Multi-session test {i + 1}", windows=[{"window_name": f"window_{i}", "panes": [{"shell_command": ["echo", f"Session {i + 1}"]}]}])
+            self.create_test_session(
+                session_name,
+                description=f"Multi-session test {i + 1}",
+                windows=[
+                    {
+                        "window_name": f"window_{i}",
+                        "panes": [{"shell_command": ["echo", f"Session {i + 1}"]}],
+                    }
+                ],
+            )
 
         # Setup all sessions
         self.performance_monitor.start_timing("multi_session_setup")
@@ -142,7 +165,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         assert multi_setup_duration < 30.0, f"Multi-session setup took {multi_setup_duration:.2f}s, should be < 30s"
 
     def test_session_error_handling_integration(self):
-        """Test error handling across session operations"""
+        """Test error handling across session operations."""
         # Test 1: Invalid session configuration
         with pytest.raises(Exception):
             self.create_test_session(
@@ -167,7 +190,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         self.assert_session_exists(valid_session)
 
     def test_session_cleanup_integration(self):
-        """Test session cleanup and resource management"""
+        """Test session cleanup and resource management."""
         session_name = "cleanup-test-session"
 
         # Create and setup session
@@ -184,14 +207,14 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         # Verify session is cleaned up
         # Note: Actual cleanup depends on tmux integration
         # In test environment, we verify the cleanup call succeeds
-        assert cleanup_result is not None or True  # Cleanup attempted
+        assert True  # Cleanup attempted
 
 
 class TestSessionStateConsistency(IntegrationTestBase):
-    """Test session state consistency across different access methods"""
+    """Test session state consistency across different access methods."""
 
     def test_cli_api_state_consistency(self):
-        """Test that CLI and API views of session state are consistent"""
+        """Test that CLI and API views of session state are consistent."""
         session_name = "consistency-test-session"
 
         # Create session via CLI
@@ -223,7 +246,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
         assert len(cli_session_info.get("windows", [])) == len(api_session_info.get("windows", []))
 
     def test_concurrent_session_access(self):
-        """Test concurrent access to session information"""
+        """Test concurrent access to session information."""
         session_name = "concurrent-test-session"
 
         # Create session
@@ -271,15 +294,15 @@ class TestSessionStateConsistency(IntegrationTestBase):
 
 
 class TestSessionPerformanceIntegration(IntegrationTestBase):
-    """Test session performance under various conditions"""
+    """Test session performance under various conditions."""
 
     def setup_method(self):
-        """Setup for performance tests"""
+        """Setup for performance tests."""
         super().setup_method()
         self.performance_monitor = PerformanceMonitor()
 
     def test_session_setup_performance(self):
-        """Test session setup performance"""
+        """Test session setup performance."""
         session_name = "performance-test-session"
 
         # Create complex session configuration
@@ -312,7 +335,7 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
         assert setup_duration < 15.0, f"Complex session setup took {setup_duration:.2f}s, should be < 15s"
 
     def test_status_query_performance(self):
-        """Test status query performance with multiple sessions"""
+        """Test status query performance with multiple sessions."""
         # Create multiple sessions
         session_count = 10
         for i in range(session_count):
@@ -345,7 +368,7 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
         assert status_duration < 5.0, f"Status query with {session_count} sessions took {status_duration:.2f}s, should be < 5s"
 
     def test_memory_usage_stability(self):
-        """Test that session operations don't cause memory leaks"""
+        """Test that session operations don't cause memory leaks."""
         import os
 
         import psutil

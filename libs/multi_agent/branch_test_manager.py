@@ -1,4 +1,4 @@
-"""Branch-specific test execution and result integration system"""
+"""Branch-specific test execution and result integration system."""
 
 import asyncio
 import contextlib
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestStatus(Enum):
-    """Test execution status"""
+    """Test execution status."""
 
     PENDING = "pending"
     RUNNING = "running"
@@ -30,7 +30,7 @@ class TestStatus(Enum):
 
 
 class TestType(Enum):
-    """Types of tests that can be executed"""
+    """Types of tests that can be executed."""
 
     UNIT = "unit"
     INTEGRATION = "integration"
@@ -43,7 +43,7 @@ class TestType(Enum):
 
 @dataclass
 class TestResult:
-    """Result of a test execution"""
+    """Result of a test execution."""
 
     test_id: str
     test_type: TestType
@@ -60,7 +60,7 @@ class TestResult:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization"""
+        """Convert to dictionary for serialization."""
         return {
             "test_id": self.test_id,
             "test_type": self.test_type.value,
@@ -79,7 +79,7 @@ class TestResult:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TestResult":
-        """Create from dictionary"""
+        """Create from dictionary."""
         data["test_type"] = TestType(data["test_type"])
         data["status"] = TestStatus(data["status"])
         data["start_time"] = datetime.fromisoformat(data["start_time"])
@@ -90,7 +90,7 @@ class TestResult:
 
 @dataclass
 class TestSuite:
-    """Configuration for a test suite"""
+    """Configuration for a test suite."""
 
     name: str
     test_type: TestType
@@ -105,7 +105,7 @@ class TestSuite:
 
 
 class BranchTestManager:
-    """Manages automatic testing execution per branch with result integration"""
+    """Manages automatic testing execution per branch with result integration."""
 
     def __init__(
         self,
@@ -113,8 +113,7 @@ class BranchTestManager:
         results_dir: str = ".scripton/yesman/test_results",
         agent_pool=None,
     ):
-        """
-        Initialize branch test manager
+        """Initialize branch test manager.
 
         Args:
             repo_path: Path to git repository
@@ -147,16 +146,16 @@ class BranchTestManager:
         self._load_test_results()
 
     def _get_config_file(self) -> Path:
-        """Get path to test configuration file"""
+        """Get path to test configuration file."""
         return self.repo_path / ".scripton" / "yesman" / "test_config.json"
 
     def _get_results_file(self, branch_name: str) -> Path:
-        """Get path to test results file for a branch"""
+        """Get path to test results file for a branch."""
         safe_branch = branch_name.replace("/", "_").replace("\\", "_")
         return self.results_dir / f"{safe_branch}_results.json"
 
     def _load_test_configuration(self) -> None:
-        """Load test suite configuration"""
+        """Load test suite configuration."""
         config_file = self._get_config_file()
 
         if config_file.exists():
@@ -185,7 +184,7 @@ class BranchTestManager:
             self._create_default_configuration()
 
     def _create_default_configuration(self) -> None:
-        """Create default test configuration"""
+        """Create default test configuration."""
         # Default test suites for common project types
         default_suites = {
             "unit_tests": TestSuite(
@@ -222,7 +221,7 @@ class BranchTestManager:
         self._save_test_configuration()
 
     def _save_test_configuration(self) -> None:
-        """Save test configuration to file"""
+        """Save test configuration to file."""
         config_file = self._get_config_file()
         config_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -257,7 +256,7 @@ class BranchTestManager:
             logger.error(f"Failed to save test configuration: {e}")
 
     def _load_test_results(self) -> None:
-        """Load test results for all branches"""
+        """Load test results for all branches."""
         self.branch_results = {}
 
         try:
@@ -280,7 +279,7 @@ class BranchTestManager:
             # Continue without loading existing results
 
     def _save_test_results(self, branch_name: str) -> None:
-        """Save test results for a branch"""
+        """Save test results for a branch."""
         if branch_name not in self.branch_results:
             return
 
@@ -301,8 +300,7 @@ class BranchTestManager:
         suite_name: str,
         force: bool = False,
     ) -> TestResult:
-        """
-        Run a specific test suite on a branch
+        """Run a specific test suite on a branch.
 
         Args:
             branch_name: Name of the branch to test
@@ -441,8 +439,7 @@ class BranchTestManager:
         branch_name: str,
         parallel: bool = True,
     ) -> list[TestResult]:
-        """
-        Run all test suites on a branch
+        """Run all test suites on a branch.
 
         Args:
             branch_name: Name of the branch to test
@@ -497,7 +494,7 @@ class BranchTestManager:
         return results
 
     async def _parse_test_output(self, result: TestResult, suite: TestSuite) -> None:
-        """Parse test output to extract additional information"""
+        """Parse test output to extract additional information."""
         try:
             output = result.output
 
@@ -535,7 +532,7 @@ class BranchTestManager:
             logger.debug(f"Error parsing test output: {e}")
 
     async def _run_build(self, branch_name: str) -> bool:
-        """Run build process for a branch"""
+        """Run build process for a branch."""
         try:
             # Simple build check - can be extended
             process = await asyncio.create_subprocess_exec(
@@ -555,7 +552,7 @@ class BranchTestManager:
             return False
 
     def get_branch_test_summary(self, branch_name: str) -> dict[str, Any]:
-        """Get test summary for a branch"""
+        """Get test summary for a branch."""
         if branch_name not in self.branch_results:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
 
@@ -598,7 +595,7 @@ class BranchTestManager:
         }
 
     def get_all_branch_summaries(self) -> dict[str, dict[str, Any]]:
-        """Get test summaries for all active branches"""
+        """Get test summaries for all active branches."""
         summaries = {}
 
         try:
@@ -613,7 +610,7 @@ class BranchTestManager:
         return summaries
 
     async def auto_test_on_commit(self, branch_name: str) -> list[TestResult]:
-        """Automatically run tests when commits are detected on a branch"""
+        """Automatically run tests when commits are detected on a branch."""
         if not self.auto_testing_enabled or not self.test_on_commit:
             return []
 
@@ -627,7 +624,7 @@ class BranchTestManager:
         command: list[str],
         **kwargs,
     ) -> None:
-        """Configure or update a test suite"""
+        """Configure or update a test suite."""
         self.test_suites[name] = TestSuite(
             name=name,
             test_type=test_type,
@@ -638,13 +635,13 @@ class BranchTestManager:
         logger.info(f"Configured test suite: {name}")
 
     def enable_auto_testing(self, enabled: bool = True) -> None:
-        """Enable or disable automatic testing"""
+        """Enable or disable automatic testing."""
         self.auto_testing_enabled = enabled
         self._save_test_configuration()
         logger.info(f"Auto-testing {'enabled' if enabled else 'disabled'}")
 
     async def start_test_monitor(self) -> None:
-        """Start monitoring for automatic test execution"""
+        """Start monitoring for automatic test execution."""
         if not self.auto_testing_enabled:
             logger.info("Auto-testing is disabled")
             return
@@ -703,7 +700,7 @@ class BranchTestManager:
                 await asyncio.sleep(60)
 
     def _get_last_test_time(self, branch_name: str) -> datetime:
-        """Get the time of the last test run for a branch"""
+        """Get the time of the last test run for a branch."""
         if branch_name not in self.branch_results or not self.branch_results[branch_name]:
             return datetime.min
 

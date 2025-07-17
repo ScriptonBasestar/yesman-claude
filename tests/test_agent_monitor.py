@@ -1,19 +1,24 @@
-"""Tests for AgentMonitor dashboard widget"""
+"""Tests for AgentMonitor dashboard widget."""
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from libs.dashboard.widgets.agent_monitor import AgentMetrics, AgentMonitor, MonitorDisplayMode, TaskMetrics
+from libs.dashboard.widgets.agent_monitor import (
+    AgentMetrics,
+    AgentMonitor,
+    MonitorDisplayMode,
+    TaskMetrics,
+)
 from libs.multi_agent.types import TaskStatus
 
 
 class TestAgentMetrics:
-    """Test cases for AgentMetrics"""
+    """Test cases for AgentMetrics."""
 
     def test_init(self):
-        """Test AgentMetrics initialization"""
+        """Test AgentMetrics initialization."""
         metrics = AgentMetrics(agent_id="test-agent")
 
         assert metrics.agent_id == "test-agent"
@@ -25,14 +30,14 @@ class TestAgentMetrics:
         assert metrics.current_load == 0.0
 
     def test_efficiency_score_no_tasks(self):
-        """Test efficiency score with no completed tasks"""
+        """Test efficiency score with no completed tasks."""
         metrics = AgentMetrics(agent_id="test-agent")
 
         score = metrics.efficiency_score
         assert score == 0.5  # Default score for new agents
 
     def test_efficiency_score_with_tasks(self):
-        """Test efficiency score calculation with completed tasks"""
+        """Test efficiency score calculation with completed tasks."""
         metrics = AgentMetrics(
             agent_id="test-agent",
             tasks_completed=10,
@@ -47,10 +52,10 @@ class TestAgentMetrics:
 
 
 class TestTaskMetrics:
-    """Test cases for TaskMetrics"""
+    """Test cases for TaskMetrics."""
 
     def test_init(self):
-        """Test TaskMetrics initialization"""
+        """Test TaskMetrics initialization."""
         metrics = TaskMetrics(
             task_id="task-1",
             title="Test Task",
@@ -65,11 +70,11 @@ class TestTaskMetrics:
 
 
 class TestAgentMonitor:
-    """Test cases for AgentMonitor"""
+    """Test cases for AgentMonitor."""
 
     @pytest.fixture
     def mock_agent_pool(self):
-        """Create mock agent pool"""
+        """Create mock agent pool."""
         pool = Mock()
         pool.list_agents.return_value = [
             {
@@ -122,11 +127,11 @@ class TestAgentMonitor:
 
     @pytest.fixture
     def monitor(self, mock_agent_pool):
-        """Create AgentMonitor instance"""
+        """Create AgentMonitor instance."""
         return AgentMonitor(agent_pool=mock_agent_pool)
 
     def test_init(self, monitor):
-        """Test AgentMonitor initialization"""
+        """Test AgentMonitor initialization."""
         assert monitor.display_mode == MonitorDisplayMode.OVERVIEW
         assert monitor.selected_agent is None
         assert monitor.auto_refresh is True
@@ -135,7 +140,7 @@ class TestAgentMonitor:
         assert monitor.task_metrics == {}
 
     def test_update_metrics(self, monitor, mock_agent_pool):
-        """Test metrics update from agent pool"""
+        """Test metrics update from agent pool."""
         monitor.update_metrics()
 
         # Check agent metrics were created
@@ -172,7 +177,7 @@ class TestAgentMonitor:
         assert monitor.system_metrics["completed_tasks"] == 8
 
     def test_calculate_task_progress(self, monitor):
-        """Test task progress calculation"""
+        """Test task progress calculation."""
         # Completed task
         completed_task = {"status": "completed"}
         assert monitor._calculate_task_progress(completed_task) == 1.0
@@ -196,7 +201,7 @@ class TestAgentMonitor:
         assert 0.0 < progress < 1.0
 
     def test_render_overview(self, monitor, mock_agent_pool):
-        """Test overview rendering"""
+        """Test overview rendering."""
         monitor.update_metrics()
         panel = monitor.render_overview()
 
@@ -204,14 +209,14 @@ class TestAgentMonitor:
         assert "Multi-Agent Monitor - Overview" in str(panel)
 
     def test_render_detailed_no_selection(self, monitor):
-        """Test detailed rendering with no agent selected"""
+        """Test detailed rendering with no agent selected."""
         panel = monitor.render_detailed()
 
         assert panel is not None
         assert "No agent selected" in str(panel)
 
     def test_render_detailed_with_selection(self, monitor, mock_agent_pool):
-        """Test detailed rendering with agent selected"""
+        """Test detailed rendering with agent selected."""
         monitor.update_metrics()
         monitor.select_agent("agent-1")
 
@@ -221,7 +226,7 @@ class TestAgentMonitor:
         assert "Agent Details - agent-1" in str(panel)
 
     def test_render_tasks(self, monitor, mock_agent_pool):
-        """Test task rendering"""
+        """Test task rendering."""
         monitor.update_metrics()
         panel = monitor.render_tasks()
 
@@ -229,7 +234,7 @@ class TestAgentMonitor:
         assert "Task Monitor" in str(panel)
 
     def test_render_performance(self, monitor, mock_agent_pool):
-        """Test performance rendering"""
+        """Test performance rendering."""
         monitor.update_metrics()
         panel = monitor.render_performance()
 
@@ -237,7 +242,7 @@ class TestAgentMonitor:
         assert "Performance Analytics" in str(panel)
 
     def test_set_display_mode(self, monitor):
-        """Test display mode changes"""
+        """Test display mode changes."""
         monitor.set_display_mode(MonitorDisplayMode.DETAILED)
         assert monitor.display_mode == MonitorDisplayMode.DETAILED
 
@@ -245,7 +250,7 @@ class TestAgentMonitor:
         assert monitor.display_mode == MonitorDisplayMode.TASKS
 
     def test_select_agent(self, monitor, mock_agent_pool):
-        """Test agent selection"""
+        """Test agent selection."""
         monitor.update_metrics()
         monitor.select_agent("agent-1")
 
@@ -253,14 +258,14 @@ class TestAgentMonitor:
         assert monitor.display_mode == MonitorDisplayMode.DETAILED
 
     def test_select_invalid_agent(self, monitor):
-        """Test selecting non-existent agent"""
+        """Test selecting non-existent agent."""
         monitor.select_agent("invalid-agent")
 
         # Should not change selected agent
         assert monitor.selected_agent is None
 
     def test_keyboard_help(self, monitor):
-        """Test keyboard help text"""
+        """Test keyboard help text."""
         help_text = monitor.get_keyboard_help()
 
         assert "Keyboard Shortcuts" in help_text
@@ -270,7 +275,7 @@ class TestAgentMonitor:
 
     @pytest.mark.asyncio
     async def test_start_monitoring_duration(self, monitor):
-        """Test monitoring with duration limit"""
+        """Test monitoring with duration limit."""
         monitor.auto_refresh = True
 
         # Mock the update and render methods
@@ -285,7 +290,7 @@ class TestAgentMonitor:
 
     @pytest.mark.asyncio
     async def test_start_monitoring_keyboard_interrupt(self, monitor):
-        """Test monitoring stops on keyboard interrupt"""
+        """Test monitoring stops on keyboard interrupt."""
         monitor.auto_refresh = True
 
         # Mock methods to raise KeyboardInterrupt
@@ -299,7 +304,7 @@ class TestAgentMonitor:
         await monitor.start_monitoring()
 
     def test_update_metrics_no_pool(self, monitor):
-        """Test update_metrics with no agent pool"""
+        """Test update_metrics with no agent pool."""
         monitor.agent_pool = None
 
         # Should not raise exception
@@ -310,7 +315,7 @@ class TestAgentMonitor:
         assert monitor.task_metrics == {}
 
     def test_update_metrics_exception_handling(self, monitor, mock_agent_pool):
-        """Test update_metrics handles exceptions"""
+        """Test update_metrics handles exceptions."""
         # Make agent pool raise exception
         mock_agent_pool.list_agents.side_effect = Exception("Test error")
 
@@ -321,7 +326,7 @@ class TestAgentMonitor:
         assert monitor.agent_metrics == {}
 
     def test_performance_history_tracking(self, monitor, mock_agent_pool):
-        """Test performance history tracking"""
+        """Test performance history tracking."""
         # Update metrics multiple times
         for _ in range(5):
             monitor.update_metrics()
@@ -335,7 +340,7 @@ class TestAgentMonitor:
         assert len(monitor.performance_history["agent-2"]) == 5
 
     def test_performance_history_limit(self, monitor, mock_agent_pool):
-        """Test performance history size limiting"""
+        """Test performance history size limiting."""
         # Add more than 100 data points
         agent_id = "agent-1"
         monitor.performance_history[agent_id] = [(datetime.now(), 0.5) for _ in range(105)]
@@ -347,10 +352,10 @@ class TestAgentMonitor:
 
 
 class TestStandaloneFunctions:
-    """Test standalone helper functions"""
+    """Test standalone helper functions."""
 
     def test_create_agent_monitor(self):
-        """Test create_agent_monitor function"""
+        """Test create_agent_monitor function."""
         from libs.dashboard.widgets.agent_monitor import create_agent_monitor
 
         monitor = create_agent_monitor()
@@ -358,7 +363,7 @@ class TestStandaloneFunctions:
         assert monitor.agent_pool is None
 
     def test_create_agent_monitor_with_pool(self):
-        """Test create_agent_monitor with agent pool"""
+        """Test create_agent_monitor with agent pool."""
         from libs.dashboard.widgets.agent_monitor import create_agent_monitor
 
         mock_pool = Mock()
@@ -368,7 +373,7 @@ class TestStandaloneFunctions:
 
     @pytest.mark.asyncio
     async def test_run_agent_monitor(self):
-        """Test run_agent_monitor function"""
+        """Test run_agent_monitor function."""
         from libs.dashboard.widgets.agent_monitor import run_agent_monitor
 
         # Mock the monitor to avoid actual UI

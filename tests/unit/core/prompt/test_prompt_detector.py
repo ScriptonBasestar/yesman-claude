@@ -1,4 +1,4 @@
-"""Test prompt detection functionality"""
+"""Test prompt detection functionality."""
 
 import pytest
 
@@ -12,7 +12,8 @@ class TestClaudePromptDetector:
 
     def test_detect_numbered_selection_prompt_should_return_correct_type(self):
         """Test that numbered selection prompts are correctly detected
-        and return PromptType.NUMBERED_SELECTION"""
+        and return PromptType.NUMBERED_SELECTION.
+        """
         content = """
 Do you want to make this edit to VideoProcessingService.kt?
 ❯ 1. Yes
@@ -28,7 +29,8 @@ Do you want to make this edit to VideoProcessingService.kt?
 
     def test_detect_binary_choice_yn_prompt_should_return_binary_choice_type(self):
         """Test that y/n binary choice prompts are correctly detected
-        and return PromptType.BINARY_CHOICE"""
+        and return PromptType.BINARY_CHOICE.
+        """
         content = "Do you want to continue? (y/n)"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -38,7 +40,8 @@ Do you want to make this edit to VideoProcessingService.kt?
 
     def test_detect_true_false_prompt_should_return_true_false_type(self):
         """Test that true/false prompts are correctly detected
-        and return PromptType.TRUE_FALSE"""
+        and return PromptType.TRUE_FALSE.
+        """
         content = "Enable advanced features? (true/false)"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -48,7 +51,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert prompt_info.options[1][0] == "false"
 
     def test_detect_text_input(self):
-        """Test detection of text input prompts"""
+        """Test detection of text input prompts."""
         content = "Enter your name:"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -57,7 +60,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert "name" in prompt_info.metadata.get("field_name", "").lower()
 
     def test_detect_terminal_settings(self):
-        """Test detection of terminal settings prompts"""
+        """Test detection of terminal settings prompts."""
         content = "Configure terminal settings for optimal display"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -65,7 +68,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert prompt_info.type == PromptType.TERMINAL_SETTINGS
 
     def test_detect_login_redirect(self):
-        """Test detection of login/authentication prompts"""
+        """Test detection of login/authentication prompts."""
         content = "Login required to continue. Please sign in."
 
         prompt_info = self.detector.detect_prompt(content)
@@ -73,7 +76,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert prompt_info.type == PromptType.LOGIN_REDIRECT
 
     def test_detect_confirmation(self):
-        """Test detection of confirmation prompts"""
+        """Test detection of confirmation prompts."""
         content = "Are you sure you want to proceed with this action?"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -81,14 +84,14 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert prompt_info.type == PromptType.CONFIRMATION
 
     def test_no_detection_regular_text(self):
-        """Test that regular text doesn't trigger detection"""
+        """Test that regular text doesn't trigger detection."""
         content = "This is just regular output from Claude Code without any prompts."
 
         prompt_info = self.detector.detect_prompt(content)
         assert prompt_info is None
 
     def test_is_waiting_for_input_true(self):
-        """Test waiting for input detection - positive cases"""
+        """Test waiting for input detection - positive cases."""
         test_cases = [
             "Select an option: ❯",
             "Enter value: ",
@@ -102,7 +105,7 @@ Do you want to make this edit to VideoProcessingService.kt?
                 assert result, f"Should detect waiting for input: {content}"
 
     def test_is_waiting_for_input_false(self):
-        """Test waiting for input detection - negative cases"""
+        """Test waiting for input detection - negative cases."""
         test_cases = [
             "Processing complete.",
             "File saved successfully.",
@@ -116,7 +119,7 @@ Do you want to make this edit to VideoProcessingService.kt?
                 assert not result, f"Should not detect waiting for input: {content}"
 
     def test_clean_content(self):
-        """Test content cleaning functionality"""
+        """Test content cleaning functionality."""
         content_with_ansi = "\x1b[31mError:\x1b[0m Choose option (1/2)"
         cleaned = self.detector._clean_content(content_with_ansi)
 
@@ -124,7 +127,7 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert "Choose option" in cleaned
 
     def test_extract_question(self):
-        """Test question extraction"""
+        """Test question extraction."""
         content = """
 Some output here
 Do you want to continue with this operation?
@@ -137,7 +140,7 @@ Do you want to continue with this operation?
         assert question.endswith("?")
 
     def test_numbered_selection_variations(self):
-        """Test different numbered selection formats"""
+        """Test different numbered selection formats."""
         test_cases = [
             # [1] format
             "[1] Option A\n[2] Option B\n[3] Option C",
@@ -157,7 +160,7 @@ Do you want to continue with this operation?
                 assert len(prompt_info.options) >= 2
 
     def test_confidence_scores(self):
-        """Test that confidence scores are reasonable"""
+        """Test that confidence scores are reasonable."""
         # High confidence case
         content = "❯ 1. Yes\n  2. No\n  3. Cancel"
         prompt_info = self.detector.detect_prompt(content)

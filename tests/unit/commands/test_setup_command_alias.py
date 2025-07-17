@@ -1,6 +1,4 @@
-"""
-Test for setup alias (up command)
-"""
+"""Test for setup alias (up command)."""
 
 import unittest
 from unittest.mock import MagicMock, call, patch
@@ -16,7 +14,7 @@ class TestSetupAliasCommand(unittest.TestCase):
 
     @patch("commands.up.SessionManager")
     def test_setup_alias_creates_all_sessions(self, mock_session_manager):
-        """Test setup alias (up) command creates all sessions from projects.yaml"""
+        """Test setup alias (up) command creates all sessions from projects.yaml."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_projects.return_value = [
@@ -42,7 +40,7 @@ class TestSetupAliasCommand(unittest.TestCase):
 
     @patch("commands.up.SessionManager")
     def test_setup_alias_with_specific_project(self, mock_session_manager):
-        """Test setup alias (up) command with specific project name"""
+        """Test setup alias (up) command with specific project name."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.return_value = True
@@ -57,7 +55,7 @@ class TestSetupAliasCommand(unittest.TestCase):
 
     @patch("commands.up.SessionManager")
     def test_setup_alias_handles_session_exists(self, mock_session_manager):
-        """Test setup alias (up) handles existing session gracefully"""
+        """Test setup alias (up) handles existing session gracefully."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.side_effect = Exception("Session already exists")
@@ -72,7 +70,7 @@ class TestSetupAliasCommand(unittest.TestCase):
 
     @patch("commands.up.SessionManager")
     def test_setup_alias_with_force_flag(self, mock_session_manager):
-        """Test setup alias (up) with --force flag recreates session"""
+        """Test setup alias (up) with --force flag recreates session."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.return_value = True
@@ -89,7 +87,7 @@ class TestSetupAliasCommand(unittest.TestCase):
 
     @patch("commands.up.SessionManager")
     def test_setup_alias_no_projects_found(self, mock_session_manager):
-        """Test setup alias (up) when no projects are configured"""
+        """Test setup alias (up) when no projects are configured."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_projects.return_value = []

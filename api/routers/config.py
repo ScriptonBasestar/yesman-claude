@@ -1,11 +1,5 @@
-import os
-import sys
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-
-# 프로젝트 루트를 경로에 추가
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from libs.core.services import get_config, get_tmux_manager
 

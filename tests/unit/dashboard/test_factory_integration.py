@@ -3,10 +3,10 @@ from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
 
 
 class TestFactoryIntegration:
-    """Tests for renderer factory with all formats"""
+    """Tests for renderer factory with all formats."""
 
     def test_factory_integration(self):
-        """Test 11: Renderer factory with all formats"""
+        """Test 11: Renderer factory with all formats."""
         factory = RendererFactory()
 
         # Test factory creates all renderer types

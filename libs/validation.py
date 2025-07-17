@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Centralized validation utilities for the Yesman-Claude project.
+"""Centralized validation utilities for the Yesman-Claude project.
 
 This module provides common validation functions used throughout the project
 for validating session names, project names, paths, and other inputs.
@@ -16,7 +15,7 @@ from libs.core.settings import ContentLimits, ValidationPatterns
 class ValidationError(Exception):
     """Custom exception for validation errors with detailed messages."""
 
-    def __init__(self, field: str, value: str, reason: str):
+    def __init__(self, field: str, value: str, reason: str) -> None:
         self.field = field
         self.value = value
         self.reason = reason
@@ -24,8 +23,7 @@ class ValidationError(Exception):
 
 
 def validate_session_name(name: str, max_length: int | None = None) -> tuple[bool, str | None]:
-    """
-    Validate tmux session name.
+    """Validate tmux session name.
 
     Args:
         name: Session name to validate
@@ -60,8 +58,7 @@ def validate_session_name(name: str, max_length: int | None = None) -> tuple[boo
 
 
 def validate_project_name(name: str) -> tuple[bool, str | None]:
-    """
-    Validate project name.
+    """Validate project name.
 
     Project names have the same rules as session names.
 
@@ -75,8 +72,7 @@ def validate_project_name(name: str) -> tuple[bool, str | None]:
 
 
 def validate_window_name(name: str, max_length: int | None = None) -> tuple[bool, str | None]:
-    """
-    Validate tmux window name.
+    """Validate tmux window name.
 
     Args:
         name: Window name to validate
@@ -101,8 +97,7 @@ def validate_window_name(name: str, max_length: int | None = None) -> tuple[bool
 
 
 def validate_pane_command(command: str, max_length: int | None = None) -> tuple[bool, str | None]:
-    """
-    Validate pane command.
+    """Validate pane command.
 
     Args:
         command: Command to validate
@@ -135,8 +130,7 @@ def validate_pane_command(command: str, max_length: int | None = None) -> tuple[
 
 
 def validate_template_exists(template_name: str, templates_dir: str | None = None) -> tuple[bool, str | None]:
-    """
-    Check if template exists.
+    """Check if template exists.
 
     Args:
         template_name: Name of the template (without extension)
@@ -164,8 +158,7 @@ def validate_template_exists(template_name: str, templates_dir: str | None = Non
 
 
 def validate_directory_path(path: str, must_exist: bool = True, create_if_missing: bool = False) -> tuple[bool, str | None]:
-    """
-    Validate directory path.
+    """Validate directory path.
 
     Args:
         path: Directory path to validate
@@ -206,8 +199,7 @@ def validate_directory_path(path: str, must_exist: bool = True, create_if_missin
 
 
 def validate_port_number(port: str) -> tuple[bool, str | None]:
-    """
-    Validate port number.
+    """Validate port number.
 
     Args:
         port: Port number as string
@@ -236,8 +228,7 @@ def validate_port_number(port: str) -> tuple[bool, str | None]:
 
 
 def validate_log_level(level: str) -> tuple[bool, str | None]:
-    """
-    Validate log level.
+    """Validate log level.
 
     Args:
         level: Log level string
@@ -250,14 +241,16 @@ def validate_log_level(level: str) -> tuple[bool, str | None]:
 
     # Check pattern
     if not re.match(ValidationPatterns.LOG_LEVEL, level.upper()):
-        return False, "Invalid log level. Must be one of: DEBUG, INFO, WARNING, ERROR, CRITICAL"
+        return (
+            False,
+            "Invalid log level. Must be one of: DEBUG, INFO, WARNING, ERROR, CRITICAL",
+        )
 
     return True, None
 
 
 def validate_session_config(config: dict) -> tuple[bool, list[str]]:
-    """
-    Validate a complete session configuration.
+    """Validate a complete session configuration.
 
     Args:
         config: Session configuration dictionary
@@ -304,8 +297,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
 
 # Validation decorators for common use cases
 def validate_input(validation_func, field_name: str):
-    """
-    Decorator to validate function inputs.
+    """Decorator to validate function inputs.
 
     Args:
         validation_func: Validation function to use

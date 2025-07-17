@@ -1,4 +1,4 @@
-"""Branch information sharing protocol for multi-agent collaboration"""
+"""Branch information sharing protocol for multi-agent collaboration."""
 
 import asyncio
 import contextlib
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class BranchInfoType(Enum):
-    """Types of branch information that can be shared"""
+    """Types of branch information that can be shared."""
 
     BRANCH_STATE = "branch_state"  # Current state of branch
     COMMIT_HISTORY = "commit_history"  # Recent commits
@@ -32,7 +32,7 @@ class BranchInfoType(Enum):
 
 
 class SyncStrategy(Enum):
-    """Strategies for synchronizing branch information"""
+    """Strategies for synchronizing branch information."""
 
     IMMEDIATE = "immediate"  # Share immediately on change
     PERIODIC = "periodic"  # Share at regular intervals
@@ -43,7 +43,7 @@ class SyncStrategy(Enum):
 
 @dataclass
 class BranchInfo:
-    """Information about a branch's current state"""
+    """Information about a branch's current state."""
 
     branch_name: str
     agent_id: str
@@ -64,7 +64,7 @@ class BranchInfo:
 
 @dataclass
 class BranchSyncEvent:
-    """Event representing a branch synchronization"""
+    """Event representing a branch synchronization."""
 
     event_id: str
     branch_name: str
@@ -78,7 +78,7 @@ class BranchSyncEvent:
 
 
 class BranchInfoProtocol:
-    """Protocol for sharing branch information between agents"""
+    """Protocol for sharing branch information between agents."""
 
     def __init__(
         self,
@@ -87,8 +87,7 @@ class BranchInfoProtocol:
         repo_path: str | None = None,
         sync_strategy: SyncStrategy = SyncStrategy.SMART,
     ):
-        """
-        Initialize the branch info protocol
+        """Initialize the branch info protocol.
 
         Args:
             branch_manager: Manager for branch operations
@@ -131,7 +130,7 @@ class BranchInfoProtocol:
         self._sync_task = None
 
     async def start(self):
-        """Start the branch info protocol"""
+        """Start the branch info protocol."""
         self._running = True
         logger.info("Starting branch info protocol")
 
@@ -140,7 +139,7 @@ class BranchInfoProtocol:
             self._sync_task = asyncio.create_task(self._periodic_sync_loop())
 
     async def stop(self):
-        """Stop the branch info protocol"""
+        """Stop the branch info protocol."""
         self._running = False
         logger.info("Stopping branch info protocol")
 
@@ -156,8 +155,7 @@ class BranchInfoProtocol:
         base_branch: str = "main",
         work_items: list[str] | None = None,
     ) -> BranchInfo:
-        """
-        Register a new branch with the protocol
+        """Register a new branch with the protocol.
 
         Args:
             branch_name: Name of the branch
@@ -200,8 +198,7 @@ class BranchInfoProtocol:
         update_data: dict[str, Any],
         requires_immediate_sync: bool = False,
     ):
-        """
-        Update branch information and potentially trigger sync
+        """Update branch information and potentially trigger sync.
 
         Args:
             branch_name: Name of the branch
@@ -257,15 +254,15 @@ class BranchInfoProtocol:
             await self._share_branch_info(branch_info, info_type, update_data)
 
     async def get_branch_info(self, branch_name: str) -> BranchInfo | None:
-        """Get current information about a branch"""
+        """Get current information about a branch."""
         return self.branch_info.get(branch_name)
 
     async def get_all_branches_info(self) -> dict[str, BranchInfo]:
-        """Get information about all branches"""
+        """Get information about all branches."""
         return self.branch_info.copy()
 
     async def subscribe_to_branch(self, agent_id: str, branch_name: str):
-        """Subscribe an agent to receive updates about a branch"""
+        """Subscribe an agent to receive updates about a branch."""
         self.branch_subscriptions[branch_name].add(agent_id)
         self.protocol_stats["subscriptions_active"] += 1
 
@@ -281,7 +278,7 @@ class BranchInfoProtocol:
             )
 
     async def unsubscribe_from_branch(self, agent_id: str, branch_name: str):
-        """Unsubscribe an agent from branch updates"""
+        """Unsubscribe an agent from branch updates."""
         if agent_id in self.branch_subscriptions[branch_name]:
             self.branch_subscriptions[branch_name].remove(agent_id)
             self.protocol_stats["subscriptions_active"] -= 1
@@ -292,8 +289,7 @@ class BranchInfoProtocol:
         requester_id: str,
         branch_names: list[str] | None = None,
     ):
-        """
-        Request synchronization of branch information
+        """Request synchronization of branch information.
 
         Args:
             requester_id: ID of requesting agent
@@ -312,8 +308,7 @@ class BranchInfoProtocol:
                 )
 
     async def detect_branch_conflicts(self, branch1: str, branch2: str) -> list[str]:
-        """
-        Detect potential conflicts between two branches
+        """Detect potential conflicts between two branches.
 
         Args:
             branch1: First branch name
@@ -350,8 +345,7 @@ class BranchInfoProtocol:
         return conflicts
 
     async def prepare_merge_report(self, branch_name: str) -> dict[str, Any]:
-        """
-        Prepare a comprehensive merge readiness report
+        """Prepare a comprehensive merge readiness report.
 
         Args:
             branch_name: Branch to analyze
@@ -422,7 +416,7 @@ class BranchInfoProtocol:
         info_type: BranchInfoType,
         event_data: dict[str, Any],
     ):
-        """Share branch information with subscribed agents"""
+        """Share branch information with subscribed agents."""
         # Create sync event
         event = BranchSyncEvent(
             event_id=f"sync_{branch_info.branch_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -481,7 +475,7 @@ class BranchInfoProtocol:
         info_type: BranchInfoType,
         event_data: dict[str, Any],
     ):
-        """Send branch update to specific agent"""
+        """Send branch update to specific agent."""
         message_type = MessageType.STATUS_UPDATE
         if info_type == BranchInfoType.CONFLICT_INFO:
             message_type = MessageType.CONFLICT_ALERT
@@ -512,7 +506,7 @@ class BranchInfoProtocol:
         )
 
     def _determine_priority(self, info_type: BranchInfoType) -> MessagePriority:
-        """Determine message priority based on info type"""
+        """Determine message priority based on info type."""
         priority_map = {
             BranchInfoType.CONFLICT_INFO: MessagePriority.HIGH,
             BranchInfoType.API_CHANGES: MessagePriority.HIGH,
@@ -525,7 +519,7 @@ class BranchInfoProtocol:
         return priority_map.get(info_type, MessagePriority.NORMAL)
 
     def _calculate_relevance(self, info_type: BranchInfoType) -> float:
-        """Calculate relevance score for knowledge sharing"""
+        """Calculate relevance score for knowledge sharing."""
         relevance_map = {
             BranchInfoType.CONFLICT_INFO: 1.0,
             BranchInfoType.API_CHANGES: 0.9,
@@ -541,7 +535,7 @@ class BranchInfoProtocol:
         return relevance_map.get(info_type, 0.5)
 
     async def _periodic_sync_loop(self):
-        """Background task for periodic synchronization"""
+        """Background task for periodic synchronization."""
         while self._running:
             try:
                 await asyncio.sleep(self.sync_interval)
@@ -575,7 +569,7 @@ class BranchInfoProtocol:
                 logger.error(f"Error in periodic sync: {e}")
 
     def get_protocol_summary(self) -> dict[str, Any]:
-        """Get comprehensive summary of protocol activity"""
+        """Get comprehensive summary of protocol activity."""
         active_branches = [
             {
                 "branch_name": info.branch_name,

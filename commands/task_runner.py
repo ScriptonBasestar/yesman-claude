@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Task Runner CLI command for automated TODO processing
+"""Task Runner CLI command for automated TODO processing.
 
 Provides automation for processing TODO files in /tasks/todo/ directory.
 Implements the TASK_RUNNER.todo prompt workflow:
@@ -25,10 +24,10 @@ from libs.task_runner import TaskRunner
 
 
 class TaskRunnerNextCommand(BaseCommand):
-    """Process the next available task"""
+    """Process the next available task."""
 
     def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:
-        """Execute the next command"""
+        """Execute the next command."""
         try:
             runner = TaskRunner()
             success = runner.process_next_task(directory)
@@ -45,10 +44,16 @@ class TaskRunnerNextCommand(BaseCommand):
 
 
 class TaskRunnerRunCommand(BaseCommand):
-    """Run task processor continuously"""
+    """Run task processor continuously."""
 
-    def execute(self, directory: str | None = None, max_iterations: int = 100, dry_run: bool = False, **kwargs) -> dict:
-        """Execute the run command"""
+    def execute(
+        self,
+        directory: str | None = None,
+        max_iterations: int = 100,
+        dry_run: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the run command."""
         try:
             runner = TaskRunner()
 
@@ -61,7 +66,11 @@ class TaskRunnerRunCommand(BaseCommand):
 
                 task_count = 0
                 # Use progress bar for file analysis
-                for file_path in track(todo_files, description="📁 Analyzing todo files...", style="bold cyan"):
+                for file_path in track(
+                    todo_files,
+                    description="📁 Analyzing todo files...",
+                    style="bold cyan",
+                ):
                     from libs.task_runner import TodoFile
 
                     todo_file = TodoFile(file_path)
@@ -84,7 +93,11 @@ class TaskRunnerRunCommand(BaseCommand):
                 runner.run_continuously(directory, max_iterations)
                 progress.update(task_id, description="✅ Task processing completed")
 
-            return {"success": True, "directory": directory, "max_iterations": max_iterations}
+            return {
+                "success": True,
+                "directory": directory,
+                "max_iterations": max_iterations,
+            }
 
         except KeyboardInterrupt:
             self.print_warning("\n⏹️ Task runner interrupted by user")
@@ -94,10 +107,10 @@ class TaskRunnerRunCommand(BaseCommand):
 
 
 class TaskRunnerStatusCommand(BaseCommand):
-    """Show current task status"""
+    """Show current task status."""
 
     def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:
-        """Execute the status command"""
+        """Execute the status command."""
         try:
             runner = TaskRunner()
             todo_files = runner.find_todo_files(directory)
@@ -177,10 +190,10 @@ class TaskRunnerStatusCommand(BaseCommand):
 
 
 class TaskRunnerAddCommand(BaseCommand):
-    """Add a new task to a todo file"""
+    """Add a new task to a todo file."""
 
     def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:
-        """Execute the add command"""
+        """Execute the add command."""
         if not task or not file_path:
             raise CommandError("Both --task and --file options are required")
 
@@ -208,7 +221,7 @@ class TaskRunnerAddCommand(BaseCommand):
 
 @click.group()
 def task_runner():
-    """Automated TODO task processor
+    """Automated TODO task processor.
 
     Processes TODO files in tasks/todo/ directory according to TASK_RUNNER.todo workflow.
     Automatically finds next incomplete task, analyzes dependencies, implements solutions,
@@ -226,7 +239,7 @@ def task_runner():
 )
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 def next(directory, verbose):
-    """Process the next available task
+    """Process the next available task.
 
     Finds and processes the next uncompleted task in todo files.
     Tasks are processed in filename order, then by task order within files.
@@ -260,7 +273,7 @@ def next(directory, verbose):
     help="Show what would be processed without making changes",
 )
 def run(directory, max_iterations, dry_run):
-    """Run task processor continuously
+    """Run task processor continuously.
 
     Processes all available tasks until none remain or max iterations reached.
     Automatically handles task breakdown, implementation, testing, and file management.
@@ -279,7 +292,7 @@ def run(directory, max_iterations, dry_run):
 @click.option("--dir", "-d", "directory", help="Specific directory to show status for")
 @click.option("--detailed", is_flag=True, help="Show detailed task breakdown")
 def status(directory, detailed):
-    """Show current task status
+    """Show current task status.
 
     Displays overview of todo files and task completion status.
     Shows pending, completed, and skipped tasks across all files.
@@ -297,7 +310,7 @@ def status(directory, detailed):
 @click.option("--task", "-t", help="Task content to add")
 @click.option("--file", "-f", "file_path", help="File to add task to")
 def add(task, file_path):
-    """Add a new task to a todo file
+    """Add a new task to a todo file.
 
     Adds a new uncompleted task to the specified todo file.
 

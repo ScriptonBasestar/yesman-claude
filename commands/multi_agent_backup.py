@@ -1,4 +1,4 @@
-"""Multi-agent system commands for parallel development automation"""
+"""Multi-agent system commands for parallel development automation."""
 
 import asyncio
 import logging
@@ -13,21 +13,41 @@ from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.code_review_engine import CodeReviewEngine, QualityMetric, ReviewSeverity, ReviewType
+from libs.multi_agent.code_review_engine import (
+    CodeReviewEngine,
+    QualityMetric,
+    ReviewSeverity,
+    ReviewType,
+)
 from libs.multi_agent.conflict_prediction import ConflictPredictor
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-from libs.multi_agent.dependency_propagation import ChangeImpact, DependencyPropagationSystem, DependencyType, PropagationStrategy
+from libs.multi_agent.dependency_propagation import (
+    ChangeImpact,
+    DependencyPropagationSystem,
+    DependencyType,
+    PropagationStrategy,
+)
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.semantic_merger import MergeResolution, MergeStrategy, SemanticMerger
+from libs.multi_agent.semantic_merger import (
+    MergeResolution,
+    MergeStrategy,
+    SemanticMerger,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class StartAgentsCommand(BaseCommand):
-    """Start the multi-agent pool"""
+    """Start the multi-agent pool."""
 
-    def execute(self, max_agents: int = 3, work_dir: str | None = None, monitor: bool = False, **kwargs) -> dict:
-        """Execute the start agents command"""
+    def execute(
+        self,
+        max_agents: int = 3,
+        work_dir: str | None = None,
+        monitor: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the start agents command."""
         try:
             # Create progress indicator for agent startup
             with Progress(
@@ -36,7 +56,10 @@ class StartAgentsCommand(BaseCommand):
                 TimeElapsedColumn(),
                 transient=True,
             ) as progress:
-                startup_task = progress.add_task(f"🤖 Starting multi-agent pool with {max_agents} agents...", total=None)
+                startup_task = progress.add_task(
+                    f"🤖 Starting multi-agent pool with {max_agents} agents...",
+                    total=None,
+                )
 
                 # Create agent pool
                 pool = AgentPool(max_agents=max_agents, work_dir=work_dir)
@@ -46,7 +69,10 @@ class StartAgentsCommand(BaseCommand):
                     progress.update(startup_task, description="✅ Agent pool started successfully")
 
                     if monitor:
-                        progress.update(startup_task, description="📊 Starting monitoring dashboard...")
+                        progress.update(
+                            startup_task,
+                            description="📊 Starting monitoring dashboard...",
+                        )
                         await run_agent_monitor(pool)
                     else:
                         self.print_success("✅ Agent pool started successfully")
@@ -68,10 +94,16 @@ class StartAgentsCommand(BaseCommand):
 
 
 class MonitorAgentsCommand(BaseCommand):
-    """Start real-time agent monitoring dashboard"""
+    """Start real-time agent monitoring dashboard."""
 
-    def execute(self, work_dir: str | None = None, duration: float | None = None, refresh: float = 1.0, **kwargs) -> dict:
-        """Execute the monitor agents command"""
+    def execute(
+        self,
+        work_dir: str | None = None,
+        duration: float | None = None,
+        refresh: float = 1.0,
+        **kwargs,
+    ) -> dict:
+        """Execute the monitor agents command."""
         try:
             self.print_info("📊 Starting agent monitoring dashboard...")
 
@@ -124,10 +156,10 @@ class MonitorAgentsCommand(BaseCommand):
 
 
 class StatusCommand(BaseCommand):
-    """Show current agent pool status"""
+    """Show current agent pool status."""
 
     def execute(self, work_dir: str | None = None, **kwargs) -> dict:
-        """Execute the status command"""
+        """Execute the status command."""
         try:
             # Initialize agent pool
             pool = AgentPool(work_dir=work_dir)
@@ -176,10 +208,10 @@ class StatusCommand(BaseCommand):
 
 
 class StopAgentsCommand(BaseCommand):
-    """Stop the multi-agent pool"""
+    """Stop the multi-agent pool."""
 
     def execute(self, work_dir: str | None = None, **kwargs) -> dict:
-        """Execute the stop agents command"""
+        """Execute the stop agents command."""
         try:
             self.print_info("🛑 Stopping multi-agent pool...")
 
@@ -191,19 +223,32 @@ class StopAgentsCommand(BaseCommand):
 
             asyncio.run(stop_pool())
 
-            return {"success": True, "work_dir": work_dir, "message": "Agent pool stopped successfully"}
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "message": "Agent pool stopped successfully",
+            }
 
         except Exception as e:
             raise CommandError(f"Error stopping agents: {e}") from e
 
 
 class AddTaskCommand(BaseCommand):
-    """Add a task to the agent pool queue"""
+    """Add a task to the agent pool queue."""
 
     def execute(
-        self, title: str, command: list[str], work_dir: str | None = None, directory: str = ".", priority: int = 5, complexity: int = 5, timeout: int = 300, description: str | None = None, **kwargs
+        self,
+        title: str,
+        command: list[str],
+        work_dir: str | None = None,
+        directory: str = ".",
+        priority: int = 5,
+        complexity: int = 5,
+        timeout: int = 300,
+        description: str | None = None,
+        **kwargs,
     ) -> dict:
-        """Execute the add task command"""
+        """Execute the add task command."""
         try:
             pool = AgentPool(work_dir=work_dir)
 
@@ -222,17 +267,24 @@ class AddTaskCommand(BaseCommand):
             self.print_info(f"   Command: {' '.join(task.command)}")
             self.print_info(f"   Priority: {task.priority}")
 
-            return {"success": True, "work_dir": work_dir, "task_id": task.task_id, "title": task.title, "command": task.command, "priority": task.priority}
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "task_id": task.task_id,
+                "title": task.title,
+                "command": task.command,
+                "priority": task.priority,
+            }
 
         except Exception as e:
             raise CommandError(f"Error adding task: {e}") from e
 
 
 class ListTasksCommand(BaseCommand):
-    """List tasks in the agent pool"""
+    """List tasks in the agent pool."""
 
     def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:
-        """Execute the list tasks command"""
+        """Execute the list tasks command."""
         try:
             pool = AgentPool(work_dir=work_dir)
 
@@ -243,7 +295,10 @@ class ListTasksCommand(BaseCommand):
                 try:
                     filter_status = TaskStatus(status.lower())
                 except ValueError as e:
-                    raise CommandError(f"Invalid status: {status}", recovery_hint="Valid statuses are: pending, assigned, running, completed, failed, cancelled") from e
+                    raise CommandError(
+                        f"Invalid status: {status}",
+                        recovery_hint="Valid statuses are: pending, assigned, running, completed, failed, cancelled",
+                    ) from e
 
             tasks = pool.list_tasks(filter_status)
 
@@ -271,17 +326,29 @@ class ListTasksCommand(BaseCommand):
                 self.print_info(f"   Command: {' '.join(task['command'])}")
                 self.print_info("")
 
-            return {"success": True, "work_dir": work_dir, "tasks": tasks, "count": len(tasks), "filter_status": status}
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "tasks": tasks,
+                "count": len(tasks),
+                "filter_status": status,
+            }
 
         except Exception as e:
             raise CommandError(f"Error listing tasks: {e}") from e
 
 
 class DetectConflictsCommand(BaseCommand):
-    """Detect conflicts between branches"""
+    """Detect conflicts between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, auto_resolve: bool = False, **kwargs) -> dict:
-        """Execute the detect conflicts command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        auto_resolve: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the detect conflicts command."""
         try:
             # Create progress indicator for conflict detection
             with Progress(
@@ -290,19 +357,33 @@ class DetectConflictsCommand(BaseCommand):
                 TimeElapsedColumn(),
                 transient=True,
             ) as progress:
-                detection_task = progress.add_task(f"🔍 Detecting conflicts between branches: {', '.join(branches)}", total=None)
+                detection_task = progress.add_task(
+                    f"🔍 Detecting conflicts between branches: {', '.join(branches)}",
+                    total=None,
+                )
 
                 # Create conflict resolution engine
                 branch_manager = BranchManager(repo_path=repo_path)
                 engine = ConflictResolutionEngine(branch_manager, repo_path)
 
                 async def run_detection():
-                    conflicts = await engine.detect_potential_conflicts(branches)
-                    progress.update(detection_task, description="✅ Conflict detection completed")
+                    return await engine.detect_potential_conflicts(branches)
+
+                # Run the async detection
+                import asyncio
+
+                conflicts = asyncio.run(run_detection())
+                progress.update(detection_task, description="✅ Conflict detection completed")
 
                 if not conflicts:
                     self.print_success("✅ No conflicts detected")
-                    return {"success": True, "branches": branches, "repo_path": repo_path, "conflicts": [], "auto_resolve_results": None}
+                    return {
+                        "success": True,
+                        "branches": branches,
+                        "repo_path": repo_path,
+                        "conflicts": [],
+                        "auto_resolve_results": None,
+                    }
 
                 self.print_info(f"⚠️  Found {len(conflicts)} potential conflicts:")
                 self.print_info("=" * 60)
@@ -328,7 +409,11 @@ class DetectConflictsCommand(BaseCommand):
                 # Auto-resolve if requested
                 if auto_resolve:
                     self.print_info("🔧 Attempting automatic resolution...")
-                    results = await engine.auto_resolve_all()
+
+                    async def run_auto_resolve():
+                        return await engine.auto_resolve_all()
+
+                    results = asyncio.run(run_auto_resolve())
                     resolved = len([r for r in results if r.success])
                     failed = len(results) - resolved
 
@@ -337,9 +422,19 @@ class DetectConflictsCommand(BaseCommand):
                         self.print_error(f"❌ Failed to resolve: {failed}")
                         self.print_warning("🚨 Manual intervention required for remaining conflicts")
 
-                    auto_resolve_results = {"resolved": resolved, "failed": failed, "results": results}
+                    auto_resolve_results = {
+                        "resolved": resolved,
+                        "failed": failed,
+                        "results": results,
+                    }
 
-                return {"success": True, "branches": branches, "repo_path": repo_path, "conflicts": conflicts, "auto_resolve_results": auto_resolve_results}
+                return {
+                    "success": True,
+                    "branches": branches,
+                    "repo_path": repo_path,
+                    "conflicts": conflicts,
+                    "auto_resolve_results": auto_resolve_results,
+                }
 
             return asyncio.run(run_detection())
 
@@ -348,10 +443,16 @@ class DetectConflictsCommand(BaseCommand):
 
 
 class ResolveConflictCommand(BaseCommand):
-    """Resolve a specific conflict"""
+    """Resolve a specific conflict."""
 
-    def execute(self, conflict_id: str, strategy: str | None = None, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the resolve conflict command"""
+    def execute(
+        self,
+        conflict_id: str,
+        strategy: str | None = None,
+        repo_path: str | None = None,
+        **kwargs,
+    ) -> dict:
+        """Execute the resolve conflict command."""
         try:
             self.print_info(f"🔧 Resolving conflict: {conflict_id}")
 
@@ -367,7 +468,10 @@ class ResolveConflictCommand(BaseCommand):
 
                     resolution_strategy = ResolutionStrategy(strategy)
                 except ValueError as e:
-                    raise CommandError(f"Invalid strategy: {strategy}", recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis") from e
+                    raise CommandError(
+                        f"Invalid strategy: {strategy}",
+                        recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis",
+                    ) from e
 
             async def run_resolution():
                 result = await engine.resolve_conflict(conflict_id, resolution_strategy)
@@ -405,10 +509,10 @@ class ResolveConflictCommand(BaseCommand):
 
 
 class ConflictSummaryCommand(BaseCommand):
-    """Show conflict resolution summary and statistics"""
+    """Show conflict resolution summary and statistics."""
 
     def execute(self, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the conflict summary command"""
+        """Execute the conflict summary command."""
         try:
             self.print_info("📊 Conflict Resolution Summary")
             self.print_info("=" * 40)
@@ -469,10 +573,18 @@ class ConflictSummaryCommand(BaseCommand):
 
 
 class PredictConflictsCommand(BaseCommand):
-    """Predict potential conflicts between branches"""
+    """Predict potential conflicts between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, time_horizon: int = 7, min_confidence: float = 0.3, limit: int = 10, **kwargs) -> dict:
-        """Execute the predict conflicts command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        time_horizon: int = 7,
+        min_confidence: float = 0.3,
+        limit: int = 10,
+        **kwargs,
+    ) -> dict:
+        """Execute the predict conflicts command."""
         try:
             self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
             self.print_info(f"   Time horizon: {time_horizon} days")
@@ -500,7 +612,11 @@ class PredictConflictsCommand(BaseCommand):
                         "branches": branches,
                         "repo_path": repo_path,
                         "predictions": [],
-                        "parameters": {"time_horizon": time_horizon, "min_confidence": min_confidence, "limit": limit},
+                        "parameters": {
+                            "time_horizon": time_horizon,
+                            "min_confidence": min_confidence,
+                            "limit": limit,
+                        },
                     }
 
                 # Filter and limit results
@@ -559,7 +675,11 @@ class PredictConflictsCommand(BaseCommand):
                     "predictions": filtered_predictions,
                     "total_found": len(predictions),
                     "filtered_count": len(filtered_predictions),
-                    "parameters": {"time_horizon": time_horizon, "min_confidence": min_confidence, "limit": limit},
+                    "parameters": {
+                        "time_horizon": time_horizon,
+                        "min_confidence": min_confidence,
+                        "limit": limit,
+                    },
                 }
 
             return asyncio.run(run_prediction())
@@ -569,10 +689,10 @@ class PredictConflictsCommand(BaseCommand):
 
 
 class PredictionSummaryCommand(BaseCommand):
-    """Show conflict prediction summary and statistics"""
+    """Show conflict prediction summary and statistics."""
 
     def execute(self, repo_path: str | None = None, **kwargs) -> dict:
-        """Execute the prediction summary command"""
+        """Execute the prediction summary command."""
         try:
             self.print_info("🔮 Conflict Prediction Summary")
             self.print_info("=" * 40)
@@ -639,10 +759,17 @@ class PredictionSummaryCommand(BaseCommand):
 
 
 class AnalyzeConflictPatternsCommand(BaseCommand):
-    """Analyze detailed conflict patterns between branches"""
+    """Analyze detailed conflict patterns between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, pattern: str | None = None, export: str | None = None, **kwargs) -> dict:
-        """Execute the analyze conflict patterns command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        pattern: str | None = None,
+        export: str | None = None,
+        **kwargs,
+    ) -> dict:
+        """Execute the analyze conflict patterns command."""
         try:
             self.print_info(f"🔍 Analyzing conflict patterns for: {', '.join(branches)}")
 
@@ -683,7 +810,9 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 
                         # Pattern-specific analysis
                         if pattern:
-                            from libs.multi_agent.conflict_prediction import ConflictPattern
+                            from libs.multi_agent.conflict_prediction import (
+                                ConflictPattern,
+                            )
 
                             try:
                                 target_pattern = ConflictPattern(pattern)
@@ -708,7 +837,14 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
                         json.dump(analysis_results, f, indent=2, default=str)
                     self.print_success(f"\n💾 Analysis exported to: {export}")
 
-                return {"success": True, "branches": branches, "repo_path": repo_path, "pattern": pattern, "export": export, "analysis_results": analysis_results}
+                return {
+                    "success": True,
+                    "branches": branches,
+                    "repo_path": repo_path,
+                    "pattern": pattern,
+                    "export": export,
+                    "analysis_results": analysis_results,
+                }
 
             return asyncio.run(run_analysis())
 
@@ -717,10 +853,19 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 
 
 class AnalyzeSemanticConflictsCommand(BaseCommand):
-    """Analyze AST-based semantic conflicts between branches"""
+    """Analyze AST-based semantic conflicts between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, files: str | None = None, include_private: bool = False, export: str | None = None, detailed: bool = False, **kwargs) -> dict:
-        """Execute the analyze semantic conflicts command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        files: str | None = None,
+        include_private: bool = False,
+        export: str | None = None,
+        detailed: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the analyze semantic conflicts command."""
         try:
             self.print_info(f"🧠 Analyzing semantic conflicts between: {', '.join(branches)}")
 
@@ -733,7 +878,12 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             file_list = files.split(",") if files else None
 
             async def run_semantic_analysis():
-                results = await semantic_analyzer.analyze_semantic_conflicts(branches, target_files=file_list, include_private_members=include_private, detailed_output=detailed)
+                results = await semantic_analyzer.analyze_semantic_conflicts(
+                    branches,
+                    target_files=file_list,
+                    include_private_members=include_private,
+                    detailed_output=detailed,
+                )
 
                 # Display results
                 for file_path, conflicts in results.items():
@@ -742,7 +892,12 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                         self.print_info("-" * len(file_path))
 
                         for conflict in conflicts:
-                            severity_icon = {"low": "🟢", "medium": "🟡", "high": "🔴", "critical": "💀"}.get(conflict.severity, "❓")
+                            severity_icon = {
+                                "low": "🟢",
+                                "medium": "🟡",
+                                "high": "🔴",
+                                "critical": "💀",
+                            }.get(conflict.severity, "❓")
 
                             self.print_info(f"  {severity_icon} {conflict.conflict_type}")
                             self.print_info(f"    Branches: {', '.join(conflict.affected_branches)}")
@@ -760,7 +915,16 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                         json.dump(results, f, indent=2, default=str)
                     self.print_success(f"\n💾 Results exported to: {export}")
 
-                return {"success": True, "branches": branches, "repo_path": repo_path, "files": files, "include_private": include_private, "detailed": detailed, "export": export, "results": results}
+                return {
+                    "success": True,
+                    "branches": branches,
+                    "repo_path": repo_path,
+                    "files": files,
+                    "include_private": include_private,
+                    "detailed": detailed,
+                    "export": export,
+                    "results": results,
+                }
 
             return asyncio.run(run_semantic_analysis())
 
@@ -769,10 +933,16 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 
 
 class SemanticSummaryCommand(BaseCommand):
-    """Show semantic structure summary of code"""
+    """Show semantic structure summary of code."""
 
-    def execute(self, repo_path: str | None = None, branch: str | None = None, files: str | None = None, **kwargs) -> dict:
-        """Execute semantic summary command"""
+    def execute(
+        self,
+        repo_path: str | None = None,
+        branch: str | None = None,
+        files: str | None = None,
+        **kwargs,
+    ) -> dict:
+        """Execute semantic summary command."""
         try:
             self.print_info("🧠 Semantic Code Analysis")
             self.print_info("=" * 40)
@@ -793,7 +963,13 @@ class SemanticSummaryCommand(BaseCommand):
                 self.print_info(f"Classes: {summary.get('class_count', 0)}")
                 self.print_info(f"Functions: {summary.get('function_count', 0)}")
 
-                return {"success": True, "repo_path": repo_path, "branch": current_branch, "files": files, "summary": summary}
+                return {
+                    "success": True,
+                    "repo_path": repo_path,
+                    "branch": current_branch,
+                    "files": files,
+                    "summary": summary,
+                }
 
             return asyncio.run(run_summary())
 
@@ -802,10 +978,17 @@ class SemanticSummaryCommand(BaseCommand):
 
 
 class FunctionDiffCommand(BaseCommand):
-    """Compare function signatures between branches"""
+    """Compare function signatures between branches."""
 
-    def execute(self, branches: list[str], repo_path: str | None = None, files: str | None = None, export: str | None = None, **kwargs) -> dict:
-        """Execute function diff command"""
+    def execute(
+        self,
+        branches: list[str],
+        repo_path: str | None = None,
+        files: str | None = None,
+        export: str | None = None,
+        **kwargs,
+    ) -> dict:
+        """Execute function diff command."""
         try:
             self.print_info(f"🔧 Comparing function signatures: {', '.join(branches)}")
 
@@ -833,7 +1016,14 @@ class FunctionDiffCommand(BaseCommand):
                         json.dump(diff_results, f, indent=2)
                     self.print_success(f"\n💾 Diff exported to: {export}")
 
-                return {"success": True, "branches": branches, "repo_path": repo_path, "files": files, "export": export, "diff_results": diff_results}
+                return {
+                    "success": True,
+                    "branches": branches,
+                    "repo_path": repo_path,
+                    "files": files,
+                    "export": export,
+                    "diff_results": diff_results,
+                }
 
             return asyncio.run(run_diff())
 
@@ -842,10 +1032,18 @@ class FunctionDiffCommand(BaseCommand):
 
 
 class SemanticMergeCommand(BaseCommand):
-    """Perform intelligent semantic merge"""
+    """Perform intelligent semantic merge."""
 
-    def execute(self, source_branch: str, target_branch: str, repo_path: str | None = None, strategy: str = "auto", dry_run: bool = False, **kwargs) -> dict:
-        """Execute semantic merge command"""
+    def execute(
+        self,
+        source_branch: str,
+        target_branch: str,
+        repo_path: str | None = None,
+        strategy: str = "auto",
+        dry_run: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute semantic merge command."""
         try:
             self.print_info(f"🔀 Semantic merge: {source_branch} → {target_branch}")
 
@@ -886,7 +1084,7 @@ class SemanticMergeCommand(BaseCommand):
 @click.group(name="multi-agent")
 @click.pass_context
 def multi_agent_cli(ctx):
-    """Multi-agent system for parallel development automation"""
+    """Multi-agent system for parallel development automation."""
     pass
 
 
@@ -895,7 +1093,7 @@ def multi_agent_cli(ctx):
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
 def start_agents(max_agents: int, work_dir: str | None, monitor: bool):
-    """Start the multi-agent pool"""
+    """Start the multi-agent pool."""
     command = StartAgentsCommand()
     command.run(max_agents=max_agents, work_dir=work_dir, monitor=monitor)
 
@@ -905,7 +1103,7 @@ def start_agents(max_agents: int, work_dir: str | None, monitor: bool):
 @click.option("--duration", "-d", type=float, help="Monitoring duration in seconds")
 @click.option("--refresh", "-r", default=1.0, help="Refresh interval in seconds")
 def monitor_agents(work_dir: str | None, duration: float | None, refresh: float):
-    """Start real-time agent monitoring dashboard"""
+    """Start real-time agent monitoring dashboard."""
     command = MonitorAgentsCommand()
     command.run(work_dir=work_dir, duration=duration, refresh=refresh)
 
@@ -913,7 +1111,7 @@ def monitor_agents(work_dir: str | None, duration: float | None, refresh: float)
 @multi_agent_cli.command("status")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 def status(work_dir: str | None):
-    """Show current agent pool status"""
+    """Show current agent pool status."""
     command = StatusCommand()
     command.run(work_dir=work_dir)
 
@@ -921,7 +1119,7 @@ def status(work_dir: str | None):
 @multi_agent_cli.command("stop")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 def stop_agents(work_dir: str | None):
-    """Stop the multi-agent pool"""
+    """Stop the multi-agent pool."""
     command = StopAgentsCommand()
     command.run(work_dir=work_dir)
 
@@ -945,7 +1143,7 @@ def add_task(
     timeout: int,
     description: str | None,
 ):
-    """Add a task to the agent pool queue"""
+    """Add a task to the agent pool queue."""
     add_command = AddTaskCommand()
     add_command.run(
         title=title,
@@ -963,7 +1161,7 @@ def add_task(
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--status", help="Filter by status (pending/running/completed/failed)")
 def list_tasks(work_dir: str | None, status: str | None):
-    """List tasks in the agent pool"""
+    """List tasks in the agent pool."""
     command = ListTasksCommand()
     command.run(work_dir=work_dir, status=status)
 
@@ -973,7 +1171,7 @@ def list_tasks(work_dir: str | None, status: str | None):
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--auto-resolve", "-a", is_flag=True, help="Attempt automatic resolution")
 def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool):
-    """Detect conflicts between branches"""
+    """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
 
@@ -990,7 +1188,7 @@ def resolve_conflict(
     strategy: str | None,
     repo_path: str | None,
 ):
-    """Resolve a specific conflict"""
+    """Resolve a specific conflict."""
     command = ResolveConflictCommand()
     command.run(conflict_id=conflict_id, strategy=strategy, repo_path=repo_path)
 
@@ -998,7 +1196,7 @@ def resolve_conflict(
 @multi_agent_cli.command("conflict-summary")
 @click.option("--repo-path", "-r", help="Path to git repository")
 def conflict_summary(repo_path: str | None):
-    """Show conflict resolution summary and statistics"""
+    """Show conflict resolution summary and statistics."""
     command = ConflictSummaryCommand()
     command.run(repo_path=repo_path)
 
@@ -1034,15 +1232,21 @@ def predict_conflicts(
     min_confidence: float,
     limit: int,
 ):
-    """Predict potential conflicts between branches"""
+    """Predict potential conflicts between branches."""
     command = PredictConflictsCommand()
-    command.run(branches=list(branches), repo_path=repo_path, time_horizon=time_horizon, min_confidence=min_confidence, limit=limit)
+    command.run(
+        branches=list(branches),
+        repo_path=repo_path,
+        time_horizon=time_horizon,
+        min_confidence=min_confidence,
+        limit=limit,
+    )
 
 
 @multi_agent_cli.command("prediction-summary")
 @click.option("--repo-path", "-r", help="Path to git repository")
 def prediction_summary(repo_path: str | None):
-    """Show conflict prediction summary and statistics"""
+    """Show conflict prediction summary and statistics."""
     command = PredictionSummaryCommand()
     command.run(repo_path=repo_path)
 
@@ -1058,7 +1262,7 @@ def analyze_conflict_patterns(
     pattern: str | None,
     export: str | None,
 ):
-    """Analyze detailed conflict patterns between branches"""
+    """Analyze detailed conflict patterns between branches."""
     command = AnalyzeConflictPatternsCommand()
     command.run(branches=list(branches), repo_path=repo_path, pattern=pattern, export=export)
 
@@ -1083,7 +1287,7 @@ def analyze_semantic_conflicts(
     export: str | None,
     detailed: bool,
 ):
-    """Analyze AST-based semantic conflicts between branches"""
+    """Analyze AST-based semantic conflicts between branches."""
     try:
         click.echo(f"🧠 Analyzing semantic conflicts between: {', '.join(branches)}")
 
@@ -1257,7 +1461,7 @@ def semantic_summary(
     branch: str | None,
     files: str | None,
 ):
-    """Show semantic structure summary of code"""
+    """Show semantic structure summary of code."""
     command = SemanticSummaryCommand()
     command.run(repo_path=repo_path, branch=branch, files=files)
 
@@ -1275,7 +1479,7 @@ def function_diff(
     repo_path: str | None,
     file: str | None,
 ):
-    """Compare function signatures between branches"""
+    """Compare function signatures between branches."""
     command = FunctionDiffCommand()
     command.run(branches=[branch1, branch2], repo_path=repo_path, files=file, export=None)
 
@@ -1308,9 +1512,15 @@ def semantic_merge(
     apply: bool,
     export: str | None,
 ):
-    """Perform intelligent semantic merge of a file between branches"""
+    """Perform intelligent semantic merge of a file between branches."""
     command = SemanticMergeCommand()
-    command.run(source_branch=branch1, target_branch=target_branch or branch2, repo_path=repo_path, strategy=strategy or "auto", dry_run=not apply)
+    command.run(
+        source_branch=branch1,
+        target_branch=target_branch or branch2,
+        repo_path=repo_path,
+        strategy=strategy or "auto",
+        dry_run=not apply,
+    )
 
 
 @multi_agent_cli.command("batch-merge")
@@ -1343,7 +1553,7 @@ def batch_merge(
     apply: bool,
     export_summary: str | None,
 ):
-    """Perform batch semantic merge of multiple files between branches"""
+    """Perform batch semantic merge of multiple files between branches."""
     try:
         click.echo(f"🔀 Batch semantic merge: {branch1} ↔ {branch2}")
 
@@ -1532,7 +1742,7 @@ def auto_resolve(
     export: str | None,
     preview: bool,
 ):
-    """Automatically resolve conflicts between branches using AI-powered semantic analysis"""
+    """Automatically resolve conflicts between branches using AI-powered semantic analysis."""
     try:
         mode_enum = AutoResolutionMode(mode)
 
@@ -1767,7 +1977,7 @@ def prevent_conflicts(
     apply_measures: bool,
     export: str | None,
 ):
-    """Use AI prediction to prevent conflicts before they occur"""
+    """Use AI prediction to prevent conflicts before they occur."""
     try:
         mode_enum = AutoResolutionMode(mode)
 
@@ -1946,7 +2156,7 @@ def collaborate(
     duration: int,
     enable_sync: bool,
 ):
-    """Start a collaboration session between multiple agents"""
+    """Start a collaboration session between multiple agents."""
     try:
         from libs.multi_agent.collaboration_engine import CollaborationMode
 
@@ -1981,7 +2191,10 @@ def collaborate(
             collab_engine.sync_interval = 30  # More frequent for demo
 
         async def run_collaboration():
-            from libs.multi_agent.collaboration_engine import MessagePriority, MessageType
+            from libs.multi_agent.collaboration_engine import (
+                MessagePriority,
+                MessageType,
+            )
 
             # Start collaboration engine
             await collab_engine.start()
@@ -2118,7 +2331,7 @@ def send_message(
     priority: str,
     repo_path: str | None,
 ):
-    """Send a message between agents in the collaboration system"""
+    """Send a message between agents in the collaboration system."""
     try:
         import json
 
@@ -2195,7 +2408,7 @@ def share_knowledge(
     relevance: float,
     repo_path: str | None,
 ):
-    """Share knowledge in the collaboration system"""
+    """Share knowledge in the collaboration system."""
     try:
         import json
 
@@ -2273,7 +2486,7 @@ def branch_info(
     repo_path: str | None,
     sync_strategy: str,
 ):
-    """Manage branch information sharing protocol"""
+    """Manage branch information sharing protocol."""
     try:
         import json
 
@@ -2428,7 +2641,7 @@ def dependency_track(
     strategy: str,
     repo_path: str | None,
 ):
-    """Track a dependency change for propagation"""
+    """Track a dependency change for propagation."""
     try:
         import json
 
@@ -2506,7 +2719,7 @@ def dependency_track(
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
 @click.option("--export", "-e", help="Export dependency data to JSON file")
 def dependency_status(repo_path: str | None, detailed: bool, export: str | None):
-    """Show dependency propagation system status"""
+    """Show dependency propagation system status."""
     try:
         click.echo("📊 Dependency Propagation System Status")
         click.echo("=" * 50)
@@ -2568,7 +2781,7 @@ def dependency_status(repo_path: str | None, detailed: bool, export: str | None)
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--export", "-e", help="Export impact report to JSON file")
 def dependency_impact(file_path: str, repo_path: str | None, export: str | None):
-    """Analyze dependency impact for a specific file"""
+    """Analyze dependency impact for a specific file."""
     try:
         click.echo(f"🔍 Analyzing dependency impact for: {file_path}")
 
@@ -2662,7 +2875,7 @@ def dependency_propagate(
     repo_path: str | None,
     export: str | None,
 ):
-    """Manually propagate specific dependency changes to branches"""
+    """Manually propagate specific dependency changes to branches."""
     try:
         click.echo("🚀 Propagating dependency changes")
         click.echo(f"   Change IDs: {', '.join(change_ids)}")
@@ -2788,7 +3001,7 @@ def review_initiate(
     priority: str,
     repo_path: str | None,
 ):
-    """Initiate a code review for changes in a branch"""
+    """Initiate a code review for changes in a branch."""
     try:
         from libs.multi_agent.collaboration_engine import MessagePriority
 
@@ -2910,7 +3123,7 @@ def review_approve(
     comments: str | None,
     repo_path: str | None,
 ):
-    """Approve a code review"""
+    """Approve a code review."""
     try:
         click.echo("✅ Approving code review")
         click.echo(f"   Review ID: {review_id}")
@@ -2980,7 +3193,7 @@ def review_reject(
     suggestions: str | None,
     repo_path: str | None,
 ):
-    """Reject a code review with reasons"""
+    """Reject a code review with reasons."""
     try:
         click.echo("❌ Rejecting code review")
         click.echo(f"   Review ID: {review_id}")
@@ -3058,7 +3271,7 @@ def review_reject(
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed review information")
 def review_status(review_id: str | None, repo_path: str | None, detailed: bool):
-    """Get status of a specific review or all reviews"""
+    """Get status of a specific review or all reviews."""
     try:
         if review_id:
             click.echo(f"📊 Code Review Status: {review_id}")
@@ -3196,7 +3409,7 @@ def quality_check(
     export: str | None,
     repo_path: str | None,
 ):
-    """Perform quality check on specified files"""
+    """Perform quality check on specified files."""
     try:
         click.echo("🔍 Performing quality check")
         click.echo(f"   Files: {len(files)} files")
@@ -3321,7 +3534,7 @@ def quality_check(
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--export", "-e", help="Export summary to JSON file")
 def review_summary(repo_path: str | None, export: str | None):
-    """Get comprehensive review engine summary"""
+    """Get comprehensive review engine summary."""
     try:
         click.echo("📊 Code Review Engine Summary")
         click.echo("=" * 40)
@@ -3430,5 +3643,5 @@ def review_summary(repo_path: str | None, export: str | None):
 
 # Register the command group
 def register_commands(cli):
-    """Register multi-agent commands with the main CLI"""
+    """Register multi-agent commands with the main CLI."""
     cli.add_command(multi_agent_cli)

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Tests for progress indicator utilities
-"""
+"""Tests for progress indicator utilities."""
 
 import time
 
@@ -21,17 +19,17 @@ from libs.core.progress_indicators import (
 
 
 class TestProgressIndicators:
-    """Test progress indicator utilities"""
+    """Test progress indicator utilities."""
 
     def test_spinner_progress_context_manager(self):
-        """Test spinner progress context manager"""
+        """Test spinner progress context manager."""
         with spinner_progress("Testing spinner") as update:
             # Should not raise any exceptions
             update("Updated description")
             assert True  # If we get here, context manager worked
 
     def test_bar_progress_context_manager(self):
-        """Test bar progress context manager"""
+        """Test bar progress context manager."""
         with bar_progress("Testing bar", total=10) as update:
             # Simulate processing items
             for i in range(5):
@@ -39,7 +37,7 @@ class TestProgressIndicators:
             assert True  # If we get here, context manager worked
 
     def test_track_items(self):
-        """Test track_items function"""
+        """Test track_items function."""
         items = ["item1", "item2", "item3"]
         processed_items = []
 
@@ -49,7 +47,7 @@ class TestProgressIndicators:
         assert processed_items == items
 
     def test_multi_stage_progress(self):
-        """Test multi-stage progress indicator"""
+        """Test multi-stage progress indicator."""
         stages = ["Stage 1", "Stage 2", "Stage 3"]
 
         with multi_stage_progress(stages) as next_stage:
@@ -58,7 +56,7 @@ class TestProgressIndicators:
             assert True  # If we get here, context manager worked
 
     def test_progress_manager_startup_sequence(self):
-        """Test ProgressManager startup sequence"""
+        """Test ProgressManager startup sequence."""
 
         def mock_operation_1():
             return "result1"
@@ -81,7 +79,7 @@ class TestProgressIndicators:
         assert results["stage_1"]["result"] == "result2"
 
     def test_progress_manager_startup_sequence_with_error(self):
-        """Test ProgressManager startup sequence with error handling"""
+        """Test ProgressManager startup sequence with error handling."""
 
         def mock_operation_success():
             return "success"
@@ -98,7 +96,7 @@ class TestProgressIndicators:
             ProgressManager.startup_sequence(operations)
 
     def test_progress_manager_file_batch_operation(self):
-        """Test ProgressManager file batch operation"""
+        """Test ProgressManager file batch operation."""
         # Mock file objects
         files = ["file1.txt", "file2.txt", "file3.txt"]
 
@@ -114,7 +112,7 @@ class TestProgressIndicators:
             assert result["file"] == files[i]
 
     def test_progress_manager_file_batch_operation_with_errors(self):
-        """Test ProgressManager file batch operation with error handling"""
+        """Test ProgressManager file batch operation with error handling."""
         files = ["file1.txt", "error_file.txt", "file3.txt"]
 
         def mock_operation(file_name):
@@ -131,7 +129,7 @@ class TestProgressIndicators:
         assert results[2]["success"] is True
 
     def test_convenience_decorators(self):
-        """Test convenience decorator functions"""
+        """Test convenience decorator functions."""
         # Test that decorators return context managers
         with with_startup_progress("Starting up") as update:
             update("Started")
@@ -146,7 +144,7 @@ class TestProgressIndicators:
             assert True
 
     def test_progress_styles(self):
-        """Test that progress styles are defined"""
+        """Test that progress styles are defined."""
         assert hasattr(ProgressStyle, "STARTUP")
         assert hasattr(ProgressStyle, "PROCESSING")
         assert hasattr(ProgressStyle, "ANALYZING")
@@ -159,10 +157,10 @@ class TestProgressIndicators:
 
 
 class TestIntegrationScenarios:
-    """Test realistic integration scenarios"""
+    """Test realistic integration scenarios."""
 
     def test_session_setup_scenario(self):
-        """Test progress indicators for session setup scenario"""
+        """Test progress indicators for session setup scenario."""
         sessions = ["session1", "session2", "session3"]
 
         with with_startup_progress("Setting up sessions") as update:
@@ -174,7 +172,7 @@ class TestIntegrationScenarios:
         assert True  # Test passes if no exceptions
 
     def test_multi_agent_startup_scenario(self):
-        """Test progress indicators for multi-agent startup"""
+        """Test progress indicators for multi-agent startup."""
         agents = ["agent1", "agent2", "agent3"]
 
         with multi_stage_progress(["Initializing agent pool", "Starting agents", "Monitoring setup", "Ready"]) as next_stage:
@@ -193,7 +191,7 @@ class TestIntegrationScenarios:
         assert True  # Test passes if no exceptions
 
     def test_file_processing_scenario(self):
-        """Test progress indicators for file processing"""
+        """Test progress indicators for file processing."""
         # Simulate file processing
         mock_files = [f"file_{i}.txt" for i in range(5)]
 
@@ -201,13 +199,18 @@ class TestIntegrationScenarios:
             time.sleep(0.001)  # Simulate processing time
             return f"processed_{filename}"
 
-        results = ProgressManager.file_batch_operation(mock_files, process_file, "🔧 Processing configuration files", ProgressStyle.FILE_OPERATIONS)
+        results = ProgressManager.file_batch_operation(
+            mock_files,
+            process_file,
+            "🔧 Processing configuration files",
+            ProgressStyle.FILE_OPERATIONS,
+        )
 
         assert len(results) == 5
         assert all(result["success"] for result in results)
 
     def test_complex_workflow_scenario(self):
-        """Test progress indicators for complex workflow"""
+        """Test progress indicators for complex workflow."""
         # Simulate complex workflow with multiple stages
 
         # Stage 1: Initialization
@@ -240,10 +243,10 @@ class TestIntegrationScenarios:
 
 # Performance tests
 class TestProgressPerformance:
-    """Test progress indicator performance"""
+    """Test progress indicator performance."""
 
     def test_progress_overhead(self):
-        """Test that progress indicators don't add excessive overhead"""
+        """Test that progress indicators don't add excessive overhead."""
         import time
 
         # Test with meaningful work to measure relative overhead

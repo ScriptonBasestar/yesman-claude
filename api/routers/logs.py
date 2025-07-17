@@ -1,15 +1,10 @@
 import logging
-import os
 import re
-import sys
 from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-
-# 프로젝트 루트를 경로에 추가
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from libs.core.services import get_config
 
@@ -41,7 +36,10 @@ def get_session_logs(session_name: str, limit: int = 100):
             # 컨트롤러 로그가 없을 경우, 메인 로그를 대신 반환해볼 수 있습니다.
             log_file = Path(log_path_str).expanduser() / "yesman.log"
             if not log_file.exists():
-                raise HTTPException(status_code=404, detail=f"Log file for session '{session_name}' not found.")
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Log file for session '{session_name}' not found.",
+                )
 
         with open(log_file, encoding="utf-8") as f:
             # 큰 로그 파일을 효율적으로 읽기 위해 마지막 N줄만 읽는 것이 좋지만,
@@ -54,7 +52,7 @@ def get_session_logs(session_name: str, limit: int = 100):
 
 
 def parse_log_line(line: str) -> LogEntry | None:
-    """Parse a log line into a structured LogEntry"""
+    """Parse a log line into a structured LogEntry."""
     line = line.strip()
     if not line:
         return None
@@ -104,7 +102,7 @@ def get_logs(
     source: str | None = Query(default=None),
     search: str | None = Query(default=None),
 ):
-    """Get parsed log entries with optional filtering"""
+    """Get parsed log entries with optional filtering."""
     try:
         config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
@@ -153,7 +151,7 @@ def get_logs(
 
 @router.get("/logs/sources")
 def get_log_sources():
-    """Get available log sources"""
+    """Get available log sources."""
     try:
         config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
@@ -188,7 +186,7 @@ def get_log_sources():
 
 @router.post("/logs/test")
 def add_test_log(level: str = "info", source: str = "test", message: str = "Test log message"):
-    """Add a test log entry (for development/testing)"""
+    """Add a test log entry (for development/testing)."""
     # This is a simple test endpoint that could write to a test log file
     # or in a real implementation, emit through the logging system
 

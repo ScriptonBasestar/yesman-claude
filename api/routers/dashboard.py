@@ -1,4 +1,4 @@
-"""Web dashboard router for FastAPI"""
+"""Web dashboard router for FastAPI."""
 
 import logging
 import secrets
@@ -11,7 +11,8 @@ from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.project_health import ProjectHealth
 from libs.yesman_config import YesmanConfig
-from api.shared import claude_manager
+
+from ..shared import claude_manager
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ heatmap_generator = ActivityHeatmapGenerator(config)
 
 @router.get("/api/dashboard/sessions")
 async def get_sessions():
-    """Get session list"""
+    """Get session list."""
     try:
         # Get session information from SessionManager
         sessions = session_manager.get_all_sessions()
@@ -36,14 +37,15 @@ async def get_sessions():
         # Convert SessionInfo objects to web-friendly format
         web_sessions = []
         for session in sessions:
-            # Get accurate controller status using ClaudeManager (same as individual controller status API)
+            # Get accurate controller status using ClaudeManager
+            # (same as individual controller status API)
             try:
                 controller = claude_manager.get_controller(session.session_name)
                 actual_controller_status = "running" if controller.is_running else "stopped"
             except Exception:
                 # Fallback to original status if controller lookup fails
                 actual_controller_status = session.controller_status
-            
+
             web_sessions.append(
                 {
                     "session_name": session.session_name,
@@ -83,7 +85,7 @@ async def get_sessions():
 
 @router.get("/api/dashboard/health")
 async def get_project_health():
-    """Get project health metrics"""
+    """Get project health metrics."""
     try:
         # Try to use ProjectHealth widget if available
         try:
@@ -93,14 +95,38 @@ async def get_project_health():
             return {
                 "overall_score": health_data.get("overall_score", 75),
                 "categories": {
-                    "build": {"score": health_data.get("build_score", 85), "status": "good"},
-                    "tests": {"score": health_data.get("test_score", 70), "status": "warning"},
-                    "dependencies": {"score": health_data.get("deps_score", 90), "status": "good"},
-                    "security": {"score": health_data.get("security_score", 80), "status": "good"},
-                    "performance": {"score": health_data.get("perf_score", 65), "status": "warning"},
-                    "code_quality": {"score": health_data.get("quality_score", 85), "status": "good"},
-                    "git": {"score": health_data.get("git_score", 95), "status": "excellent"},
-                    "documentation": {"score": health_data.get("docs_score", 60), "status": "warning"},
+                    "build": {
+                        "score": health_data.get("build_score", 85),
+                        "status": "good",
+                    },
+                    "tests": {
+                        "score": health_data.get("test_score", 70),
+                        "status": "warning",
+                    },
+                    "dependencies": {
+                        "score": health_data.get("deps_score", 90),
+                        "status": "good",
+                    },
+                    "security": {
+                        "score": health_data.get("security_score", 80),
+                        "status": "good",
+                    },
+                    "performance": {
+                        "score": health_data.get("perf_score", 65),
+                        "status": "warning",
+                    },
+                    "code_quality": {
+                        "score": health_data.get("quality_score", 85),
+                        "status": "good",
+                    },
+                    "git": {
+                        "score": health_data.get("git_score", 95),
+                        "status": "excellent",
+                    },
+                    "documentation": {
+                        "score": health_data.get("docs_score", 60),
+                        "status": "warning",
+                    },
                 },
                 "suggestions": health_data.get(
                     "suggestions",
@@ -140,7 +166,7 @@ async def get_project_health():
 
 @router.get("/api/dashboard/activity")
 async def get_activity_data():
-    """Get activity heatmap data"""
+    """Get activity heatmap data."""
     try:
         # Try to get real git activity data
         import subprocess
@@ -149,11 +175,17 @@ async def get_activity_data():
 
         try:
             # Get git log for last 365 days
-            cmd = ["git", "log", "--since=365 days ago", "--pretty=format:%ad", "--date=short"]
+            cmd = [
+                "git",
+                "log",
+                "--since=365 days ago",
+                "--pretty=format:%ad",
+                "--date=short",
+            ]
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             # Count activities per day
-            activity_counts = defaultdict(int)
+            activity_counts: dict[str, int] = defaultdict(int)
             for date_str in result.stdout.strip().split("\n"):
                 if date_str:
                     activity_counts[date_str] += 1
@@ -219,7 +251,7 @@ async def get_activity_data():
 
 @router.get("/api/dashboard/heatmap/{session_name}")
 async def get_session_heatmap(session_name: str, days: int = Query(7, ge=1, le=30)):
-    """세션별 히트맵 데이터 반환"""
+    """세션별 히트맵 데이터 반환."""
     try:
         heatmap_data = heatmap_generator.generate_heatmap_data([session_name], days=days)
         return heatmap_data
@@ -230,7 +262,7 @@ async def get_session_heatmap(session_name: str, days: int = Query(7, ge=1, le=3
 
 @router.get("/api/dashboard/stats")
 async def get_dashboard_stats():
-    """Get dashboard statistics summary"""
+    """Get dashboard statistics summary."""
     try:
         # Get data from other endpoints
         sessions_data = await get_sessions()
@@ -238,7 +270,7 @@ async def get_dashboard_stats():
         activity_data = await get_activity_data()
 
         return {
-            "active_sessions": sessions_data["active"],
+            "active_sessions": len([s for s in sessions_data if s.get("status") == "active"]),
             "total_projects": 1,  # Current project count
             "health_score": health_data["overall_score"],
             "activity_streak": activity_data["active_days"],

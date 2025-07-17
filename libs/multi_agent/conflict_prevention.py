@@ -1,4 +1,4 @@
-"""Predictive conflict prevention system for proactive multi-agent development"""
+"""Predictive conflict prevention system for proactive multi-agent development."""
 
 import asyncio
 import contextlib
@@ -13,13 +13,18 @@ from typing import Any
 from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
-from .conflict_prediction import ConflictPattern, ConflictPredictor, PredictionConfidence, PredictionResult
+from .conflict_prediction import (
+    ConflictPattern,
+    ConflictPredictor,
+    PredictionConfidence,
+    PredictionResult,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class PreventionStrategy(Enum):
-    """Strategies for preventing conflicts"""
+    """Strategies for preventing conflicts."""
 
     BRANCH_ISOLATION = "branch_isolation"  # Isolate conflicting branches
     WORK_REALLOCATION = "work_reallocation"  # Redistribute work assignments
@@ -31,7 +36,7 @@ class PreventionStrategy(Enum):
 
 
 class PreventionAction(Enum):
-    """Specific actions that can be taken to prevent conflicts"""
+    """Specific actions that can be taken to prevent conflicts."""
 
     DEFER_TASK = "defer_task"
     REASSIGN_AGENT = "reassign_agent"
@@ -45,7 +50,7 @@ class PreventionAction(Enum):
 
 @dataclass
 class PreventionMeasure:
-    """A specific measure to prevent predicted conflicts"""
+    """A specific measure to prevent predicted conflicts."""
 
     measure_id: str
     strategy: PreventionStrategy
@@ -73,7 +78,7 @@ class PreventionMeasure:
 
 @dataclass
 class PreventionResult:
-    """Result of applying prevention measures"""
+    """Result of applying prevention measures."""
 
     session_id: str
     branches_analyzed: list[str]
@@ -99,7 +104,7 @@ class PreventionResult:
 
 
 class ConflictPreventionSystem:
-    """Proactive system for preventing conflicts before they occur"""
+    """Proactive system for preventing conflicts before they occur."""
 
     def __init__(
         self,
@@ -109,8 +114,7 @@ class ConflictPreventionSystem:
         branch_manager: BranchManager,
         repo_path: str | None = None,
     ):
-        """
-        Initialize the conflict prevention system
+        """Initialize the conflict prevention system.
 
         Args:
             conflict_predictor: For predicting potential conflicts
@@ -164,7 +168,7 @@ class ConflictPreventionSystem:
         self._prevention_monitor_task = None
 
     async def start_prevention_monitoring(self, monitoring_interval: float = 300.0):
-        """Start continuous conflict prevention monitoring"""
+        """Start continuous conflict prevention monitoring."""
         self._running = True
         self._prevention_monitor_task = asyncio.create_task(
             self._prevention_monitor_loop(monitoring_interval),
@@ -172,7 +176,7 @@ class ConflictPreventionSystem:
         logger.info("Started conflict prevention monitoring")
 
     async def stop_prevention_monitoring(self):
-        """Stop conflict prevention monitoring"""
+        """Stop conflict prevention monitoring."""
         self._running = False
         if self._prevention_monitor_task:
             self._prevention_monitor_task.cancel()
@@ -186,8 +190,7 @@ class ConflictPreventionSystem:
         time_horizon: timedelta | None = None,
         agents: list[str] | None = None,
     ) -> PreventionResult:
-        """
-        Analyze branches for potential conflicts and apply prevention measures
+        """Analyze branches for potential conflicts and apply prevention measures.
 
         Args:
             branches: Branches to analyze for conflicts
@@ -294,7 +297,7 @@ class ConflictPreventionSystem:
         prediction: PredictionResult,
         agents: list[str] | None = None,
     ) -> list[PreventionMeasure]:
-        """Generate appropriate prevention measures for a conflict prediction"""
+        """Generate appropriate prevention measures for a conflict prediction."""
         measures = []
 
         # Determine strategy based on conflict pattern
@@ -319,7 +322,7 @@ class ConflictPreventionSystem:
         self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
-        """Generate measures for dependency-related conflicts"""
+        """Generate measures for dependency-related conflicts."""
         measures = []
 
         # Dependency synchronization
@@ -349,7 +352,7 @@ class ConflictPreventionSystem:
         self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
-        """Generate measures for coordination-related conflicts"""
+        """Generate measures for coordination-related conflicts."""
         measures = []
 
         # Agent coordination
@@ -379,7 +382,7 @@ class ConflictPreventionSystem:
         self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
-        """Generate measures for API/interface conflicts"""
+        """Generate measures for API/interface conflicts."""
         measures = []
 
         # Interface creation
@@ -409,7 +412,7 @@ class ConflictPreventionSystem:
         self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
-        """Generate measures for temporal/timing conflicts"""
+        """Generate measures for temporal/timing conflicts."""
         measures = []
 
         # Temporal separation
@@ -439,7 +442,7 @@ class ConflictPreventionSystem:
         self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
-        """Generate generic prevention measures"""
+        """Generate generic prevention measures."""
         measures = []
 
         # Early merge if high confidence
@@ -467,7 +470,7 @@ class ConflictPreventionSystem:
         return measures
 
     async def _apply_prevention_measure(self, measure: PreventionMeasure) -> bool:
-        """Apply a specific prevention measure"""
+        """Apply a specific prevention measure."""
         logger.info(f"Applying prevention measure: {measure.measure_id}")
 
         try:
@@ -500,14 +503,14 @@ class ConflictPreventionSystem:
     # Strategy implementation methods
 
     async def _apply_branch_isolation(self, measure: PreventionMeasure) -> bool:
-        """Apply branch isolation strategy"""
+        """Apply branch isolation strategy."""
         # This is a placeholder - in a real implementation, this would
         # create separate working directories or use git worktrees
         logger.info(f"Applying branch isolation for {measure.target_branches}")
         return True
 
     async def _apply_work_reallocation(self, measure: PreventionMeasure) -> bool:
-        """Apply work reallocation strategy"""
+        """Apply work reallocation strategy."""
         # Notify collaboration engine to redistribute work
         for agent_id in measure.target_agents:
             await self.collaboration_engine.send_message(
@@ -526,7 +529,7 @@ class ConflictPreventionSystem:
         return True
 
     async def _apply_dependency_sync(self, measure: PreventionMeasure) -> bool:
-        """Apply dependency synchronization strategy"""
+        """Apply dependency synchronization strategy."""
         # Coordinate dependency updates across branches
         for agent_id in measure.target_agents:
             await self.collaboration_engine.send_message(
@@ -545,7 +548,7 @@ class ConflictPreventionSystem:
         return True
 
     async def _apply_early_merge(self, measure: PreventionMeasure) -> bool:
-        """Apply early merge strategy"""
+        """Apply early merge strategy."""
         try:
             # Use auto resolver to perform early merge
             if len(measure.target_branches) >= 2:
@@ -560,7 +563,7 @@ class ConflictPreventionSystem:
         return False
 
     async def _apply_agent_coordination(self, measure: PreventionMeasure) -> bool:
-        """Apply agent coordination strategy"""
+        """Apply agent coordination strategy."""
         # Send coordination messages to all affected agents
         for agent_id in measure.target_agents:
             await self.collaboration_engine.send_message(
@@ -581,7 +584,7 @@ class ConflictPreventionSystem:
         return True
 
     async def _apply_temporal_separation(self, measure: PreventionMeasure) -> bool:
-        """Apply temporal separation strategy"""
+        """Apply temporal separation strategy."""
         # Implement timing coordination
         for i, agent_id in enumerate(measure.target_agents):
             delay_hours = i * self.prevention_config["coordination_delay"]
@@ -602,7 +605,7 @@ class ConflictPreventionSystem:
         return True
 
     async def _apply_semantic_refactoring(self, measure: PreventionMeasure) -> bool:
-        """Apply semantic refactoring strategy"""
+        """Apply semantic refactoring strategy."""
         # This would involve more complex refactoring operations
         # For now, just notify agents about the need for refactoring
         for agent_id in measure.target_agents:
@@ -622,7 +625,7 @@ class ConflictPreventionSystem:
         return True
 
     async def _prevention_monitor_loop(self, interval: float):
-        """Background loop for continuous conflict prevention monitoring"""
+        """Background loop for continuous conflict prevention monitoring."""
         while self._running:
             try:
                 # Get all active branches
@@ -644,7 +647,7 @@ class ConflictPreventionSystem:
                 await asyncio.sleep(interval)
 
     async def _get_active_branches(self) -> list[str]:
-        """Get list of currently active branches with ongoing work"""
+        """Get list of currently active branches with ongoing work."""
         # This would integrate with the branch manager and agent pool
         # For now, return a placeholder
         try:
@@ -657,7 +660,7 @@ class ConflictPreventionSystem:
             return []
 
     def get_prevention_summary(self) -> dict[str, Any]:
-        """Get summary of prevention system status and performance"""
+        """Get summary of prevention system status and performance."""
         active_measures_count = len(self.active_measures)
         recent_results = self.prevention_history[-10:] if self.prevention_history else []
 

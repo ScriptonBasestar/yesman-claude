@@ -1,4 +1,4 @@
-"""Tests for centralized configuration management"""
+"""Tests for centralized configuration management."""
 
 import os
 from pathlib import Path
@@ -19,17 +19,17 @@ from libs.yesman_config import YesmanConfig
 
 
 class TestConfigSchema:
-    """Test configuration schema validation"""
+    """Test configuration schema validation."""
 
     def test_default_config_valid(self):
-        """Test that default configuration is valid"""
+        """Test that default configuration is valid."""
         config = YesmanConfigSchema()
         assert config.mode == "merge"
         assert config.tmux.default_shell == "/bin/bash"
         assert config.logging.level == "INFO"
 
     def test_validation_errors(self):
-        """Test validation errors for invalid config"""
+        """Test validation errors for invalid config."""
         with pytest.raises(ValueError):
             YesmanConfigSchema(mode="invalid_mode")
 
@@ -40,17 +40,17 @@ class TestConfigSchema:
             YesmanConfigSchema(tmux={"status_position": "middle"})
 
     def test_path_expansion(self):
-        """Test that paths are expanded correctly"""
+        """Test that paths are expanded correctly."""
         config = YesmanConfigSchema(root_dir="~/test")
         assert str(config.root_dir).startswith("/")
         assert "~" not in config.root_dir
 
 
 class TestConfigSources:
-    """Test configuration sources"""
+    """Test configuration sources."""
 
     def test_yaml_file_source(self, tmp_path):
-        """Test YAML file source"""
+        """Test YAML file source."""
         # Create test config file
         config_file = tmp_path / "test.yaml"
         config_data = {"mode": "isolated", "logging": {"level": "DEBUG"}}
@@ -69,7 +69,7 @@ class TestConfigSources:
         assert source.load() == {}
 
     def test_environment_source(self):
-        """Test environment variable source"""
+        """Test environment variable source."""
         with patch.dict(
             os.environ,
             {
@@ -91,7 +91,7 @@ class TestConfigSources:
             assert "other_var" not in config
 
     def test_dict_source(self):
-        """Test dictionary source"""
+        """Test dictionary source."""
         config_data = {"mode": "merge", "custom": {"key": "value"}}
         source = DictSource(config_data)
         assert source.exists()
@@ -99,10 +99,10 @@ class TestConfigSources:
 
 
 class TestConfigLoader:
-    """Test configuration loader"""
+    """Test configuration loader."""
 
     def test_single_source(self):
-        """Test loading from single source"""
+        """Test loading from single source."""
         loader = ConfigLoader()
         loader.add_source(DictSource({"mode": "isolated"}))
 
@@ -110,7 +110,7 @@ class TestConfigLoader:
         assert config.mode == "isolated"
 
     def test_multiple_sources_merge(self):
-        """Test merging multiple sources"""
+        """Test merging multiple sources."""
         loader = ConfigLoader()
 
         # Base config
@@ -125,7 +125,7 @@ class TestConfigLoader:
         assert config.confidence_threshold == 0.9  # From second source
 
     def test_deep_merge(self):
-        """Test deep merging of nested configs"""
+        """Test deep merging of nested configs."""
         loader = ConfigLoader()
 
         loader.add_source(DictSource({"tmux": {"default_shell": "/bin/bash", "mouse": True}}))
@@ -138,7 +138,7 @@ class TestConfigLoader:
         assert config.tmux.base_index == 1  # Added
 
     def test_validation_errors(self):
-        """Test validation error handling"""
+        """Test validation error handling."""
         loader = ConfigLoader()
         loader.add_source(DictSource({"mode": "invalid", "logging": {"level": "INVALID"}}))
 
@@ -151,7 +151,7 @@ class TestConfigLoader:
         assert "logging.level" in error_msg
 
     def test_cache_invalidation(self):
-        """Test that cache is invalidated when sources change"""
+        """Test that cache is invalidated when sources change."""
         loader = ConfigLoader()
         loader.add_source(DictSource({"mode": "merge"}))
 
@@ -168,10 +168,10 @@ class TestConfigLoader:
 
 
 class TestYesmanConfig:
-    """Test YesmanConfig with new configuration system"""
+    """Test YesmanConfig with new configuration system."""
 
     def test_backward_compatibility(self):
-        """Test backward compatibility methods"""
+        """Test backward compatibility methods."""
         loader = ConfigLoader()
         loader.add_source(
             DictSource(
@@ -192,7 +192,7 @@ class TestYesmanConfig:
         assert config.get("missing.key", "default") == "default"
 
     def test_save_and_reload(self, tmp_path):
-        """Test saving and reloading configuration"""
+        """Test saving and reloading configuration."""
         # Change working directory for test
         original_cwd = Path.cwd()
         os.chdir(tmp_path)
@@ -215,7 +215,7 @@ class TestYesmanConfig:
             os.chdir(original_cwd)
 
     def test_schema_access(self):
-        """Test accessing typed schema"""
+        """Test accessing typed schema."""
         config = YesmanConfig()
         schema = config.schema
 
@@ -224,7 +224,7 @@ class TestYesmanConfig:
         assert hasattr(schema, "logging")
 
     def test_directory_creation(self, tmp_path):
-        """Test that required directories are created"""
+        """Test that required directories are created."""
         with patch("libs.yesman_config.Path.home", return_value=tmp_path):
             config = YesmanConfig()
 
@@ -236,10 +236,10 @@ class TestYesmanConfig:
 
 
 class TestEnvironmentSpecificConfig:
-    """Test environment-specific configuration loading"""
+    """Test environment-specific configuration loading."""
 
     def test_development_environment(self):
-        """Test loading development config"""
+        """Test loading development config."""
         with patch.dict(os.environ, {"YESMAN_ENV": "development"}):
             # Would load config/development.yaml if it exists
             loader = create_default_loader()
@@ -252,10 +252,10 @@ class TestEnvironmentSpecificConfig:
 
 
 class TestConfigPriority:
-    """Test configuration priority order"""
+    """Test configuration priority order."""
 
     def test_priority_order(self, tmp_path):
-        """Test that sources override in correct order"""
+        """Test that sources override in correct order."""
         # Create test files
         default_config = {"mode": "merge", "confidence_threshold": 0.5}
         global_config = {"mode": "isolated", "confidence_threshold": 0.7}

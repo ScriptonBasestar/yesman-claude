@@ -416,7 +416,7 @@ export async function teardownAllSessions(): Promise<void> {
 export async function startAllControllers(): Promise<void> {
   try {
     showNotification('info', 'Starting All', 'Starting all controllers...');
-    
+
     const response = await fetch('/api/controllers/start-all', {
       method: 'POST',
       headers: {
@@ -430,14 +430,14 @@ export async function startAllControllers(): Promise<void> {
     }
 
     const result = await response.json();
-    
+
     if (result.errors && result.errors.length > 0) {
-      showNotification('warning', 'Partial Success', 
+      showNotification('warning', 'Partial Success',
         `Started ${result.started}/${result.total_sessions} controllers. Errors: ${result.errors.join('; ')}`);
     } else {
       showNotification('success', 'Success', result.message);
     }
-    
+
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -449,7 +449,7 @@ export async function startAllControllers(): Promise<void> {
 export async function stopAllControllers(): Promise<void> {
   try {
     showNotification('info', 'Stopping All', 'Stopping all controllers...');
-    
+
     const response = await fetch('/api/controllers/stop-all', {
       method: 'POST',
       headers: {
@@ -463,14 +463,14 @@ export async function stopAllControllers(): Promise<void> {
     }
 
     const result = await response.json();
-    
+
     if (result.errors && result.errors.length > 0) {
-      showNotification('warning', 'Partial Success', 
+      showNotification('warning', 'Partial Success',
         `Stopped ${result.stopped}/${result.total_sessions} controllers. Errors: ${result.errors.join('; ')}`);
     } else {
       showNotification('success', 'Success', result.message);
     }
-    
+
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';

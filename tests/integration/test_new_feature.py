@@ -1,8 +1,8 @@
-"""Integration test for new feature development workflow"""
+"""Integration test for new feature development workflow."""
 
 
 def test_new_feature_creation_workflow_should_pass_quality_checks():
-    """Test that new feature development passes all quality checks"""
+    """Test that new feature development passes all quality checks."""
     # 새 기능 개발 시뮬레이션
     feature_code = '''
 def calculate_session_health(session_data):

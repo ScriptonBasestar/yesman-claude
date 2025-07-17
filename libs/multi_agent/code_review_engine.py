@@ -1,4 +1,4 @@
-"""Automated code review and quality checking engine for multi-agent collaboration"""
+"""Automated code review and quality checking engine for multi-agent collaboration."""
 
 import ast
 import asyncio
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class ReviewType(Enum):
-    """Types of code reviews that can be performed"""
+    """Types of code reviews that can be performed."""
 
     STYLE_QUALITY = "style_quality"  # Code style and formatting
     SECURITY = "security"  # Security vulnerabilities
@@ -34,7 +34,7 @@ class ReviewType(Enum):
 
 
 class ReviewSeverity(Enum):
-    """Severity levels for review findings"""
+    """Severity levels for review findings."""
 
     CRITICAL = "critical"  # Must fix before merge
     HIGH = "high"  # Should fix before merge
@@ -44,7 +44,7 @@ class ReviewSeverity(Enum):
 
 
 class ReviewStatus(Enum):
-    """Status of a code review"""
+    """Status of a code review."""
 
     PENDING = "pending"  # Review not started
     IN_PROGRESS = "in_progress"  # Review in progress
@@ -55,7 +55,7 @@ class ReviewStatus(Enum):
 
 
 class QualityMetric(Enum):
-    """Quality metrics that can be measured"""
+    """Quality metrics that can be measured."""
 
     CYCLOMATIC_COMPLEXITY = "cyclomatic_complexity"
     MAINTAINABILITY_INDEX = "maintainability_index"
@@ -69,7 +69,7 @@ class QualityMetric(Enum):
 
 @dataclass
 class ReviewFinding:
-    """A single finding from code review"""
+    """A single finding from code review."""
 
     finding_id: str
     review_type: ReviewType
@@ -88,7 +88,7 @@ class ReviewFinding:
 
 @dataclass
 class QualityMetrics:
-    """Quality metrics for a piece of code"""
+    """Quality metrics for a piece of code."""
 
     file_path: str
     metrics: dict[QualityMetric, float] = field(default_factory=dict)
@@ -100,7 +100,7 @@ class QualityMetrics:
 
 @dataclass
 class CodeReview:
-    """A comprehensive code review session"""
+    """A comprehensive code review session."""
 
     review_id: str
     branch_name: str
@@ -122,7 +122,7 @@ class CodeReview:
 
 @dataclass
 class ReviewSummary:
-    """Summary of multiple reviews"""
+    """Summary of multiple reviews."""
 
     total_reviews: int = 0
     approved_reviews: int = 0
@@ -137,7 +137,7 @@ class ReviewSummary:
 
 
 class CodeReviewEngine:
-    """Engine for automated code review and quality checking"""
+    """Engine for automated code review and quality checking."""
 
     def __init__(
         self,
@@ -147,8 +147,7 @@ class CodeReviewEngine:
         repo_path: str | None = None,
         enable_auto_review: bool = True,
     ):
-        """
-        Initialize the code review engine
+        """Initialize the code review engine.
 
         Args:
             collaboration_engine: Engine for agent collaboration
@@ -212,7 +211,7 @@ class CodeReviewEngine:
         self._quality_monitor_task = None
 
     async def start(self):
-        """Start the code review engine"""
+        """Start the code review engine."""
         self._running = True
         logger.info("Starting code review engine")
 
@@ -221,7 +220,7 @@ class CodeReviewEngine:
         self._quality_monitor_task = asyncio.create_task(self._quality_monitor_loop())
 
     async def stop(self):
-        """Stop the code review engine"""
+        """Stop the code review engine."""
         self._running = False
         logger.info("Stopping code review engine")
 
@@ -245,8 +244,7 @@ class CodeReviewEngine:
         reviewer_ids: list[str] | None = None,
         priority: MessagePriority = MessagePriority.NORMAL,
     ) -> str:
-        """
-        Initiate a code review for changes in a branch
+        """Initiate a code review for changes in a branch.
 
         Args:
             branch_name: Branch containing changes to review
@@ -325,8 +323,7 @@ class CodeReviewEngine:
         file_paths: list[str],
         quality_types: list[QualityMetric] | None = None,
     ) -> list[QualityMetrics]:
-        """
-        Perform comprehensive quality check on files
+        """Perform comprehensive quality check on files.
 
         Args:
             file_paths: Files to analyze
@@ -347,7 +344,7 @@ class CodeReviewEngine:
         return results
 
     async def get_review_status(self, review_id: str) -> CodeReview | None:
-        """Get status of a specific review"""
+        """Get status of a specific review."""
         review = self.active_reviews.get(review_id)
         if not review:
             # Check review history
@@ -363,8 +360,7 @@ class CodeReviewEngine:
         reviewer_id: str,
         comments: str | None = None,
     ) -> bool:
-        """
-        Approve a code review
+        """Approve a code review.
 
         Args:
             review_id: ID of review to approve
@@ -430,8 +426,7 @@ class CodeReviewEngine:
         reasons: list[str],
         suggestions: list[str] | None = None,
     ) -> bool:
-        """
-        Reject a code review with reasons
+        """Reject a code review with reasons.
 
         Args:
             review_id: ID of review to reject
@@ -491,7 +486,7 @@ class CodeReviewEngine:
     # Private methods
 
     async def _perform_automated_review(self, review: CodeReview):
-        """Perform automated review using various tools and analysis"""
+        """Perform automated review using various tools and analysis."""
         review.status = ReviewStatus.IN_PROGRESS
         review.started_at = datetime.now()
 
@@ -621,7 +616,7 @@ class CodeReviewEngine:
             review.metadata["error"] = str(e)
 
     async def _check_style_quality(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check code style and formatting quality"""
+        """Check code style and formatting quality."""
         findings = []
 
         for file_path in file_paths:
@@ -669,7 +664,7 @@ class CodeReviewEngine:
         return findings
 
     async def _check_security(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check for security vulnerabilities"""
+        """Check for security vulnerabilities."""
         findings = []
 
         for file_path in file_paths:
@@ -731,7 +726,7 @@ class CodeReviewEngine:
         return findings
 
     async def _check_performance(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check for performance issues"""
+        """Check for performance issues."""
         findings = []
 
         for file_path in file_paths:
@@ -798,7 +793,7 @@ class CodeReviewEngine:
         self,
         file_paths: list[str],
     ) -> list[ReviewFinding]:
-        """Check code maintainability"""
+        """Check code maintainability."""
         findings = []
 
         for file_path in file_paths:
@@ -871,7 +866,7 @@ class CodeReviewEngine:
         return findings
 
     async def _check_functionality(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check functional correctness"""
+        """Check functional correctness."""
         findings = []
 
         # This is a simplified implementation
@@ -908,7 +903,7 @@ class CodeReviewEngine:
         return findings
 
     async def _check_documentation(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check documentation quality"""
+        """Check documentation quality."""
         findings = []
 
         for file_path in file_paths:
@@ -964,7 +959,7 @@ class CodeReviewEngine:
         return findings
 
     async def _check_testing(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check testing coverage and quality"""
+        """Check testing coverage and quality."""
         findings = []
 
         # This is a simplified implementation
@@ -998,7 +993,7 @@ class CodeReviewEngine:
         return findings
 
     async def _check_complexity(self, file_paths: list[str]) -> list[ReviewFinding]:
-        """Check code complexity"""
+        """Check code complexity."""
         findings = []
 
         for file_path in file_paths:
@@ -1036,7 +1031,7 @@ class CodeReviewEngine:
         file_path: str,
         metric_types: list[QualityMetric] | None = None,
     ) -> QualityMetrics:
-        """Calculate quality metrics for a file"""
+        """Calculate quality metrics for a file."""
         if metric_types is None:
             metric_types = list(QualityMetric)
 
@@ -1085,13 +1080,16 @@ class CodeReviewEngine:
         return metrics
 
     def _estimate_cyclomatic_complexity(self, content: str) -> float:
-        """Estimate cyclomatic complexity by counting decision points"""
+        """Estimate cyclomatic complexity by counting decision points."""
         try:
             tree = ast.parse(content)
             complexity = 1  # Base complexity
 
             for node in ast.walk(tree):
-                if isinstance(node, ast.If | ast.While | ast.For | ast.AsyncFor | ast.ExceptHandler):
+                if isinstance(
+                    node,
+                    ast.If | ast.While | ast.For | ast.AsyncFor | ast.ExceptHandler,
+                ):
                     complexity += 1
                 elif isinstance(node, ast.BoolOp):
                     complexity += len(node.values) - 1
@@ -1101,7 +1099,7 @@ class CodeReviewEngine:
             return 1.0
 
     def _calculate_maintainability_index(self, content: str, loc: int) -> float:
-        """Calculate a simplified maintainability index"""
+        """Calculate a simplified maintainability index."""
         try:
             # Simplified calculation based on lines of code and comments
             comment_ratio = content.count("#") / max(loc, 1)
@@ -1124,7 +1122,7 @@ class CodeReviewEngine:
         findings: list[ReviewFinding],
         metrics: list[QualityMetrics],
     ) -> float:
-        """Calculate overall review score from findings and metrics"""
+        """Calculate overall review score from findings and metrics."""
         base_score = 10.0
 
         # Deduct points for findings based on severity
@@ -1147,7 +1145,7 @@ class CodeReviewEngine:
         return max(0.0, min(10.0, base_score))
 
     def _can_auto_approve(self, review: CodeReview) -> bool:
-        """Determine if a review can be automatically approved"""
+        """Determine if a review can be automatically approved."""
         # Check overall score threshold
         if review.overall_score < self.review_config["auto_approve_threshold"]:
             return False
@@ -1162,7 +1160,7 @@ class CodeReviewEngine:
         return all(not metrics.violations for metrics in review.quality_metrics)
 
     def _summarize_findings(self, findings: list[ReviewFinding]) -> dict[str, Any]:
-        """Create a summary of review findings"""
+        """Create a summary of review findings."""
         severity_counts = Counter(f.severity.value for f in findings)
         type_counts = Counter(f.review_type.value for f in findings)
 
@@ -1179,7 +1177,7 @@ class CodeReviewEngine:
         files_changed: list[str],
         num_reviewers: int,
     ) -> list[str]:
-        """Find suitable reviewers for a code review"""
+        """Find suitable reviewers for a code review."""
         # This is a simplified implementation
         # In a real system, this would consider expertise, availability, workload, etc.
 
@@ -1200,14 +1198,14 @@ class CodeReviewEngine:
         tool_name: str,
         file_path: str,
     ) -> list[str] | None:
-        """Run an external tool for code checking"""
+        """Run an external tool for code checking."""
         # This is a placeholder implementation
         # In a real system, this would actually run the tools
         logger.debug(f"Would run {tool_name} on {file_path}")
         return None
 
     async def _review_monitor_loop(self):
-        """Background task to monitor review progress"""
+        """Background task to monitor review progress."""
         while self._running:
             try:
                 # Check for stale reviews
@@ -1230,7 +1228,7 @@ class CodeReviewEngine:
                 await asyncio.sleep(300)
 
     async def _quality_monitor_loop(self):
-        """Background task to monitor code quality trends"""
+        """Background task to monitor code quality trends."""
         while self._running:
             try:
                 # Collect quality metrics across all recent reviews
@@ -1243,7 +1241,7 @@ class CodeReviewEngine:
                 await asyncio.sleep(3600)
 
     def get_review_summary(self) -> ReviewSummary:
-        """Get summary of all reviews"""
+        """Get summary of all reviews."""
         all_reviews = list(self.active_reviews.values()) + self.review_history
 
         if not all_reviews:
@@ -1308,7 +1306,7 @@ class CodeReviewEngine:
         )
 
     def get_engine_summary(self) -> dict[str, Any]:
-        """Get comprehensive summary of the review engine"""
+        """Get comprehensive summary of the review engine."""
         return {
             "statistics": self.review_stats.copy(),
             "active_reviews": len(self.active_reviews),

@@ -71,13 +71,17 @@ if os.path.exists(sveltekit_build_path):
                     response.headers["Cache-Control"] = "public, max-age=31536000"
             return response
 
-    app.mount("/_app", CacheControlStaticFiles(directory="tauri-dashboard/build/_app"), name="app-assets")
+    app.mount(
+        "/_app",
+        CacheControlStaticFiles(directory="tauri-dashboard/build/_app"),
+        name="app-assets",
+    )
 
 
 # Health check endpoint
 @app.get("/healthz")
 async def health_check():
-    """Health check endpoint for monitoring and load balancer"""
+    """Health check endpoint for monitoring and load balancer."""
     return {
         "status": "healthy",
         "service": "yesman-claude-api",
@@ -89,7 +93,7 @@ async def health_check():
 # API info endpoint
 @app.get("/api")
 async def api_info():
-    """API information and available endpoints"""
+    """API information and available endpoints."""
     return {
         "service": "Yesman Claude API",
         "version": "0.1.0",
@@ -117,7 +121,7 @@ if os.path.exists(sveltekit_build_path):
     @app.get("/")
     @app.get("/{path:path}")
     async def serve_dashboard(path: str = ""):
-        """Serve SvelteKit dashboard at root"""
+        """Serve SvelteKit dashboard at root."""
         # Skip API routes and specific endpoints
         if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
             from fastapi import HTTPException
@@ -135,14 +139,14 @@ if os.path.exists(sveltekit_build_path):
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    """Start background tasks on application startup"""
+    """Start background tasks on application startup."""
     asyncio.create_task(task_runner.start())
 
 
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Stop background tasks on application shutdown"""
+    """Stop background tasks on application shutdown."""
     await task_runner.stop()
 
     # Shutdown WebSocket manager and batch processor
@@ -154,7 +158,7 @@ async def shutdown_event():
 # Add endpoint to check task status
 @app.get("/api/tasks/status")
 async def get_task_status():
-    """Get status of background tasks"""
+    """Get status of background tasks."""
     return {
         "is_running": task_runner.is_running,
         "tasks": task_runner.get_task_states(),
@@ -164,7 +168,7 @@ async def get_task_status():
 # Add endpoint to check WebSocket batch processing stats
 @app.get("/api/websocket/stats")
 async def get_websocket_stats():
-    """Get WebSocket connection and batch processing statistics"""
+    """Get WebSocket connection and batch processing statistics."""
     from api.routers.websocket_router import manager
 
     connection_stats = manager.get_connection_stats()

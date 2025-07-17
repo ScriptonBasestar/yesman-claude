@@ -1,4 +1,4 @@
-"""Git activity visualization and metrics widget"""
+"""Git activity visualization and metrics widget."""
 
 import re
 import subprocess
@@ -15,7 +15,7 @@ from rich.text import Text
 
 @dataclass
 class CommitInfo:
-    """Information about a git commit"""
+    """Information about a git commit."""
 
     hash: str
     author: str
@@ -28,7 +28,7 @@ class CommitInfo:
 
 @dataclass
 class GitStats:
-    """Git repository statistics"""
+    """Git repository statistics."""
 
     total_commits: int
     active_contributors: int
@@ -39,15 +39,14 @@ class GitStats:
 
 
 class GitActivityWidget:
-    """Git activity and metrics visualization"""
+    """Git activity and metrics visualization."""
 
     def __init__(self, console: Console | None = None, repo_path: str = "."):
         self.console = console or Console()
         self.repo_path = repo_path
 
     def update_git_stats(self) -> GitStats:
-        """Update git statistics from repository"""
-
+        """Update git statistics from repository."""
         try:
             # Get basic repo info
             total_commits = self._get_total_commits()
@@ -78,7 +77,7 @@ class GitActivityWidget:
             )
 
     def _run_git_command(self, command: list[str]) -> str:
-        """Run a git command and return output"""
+        """Run a git command and return output."""
         try:
             result = subprocess.run(
                 ["git"] + command,
@@ -93,12 +92,12 @@ class GitActivityWidget:
             return ""
 
     def _get_total_commits(self) -> int:
-        """Get total number of commits"""
+        """Get total number of commits."""
         output = self._run_git_command(["rev-list", "--count", "HEAD"])
         return int(output) if output.isdigit() else 0
 
     def _get_recent_commits(self, limit: int = 20) -> list[CommitInfo]:
-        """Get recent commit information"""
+        """Get recent commit information."""
         commits = []
 
         # Get commit information
@@ -157,7 +156,7 @@ class GitActivityWidget:
         return commits
 
     def _parse_diff_stats(self, stats_output: str) -> tuple[int, int, int]:
-        """Parse git diff stats output"""
+        """Parse git diff stats output."""
         files_changed = 0
         insertions = 0
         deletions = 0
@@ -174,7 +173,7 @@ class GitActivityWidget:
         return files_changed, insertions, deletions
 
     def _get_active_contributors(self, days: int = 30) -> dict[str, int]:
-        """Get active contributors in the last N days"""
+        """Get active contributors in the last N days."""
         since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
         output = self._run_git_command(
@@ -194,7 +193,7 @@ class GitActivityWidget:
         return contributors
 
     def _get_daily_activity(self, days: int = 30) -> dict[str, int]:
-        """Get daily commit activity for the last N days"""
+        """Get daily commit activity for the last N days."""
         since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
         output = self._run_git_command(
@@ -214,7 +213,7 @@ class GitActivityWidget:
         return dict(activity)
 
     def _get_file_change_stats(self, limit: int = 10) -> dict[str, int]:
-        """Get most frequently changed files"""
+        """Get most frequently changed files."""
         output = self._run_git_command(
             [
                 "log",
@@ -235,7 +234,7 @@ class GitActivityWidget:
         return dict(sorted_files[:limit])
 
     def _get_branch_info(self) -> dict[str, Any]:
-        """Get branch information"""
+        """Get branch information."""
         info = {}
 
         # Current branch
@@ -261,7 +260,7 @@ class GitActivityWidget:
         return info
 
     def render_activity_overview(self) -> Panel:
-        """Render git activity overview"""
+        """Render git activity overview."""
         stats = self.update_git_stats()
 
         content = Text()
@@ -292,7 +291,7 @@ class GitActivityWidget:
         return Panel(content, title="🔀 Git Activity", border_style="blue")
 
     def render_recent_commits(self, limit: int = 5) -> Panel:
-        """Render recent commits table"""
+        """Render recent commits table."""
         stats = self.update_git_stats()
 
         table = Table(show_header=True, header_style="bold magenta")
@@ -323,7 +322,7 @@ class GitActivityWidget:
         return Panel(table, title="📝 Recent Commits", border_style="green")
 
     def render_file_activity(self) -> Panel:
-        """Render file change activity"""
+        """Render file change activity."""
         stats = self.update_git_stats()
 
         if not stats.file_changes:
@@ -349,7 +348,7 @@ class GitActivityWidget:
         return Panel(content, title="📁 File Activity", border_style="yellow")
 
     def render_contributors(self) -> Panel:
-        """Render contributor activity"""
+        """Render contributor activity."""
         contributors = self._get_active_contributors(days=30)
 
         if not contributors:
@@ -372,7 +371,7 @@ class GitActivityWidget:
         return Panel(table, title="👥 Contributors (30 days)", border_style="cyan")
 
     def render_compact_status(self) -> Text:
-        """Render compact git status for status bars"""
+        """Render compact git status for status bars."""
         stats = self.update_git_stats()
 
         text = Text()
@@ -393,7 +392,7 @@ class GitActivityWidget:
         return text
 
     def get_activity_metrics(self) -> dict[str, Any]:
-        """Get git activity metrics as data"""
+        """Get git activity metrics as data."""
         stats = self.update_git_stats()
 
         # Calculate trends

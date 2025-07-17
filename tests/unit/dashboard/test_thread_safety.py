@@ -5,10 +5,10 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 
 
 class TestThreadSafety:
-    """Tests for thread safety of components"""
+    """Tests for thread safety of components."""
 
     def test_thread_safety(self):
-        """Test 15: Thread safety of components"""
+        """Test 15: Thread safety of components."""
         factory = RendererFactory()
         results = []
         errors = []

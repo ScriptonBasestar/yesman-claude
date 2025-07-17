@@ -21,7 +21,7 @@ class TmuxManager:
         self.sessions_path = config.get_sessions_dir()
 
     def create_session(self, session_name: str, config_dict: dict) -> bool:
-        """Create tmux session from a YAML config file in templates directory"""
+        """Create tmux session from a YAML config file in templates directory."""
         try:
             server = libtmux.Server()
             session_name_from_config = config_dict.get("session_name", session_name)
@@ -50,13 +50,13 @@ class TmuxManager:
             return False
 
     def get_templates(self) -> list[str]:
-        """Get all available session templates"""
+        """Get all available session templates."""
         return [f.stem for f in self.templates_path.glob("*.yaml")]
 
     def load_projects(self) -> dict[str, Any]:
-        """Load project sessions from individual session files in sessions/ directory"""
+        """Load project sessions from individual session files in sessions/ directory."""
         projects = {"sessions": {}}
-        
+
         # 새로운 sessions/ 디렉토리에서 개별 세션 파일들 로드
         if self.sessions_path.exists():
             for session_file in self.sessions_path.glob("*.yaml"):
@@ -68,7 +68,7 @@ class TmuxManager:
                     self.logger.debug(f"Loaded session config: {session_name}")
                 except Exception as e:
                     self.logger.error(f"Failed to load session file {session_file}: {e}")
-            
+
             # .yml 확장자도 지원
             for session_file in self.sessions_path.glob("*.yml"):
                 try:
@@ -81,12 +81,11 @@ class TmuxManager:
                         self.logger.debug(f"Loaded session config: {session_name}")
                 except Exception as e:
                     self.logger.error(f"Failed to load session file {session_file}: {e}")
-        
-        
+
         return projects
-    
+
     def save_session_config(self, session_name: str, session_config: dict[str, Any]) -> bool:
-        """Save a session configuration to an individual file"""
+        """Save a session configuration to an individual file."""
         try:
             session_file = self.sessions_path / f"{session_name}.yaml"
             with open(session_file, "w", encoding="utf-8") as f:
@@ -96,58 +95,57 @@ class TmuxManager:
         except Exception as e:
             self.logger.error(f"Failed to save session config {session_name}: {e}")
             return False
-    
+
     def delete_session_config(self, session_name: str) -> bool:
-        """Delete a session configuration file"""
+        """Delete a session configuration file."""
         try:
             session_file = self.sessions_path / f"{session_name}.yaml"
             if session_file.exists():
                 session_file.unlink()
                 self.logger.info(f"Deleted session config: {session_name}")
                 return True
-            
+
             # .yml 확장자도 확인
             session_file_yml = self.sessions_path / f"{session_name}.yml"
             if session_file_yml.exists():
                 session_file_yml.unlink()
                 self.logger.info(f"Deleted session config: {session_name}")
                 return True
-            
+
             self.logger.warning(f"Session config file not found: {session_name}")
             return False
         except Exception as e:
             self.logger.error(f"Failed to delete session config {session_name}: {e}")
             return False
-    
+
     def get_session_config_file(self, session_name: str) -> Path | None:
-        """Get the path to a session configuration file"""
+        """Get the path to a session configuration file."""
         yaml_file = self.sessions_path / f"{session_name}.yaml"
         yml_file = self.sessions_path / f"{session_name}.yml"
-        
+
         if yaml_file.exists():
             return yaml_file
         elif yml_file.exists():
             return yml_file
         else:
             return None
-    
+
     def list_session_configs(self) -> list[str]:
-        """List all available session configurations"""
+        """List all available session configurations."""
         session_names = set()
-        
+
         # .yaml 파일들
         for session_file in self.sessions_path.glob("*.yaml"):
             session_names.add(session_file.stem)
-        
+
         # .yml 파일들
         for session_file in self.sessions_path.glob("*.yml"):
             session_names.add(session_file.stem)
-        
+
         return sorted(list(session_names))
-    
 
     def load_template(self, template_name: str) -> dict[str, Any]:
-        """Load a specific template file"""
+        """Load a specific template file."""
         template_path = self.templates_path / f"{template_name}.yaml"
         if not template_path.exists():
             raise FileNotFoundError(f"Template {template_name} not found at {template_path}")
@@ -156,7 +154,7 @@ class TmuxManager:
             return yaml.safe_load(f) or {}
 
     def get_session_config(self, session_name: str, session_config: dict[str, Any]) -> dict[str, Any]:
-        """Get final session configuration after applying template and overrides"""
+        """Get final session configuration after applying template and overrides."""
         # Start with base configuration
         final_config = {}
 
@@ -182,7 +180,7 @@ class TmuxManager:
         return final_config
 
     def _deep_merge_dicts(self, base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
-        """Deep merge two dictionaries, with override taking precedence"""
+        """Deep merge two dictionaries, with override taking precedence."""
         result = base.copy()
 
         for key, value in override.items():
@@ -194,7 +192,7 @@ class TmuxManager:
         return result
 
     def list_running_sessions(self) -> None:
-        """List currently running tmux sessions"""
+        """List currently running tmux sessions."""
         server = libtmux.Server()
         sessions = server.list_sessions()
         if not sessions:
@@ -206,10 +204,10 @@ class TmuxManager:
             click.echo(f"  - {name}")
 
     def get_session_info(self, session_name: str) -> dict[str, Any]:
-        """Get session information directly from tmux"""
+        """Get session information directly from tmux."""
 
         def fetch_session_info():
-            """Fetch session information from tmux"""
+            """Fetch session information from tmux."""
             try:
                 server = libtmux.Server()
                 session = server.find_where({"session_name": session_name})
@@ -254,7 +252,7 @@ class TmuxManager:
         return fetch_session_info()
 
     def get_cached_sessions_list(self) -> list[dict[str, Any]]:
-        """Get list of all sessions directly from tmux"""
+        """Get list of all sessions directly from tmux."""
         try:
             server = libtmux.Server()
             sessions = server.list_sessions()
@@ -272,7 +270,7 @@ class TmuxManager:
             return []
 
     def teardown_session(self, session_name: str) -> bool:
-        """Teardown a specific tmux session"""
+        """Teardown a specific tmux session."""
         try:
             server = libtmux.Server()
             session = server.find_where({"session_name": session_name})
@@ -288,7 +286,7 @@ class TmuxManager:
             return False
 
     def teardown_all_sessions(self) -> None:
-        """Teardown all tmux sessions"""
+        """Teardown all tmux sessions."""
         try:
             server = libtmux.Server()
             server.kill_server()
@@ -297,7 +295,7 @@ class TmuxManager:
             self.logger.error(f"Failed to teardown all sessions: {e}")
 
     def attach_to_session(self, session_name: str) -> None:
-        """Attach to a specific tmux session"""
+        """Attach to a specific tmux session."""
         import subprocess
 
         # Use subprocess.run for security (no shell injection)
@@ -309,9 +307,7 @@ class TmuxManager:
             self.logger.error("tmux command not found")
 
     def get_session_activity(self, session_name: str) -> dict[str, Any]:
-        """
-        Get session activity data by parsing session logs.
-        """
+        """Get session activity data by parsing session logs."""
         try:
             log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
             safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()

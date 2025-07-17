@@ -1,4 +1,4 @@
-"""Tests for CodeReviewEngine module"""
+"""Tests for CodeReviewEngine module."""
 
 import asyncio
 import tempfile
@@ -9,14 +9,23 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.code_review_engine import CodeReview, CodeReviewEngine, QualityMetric, QualityMetrics, ReviewFinding, ReviewSeverity, ReviewStatus, ReviewType
+from libs.multi_agent.code_review_engine import (
+    CodeReview,
+    CodeReviewEngine,
+    QualityMetric,
+    QualityMetrics,
+    ReviewFinding,
+    ReviewSeverity,
+    ReviewStatus,
+    ReviewType,
+)
 from libs.multi_agent.collaboration_engine import CollaborationEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 
 
 @pytest.fixture
 def temp_repo():
-    """Create a temporary repository for testing"""
+    """Create a temporary repository for testing."""
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_path = Path(temp_dir)
 
@@ -133,7 +142,7 @@ class WellWrittenClass:
 
 @pytest.fixture
 def mock_collaboration_engine():
-    """Create a mock collaboration engine"""
+    """Create a mock collaboration engine."""
     engine = Mock(spec=CollaborationEngine)
     engine.send_message = AsyncMock()
     engine.agent_pool = Mock()
@@ -147,13 +156,13 @@ def mock_collaboration_engine():
 
 @pytest.fixture
 def mock_semantic_analyzer():
-    """Create a mock semantic analyzer"""
+    """Create a mock semantic analyzer."""
     return Mock(spec=SemanticAnalyzer)
 
 
 @pytest.fixture
 def mock_branch_manager():
-    """Create a mock branch manager"""
+    """Create a mock branch manager."""
     return Mock(spec=BranchManager)
 
 
@@ -164,7 +173,7 @@ async def code_review_engine(
     mock_semantic_analyzer,
     mock_branch_manager,
 ):
-    """Create a CodeReviewEngine instance for testing"""
+    """Create a CodeReviewEngine instance for testing."""
     engine = CodeReviewEngine(
         collaboration_engine=mock_collaboration_engine,
         semantic_analyzer=mock_semantic_analyzer,
@@ -179,11 +188,11 @@ async def code_review_engine(
 
 
 class TestCodeReviewEngine:
-    """Test cases for CodeReviewEngine"""
+    """Test cases for CodeReviewEngine."""
 
     @pytest.mark.asyncio
     async def test_initiate_review(self, code_review_engine, mock_collaboration_engine):
-        """Test initiating a code review"""
+        """Test initiating a code review."""
         review_id = await code_review_engine.initiate_review(
             branch_name="feature/test-branch",
             agent_id="agent-1",
@@ -206,7 +215,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_automated_review_style_quality(self, code_review_engine):
-        """Test automated style and quality review"""
+        """Test automated style and quality review."""
         findings = await code_review_engine._check_style_quality(["src/test_module.py"])
 
         # Should detect line length issues
@@ -220,7 +229,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_automated_review_security(self, code_review_engine):
-        """Test automated security review"""
+        """Test automated security review."""
         findings = await code_review_engine._check_security(["src/test_module.py"])
 
         # Should detect hardcoded password
@@ -234,7 +243,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_automated_review_performance(self, code_review_engine):
-        """Test automated performance review"""
+        """Test automated performance review."""
         findings = await code_review_engine._check_performance(["src/test_module.py"])
 
         # Should detect range(len()) pattern
@@ -251,7 +260,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_automated_review_maintainability(self, code_review_engine):
-        """Test automated maintainability review"""
+        """Test automated maintainability review."""
         findings = await code_review_engine._check_maintainability(
             ["src/test_module.py"],
         )
@@ -270,7 +279,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_automated_review_documentation(self, code_review_engine):
-        """Test automated documentation review"""
+        """Test automated documentation review."""
         findings = await code_review_engine._check_documentation(["src/test_module.py"])
 
         # Should detect missing docstrings
@@ -287,7 +296,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_automated_review_testing(self, code_review_engine):
-        """Test automated testing review"""
+        """Test automated testing review."""
         findings = await code_review_engine._check_testing(["src/test_module.py"])
 
         # Should detect missing test file
@@ -300,7 +309,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_quality_metrics_calculation(self, code_review_engine):
-        """Test quality metrics calculation"""
+        """Test quality metrics calculation."""
         metrics = await code_review_engine._calculate_quality_metrics(
             "src/test_module.py",
         )
@@ -315,7 +324,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_quality_check_multiple_files(self, code_review_engine):
-        """Test quality check on multiple files"""
+        """Test quality check on multiple files."""
         metrics_list = await code_review_engine.perform_quality_check(
             ["src/test_module.py", "src/good_module.py"],
         )
@@ -332,7 +341,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_overall_score_calculation(self, code_review_engine):
-        """Test overall score calculation"""
+        """Test overall score calculation."""
         # Create some test findings
         findings = [
             ReviewFinding(
@@ -367,7 +376,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_auto_approval_logic(self, code_review_engine):
-        """Test auto-approval logic"""
+        """Test auto-approval logic."""
         # Create a review with high score and no critical issues
         review = CodeReview(
             review_id="test_review",
@@ -409,7 +418,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_approve_review(self, code_review_engine, mock_collaboration_engine):
-        """Test review approval"""
+        """Test review approval."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
             branch_name="test_branch",
@@ -435,7 +444,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_reject_review(self, code_review_engine, mock_collaboration_engine):
-        """Test review rejection"""
+        """Test review rejection."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
             branch_name="test_branch",
@@ -462,7 +471,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_get_review_status(self, code_review_engine):
-        """Test getting review status"""
+        """Test getting review status."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
             branch_name="test_branch",
@@ -488,7 +497,7 @@ class TestCodeReviewEngine:
         assert review.status == ReviewStatus.APPROVED
 
     def test_review_summary(self, code_review_engine):
-        """Test review summary generation"""
+        """Test review summary generation."""
         # Add some test reviews to history
         test_reviews = [
             CodeReview(
@@ -543,7 +552,7 @@ class TestCodeReviewEngine:
         assert len(summary.most_common_issues) > 0
 
     def test_engine_summary(self, code_review_engine):
-        """Test engine summary generation"""
+        """Test engine summary generation."""
         summary = code_review_engine.get_engine_summary()
 
         assert "statistics" in summary
@@ -559,7 +568,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     async def test_find_suitable_reviewers(self, code_review_engine):
-        """Test finding suitable reviewers"""
+        """Test finding suitable reviewers."""
         reviewers = await code_review_engine._find_suitable_reviewers(
             requester_id="agent-1",
             files_changed=["test.py"],
@@ -575,7 +584,7 @@ class TestCodeReviewEngine:
             assert reviewer in available_agent_ids
 
     def test_cyclomatic_complexity_estimation(self, code_review_engine):
-        """Test cyclomatic complexity estimation"""
+        """Test cyclomatic complexity estimation."""
         simple_code = """
 def simple_function():
     return True
@@ -602,7 +611,7 @@ def complex_function(x, y):
         assert complexity > 5.0
 
     def test_maintainability_index_calculation(self, code_review_engine):
-        """Test maintainability index calculation"""
+        """Test maintainability index calculation."""
         well_documented_code = '''
 """Well documented module"""
 
@@ -629,7 +638,7 @@ def function():
         code_review_engine,
         mock_collaboration_engine,
     ):
-        """Test full automated review flow"""
+        """Test full automated review flow."""
         # Initiate review
         review_id = await code_review_engine.initiate_review(
             branch_name="feature/full-test",
@@ -658,10 +667,10 @@ def function():
 
 
 class TestReviewDataClasses:
-    """Test the review data classes"""
+    """Test the review data classes."""
 
     def test_review_finding_creation(self):
-        """Test ReviewFinding creation"""
+        """Test ReviewFinding creation."""
         finding = ReviewFinding(
             finding_id="test_finding",
             review_type=ReviewType.SECURITY,
@@ -682,7 +691,7 @@ class TestReviewDataClasses:
         assert isinstance(finding.created_at, datetime)
 
     def test_quality_metrics_creation(self):
-        """Test QualityMetrics creation"""
+        """Test QualityMetrics creation."""
         metrics = QualityMetrics(
             file_path="test.py",
             metrics={
@@ -701,7 +710,7 @@ class TestReviewDataClasses:
         assert isinstance(metrics.calculated_at, datetime)
 
     def test_code_review_creation(self):
-        """Test CodeReview creation"""
+        """Test CodeReview creation."""
         review = CodeReview(
             review_id="test_review",
             branch_name="test_branch",

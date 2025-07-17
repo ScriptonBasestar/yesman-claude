@@ -1,4 +1,4 @@
-"""Claude status and callback management"""
+"""Claude status and callback management."""
 
 import datetime
 import logging
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ClaudeStatusManager:
-    """Manages status updates, callbacks, and response history"""
+    """Manages status updates, callbacks, and response history."""
 
     def __init__(self, session_name: str):
         self.session_name = session_name
@@ -23,26 +23,26 @@ class ClaudeStatusManager:
         self.logger = logging.getLogger(f"yesman.claude_status.{session_name}")
 
     def set_status_callback(self, callback: Callable):
-        """Set callback for status updates"""
+        """Set callback for status updates."""
         self.status_callback = callback
 
     def set_activity_callback(self, callback: Callable):
-        """Set callback for activity updates"""
+        """Set callback for activity updates."""
         self.activity_callback = callback
 
     def update_status(self, message: str):
-        """Update status through callback"""
+        """Update status through callback."""
         if self.status_callback:
             self.status_callback(message)
         self.logger.info(message)
 
     def update_activity(self, activity: str):
-        """Update activity through callback"""
+        """Update activity through callback."""
         if self.activity_callback:
             self.activity_callback(activity)
 
     def record_response(self, prompt_type: str, response: str, content: str):
-        """Record auto-response in history"""
+        """Record auto-response in history."""
         record = {
             "timestamp": datetime.datetime.now().isoformat(),
             "prompt_type": prompt_type,
@@ -57,11 +57,11 @@ class ClaudeStatusManager:
             self.response_history = self.response_history[-100:]
 
     def get_response_history(self) -> list[dict[str, Any]]:
-        """Get the response history"""
+        """Get the response history."""
         return self.response_history
 
     def save_capture_to_file(self, content: str, pane_id: str | None = None) -> str:
-        """Save captured content to file and return file path"""
+        """Save captured content to file and return file path."""
         try:
             # Import here to avoid circular import
             from ..yesman_config import YesmanConfig

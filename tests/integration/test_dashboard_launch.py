@@ -6,11 +6,11 @@ from libs.dashboard import DashboardLauncher
 
 
 class TestDashboardLaunch:
-    """Tests for end-to-end dashboard launch process"""
+    """Tests for end-to-end dashboard launch process."""
 
     @pytest.fixture
     def temp_project_root(self):
-        """Create temporary project directory"""
+        """Create temporary project directory."""
         import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -25,11 +25,11 @@ class TestDashboardLaunch:
 
     @pytest.fixture
     def launcher(self, temp_project_root):
-        """Create DashboardLauncher with temp project root"""
+        """Create DashboardLauncher with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
     def test_end_to_end_dashboard_launch(self, launcher, temp_project_root):
-        """Test 6: End-to-end dashboard launch process"""
+        """Test 6: End-to-end dashboard launch process."""
         # 1. Interface detection
         interface = launcher.detect_best_interface()
         assert interface in ["tui", "web", "tauri"]

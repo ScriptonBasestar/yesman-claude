@@ -1,6 +1,4 @@
-"""
-Test for FastAPI session endpoints
-"""
+"""Test for FastAPI session endpoints."""
 
 import unittest
 from unittest.mock import MagicMock, patch
@@ -17,7 +15,7 @@ class TestSessionEndpoints(unittest.TestCase):
 
     @patch("api.routes.sessions.SessionManager")
     def test_get_sessions_list(self, mock_session_manager):
-        """Test GET /api/sessions returns session list"""
+        """Test GET /api/sessions returns session list."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_sessions.return_value = [
@@ -42,7 +40,7 @@ class TestSessionEndpoints(unittest.TestCase):
 
     @patch("api.routes.sessions.SessionManager")
     def test_get_session_detail(self, mock_session_manager):
-        """Test GET /api/sessions/{session_name} returns session details"""
+        """Test GET /api/sessions/{session_name} returns session details."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_session_info.return_value = {
@@ -68,7 +66,7 @@ class TestSessionEndpoints(unittest.TestCase):
 
     @patch("api.routes.sessions.SessionManager")
     def test_create_session(self, mock_session_manager):
-        """Test POST /api/sessions creates new session"""
+        """Test POST /api/sessions creates new session."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.return_value = True
@@ -94,7 +92,7 @@ class TestSessionEndpoints(unittest.TestCase):
 
     @patch("api.routes.sessions.SessionManager")
     def test_delete_session(self, mock_session_manager):
-        """Test DELETE /api/sessions/{session_name} removes session"""
+        """Test DELETE /api/sessions/{session_name} removes session."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.kill_session.return_value = True
@@ -111,7 +109,7 @@ class TestSessionEndpoints(unittest.TestCase):
 
     @patch("api.routes.sessions.SessionManager")
     def test_get_nonexistent_session(self, mock_session_manager):
-        """Test GET for non-existent session returns 404"""
+        """Test GET for non-existent session returns 404."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_session_info.return_value = None
@@ -127,7 +125,7 @@ class TestSessionEndpoints(unittest.TestCase):
 
     @patch("api.routes.sessions.SessionManager")
     def test_create_duplicate_session(self, mock_session_manager):
-        """Test creating duplicate session returns 409"""
+        """Test creating duplicate session returns 409."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.create_session.side_effect = Exception("Session already exists")

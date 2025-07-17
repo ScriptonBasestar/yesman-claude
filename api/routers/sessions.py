@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Improved sessions router with dependency injection and proper error handling
-"""
+"""Improved sessions router with dependency injection and proper error handling."""
 
 import logging
 from typing import Any
@@ -20,7 +18,7 @@ logger = logging.getLogger("yesman.api.sessions")
 
 
 class SessionService:
-    """Service class for session operations"""
+    """Service class for session operations."""
 
     def __init__(self, session_manager: SessionManager, tmux_manager: TmuxManager):
         self.session_manager = session_manager
@@ -28,7 +26,7 @@ class SessionService:
         self.logger = logging.getLogger("yesman.api.sessions.service")
 
     def get_all_sessions(self) -> list[SessionAPIData]:
-        """Get all sessions with error handling"""
+        """Get all sessions with error handling."""
         try:
             sessions_data = self.session_manager.get_all_sessions()
             return [self._convert_session_to_api_data(session) for session in sessions_data]
@@ -41,9 +39,9 @@ class SessionService:
             )
 
     def get_session_by_name(self, session_name: str) -> SessionAPIData | None:
-        """Get specific session by name"""
+        """Get specific session by name."""
         try:
-            session_data = self.session_manager.get_session_info(session_name)
+            session_data = self.session_manager._get_session_info(session_name)
             if session_data:
                 return self._convert_session_to_api_data(session_data)
             return None
@@ -56,7 +54,7 @@ class SessionService:
             )
 
     def setup_session(self, session_name: str) -> dict[str, Any]:
-        """Set up a specific session"""
+        """Set up a specific session."""
         try:
             # Check if session already exists
             if self._session_exists(session_name):
@@ -93,7 +91,7 @@ class SessionService:
             )
 
     def teardown_session(self, session_name: str) -> dict[str, Any]:
-        """Teardown a specific session"""
+        """Teardown a specific session."""
         try:
             if not self._session_exists(session_name):
                 raise YesmanError(
@@ -120,9 +118,9 @@ class SessionService:
             )
 
     def get_session_status(self, session_name: str) -> dict[str, Any]:
-        """Get session status information"""
+        """Get session status information."""
         try:
-            session_data = self.session_manager.get_session_info(session_name)
+            session_data = self.session_manager._get_session_info(session_name)
             if not session_data:
                 return {
                     "session_name": session_name,
@@ -135,7 +133,7 @@ class SessionService:
                 "status": session_data.status,
                 "exists": True,
                 "windows": len(session_data.windows),
-                "last_activity": session_data.last_activity,
+                "last_activity": getattr(session_data, "last_activity", None),
             }
 
         except Exception as e:
@@ -147,7 +145,7 @@ class SessionService:
             )
 
     def setup_all_sessions(self) -> dict[str, Any]:
-        """Setup all sessions defined in projects.yaml"""
+        """Setup all sessions defined in projects.yaml."""
         try:
             projects = self.tmux_manager.load_projects().get("sessions", {})
             successful = []
@@ -180,14 +178,14 @@ class SessionService:
             )
 
     def teardown_all_sessions(self) -> dict[str, Any]:
-        """Teardown all managed sessions"""
+        """Teardown all managed sessions."""
         try:
-            sessions = self.tmux_manager.get_all_sessions()
+            sessions = self.session_manager.get_all_sessions()
             successful = []
             failed = []
 
             for session in sessions:
-                session_name = session.get("session_name")
+                session_name = session.session_name
                 try:
                     self._teardown_session_internal(session_name)
                     successful.append(session_name)
@@ -211,7 +209,7 @@ class SessionService:
             )
 
     def start_session(self, session_name: str) -> dict[str, Any]:
-        """Start an existing session"""
+        """Start an existing session."""
         try:
             if self._session_exists(session_name):
                 raise YesmanError(
@@ -240,7 +238,7 @@ class SessionService:
             )
 
     def stop_session(self, session_name: str) -> dict[str, Any]:
-        """Stop a running session"""
+        """Stop a running session."""
         try:
             if not self._session_exists(session_name):
                 raise YesmanError(
@@ -267,7 +265,7 @@ class SessionService:
             )
 
     def _convert_session_to_api_data(self, session_data) -> SessionAPIData:
-        """Convert internal session data to API format"""
+        """Convert internal session data to API format."""
         try:
             return {
                 "session_name": session_data.session_name,
@@ -299,25 +297,29 @@ class SessionService:
             )
 
     def _session_exists(self, session_name: str) -> bool:
-        """Check if session exists"""
+        """Check if session exists."""
         try:
-            sessions = self.tmux_manager.get_all_sessions()
-            return any(session.get("session_name") == session_name for session in sessions)
+            sessions = self.session_manager.get_all_sessions()
+            return any(session.session_name == session_name for session in sessions)
         except Exception:
             return False
 
     def _setup_session_internal(self, session_name: str, session_config: dict[str, Any]) -> dict[str, Any]:
-        """Internal session setup logic"""
+        """Internal session setup logic."""
         # This would integrate with the improved SessionSetupService
         # For now, return a placeholder
         return {"message": "Session setup completed"}
 
     def _teardown_session_internal(self, session_name: str) -> None:
-        """Internal session teardown logic"""
+        """Internal session teardown logic."""
         import subprocess
 
         try:
-            subprocess.run(["tmux", "kill-session", "-t", session_name], check=True, capture_output=True)
+            subprocess.run(
+                ["tmux", "kill-session", "-t", session_name],
+                check=True,
+                capture_output=True,
+            )
         except subprocess.CalledProcessError as e:
             raise YesmanError(f"Failed to kill session: {e}")
 
@@ -326,9 +328,14 @@ class SessionService:
 router = APIRouter(tags=["sessions"])
 
 
-@router.get("/sessions", response_model=list[models.SessionInfo], summary="Get all sessions", description="Retrieve information about all active tmux sessions")
+@router.get(
+    "/sessions",
+    response_model=list[models.SessionInfo],
+    summary="Get all sessions",
+    description="Retrieve information about all active tmux sessions",
+)
 def get_all_sessions():
-    """Get all tmux sessions with detailed information"""
+    """Get all tmux sessions with detailed information."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -375,9 +382,14 @@ def get_all_sessions():
         )
 
 
-@router.get("/sessions/{session_name}", response_model=models.SessionInfo, summary="Get specific session", description="Retrieve information about a specific session")
+@router.get(
+    "/sessions/{session_name}",
+    response_model=models.SessionInfo,
+    summary="Get specific session",
+    description="Retrieve information about a specific session",
+)
 def get_session(session_name: str):
-    """Get specific session by name"""
+    """Get specific session by name."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -429,9 +441,13 @@ def get_session(session_name: str):
         )
 
 
-@router.post("/sessions/{session_name}/setup", summary="Setup session", description="Create and setup a tmux session")
+@router.post(
+    "/sessions/{session_name}/setup",
+    summary="Setup session",
+    description="Create and setup a tmux session",
+)
 def setup_session(session_name: str):
-    """Setup a specific session"""
+    """Setup a specific session."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -451,9 +467,13 @@ def setup_session(session_name: str):
         )
 
 
-@router.delete("/sessions/{session_name}", summary="Teardown session", description="Remove a tmux session")
+@router.delete(
+    "/sessions/{session_name}",
+    summary="Teardown session",
+    description="Remove a tmux session",
+)
 def teardown_session(session_name: str):
-    """Teardown a specific session"""
+    """Teardown a specific session."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -473,9 +493,13 @@ def teardown_session(session_name: str):
         )
 
 
-@router.get("/sessions/{session_name}/status", summary="Get session status", description="Get current status of a session")
+@router.get(
+    "/sessions/{session_name}/status",
+    summary="Get session status",
+    description="Get current status of a session",
+)
 def get_session_status(session_name: str):
-    """Get session status"""
+    """Get session status."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -497,9 +521,13 @@ def get_session_status(session_name: str):
         )
 
 
-@router.post("/sessions/setup-all", summary="Setup all sessions", description="Create and setup all tmux sessions defined in projects.yaml")
+@router.post(
+    "/sessions/setup-all",
+    summary="Setup all sessions",
+    description="Create and setup all tmux sessions defined in projects.yaml",
+)
 def setup_all_sessions():
-    """Setup all sessions from projects configuration"""
+    """Setup all sessions from projects configuration."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -521,9 +549,13 @@ def setup_all_sessions():
         )
 
 
-@router.post("/sessions/teardown-all", summary="Teardown all sessions", description="Remove all managed tmux sessions")
+@router.post(
+    "/sessions/teardown-all",
+    summary="Teardown all sessions",
+    description="Remove all managed tmux sessions",
+)
 def teardown_all_sessions():
-    """Teardown all managed sessions"""
+    """Teardown all managed sessions."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -545,9 +577,13 @@ def teardown_all_sessions():
         )
 
 
-@router.post("/sessions/{session_name}/start", summary="Start session", description="Start an existing tmux session")
+@router.post(
+    "/sessions/{session_name}/start",
+    summary="Start session",
+    description="Start an existing tmux session",
+)
 def start_session(session_name: str):
-    """Start a specific session"""
+    """Start a specific session."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -567,9 +603,13 @@ def start_session(session_name: str):
         )
 
 
-@router.post("/sessions/{session_name}/stop", summary="Stop session", description="Stop a running tmux session")
+@router.post(
+    "/sessions/{session_name}/stop",
+    summary="Stop session",
+    description="Stop a running tmux session",
+)
 def stop_session(session_name: str):
-    """Stop a specific session"""
+    """Stop a specific session."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()

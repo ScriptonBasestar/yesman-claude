@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Configuration caching system for improved performance
-"""
+"""Configuration caching system for improved performance."""
 
 import hashlib
 import json
@@ -15,11 +13,10 @@ from .config_schema import YesmanConfigSchema
 
 
 class ConfigCache:
-    """Thread-safe configuration cache with TTL and invalidation"""
+    """Thread-safe configuration cache with TTL and invalidation."""
 
     def __init__(self, cache_ttl: float = 300.0, max_cache_size: int = 100):
-        """
-        Initialize configuration cache
+        """Initialize configuration cache.
 
         Args:
             cache_ttl: Time to live for cache entries in seconds (default: 5 minutes)
@@ -33,7 +30,7 @@ class ConfigCache:
         self._logger = logging.getLogger(__name__)
 
     def _generate_cache_key(self, config_sources: list, env_vars: dict = None) -> str:
-        """Generate a unique cache key based on configuration sources and environment"""
+        """Generate a unique cache key based on configuration sources and environment."""
         key_data = {
             "sources": [],
             "env_vars": env_vars or {},
@@ -53,7 +50,7 @@ class ConfigCache:
         return hashlib.sha256(key_json.encode()).hexdigest()[:16]
 
     def get(self, cache_key: str) -> YesmanConfigSchema | None:
-        """Get configuration from cache if valid"""
+        """Get configuration from cache if valid."""
         with self._lock:
             if cache_key not in self._cache:
                 return None
@@ -76,7 +73,7 @@ class ConfigCache:
             return cache_entry["config"]
 
     def put(self, cache_key: str, config: YesmanConfigSchema) -> None:
-        """Store configuration in cache"""
+        """Store configuration in cache."""
         with self._lock:
             current_time = time.time()
 
@@ -90,7 +87,7 @@ class ConfigCache:
             self._logger.debug(f"Cache store: {cache_key}")
 
     def _evict_oldest(self) -> None:
-        """Evict the least recently used cache entry"""
+        """Evict the least recently used cache entry."""
         if not self._access_times:
             return
 
@@ -103,7 +100,7 @@ class ConfigCache:
         self._logger.debug(f"Cache eviction: {oldest_key}")
 
     def invalidate(self, cache_key: str = None) -> None:
-        """Invalidate cache entry or entire cache"""
+        """Invalidate cache entry or entire cache."""
         with self._lock:
             if cache_key:
                 if cache_key in self._cache:
@@ -119,7 +116,7 @@ class ConfigCache:
                 self._logger.debug(f"Cache cleared: {cleared_count} entries")
 
     def get_stats(self) -> dict[str, Any]:
-        """Get cache statistics"""
+        """Get cache statistics."""
         with self._lock:
             current_time = time.time()
             valid_entries = 0
@@ -143,7 +140,7 @@ class ConfigCache:
             }
 
     def cleanup_expired(self) -> int:
-        """Remove expired cache entries and return count removed"""
+        """Remove expired cache entries and return count removed."""
         with self._lock:
             current_time = time.time()
             expired_keys = []
@@ -164,7 +161,7 @@ class ConfigCache:
 
 
 class FileWatcher:
-    """Watch configuration files for changes to invalidate cache"""
+    """Watch configuration files for changes to invalidate cache."""
 
     def __init__(self, config_cache: ConfigCache):
         self.config_cache = config_cache
@@ -172,14 +169,14 @@ class FileWatcher:
         self._logger = logging.getLogger(__name__)
 
     def watch_file(self, file_path: Path) -> None:
-        """Add a file to the watch list"""
+        """Add a file to the watch list."""
         if file_path.exists():
             mtime = file_path.stat().st_mtime
             self._watched_files[str(file_path)] = mtime
             self._logger.debug(f"Watching config file: {file_path}")
 
     def check_for_changes(self) -> bool:
-        """Check if any watched files have changed"""
+        """Check if any watched files have changed."""
         changes_detected = False
 
         for file_path_str, last_mtime in list(self._watched_files.items()):
@@ -208,11 +205,10 @@ class FileWatcher:
 
 
 class CachedConfigLoader:
-    """Configuration loader with caching capabilities"""
+    """Configuration loader with caching capabilities."""
 
     def __init__(self, base_loader, cache_ttl: float = 300.0):
-        """
-        Initialize cached config loader
+        """Initialize cached config loader.
 
         Args:
             base_loader: The underlying ConfigLoader instance
@@ -228,7 +224,7 @@ class CachedConfigLoader:
         self._miss_count = 0
 
     def load(self) -> YesmanConfigSchema:
-        """Load configuration with caching"""
+        """Load configuration with caching."""
         # Check for file changes first
         self.file_watcher.check_for_changes()
 
@@ -258,7 +254,7 @@ class CachedConfigLoader:
         return config
 
     def _generate_current_cache_key(self) -> str:
-        """Generate cache key for current loader state"""
+        """Generate cache key for current loader state."""
         import os
 
         # Get environment variables that affect configuration
@@ -267,19 +263,19 @@ class CachedConfigLoader:
         return self.cache._generate_cache_key(self.base_loader.sources, env_vars)
 
     def _update_file_watchers(self) -> None:
-        """Update file watchers for all config file sources"""
+        """Update file watchers for all config file sources."""
         for source in self.base_loader.sources:
             if hasattr(source, "file_path") and source.file_path:
                 file_path = Path(source.file_path)
                 self.file_watcher.watch_file(file_path)
 
     def invalidate_cache(self) -> None:
-        """Manually invalidate the configuration cache"""
+        """Manually invalidate the configuration cache."""
         self.cache.invalidate()
         self._logger.info("Configuration cache manually invalidated")
 
     def get_cache_stats(self) -> dict[str, Any]:
-        """Get comprehensive cache statistics"""
+        """Get comprehensive cache statistics."""
         cache_stats = self.cache.get_stats()
 
         total_requests = self._hit_count + self._miss_count
@@ -295,18 +291,21 @@ class CachedConfigLoader:
         }
 
     def cleanup(self) -> dict[str, int]:
-        """Cleanup expired cache entries and return statistics"""
+        """Cleanup expired cache entries and return statistics."""
         expired_count = self.cache.cleanup_expired()
-        return {"expired_entries_removed": expired_count, "remaining_entries": len(self.cache._cache)}
+        return {
+            "expired_entries_removed": expired_count,
+            "remaining_entries": len(self.cache._cache),
+        }
 
     def get_config_sources_info(self) -> list[dict[str, Any]]:
-        """Get information about configured sources (delegate to base loader)"""
+        """Get information about configured sources (delegate to base loader)."""
         return self.base_loader.get_config_sources_info()
 
 
 # Enhanced config source classes with cache key support
 class CacheableYamlFileSource:
-    """YAML file source with cache key support"""
+    """YAML file source with cache key support."""
 
     def __init__(self, file_path: str):
         self.file_path = Path(file_path)
@@ -321,7 +320,7 @@ class CacheableYamlFileSource:
             return yaml.safe_load(f) or {}
 
     def get_cache_key(self) -> str:
-        """Generate cache key based on file path and modification time"""
+        """Generate cache key based on file path and modification time."""
         if not self.file_path.exists():
             return f"file:{self.file_path}:missing"
 
@@ -330,7 +329,7 @@ class CacheableYamlFileSource:
 
 
 class CacheableEnvironmentSource:
-    """Environment source with cache key support"""
+    """Environment source with cache key support."""
 
     def __init__(self, prefix: str = "YESMAN_"):
         self.prefix = prefix
@@ -361,19 +360,19 @@ class CacheableEnvironmentSource:
         return config
 
     def _set_nested_value(self, d: dict, key: str, value):
-        """Set value in nested dictionary using dot notation"""
+        """Set value in nested dictionary using dot notation."""
         keys = key.split(".")
         for k in keys[:-1]:
             d = d.setdefault(k, {})
         d[keys[-1]] = value
 
     def get_cache_key(self) -> str:
-        """Generate cache key based on relevant environment variables"""
+        """Generate cache key based on relevant environment variables."""
         import hashlib
         import os
 
         env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)
-        env_hash = hashlib.md5(env_json.encode()).hexdigest()[:8]
+        env_hash = hashlib.sha256(env_json.encode()).hexdigest()[:16]
         return f"env:{self.prefix}:{env_hash}"

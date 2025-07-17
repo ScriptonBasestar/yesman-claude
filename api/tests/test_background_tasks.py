@@ -1,4 +1,4 @@
-"""Test background tasks and WebSocket updates"""
+"""Test background tasks and WebSocket updates."""
 
 import asyncio
 import json
@@ -10,7 +10,7 @@ import websockets
 
 
 def check_task_status():
-    """Check the status of background tasks via API"""
+    """Check the status of background tasks via API."""
     response = requests.get("http://localhost:8000/api/tasks/status", timeout=5)
     if response.status_code == 200:
         data = response.json()
@@ -28,7 +28,7 @@ def check_task_status():
 
 
 async def monitor_updates(duration: int = 60):
-    """Monitor WebSocket updates for a specified duration"""
+    """Monitor WebSocket updates for a specified duration."""
     uri = "ws://localhost:8000/ws/dashboard"
 
     print(f"\n🔌 Connecting to WebSocket for {duration} seconds...")
@@ -67,7 +67,11 @@ async def monitor_updates(duration: int = 60):
                             )
                         )
 
-                    elif msg_type in ["session_update", "health_update", "activity_update"]:
+                    elif msg_type in [
+                        "session_update",
+                        "health_update",
+                        "activity_update",
+                    ]:
                         print(f"\n📥 Received {msg_type}:")
                         print(f"   Timestamp: {data.get('timestamp')}")
 
@@ -100,7 +104,7 @@ async def monitor_updates(duration: int = 60):
 
 
 async def trigger_session_change():
-    """Simulate a session change to trigger updates"""
+    """Simulate a session change to trigger updates."""
     print("\n🔄 Simulating session change...")
 
     # This would normally be done by creating/stopping a tmux session
@@ -111,7 +115,7 @@ async def trigger_session_change():
 
 
 async def main():
-    """Run background task tests"""
+    """Run background task tests."""
     print("🚀 Testing Background Tasks and Real-time Updates")
     print("=" * 50)
 

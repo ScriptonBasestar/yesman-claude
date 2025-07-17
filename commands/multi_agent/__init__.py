@@ -1,5 +1,4 @@
-"""
-Multi-agent system commands package
+"""Multi-agent system commands package.
 
 This package contains modular multi-agent commands split from the original
 monolithic multi_agent.py file for better maintainability and development.

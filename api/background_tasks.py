@@ -134,13 +134,13 @@ class BackgroundTaskRunner:
         async def check_sessions():
             try:
                 # Get current session data
-                sessions = self.session_manager.get_cached_sessions_list()
+                sessions = self.session_manager.get_all_sessions()
 
                 # Get project configuration
                 from libs.yesman_config import YesmanConfig
 
                 config = YesmanConfig()
-                project_sessions = config.get_projects()
+                project_sessions = config.projects
 
                 # Format session data
                 formatted_sessions = []
@@ -150,7 +150,7 @@ class BackgroundTaskRunner:
                         project_name,
                     )
                     session_exists = any(s["session_name"] == session_name for s in sessions)
-                    session_detail = self.session_manager.get_session_info(session_name) if session_exists else None
+                    session_detail = self.session_manager._get_session_info(session_name) if session_exists else None
 
                     formatted_sessions.append(
                         {
@@ -175,7 +175,7 @@ class BackgroundTaskRunner:
                     # Broadcast update via WebSocket
                     from api.routers.websocket_router import manager
 
-                    await manager.broadcast_session_update(formatted_sessions)
+                    await manager.broadcast_session_update({"sessions": formatted_sessions})
 
                     logger.debug(
                         f"Session data updated and broadcast ({len(formatted_sessions)} sessions)",
@@ -197,7 +197,7 @@ class BackgroundTaskRunner:
         async def check_health():
             try:
                 # Calculate health metrics
-                health_data = await self.health_calculator.calculate_health()
+                health_data = self.health_calculator.calculate_health()
 
                 # Format health data
                 formatted_health = {
@@ -285,7 +285,7 @@ class BackgroundTaskRunner:
                 from collections import defaultdict
 
                 # Get git activity data
-                activity_counts = defaultdict(int)
+                activity_counts: dict[str, int] = defaultdict(int)
 
                 try:
                     # Get git log for last 365 days

@@ -5,10 +5,10 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 
 
 class TestPerformanceBenchmark:
-    """Tests for basic performance benchmark"""
+    """Tests for basic performance benchmark."""
 
     def test_performance_benchmark(self):
-        """Test 16: Basic performance benchmark"""
+        """Test 16: Basic performance benchmark."""
         factory = RendererFactory()
         renderer = factory.create_renderer(RenderFormat.TUI)
 

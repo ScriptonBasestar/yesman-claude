@@ -1,6 +1,4 @@
-"""
-TUI Session Selector using Rich
-"""
+"""TUI Session Selector using Rich."""
 
 import libtmux
 from rich.console import Console
@@ -11,14 +9,14 @@ from rich.text import Text
 
 
 class SessionSelector:
-    """Interactive TUI session selector"""
+    """Interactive TUI session selector."""
 
     def __init__(self, sessions: list[dict[str, str]]):
         self.sessions = sessions
         self.console = Console()
 
     def _get_session_details(self, session_name: str) -> dict[str, str]:
-        """Get session details from tmux"""
+        """Get session details from tmux."""
         try:
             server = libtmux.Server()
             session = server.find_where({"session_name": session_name})
@@ -43,7 +41,7 @@ class SessionSelector:
         }
 
     def _create_display(self, search_term: str = "") -> Table:
-        """Create the display table"""
+        """Create the display table."""
         table = Table(
             title="🖥️  Select a tmux session",
             show_header=True,
@@ -89,7 +87,7 @@ class SessionSelector:
         return table, filtered_sessions
 
     def select_session(self) -> str | None:
-        """Show interactive session selector and return selected session"""
+        """Show interactive session selector and return selected session."""
         if not self.sessions:
             return None
 
@@ -141,8 +139,7 @@ class SessionSelector:
 
 
 def show_session_selector(sessions: list[dict[str, str]]) -> str | None:
-    """
-    Show interactive session selector
+    """Show interactive session selector.
 
     Args:
         sessions: List of session dictionaries with 'project' and 'session' keys

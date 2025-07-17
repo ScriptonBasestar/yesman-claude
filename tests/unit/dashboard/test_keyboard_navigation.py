@@ -5,11 +5,11 @@ from libs.dashboard.keyboard_navigation import KeyModifier
 
 
 class TestKeyboardNavigation:
-    """Tests for keyboard navigation system"""
+    """Tests for keyboard navigation system."""
 
     @pytest.fixture
     def keyboard_manager(self):
-        """Create KeyboardNavigationManager instance"""
+        """Create KeyboardNavigationManager instance."""
         manager = KeyboardNavigationManager()
         yield manager
         # Cleanup
@@ -17,7 +17,7 @@ class TestKeyboardNavigation:
         manager.bindings.clear()
 
     def test_keyboard_navigation(self, keyboard_manager):
-        """Test 4: Keyboard navigation system"""
+        """Test 4: Keyboard navigation system."""
         # Test action registration
         test_called = False
 

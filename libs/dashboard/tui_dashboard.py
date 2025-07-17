@@ -1,5 +1,4 @@
-"""
-TUI Dashboard
+"""TUI Dashboard.
 
 Textual-based terminal user interface dashboard for Yesman-Claude
 Provides comprehensive project monitoring with multiple views and real-time updates.
@@ -14,15 +13,30 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.message import Message
 from textual.reactive import reactive
 from textual.timer import Timer
-from textual.widgets import Footer, Header, Label, Placeholder, RichLog, Static, Switch, TabbedContent, TabPane
+from textual.widgets import (
+    Footer,
+    Header,
+    Label,
+    Placeholder,
+    RichLog,
+    Static,
+    Switch,
+    TabbedContent,
+    TabPane,
+)
 
 from .renderers import TUIRenderer, WidgetType
-from .renderers.widget_models import ActivityData, HealthData, HealthLevel, SessionData, SessionStatus
+from .renderers.widget_models import (
+    ActivityData,
+    HealthData,
+    HealthLevel,
+    SessionData,
+    SessionStatus,
+)
 
 
 class DashboardWidget(Static):
-    """
-    Base dashboard widget component for Textual UI
+    """Base dashboard widget component for Textual UI.
 
     Integrates with TUIRenderer to display various widget types
     with real-time data updates and rich formatting.
@@ -35,8 +49,7 @@ class DashboardWidget(Static):
         update_interval: float = 2.0,
         **kwargs,
     ):
-        """
-        Initialize dashboard widget
+        """Initialize dashboard widget.
 
         Args:
             widget_type: Type of widget to render
@@ -52,24 +65,23 @@ class DashboardWidget(Static):
         self._last_data: Any | None = None
 
     def compose(self) -> ComposeResult:
-        """Compose the widget structure"""
+        """Compose the widget structure."""
         if self.title:
             yield Label(self.title, classes="widget-title")
         yield Container(id="widget-content")
 
     def on_mount(self) -> None:
-        """Start auto-update timer when widget is mounted"""
+        """Start auto-update timer when widget is mounted."""
         if self.update_interval > 0:
             self._timer = self.set_interval(self.update_interval, self.auto_update)
 
     def on_unmount(self) -> None:
-        """Clean up timer when widget is unmounted"""
+        """Clean up timer when widget is unmounted."""
         if self._timer:
             self._timer.stop()
 
     async def update_data(self, data: Any) -> None:
-        """
-        Update widget with new data
+        """Update widget with new data.
 
         Args:
             data: Widget-specific data to display
@@ -91,13 +103,13 @@ class DashboardWidget(Static):
             await content_container.update(f"[red]{error_msg}[/red]")
 
     async def auto_update(self) -> None:
-        """Auto-update callback - override in subclasses for custom data fetching"""
+        """Auto-update callback - override in subclasses for custom data fetching."""
         if self._last_data is not None:
             await self.update_data(self._last_data)
 
 
 class SessionsView(DashboardWidget):
-    """Sessions monitoring view"""
+    """Sessions monitoring view."""
 
     def __init__(self, **kwargs):
         super().__init__(
@@ -108,7 +120,7 @@ class SessionsView(DashboardWidget):
         )
 
     async def auto_update(self) -> None:
-        """Fetch and update session data"""
+        """Fetch and update session data."""
         # Mock session data - replace with actual data fetching
         mock_sessions = [
             SessionData(
@@ -130,7 +142,7 @@ class SessionsView(DashboardWidget):
 
 
 class HealthView(DashboardWidget):
-    """Project health monitoring view"""
+    """Project health monitoring view."""
 
     def __init__(self, **kwargs):
         super().__init__(
@@ -141,7 +153,7 @@ class HealthView(DashboardWidget):
         )
 
     async def auto_update(self) -> None:
-        """Fetch and update health data"""
+        """Fetch and update health data."""
         # Mock health data
         mock_health = HealthData(
             overall_score=85,
@@ -162,7 +174,7 @@ class HealthView(DashboardWidget):
 
 
 class ActivityView(DashboardWidget):
-    """Activity monitoring view"""
+    """Activity monitoring view."""
 
     def __init__(self, **kwargs):
         super().__init__(
@@ -173,7 +185,7 @@ class ActivityView(DashboardWidget):
         )
 
     async def auto_update(self) -> None:
-        """Fetch and update activity data"""
+        """Fetch and update activity data."""
         # Mock activity data
         mock_activity = ActivityData(
             hourly_stats={f"{i:02d}:00": i * 10 for i in range(24)},
@@ -186,7 +198,7 @@ class ActivityView(DashboardWidget):
 
 
 class LogsView(Static):
-    """Logs monitoring view"""
+    """Logs monitoring view."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -194,18 +206,18 @@ class LogsView(Static):
         self.max_logs = 100
 
     def compose(self) -> ComposeResult:
-        """Compose logs view"""
+        """Compose logs view."""
         yield Label("System Logs", classes="widget-title")
         yield RichLog(id="logs-content", highlight=True, markup=True)
 
     def on_mount(self) -> None:
-        """Initialize logs view with sample data"""
+        """Initialize logs view with sample data."""
         self.add_log("INFO", "TUI Dashboard started")
         self.add_log("DEBUG", "Initializing widget components")
         self.add_log("INFO", "Auto-refresh enabled for all views")
 
     def add_log(self, level: str, message: str) -> None:
-        """Add a log entry"""
+        """Add a log entry."""
         timestamp = datetime.now().strftime("%H:%M:%S")
 
         # Color-code log levels
@@ -230,7 +242,7 @@ class LogsView(Static):
 
 
 class SettingsView(Static):
-    """Settings and configuration view"""
+    """Settings and configuration view."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -242,7 +254,7 @@ class SettingsView(Static):
         }
 
     def compose(self) -> ComposeResult:
-        """Compose settings view"""
+        """Compose settings view."""
         yield Label("Dashboard Settings", classes="widget-title")
         yield Vertical(
             Horizontal(
@@ -264,7 +276,7 @@ class SettingsView(Static):
         )
 
     def on_switch_changed(self, event: Switch.Changed) -> None:
-        """Handle settings changes"""
+        """Handle settings changes."""
         if event.switch.id == "auto-refresh-switch":
             self.settings["auto_refresh"] = event.value
             self.post_message(self.SettingChanged("auto_refresh", event.value))
@@ -276,7 +288,7 @@ class SettingsView(Static):
             self.post_message(self.SettingChanged("show_timestamps", event.value))
 
     class SettingChanged(Message):
-        """Setting changed message"""
+        """Setting changed message."""
 
         def __init__(self, setting: str, value: Any) -> None:
             self.setting = setting
@@ -285,8 +297,7 @@ class SettingsView(Static):
 
 
 class TUIDashboard(App):
-    """
-    Textual-based TUI Dashboard for Yesman-Claude
+    """Textual-based TUI Dashboard for Yesman-Claude.
 
     Provides comprehensive project monitoring with multiple views,
     keyboard shortcuts, auto-refresh, and customizable settings.
@@ -312,7 +323,7 @@ class TUIDashboard(App):
     refresh_interval = reactive(3.0)
 
     def __init__(self, **kwargs):
-        """Initialize TUI Dashboard"""
+        """Initialize TUI Dashboard."""
         super().__init__(**kwargs)
         self.title = "Yesman-Claude TUI Dashboard"
         self.sub_title = "Real-time Project Monitoring"
@@ -328,7 +339,7 @@ class TUIDashboard(App):
         self._refresh_timer: Timer | None = None
 
     def compose(self) -> ComposeResult:
-        """Compose the main dashboard layout"""
+        """Compose the main dashboard layout."""
         yield Header(show_clock=True)
 
         with TabbedContent():
@@ -350,12 +361,12 @@ class TUIDashboard(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        """Initialize dashboard after mounting"""
+        """Initialize dashboard after mounting."""
         self.call_after_refresh(self.initialize_views)
         self.start_auto_refresh()
 
     async def initialize_views(self) -> None:
-        """Initialize all view components"""
+        """Initialize all view components."""
         # Initialize views
         self.sessions_view = SessionsView()
         self.health_view = HealthView()
@@ -389,7 +400,7 @@ class TUIDashboard(App):
             self.logs_view.add_log("INFO", "All dashboard views initialized")
 
     def start_auto_refresh(self) -> None:
-        """Start auto-refresh timer"""
+        """Start auto-refresh timer."""
         if self.auto_refresh_enabled and self._refresh_timer is None:
             self._refresh_timer = self.set_interval(
                 self.refresh_interval,
@@ -397,13 +408,13 @@ class TUIDashboard(App):
             )
 
     def stop_auto_refresh(self) -> None:
-        """Stop auto-refresh timer"""
+        """Stop auto-refresh timer."""
         if self._refresh_timer:
             self._refresh_timer.stop()
             self._refresh_timer = None
 
     async def auto_refresh_all_views(self) -> None:
-        """Auto-refresh all active views"""
+        """Auto-refresh all active views."""
         try:
             # Refresh only the currently visible view for performance
             current_tab = self.query_one(TabbedContent).active_pane
@@ -427,55 +438,55 @@ class TUIDashboard(App):
 
     # Action handlers
     def action_quit(self) -> None:
-        """Quit the application"""
+        """Quit the application."""
         self.stop_auto_refresh()
         self.exit()
 
     def action_toggle_dark(self) -> None:
-        """Toggle dark mode"""
+        """Toggle dark mode."""
         self.dark = not self.dark
         if self.logs_view:
             mode = "dark" if self.dark else "light"
             self.logs_view.add_log("INFO", f"Switched to {mode} mode")
 
     async def action_refresh(self) -> None:
-        """Manual refresh current view"""
+        """Manual refresh current view."""
         await self.auto_refresh_all_views()
         if self.logs_view:
             self.logs_view.add_log("INFO", "Manual refresh triggered")
 
     def action_view_sessions(self) -> None:
-        """Switch to sessions view"""
+        """Switch to sessions view."""
         tabs = self.query_one(TabbedContent)
         tabs.active = "sessions-tab"
         self.current_view = "sessions"
 
     def action_view_health(self) -> None:
-        """Switch to health view"""
+        """Switch to health view."""
         tabs = self.query_one(TabbedContent)
         tabs.active = "health-tab"
         self.current_view = "health"
 
     def action_view_activity(self) -> None:
-        """Switch to activity view"""
+        """Switch to activity view."""
         tabs = self.query_one(TabbedContent)
         tabs.active = "activity-tab"
         self.current_view = "activity"
 
     def action_view_logs(self) -> None:
-        """Switch to logs view"""
+        """Switch to logs view."""
         tabs = self.query_one(TabbedContent)
         tabs.active = "logs-tab"
         self.current_view = "logs"
 
     def action_view_settings(self) -> None:
-        """Switch to settings view"""
+        """Switch to settings view."""
         tabs = self.query_one(TabbedContent)
         tabs.active = "settings-tab"
         self.current_view = "settings"
 
     def on_settings_view_setting_changed(self, message: SettingsView.SettingChanged) -> None:
-        """Handle settings changes"""
+        """Handle settings changes."""
         if message.setting == "auto_refresh":
             self.auto_refresh_enabled = message.value
             if message.value:
@@ -490,7 +501,7 @@ class TUIDashboard(App):
 
 
 def run_tui_dashboard():
-    """Convenience function to run the TUI dashboard"""
+    """Convenience function to run the TUI dashboard."""
     app = TUIDashboard()
     app.run()
 

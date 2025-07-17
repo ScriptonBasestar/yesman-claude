@@ -1,4 +1,4 @@
-"""Centralized configuration loader with multiple source support and caching"""
+"""Centralized configuration loader with multiple source support and caching."""
 
 import os
 from abc import ABC, abstractmethod
@@ -12,28 +12,28 @@ from .config_schema import YesmanConfigSchema
 
 
 class ConfigSource(ABC):
-    """Abstract base class for configuration sources"""
+    """Abstract base class for configuration sources."""
 
     @abstractmethod
     def load(self) -> dict[str, Any]:
-        """Load configuration from this source"""
+        """Load configuration from this source."""
         pass
 
     @abstractmethod
     def exists(self) -> bool:
-        """Check if this source exists/is available"""
+        """Check if this source exists/is available."""
         pass
 
 
 class YamlFileSource(ConfigSource):
-    """YAML file configuration source"""
+    """YAML file configuration source."""
 
     def __init__(self, path: Path | str):
         self.path = Path(path).expanduser()
         self.file_path = self.path  # For cache compatibility
 
     def load(self) -> dict[str, Any]:
-        """Load configuration from YAML file"""
+        """Load configuration from YAML file."""
         if not self.exists():
             return {}
 
@@ -41,11 +41,11 @@ class YamlFileSource(ConfigSource):
             return yaml.safe_load(f) or {}
 
     def exists(self) -> bool:
-        """Check if file exists"""
+        """Check if file exists."""
         return self.path.exists() and self.path.is_file()
 
     def get_cache_key(self) -> str:
-        """Generate cache key based on file path and modification time"""
+        """Generate cache key based on file path and modification time."""
         if not self.path.exists():
             return f"file:{self.path}:missing"
 
@@ -54,13 +54,13 @@ class YamlFileSource(ConfigSource):
 
 
 class EnvironmentSource(ConfigSource):
-    """Environment variable configuration source"""
+    """Environment variable configuration source."""
 
     def __init__(self, prefix: str = "YESMAN_"):
         self.prefix = prefix
 
     def load(self) -> dict[str, Any]:
-        """Load configuration from environment variables"""
+        """Load configuration from environment variables."""
         config: dict[str, Any] = {}
 
         for key, value in os.environ.items():
@@ -87,11 +87,11 @@ class EnvironmentSource(ConfigSource):
         return config
 
     def exists(self) -> bool:
-        """Environment source always exists"""
+        """Environment source always exists."""
         return True
 
     def _convert_value(self, value: str) -> Any:
-        """Convert string value to appropriate type"""
+        """Convert string value to appropriate type."""
         # Try boolean
         if value.lower() in ("true", "false"):
             return value.lower() == "true"
@@ -112,43 +112,43 @@ class EnvironmentSource(ConfigSource):
         return value
 
     def get_cache_key(self) -> str:
-        """Generate cache key based on relevant environment variables"""
+        """Generate cache key based on relevant environment variables."""
         import hashlib
         import json
 
         env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)
-        env_hash = hashlib.md5(env_json.encode()).hexdigest()[:8]
+        env_hash = hashlib.sha256(env_json.encode()).hexdigest()[:16]
         return f"env:{self.prefix}:{env_hash}"
 
 
 class DictSource(ConfigSource):
-    """Dictionary configuration source (for programmatic config)"""
+    """Dictionary configuration source (for programmatic config)."""
 
     def __init__(self, config: dict[str, Any]):
         self.config = config
 
     def load(self) -> dict[str, Any]:
-        """Return the dictionary"""
+        """Return the dictionary."""
         return self.config.copy()
 
     def exists(self) -> bool:
-        """Dict source always exists"""
+        """Dict source always exists."""
         return True
 
     def get_cache_key(self) -> str:
-        """Generate cache key based on dictionary content"""
+        """Generate cache key based on dictionary content."""
         import hashlib
         import json
 
         content_json = json.dumps(self.config, sort_keys=True)
-        content_hash = hashlib.md5(content_json.encode()).hexdigest()[:8]
+        content_hash = hashlib.sha256(content_json.encode()).hexdigest()[:16]
         return f"dict:{content_hash}"
 
 
 class ConfigLoader:
-    """Centralized configuration loader with validation"""
+    """Centralized configuration loader with validation."""
 
     def __init__(self):
         self._sources: list[ConfigSource] = []
@@ -156,17 +156,17 @@ class ConfigLoader:
 
     @property
     def sources(self) -> list[ConfigSource]:
-        """Get list of configuration sources"""
+        """Get list of configuration sources."""
         return self._sources.copy()
 
     def add_source(self, source: ConfigSource) -> None:
-        """Add a configuration source"""
+        """Add a configuration source."""
         self._sources.append(source)
         # Invalidate cache when source is added
         self._cached_config = None
 
     def load(self, validate: bool = True) -> YesmanConfigSchema:
-        """Load and merge configurations from all sources"""
+        """Load and merge configurations from all sources."""
         if self._cached_config is not None:
             return self._cached_config
 
@@ -188,7 +188,7 @@ class ConfigLoader:
         return self._cached_config
 
     def validate(self, config: dict[str, Any]) -> YesmanConfigSchema:
-        """Validate configuration against schema"""
+        """Validate configuration against schema."""
         try:
             return YesmanConfigSchema.model_validate(config)
         except ValidationError as e:
@@ -202,12 +202,12 @@ class ConfigLoader:
             raise ValueError("Configuration validation failed:\n" + "\n".join(errors)) from e
 
     def reload(self) -> YesmanConfigSchema:
-        """Force reload configuration from all sources"""
+        """Force reload configuration from all sources."""
         self._cached_config = None
         return self.load()
 
     def _deep_merge(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> dict[str, Any]:
-        """Deep merge two dictionaries"""
+        """Deep merge two dictionaries."""
         result = dict1.copy()
 
         for key, value in dict2.items():
@@ -219,7 +219,7 @@ class ConfigLoader:
         return result
 
     def get_config_sources_info(self) -> list[dict[str, Any]]:
-        """Get information about configured sources"""
+        """Get information about configured sources."""
         info = []
         for i, source in enumerate(self._sources):
             source_info = {
@@ -239,7 +239,7 @@ class ConfigLoader:
 
 
 def create_default_loader() -> ConfigLoader:
-    """Create a ConfigLoader with default sources"""
+    """Create a ConfigLoader with default sources."""
     loader = ConfigLoader()
 
     # Add default configuration sources in priority order
@@ -270,8 +270,7 @@ def create_default_loader() -> ConfigLoader:
 
 
 def create_cached_config_loader(cache_ttl: float = 300.0):
-    """
-    Create a cached configuration loader with default sources
+    """Create a cached configuration loader with default sources.
 
     Args:
         cache_ttl: Cache time-to-live in seconds (default: 5 minutes)

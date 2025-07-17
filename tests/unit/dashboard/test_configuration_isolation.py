@@ -6,10 +6,10 @@ from libs.dashboard.theme_system import ColorPalette, Theme, ThemeMode
 
 
 class TestConfigurationIsolation:
-    """Tests for configuration isolation between instances"""
+    """Tests for configuration isolation between instances."""
 
     def test_configuration_isolation(self):
-        """Test configuration isolation between instances"""
+        """Test configuration isolation between instances."""
         with (
             tempfile.TemporaryDirectory() as temp_dir1,
             tempfile.TemporaryDirectory() as temp_dir2,

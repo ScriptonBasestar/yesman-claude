@@ -6,11 +6,11 @@ from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
 
 
 class TestThemeRendererIntegration:
-    """Tests for theme and renderer integration"""
+    """Tests for theme and renderer integration."""
 
     @pytest.fixture
     def theme_manager(self):
-        """Create ThemeManager instance"""
+        """Create ThemeManager instance."""
         import tempfile
         from pathlib import Path
 
@@ -18,7 +18,7 @@ class TestThemeRendererIntegration:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     def test_theme_renderer_integration(self, theme_manager):
-        """Test 8: Theme and renderer integration"""
+        """Test 8: Theme and renderer integration."""
         factory = RendererFactory()
 
         # Test theme switching affects renderers

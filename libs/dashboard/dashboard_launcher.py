@@ -1,5 +1,4 @@
-"""
-Dashboard Launcher
+"""Dashboard Launcher.
 
 Detects optimal dashboard interface and manages system requirements.
 """
@@ -16,7 +15,7 @@ from typing import Any
 
 @dataclass
 class InterfaceInfo:
-    """Information about a dashboard interface"""
+    """Information about a dashboard interface."""
 
     name: str
     description: str
@@ -27,16 +26,14 @@ class InterfaceInfo:
 
 
 class DashboardLauncher:
-    """
-    Manages dashboard interface detection, dependency checking, and launching.
+    """Manages dashboard interface detection, dependency checking, and launching.
 
     Provides intelligent interface selection based on system capabilities,
     user preferences, and environment constraints.
     """
 
     def __init__(self, project_root: Path | None = None):
-        """
-        Initialize the dashboard launcher.
+        """Initialize the dashboard launcher.
 
         Args:
             project_root: Path to project root. If None, auto-detects from current file.
@@ -76,8 +73,7 @@ class DashboardLauncher:
         }
 
     def detect_best_interface(self) -> str:
-        """
-        Automatically detect the best dashboard interface for current environment.
+        """Automatically detect the best dashboard interface for current environment.
 
         Returns:
             Interface name (tui/web/tauri)
@@ -107,8 +103,7 @@ class DashboardLauncher:
             return "web"
 
     def get_available_interfaces(self) -> dict[str, InterfaceInfo]:
-        """
-        Get information about all available interfaces.
+        """Get information about all available interfaces.
 
         Returns:
             Dictionary of interface name to InterfaceInfo
@@ -117,8 +112,7 @@ class DashboardLauncher:
         return self._interface_configs.copy()
 
     def get_interface_info(self, interface: str) -> InterfaceInfo:
-        """
-        Get detailed information about a specific interface.
+        """Get detailed information about a specific interface.
 
         Args:
             interface: Interface name (tui/web/tauri)
@@ -136,8 +130,7 @@ class DashboardLauncher:
         return self._interface_configs[interface]
 
     def check_system_requirements(self) -> dict[str, dict[str, Any]]:
-        """
-        Check system requirements for all interfaces.
+        """Check system requirements for all interfaces.
 
         Returns:
             Dictionary with requirement status for each interface
@@ -166,8 +159,7 @@ class DashboardLauncher:
         return results
 
     def install_dependencies(self, interface: str) -> bool:
-        """
-        Attempt to install missing dependencies for an interface.
+        """Attempt to install missing dependencies for an interface.
 
         Args:
             interface: Interface name to install dependencies for
@@ -214,22 +206,22 @@ class DashboardLauncher:
     # Private methods for environment detection
 
     def _is_gui_available(self) -> bool:
-        """Check if GUI environment is available"""
+        """Check if GUI environment is available."""
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
         else:  # Linux/Unix
             return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
 
     def _is_ssh_session(self) -> bool:
-        """Check if running in SSH session"""
+        """Check if running in SSH session."""
         return bool(os.environ.get("SSH_CLIENT") or os.environ.get("SSH_TTY"))
 
     def _is_terminal_capable(self) -> bool:
-        """Check if terminal supports rich output"""
+        """Check if terminal supports rich output."""
         return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
 
     def _is_tauri_available(self) -> bool:
-        """Check if Tauri desktop app is available"""
+        """Check if Tauri desktop app is available."""
         # Check if tauri directory exists
         if not self.tauri_path.exists():
             return False
@@ -242,11 +234,11 @@ class DashboardLauncher:
         return self._is_node_available()
 
     def _is_node_available(self) -> bool:
-        """Check if Node.js and npm are available"""
+        """Check if Node.js and npm are available."""
         return shutil.which("node") is not None and shutil.which("npm") is not None
 
     def _is_python_package_available(self, package: str) -> bool:
-        """Check if a Python package is available"""
+        """Check if a Python package is available."""
         try:
             __import__(package)
             return True
@@ -254,7 +246,7 @@ class DashboardLauncher:
             return False
 
     def _update_interface_availability(self) -> None:
-        """Update availability status for all interfaces"""
+        """Update availability status for all interfaces."""
         # TUI - always available (uses rich which is a core dependency)
         self._interface_configs["tui"].available = True
         self._interface_configs["tui"].reason = None
@@ -291,8 +283,7 @@ class DashboardLauncher:
         self._interface_configs["tauri"].reason = tauri_reason
 
     def _check_requirement(self, requirement: str) -> tuple[bool, str]:
-        """
-        Check if a specific requirement is met.
+        """Check if a specific requirement is met.
 
         Args:
             requirement: Requirement name to check
@@ -372,7 +363,7 @@ class DashboardLauncher:
             return False, f"Unknown requirement: {requirement}"
 
     def _install_python_packages(self, packages: list[str]) -> None:
-        """Install Python packages using pip"""
+        """Install Python packages using pip."""
         for package in packages:
             if not self._is_python_package_available(package):
                 print(f"📦 Installing {package}...")

@@ -1,4 +1,4 @@
-"""Dependency Injection Container for managing service instances and dependencies"""
+"""Dependency Injection Container for managing service instances and dependencies."""
 
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 
 class DIContainer:
-    """Dependency Injection Container
+    """Dependency Injection Container.
 
     Provides service registration and resolution with support for:
     - Singleton instances
@@ -23,7 +23,7 @@ class DIContainer:
         self._resolving: set = set()  # Track circular dependencies
 
     def register_singleton(self, service_type: type[T], instance: T) -> None:
-        """Register a singleton instance
+        """Register a singleton instance.
 
         Args:
             service_type: The type/interface to register
@@ -35,7 +35,7 @@ class DIContainer:
         self._services.pop(service_type, None)
 
     def register_factory(self, service_type: type[T], factory: Callable[[], T]) -> None:
-        """Register a factory function
+        """Register a factory function.
 
         Args:
             service_type: The type/interface to register
@@ -47,7 +47,7 @@ class DIContainer:
         self._services.pop(service_type, None)
 
     def register_transient(self, service_type: type[T], factory: Callable[[], T]) -> None:
-        """Register a transient service (new instance each time)
+        """Register a transient service (new instance each time).
 
         Args:
             service_type: The type/interface to register
@@ -59,7 +59,7 @@ class DIContainer:
         self._factories.pop(service_type, None)
 
     def resolve(self, service_type: type[T]) -> T:
-        """Resolve a service instance
+        """Resolve a service instance.
 
         Args:
             service_type: The type/interface to resolve
@@ -100,7 +100,7 @@ class DIContainer:
         raise ValueError(f"Service {service_type.__name__} is not registered")
 
     def is_registered(self, service_type: type[T]) -> bool:
-        """Check if a service type is registered
+        """Check if a service type is registered.
 
         Args:
             service_type: The type/interface to check
@@ -111,14 +111,14 @@ class DIContainer:
         return service_type in self._singletons or service_type in self._factories or service_type in self._services
 
     def clear(self) -> None:
-        """Clear all registrations and reset the container"""
+        """Clear all registrations and reset the container."""
         self._services.clear()
         self._factories.clear()
         self._singletons.clear()
         self._resolving.clear()
 
     def get_registered_services(self) -> dict[str, str]:
-        """Get information about all registered services
+        """Get information about all registered services.
 
         Returns:
             Dictionary mapping service names to registration types

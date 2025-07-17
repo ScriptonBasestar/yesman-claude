@@ -88,44 +88,6 @@ exclude_lines = [
 [tool.coverage.html]
 directory = "htmlcov"
 
-[tool.ruff]
-target-version = "py311"
-line-length = 88
-
-[tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "F",   # pyflakes
-    "W",   # pycodestyle warnings
-    "I",   # isort
-    "N",   # pep8-naming
-    "UP",  # pyupgrade
-    "D",   # pydocstyle (docstring linting)
-]
-ignore = [
-    "D203", # one-blank-line-before-class (conflicts with D211)
-    "D213", # multi-line-summary-second-line (conflicts with D212)
-]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = false
-warn_unused_configs = false
-disallow_untyped_defs = false
-no_implicit_optional = false
-strict_optional = false
-ignore_missing_imports = true
-show_error_codes = false
-disable_error_code = ["attr-defined", "arg-type", "override", "operator", "call-overload", "no-any-return", "var-annotated", "has-type", "misc", "assignment", "return-value", "index", "call-arg", "no-redef", "import-untyped", "valid-type", "dict-item", "func-returns-value", "union-attr", "annotation-unchecked"]
-explicit_package_bases = true
-exclude = [
-    "tauri-dashboard/",
-    "test-integration/",
-]
-
 [dependency-groups]
 dev = [
     "ruff>=0.12.3",

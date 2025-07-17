@@ -29,7 +29,9 @@ async def demo_branch_testing():
         print("   🔧 Enabling branch testing...")
 
         # Create a mock branch test manager for demo
-        btm = BranchTestManager(repo_path=str(work_dir), results_dir=str(work_dir / "test_results"))
+        btm = BranchTestManager(
+            repo_path=str(work_dir), results_dir=str(work_dir / "test_results")
+        )
 
         # Configure some demo test suites
         print("   📋 Configuring test suites...")

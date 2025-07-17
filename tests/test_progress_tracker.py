@@ -1,14 +1,14 @@
-"""Test progress tracking functionality"""
+"""Test progress tracking functionality."""
 
 from libs.core.models import SessionProgress, TaskPhase, TaskProgress
 from libs.core.progress_tracker import ProgressAnalyzer
 
 
 class TestTaskProgress:
-    """Test TaskProgress model"""
+    """Test TaskProgress model."""
 
     def test_phase_update(self):
-        """Test phase updates and progress calculation"""
+        """Test phase updates and progress calculation."""
         task = TaskProgress()
         assert task.phase == TaskPhase.IDLE
         assert task.overall_progress == 0.0
@@ -25,7 +25,7 @@ class TestTaskProgress:
         assert task.overall_progress == 10.0
 
     def test_phase_progression(self):
-        """Test progression through all phases"""
+        """Test progression through all phases."""
         task = TaskProgress()
 
         # Starting phase (10% weight)
@@ -59,7 +59,7 @@ class TestTaskProgress:
         assert task.overall_progress == 100.0
 
     def test_to_dict(self):
-        """Test serialization to dictionary"""
+        """Test serialization to dictionary."""
         task = TaskProgress()
         task.files_created = 3
         task.files_modified = 5
@@ -76,10 +76,10 @@ class TestTaskProgress:
 
 
 class TestSessionProgress:
-    """Test SessionProgress model"""
+    """Test SessionProgress model."""
 
     def test_add_task(self):
-        """Test adding tasks to session"""
+        """Test adding tasks to session."""
         session = SessionProgress(session_name="test-session")
         assert len(session.tasks) == 0
 
@@ -94,7 +94,7 @@ class TestSessionProgress:
         assert session.get_current_task() == task2
 
     def test_overall_progress(self):
-        """Test overall progress calculation"""
+        """Test overall progress calculation."""
         session = SessionProgress(session_name="test-session")
 
         # No tasks
@@ -111,7 +111,7 @@ class TestSessionProgress:
         assert session.calculate_overall_progress() == 75.0
 
     def test_aggregate_updates(self):
-        """Test aggregate metric updates"""
+        """Test aggregate metric updates."""
         session = SessionProgress(session_name="test-session")
 
         task1 = session.add_task()
@@ -134,10 +134,10 @@ class TestSessionProgress:
 
 
 class TestProgressAnalyzer:
-    """Test ProgressAnalyzer functionality"""
+    """Test ProgressAnalyzer functionality."""
 
     def test_phase_detection(self):
-        """Test phase detection from output"""
+        """Test phase detection from output."""
         analyzer = ProgressAnalyzer()
 
         # Test starting phase
@@ -162,7 +162,7 @@ class TestProgressAnalyzer:
         assert progress.get_current_task().phase == TaskPhase.IMPLEMENTING
 
     def test_file_activity_analysis(self):
-        """Test file activity detection"""
+        """Test file activity detection."""
         analyzer = ProgressAnalyzer()
 
         output = [
@@ -178,7 +178,7 @@ class TestProgressAnalyzer:
         assert task.files_modified >= 1
 
     def test_command_activity_analysis(self):
-        """Test command execution detection"""
+        """Test command execution detection."""
         analyzer = ProgressAnalyzer()
 
         output = [
@@ -198,7 +198,7 @@ class TestProgressAnalyzer:
         assert task.commands_failed >= 1
 
     def test_todo_activity_analysis(self):
-        """Test TODO tracking"""
+        """Test TODO tracking."""
         analyzer = ProgressAnalyzer()
 
         output = [
@@ -214,7 +214,7 @@ class TestProgressAnalyzer:
         assert task.todos_completed >= 1
 
     def test_session_persistence(self):
-        """Test that analyzer maintains session state"""
+        """Test that analyzer maintains session state."""
         analyzer = ProgressAnalyzer()
 
         # First analysis

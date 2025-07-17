@@ -1,28 +1,25 @@
-"""
-Renderer Registry
-Central registry for managing renderer instances and types
+"""Renderer Registry
+Central registry for managing renderer instances and types.
 """
 
 from .base_renderer import BaseRenderer, RenderFormat
 
 
 class RendererRegistry:
-    """
-    Registry for managing renderer classes and instances
+    """Registry for managing renderer classes and instances.
 
     Provides a centralized way to register, retrieve, and manage
     different renderer implementations for various formats.
     """
 
     def __init__(self):
-        """Initialize the registry"""
+        """Initialize the registry."""
         self._renderers: dict[RenderFormat, type[BaseRenderer]] = {}
         self._instances: dict[RenderFormat, BaseRenderer] = {}
         self._default_format: RenderFormat | None = None
 
     def register(self, format_type: RenderFormat, renderer_class: type[BaseRenderer]):
-        """
-        Register a renderer class for a specific format
+        """Register a renderer class for a specific format.
 
         Args:
             format_type: The format this renderer handles
@@ -41,8 +38,7 @@ class RendererRegistry:
             self._default_format = format_type
 
     def unregister(self, format_type: RenderFormat):
-        """
-        Unregister a renderer for a specific format
+        """Unregister a renderer for a specific format.
 
         Args:
             format_type: The format to unregister
@@ -58,8 +54,7 @@ class RendererRegistry:
             self._default_format = next(iter(self._renderers.keys())) if self._renderers else None
 
     def get_renderer_class(self, format_type: RenderFormat) -> type[BaseRenderer] | None:
-        """
-        Get the renderer class for a specific format
+        """Get the renderer class for a specific format.
 
         Args:
             format_type: The format to get renderer class for
@@ -70,8 +65,7 @@ class RendererRegistry:
         return self._renderers.get(format_type)
 
     def get_renderer(self, format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
-        """
-        Get a renderer instance for a specific format
+        """Get a renderer instance for a specific format.
 
         Args:
             format_type: The format to get renderer for
@@ -98,8 +92,7 @@ class RendererRegistry:
         return instance
 
     def get_default_renderer(self, **kwargs) -> BaseRenderer | None:
-        """
-        Get the default renderer instance
+        """Get the default renderer instance.
 
         Args:
             **kwargs: Additional arguments to pass to renderer constructor
@@ -113,8 +106,7 @@ class RendererRegistry:
         return self.get_renderer(self._default_format, **kwargs)
 
     def set_default_format(self, format_type: RenderFormat):
-        """
-        Set the default renderer format
+        """Set the default renderer format.
 
         Args:
             format_type: The format to set as default
@@ -128,8 +120,7 @@ class RendererRegistry:
         self._default_format = format_type
 
     def get_default_format(self) -> RenderFormat | None:
-        """
-        Get the current default format
+        """Get the current default format.
 
         Returns:
             Default format or None if not set
@@ -137,8 +128,7 @@ class RendererRegistry:
         return self._default_format
 
     def get_registered_formats(self) -> list[RenderFormat]:
-        """
-        Get list of all registered formats
+        """Get list of all registered formats.
 
         Returns:
             List of registered formats
@@ -146,8 +136,7 @@ class RendererRegistry:
         return list(self._renderers.keys())
 
     def is_registered(self, format_type: RenderFormat) -> bool:
-        """
-        Check if a format is registered
+        """Check if a format is registered.
 
         Args:
             format_type: The format to check
@@ -158,21 +147,21 @@ class RendererRegistry:
         return format_type in self._renderers
 
     def clear(self):
-        """Clear all registered renderers and instances"""
+        """Clear all registered renderers and instances."""
         self._renderers.clear()
         self._instances.clear()
         self._default_format = None
 
     def __len__(self) -> int:
-        """Get number of registered renderers"""
+        """Get number of registered renderers."""
         return len(self._renderers)
 
     def __contains__(self, format_type: RenderFormat) -> bool:
-        """Check if format is registered"""
+        """Check if format is registered."""
         return format_type in self._renderers
 
     def __repr__(self) -> str:
-        """String representation of registry"""
+        """String representation of registry."""
         formats = ", ".join(f.value for f in self._renderers)
         default = self._default_format.value if self._default_format else "None"
         return f"RendererRegistry(formats=[{formats}], default={default})"
@@ -183,8 +172,7 @@ registry = RendererRegistry()
 
 
 def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRenderer]):
-    """
-    Convenience function to register a renderer globally
+    """Convenience function to register a renderer globally.
 
     Args:
         format_type: The format this renderer handles
@@ -194,8 +182,7 @@ def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRender
 
 
 def get_renderer(format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
-    """
-    Convenience function to get a renderer from global registry
+    """Convenience function to get a renderer from global registry.
 
     Args:
         format_type: The format to get renderer for
@@ -208,8 +195,7 @@ def get_renderer(format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
 
 
 def get_default_renderer(**kwargs) -> BaseRenderer | None:
-    """
-    Convenience function to get default renderer from global registry
+    """Convenience function to get default renderer from global registry.
 
     Args:
         **kwargs: Additional arguments to pass to renderer constructor

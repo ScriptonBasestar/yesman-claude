@@ -1,4 +1,4 @@
-"""Advanced conflict prediction system for multi-agent branch development"""
+"""Advanced conflict prediction system for multi-agent branch development."""
 
 import ast
 import difflib
@@ -12,14 +12,19 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from .branch_manager import BranchManager
-from .conflict_resolution import ConflictInfo, ConflictResolutionEngine, ConflictSeverity, ConflictType
+from .conflict_resolution import (
+    ConflictInfo,
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
+)
 from .semantic_analyzer import SemanticAnalyzer
 
 logger = logging.getLogger(__name__)
 
 
 class PredictionConfidence(Enum):
-    """Confidence levels for conflict predictions"""
+    """Confidence levels for conflict predictions."""
 
     LOW = "low"  # 20-40% chance
     MEDIUM = "medium"  # 40-70% chance
@@ -28,7 +33,7 @@ class PredictionConfidence(Enum):
 
 
 class ConflictPattern(Enum):
-    """Types of conflict patterns that can be predicted"""
+    """Types of conflict patterns that can be predicted."""
 
     OVERLAPPING_IMPORTS = "overlapping_imports"
     FUNCTION_SIGNATURE_DRIFT = "function_signature_drift"
@@ -42,7 +47,7 @@ class ConflictPattern(Enum):
 
 @dataclass
 class PredictionResult:
-    """Result of a conflict prediction analysis"""
+    """Result of a conflict prediction analysis."""
 
     prediction_id: str
     confidence: PredictionConfidence
@@ -61,7 +66,7 @@ class PredictionResult:
 
 
 class ConflictVector(NamedTuple):
-    """Vector representing potential conflict characteristics"""
+    """Vector representing potential conflict characteristics."""
 
     file_overlap_score: float
     change_frequency_score: float
@@ -72,7 +77,7 @@ class ConflictVector(NamedTuple):
 
 
 class ConflictPredictor:
-    """Advanced system for predicting potential conflicts before they occur"""
+    """Advanced system for predicting potential conflicts before they occur."""
 
     def __init__(
         self,
@@ -80,8 +85,7 @@ class ConflictPredictor:
         branch_manager: BranchManager,
         repo_path: str | None = None,
     ):
-        """
-        Initialize the conflict predictor
+        """Initialize the conflict predictor.
 
         Args:
             conflict_engine: ConflictResolutionEngine for resolution context
@@ -134,8 +138,7 @@ class ConflictPredictor:
         branches: list[str],
         time_horizon: timedelta | None = None,
     ) -> list[PredictionResult]:
-        """
-        Predict potential conflicts between branches
+        """Predict potential conflicts between branches.
 
         Args:
             branches: List of branch names to analyze
@@ -192,7 +195,7 @@ class ConflictPredictor:
         branch1: str,
         branch2: str,
     ) -> ConflictVector:
-        """Calculate multi-dimensional conflict probability vector"""
+        """Calculate multi-dimensional conflict probability vector."""
         try:
             # File overlap analysis
             files1 = await self.conflict_engine._get_changed_files(branch1)
@@ -242,7 +245,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential import statement conflicts"""
+        """Detect potential import statement conflicts."""
         try:
             # Get Python files changed in both branches
             files1 = await self._get_python_files_with_imports(branch1)
@@ -306,7 +309,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential function signature conflicts"""
+        """Detect potential function signature conflicts."""
         try:
             # Get function signatures from both branches
             functions1 = await self._get_all_function_signatures(branch1)
@@ -374,7 +377,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential variable/class naming collisions"""
+        """Detect potential variable/class naming collisions."""
         try:
             # Get symbol definitions from both branches
             symbols1 = await self._extract_symbol_definitions(branch1)
@@ -428,7 +431,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential class hierarchy conflicts"""
+        """Detect potential class hierarchy conflicts."""
         try:
             # Get class hierarchies from both branches
             hierarchies1 = await self._extract_class_hierarchies(branch1)
@@ -486,7 +489,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential dependency version conflicts"""
+        """Detect potential dependency version conflicts."""
         try:
             # Get dependency versions from both branches
             deps1 = await self._get_dependency_versions(branch1)
@@ -544,7 +547,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential API breaking changes"""
+        """Detect potential API breaking changes."""
         # Implementation would analyze public API changes
         # This is a simplified version
         return None
@@ -555,7 +558,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential resource contention conflicts"""
+        """Detect potential resource contention conflicts."""
         # Implementation would analyze file locks, database access, etc.
         return None
 
@@ -565,7 +568,7 @@ class ConflictPredictor:
         branch2: str,
         vector: ConflictVector,
     ) -> PredictionResult | None:
-        """Detect potential merge context loss scenarios"""
+        """Detect potential merge context loss scenarios."""
         # Implementation would analyze merge complexity
         return None
 
@@ -573,7 +576,7 @@ class ConflictPredictor:
         self,
         predictions: list[PredictionResult],
     ) -> list[PredictionResult]:
-        """Apply machine learning scoring to improve prediction accuracy"""
+        """Apply machine learning scoring to improve prediction accuracy."""
         # This would implement actual ML scoring
         # For now, apply simple heuristics
 
@@ -592,7 +595,7 @@ class ConflictPredictor:
         return predictions
 
     def _likelihood_to_confidence(self, likelihood: float) -> PredictionConfidence:
-        """Convert likelihood score to confidence enum"""
+        """Convert likelihood score to confidence enum."""
         if likelihood >= 0.9:
             return PredictionConfidence.CRITICAL
         elif likelihood >= 0.7:
@@ -605,7 +608,7 @@ class ConflictPredictor:
     # Helper methods for analysis
 
     async def _get_change_frequency(self, branch: str) -> float:
-        """Get change frequency for a branch (commits per day)"""
+        """Get change frequency for a branch (commits per day)."""
         try:
             result = await self.conflict_engine._run_git_command(
                 ["rev-list", "--count", "--since=1 week ago", branch],
@@ -616,7 +619,7 @@ class ConflictPredictor:
             return 0.0
 
     async def _calculate_branch_complexity(self, branch: str) -> float:
-        """Calculate complexity score for a branch"""
+        """Calculate complexity score for a branch."""
         try:
             # Simple complexity metric based on lines changed
             result = await self.conflict_engine._run_git_command(
@@ -641,22 +644,22 @@ class ConflictPredictor:
             return 0.0
 
     async def _calculate_dependency_coupling(self, branch1: str, branch2: str) -> float:
-        """Calculate dependency coupling between branches"""
+        """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
     async def _calculate_semantic_distance(self, branch1: str, branch2: str) -> float:
-        """Calculate semantic distance between branches"""
+        """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
     async def _calculate_temporal_proximity(self, branch1: str, branch2: str) -> float:
-        """Calculate temporal proximity of changes"""
+        """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5
 
     async def _get_python_files_with_imports(self, branch: str) -> dict[str, list[str]]:
-        """Get Python files and their import statements"""
+        """Get Python files and their import statements."""
         files = {}
         try:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
@@ -673,7 +676,7 @@ class ConflictPredictor:
         return files
 
     def _extract_imports(self, content: str) -> list[str]:
-        """Extract import statements from Python code"""
+        """Extract import statements from Python code."""
         imports = []
         try:
             tree = ast.parse(content)
@@ -704,7 +707,7 @@ class ConflictPredictor:
         imports1: list[str],
         imports2: list[str],
     ) -> bool:
-        """Check if import lists are likely to conflict"""
+        """Check if import lists are likely to conflict."""
         set1 = set(imports1)
         set2 = set(imports2)
 
@@ -725,7 +728,7 @@ class ConflictPredictor:
         return False
 
     async def _get_all_function_signatures(self, branch: str) -> dict[str, str]:
-        """Get all function signatures from a branch"""
+        """Get all function signatures from a branch."""
         signatures = {}
         try:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
@@ -745,7 +748,7 @@ class ConflictPredictor:
         return signatures
 
     async def _extract_symbol_definitions(self, branch: str) -> dict[str, str]:
-        """Extract symbol definitions from a branch"""
+        """Extract symbol definitions from a branch."""
         symbols = {}
         try:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
@@ -770,7 +773,7 @@ class ConflictPredictor:
         return symbols
 
     async def _extract_class_hierarchies(self, branch: str) -> dict[str, list[str]]:
-        """Extract class inheritance hierarchies"""
+        """Extract class inheritance hierarchies."""
         hierarchies = {}
         try:
             python_files = await self.conflict_engine._get_python_files_changed(branch)
@@ -798,7 +801,7 @@ class ConflictPredictor:
         return hierarchies
 
     async def _get_dependency_versions(self, branch: str) -> dict[str, str]:
-        """Get dependency versions from requirements files"""
+        """Get dependency versions from requirements files."""
         versions = {}
         try:
             # Check requirements.txt
@@ -841,7 +844,7 @@ class ConflictPredictor:
         return versions
 
     def _calculate_version_distance(self, ver1: str, ver2: str) -> float:
-        """Calculate semantic distance between version strings"""
+        """Calculate semantic distance between version strings."""
         try:
             # Simple version comparison
             def parse_version(v):
@@ -865,7 +868,7 @@ class ConflictPredictor:
             return 0.5  # Default moderate distance
 
     def get_prediction_summary(self) -> dict[str, Any]:
-        """Get summary of all predictions and statistics"""
+        """Get summary of all predictions and statistics."""
         if not self.predictions:
             return {
                 "total_predictions": 0,
@@ -901,7 +904,7 @@ class ConflictPredictor:
         }
 
     def validate_prediction_accuracy(self, actual_conflicts: list[ConflictInfo]):
-        """Validate prediction accuracy against actual conflicts"""
+        """Validate prediction accuracy against actual conflicts."""
         # Implementation would compare predictions with actual conflicts
         # and update accuracy metrics
         pass

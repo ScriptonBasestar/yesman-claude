@@ -1,11 +1,11 @@
-"""Claude process control and lifecycle management"""
+"""Claude process control and lifecycle management."""
 
 import logging
 import time
 
 
 class ClaudeProcessController:
-    """Controls Claude process lifecycle (start, stop, restart)"""
+    """Controls Claude process lifecycle (start, stop, restart)."""
 
     def __init__(self, session_manager, status_manager):
         self.session_manager = session_manager
@@ -14,12 +14,12 @@ class ClaudeProcessController:
         self.logger = logging.getLogger(f"yesman.claude_process.{session_manager.session_name}")
 
     def set_model(self, model: str):
-        """Set the selected model"""
+        """Set the selected model."""
         self.selected_model = model
         self.status_manager.update_status(f"[cyan]Model set to: {model}[/]")
 
     def restart_claude_pane(self) -> bool:
-        """Restart Claude pane"""
+        """Restart Claude pane."""
         if not self.session_manager.get_claude_pane():
             self.status_manager.update_status("[red]Cannot restart: No Claude pane in session[/]")
             return False
@@ -43,7 +43,7 @@ class ClaudeProcessController:
             return False
 
     def _terminate_claude_process(self) -> None:
-        """Terminate any existing claude process in the pane"""
+        """Terminate any existing claude process in the pane."""
         try:
             # Send multiple Ctrl+C to ensure termination
             self.session_manager.send_keys("C-c")
@@ -84,7 +84,7 @@ class ClaudeProcessController:
             self.logger.warning(f"Error during claude process termination: {e}")
 
     def _get_claude_command(self) -> str:
-        """Get claude command based on selected model"""
+        """Get claude command based on selected model."""
         if self.selected_model == "opus":
             return "claude --model claude-3-5-opus-20241022"
         elif self.selected_model == "sonnet":
@@ -93,7 +93,7 @@ class ClaudeProcessController:
             return "claude"
 
     def is_claude_running(self) -> bool:
-        """Check if Claude is currently running"""
+        """Check if Claude is currently running."""
         try:
             cmd = self.session_manager.get_current_command()
             return "claude" in cmd.lower()
@@ -101,5 +101,5 @@ class ClaudeProcessController:
             return False
 
     def send_input(self, text: str):
-        """Send input to Claude pane"""
+        """Send input to Claude pane."""
         self.session_manager.send_keys(text)

@@ -1,4 +1,4 @@
-"""Test content collection functionality"""
+"""Test content collection functionality."""
 
 import json
 import shutil
@@ -24,7 +24,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_collect_interaction_success(self):
-        """Test successful interaction collection"""
+        """Test successful interaction collection."""
         content = "Do you want to make this edit? [1] Yes [2] No"
         prompt_info = {"type": "numbered", "count": 2}
         response = "1"
@@ -47,7 +47,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         self.assertTrue(data["prompt_detected"])
 
     def test_collect_interaction_no_duplicates(self):
-        """Test that duplicate content is not collected"""
+        """Test that duplicate content is not collected."""
         content = "Same content"
 
         # First collection should succeed
@@ -63,7 +63,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         self.assertEqual(len(files), 1)
 
     def test_collect_raw_content(self):
-        """Test raw content collection"""
+        """Test raw content collection."""
         content = "Regular Claude output without prompts"
         metadata = {"source": "test"}
 
@@ -83,7 +83,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         self.assertEqual(data["record_type"], "raw_content")
 
     def test_skip_empty_content(self):
-        """Test that empty or very short content is skipped"""
+        """Test that empty or very short content is skipped."""
         test_cases = ["", "   ", "short"]
 
         for content in test_cases:
@@ -95,7 +95,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         self.assertEqual(len(files), 0)
 
     def test_get_collection_stats(self):
-        """Test collection statistics"""
+        """Test collection statistics."""
         # Collect some interactions
         self.collector.collect_interaction("First interaction with prompt", {"type": "yn"}, "yes")
         self.collector.collect_raw_content("Raw content without prompts")
@@ -110,7 +110,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         self.assertEqual(stats["last_interaction_count"], 1)
 
     def test_cleanup_old_files(self):
-        """Test cleanup of old files"""
+        """Test cleanup of old files."""
         # Create some test files
         self.collector.collect_interaction("Test interaction 1")
         self.collector.collect_raw_content("Test raw content 1")
@@ -141,7 +141,7 @@ class TestContentCollectionManager(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_get_collector(self):
-        """Test getting collector for session"""
+        """Test getting collector for session."""
         session_name = "test_session"
 
         collector1 = self.manager.get_collector(session_name)
@@ -152,7 +152,7 @@ class TestContentCollectionManager(unittest.TestCase):
         self.assertEqual(len(self.manager.collectors), 1)
 
     def test_collect_for_session(self):
-        """Test collecting content for session"""
+        """Test collecting content for session."""
         session_name = "test_session"
         content = "Test content with prompt"
         prompt_info = {"type": "yn"}
@@ -165,7 +165,7 @@ class TestContentCollectionManager(unittest.TestCase):
         self.assertIn(session_name, self.manager.collectors)
 
     def test_get_all_stats(self):
-        """Test getting stats for all sessions"""
+        """Test getting stats for all sessions."""
         # Collect for multiple sessions
         self.manager.collect_for_session("session1", "Content for session 1")
         self.manager.collect_for_session("session2", "Content for session 2")

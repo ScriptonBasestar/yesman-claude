@@ -1,20 +1,26 @@
-"""Tests for BranchInfoProtocol branch information sharing system"""
+"""Tests for BranchInfoProtocol branch information sharing system."""
 
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from libs.multi_agent.branch_info_protocol import BranchInfo, BranchInfoProtocol, BranchInfoType, BranchSyncEvent, SyncStrategy
+from libs.multi_agent.branch_info_protocol import (
+    BranchInfo,
+    BranchInfoProtocol,
+    BranchInfoType,
+    BranchSyncEvent,
+    SyncStrategy,
+)
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import CollaborationEngine, MessagePriority
 
 
 class TestBranchInfo:
-    """Test cases for BranchInfo dataclass"""
+    """Test cases for BranchInfo dataclass."""
 
     def test_init(self):
-        """Test BranchInfo initialization"""
+        """Test BranchInfo initialization."""
         now = datetime.now()
         branch_info = BranchInfo(
             branch_name="feature-x",
@@ -45,10 +51,10 @@ class TestBranchInfo:
 
 
 class TestBranchSyncEvent:
-    """Test cases for BranchSyncEvent dataclass"""
+    """Test cases for BranchSyncEvent dataclass."""
 
     def test_init(self):
-        """Test BranchSyncEvent initialization"""
+        """Test BranchSyncEvent initialization."""
         event = BranchSyncEvent(
             event_id="sync-1",
             branch_name="feature-x",
@@ -72,16 +78,16 @@ class TestBranchSyncEvent:
 
 
 class TestBranchInfoProtocol:
-    """Test cases for BranchInfoProtocol"""
+    """Test cases for BranchInfoProtocol."""
 
     @pytest.fixture
     def mock_branch_manager(self):
-        """Create mock branch manager"""
+        """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
     def mock_collaboration_engine(self):
-        """Create mock collaboration engine"""
+        """Create mock collaboration engine."""
         engine = Mock(spec=CollaborationEngine)
         engine.share_knowledge = AsyncMock(return_value="knowledge-123")
         engine.send_message = AsyncMock(return_value="message-123")
@@ -89,7 +95,7 @@ class TestBranchInfoProtocol:
 
     @pytest.fixture
     def protocol(self, mock_branch_manager, mock_collaboration_engine):
-        """Create BranchInfoProtocol instance"""
+        """Create BranchInfoProtocol instance."""
         return BranchInfoProtocol(
             branch_manager=mock_branch_manager,
             collaboration_engine=mock_collaboration_engine,
@@ -97,7 +103,7 @@ class TestBranchInfoProtocol:
         )
 
     def test_init(self, protocol, mock_branch_manager, mock_collaboration_engine):
-        """Test BranchInfoProtocol initialization"""
+        """Test BranchInfoProtocol initialization."""
         assert protocol.branch_manager == mock_branch_manager
         assert protocol.collaboration_engine == mock_collaboration_engine
         assert protocol.sync_strategy == SyncStrategy.SMART
@@ -110,7 +116,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_start_stop(self, protocol):
-        """Test starting and stopping the protocol"""
+        """Test starting and stopping the protocol."""
         # Start protocol
         await protocol.start()
         assert protocol._running is True
@@ -122,7 +128,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_register_branch(self, protocol):
-        """Test registering a new branch"""
+        """Test registering a new branch."""
         branch_info = await protocol.register_branch(
             branch_name="feature-xyz",
             agent_id="agent-1",
@@ -146,7 +152,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_file_changes(self, protocol):
-        """Test updating branch info with file changes"""
+        """Test updating branch info with file changes."""
         # Register branch first
         await protocol.register_branch("feature-x", "agent-1")
 
@@ -163,7 +169,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_test_status(self, protocol):
-        """Test updating branch info with test status"""
+        """Test updating branch info with test status."""
         await protocol.register_branch("feature-x", "agent-1")
 
         await protocol.update_branch_info(
@@ -177,7 +183,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_build_status(self, protocol):
-        """Test updating branch info with build status"""
+        """Test updating branch info with build status."""
         await protocol.register_branch("feature-x", "agent-1")
 
         await protocol.update_branch_info(
@@ -195,7 +201,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_conflicts(self, protocol):
-        """Test updating branch info with conflict information"""
+        """Test updating branch info with conflict information."""
         await protocol.register_branch("feature-x", "agent-1")
 
         conflicts = ["Merge conflict in main.py", "API signature mismatch"]
@@ -211,7 +217,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_api_changes(self, protocol):
-        """Test updating branch info with API changes"""
+        """Test updating branch info with API changes."""
         await protocol.register_branch("feature-x", "agent-1")
 
         api_changes = {
@@ -231,7 +237,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_dependencies(self, protocol):
-        """Test updating branch info with dependency map"""
+        """Test updating branch info with dependency map."""
         await protocol.register_branch("feature-x", "agent-1")
 
         dependencies = {
@@ -250,7 +256,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_merge_readiness(self, protocol):
-        """Test updating branch info with merge readiness"""
+        """Test updating branch info with merge readiness."""
         await protocol.register_branch("feature-x", "agent-1")
 
         await protocol.update_branch_info(
@@ -265,7 +271,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_update_branch_info_work_progress(self, protocol):
-        """Test updating branch info with work progress"""
+        """Test updating branch info with work progress."""
         await protocol.register_branch(
             "feature-x",
             "agent-1",
@@ -287,7 +293,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_get_branch_info(self, protocol):
-        """Test getting branch information"""
+        """Test getting branch information."""
         await protocol.register_branch("feature-x", "agent-1")
 
         # Get existing branch
@@ -301,7 +307,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_get_all_branches_info(self, protocol):
-        """Test getting all branches information"""
+        """Test getting all branches information."""
         await protocol.register_branch("feature-x", "agent-1")
         await protocol.register_branch("feature-y", "agent-2")
 
@@ -312,7 +318,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_subscribe_to_branch(self, protocol):
-        """Test subscribing to branch updates"""
+        """Test subscribing to branch updates."""
         await protocol.register_branch("feature-x", "agent-1")
 
         # Subscribe another agent
@@ -328,7 +334,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_unsubscribe_from_branch(self, protocol):
-        """Test unsubscribing from branch updates"""
+        """Test unsubscribing from branch updates."""
         await protocol.register_branch("feature-x", "agent-1")
         await protocol.subscribe_to_branch("agent-2", "feature-x")
 
@@ -340,7 +346,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_request_branch_sync(self, protocol):
-        """Test requesting branch synchronization"""
+        """Test requesting branch synchronization."""
         await protocol.register_branch("feature-x", "agent-1")
         await protocol.register_branch("feature-y", "agent-2")
 
@@ -358,7 +364,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_detect_branch_conflicts(self, protocol):
-        """Test detecting conflicts between branches"""
+        """Test detecting conflicts between branches."""
         # Register two branches with overlapping changes
         await protocol.register_branch("feature-x", "agent-1")
         await protocol.register_branch("feature-y", "agent-2")
@@ -399,7 +405,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_prepare_merge_report(self, protocol):
-        """Test preparing merge readiness report"""
+        """Test preparing merge readiness report."""
         await protocol.register_branch("feature-x", "agent-1")
 
         # Update branch to be merge-ready
@@ -434,7 +440,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_prepare_merge_report_not_ready(self, protocol):
-        """Test merge report for branch not ready to merge"""
+        """Test merge report for branch not ready to merge."""
         await protocol.register_branch(
             "feature-x",
             "agent-1",
@@ -465,20 +471,20 @@ class TestBranchInfoProtocol:
         assert any("Resolve 1 conflicts" in r for r in report["recommendations"])
 
     def test_determine_priority(self, protocol):
-        """Test priority determination for different info types"""
+        """Test priority determination for different info types."""
         assert protocol._determine_priority(BranchInfoType.CONFLICT_INFO) == MessagePriority.HIGH
         assert protocol._determine_priority(BranchInfoType.API_CHANGES) == MessagePriority.HIGH
         assert protocol._determine_priority(BranchInfoType.BUILD_STATUS) == MessagePriority.NORMAL
         assert protocol._determine_priority(BranchInfoType.FILE_CHANGES) == MessagePriority.LOW
 
     def test_calculate_relevance(self, protocol):
-        """Test relevance score calculation"""
+        """Test relevance score calculation."""
         assert protocol._calculate_relevance(BranchInfoType.CONFLICT_INFO) == 1.0
         assert protocol._calculate_relevance(BranchInfoType.API_CHANGES) == 0.9
         assert protocol._calculate_relevance(BranchInfoType.BRANCH_STATE) == 0.3
 
     def test_get_protocol_summary(self, protocol):
-        """Test getting protocol summary"""
+        """Test getting protocol summary."""
         summary = protocol.get_protocol_summary()
 
         assert "statistics" in summary
@@ -491,7 +497,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_immediate_sync_types(self, protocol):
-        """Test that certain info types trigger immediate sync"""
+        """Test that certain info types trigger immediate sync."""
         await protocol.register_branch("feature-x", "agent-1")
 
         # Reset to count only update-triggered shares
@@ -518,7 +524,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_sync_history_tracking(self, protocol):
-        """Test that sync events are properly tracked"""
+        """Test that sync events are properly tracked."""
         await protocol.register_branch("feature-x", "agent-1")
 
         # Trigger some syncs
@@ -541,7 +547,7 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     async def test_protocol_with_multiple_subscribers(self, protocol):
-        """Test protocol behavior with multiple subscribers"""
+        """Test protocol behavior with multiple subscribers."""
         await protocol.register_branch("feature-x", "agent-1")
         await protocol.subscribe_to_branch("agent-2", "feature-x")
         await protocol.subscribe_to_branch("agent-3", "feature-x")

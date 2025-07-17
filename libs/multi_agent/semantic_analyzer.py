@@ -1,4 +1,4 @@
-"""AST-based semantic conflict analysis engine for multi-agent development"""
+"""AST-based semantic conflict analysis engine for multi-agent development."""
 
 import ast
 import hashlib
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SemanticConflictType(Enum):
-    """Types of semantic conflicts that can be detected"""
+    """Types of semantic conflicts that can be detected."""
 
     FUNCTION_SIGNATURE_CHANGE = "function_signature_change"
     CLASS_INTERFACE_CHANGE = "class_interface_change"
@@ -31,7 +31,7 @@ class SemanticConflictType(Enum):
 
 
 class SymbolVisibility(Enum):
-    """Symbol visibility levels"""
+    """Symbol visibility levels."""
 
     PUBLIC = "public"  # No leading underscore
     PROTECTED = "protected"  # Single leading underscore
@@ -41,7 +41,7 @@ class SymbolVisibility(Enum):
 
 @dataclass
 class FunctionSignature:
-    """Detailed function signature information"""
+    """Detailed function signature information."""
 
     name: str
     args: list[str]
@@ -59,7 +59,7 @@ class FunctionSignature:
 
 @dataclass
 class ClassDefinition:
-    """Detailed class definition information"""
+    """Detailed class definition information."""
 
     name: str
     bases: list[str] = field(default_factory=list)
@@ -74,7 +74,7 @@ class ClassDefinition:
 
 @dataclass
 class ImportInfo:
-    """Import statement information"""
+    """Import statement information."""
 
     module: str
     name: str | None = None  # For from imports
@@ -85,7 +85,7 @@ class ImportInfo:
 
 @dataclass
 class SemanticContext:
-    """Complete semantic context of a Python file"""
+    """Complete semantic context of a Python file."""
 
     file_path: str
     functions: dict[str, FunctionSignature] = field(default_factory=dict)
@@ -99,7 +99,7 @@ class SemanticContext:
 
 @dataclass
 class SemanticConflict:
-    """Detected semantic conflict between two code versions"""
+    """Detected semantic conflict between two code versions."""
 
     conflict_id: str
     conflict_type: SemanticConflictType
@@ -118,11 +118,10 @@ class SemanticConflict:
 
 
 class SemanticAnalyzer:
-    """Advanced AST-based semantic conflict analysis engine"""
+    """Advanced AST-based semantic conflict analysis engine."""
 
     def __init__(self, branch_manager: BranchManager, repo_path: str | None = None):
-        """
-        Initialize the semantic analyzer
+        """Initialize the semantic analyzer.
 
         Args:
             branch_manager: BranchManager for branch operations
@@ -155,8 +154,7 @@ class SemanticAnalyzer:
         branch2: str,
         file_paths: list[str] | None = None,
     ) -> list[SemanticConflict]:
-        """
-        Analyze semantic conflicts between two branches
+        """Analyze semantic conflicts between two branches.
 
         Args:
             branch1: First branch name
@@ -207,7 +205,7 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Analyze semantic conflicts in a specific file"""
+        """Analyze semantic conflicts in a specific file."""
         conflicts = []
 
         try:
@@ -264,7 +262,7 @@ class SemanticAnalyzer:
         file_path: str,
         branch: str,
     ) -> SemanticContext | None:
-        """Get or create semantic context for a file in a specific branch"""
+        """Get or create semantic context for a file in a specific branch."""
         cache_key = f"{branch}:{file_path}"
 
         # Check cache
@@ -297,7 +295,7 @@ class SemanticAnalyzer:
         file_path: str,
         content: str,
     ) -> SemanticContext:
-        """Extract semantic context from Python source code"""
+        """Extract semantic context from Python source code."""
         context = SemanticContext(file_path=file_path)
 
         try:
@@ -331,7 +329,7 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect function-related semantic conflicts"""
+        """Detect function-related semantic conflicts."""
         conflicts = []
 
         # Find common functions
@@ -405,7 +403,7 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect class-related semantic conflicts"""
+        """Detect class-related semantic conflicts."""
         conflicts = []
 
         # Find common classes
@@ -452,7 +450,7 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect import-related semantic conflicts"""
+        """Detect import-related semantic conflicts."""
         conflicts = []
 
         # Compare imports
@@ -494,7 +492,7 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect variable-related semantic conflicts"""
+        """Detect variable-related semantic conflicts."""
         conflicts = []
 
         # Check global variables
@@ -533,7 +531,7 @@ class SemanticAnalyzer:
         branch2: str,
         file_path: str,
     ) -> list[SemanticConflict]:
-        """Detect method conflicts within a class"""
+        """Detect method conflicts within a class."""
         conflicts = []
 
         common_methods = set(class1.methods.keys()) & set(class2.methods.keys())
@@ -568,7 +566,7 @@ class SemanticAnalyzer:
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> bool:
-        """Check if two function signatures have conflicts"""
+        """Check if two function signatures have conflicts."""
         # Check argument changes
         if func1.args != func2.args:
             return True
@@ -593,7 +591,7 @@ class SemanticAnalyzer:
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> ConflictSeverity:
-        """Assess the severity of a function signature conflict"""
+        """Assess the severity of a function signature conflict."""
         # Public functions with signature changes are more severe
         if func1.visibility == SymbolVisibility.PUBLIC:
             # Breaking changes (removed parameters, changed types)
@@ -621,7 +619,7 @@ class SemanticAnalyzer:
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> dict[str, Any]:
-        """Analyze the impact of function signature changes"""
+        """Analyze the impact of function signature changes."""
         impact = {
             "breaking_change": False,
             "parameter_changes": [],
@@ -652,7 +650,7 @@ class SemanticAnalyzer:
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> ResolutionStrategy:
-        """Suggest resolution strategy for function conflicts"""
+        """Suggest resolution strategy for function conflicts."""
         # If it's a breaking change, require human intervention
         impact = self._analyze_function_impact(func1, func2)
         if impact["breaking_change"]:
@@ -666,7 +664,7 @@ class SemanticAnalyzer:
         return ResolutionStrategy.SEMANTIC_ANALYSIS
 
     def _signature_to_string(self, func: FunctionSignature) -> str:
-        """Convert function signature to string representation"""
+        """Convert function signature to string representation."""
         args = func.args.copy()
 
         # Add defaults
@@ -701,7 +699,7 @@ class SemanticAnalyzer:
         self,
         conflicts: list[SemanticConflict],
     ) -> list[SemanticConflict]:
-        """Rank conflicts by their potential impact"""
+        """Rank conflicts by their potential impact."""
 
         def conflict_priority(conflict):
             priority = 0
@@ -738,14 +736,14 @@ class SemanticAnalyzer:
         self,
         conflicts: list[SemanticConflict],
     ) -> list[SemanticConflict]:
-        """Merge related conflicts to reduce noise"""
+        """Merge related conflicts to reduce noise."""
         # Simple implementation - could be enhanced
         return conflicts
 
     # Helper methods
 
     async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:
-        """Get list of Python files changed between branches"""
+        """Get list of Python files changed between branches."""
         try:
             # This would use git to find changed files
             # For now, return a placeholder
@@ -754,7 +752,7 @@ class SemanticAnalyzer:
             return []
 
     async def _get_file_content(self, file_path: str, branch: str) -> str | None:
-        """Get file content from specific branch"""
+        """Get file content from specific branch."""
         try:
             # This would use git to get file content from branch
             # For now, read from current working directory
@@ -767,7 +765,7 @@ class SemanticAnalyzer:
         return None
 
     def get_analysis_summary(self) -> dict[str, Any]:
-        """Get summary of semantic analysis"""
+        """Get summary of semantic analysis."""
         return {
             "files_analyzed": self.analysis_stats["files_analyzed"],
             "conflicts_detected": self.analysis_stats["conflicts_detected"],
@@ -778,7 +776,7 @@ class SemanticAnalyzer:
 
 
 class SemanticVisitor(ast.NodeVisitor):
-    """AST visitor for extracting semantic information"""
+    """AST visitor for extracting semantic information."""
 
     def __init__(self):
         self.functions: dict[str, FunctionSignature] = {}
@@ -789,7 +787,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self._current_class: str | None = None
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        """Visit function definition"""
+        """Visit function definition."""
         signature = self._extract_function_signature(node)
 
         if self._current_class:
@@ -806,7 +804,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
-        """Visit async function definition"""
+        """Visit async function definition."""
         signature = self._extract_function_signature(node)
         signature.name = f"async {signature.name}"
 
@@ -822,7 +820,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef):
-        """Visit class definition"""
+        """Visit class definition."""
         old_class = self._current_class
         self._current_class = node.name
 
@@ -857,7 +855,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self._current_class = old_class
 
     def visit_Import(self, node: ast.Import):
-        """Visit import statement"""
+        """Visit import statement."""
         for alias in node.names:
             import_info = ImportInfo(
                 module=alias.name,
@@ -867,7 +865,7 @@ class SemanticVisitor(ast.NodeVisitor):
             self.imports.append(import_info)
 
     def visit_ImportFrom(self, node: ast.ImportFrom):
-        """Visit from import statement"""
+        """Visit from import statement."""
         module = node.module or ""
         level = node.level
 
@@ -882,7 +880,7 @@ class SemanticVisitor(ast.NodeVisitor):
             self.imports.append(import_info)
 
     def visit_Assign(self, node: ast.Assign):
-        """Visit assignment for global variables"""
+        """Visit assignment for global variables."""
         if self._current_class is None:  # Only global assignments
             for target in node.targets:
                 if isinstance(target, ast.Name):
@@ -899,7 +897,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AnnAssign(self, node: ast.AnnAssign):
-        """Visit annotated assignment"""
+        """Visit annotated assignment."""
         if self._current_class is None and isinstance(node.target, ast.Name):
             var_name = node.target.id
             var_type = ast.unparse(node.annotation)
@@ -915,7 +913,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self,
         node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> FunctionSignature:
-        """Extract detailed function signature"""
+        """Extract detailed function signature."""
         args = []
         defaults = []
         kwonlyargs = []
@@ -985,7 +983,7 @@ class SemanticVisitor(ast.NodeVisitor):
         )
 
     def _determine_visibility(self, name: str) -> SymbolVisibility:
-        """Determine symbol visibility based on naming convention"""
+        """Determine symbol visibility based on naming convention."""
         if name.startswith("__") and name.endswith("__"):
             return SymbolVisibility.MAGIC
         elif name.startswith("__"):
@@ -996,7 +994,7 @@ class SemanticVisitor(ast.NodeVisitor):
             return SymbolVisibility.PUBLIC
 
     def _infer_type(self, node: ast.expr) -> str:
-        """Simple type inference for AST nodes"""
+        """Simple type inference for AST nodes."""
         if isinstance(node, ast.Constant):
             return type(node.value).__name__
         elif isinstance(node, ast.List):

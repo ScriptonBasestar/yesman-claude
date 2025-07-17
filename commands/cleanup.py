@@ -1,4 +1,4 @@
-"""Cache cleanup command for removing excessive cache files"""
+"""Cache cleanup command for removing excessive cache files."""
 
 import os
 import shutil
@@ -13,14 +13,20 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin
 
 
 class CleanupCommand(BaseCommand, ConfigCommandMixin):
-    """Clean up excessive cache files and temporary data"""
+    """Clean up excessive cache files and temporary data."""
 
     def __init__(self):
         super().__init__()
         self.console = Console()
 
-    def execute(self, dry_run: bool = False, force: bool = False, cleanup_all: bool = False, **kwargs) -> dict:
-        """Execute the cleanup command"""
+    def execute(
+        self,
+        dry_run: bool = False,
+        force: bool = False,
+        cleanup_all: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the cleanup command."""
         # Find cache files to clean
         cache_paths = self._find_cache_files(cleanup_all)
         total_size = sum(size for _, _, size in cache_paths)
@@ -34,7 +40,11 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 
         if dry_run:
             self.print_warning("🔍 Dry run mode - no files will be deleted")
-            return {"dry_run": True, "found_count": len(cache_paths), "found_size": total_size}
+            return {
+                "dry_run": True,
+                "found_count": len(cache_paths),
+                "found_size": total_size,
+            }
 
         # Confirm cleanup
         if not force:
@@ -48,10 +58,15 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         # Show results
         self._display_results(cleaned_count, cleaned_size, errors)
 
-        return {"cleaned_count": cleaned_count, "cleaned_size": cleaned_size, "errors": errors, "success": len(errors) == 0}
+        return {
+            "cleaned_count": cleaned_count,
+            "cleaned_size": cleaned_size,
+            "errors": errors,
+            "success": len(errors) == 0,
+        }
 
     def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:
-        """Find cache files to clean"""
+        """Find cache files to clean."""
         cache_paths = []
 
         # Python cache files (__pycache__, *.pyc)
@@ -97,7 +112,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         return cache_paths
 
     def _display_summary(self, cache_paths: list[tuple[str, Path, int]], total_size: int) -> None:
-        """Display cache cleanup summary"""
+        """Display cache cleanup summary."""
         table = Table(title="Cache Cleanup Summary")
         table.add_column("Type", style="cyan")
         table.add_column("Path", style="yellow")
@@ -111,7 +126,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         self.console.print(f"\n[bold]Total cache size:[/bold] {self._human_readable_size(total_size)}")
 
     def _perform_cleanup(self, cache_paths: list[tuple[str, Path, int]]) -> tuple[int, int, list[str]]:
-        """Perform the actual cleanup"""
+        """Perform the actual cleanup."""
         self.console.print("\n[blue]🧹 Cleaning up cache files...[/blue]")
 
         cleaned_count = 0
@@ -132,7 +147,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         return cleaned_count, cleaned_size, errors
 
     def _display_results(self, cleaned_count: int, cleaned_size: int, errors: list[str]) -> None:
-        """Display cleanup results"""
+        """Display cleanup results."""
         if cleaned_count > 0:
             self.print_success(f"Cleaned {cleaned_count} items ({self._human_readable_size(cleaned_size)})")
 
@@ -144,7 +159,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
                 self.console.print(f"   ... and {len(errors) - 5} more")
 
     def _human_readable_size(self, size_bytes: int) -> str:
-        """Convert bytes to human readable format"""
+        """Convert bytes to human readable format."""
         if size_bytes == 0:
             return "0 B"
 
@@ -165,7 +180,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
 def cleanup(dry_run: bool, force: bool, cleanup_all: bool):
-    """Clean up excessive cache files and temporary data"""
+    """Clean up excessive cache files and temporary data."""
     command = CleanupCommand()
     command.run(dry_run=dry_run, force=force, cleanup_all=cleanup_all)
 

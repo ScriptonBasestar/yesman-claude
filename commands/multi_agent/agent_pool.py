@@ -1,4 +1,4 @@
-"""Agent pool management commands"""
+"""Agent pool management commands."""
 
 import asyncio
 import logging
@@ -14,10 +14,16 @@ logger = logging.getLogger(__name__)
 
 
 class StartAgentsCommand(BaseCommand):
-    """Start the multi-agent pool"""
+    """Start the multi-agent pool."""
 
-    def execute(self, max_agents: int = 3, work_dir: str | None = None, monitor: bool = False, **kwargs) -> dict:
-        """Execute the start agents command"""
+    def execute(
+        self,
+        max_agents: int = 3,
+        work_dir: str | None = None,
+        monitor: bool = False,
+        **kwargs,
+    ) -> dict:
+        """Execute the start agents command."""
         try:
             # Create progress indicator for agent startup
             with Progress(
@@ -26,7 +32,10 @@ class StartAgentsCommand(BaseCommand):
                 TimeElapsedColumn(),
                 transient=True,
             ) as progress:
-                startup_task = progress.add_task(f"🤖 Starting multi-agent pool with {max_agents} agents...", total=None)
+                startup_task = progress.add_task(
+                    f"🤖 Starting multi-agent pool with {max_agents} agents...",
+                    total=None,
+                )
 
                 # Create agent pool
                 pool = AgentPool(max_agents=max_agents, work_dir=work_dir)
@@ -36,7 +45,10 @@ class StartAgentsCommand(BaseCommand):
                     progress.update(startup_task, description="✅ Agent pool started successfully")
 
                     if monitor:
-                        progress.update(startup_task, description="📊 Starting monitoring dashboard...")
+                        progress.update(
+                            startup_task,
+                            description="📊 Starting monitoring dashboard...",
+                        )
                         await run_agent_monitor(pool)
                     else:
                         self.print_success("✅ Agent pool started successfully")
@@ -58,10 +70,16 @@ class StartAgentsCommand(BaseCommand):
 
 
 class MonitorAgentsCommand(BaseCommand):
-    """Start real-time agent monitoring dashboard"""
+    """Start real-time agent monitoring dashboard."""
 
-    def execute(self, work_dir: str | None = None, duration: float | None = None, refresh: float = 1.0, **kwargs) -> dict:
-        """Execute the monitor agents command"""
+    def execute(
+        self,
+        work_dir: str | None = None,
+        duration: float | None = None,
+        refresh: float = 1.0,
+        **kwargs,
+    ) -> dict:
+        """Execute the monitor agents command."""
         try:
             self.print_info("📊 Starting agent monitoring dashboard...")
 
@@ -114,10 +132,10 @@ class MonitorAgentsCommand(BaseCommand):
 
 
 class StatusCommand(BaseCommand):
-    """Show current agent pool status"""
+    """Show current agent pool status."""
 
     def execute(self, work_dir: str | None = None, **kwargs) -> dict:
-        """Execute the status command"""
+        """Execute the status command."""
         try:
             # Initialize agent pool
             pool = AgentPool(work_dir=work_dir)
@@ -166,10 +184,10 @@ class StatusCommand(BaseCommand):
 
 
 class StopAgentsCommand(BaseCommand):
-    """Stop the multi-agent pool"""
+    """Stop the multi-agent pool."""
 
     def execute(self, work_dir: str | None = None, **kwargs) -> dict:
-        """Execute the stop agents command"""
+        """Execute the stop agents command."""
         try:
             self.print_info("🛑 Stopping multi-agent pool...")
 
@@ -181,19 +199,32 @@ class StopAgentsCommand(BaseCommand):
 
             asyncio.run(stop_pool())
 
-            return {"success": True, "work_dir": work_dir, "message": "Agent pool stopped successfully"}
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "message": "Agent pool stopped successfully",
+            }
 
         except Exception as e:
             raise CommandError(f"Error stopping agents: {e}") from e
 
 
 class AddTaskCommand(BaseCommand):
-    """Add a task to the agent pool queue"""
+    """Add a task to the agent pool queue."""
 
     def execute(
-        self, title: str, command: list[str], work_dir: str | None = None, directory: str = ".", priority: int = 5, complexity: int = 5, timeout: int = 300, description: str | None = None, **kwargs
+        self,
+        title: str,
+        command: list[str],
+        work_dir: str | None = None,
+        directory: str = ".",
+        priority: int = 5,
+        complexity: int = 5,
+        timeout: int = 300,
+        description: str | None = None,
+        **kwargs,
     ) -> dict:
-        """Execute the add task command"""
+        """Execute the add task command."""
         try:
             pool = AgentPool(work_dir=work_dir)
 
@@ -212,17 +243,24 @@ class AddTaskCommand(BaseCommand):
             self.print_info(f"   Command: {' '.join(task.command)}")
             self.print_info(f"   Priority: {task.priority}")
 
-            return {"success": True, "work_dir": work_dir, "task_id": task.task_id, "title": task.title, "command": task.command, "priority": task.priority}
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "task_id": task.task_id,
+                "title": task.title,
+                "command": task.command,
+                "priority": task.priority,
+            }
 
         except Exception as e:
             raise CommandError(f"Error adding task: {e}") from e
 
 
 class ListTasksCommand(BaseCommand):
-    """List tasks in the agent pool"""
+    """List tasks in the agent pool."""
 
     def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:
-        """Execute the list tasks command"""
+        """Execute the list tasks command."""
         try:
             pool = AgentPool(work_dir=work_dir)
 
@@ -233,7 +271,10 @@ class ListTasksCommand(BaseCommand):
                 try:
                     filter_status = TaskStatus(status.lower())
                 except ValueError as e:
-                    raise CommandError(f"Invalid status: {status}", recovery_hint="Valid statuses are: pending, assigned, running, completed, failed, cancelled") from e
+                    raise CommandError(
+                        f"Invalid status: {status}",
+                        recovery_hint="Valid statuses are: pending, assigned, running, completed, failed, cancelled",
+                    ) from e
 
             tasks = pool.list_tasks(filter_status)
 
@@ -261,7 +302,13 @@ class ListTasksCommand(BaseCommand):
                 self.print_info(f"   Command: {' '.join(task['command'])}")
                 self.print_info("")
 
-            return {"success": True, "work_dir": work_dir, "tasks": tasks, "count": len(tasks), "filter_status": status}
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "tasks": tasks,
+                "count": len(tasks),
+                "filter_status": status,
+            }
 
         except Exception as e:
             raise CommandError(f"Error listing tasks: {e}") from e
