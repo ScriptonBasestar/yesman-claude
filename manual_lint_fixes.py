@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Manual lint fixes for common issues
-"""
+"""Manual lint fixes for common issues"""
 
 import re
 from pathlib import Path
@@ -25,11 +23,7 @@ def fix_import_order(file_path):
             import_end = i
         elif import_start is not None and line.strip() == "":
             continue
-        elif (
-            import_start is not None
-            and not line.strip().startswith('"""')
-            and not line.strip().startswith("#")
-        ):
+        elif import_start is not None and not line.strip().startswith('"""') and not line.strip().startswith("#"):
             break
 
     if import_start is None:
@@ -48,16 +42,9 @@ def fix_import_order(file_path):
     local_imports = []
 
     for imp in imports:
-        if (
-            imp.strip().startswith("from libs.")
-            or imp.strip().startswith("from commands.")
-            or imp.strip().startswith("from api.")
-        ):
+        if imp.strip().startswith("from libs.") or imp.strip().startswith("from commands.") or imp.strip().startswith("from api."):
             local_imports.append(imp)
-        elif any(
-            pkg in imp
-            for pkg in ["click", "rich", "fastapi", "uvicorn", "pydantic", "typer"]
-        ):
+        elif any(pkg in imp for pkg in ["click", "rich", "fastapi", "uvicorn", "pydantic", "typer"]):
             third_party_imports.append(imp)
         else:
             stdlib_imports.append(imp)
@@ -102,12 +89,7 @@ def fix_long_lines(file_path):
     for i, line in enumerate(lines):
         if len(line) > 120:  # Using 120 as a reasonable limit
             # Try to fix long import lines
-            if (
-                "from " in line
-                and "import " in line
-                and line.count(",") > 2
-                and not line.strip().endswith("(")
-            ):
+            if "from " in line and "import " in line and line.count(",") > 2 and not line.strip().endswith("("):
                 # Extract the import parts
                 match = re.match(r"(\s*from\s+[^\s]+\s+import\s+)", line)
                 if match:

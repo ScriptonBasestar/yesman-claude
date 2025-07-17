@@ -11,7 +11,6 @@ from libs.multi_agent.branch_test_manager import BranchTestManager, TestType
 
 async def demo_branch_testing():
     """Demonstrate branch testing functionality"""
-
     print("🧪 Branch Testing Integration Demo")
     print("=" * 50)
 
@@ -29,9 +28,7 @@ async def demo_branch_testing():
         print("   🔧 Enabling branch testing...")
 
         # Create a mock branch test manager for demo
-        btm = BranchTestManager(
-            repo_path=str(work_dir), results_dir=str(work_dir / "test_results")
-        )
+        btm = BranchTestManager(repo_path=str(work_dir), results_dir=str(work_dir / "test_results"))
 
         # Configure some demo test suites
         print("   📋 Configuring test suites...")

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Run lint-fix commands directly from Python
-"""
+"""Run lint-fix commands directly from Python"""
 
 import os
 import subprocess
@@ -12,9 +10,7 @@ def run_command(cmd, description):
     print(f"Running: {description}")
     print(f"Command: {cmd}")
     try:
-        result = subprocess.run(
-            cmd, check=False, shell=True, capture_output=True, text=True
-        )
+        result = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True)
         print(f"Return code: {result.returncode}")
         if result.stdout:
             print(f"STDOUT:\n{result.stdout}")

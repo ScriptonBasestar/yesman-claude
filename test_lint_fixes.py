@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script to verify lint fixes are working
-"""
+"""Test script to verify lint fixes are working"""
 
 import os
 import subprocess
@@ -104,9 +102,7 @@ def main():
 
     # Test 4: Pre-commit if available
     print("\n4. Testing pre-commit...")
-    success4, stdout4, stderr4 = run_command(
-        [sys.executable, "-m", "pre_commit", "run", "--all-files"], "Pre-commit hooks"
-    )
+    success4, stdout4, stderr4 = run_command([sys.executable, "-m", "pre_commit", "run", "--all-files"], "Pre-commit hooks")
 
     # Summary
     print(f"\n{'=' * 60}")

@@ -14,9 +14,7 @@ def run_single_command(cmd, description):
     print(f"{'=' * 60}")
 
     try:
-        result = subprocess.run(
-            cmd, check=False, shell=True, capture_output=True, text=True, timeout=60
-        )
+        result = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True, timeout=60)
         print(f"Exit code: {result.returncode}")
 
         if result.stdout:
@@ -42,12 +40,8 @@ print("Running individual lint commands...")
 
 # Try to run ruff check
 success1 = run_single_command("python -m ruff check --version", "Check ruff version")
-success2 = run_single_command(
-    "python -m ruff check libs/ --config pyproject.toml", "Ruff check on libs"
-)
-success3 = run_single_command(
-    "python -m ruff check commands/ --config pyproject.toml", "Ruff check on commands"
-)
+success2 = run_single_command("python -m ruff check libs/ --config pyproject.toml", "Ruff check on libs")
+success3 = run_single_command("python -m ruff check commands/ --config pyproject.toml", "Ruff check on commands")
 
 print(f"\nRuff version check: {'PASS' if success1 else 'FAIL'}")
 print(f"Ruff libs check: {'PASS' if success2 else 'FAIL'}")

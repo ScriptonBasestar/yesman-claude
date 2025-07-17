@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Script to run ruff commands using subprocess directly
-"""
+"""Script to run ruff commands using subprocess directly"""
 
 import subprocess
 

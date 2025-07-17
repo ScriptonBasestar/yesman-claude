@@ -23,9 +23,7 @@ def run_ruff_check():
             "--diff",
         ]
 
-        result = subprocess.run(
-            cmd, check=False, capture_output=True, text=True, timeout=60
-        )
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
 
         print("=== RUFF CHECK RESULTS ===")
         print(f"Return code: {result.returncode}")
@@ -61,9 +59,7 @@ def run_mypy_check():
             "--ignore-missing-imports",
         ]
 
-        result = subprocess.run(
-            cmd, check=False, capture_output=True, text=True, timeout=60
-        )
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
 
         print("\n=== MYPY CHECK RESULTS ===")
         print(f"Return code: {result.returncode}")

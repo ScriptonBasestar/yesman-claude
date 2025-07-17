@@ -10,9 +10,7 @@ commands = [["ls", "-la"], ["uv", "--version"], ["uv", "run", "python", "--versi
 
 for cmd in commands:
     try:
-        result = subprocess.run(
-            cmd, check=False, capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=10)
         print(f"Command: {' '.join(cmd)}")
         print(f"Return code: {result.returncode}")
         print(f"Output: {result.stdout.strip()}")

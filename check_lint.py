@@ -16,9 +16,7 @@ def run_command(cmd, description):
     print(f"{'=' * 60}")
 
     try:
-        result = subprocess.run(
-            cmd, check=False, capture_output=True, text=True, timeout=120
-        )
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=120)
 
         print(f"Return code: {result.returncode}")
         if result.stdout:

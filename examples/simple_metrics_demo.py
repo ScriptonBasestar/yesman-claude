@@ -9,7 +9,6 @@ from libs.multi_agent.metrics_verifier import MetricsVerifier
 
 def demo_simple_metrics_verification():
     """Demonstrate metrics verification with simulated data"""
-
     print("🎯 Simplified Multi-Agent Metrics Verification Demo")
     print("=" * 60)
 
@@ -29,12 +28,8 @@ def demo_simple_metrics_verification():
         # 2. Show success criteria
         print("\n2️⃣ Success Criteria Requirements...")
         criteria = verifier.success_criteria
-        print(
-            f"   🚀 Speed improvement: {criteria.min_speed_improvement}x - {criteria.max_speed_improvement}x"
-        )
-        print(
-            f"   🔧 Conflict resolution: ≥{criteria.min_conflict_resolution_rate:.0%}"
-        )
+        print(f"   🚀 Speed improvement: {criteria.min_speed_improvement}x - {criteria.max_speed_improvement}x")
+        print(f"   🔧 Conflict resolution: ≥{criteria.min_conflict_resolution_rate:.0%}")
         print(f"   🌿 Merge success rate: ≥{criteria.min_merge_success_rate:.0%}")
         print(f"   📈 Quality maintenance: ≥{criteria.min_quality_maintenance:+.1f}")
 
@@ -52,9 +47,7 @@ def demo_simple_metrics_verification():
         verifier.current_metrics.speed_improvement_ratio = 12.0 / 4.5  # 2.67x
         verifier.multi_agent_benchmarks.append(4.5)
 
-        print(
-            f"   🚀 Speed improvement: {verifier.current_metrics.speed_improvement_ratio:.2f}x"
-        )
+        print(f"   🚀 Speed improvement: {verifier.current_metrics.speed_improvement_ratio:.2f}x")
 
         # 4. Simulate conflict resolution metrics
         print("\n4️⃣ Simulating Conflict Resolution Operations...")
@@ -101,14 +94,10 @@ def demo_simple_metrics_verification():
 
         for initial, final in quality_scenarios:
             verifier.track_code_quality(initial, final)
-            print(
-                f"   📈 Quality: {initial} -> {final} (change: {final - initial:+.1f})"
-            )
+            print(f"   📈 Quality: {initial} -> {final} (change: {final - initial:+.1f})")
 
         final_quality = verifier.current_metrics
-        print(
-            f"   📊 Overall quality improvement: {final_quality.quality_improvement:+.2f}"
-        )
+        print(f"   📊 Overall quality improvement: {final_quality.quality_improvement:+.2f}")
 
         # 7. Add some task completion metrics
         print("\n7️⃣ Adding Task Completion Metrics...")
@@ -126,12 +115,8 @@ def demo_simple_metrics_verification():
             "agent-2": 0.78,
             "agent-3": 0.92,
         }
-        print(
-            f"   ⏱️ Task completions: {len(verifier.current_metrics.task_completion_times)} tasks"
-        )
-        print(
-            f"   🤖 Agent utilization: {len(verifier.current_metrics.agent_utilization_rates)} agents"
-        )
+        print(f"   ⏱️ Task completions: {len(verifier.current_metrics.task_completion_times)} tasks")
+        print(f"   🤖 Agent utilization: {len(verifier.current_metrics.agent_utilization_rates)} agents")
 
         # 8. Verify success criteria
         print("\n8️⃣ Success Criteria Verification...")
@@ -139,21 +124,11 @@ def demo_simple_metrics_verification():
         compliance = verification_results["compliance"]
 
         print("   🎯 Verification Results:")
-        print(
-            f"      Speed improvement: {'✅ PASS' if compliance['speed_improvement'] else '❌ FAIL'}"
-        )
-        print(
-            f"      Conflict resolution: {'✅ PASS' if compliance['conflict_resolution'] else '❌ FAIL'}"
-        )
-        print(
-            f"      Merge success: {'✅ PASS' if compliance['merge_success'] else '❌ FAIL'}"
-        )
-        print(
-            f"      Quality maintenance: {'✅ PASS' if compliance['quality_maintenance'] else '❌ FAIL'}"
-        )
-        print(
-            f"      Overall success: {'✅ PASS' if compliance['overall_success'] else '❌ FAIL'}"
-        )
+        print(f"      Speed improvement: {'✅ PASS' if compliance['speed_improvement'] else '❌ FAIL'}")
+        print(f"      Conflict resolution: {'✅ PASS' if compliance['conflict_resolution'] else '❌ FAIL'}")
+        print(f"      Merge success: {'✅ PASS' if compliance['merge_success'] else '❌ FAIL'}")
+        print(f"      Quality maintenance: {'✅ PASS' if compliance['quality_maintenance'] else '❌ FAIL'}")
+        print(f"      Overall success: {'✅ PASS' if compliance['overall_success'] else '❌ FAIL'}")
 
         # 9. Generate detailed report
         print("\n9️⃣ Detailed Performance Report...")
@@ -175,34 +150,22 @@ def demo_simple_metrics_verification():
         if overall_success:
             print("   🎉 SUCCESS: Multi-agent system meets all success criteria!")
             print("   ✅ The system achieves the required performance targets:")
-            print(
-                f"      • {verifier.current_metrics.speed_improvement_ratio:.1f}x speed improvement (target: 2-3x)"
-            )
-            print(
-                f"      • {final_conflict_rate:.0%} conflict resolution rate (target: ≥80%)"
-            )
+            print(f"      • {verifier.current_metrics.speed_improvement_ratio:.1f}x speed improvement (target: 2-3x)")
+            print(f"      • {final_conflict_rate:.0%} conflict resolution rate (target: ≥80%)")
             print(f"      • {final_merge_rate:.0%} merge success rate (target: ≥99%)")
-            print(
-                f"      • {final_quality.quality_improvement:+.1f} quality improvement (target: ≥0)"
-            )
+            print(f"      • {final_quality.quality_improvement:+.1f} quality improvement (target: ≥0)")
         else:
             print("   ⚠️  WARNING: System does not meet all success criteria")
             print("   📋 Areas needing improvement:")
 
             if not compliance["speed_improvement"]:
-                print(
-                    f"      • Speed improvement: {verifier.current_metrics.speed_improvement_ratio:.1f}x (needs 2-3x)"
-                )
+                print(f"      • Speed improvement: {verifier.current_metrics.speed_improvement_ratio:.1f}x (needs 2-3x)")
             if not compliance["conflict_resolution"]:
-                print(
-                    f"      • Conflict resolution: {final_conflict_rate:.0%} (needs ≥80%)"
-                )
+                print(f"      • Conflict resolution: {final_conflict_rate:.0%} (needs ≥80%)")
             if not compliance["merge_success"]:
                 print(f"      • Merge success: {final_merge_rate:.0%} (needs ≥99%)")
             if not compliance["quality_maintenance"]:
-                print(
-                    f"      • Quality change: {final_quality.quality_improvement:+.1f} (needs ≥0)"
-                )
+                print(f"      • Quality change: {final_quality.quality_improvement:+.1f} (needs ≥0)")
 
         # 12. Integration recommendations
         print("\n1️⃣2️⃣ Integration Recommendations...")

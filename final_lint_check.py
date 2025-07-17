@@ -11,9 +11,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 def run_command(cmd):
     """Run a command and return output"""
     try:
-        result = subprocess.run(
-            cmd, check=False, shell=True, capture_output=True, text=True, timeout=30
-        )
+        result = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True, timeout=30)
         return result.returncode, result.stdout, result.stderr
     except Exception as e:
         return -1, "", str(e)
@@ -24,9 +22,7 @@ print()
 
 # Check the specific file that had errors
 print("1. Checking commands/multi_agent_backup.py with ruff:")
-code, stdout, stderr = run_command(
-    "python -m ruff check commands/multi_agent_backup.py"
-)
+code, stdout, stderr = run_command("python -m ruff check commands/multi_agent_backup.py")
 print(f"   Exit code: {code}")
 if stdout.strip():
     print(f"   Output: {stdout}")
@@ -47,9 +43,7 @@ print()
 
 # Quick syntax check
 print("3. Python syntax check:")
-code, stdout, stderr = run_command(
-    "python -m py_compile commands/multi_agent_backup.py"
-)
+code, stdout, stderr = run_command("python -m py_compile commands/multi_agent_backup.py")
 print(f"   Exit code: {code}")
 if code == 0:
     print("   ✅ Syntax is valid")

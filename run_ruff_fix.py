@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple script to run ruff fix commands
-"""
+"""Simple script to run ruff fix commands"""
 
 import os
 import subprocess

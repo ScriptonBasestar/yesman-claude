@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Analyze common lint issues by examining the codebase
-"""
+"""Analyze common lint issues by examining the codebase"""
 
 import ast
 import re
@@ -61,9 +59,7 @@ class LintAnalyzer:
                         module_name = import_match.group(1)
                         imports_defined[module_name] = line_num
                 elif line.strip().startswith("from "):
-                    from_match = re.match(
-                        r"from\s+[\w.]+\s+import\s+(.+)", line.strip()
-                    )
+                    from_match = re.match(r"from\s+[\w.]+\s+import\s+(.+)", line.strip())
                     if from_match:
                         imports_str = from_match.group(1)
                         # Handle multiple imports
@@ -112,9 +108,7 @@ class LintAnalyzer:
                             "file": str(file_path),
                             "line": node.lineno,
                             "type": "missing_docstring",
-                            "message": (
-                                f"Missing docstring in {node.__class__.__name__.lower()} '{node.name}'"
-                            ),
+                            "message": (f"Missing docstring in {node.__class__.__name__.lower()} '{node.name}'"),
                             "code": "D100",
                         }
                     )
@@ -263,9 +257,7 @@ def main():
 
         for issue in results["all_issues"]:
             relative_path = issue["file"].replace(project_path + "/", "")
-            f.write(
-                f"{relative_path}:{issue['line']} [{issue['code']}] {issue['message']}\n"
-            )
+            f.write(f"{relative_path}:{issue['line']} [{issue['code']}] {issue['message']}\n")
 
     print("Detailed results saved to lint_analysis_results.txt")
 

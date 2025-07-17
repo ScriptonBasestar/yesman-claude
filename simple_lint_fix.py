@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple lint fix runner without subprocess
-"""
+"""Simple lint fix runner without subprocess"""
 
 import os
 import sys
@@ -98,9 +96,7 @@ def main():
         for cmd in commands:
             try:
                 print(f"Running: {' '.join(cmd)}")
-                result = subprocess.run(
-                    cmd, check=False, capture_output=True, text=True
-                )
+                result = subprocess.run(cmd, check=False, capture_output=True, text=True)
                 print(f"Return code: {result.returncode}")
                 if result.stdout:
                     print(f"STDOUT:\n{result.stdout}")

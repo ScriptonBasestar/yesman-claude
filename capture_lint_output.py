@@ -59,16 +59,12 @@ def main():
     print("Checking lint tools availability...")
 
     # Check ruff
-    success, output = run_command_safely(
-        "python -m ruff --version", "Check ruff version"
-    )
+    success, output = run_command_safely("python -m ruff --version", "Check ruff version")
     all_output.append(output)
 
     if success:
         # Try to run ruff check on individual directories
-        success, output = run_command_safely(
-            "python -m ruff check libs --config pyproject.toml", "Ruff check libs"
-        )
+        success, output = run_command_safely("python -m ruff check libs --config pyproject.toml", "Ruff check libs")
         all_output.append(output)
 
         success, output = run_command_safely(
@@ -78,16 +74,12 @@ def main():
         all_output.append(output)
 
     # Check mypy
-    success, output = run_command_safely(
-        "python -m mypy --version", "Check mypy version"
-    )
+    success, output = run_command_safely("python -m mypy --version", "Check mypy version")
     all_output.append(output)
 
     if success:
         # Try to run mypy
-        success, output = run_command_safely(
-            "python -m mypy libs --config-file pyproject.toml", "MyPy check libs"
-        )
+        success, output = run_command_safely("python -m mypy libs --config-file pyproject.toml", "MyPy check libs")
         all_output.append(output)
 
         success, output = run_command_safely(
@@ -97,9 +89,7 @@ def main():
         all_output.append(output)
 
     # Check bandit
-    success, output = run_command_safely(
-        "python -m bandit --version", "Check bandit version"
-    )
+    success, output = run_command_safely("python -m bandit --version", "Check bandit version")
     all_output.append(output)
 
     if success:

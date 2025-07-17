@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Fix the module naming conflict by removing the wrapper file."""
+
 import os
 import shutil
 
@@ -12,7 +13,7 @@ if os.path.exists(conflict_file):
     backup_file = os.path.join(base_path, "commands", "multi_agent_wrapper_backup.py")
     shutil.copy2(conflict_file, backup_file)
     print(f"Backed up {conflict_file} to {backup_file}")
-    
+
     # Remove the original
     os.remove(conflict_file)
     print(f"Removed conflicting file: {conflict_file}")

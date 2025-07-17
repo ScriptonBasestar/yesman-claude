@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Lint configuration validation script.
+"""Lint configuration validation script.
 Ensures make lint, pre-commit, and pre-push hooks are consistent.
 """
 
@@ -12,9 +11,7 @@ from pathlib import Path
 def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
     """Run a shell command and return the result."""
     print(f"🔍 Running: {cmd}")
-    result = subprocess.run(
-        cmd, shell=True, capture_output=True, text=True, check=False
-    )
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
 
     if result.returncode != 0 and check:
         print(f"❌ Command failed: {cmd}")
@@ -39,9 +36,7 @@ def validate_lint_consistency():
 
     # Test pre-push hooks
     print("\n🚀 Testing pre-push hooks...")
-    prepush_result = run_command(
-        "uv run pre-commit run --hook-stage pre-push --all-files", check=False
-    )
+    prepush_result = run_command("uv run pre-commit run --hook-stage pre-push --all-files", check=False)
 
     # Summary
     print("\n📊 Validation Summary:")
@@ -50,10 +45,7 @@ def validate_lint_consistency():
     print(f"Pre-push: {'✅ PASS' if prepush_result.returncode == 0 else '❌ FAIL'}")
 
     # Check for consistency
-    all_passed = all(
-        result.returncode == 0
-        for result in [make_lint_result, precommit_result, prepush_result]
-    )
+    all_passed = all(result.returncode == 0 for result in [make_lint_result, precommit_result, prepush_result])
 
     if all_passed:
         print("\n🎉 All lint configurations are consistent and passing!")

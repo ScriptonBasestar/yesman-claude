@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple script to run lint commands and capture output
-"""
+"""Simple script to run lint commands and capture output"""
 
 import os
 import subprocess

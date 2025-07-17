@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Demo: Mock Centralization Benefits
+"""Demo: Mock Centralization Benefits
 
 Shows the difference between old duplicated mock patterns and new centralized approach
 """
@@ -18,7 +17,6 @@ from tests.fixtures.mock_factories import ManagerMockFactory
 
 def demo_old_vs_new_patterns():
     """Demonstrate the difference between old and new mock patterns"""
-
     print("🔧 Mock Centralization Demo")
     print("=" * 50)
 
@@ -46,9 +44,7 @@ def demo_old_vs_new_patterns():
     print("@patch('commands.setup.SessionManager')")
     print("def test_setup_session(self, mock_session_manager):")
     print("    # One line replaces 10+ lines of setup")
-    print(
-        "    mock_manager_instance = ManagerMockFactory.create_session_manager_mock()"
-    )
+    print("    mock_manager_instance = ManagerMockFactory.create_session_manager_mock()")
     print("    mock_session_manager.return_value = mock_manager_instance")
     print("    # ... test code ...")
     print("```")
@@ -79,7 +75,6 @@ def demo_old_vs_new_patterns():
 
 def demo_customization_options():
     """Show how to customize the centralized mocks"""
-
     print("\n\n🎛️ Customization Examples")
     print("=" * 50)
 
@@ -140,7 +135,6 @@ def demo_customization_options():
 
 def demo_migration_example():
     """Show a real migration example"""
-
     print("\n\n📦 Migration Example")
     print("=" * 50)
 
@@ -191,7 +185,6 @@ def test_get_sessions_list(mock_session_manager):
 
 def demo_priority_targets():
     """Show the highest impact migration targets"""
-
     print("\n\n🎯 Priority Migration Targets")
     print("=" * 50)
 
@@ -206,9 +199,7 @@ def demo_priority_targets():
     print("Priority | Mock Object    | Uses | Files | Impact")
     print("---------|----------------|------|-------|--------")
     for obj, uses, files, priority in targets:
-        print(
-            f"{priority:8} | {obj:14} | {uses:4} | {files:5} | {'🔥' if priority == 'HIGH' else '🔸' if priority == 'MEDIUM' else '🔹'}"
-        )
+        print(f"{priority:8} | {obj:14} | {uses:4} | {files:5} | {'🔥' if priority == 'HIGH' else '🔸' if priority == 'MEDIUM' else '🔹'}")
 
     print("\nRecommended migration order:")
     print("1. SessionManager - Highest impact (20 duplications)")

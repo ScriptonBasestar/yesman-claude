@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Final verification of lint status"""
-import subprocess
+
 import os
 from pathlib import Path
 
@@ -18,13 +18,13 @@ long_line_files = 0
 for py_file in Path(".").rglob("*.py"):
     if any(skip in str(py_file) for skip in ["__pycache__", "migrations", "node_modules", ".git"]):
         continue
-    
+
     try:
-        with open(py_file, 'r', encoding='utf-8') as f:
+        with open(py_file, encoding="utf-8") as f:
             lines = f.readlines()
-        
+
         for i, line in enumerate(lines, 1):
-            if len(line.rstrip()) > 88 and 'http' not in line and '"""' not in line:
+            if len(line.rstrip()) > 88 and "http" not in line and '"""' not in line:
                 long_line_files += 1
                 break
     except Exception:
@@ -41,11 +41,11 @@ no_newline_files = 0
 for py_file in Path(".").rglob("*.py"):
     if any(skip in str(py_file) for skip in ["__pycache__", "migrations", "node_modules", ".git"]):
         continue
-    
+
     try:
-        with open(py_file, 'rb') as f:
+        with open(py_file, "rb") as f:
             content = f.read()
-        if content and not content.endswith(b'\n'):
+        if content and not content.endswith(b"\n"):
             no_newline_files += 1
     except Exception:
         pass
@@ -61,9 +61,9 @@ syntax_errors = 0
 for py_file in Path(".").rglob("*.py"):
     if any(skip in str(py_file) for skip in ["__pycache__", "migrations", "node_modules", ".git"]):
         continue
-    
+
     try:
-        compile(open(py_file).read(), py_file, 'exec')
+        compile(open(py_file).read(), py_file, "exec")
     except SyntaxError:
         syntax_errors += 1
     except Exception:

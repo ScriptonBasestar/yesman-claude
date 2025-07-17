@@ -23,12 +23,7 @@ def analyze_common_issues():
         lines = makefile_content.split("\n")
         targets = []
         for line in lines:
-            if (
-                line
-                and not line.startswith("\t")
-                and not line.startswith("#")
-                and ":" in line
-            ):
+            if line and not line.startswith("\t") and not line.startswith("#") and ":" in line:
                 target = line.split(":")[0].strip()
                 if target:
                     targets.append(target)
@@ -48,9 +43,7 @@ def analyze_common_issues():
 
         # Check for inconsistent references
         if "sbkube" in makefile_content:
-            print(
-                "  • Found 'sbkube' references in Makefile (should be 'libs commands')"
-            )
+            print("  • Found 'sbkube' references in Makefile (should be 'libs commands')")
 
     # 2. Configuration conflicts
     print("\n2. CONFIGURATION CONFLICTS:")
@@ -73,20 +66,11 @@ def analyze_common_issues():
         if "line-length = 200" in ruff_content:
             ruff_line_length = 200
 
-        if (
-            pyproject_line_length
-            and ruff_line_length
-            and pyproject_line_length != ruff_line_length
-        ):
-            print(
-                f"  • Line length mismatch: pyproject.toml={pyproject_line_length}, ruff.toml={ruff_line_length}"
-            )
+        if pyproject_line_length and ruff_line_length and pyproject_line_length != ruff_line_length:
+            print(f"  • Line length mismatch: pyproject.toml={pyproject_line_length}, ruff.toml={ruff_line_length}")
 
         # Check target version
-        if (
-            'target-version = "py311"' in pyproject_content
-            and 'target-version = "py38"' in ruff_content
-        ):
+        if 'target-version = "py311"' in pyproject_content and 'target-version = "py38"' in ruff_content:
             print("  • Target version mismatch: pyproject.toml=py311, ruff.toml=py38")
 
     # 3. Import issues
@@ -153,9 +137,7 @@ def analyze_common_issues():
                                 missing_hints_count += 1
                                 if missing_hints_count <= 10:
                                     relative_path = py_file.relative_to(project_path)
-                                    print(
-                                        f"  • {relative_path}:{node.lineno} - Function '{node.name}' missing return type"
-                                    )
+                                    print(f"  • {relative_path}:{node.lineno} - Function '{node.name}' missing return type")
                 except:
                     pass
 
@@ -182,17 +164,11 @@ def analyze_common_issues():
                             if import_match:
                                 module_name = import_match.group(1)
                                 # Check if module is used elsewhere in the file
-                                if (
-                                    lines.count(module_name) == 1
-                                ):  # Only appears in import line
+                                if lines.count(module_name) == 1:  # Only appears in import line
                                     unused_count += 1
                                     if unused_count <= 10:
-                                        relative_path = py_file.relative_to(
-                                            project_path
-                                        )
-                                        print(
-                                            f"  • {relative_path}:{i} - Potentially unused import '{module_name}'"
-                                        )
+                                        relative_path = py_file.relative_to(project_path)
+                                        print(f"  • {relative_path}:{i} - Potentially unused import '{module_name}'")
                 except:
                     pass
 
@@ -218,9 +194,7 @@ def analyze_common_issues():
                             security_issues += 1
                             if security_issues <= 5:
                                 relative_path = py_file.relative_to(project_path)
-                                print(
-                                    f"  • {relative_path}:{i} - subprocess with shell=True"
-                                )
+                                print(f"  • {relative_path}:{i} - subprocess with shell=True")
 
                         # Check for eval/exec
                         if "eval(" in line or "exec(" in line:

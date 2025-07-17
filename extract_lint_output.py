@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Script to extract lint output by running each command individually
-"""
+"""Script to extract lint output by running each command individually"""
 
 import os
 import subprocess

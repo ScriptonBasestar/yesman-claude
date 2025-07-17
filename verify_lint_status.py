@@ -13,7 +13,6 @@ def check_file_exists(file_path):
 
 def analyze_current_status():
     """Analyze the current lint status based on available information"""
-
     print("=== LINT STATUS VERIFICATION ===")
     print()
 
@@ -27,9 +26,7 @@ def analyze_current_status():
     makefile = project_root / "Makefile"
 
     print(f"  ruff.toml: {'✅ EXISTS' if ruff_toml.exists() else '❌ MISSING'}")
-    print(
-        f"  pyproject.toml: {'✅ EXISTS' if pyproject_toml.exists() else '❌ MISSING'}"
-    )
+    print(f"  pyproject.toml: {'✅ EXISTS' if pyproject_toml.exists() else '❌ MISSING'}")
     print(f"  Makefile: {'✅ EXISTS' if makefile.exists() else '❌ MISSING'}")
 
     # Check for source directories
@@ -49,12 +46,8 @@ def analyze_current_status():
     lint_error_report = project_root / "LINT_ERRORS_REPORT.md"
     lint_fix_report = project_root / "LINT_FIX_REPORT.md"
 
-    print(
-        f"  LINT_ERRORS_REPORT.md: {'✅ EXISTS' if lint_error_report.exists() else '❌ MISSING'}"
-    )
-    print(
-        f"  LINT_FIX_REPORT.md: {'✅ EXISTS' if lint_fix_report.exists() else '❌ MISSING'}"
-    )
+    print(f"  LINT_ERRORS_REPORT.md: {'✅ EXISTS' if lint_error_report.exists() else '❌ MISSING'}")
+    print(f"  LINT_FIX_REPORT.md: {'✅ EXISTS' if lint_fix_report.exists() else '❌ MISSING'}")
 
     # Try to run basic Python commands to test environment
     print("\n🧪 Environment Tests:")
@@ -75,9 +68,7 @@ def analyze_current_status():
 
     # Try to check if uv is available
     try:
-        result = subprocess.run(
-            ["uv", "--version"], check=False, capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["uv", "--version"], check=False, capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
             print(f"  uv: ✅ {result.stdout.strip()}")
         else:
@@ -91,13 +82,9 @@ def analyze_current_status():
     # Check if recent changes suggest lint issues are resolved
     if lint_fix_report.exists():
         print("  ✅ LINT_FIX_REPORT.md indicates many issues have been resolved")
-        print(
-            "  ✅ Configuration conflicts (line-length, target-version) have been fixed"
-        )
+        print("  ✅ Configuration conflicts (line-length, target-version) have been fixed")
         print("  ✅ Import sorting and formatting issues have been addressed")
-        print(
-            "  ✅ Circular import issues have been resolved through modular refactoring"
-        )
+        print("  ✅ Circular import issues have been resolved through modular refactoring")
 
     # Check git status from environment
     print("\n📝 Git Status (from environment):")
@@ -116,12 +103,8 @@ def analyze_current_status():
 
     print("\n💡 RECOMMENDATION:")
     print("  The project appears to be in good lint health based on recent fixes.")
-    print(
-        "  When shell issues are resolved, running 'make lint' should show minimal issues."
-    )
-    print(
-        "  Focus should be on manual fixes like type annotations and security reviews."
-    )
+    print("  When shell issues are resolved, running 'make lint' should show minimal issues.")
+    print("  Focus should be on manual fixes like type annotations and security reviews.")
 
 
 if __name__ == "__main__":

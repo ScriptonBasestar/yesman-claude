@@ -39,19 +39,14 @@ def start_controller(session_name: str):
         if not session_exists:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"❌ Session '{session_name}' is not running. "
-                    f"Please start the session first using 'yesman up' or the dashboard."
-                ),
+                detail=(f"❌ Session '{session_name}' is not running. Please start the session first using 'yesman up' or the dashboard."),
             )
 
         # Check if controller is already running
         if controller.is_running:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"✅ Controller for session '{session_name}' is already running."
-                ),
+                detail=(f"✅ Controller for session '{session_name}' is already running."),
             )
 
         # Check if Claude pane exists before attempting to start
@@ -101,12 +96,7 @@ def start_controller(session_name: str):
             else:
                 detail_msg += "  • No panes found"
 
-            detail_msg += (
-                f"\n\n💡 To fix this:\n"
-                f"1. Open session: tmux attach -t {session_name}\n"
-                f"2. Start Claude Code in a pane: claude\n"
-                f"3. Try starting the controller again"
-            )
+            detail_msg += f"\n\n💡 To fix this:\n1. Open session: tmux attach -t {session_name}\n2. Start Claude Code in a pane: claude\n3. Try starting the controller again"
 
             raise HTTPException(status_code=500, detail=detail_msg)
 
@@ -335,25 +325,17 @@ def start_all_controllers():
                     # 이미 실행 중인 경우도 성공으로 카운트
                     started_count += 1
             except Exception as e:
-                errors.append(
-                    f"Error starting controller for session "
-                    f"'{session.session_name}': {str(e)}"
-                )
+                errors.append(f"Error starting controller for session '{session.session_name}': {str(e)}")
 
         if errors and started_count == 0:
             # 모든 요청이 실패한 경우
             raise HTTPException(
                 status_code=500,
-                detail=(
-                    f"Failed to start any controllers. Errors: {'; '.join(errors)}"
-                ),
+                detail=(f"Failed to start any controllers. Errors: {'; '.join(errors)}"),
             )
 
         return {
-            "message": (
-                f"Started {started_count} controller(s) out of "
-                f"{len(running_sessions)} session(s)."
-            ),
+            "message": (f"Started {started_count} controller(s) out of {len(running_sessions)} session(s)."),
             "started": started_count,
             "total_sessions": len(running_sessions),
             "errors": errors,
@@ -409,16 +391,11 @@ def stop_all_controllers():
             # 모든 요청이 실패한 경우
             raise HTTPException(
                 status_code=500,
-                detail=(
-                    f"Failed to stop any controllers. Errors: {'; '.join(errors)}"
-                ),
+                detail=(f"Failed to stop any controllers. Errors: {'; '.join(errors)}"),
             )
 
         return {
-            "message": (
-                f"Stopped {stopped_count} controller(s) out of "
-                f"{len(running_sessions)} session(s)."
-            ),
+            "message": (f"Stopped {stopped_count} controller(s) out of {len(running_sessions)} session(s)."),
             "stopped": stopped_count,
             "total_sessions": len(running_sessions),
             "errors": errors,

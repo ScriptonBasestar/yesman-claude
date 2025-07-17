@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Direct script to run lint commands and save output to file
-"""
+"""Direct script to run lint commands and save output to file"""
 
 import os
 import subprocess

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Manual lint check script to analyze files for common issues
-"""
+"""Manual lint check script to analyze files for common issues"""
 
 import ast
 from pathlib import Path
