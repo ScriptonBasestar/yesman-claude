@@ -3,13 +3,26 @@ import os
 from datetime import datetime
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from api.background_tasks import task_runner
+from api.middleware.error_handler import add_request_id_middleware, global_error_handler
 from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
+from libs.core.error_handling import YesmanError
 
-app = FastAPI()
+app = FastAPI(title="Yesman Claude API", version="0.1.0")
+
+# Add error handling middleware
+app.add_exception_handler(YesmanError, global_error_handler)
+app.add_exception_handler(StarletteHTTPException, global_error_handler)
+app.add_exception_handler(RequestValidationError, global_error_handler)
+app.add_exception_handler(Exception, global_error_handler)
+
+# Add request ID middleware
+app.middleware("http")(add_request_id_middleware)
 
 # Configure CORS
 app.add_middleware(
@@ -39,26 +52,25 @@ app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="
 sveltekit_build_path = "tauri-dashboard/build"
 if os.path.exists(sveltekit_build_path):
     # Mount SvelteKit static assets with cache control headers
-    from fastapi import Response
     from fastapi.staticfiles import StaticFiles
-    
+
     class CacheControlStaticFiles(StaticFiles):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-        
+
         async def get_response(self, path: str, scope):
             response = await super().get_response(path, scope)
-            if hasattr(response, 'headers'):
+            if hasattr(response, "headers"):
                 # Add cache-busting headers for JavaScript files
-                if path.endswith('.js'):
+                if path.endswith(".js"):
                     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
                     response.headers["Pragma"] = "no-cache"
                     response.headers["Expires"] = "0"
                 # Cache assets with hash in filename for longer
-                elif any(path.endswith(ext) for ext in ['.css', '.png', '.jpg', '.svg', '.woff', '.woff2']):
+                elif any(path.endswith(ext) for ext in [".css", ".png", ".jpg", ".svg", ".woff", ".woff2"]):
                     response.headers["Cache-Control"] = "public, max-age=31536000"
             return response
-    
+
     app.mount("/_app", CacheControlStaticFiles(directory="tauri-dashboard/build/_app"), name="app-assets")
 
 

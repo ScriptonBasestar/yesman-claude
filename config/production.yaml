@@ -1,0 +1,18 @@
+# Production environment configuration
+# Overrides for production
+
+# Less verbose logging
+logging:
+  level: WARNING
+  max_size: 52428800  # 50MB
+  backup_count: 10
+
+# Production database settings
+database:
+  pool_size: 10
+
+# Higher confidence threshold
+confidence_threshold: 0.9
+
+# Enable telemetry in production
+enable_telemetry: true

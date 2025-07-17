@@ -1,0 +1,21 @@
+# Test environment configuration
+# Overrides for testing
+
+# Test-specific root directory
+root_dir: /tmp/yesman-test
+
+# Minimal logging for tests
+logging:
+  level: ERROR
+  log_path: /tmp/yesman-test/logs/
+
+# In-memory database for tests
+database:
+  enabled: true
+  url: "sqlite:///:memory:"
+  echo: false
+
+# Test-specific settings
+confidence_threshold: 0.5
+auto_cleanup_days: 1
+enable_telemetry: false

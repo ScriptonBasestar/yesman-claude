@@ -1,0 +1,16 @@
+# Development environment configuration
+# Overrides for development
+
+# More verbose logging
+logging:
+  level: DEBUG
+
+# Enable SQL echo for debugging
+database:
+  echo: true
+
+# Lower confidence threshold for testing
+confidence_threshold: 0.5
+
+# Shorter cleanup period for testing
+auto_cleanup_days: 7

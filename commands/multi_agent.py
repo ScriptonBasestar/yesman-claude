@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from libs.core.base_command import BaseCommand, CommandError
 from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
@@ -19,6 +20,850 @@ from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 from libs.multi_agent.semantic_merger import MergeResolution, MergeStrategy, SemanticMerger
 
 logger = logging.getLogger(__name__)
+
+
+class StartAgentsCommand(BaseCommand):
+    """Start the multi-agent pool"""
+
+    def execute(self, max_agents: int = 3, work_dir: str | None = None, monitor: bool = False, **kwargs) -> dict:
+        """Execute the start agents command"""
+        try:
+            self.print_info(f"🤖 Starting multi-agent pool with {max_agents} agents...")
+
+            # Create agent pool
+            pool = AgentPool(max_agents=max_agents, work_dir=work_dir)
+
+            async def run_pool():
+                await pool.start()
+
+                if monitor:
+                    self.print_info("📊 Starting monitoring dashboard...")
+                    await run_agent_monitor(pool)
+                else:
+                    self.print_success("✅ Agent pool started successfully")
+                    self.print_info("Use 'yesman multi-agent monitor' to view status")
+
+                    # Keep running until interrupted
+                    try:
+                        while pool._running:
+                            await asyncio.sleep(1)
+                    except KeyboardInterrupt:
+                        self.print_warning("\n🛑 Stopping agent pool...")
+                        await pool.stop()
+
+            asyncio.run(run_pool())
+            return {"success": True, "max_agents": max_agents, "work_dir": work_dir}
+
+        except Exception as e:
+            raise CommandError(f"Error starting agents: {e}") from e
+
+
+class MonitorAgentsCommand(BaseCommand):
+    """Start real-time agent monitoring dashboard"""
+
+    def execute(self, work_dir: str | None = None, duration: float | None = None, refresh: float = 1.0, **kwargs) -> dict:
+        """Execute the monitor agents command"""
+        try:
+            self.print_info("📊 Starting agent monitoring dashboard...")
+
+            # Try to connect to existing agent pool
+            pool = None
+            if work_dir:
+                pool_dir = Path(work_dir) / ".yesman-agents"
+                if pool_dir.exists():
+                    pool = AgentPool(work_dir=work_dir)
+                    # Load existing state without starting
+                    pool._load_state()
+
+            async def run_monitor():
+                monitor = AgentMonitor(agent_pool=pool)
+                monitor.refresh_interval = refresh
+
+                if not pool:
+                    self.print_warning("⚠️  No active agent pool found. Showing demo mode.")
+                    # Add some demo data for visualization
+                    monitor.agent_metrics = {
+                        "agent-1": monitor.AgentMetrics(
+                            agent_id="agent-1",
+                            current_task="task-123",
+                            tasks_completed=5,
+                            tasks_failed=1,
+                            total_execution_time=300.0,
+                        ),
+                    }
+
+                if duration:
+                    self.print_info(f"⏱️  Monitoring for {duration} seconds...")
+                    import signal
+
+                    def timeout_handler(signum, frame):
+                        raise KeyboardInterrupt()
+
+                    signal.signal(signal.SIGALRM, timeout_handler)
+                    signal.alarm(int(duration))
+
+                try:
+                    await monitor.run()
+                except KeyboardInterrupt:
+                    self.print_info("\n📊 Monitoring stopped.")
+
+            asyncio.run(run_monitor())
+            return {"success": True, "work_dir": work_dir, "duration": duration}
+
+        except Exception as e:
+            raise CommandError(f"Error monitoring agents: {e}") from e
+
+
+class StatusCommand(BaseCommand):
+    """Show current agent pool status"""
+
+    def execute(self, work_dir: str | None = None, **kwargs) -> dict:
+        """Execute the status command"""
+        try:
+            # Initialize agent pool
+            pool = AgentPool(work_dir=work_dir)
+            pool._load_state()
+
+            # Get pool statistics
+            stats = pool.get_pool_statistics()
+            agents = pool.list_agents()
+            tasks = pool.list_tasks()
+
+            # Display status information
+            self.print_info("🤖 Multi-Agent Pool Status")
+            self.print_info("=" * 40)
+            self.print_info(f"Total Agents: {len(agents)}")
+            self.print_info(f"Active Agents: {stats.get('active_agents', 0)}")
+            self.print_info(f"Idle Agents: {stats.get('idle_agents', 0)}")
+            self.print_info(f"Total Tasks: {len(tasks)}")
+            self.print_info(f"Completed Tasks: {stats.get('completed_tasks', 0)}")
+            self.print_info(f"Failed Tasks: {stats.get('failed_tasks', 0)}")
+            self.print_info(f"Queue Size: {stats.get('queue_size', 0)}")
+            self.print_info(f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s")
+
+            # Display agent details
+            if agents:
+                self.print_info("\n📋 Agents:")
+                for agent in agents:
+                    status_icon = {
+                        "idle": "🟢",
+                        "working": "🟡",
+                        "error": "🔴",
+                        "terminated": "⚫",
+                    }.get(agent.get("state", "unknown"), "❓")
+
+                    self.print_info(f"  {status_icon} {agent['agent_id']} - Completed: {agent.get('completed_tasks', 0)}, Failed: {agent.get('failed_tasks', 0)}")
+
+            return {
+                "success": True,
+                "work_dir": work_dir,
+                "statistics": stats,
+                "agents": agents,
+                "tasks": tasks,
+            }
+
+        except Exception as e:
+            raise CommandError(f"Error getting agent pool status: {e}") from e
+
+
+class StopAgentsCommand(BaseCommand):
+    """Stop the multi-agent pool"""
+
+    def execute(self, work_dir: str | None = None, **kwargs) -> dict:
+        """Execute the stop agents command"""
+        try:
+            self.print_info("🛑 Stopping multi-agent pool...")
+
+            pool = AgentPool(work_dir=work_dir)
+
+            async def stop_pool():
+                await pool.stop()
+                self.print_success("✅ Agent pool stopped successfully")
+
+            asyncio.run(stop_pool())
+
+            return {"success": True, "work_dir": work_dir, "message": "Agent pool stopped successfully"}
+
+        except Exception as e:
+            raise CommandError(f"Error stopping agents: {e}") from e
+
+
+class AddTaskCommand(BaseCommand):
+    """Add a task to the agent pool queue"""
+
+    def execute(
+        self, title: str, command: list[str], work_dir: str | None = None, directory: str = ".", priority: int = 5, complexity: int = 5, timeout: int = 300, description: str | None = None, **kwargs
+    ) -> dict:
+        """Execute the add task command"""
+        try:
+            pool = AgentPool(work_dir=work_dir)
+
+            task = pool.create_task(
+                title=title,
+                command=command,
+                working_directory=directory,
+                description=description or f"Execute: {' '.join(command)}",
+                priority=priority,
+                complexity=complexity,
+                timeout=timeout,
+            )
+
+            self.print_success(f"✅ Task added: {task.task_id}")
+            self.print_info(f"   Title: {task.title}")
+            self.print_info(f"   Command: {' '.join(task.command)}")
+            self.print_info(f"   Priority: {task.priority}")
+
+            return {"success": True, "work_dir": work_dir, "task_id": task.task_id, "title": task.title, "command": task.command, "priority": task.priority}
+
+        except Exception as e:
+            raise CommandError(f"Error adding task: {e}") from e
+
+
+class ListTasksCommand(BaseCommand):
+    """List tasks in the agent pool"""
+
+    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:
+        """Execute the list tasks command"""
+        try:
+            pool = AgentPool(work_dir=work_dir)
+
+            from libs.multi_agent.types import TaskStatus
+
+            filter_status = None
+            if status:
+                try:
+                    filter_status = TaskStatus(status.lower())
+                except ValueError as e:
+                    raise CommandError(f"Invalid status: {status}", recovery_hint="Valid statuses are: pending, assigned, running, completed, failed, cancelled") from e
+
+            tasks = pool.list_tasks(filter_status)
+
+            if not tasks:
+                self.print_info("📝 No tasks found")
+                return {"success": True, "work_dir": work_dir, "tasks": [], "count": 0}
+
+            self.print_info(f"📋 Tasks ({len(tasks)} found):")
+            self.print_info("=" * 80)
+
+            for task in tasks:
+                status_icon = {
+                    "pending": "⏳",
+                    "assigned": "📤",
+                    "running": "⚡",
+                    "completed": "✅",
+                    "failed": "❌",
+                    "cancelled": "🚫",
+                }.get(task.get("status", "unknown"), "❓")
+
+                self.print_info(f"{status_icon} {task['task_id'][:8]}... - {task['title']}")
+                self.print_info(f"   Status: {task['status'].upper()}")
+                if task.get("assigned_agent"):
+                    self.print_info(f"   Agent: {task['assigned_agent']}")
+                self.print_info(f"   Command: {' '.join(task['command'])}")
+                self.print_info("")
+
+            return {"success": True, "work_dir": work_dir, "tasks": tasks, "count": len(tasks), "filter_status": status}
+
+        except Exception as e:
+            raise CommandError(f"Error listing tasks: {e}") from e
+
+
+class DetectConflictsCommand(BaseCommand):
+    """Detect conflicts between branches"""
+
+    def execute(self, branches: list[str], repo_path: str | None = None, auto_resolve: bool = False, **kwargs) -> dict:
+        """Execute the detect conflicts command"""
+        try:
+            self.print_info(f"🔍 Detecting conflicts between branches: {', '.join(branches)}")
+
+            # Create conflict resolution engine
+            branch_manager = BranchManager(repo_path=repo_path)
+            engine = ConflictResolutionEngine(branch_manager, repo_path)
+
+            async def run_detection():
+                conflicts = await engine.detect_potential_conflicts(branches)
+
+                if not conflicts:
+                    self.print_success("✅ No conflicts detected")
+                    return {"success": True, "branches": branches, "repo_path": repo_path, "conflicts": [], "auto_resolve_results": None}
+
+                self.print_info(f"⚠️  Found {len(conflicts)} potential conflicts:")
+                self.print_info("=" * 60)
+
+                for conflict in conflicts:
+                    severity_icon = {
+                        "low": "🟢",
+                        "medium": "🟡",
+                        "high": "🔴",
+                        "critical": "💀",
+                    }.get(conflict.severity.value, "❓")
+
+                    self.print_info(f"{severity_icon} {conflict.conflict_id}")
+                    self.print_info(f"   Type: {conflict.conflict_type.value}")
+                    self.print_info(f"   Severity: {conflict.severity.value}")
+                    self.print_info(f"   Branches: {', '.join(conflict.branches)}")
+                    self.print_info(f"   Files: {', '.join(conflict.files)}")
+                    self.print_info(f"   Description: {conflict.description}")
+                    self.print_info(f"   Suggested Strategy: {conflict.suggested_strategy.value}")
+                    self.print_info("")
+
+                auto_resolve_results = None
+                # Auto-resolve if requested
+                if auto_resolve:
+                    self.print_info("🔧 Attempting automatic resolution...")
+                    results = await engine.auto_resolve_all()
+                    resolved = len([r for r in results if r.success])
+                    failed = len(results) - resolved
+
+                    self.print_success(f"✅ Auto-resolved: {resolved}")
+                    if failed > 0:
+                        self.print_error(f"❌ Failed to resolve: {failed}")
+                        self.print_warning("🚨 Manual intervention required for remaining conflicts")
+
+                    auto_resolve_results = {"resolved": resolved, "failed": failed, "results": results}
+
+                return {"success": True, "branches": branches, "repo_path": repo_path, "conflicts": conflicts, "auto_resolve_results": auto_resolve_results}
+
+            return asyncio.run(run_detection())
+
+        except Exception as e:
+            raise CommandError(f"Error detecting conflicts: {e}") from e
+
+
+class ResolveConflictCommand(BaseCommand):
+    """Resolve a specific conflict"""
+
+    def execute(self, conflict_id: str, strategy: str | None = None, repo_path: str | None = None, **kwargs) -> dict:
+        """Execute the resolve conflict command"""
+        try:
+            self.print_info(f"🔧 Resolving conflict: {conflict_id}")
+
+            # Create conflict resolution engine
+            branch_manager = BranchManager(repo_path=repo_path)
+            engine = ConflictResolutionEngine(branch_manager, repo_path)
+
+            # Convert strategy string to enum
+            resolution_strategy = None
+            if strategy:
+                try:
+                    from libs.multi_agent.conflict_resolution import ResolutionStrategy
+
+                    resolution_strategy = ResolutionStrategy(strategy)
+                except ValueError as e:
+                    raise CommandError(f"Invalid strategy: {strategy}", recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis") from e
+
+            async def run_resolution():
+                result = await engine.resolve_conflict(conflict_id, resolution_strategy)
+
+                if result.success:
+                    self.print_success("✅ Conflict resolved successfully!")
+                    self.print_info(f"   Strategy used: {result.strategy_used.value}")
+                    self.print_info(f"   Resolution time: {result.resolution_time:.2f}s")
+                    self.print_info(f"   Message: {result.message}")
+                    if result.resolved_files:
+                        self.print_info(f"   Resolved files: {', '.join(result.resolved_files)}")
+                else:
+                    self.print_error("❌ Failed to resolve conflict")
+                    self.print_info(f"   Strategy attempted: {result.strategy_used.value}")
+                    self.print_info(f"   Error: {result.message}")
+                    if result.remaining_conflicts:
+                        self.print_info(f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}")
+
+                return {
+                    "success": result.success,
+                    "conflict_id": conflict_id,
+                    "strategy": strategy,
+                    "repo_path": repo_path,
+                    "strategy_used": result.strategy_used.value if result.strategy_used else None,
+                    "resolution_time": result.resolution_time,
+                    "message": result.message,
+                    "resolved_files": result.resolved_files,
+                    "remaining_conflicts": result.remaining_conflicts,
+                }
+
+            return asyncio.run(run_resolution())
+
+        except Exception as e:
+            raise CommandError(f"Error resolving conflict: {e}") from e
+
+
+class ConflictSummaryCommand(BaseCommand):
+    """Show conflict resolution summary and statistics"""
+
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict:
+        """Execute the conflict summary command"""
+        try:
+            self.print_info("📊 Conflict Resolution Summary")
+            self.print_info("=" * 40)
+
+            # Create conflict resolution engine
+            branch_manager = BranchManager(repo_path=repo_path)
+            engine = ConflictResolutionEngine(branch_manager, repo_path)
+
+            summary = engine.get_conflict_summary()
+
+            # Overall statistics
+            self.print_info(f"Total Conflicts: {summary['total_conflicts']}")
+            self.print_info(f"Resolved: {summary['resolved_conflicts']}")
+            self.print_info(f"Unresolved: {summary['unresolved_conflicts']}")
+            self.print_info(f"Resolution Rate: {summary['resolution_rate']:.1%}")
+
+            # Severity breakdown
+            if summary["severity_breakdown"]:
+                self.print_info("\n📈 Severity Breakdown:")
+                for severity, count in summary["severity_breakdown"].items():
+                    if count > 0:
+                        severity_icon = {
+                            "low": "🟢",
+                            "medium": "🟡",
+                            "high": "🔴",
+                            "critical": "💀",
+                        }.get(severity, "❓")
+                        self.print_info(f"  {severity_icon} {severity.capitalize()}: {count}")
+
+            # Type breakdown
+            if summary["type_breakdown"]:
+                self.print_info("\n🏷️  Type Breakdown:")
+                for conflict_type, count in summary["type_breakdown"].items():
+                    if count > 0:
+                        type_icon = {
+                            "file_modification": "📝",
+                            "file_deletion": "🗑️",
+                            "file_creation": "📄",
+                            "semantic": "🧠",
+                            "dependency": "🔗",
+                            "merge_conflict": "⚡",
+                        }.get(conflict_type, "❓")
+                        self.print_info(f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}")
+
+            # Resolution statistics
+            stats = summary["resolution_stats"]
+            if stats["total_conflicts"] > 0:
+                self.print_info("\n⚡ Resolution Statistics:")
+                self.print_info(f"  Auto-resolved: {stats['auto_resolved']}")
+                self.print_info(f"  Human required: {stats['human_required']}")
+                self.print_info(f"  Success rate: {stats['resolution_success_rate']:.1%}")
+                self.print_info(f"  Average time: {stats['average_resolution_time']:.2f}s")
+
+            return {"success": True, "repo_path": repo_path, "summary": summary}
+
+        except Exception as e:
+            raise CommandError(f"Error getting conflict summary: {e}") from e
+
+
+class PredictConflictsCommand(BaseCommand):
+    """Predict potential conflicts between branches"""
+
+    def execute(self, branches: list[str], repo_path: str | None = None, time_horizon: int = 7, min_confidence: float = 0.3, limit: int = 10, **kwargs) -> dict:
+        """Execute the predict conflicts command"""
+        try:
+            self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
+            self.print_info(f"   Time horizon: {time_horizon} days")
+            self.print_info(f"   Confidence threshold: {min_confidence}")
+
+            # Create prediction system
+            branch_manager = BranchManager(repo_path=repo_path)
+            conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+            predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
+
+            # Set prediction parameters
+            predictor.min_confidence_threshold = min_confidence
+            predictor.max_predictions_per_run = limit * 2  # Get more, filter later
+
+            async def run_prediction():
+                from datetime import timedelta
+
+                horizon = timedelta(days=time_horizon)
+                predictions = await predictor.predict_conflicts(branches, horizon)
+
+                if not predictions:
+                    self.print_success("✅ No potential conflicts predicted")
+                    return {
+                        "success": True,
+                        "branches": branches,
+                        "repo_path": repo_path,
+                        "predictions": [],
+                        "parameters": {"time_horizon": time_horizon, "min_confidence": min_confidence, "limit": limit},
+                    }
+
+                # Filter and limit results
+                filtered_predictions = [p for p in predictions if p.likelihood_score >= min_confidence]
+                filtered_predictions = filtered_predictions[:limit]
+
+                self.print_info(f"⚠️  Found {len(filtered_predictions)} potential conflicts:")
+                self.print_info("=" * 80)
+
+                for i, prediction in enumerate(filtered_predictions, 1):
+                    confidence_icon = {
+                        "low": "🟢",
+                        "medium": "🟡",
+                        "high": "🔴",
+                        "critical": "💀",
+                    }.get(prediction.confidence.value, "❓")
+
+                    pattern_icon = {
+                        "overlapping_imports": "📦",
+                        "function_signature_drift": "🔧",
+                        "variable_naming_collision": "🏷️",
+                        "class_hierarchy_change": "🏗️",
+                        "dependency_version_mismatch": "📋",
+                        "api_breaking_change": "💥",
+                        "resource_contention": "⚡",
+                        "merge_context_loss": "🔀",
+                    }.get(prediction.pattern.value, "❓")
+
+                    self.print_info(f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}")
+                    self.print_info(f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}")
+                    self.print_info(f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})")
+                    self.print_info(f"   Branches: {', '.join(prediction.affected_branches)}")
+
+                    if prediction.affected_files:
+                        files_str = ", ".join(prediction.affected_files[:3])
+                        if len(prediction.affected_files) > 3:
+                            files_str += f" (and {len(prediction.affected_files) - 3} more)"
+                        self.print_info(f"   Files: {files_str}")
+
+                    self.print_info(f"   Description: {prediction.description}")
+
+                    if prediction.timeline_prediction:
+                        self.print_info(f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}")
+
+                    if prediction.prevention_suggestions:
+                        self.print_info("   Prevention:")
+                        for suggestion in prediction.prevention_suggestions[:2]:
+                            self.print_info(f"     • {suggestion}")
+
+                    self.print_info("")
+
+                return {
+                    "success": True,
+                    "branches": branches,
+                    "repo_path": repo_path,
+                    "predictions": filtered_predictions,
+                    "total_found": len(predictions),
+                    "filtered_count": len(filtered_predictions),
+                    "parameters": {"time_horizon": time_horizon, "min_confidence": min_confidence, "limit": limit},
+                }
+
+            return asyncio.run(run_prediction())
+
+        except Exception as e:
+            raise CommandError(f"Error predicting conflicts: {e}") from e
+
+
+class PredictionSummaryCommand(BaseCommand):
+    """Show conflict prediction summary and statistics"""
+
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict:
+        """Execute the prediction summary command"""
+        try:
+            self.print_info("🔮 Conflict Prediction Summary")
+            self.print_info("=" * 40)
+
+            # Create prediction system
+            branch_manager = BranchManager(repo_path=repo_path)
+            conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+            predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
+
+            summary = predictor.get_prediction_summary()
+
+            # Overall statistics
+            self.print_info(f"Total Predictions: {summary['total_predictions']}")
+            self.print_info(f"Active Predictions: {summary.get('active_predictions', 0)}")
+
+            # Confidence breakdown
+            if summary["by_confidence"]:
+                self.print_info("\n🎯 Confidence Breakdown:")
+                for confidence, count in summary["by_confidence"].items():
+                    if count > 0:
+                        confidence_icon = {
+                            "low": "🟢",
+                            "medium": "🟡",
+                            "high": "🔴",
+                            "critical": "💀",
+                        }.get(confidence, "❓")
+                        self.print_info(f"  {confidence_icon} {confidence.capitalize()}: {count}")
+
+            # Pattern breakdown
+            if summary["by_pattern"]:
+                self.print_info("\n🏷️  Pattern Breakdown:")
+                for pattern, count in summary["by_pattern"].items():
+                    if count > 0:
+                        pattern_icon = {
+                            "overlapping_imports": "📦",
+                            "function_signature_drift": "🔧",
+                            "variable_naming_collision": "🏷️",
+                            "class_hierarchy_change": "🏗️",
+                            "dependency_version_mismatch": "📋",
+                            "api_breaking_change": "💥",
+                            "resource_contention": "⚡",
+                            "merge_context_loss": "🔀",
+                        }.get(pattern, "❓")
+                        self.print_info(f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}")
+
+            # Accuracy metrics
+            accuracy = summary["accuracy_metrics"]
+            if accuracy["total_predictions"] > 0:
+                self.print_info("\n📊 Accuracy Metrics:")
+                self.print_info(f"  Accuracy Rate: {accuracy['accuracy_rate']:.1%}")
+                self.print_info(f"  Prevented Conflicts: {accuracy['prevented_conflicts']}")
+                self.print_info(f"  False Positives: {accuracy['false_positives']}")
+
+            # Most likely conflicts
+            if summary.get("most_likely_conflicts"):
+                self.print_info("\n🚨 Most Likely Conflicts:")
+                for conflict in summary["most_likely_conflicts"]:
+                    self.print_info(f"  • {conflict['description']} ({conflict['likelihood']:.1%})")
+
+            return {"success": True, "repo_path": repo_path, "summary": summary}
+
+        except Exception as e:
+            raise CommandError(f"Error getting prediction summary: {e}") from e
+
+
+class AnalyzeConflictPatternsCommand(BaseCommand):
+    """Analyze detailed conflict patterns between branches"""
+
+    def execute(self, branches: list[str], repo_path: str | None = None, pattern: str | None = None, export: str | None = None, **kwargs) -> dict:
+        """Execute the analyze conflict patterns command"""
+        try:
+            self.print_info(f"🔍 Analyzing conflict patterns for: {', '.join(branches)}")
+
+            # Create prediction system
+            branch_manager = BranchManager(repo_path=repo_path)
+            conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+            predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
+
+            async def run_analysis():
+                analysis_results = {}
+
+                # Calculate conflict vectors for all pairs
+                self.print_info("\n📊 Conflict Vector Analysis:")
+                self.print_info("-" * 40)
+
+                for i, branch1 in enumerate(branches):
+                    for branch2 in branches[i + 1 :]:
+                        self.print_info(f"\n🔗 {branch1} ↔ {branch2}")
+
+                        vector = await predictor._calculate_conflict_vector(branch1, branch2)
+                        analysis_results[f"{branch1}:{branch2}"] = {
+                            "vector": vector._asdict(),
+                            "patterns": {},
+                        }
+
+                        # Display vector components
+                        self.print_info(f"   File Overlap: {vector.file_overlap_score:.2f}")
+                        self.print_info(f"   Change Frequency: {vector.change_frequency_score:.2f}")
+                        self.print_info(f"   Complexity: {vector.complexity_score:.2f}")
+                        self.print_info(f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}")
+                        self.print_info(f"   Semantic Distance: {vector.semantic_distance_score:.2f}")
+                        self.print_info(f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}")
+
+                        # Overall risk score
+                        risk_score = sum(vector) / len(vector)
+                        risk_level = "🔴 HIGH" if risk_score > 0.7 else "🟡 MEDIUM" if risk_score > 0.4 else "🟢 LOW"
+                        self.print_info(f"   Overall Risk: {risk_level} ({risk_score:.2f})")
+
+                        # Pattern-specific analysis
+                        if pattern:
+                            from libs.multi_agent.conflict_prediction import ConflictPattern
+
+                            try:
+                                target_pattern = ConflictPattern(pattern)
+                                detector = predictor.pattern_detectors.get(target_pattern)
+                                if detector:
+                                    result = await detector(branch1, branch2, vector)
+                                    if result:
+                                        analysis_results[f"{branch1}:{branch2}"]["patterns"][pattern] = {
+                                            "likelihood": result.likelihood_score,
+                                            "confidence": result.confidence.value,
+                                            "description": result.description,
+                                        }
+                                        self.print_info(f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence")
+                            except ValueError:
+                                self.print_warning(f"   ❌ Unknown pattern: {pattern}")
+
+                # Export results if requested
+                if export:
+                    import json
+
+                    with open(export, "w") as f:
+                        json.dump(analysis_results, f, indent=2, default=str)
+                    self.print_success(f"\n💾 Analysis exported to: {export}")
+
+                return {"success": True, "branches": branches, "repo_path": repo_path, "pattern": pattern, "export": export, "analysis_results": analysis_results}
+
+            return asyncio.run(run_analysis())
+
+        except Exception as e:
+            raise CommandError(f"Error analyzing patterns: {e}") from e
+
+
+class AnalyzeSemanticConflictsCommand(BaseCommand):
+    """Analyze AST-based semantic conflicts between branches"""
+
+    def execute(self, branches: list[str], repo_path: str | None = None, files: str | None = None, include_private: bool = False, export: str | None = None, detailed: bool = False, **kwargs) -> dict:
+        """Execute the analyze semantic conflicts command"""
+        try:
+            self.print_info(f"🧠 Analyzing semantic conflicts between: {', '.join(branches)}")
+
+            # Create semantic analyzer
+            branch_manager = BranchManager(repo_path=repo_path)
+            conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
+            semantic_analyzer = SemanticAnalyzer(conflict_engine, branch_manager)
+
+            # Parse file list if provided
+            file_list = files.split(",") if files else None
+
+            async def run_semantic_analysis():
+                results = await semantic_analyzer.analyze_semantic_conflicts(branches, target_files=file_list, include_private_members=include_private, detailed_output=detailed)
+
+                # Display results
+                for file_path, conflicts in results.items():
+                    if conflicts:
+                        self.print_info(f"\n📄 {file_path}")
+                        self.print_info("-" * len(file_path))
+
+                        for conflict in conflicts:
+                            severity_icon = {"low": "🟢", "medium": "🟡", "high": "🔴", "critical": "💀"}.get(conflict.severity, "❓")
+
+                            self.print_info(f"  {severity_icon} {conflict.conflict_type}")
+                            self.print_info(f"    Branches: {', '.join(conflict.affected_branches)}")
+                            self.print_info(f"    Description: {conflict.description}")
+
+                            if detailed and conflict.details:
+                                for detail in conflict.details:
+                                    self.print_info(f"      • {detail}")
+
+                # Export if requested
+                if export:
+                    import json
+
+                    with open(export, "w") as f:
+                        json.dump(results, f, indent=2, default=str)
+                    self.print_success(f"\n💾 Results exported to: {export}")
+
+                return {"success": True, "branches": branches, "repo_path": repo_path, "files": files, "include_private": include_private, "detailed": detailed, "export": export, "results": results}
+
+            return asyncio.run(run_semantic_analysis())
+
+        except Exception as e:
+            raise CommandError(f"Error analyzing semantic conflicts: {e}") from e
+
+
+class SemanticSummaryCommand(BaseCommand):
+    """Show semantic structure summary of code"""
+
+    def execute(self, repo_path: str | None = None, branch: str | None = None, files: str | None = None, **kwargs) -> dict:
+        """Execute semantic summary command"""
+        try:
+            self.print_info("🧠 Semantic Code Analysis")
+            self.print_info("=" * 40)
+
+            # Create semantic analyzer
+            branch_manager = BranchManager(repo_path=repo_path)
+            analyzer = SemanticAnalyzer(branch_manager, repo_path)
+
+            # Parse file list
+            file_list = files.split(",") if files else None
+
+            async def run_summary():
+                current_branch = branch or "HEAD"
+                summary = await analyzer.get_semantic_summary(current_branch, file_list)
+
+                self.print_info(f"Branch: {current_branch}")
+                self.print_info(f"Files analyzed: {summary.get('file_count', 0)}")
+                self.print_info(f"Classes: {summary.get('class_count', 0)}")
+                self.print_info(f"Functions: {summary.get('function_count', 0)}")
+
+                return {"success": True, "repo_path": repo_path, "branch": current_branch, "files": files, "summary": summary}
+
+            return asyncio.run(run_summary())
+
+        except Exception as e:
+            raise CommandError(f"Error getting semantic summary: {e}") from e
+
+
+class FunctionDiffCommand(BaseCommand):
+    """Compare function signatures between branches"""
+
+    def execute(self, branches: list[str], repo_path: str | None = None, files: str | None = None, export: str | None = None, **kwargs) -> dict:
+        """Execute function diff command"""
+        try:
+            self.print_info(f"🔧 Comparing function signatures: {', '.join(branches)}")
+
+            # Create semantic analyzer
+            branch_manager = BranchManager(repo_path=repo_path)
+            analyzer = SemanticAnalyzer(branch_manager, repo_path)
+
+            # Parse file list
+            file_list = files.split(",") if files else None
+
+            async def run_diff():
+                diff_results = await analyzer.compare_function_signatures(branches, target_files=file_list)
+
+                for file_path, diffs in diff_results.items():
+                    if diffs:
+                        self.print_info(f"\n📄 {file_path}")
+                        for diff in diffs:
+                            self.print_info(f"  • {diff['function']}: {diff['change_type']}")
+
+                # Export if requested
+                if export:
+                    import json
+
+                    with open(export, "w") as f:
+                        json.dump(diff_results, f, indent=2)
+                    self.print_success(f"\n💾 Diff exported to: {export}")
+
+                return {"success": True, "branches": branches, "repo_path": repo_path, "files": files, "export": export, "diff_results": diff_results}
+
+            return asyncio.run(run_diff())
+
+        except Exception as e:
+            raise CommandError(f"Error comparing functions: {e}") from e
+
+
+class SemanticMergeCommand(BaseCommand):
+    """Perform intelligent semantic merge"""
+
+    def execute(self, source_branch: str, target_branch: str, repo_path: str | None = None, strategy: str = "auto", dry_run: bool = False, **kwargs) -> dict:
+        """Execute semantic merge command"""
+        try:
+            self.print_info(f"🔀 Semantic merge: {source_branch} → {target_branch}")
+
+            # Create semantic merger
+            branch_manager = BranchManager(repo_path=repo_path)
+            merger = SemanticMerger(branch_manager, repo_path)
+
+            async def run_merge():
+                if dry_run:
+                    self.print_info("🔍 Dry run mode - no changes will be made")
+
+                result = await merger.semantic_merge(source_branch, target_branch, strategy=strategy, dry_run=dry_run)
+
+                if result.success:
+                    self.print_success("✅ Semantic merge completed successfully")
+                    self.print_info(f"Files merged: {len(result.merged_files)}")
+                    self.print_info(f"Conflicts resolved: {result.conflicts_resolved}")
+                else:
+                    self.print_error("❌ Semantic merge failed")
+                    self.print_info(f"Reason: {result.error_message}")
+
+                return {
+                    "success": result.success,
+                    "source_branch": source_branch,
+                    "target_branch": target_branch,
+                    "repo_path": repo_path,
+                    "strategy": strategy,
+                    "dry_run": dry_run,
+                    "merge_result": result,
+                }
+
+            return asyncio.run(run_merge())
+
+        except Exception as e:
+            raise CommandError(f"Error performing semantic merge: {e}") from e
 
 
 @click.group(name="multi-agent")
@@ -34,35 +879,8 @@ def multi_agent_cli(ctx):
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
 def start_agents(max_agents: int, work_dir: str | None, monitor: bool):
     """Start the multi-agent pool"""
-    click.echo(f"🤖 Starting multi-agent pool with {max_agents} agents...")
-
-    try:
-        # Create agent pool
-        pool = AgentPool(max_agents=max_agents, work_dir=work_dir)
-
-        async def run_pool():
-            await pool.start()
-
-            if monitor:
-                click.echo("📊 Starting monitoring dashboard...")
-                await run_agent_monitor(pool)
-            else:
-                click.echo("✅ Agent pool started successfully")
-                click.echo("Use 'yesman multi-agent monitor' to view status")
-
-                # Keep running until interrupted
-                try:
-                    while pool._running:
-                        await asyncio.sleep(1)
-                except KeyboardInterrupt:
-                    click.echo("\n🛑 Stopping agent pool...")
-                    await pool.stop()
-
-        asyncio.run(run_pool())
-
-    except Exception as e:
-        click.echo(f"❌ Error starting agents: {e}", err=True)
-        raise click.ClickException(str(e)) from e
+    command = StartAgentsCommand()
+    command.run(max_agents=max_agents, work_dir=work_dir, monitor=monitor)
 
 
 @multi_agent_cli.command("monitor")
@@ -71,112 +889,24 @@ def start_agents(max_agents: int, work_dir: str | None, monitor: bool):
 @click.option("--refresh", "-r", default=1.0, help="Refresh interval in seconds")
 def monitor_agents(work_dir: str | None, duration: float | None, refresh: float):
     """Start real-time agent monitoring dashboard"""
-    click.echo("📊 Starting agent monitoring dashboard...")
-
-    try:
-        # Try to connect to existing agent pool
-        pool = None
-        if work_dir:
-            pool_dir = Path(work_dir) / ".yesman-agents"
-            if pool_dir.exists():
-                pool = AgentPool(work_dir=work_dir)
-                # Load existing state without starting
-                pool._load_state()
-
-        async def run_monitor():
-            monitor = AgentMonitor(agent_pool=pool)
-            monitor.refresh_interval = refresh
-
-            if not pool:
-                click.echo("⚠️  No active agent pool found. Showing demo mode.")
-                # Add some demo data for visualization
-                monitor.agent_metrics = {
-                    "agent-1": monitor.AgentMetrics(
-                        agent_id="agent-1",
-                        current_task="task-123",
-                        tasks_completed=5,
-                        tasks_failed=1,
-                        total_execution_time=300.0,
-                    ),
-                    "agent-2": monitor.AgentMetrics(
-                        agent_id="agent-2",
-                        tasks_completed=3,
-                        tasks_failed=0,
-                        total_execution_time=180.0,
-                    ),
-                }
-
-            await monitor.start_monitoring(duration)
-
-        asyncio.run(run_monitor())
-
-    except KeyboardInterrupt:
-        click.echo("\n👋 Monitoring stopped")
-    except Exception as e:
-        click.echo(f"❌ Error in monitoring: {e}", err=True)
-        raise click.ClickException(str(e)) from e
+    command = MonitorAgentsCommand()
+    command.run(work_dir=work_dir, duration=duration, refresh=refresh)
 
 
 @multi_agent_cli.command("status")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 def status(work_dir: str | None):
     """Show current agent pool status"""
-    try:
-        pool = AgentPool(work_dir=work_dir)
-        pool._load_state()
-
-        stats = pool.get_pool_statistics()
-        agents = pool.list_agents()
-        tasks = pool.list_tasks()
-
-        click.echo("🤖 Multi-Agent Pool Status")
-        click.echo("=" * 40)
-        click.echo(f"Total Agents: {len(agents)}")
-        click.echo(f"Active Agents: {stats.get('active_agents', 0)}")
-        click.echo(f"Idle Agents: {stats.get('idle_agents', 0)}")
-        click.echo(f"Total Tasks: {len(tasks)}")
-        click.echo(f"Completed Tasks: {stats.get('completed_tasks', 0)}")
-        click.echo(f"Failed Tasks: {stats.get('failed_tasks', 0)}")
-        click.echo(f"Queue Size: {stats.get('queue_size', 0)}")
-        click.echo(
-            f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s",
-        )
-
-        if agents:
-            click.echo("\n📋 Agents:")
-            for agent in agents:
-                status_icon = {
-                    "idle": "🟢",
-                    "working": "🟡",
-                    "error": "🔴",
-                    "terminated": "⚫",
-                }.get(agent.get("state", "unknown"), "❓")
-
-                click.echo(
-                    f"  {status_icon} {agent['agent_id']} - Completed: {agent.get('completed_tasks', 0)}, Failed: {agent.get('failed_tasks', 0)}",
-                )
-
-    except Exception as e:
-        click.echo(f"❌ Error getting status: {e}", err=True)
+    command = StatusCommand()
+    command.run(work_dir=work_dir)
 
 
 @multi_agent_cli.command("stop")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 def stop_agents(work_dir: str | None):
     """Stop the multi-agent pool"""
-    click.echo("🛑 Stopping multi-agent pool...")
-
-    try:
-        pool = AgentPool(work_dir=work_dir)
-
-        async def stop_pool():
-            await pool.stop()
-            click.echo("✅ Agent pool stopped successfully")
-
-        asyncio.run(stop_pool())
-
-    except Exception as e:
-        click.echo(f"❌ Error stopping agents: {e}", err=True)
+    command = StopAgentsCommand()
+    command.run(work_dir=work_dir)
 
 
 @multi_agent_cli.command("add-task")
@@ -199,26 +929,17 @@ def add_task(
     description: str | None,
 ):
     """Add a task to the agent pool queue"""
-    try:
-        pool = AgentPool(work_dir=work_dir)
-
-        task = pool.create_task(
-            title=title,
-            command=list(command),
-            working_directory=directory,
-            description=description or f"Execute: {' '.join(command)}",
-            priority=priority,
-            complexity=complexity,
-            timeout=timeout,
-        )
-
-        click.echo(f"✅ Task added: {task.task_id}")
-        click.echo(f"   Title: {task.title}")
-        click.echo(f"   Command: {' '.join(task.command)}")
-        click.echo(f"   Priority: {task.priority}")
-
-    except Exception as e:
-        click.echo(f"❌ Error adding task: {e}", err=True)
+    add_command = AddTaskCommand()
+    add_command.run(
+        title=title,
+        command=list(command),
+        work_dir=work_dir,
+        directory=directory,
+        priority=priority,
+        complexity=complexity,
+        timeout=timeout,
+        description=description,
+    )
 
 
 @multi_agent_cli.command("list-tasks")
@@ -226,47 +947,8 @@ def add_task(
 @click.option("--status", help="Filter by status (pending/running/completed/failed)")
 def list_tasks(work_dir: str | None, status: str | None):
     """List tasks in the agent pool"""
-    try:
-        pool = AgentPool(work_dir=work_dir)
-
-        from libs.multi_agent.types import TaskStatus
-
-        filter_status = None
-        if status:
-            try:
-                filter_status = TaskStatus(status.lower())
-            except ValueError:
-                click.echo(f"❌ Invalid status: {status}")
-                return
-
-        tasks = pool.list_tasks(filter_status)
-
-        if not tasks:
-            click.echo("📝 No tasks found")
-            return
-
-        click.echo(f"📋 Tasks ({len(tasks)} found):")
-        click.echo("=" * 80)
-
-        for task in tasks:
-            status_icon = {
-                "pending": "⏳",
-                "assigned": "📤",
-                "running": "⚡",
-                "completed": "✅",
-                "failed": "❌",
-                "cancelled": "🚫",
-            }.get(task.get("status", "unknown"), "❓")
-
-            click.echo(f"{status_icon} {task['task_id'][:8]}... - {task['title']}")
-            click.echo(f"   Status: {task['status'].upper()}")
-            if task.get("assigned_agent"):
-                click.echo(f"   Agent: {task['assigned_agent']}")
-            click.echo(f"   Command: {' '.join(task['command'])}")
-            click.echo()
-
-    except Exception as e:
-        click.echo(f"❌ Error listing tasks: {e}", err=True)
+    command = ListTasksCommand()
+    command.run(work_dir=work_dir, status=status)
 
 
 @multi_agent_cli.command("detect-conflicts")
@@ -275,62 +957,8 @@ def list_tasks(work_dir: str | None, status: str | None):
 @click.option("--auto-resolve", "-a", is_flag=True, help="Attempt automatic resolution")
 def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool):
     """Detect conflicts between branches"""
-    try:
-        click.echo(f"🔍 Detecting conflicts between branches: {', '.join(branches)}")
-
-        # Create conflict resolution engine
-        branch_manager = BranchManager(repo_path=repo_path)
-        engine = ConflictResolutionEngine(branch_manager, repo_path)
-
-        async def run_detection():
-            conflicts = await engine.detect_potential_conflicts(list(branches))
-
-            if not conflicts:
-                click.echo("✅ No conflicts detected")
-                return
-
-            click.echo(f"⚠️  Found {len(conflicts)} potential conflicts:")
-            click.echo("=" * 60)
-
-            for conflict in conflicts:
-                severity_icon = {
-                    "low": "🟢",
-                    "medium": "🟡",
-                    "high": "🔴",
-                    "critical": "💀",
-                }.get(conflict.severity.value, "❓")
-
-                click.echo(f"{severity_icon} {conflict.conflict_id}")
-                click.echo(f"   Type: {conflict.conflict_type.value}")
-                click.echo(f"   Severity: {conflict.severity.value}")
-                click.echo(f"   Branches: {', '.join(conflict.branches)}")
-                click.echo(f"   Files: {', '.join(conflict.files)}")
-                click.echo(f"   Description: {conflict.description}")
-                click.echo(
-                    f"   Suggested Strategy: {conflict.suggested_strategy.value}",
-                )
-                click.echo()
-
-            # Auto-resolve if requested
-            if auto_resolve:
-                click.echo("🔧 Attempting automatic resolution...")
-                results = await engine.auto_resolve_all()
-
-                resolved = len([r for r in results if r.success])
-                failed = len(results) - resolved
-
-                click.echo(f"✅ Auto-resolved: {resolved}")
-                click.echo(f"❌ Failed to resolve: {failed}")
-
-                if failed > 0:
-                    click.echo(
-                        "\n🚨 Manual intervention required for remaining conflicts",
-                    )
-
-        asyncio.run(run_detection())
-
-    except Exception as e:
-        click.echo(f"❌ Error detecting conflicts: {e}", err=True)
+    command = DetectConflictsCommand()
+    command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
 
 
 @multi_agent_cli.command("resolve-conflict")
@@ -346,113 +974,16 @@ def resolve_conflict(
     repo_path: str | None,
 ):
     """Resolve a specific conflict"""
-    try:
-        click.echo(f"🔧 Resolving conflict: {conflict_id}")
-
-        # Create conflict resolution engine
-        branch_manager = BranchManager(repo_path=repo_path)
-        engine = ConflictResolutionEngine(branch_manager, repo_path)
-
-        # Convert strategy string to enum
-        resolution_strategy = None
-        if strategy:
-            try:
-                from libs.multi_agent.conflict_resolution import ResolutionStrategy
-
-                resolution_strategy = ResolutionStrategy(strategy)
-            except ValueError:
-                click.echo(f"❌ Invalid strategy: {strategy}")
-                click.echo(
-                    "Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis",
-                )
-                return
-
-        async def run_resolution():
-            result = await engine.resolve_conflict(conflict_id, resolution_strategy)
-
-            if result.success:
-                click.echo("✅ Conflict resolved successfully!")
-                click.echo(f"   Strategy used: {result.strategy_used.value}")
-                click.echo(f"   Resolution time: {result.resolution_time:.2f}s")
-                click.echo(f"   Message: {result.message}")
-                if result.resolved_files:
-                    click.echo(f"   Resolved files: {', '.join(result.resolved_files)}")
-            else:
-                click.echo("❌ Failed to resolve conflict")
-                click.echo(f"   Strategy attempted: {result.strategy_used.value}")
-                click.echo(f"   Error: {result.message}")
-                if result.remaining_conflicts:
-                    click.echo(
-                        f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}",
-                    )
-
-        asyncio.run(run_resolution())
-
-    except Exception as e:
-        click.echo(f"❌ Error resolving conflict: {e}", err=True)
+    command = ResolveConflictCommand()
+    command.run(conflict_id=conflict_id, strategy=strategy, repo_path=repo_path)
 
 
 @multi_agent_cli.command("conflict-summary")
 @click.option("--repo-path", "-r", help="Path to git repository")
 def conflict_summary(repo_path: str | None):
     """Show conflict resolution summary and statistics"""
-    try:
-        click.echo("📊 Conflict Resolution Summary")
-        click.echo("=" * 40)
-
-        # Create conflict resolution engine
-        branch_manager = BranchManager(repo_path=repo_path)
-        engine = ConflictResolutionEngine(branch_manager, repo_path)
-
-        summary = engine.get_conflict_summary()
-
-        # Overall statistics
-        click.echo(f"Total Conflicts: {summary['total_conflicts']}")
-        click.echo(f"Resolved: {summary['resolved_conflicts']}")
-        click.echo(f"Unresolved: {summary['unresolved_conflicts']}")
-        click.echo(f"Resolution Rate: {summary['resolution_rate']:.1%}")
-
-        # Severity breakdown
-        if summary["severity_breakdown"]:
-            click.echo("\n📈 Severity Breakdown:")
-            for severity, count in summary["severity_breakdown"].items():
-                if count > 0:
-                    severity_icon = {
-                        "low": "🟢",
-                        "medium": "🟡",
-                        "high": "🔴",
-                        "critical": "💀",
-                    }.get(severity, "❓")
-                    click.echo(f"  {severity_icon} {severity.capitalize()}: {count}")
-
-        # Type breakdown
-        if summary["type_breakdown"]:
-            click.echo("\n🏷️  Type Breakdown:")
-            for conflict_type, count in summary["type_breakdown"].items():
-                if count > 0:
-                    type_icon = {
-                        "file_modification": "📝",
-                        "file_deletion": "🗑️",
-                        "file_creation": "📄",
-                        "semantic": "🧠",
-                        "dependency": "🔗",
-                        "merge_conflict": "⚡",
-                    }.get(conflict_type, "❓")
-                    click.echo(
-                        f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}",
-                    )
-
-        # Resolution statistics
-        stats = summary["resolution_stats"]
-        if stats["total_conflicts"] > 0:
-            click.echo("\n⚡ Resolution Statistics:")
-            click.echo(f"  Auto-resolved: {stats['auto_resolved']}")
-            click.echo(f"  Human required: {stats['human_required']}")
-            click.echo(f"  Success rate: {stats['resolution_success_rate']:.1%}")
-            click.echo(f"  Average time: {stats['average_resolution_time']:.2f}s")
-
-    except Exception as e:
-        click.echo(f"❌ Error getting conflict summary: {e}", err=True)
+    command = ConflictSummaryCommand()
+    command.run(repo_path=repo_path)
 
 
 @multi_agent_cli.command("predict-conflicts")
@@ -487,161 +1018,16 @@ def predict_conflicts(
     limit: int,
 ):
     """Predict potential conflicts between branches"""
-    try:
-        click.echo(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
-        click.echo(f"   Time horizon: {time_horizon} days")
-        click.echo(f"   Confidence threshold: {min_confidence}")
-
-        # Create prediction system
-        branch_manager = BranchManager(repo_path=repo_path)
-        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
-        predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
-
-        # Set prediction parameters
-        predictor.min_confidence_threshold = min_confidence
-        predictor.max_predictions_per_run = limit * 2  # Get more, filter later
-
-        async def run_prediction():
-            from datetime import timedelta
-
-            horizon = timedelta(days=time_horizon)
-            predictions = await predictor.predict_conflicts(list(branches), horizon)
-
-            if not predictions:
-                click.echo("✅ No potential conflicts predicted")
-                return
-
-            # Filter and limit results
-            filtered_predictions = [p for p in predictions if p.likelihood_score >= min_confidence]
-            filtered_predictions = filtered_predictions[:limit]
-
-            click.echo(f"⚠️  Found {len(filtered_predictions)} potential conflicts:")
-            click.echo("=" * 80)
-
-            for i, prediction in enumerate(filtered_predictions, 1):
-                confidence_icon = {
-                    "low": "🟢",
-                    "medium": "🟡",
-                    "high": "🔴",
-                    "critical": "💀",
-                }.get(prediction.confidence.value, "❓")
-
-                pattern_icon = {
-                    "overlapping_imports": "📦",
-                    "function_signature_drift": "🔧",
-                    "variable_naming_collision": "🏷️",
-                    "class_hierarchy_change": "🏗️",
-                    "dependency_version_mismatch": "📋",
-                    "api_breaking_change": "💥",
-                    "resource_contention": "⚡",
-                    "merge_context_loss": "🔀",
-                }.get(prediction.pattern.value, "❓")
-
-                click.echo(
-                    f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}",
-                )
-                click.echo(
-                    f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}",
-                )
-                click.echo(
-                    f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})",
-                )
-                click.echo(f"   Branches: {', '.join(prediction.affected_branches)}")
-                if prediction.affected_files:
-                    files_str = ", ".join(prediction.affected_files[:3])
-                    if len(prediction.affected_files) > 3:
-                        files_str += f" (and {len(prediction.affected_files) - 3} more)"
-                    click.echo(f"   Files: {files_str}")
-                click.echo(f"   Description: {prediction.description}")
-
-                if prediction.timeline_prediction:
-                    click.echo(
-                        f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}",
-                    )
-
-                if prediction.prevention_suggestions:
-                    click.echo("   Prevention:")
-                    for suggestion in prediction.prevention_suggestions[:2]:
-                        click.echo(f"     • {suggestion}")
-                click.echo()
-
-        asyncio.run(run_prediction())
-
-    except Exception as e:
-        click.echo(f"❌ Error predicting conflicts: {e}", err=True)
+    command = PredictConflictsCommand()
+    command.run(branches=list(branches), repo_path=repo_path, time_horizon=time_horizon, min_confidence=min_confidence, limit=limit)
 
 
 @multi_agent_cli.command("prediction-summary")
 @click.option("--repo-path", "-r", help="Path to git repository")
 def prediction_summary(repo_path: str | None):
     """Show conflict prediction summary and statistics"""
-    try:
-        click.echo("🔮 Conflict Prediction Summary")
-        click.echo("=" * 40)
-
-        # Create prediction system
-        branch_manager = BranchManager(repo_path=repo_path)
-        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
-        predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
-
-        summary = predictor.get_prediction_summary()
-
-        # Overall statistics
-        click.echo(f"Total Predictions: {summary['total_predictions']}")
-        click.echo(f"Active Predictions: {summary.get('active_predictions', 0)}")
-
-        # Confidence breakdown
-        if summary["by_confidence"]:
-            click.echo("\n🎯 Confidence Breakdown:")
-            for confidence, count in summary["by_confidence"].items():
-                if count > 0:
-                    confidence_icon = {
-                        "low": "🟢",
-                        "medium": "🟡",
-                        "high": "🔴",
-                        "critical": "💀",
-                    }.get(confidence, "❓")
-                    click.echo(
-                        f"  {confidence_icon} {confidence.capitalize()}: {count}",
-                    )
-
-        # Pattern breakdown
-        if summary["by_pattern"]:
-            click.echo("\n🏷️  Pattern Breakdown:")
-            for pattern, count in summary["by_pattern"].items():
-                if count > 0:
-                    pattern_icon = {
-                        "overlapping_imports": "📦",
-                        "function_signature_drift": "🔧",
-                        "variable_naming_collision": "🏷️",
-                        "class_hierarchy_change": "🏗️",
-                        "dependency_version_mismatch": "📋",
-                        "api_breaking_change": "💥",
-                        "resource_contention": "⚡",
-                        "merge_context_loss": "🔀",
-                    }.get(pattern, "❓")
-                    click.echo(
-                        f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}",
-                    )
-
-        # Accuracy metrics
-        accuracy = summary["accuracy_metrics"]
-        if accuracy["total_predictions"] > 0:
-            click.echo("\n📊 Accuracy Metrics:")
-            click.echo(f"  Accuracy Rate: {accuracy['accuracy_rate']:.1%}")
-            click.echo(f"  Prevented Conflicts: {accuracy['prevented_conflicts']}")
-            click.echo(f"  False Positives: {accuracy['false_positives']}")
-
-        # Most likely conflicts
-        if summary.get("most_likely_conflicts"):
-            click.echo("\n🚨 Most Likely Conflicts:")
-            for conflict in summary["most_likely_conflicts"]:
-                click.echo(
-                    f"  • {conflict['description']} ({conflict['likelihood']:.1%})",
-                )
-
-    except Exception as e:
-        click.echo(f"❌ Error getting prediction summary: {e}", err=True)
+    command = PredictionSummaryCommand()
+    command.run(repo_path=repo_path)
 
 
 @multi_agent_cli.command("analyze-conflict-patterns")
@@ -656,88 +1042,8 @@ def analyze_conflict_patterns(
     export: str | None,
 ):
     """Analyze detailed conflict patterns between branches"""
-    try:
-        click.echo(f"🔍 Analyzing conflict patterns for: {', '.join(branches)}")
-
-        # Create prediction system
-        branch_manager = BranchManager(repo_path=repo_path)
-        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
-        predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
-
-        async def run_analysis():
-            analysis_results = {}
-
-            # Calculate conflict vectors for all pairs
-            click.echo("\n📊 Conflict Vector Analysis:")
-            click.echo("-" * 40)
-
-            for i, branch1 in enumerate(branches):
-                for branch2 in branches[i + 1 :]:
-                    click.echo(f"\n🔗 {branch1} ↔ {branch2}")
-
-                    vector = await predictor._calculate_conflict_vector(
-                        branch1,
-                        branch2,
-                    )
-                    analysis_results[f"{branch1}:{branch2}"] = {
-                        "vector": vector._asdict(),
-                        "patterns": {},
-                    }
-
-                    # Display vector components
-                    click.echo(f"   File Overlap: {vector.file_overlap_score:.2f}")
-                    click.echo(
-                        f"   Change Frequency: {vector.change_frequency_score:.2f}",
-                    )
-                    click.echo(f"   Complexity: {vector.complexity_score:.2f}")
-                    click.echo(
-                        f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}",
-                    )
-                    click.echo(
-                        f"   Semantic Distance: {vector.semantic_distance_score:.2f}",
-                    )
-                    click.echo(
-                        f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}",
-                    )
-
-                    # Overall risk score
-                    risk_score = sum(vector) / len(vector)
-                    risk_level = "🔴 HIGH" if risk_score > 0.7 else "🟡 MEDIUM" if risk_score > 0.4 else "🟢 LOW"
-                    click.echo(f"   Overall Risk: {risk_level} ({risk_score:.2f})")
-
-                    # Pattern-specific analysis
-                    if pattern:
-                        from libs.multi_agent.conflict_prediction import ConflictPattern
-
-                        try:
-                            target_pattern = ConflictPattern(pattern)
-                            detector = predictor.pattern_detectors.get(target_pattern)
-                            if detector:
-                                result = await detector(branch1, branch2, vector)
-                                if result:
-                                    analysis_results[f"{branch1}:{branch2}"]["patterns"][pattern] = {
-                                        "likelihood": result.likelihood_score,
-                                        "confidence": result.confidence.value,
-                                        "description": result.description,
-                                    }
-                                    click.echo(
-                                        f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence",
-                                    )
-                        except ValueError:
-                            click.echo(f"   ❌ Unknown pattern: {pattern}")
-
-            # Export results if requested
-            if export:
-                import json
-
-                with open(export, "w") as f:
-                    json.dump(analysis_results, f, indent=2, default=str)
-                click.echo(f"\n💾 Analysis exported to: {export}")
-
-        asyncio.run(run_analysis())
-
-    except Exception as e:
-        click.echo(f"❌ Error analyzing patterns: {e}", err=True)
+    command = AnalyzeConflictPatternsCommand()
+    command.run(branches=list(branches), repo_path=repo_path, pattern=pattern, export=export)
 
 
 @multi_agent_cli.command("analyze-semantic-conflicts")
@@ -935,102 +1241,8 @@ def semantic_summary(
     files: str | None,
 ):
     """Show semantic structure summary of code"""
-    try:
-        click.echo("🧠 Semantic Code Analysis")
-        click.echo("=" * 40)
-
-        # Create semantic analyzer
-        branch_manager = BranchManager(repo_path=repo_path)
-        analyzer = SemanticAnalyzer(branch_manager, repo_path)
-
-        # Parse file list
-        file_list = None
-        if files:
-            file_list = [f.strip() for f in files.split(",")]
-
-        async def run_summary():
-            current_branch = branch or "HEAD"
-
-            if file_list:
-                files_to_analyze = file_list
-            else:
-                # Get all Python files in repo
-                files_to_analyze = []
-                try:
-                    result = await analyzer._get_changed_python_files(
-                        current_branch,
-                        current_branch,
-                    )
-                    files_to_analyze = result
-                except Exception:
-                    # Fallback: scan current directory
-                    for py_file in analyzer.repo_path.rglob("*.py"):
-                        if not any(part.startswith(".") for part in py_file.parts):
-                            files_to_analyze.append(
-                                str(py_file.relative_to(analyzer.repo_path)),
-                            )
-
-            total_functions = 0
-            total_classes = 0
-            total_imports = 0
-            visibility_stats = {"public": 0, "protected": 0, "private": 0, "magic": 0}
-
-            click.echo(f"Branch: {current_branch}")
-            click.echo(f"Files to analyze: {len(files_to_analyze)}")
-            click.echo()
-
-            for file_path in files_to_analyze[:20]:  # Limit to first 20 files
-                context = await analyzer._get_semantic_context(
-                    file_path,
-                    current_branch,
-                )
-                if not context:
-                    continue
-
-                click.echo(f"📄 {file_path}")
-                click.echo(f"   Functions: {len(context.functions)}")
-                click.echo(f"   Classes: {len(context.classes)}")
-                click.echo(f"   Imports: {len(context.imports)}")
-                click.echo(f"   Global Variables: {len(context.global_variables)}")
-                click.echo(f"   Constants: {len(context.constants)}")
-
-                # Count visibility
-                for func in context.functions.values():
-                    visibility_stats[func.visibility.value] += 1
-                    total_functions += 1
-
-                for cls in context.classes.values():
-                    visibility_stats[cls.visibility.value] += 1
-                    total_classes += 1
-                    total_functions += len(cls.methods)
-
-                total_imports += len(context.imports)
-                click.echo()
-
-            if len(files_to_analyze) > 20:
-                click.echo(f"... and {len(files_to_analyze) - 20} more files")
-
-            # Overall statistics
-            click.echo("📊 Overall Statistics:")
-            click.echo(f"Total Functions: {total_functions}")
-            click.echo(f"Total Classes: {total_classes}")
-            click.echo(f"Total Imports: {total_imports}")
-
-            click.echo("\n👁️  Visibility Distribution:")
-            for visibility, count in visibility_stats.items():
-                if count > 0:
-                    icon = {
-                        "public": "🌍",
-                        "protected": "🛡️",
-                        "private": "🔒",
-                        "magic": "✨",
-                    }.get(visibility, "❓")
-                    click.echo(f"  {icon} {visibility.capitalize()}: {count}")
-
-        asyncio.run(run_summary())
-
-    except Exception as e:
-        click.echo(f"❌ Error generating semantic summary: {e}", err=True)
+    command = SemanticSummaryCommand()
+    command.run(repo_path=repo_path, branch=branch, files=files)
 
 
 @multi_agent_cli.command("function-diff")
@@ -1047,140 +1259,8 @@ def function_diff(
     file: str | None,
 ):
     """Compare function signatures between branches"""
-    try:
-        click.echo(
-            f"🔧 Comparing function '{function_name}' between {branch1} and {branch2}",
-        )
-
-        # Create semantic analyzer
-        branch_manager = BranchManager(repo_path=repo_path)
-        analyzer = SemanticAnalyzer(branch_manager, repo_path)
-
-        async def run_diff():
-            # Find function in both branches
-            func1 = None
-            func2 = None
-            file1 = None
-            file2 = None
-            current_function_name = function_name  # Local copy to avoid closure issues
-
-            # Get list of files to search
-            if file:
-                files_to_search = [file]
-            else:
-                # Search all Python files
-                files_to_search = []
-                try:
-                    result1 = await analyzer._get_changed_python_files(branch1, branch1)
-                    result2 = await analyzer._get_changed_python_files(branch2, branch2)
-                    files_to_search = list(set(result1 + result2))
-                except Exception:
-                    # Fallback: scan current directory
-                    for py_file in analyzer.repo_path.rglob("*.py"):
-                        if not any(part.startswith(".") for part in py_file.parts):
-                            files_to_search.append(
-                                str(py_file.relative_to(analyzer.repo_path)),
-                            )
-
-            # Search for function
-            for file_path in files_to_search:
-                # Check branch1
-                context1 = await analyzer._get_semantic_context(file_path, branch1)
-                if context1 and current_function_name in context1.functions:
-                    func1 = context1.functions[current_function_name]
-                    file1 = file_path
-
-                # Check classes for methods
-                if context1:
-                    for class_name, class_def in context1.classes.items():
-                        if current_function_name in class_def.methods:
-                            func1 = class_def.methods[current_function_name]
-                            file1 = file_path
-                            current_function_name = f"{class_name}.{current_function_name}"
-                            break
-
-                # Check branch2
-                context2 = await analyzer._get_semantic_context(file_path, branch2)
-                if context2 and current_function_name.split(".")[-1] in context2.functions:
-                    func2 = context2.functions[current_function_name.split(".")[-1]]
-                    file2 = file_path
-
-                # Check classes for methods
-                if context2:
-                    for class_name, class_def in context2.classes.items():
-                        method_name = current_function_name.split(".")[-1]
-                        if method_name in class_def.methods:
-                            func2 = class_def.methods[method_name]
-                            file2 = file_path
-                            break
-
-                if func1 and func2:
-                    break
-
-            # Display results
-            if not func1 and not func2:
-                click.echo(f"❌ Function '{function_name}' not found in either branch")
-                return
-            elif not func1:
-                click.echo(f"⚠️  Function '{function_name}' not found in {branch1}")
-                click.echo(f"✅ Found in {branch2}: {file2}")
-                click.echo(f"\n{branch2} signature:")
-                click.echo(f"  {analyzer._signature_to_string(func2)}")
-                return
-            elif not func2:
-                click.echo(f"✅ Found in {branch1}: {file1}")
-                click.echo(f"⚠️  Function '{function_name}' not found in {branch2}")
-                click.echo(f"\n{branch1} signature:")
-                click.echo(f"  {analyzer._signature_to_string(func1)}")
-                return
-
-            # Compare signatures
-            click.echo("✅ Found in both branches")
-            click.echo(f"   {branch1}: {file1}")
-            click.echo(f"   {branch2}: {file2}")
-
-            sig1_str = analyzer._signature_to_string(func1)
-            sig2_str = analyzer._signature_to_string(func2)
-
-            click.echo("\n📋 Signature Comparison:")
-            click.echo(f"{branch1}: {sig1_str}")
-            click.echo(f"{branch2}: {sig2_str}")
-
-            if analyzer._functions_have_signature_conflict(func1, func2):
-                click.echo("\n⚠️  CONFLICT DETECTED")
-
-                # Analyze differences
-                impact = analyzer._analyze_function_impact(func1, func2)
-                severity = analyzer._assess_function_conflict_severity(func1, func2)
-
-                click.echo(f"Severity: {severity.value.upper()}")
-                click.echo(f"Breaking Change: {impact['breaking_change']}")
-
-                if impact["parameter_changes"]:
-                    click.echo("Parameter Changes:")
-                    for change in impact["parameter_changes"]:
-                        click.echo(f"  • {change}")
-
-                if impact["return_type_change"]:
-                    click.echo(
-                        f"Return Type Changed: {func1.return_type} → {func2.return_type}",
-                    )
-
-                if impact["decorator_changes"]:
-                    click.echo(
-                        f"Decorator Changes: {func1.decorators} → {func2.decorators}",
-                    )
-
-                # Suggest resolution
-                resolution = analyzer._suggest_function_resolution(func1, func2)
-                click.echo(f"Suggested Resolution: {resolution.value}")
-            else:
-                click.echo("\n✅ No conflicts detected")
-
-        asyncio.run(run_diff())
-
-    except Exception as e:
-        click.echo(f"❌ Error comparing function: {e}", err=True)
+    command = FunctionDiffCommand()
+    command.run(branches=[branch1, branch2], repo_path=repo_path, files=file, export=None)
 
 
 @multi_agent_cli.command("semantic-merge")
@@ -1212,104 +1292,8 @@ def semantic_merge(
     export: str | None,
 ):
     """Perform intelligent semantic merge of a file between branches"""
-    try:
-        click.echo(f"🔀 Semantic merge: {file_path}")
-        click.echo(f"   Branches: {branch1} ↔ {branch2}")
-
-        if strategy:
-            strategy_enum = MergeStrategy(strategy)
-            click.echo(f"   Strategy: {strategy_enum.value}")
-        else:
-            strategy_enum = None
-
-        # Create components
-        branch_manager = BranchManager(repo_path=repo_path)
-        conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
-        semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
-        semantic_merger = SemanticMerger(
-            semantic_analyzer,
-            conflict_engine,
-            branch_manager,
-            repo_path,
-        )
-
-        async def run_merge():
-            # Perform semantic merge
-            merge_result = await semantic_merger.perform_semantic_merge(
-                file_path=file_path,
-                branch1=branch1,
-                branch2=branch2,
-                target_branch=target_branch,
-                strategy=strategy_enum,
-            )
-
-            # Display results
-            click.echo("\n📊 Merge Result:")
-            click.echo(f"   Merge ID: {merge_result.merge_id}")
-            click.echo(f"   Resolution: {merge_result.resolution.value}")
-            click.echo(f"   Strategy Used: {merge_result.strategy_used.value}")
-            click.echo(f"   Confidence: {merge_result.merge_confidence:.1%}")
-            click.echo(
-                f"   Semantic Integrity: {'✅' if merge_result.semantic_integrity else '❌'}",
-            )
-
-            if merge_result.conflicts_resolved:
-                click.echo(
-                    f"   Conflicts Resolved: {len(merge_result.conflicts_resolved)}",
-                )
-                for conflict_id in merge_result.conflicts_resolved[:5]:
-                    click.echo(f"     • {conflict_id}")
-                if len(merge_result.conflicts_resolved) > 5:
-                    click.echo(
-                        f"     ... and {len(merge_result.conflicts_resolved) - 5} more",
-                    )
-
-            if merge_result.unresolved_conflicts:
-                click.echo(
-                    f"   ⚠️  Unresolved Conflicts: {len(merge_result.unresolved_conflicts)}",
-                )
-                for conflict_id in merge_result.unresolved_conflicts[:3]:
-                    click.echo(f"     • {conflict_id}")
-
-            # Show diff stats
-            if merge_result.diff_stats:
-                stats = merge_result.diff_stats
-                click.echo("\n📈 Changes:")
-                if "lines_merged" in stats:
-                    click.echo(f"   Total lines: {stats['lines_merged']}")
-                if "lines_added" in stats:
-                    click.echo(f"   Lines added: {stats['lines_added']}")
-                if "lines_removed" in stats:
-                    click.echo(f"   Lines removed: {stats['lines_removed']}")
-
-            # Export result if requested
-            if export and merge_result.merged_content:
-                with open(export, "w") as f:
-                    f.write(merge_result.merged_content)
-                click.echo(f"\n💾 Merged content exported to: {export}")
-
-            # Apply if requested and successful
-            if apply and merge_result.resolution in [
-                MergeResolution.AUTO_RESOLVED,
-                MergeResolution.PARTIAL_RESOLUTION,
-            ]:
-                if merge_result.semantic_integrity:
-                    click.echo(
-                        f"\n✅ Merge would be applied to {target_branch or branch1}",
-                    )
-                    # In actual implementation, this would write the merged content
-                    click.echo("   (Dry run - actual application not implemented yet)")
-                else:
-                    click.echo(
-                        "\n❌ Cannot apply merge due to semantic integrity issues",
-                    )
-            elif apply:
-                click.echo("\n❌ Cannot apply merge - resolution failed")
-
-        asyncio.run(run_merge())
-
-    except Exception as e:
-        click.echo(f"❌ Error performing semantic merge: {e}", err=True)
+    command = SemanticMergeCommand()
+    command.run(source_branch=branch1, target_branch=target_branch or branch2, repo_path=repo_path, strategy=strategy or "auto", dry_run=not apply)
 
 
 @multi_agent_cli.command("batch-merge")

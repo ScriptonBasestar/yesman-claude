@@ -14,17 +14,34 @@ import click
 from ..tmux_manager import TmuxManager
 from ..yesman_config import YesmanConfig
 from .claude_manager import ClaudeManager
+from .error_handling import (
+    ConfigurationError,
+    ErrorContext,
+    ErrorSeverity,
+    YesmanError,
+    error_handler,
+)
 from .services import get_config, get_tmux_manager, initialize_services
 from .settings import settings
 
 
-class CommandError(Exception):
-    """Custom exception for command errors"""
+class CommandError(YesmanError):
+    """Command-specific error"""
 
-    def __init__(self, message: str, exit_code: int = 1):
-        self.message = message
-        self.exit_code = exit_code
-        super().__init__(message)
+    def __init__(
+        self,
+        message: str,
+        exit_code: int = 1,
+        recovery_hint: str | None = None,
+        **kwargs,
+    ):
+        super().__init__(
+            message=message,
+            severity=ErrorSeverity.MEDIUM,
+            exit_code=exit_code,
+            recovery_hint=recovery_hint,
+            **kwargs,
+        )
 
 
 class BaseCommand(ABC):
@@ -76,8 +93,16 @@ class BaseCommand(ABC):
         try:
             return get_config()
         except Exception as e:
-            self.logger.error(f"Failed to resolve configuration from DI container: {e}")
-            raise CommandError(f"Configuration error: {e}") from e
+            context = ErrorContext(
+                operation="resolve_config",
+                component=self.__class__.__name__,
+            )
+            raise ConfigurationError(
+                f"Failed to resolve configuration from DI container: {e}",
+                context=context,
+                cause=e,
+                recovery_hint="Check if the DI container is properly initialized",
+            ) from e
 
     def _resolve_tmux_manager(self) -> TmuxManager:
         """Resolve TmuxManager from DI container with error handling"""
@@ -130,14 +155,17 @@ class BaseCommand(ABC):
 
         return shutil.which("tmux") is not None
 
-    def handle_error(self, error: Exception, context: str = "") -> None:
-        """Standard error handling"""
-        if isinstance(error, CommandError):
-            self.logger.error(f"{context}: {error.message}")
-            sys.exit(error.exit_code)
+    def handle_error(self, error: Exception, context_str: str = "") -> None:
+        """Standard error handling using centralized error handler"""
+        # Create error context if needed
+        if not isinstance(error, YesmanError):
+            context = ErrorContext(
+                operation=context_str or "command_execution",
+                component=self.__class__.__name__,
+            )
+            error_handler.handle_error(error, context, exit_on_critical=True)
         else:
-            self.logger.error(f"{context}: Unexpected error: {error}")
-            sys.exit(1)
+            error_handler.handle_error(error, exit_on_critical=True)
 
     def log_command_start(self, command_name: str, **kwargs) -> None:
         """Log command start with parameters"""
@@ -189,14 +217,43 @@ class BaseCommand(ABC):
             result = self.execute(**kwargs)
 
             self.log_command_end(command_name, success=True)
+            self.handle_success(result)
             return result
 
-        except CommandError as e:
+        except YesmanError as e:
             self.log_command_end(command_name, success=False)
-            self.handle_error(e, f"Command {command_name}")
+            self.handle_yesman_error(e)
         except Exception as e:
             self.log_command_end(command_name, success=False)
-            self.handle_error(e, f"Command {command_name}")
+            self.handle_unexpected_error(e)
+
+    def handle_success(self, result: Any) -> None:
+        """Handle successful command execution"""
+        # Default implementation - can be overridden
+        if result and isinstance(result, dict):
+            if result.get("message"):
+                self.print_success(result["message"])
+
+    def handle_yesman_error(self, error: YesmanError) -> None:
+        """Handle YesmanError with recovery hints"""
+        self.print_error(error.message)
+
+        if error.recovery_hint:
+            self.print_info(f"Hint: {error.recovery_hint}")
+
+        error_handler.handle_error(error, exit_on_critical=True)
+
+    def handle_unexpected_error(self, error: Exception) -> None:
+        """Handle unexpected errors"""
+        self.print_error(f"Unexpected error: {error}")
+
+        # Create context for unexpected error
+        context = ErrorContext(
+            operation="command_execution",
+            component=self.__class__.__name__,
+        )
+
+        error_handler.handle_error(error, context, exit_on_critical=True)
 
 
 class SessionCommandMixin:

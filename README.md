@@ -5,12 +5,21 @@ Code. It provides multiple dashboard interfaces for monitoring and controlling y
 
 ## 🚀 Key Features
 
+### Core Functionality
+
 - **Session Management**: Create and manage tmux sessions using YAML templates
 - **Claude Code Automation**: Automatic response to Claude Code prompts and selections
 - **Multiple Dashboard Interfaces**: Choose from TUI, Web, or native desktop interfaces
 - **Real-time Monitoring**: Live session activity tracking and health monitoring
 - **AI-Powered Learning**: Adaptive response system that learns from user behavior
-- **Performance Optimization**: Built-in performance monitoring and optimization strategies
+
+### Architecture (Phase-3 Refactoring Completed)
+
+- **Command Pattern**: Standardized command execution with BaseCommand pattern
+- **Dependency Injection**: Type-safe DI container for service management
+- **Configuration Management**: Pydantic-based configuration with environment support
+- **Error Handling**: Centralized error handling with recovery hints
+- **Type Safety**: Full TypeScript-style type hints and validation
 
 ## 📊 Dashboard Interfaces
 
@@ -232,3 +241,78 @@ sessions:
 ```
 
 자세한 내용은 [템플릿 문서](docs/user-guide/templates.md)를 참조하세요.
+
+## 🏗️ Development
+
+### Architecture Overview
+
+Yesman Claude는 Phase-3 리팩토링을 통해 현대적이고 유지보수 가능한 아키텍처로 구축되었습니다:
+
+- **Command Pattern**: 모든 CLI 명령어는 `BaseCommand`를 상속하여 일관된 인터페이스 제공
+- **Dependency Injection**: 타입 안전한 DI 컨테이너로 서비스 관리 및 테스트 용이성 향상
+- **Configuration Management**: Pydantic 스키마 기반의 검증 가능한 설정 시스템
+- **Error Handling**: 중앙화된 에러 처리와 사용자 친화적인 복구 힌트
+
+### Quick Start for Developers
+
+```bash
+# 개발 환경 설정
+git clone <repository-url>
+cd yesman-claude
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+
+# 의존성 설치
+pip install -e .
+pip install pytest pytest-cov ruff black mypy
+
+# 테스트 실행
+pytest tests/
+
+# 코드 포맷팅
+black .
+ruff check .
+```
+
+### Documentation
+
+- 📚 [Developer Guide](docs/developer-guide.md) - 개발자를 위한 상세 가이드
+- 🏗️ [Architecture Decision Records](docs/adr/) - 아키텍처 결정 기록
+- 🧪 [Testing Guide](docs/developer-guide.md#%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%80%EC%9D%B4%EB%93%9C) - 테스트 작성 및 실행 가이드
+- ⚙️ [Configuration](docs/developer-guide.md#%EC%84%A4%EC%A0%95-%EA%B4%80%EB%A6%AC) - 설정 관리 가이드
+
+### Contributing
+
+1. Fork the repository
+1. Create a feature branch: `git checkout -b feature/my-feature`
+1. Make your changes following the [Developer Guide](docs/developer-guide.md)
+1. Add tests for new functionality
+1. Ensure all tests pass: `pytest`
+1. Format code: `black . && ruff check .`
+1. Commit changes: `git commit -m 'feat: add my feature'`
+1. Push to the branch: `git push origin feature/my-feature`
+1. Create a Pull Request
+
+### Project Structure
+
+```
+yesman-claude/
+├── commands/           # CLI command implementations
+├── libs/core/         # Core architecture components
+│   ├── base_command.py    # Command pattern base class
+│   ├── container.py       # DI container
+│   ├── config_*.py       # Configuration management
+│   └── error_handling.py # Error handling system
+├── api/               # FastAPI web service
+├── tests/             # Test suites
+│   ├── unit/             # Unit tests
+│   └── integration/      # Integration tests
+├── docs/              # Documentation
+│   ├── adr/              # Architecture Decision Records
+│   └── developer-guide.md # Development guide
+└── config/            # Environment configurations
+```
+
+## 📄 License
+
+MIT License - see the [LICENSE](LICENSE) file for details.

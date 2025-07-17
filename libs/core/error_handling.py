@@ -56,6 +56,8 @@ class YesmanError(Exception):
         context: ErrorContext | None = None,
         cause: Exception | None = None,
         exit_code: int = 1,
+        recovery_hint: str | None = None,
+        error_code: str | None = None,
     ):
         self.message = message
         self.category = category
@@ -63,25 +65,49 @@ class YesmanError(Exception):
         self.context = context
         self.cause = cause
         self.exit_code = exit_code
+        self.recovery_hint = recovery_hint
+        self.error_code = error_code or self._generate_error_code()
         super().__init__(message)
+
+    def _generate_error_code(self) -> str:
+        """Generate error code from category and message"""
+        # Create a simple error code from category and hash of message
+        import hashlib
+
+        msg_hash = hashlib.sha256(self.message.encode()).hexdigest()[:8].upper()
+        return f"{self.category.value.upper()}_{msg_hash}"
 
     def to_dict(self) -> dict[str, Any]:
         """Convert error to dictionary for logging/serialization"""
-        return {
+        result = {
+            "code": self.error_code,
             "message": self.message,
             "category": self.category.value,
             "severity": self.severity.value,
-            "exit_code": self.exit_code,
-            "context": {
-                "operation": self.context.operation if self.context else None,
-                "component": self.context.component if self.context else None,
-                "session_name": self.context.session_name if self.context else None,
-                "file_path": self.context.file_path if self.context else None,
-                "line_number": self.context.line_number if self.context else None,
-                "additional_info": (self.context.additional_info if self.context else None),
-            },
-            "cause": str(self.cause) if self.cause else None,
+            "recovery_hint": self.recovery_hint,
         }
+
+        # Add context if available
+        if self.context:
+            context_dict = {
+                "operation": self.context.operation,
+                "component": self.context.component,
+            }
+            if self.context.session_name:
+                context_dict["session_name"] = self.context.session_name
+            if self.context.file_path:
+                context_dict["file_path"] = self.context.file_path
+            if self.context.line_number:
+                context_dict["line_number"] = self.context.line_number
+            if self.context.additional_info:
+                context_dict.update(self.context.additional_info)
+            result["context"] = context_dict
+
+        # Add cause if available
+        if self.cause:
+            result["cause"] = str(self.cause)
+
+        return result
 
 
 class ConfigurationError(YesmanError):
@@ -93,6 +119,11 @@ class ConfigurationError(YesmanError):
             component="config",
             file_path=config_file,
         )
+
+        # Set default recovery hint if not provided
+        if "recovery_hint" not in kwargs:
+            kwargs["recovery_hint"] = "Check the configuration file syntax and ensure all required fields are present. Run 'yesman validate' to check configuration."
+
         super().__init__(
             message,
             category=ErrorCategory.CONFIGURATION,
@@ -110,6 +141,14 @@ class ValidationError(YesmanError):
             component="validator",
             additional_info={"field_name": field_name} if field_name else None,
         )
+
+        # Set default recovery hint if not provided
+        if "recovery_hint" not in kwargs:
+            if field_name:
+                kwargs["recovery_hint"] = f"Check the value of '{field_name}' field and ensure it meets the requirements."
+            else:
+                kwargs["recovery_hint"] = "Review the input data and ensure all values meet the validation requirements."
+
         super().__init__(
             message,
             category=ErrorCategory.VALIDATION,
@@ -127,6 +166,14 @@ class SessionError(YesmanError):
             component="tmux_manager",
             session_name=session_name,
         )
+
+        # Set default recovery hint if not provided
+        if "recovery_hint" not in kwargs:
+            if session_name:
+                kwargs["recovery_hint"] = f"Check if session '{session_name}' exists using 'yesman show'. If not, create it with 'yesman enter {{session_name}}'."
+            else:
+                kwargs["recovery_hint"] = "List available sessions with 'yesman show' or check tmux directly with 'tmux ls'."
+
         super().__init__(
             message,
             category=ErrorCategory.SYSTEM,
