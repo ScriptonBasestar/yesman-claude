@@ -110,9 +110,9 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
         stats = self._statistics.copy()
         total = stats["total_operations"]
         if total > 0:
-            stats["success_rate"] = (stats["successful_operations"] / total) * 100
+            stats["success_rate"] = int((stats["successful_operations"] / total) * 100)
         else:
-            stats["success_rate"] = 0.0
+            stats["success_rate"] = 0
         return stats
 
     def _increment_stat(self, stat_name: str, value: int = 1) -> None:

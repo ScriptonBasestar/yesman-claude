@@ -5,7 +5,7 @@ import json
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .graph import DirectedGraph
 
@@ -421,7 +421,7 @@ class TaskAnalyzer:
 
     def export_dependency_graph(self, output_path: str) -> None:
         """Export dependency graph to JSON format."""
-        data = {"tasks": {}, "dependencies": []}
+        data: dict[str, Any] = {"tasks": {}, "dependencies": []}
 
         # Export tasks
         for node_id in self.task_graph.nodes_iter():
@@ -430,9 +430,13 @@ class TaskAnalyzer:
                 data["tasks"][node_id] = task.to_dict()
 
         # Export dependencies
-        for source, target, attrs in self.task_graph.edges_iter(data=True):
-            dep = {"source": source, "target": target, "attributes": attrs}
-            data["dependencies"].append(dep)
+        edges = self.task_graph.edges_iter(data=True)
+        for edge in edges:
+            # When data=True, edges_iter returns tuples of (source, target, attrs)
+            if len(edge) == 3:
+                source, target, attrs = edge
+                dep = {"source": source, "target": target, "attributes": attrs}
+                data["dependencies"].append(dep)
 
         # Write to file
         output_file = Path(output_path)

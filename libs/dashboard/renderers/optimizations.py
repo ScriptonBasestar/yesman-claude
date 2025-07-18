@@ -318,7 +318,7 @@ class LazyRenderer:
         self.widget_type = widget_type
         self.data = data
         self.options = options or {}
-        self._result = None
+        self._result: Any = None
         self._rendered = False
         self._lock = threading.Lock()
 
@@ -512,7 +512,7 @@ class TimingContext:
     def __init__(self, profiler: PerformanceProfiler, operation_name: str):
         self.profiler = profiler
         self.operation_name = operation_name
-        self.start_time = None
+        self.start_time: float | None = None
 
     def __enter__(self):
         self.start_time = time.time()

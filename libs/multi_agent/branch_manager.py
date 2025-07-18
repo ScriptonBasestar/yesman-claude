@@ -84,7 +84,7 @@ class BranchManager:
     def _get_current_branch(self) -> str:
         """Get current branch name."""
         result = self._run_git_command(["branch", "--show-current"])
-        return result.stdout.strip()
+        return result.stdout.strip() if result.stdout else ""
 
     def _branch_exists(self, branch_name: str) -> bool:
         """Check if branch exists."""

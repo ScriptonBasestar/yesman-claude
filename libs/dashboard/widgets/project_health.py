@@ -27,7 +27,7 @@ class ProjectHealth:
     def calculate_health(self) -> dict[str, Any]:
         """Calculate overall project health score."""
         try:
-            scores = {}
+            scores: dict[str, Any] = {}
 
             # Calculate individual category scores
             scores["build_score"] = self._check_build_health()
@@ -43,8 +43,9 @@ class ProjectHealth:
             valid_scores = [v for v in scores.values() if v is not None]
             overall_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
 
-            scores["overall_score"] = overall_score
-            scores["suggestions"] = self._generate_suggestions(scores)
+            scores["overall_score"] = int(overall_score)
+            suggestions = self._generate_suggestions(scores)
+            scores["suggestions"] = suggestions
 
             return scores
 

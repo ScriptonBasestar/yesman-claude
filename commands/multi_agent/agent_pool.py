@@ -99,8 +99,9 @@ class MonitorAgentsCommand(BaseCommand):
                 if not pool:
                     self.print_warning("⚠️  No active agent pool found. Showing demo mode.")
                     # Add some demo data for visualization
+                    from libs.dashboard.widgets.agent_monitor import AgentMetrics
                     monitor.agent_metrics = {
-                        "agent-1": monitor.AgentMetrics(
+                        "agent-1": AgentMetrics(
                             agent_id="agent-1",
                             current_task="task-123",
                             tasks_completed=5,
@@ -120,7 +121,7 @@ class MonitorAgentsCommand(BaseCommand):
                     signal.alarm(int(duration))
 
                 try:
-                    await monitor.run()
+                    await monitor.start_monitoring(duration)
                 except KeyboardInterrupt:
                     self.print_info("\n📊 Monitoring stopped.")
 
@@ -214,8 +215,8 @@ class AddTaskCommand(BaseCommand):
 
     def execute(
         self,
-        title: str,
-        command: list[str],
+        title: str | None = None,
+        command: list[str] | None = None,
         work_dir: str | None = None,
         directory: str = ".",
         priority: int = 5,
@@ -226,6 +227,12 @@ class AddTaskCommand(BaseCommand):
     ) -> dict:
         """Execute the add task command."""
         try:
+            # Validate required parameters
+            if not title:
+                raise CommandError("Task title is required")
+            if not command:
+                raise CommandError("Task command is required")
+
             pool = AgentPool(work_dir=work_dir)
 
             task = pool.create_task(

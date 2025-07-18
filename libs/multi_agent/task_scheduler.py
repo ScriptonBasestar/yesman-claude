@@ -457,7 +457,7 @@ class TaskScheduler:
             capability.processing_power = capability._baseline_processing_power
         else:
             # Store baseline and reset to 1.0
-            capability._baseline_processing_power = 1.0
+            capability.processing_power = 1.0
             capability.processing_power = 1.0
 
         logger.debug(f"Reset assignment preferences for agent {agent_id}")

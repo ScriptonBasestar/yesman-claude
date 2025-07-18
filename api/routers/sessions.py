@@ -41,7 +41,24 @@ class SessionService:
     def get_session_by_name(self, session_name: str) -> SessionAPIData | None:
         """Get specific session by name."""
         try:
-            session_data = self.session_manager._get_session_info(session_name)
+            # Load projects configuration to get project_conf
+            projects = self.tmux_manager.load_projects().get("sessions", {})
+
+            # Find the project that matches this session name
+            project_name = None
+            project_conf = None
+            for proj_name, proj_conf in projects.items():
+                session_name_in_conf = proj_conf.get("override", {}).get("session_name", proj_name)
+                if session_name_in_conf == session_name:
+                    project_name = proj_name
+                    project_conf = proj_conf
+                    break
+
+            if not project_name:
+                # Session not found in configuration
+                return None
+
+            session_data = self.session_manager._get_session_info(project_name, project_conf)
             if session_data:
                 return self._convert_session_to_api_data(session_data)
             return None
@@ -120,7 +137,28 @@ class SessionService:
     def get_session_status(self, session_name: str) -> dict[str, Any]:
         """Get session status information."""
         try:
-            session_data = self.session_manager._get_session_info(session_name)
+            # Load projects configuration to get project_conf
+            projects = self.tmux_manager.load_projects().get("sessions", {})
+
+            # Find the project that matches this session name
+            project_name = None
+            project_conf = None
+            for proj_name, proj_conf in projects.items():
+                session_name_in_conf = proj_conf.get("override", {}).get("session_name", proj_name)
+                if session_name_in_conf == session_name:
+                    project_name = proj_name
+                    project_conf = proj_conf
+                    break
+
+            if not project_name:
+                # Session not found in configuration
+                return {
+                    "session_name": session_name,
+                    "status": "not_found",
+                    "exists": False,
+                }
+
+            session_data = self.session_manager._get_session_info(project_name, project_conf)
             if not session_data:
                 return {
                     "session_name": session_name,
@@ -346,9 +384,9 @@ def get_all_sessions():
         return [
             models.SessionInfo(
                 session_name=session["session_name"],
-                project_name=session.get("project_name", ""),
+                project_name=str(session.get("project_name", "")) if session.get("project_name") else None,
                 status=session["status"],
-                template=session.get("template", ""),
+                template=str(session.get("template", "")) if session.get("template") else None,
                 windows=[
                     models.WindowInfo(
                         index=window["index"],
@@ -405,9 +443,9 @@ def get_session(session_name: str):
         # Convert to Pydantic model
         return models.SessionInfo(
             session_name=session_data["session_name"],
-            project_name=session_data.get("project_name", ""),
+            project_name=str(session_data.get("project_name", "")) if session_data.get("project_name") else None,
             status=session_data["status"],
-            template=session_data.get("template", ""),
+            template=str(session_data.get("template", "")) if session_data.get("template") else None,
             windows=[
                 models.WindowInfo(
                     index=window["index"],

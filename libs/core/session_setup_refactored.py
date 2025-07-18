@@ -36,9 +36,9 @@ class SessionValidator:
         self.validation_errors = []
 
         # Validate session name using centralized validation
-        session_valid = validate_session_name(session_name)
-        if not session_valid.is_valid:
-            self.validation_errors.append(session_valid.error or "Invalid session name")
+        is_valid, error = validate_session_name(session_name)
+        if not is_valid:
+            self.validation_errors.append(error or "Invalid session name")
             return False
 
         # Validate start directory
@@ -60,9 +60,9 @@ class SessionValidator:
         expanded_dir = os.path.expanduser(start_dir)
 
         # Use centralized directory validation
-        dir_valid = validate_directory_path(expanded_dir)
+        is_valid, error = validate_directory_path(expanded_dir)
 
-        if not dir_valid.is_valid:
+        if not is_valid:
             # Directory doesn't exist, offer to create it
             click.echo(f"❌ Error: start_directory '{start_dir}' does not exist for session '{session_name}'")
             click.echo(f"   Resolved path: {expanded_dir}")
@@ -107,9 +107,9 @@ class SessionValidator:
         window_name_str = window.get("window_name", f"window_{window_index}")
 
         # Validate window name using centralized validation
-        window_valid = validate_window_name(window_name_str)
-        if not window_valid.is_valid:
-            self.validation_errors.append(window_valid.error or f"Invalid window name: {window_name_str}")
+        is_valid, error = validate_window_name(window_name_str)
+        if not is_valid:
+            self.validation_errors.append(error or f"Invalid window name: {window_name_str}")
             return False
 
         # Validate window start directory
@@ -148,9 +148,9 @@ class SessionValidator:
         expanded_window_dir = os.path.expanduser(window_start_dir)
 
         # Use centralized directory validation
-        dir_valid = validate_directory_path(expanded_window_dir)
+        is_valid, error = validate_directory_path(expanded_window_dir)
 
-        if not dir_valid.is_valid:
+        if not is_valid:
             click.echo(f"❌ Error: Window '{window_name}' start_directory does not exist")
             click.echo(f"   Resolved path: {expanded_window_dir}")
 
@@ -296,7 +296,7 @@ class SessionSetupService:
                 raise CommandError(f"Session '{session_filter}' not defined in projects.yaml")
             return {session_filter: all_sessions[session_filter]}
 
-        return all_sessions
+        return dict(all_sessions)
 
     def _setup_single_session(self, session_name: str, session_conf: dict[str, Any]) -> bool:
         """Set up a single tmux session.

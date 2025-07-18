@@ -135,7 +135,7 @@ class DashboardLauncher:
         Returns:
             Dictionary with requirement status for each interface
         """
-        results = {}
+        results: dict[str, dict[str, Any]] = {}
 
         for interface, config in self._interface_configs.items():
             results[interface] = {

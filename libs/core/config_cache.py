@@ -31,7 +31,7 @@ class ConfigCache:
 
     def _generate_cache_key(self, config_sources: list, env_vars: dict = None) -> str:
         """Generate a unique cache key based on configuration sources and environment."""
-        key_data = {
+        key_data: dict[str, Any] = {
             "sources": [],
             "env_vars": env_vars or {},
             "timestamp": int(time.time() / 300),  # Round to 5-minute intervals
@@ -70,7 +70,7 @@ class ConfigCache:
             self._access_times[cache_key] = current_time
 
             self._logger.debug(f"Cache hit: {cache_key}")
-            return cache_entry["config"]
+            return cache_entry["config"]  # type: ignore[no-any-return]
 
     def put(self, cache_key: str, config: YesmanConfigSchema) -> None:
         """Store configuration in cache."""
@@ -251,7 +251,7 @@ class CachedConfigLoader:
         # Update file watchers
         self._update_file_watchers()
 
-        return config
+        return config  # type: ignore[no-any-return]
 
     def _generate_current_cache_key(self) -> str:
         """Generate cache key for current loader state."""
@@ -300,7 +300,7 @@ class CachedConfigLoader:
 
     def get_config_sources_info(self) -> list[dict[str, Any]]:
         """Get information about configured sources (delegate to base loader)."""
-        return self.base_loader.get_config_sources_info()
+        return self.base_loader.get_config_sources_info()  # type: ignore[no-any-return]
 
 
 # Enhanced config source classes with cache key support
@@ -340,22 +340,23 @@ class CacheableEnvironmentSource:
     def load(self) -> dict:
         import os
 
-        config = {}
+        config: dict[str, Any] = {}
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
                 # Convert YESMAN_LOGGING_LEVEL to logging.level
                 config_key = key[len(self.prefix) :].lower().replace("_", ".")
 
                 # Type conversion
+                converted_value: Any = value
                 if value.lower() in ["true", "false"]:
-                    value = value.lower() == "true"
+                    converted_value = value.lower() == "true"
                 elif value.isdigit():
-                    value = int(value)
+                    converted_value = int(value)
                 elif "." in value and value.replace(".", "").isdigit():
-                    value = float(value)
+                    converted_value = float(value)
 
                 # Set nested dictionary value
-                self._set_nested_value(config, config_key, value)
+                self._set_nested_value(config, config_key, converted_value)
 
         return config
 

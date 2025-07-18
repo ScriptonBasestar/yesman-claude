@@ -17,7 +17,7 @@ class PredictConflictsCommand(BaseCommand):
 
     def execute(
         self,
-        branches: list[str],
+        branches: list[str] | None = None,
         repo_path: str | None = None,
         time_horizon: int = 7,
         min_confidence: float = 0.3,
@@ -26,6 +26,10 @@ class PredictConflictsCommand(BaseCommand):
     ) -> dict:
         """Execute the predict conflicts command."""
         try:
+            # Validate required parameters
+            if not branches:
+                raise CommandError("Branches list is required for conflict prediction")
+
             self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
             self.print_info(f"   Time horizon: {time_horizon} days")
             self.print_info(f"   Confidence threshold: {min_confidence}")
@@ -74,10 +78,13 @@ class PredictConflictsCommand(BaseCommand):
 
                     self.print_info(f"{i}. {confidence_icon} {prediction.prediction_id}")
                     self.print_info(f"   Confidence: {prediction.confidence.value} ({prediction.likelihood_score:.2f})")
-                    self.print_info(f"   Branches: {', '.join(prediction.branches)}")
-                    self.print_info(f"   Predicted files: {', '.join(prediction.predicted_files)}")
-                    self.print_info(f"   Reason: {prediction.reasoning}")
-                    self.print_info(f"   Prevention strategy: {prediction.prevention_strategy}")
+                    self.print_info(f"   Branches: {', '.join(prediction.affected_branches)}")
+                    self.print_info(f"   Predicted files: {', '.join(prediction.affected_files)}")
+                    self.print_info(f"   Description: {prediction.description}")
+                    if prediction.prevention_suggestions:
+                        self.print_info("   Prevention strategies:")
+                        for suggestion in prediction.prevention_suggestions[:2]:  # Show first 2 suggestions
+                            self.print_info(f"      - {suggestion}")
                     self.print_info("")
 
                 return {
@@ -117,14 +124,16 @@ class PredictionSummaryCommand(BaseCommand):
 
             # Overall statistics
             self.print_info(f"Total Predictions: {summary['total_predictions']}")
-            self.print_info(f"Accurate Predictions: {summary['accurate_predictions']}")
-            self.print_info(f"False Positives: {summary['false_positives']}")
-            self.print_info(f"Accuracy Rate: {summary['accuracy_rate']:.1%}")
+            if "accuracy_metrics" in summary:
+                metrics = summary["accuracy_metrics"]
+                self.print_info(f"Accurate Predictions: {metrics.get('accurate_predictions', 0)}")
+                self.print_info(f"False Positives: {metrics.get('false_positives', 0)}")
+                self.print_info(f"Accuracy Rate: {metrics.get('accuracy_rate', 0):.1%}")
 
             # Confidence breakdown
-            if summary["confidence_breakdown"]:
+            if summary.get("by_confidence"):
                 self.print_info("\n📊 Confidence Breakdown:")
-                for confidence, count in summary["confidence_breakdown"].items():
+                for confidence, count in summary["by_confidence"].items():
                     if count > 0:
                         self.print_info(f"  {confidence.capitalize()}: {count}")
 

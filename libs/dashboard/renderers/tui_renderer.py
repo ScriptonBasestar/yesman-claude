@@ -432,7 +432,7 @@ class TUIRenderer(BaseRenderer):
         overall_task = progress.add_task(
             "overall",
             total=100,
-            completed=data.overall_progress,
+            completed=int(data.overall_progress),
             label="Overall Progress",
         )
 
@@ -440,7 +440,7 @@ class TUIRenderer(BaseRenderer):
         phase_task = progress.add_task(
             "phase",
             total=100,
-            completed=data.phase_progress,
+            completed=int(data.phase_progress),
             label=f"{data.phase.value.title()} Phase",
         )
 

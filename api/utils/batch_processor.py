@@ -5,6 +5,7 @@ import json
 import logging
 import time
 from collections import deque
+from collections.abc import Callable, Awaitable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -60,11 +61,11 @@ class WebSocketBatchProcessor:
         # Processing control
         self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
-        self._message_handlers: dict[str, callable] = {}
+        self._message_handlers: dict[str, Callable[[list[dict[str, Any]]], Awaitable[None]]] = {}
 
         self.logger = logging.getLogger("yesman.websocket_batch")
 
-    def register_message_handler(self, channel: str, handler: callable):
+    def register_message_handler(self, channel: str, handler: Callable[[list[dict[str, Any]]], Awaitable[None]]):
         """Register a message handler for a specific channel."""
         self._message_handlers[channel] = handler
         self.logger.info(f"Registered message handler for channel: {channel}")
@@ -248,7 +249,7 @@ class WebSocketBatchProcessor:
         optimized = []
 
         # Group messages by type for potential combination
-        message_groups = {}
+        message_groups: dict[str, list[dict[str, Any]]] = {}
         for msg in messages:
             msg_type = msg.get("type", "unknown")
             if msg_type not in message_groups:

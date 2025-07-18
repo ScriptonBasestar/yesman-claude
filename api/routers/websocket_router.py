@@ -4,6 +4,7 @@ import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -285,7 +286,7 @@ class ConnectionManager:
 
     def get_connection_stats(self):
         """Get statistics about active connections."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_connections": len(self.active_connections),
             "channels": {},
         }

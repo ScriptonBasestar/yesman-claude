@@ -55,7 +55,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         self.learned_patterns: dict[str, PromptPattern] = self._load_patterns()
 
         # Analysis cache
-        self._pattern_cache: dict[str, tuple[str, float]] = {}  # prompt -> (response, confidence)
+        self._pattern_cache: dict[str, tuple[str, float, float]] = {}  # prompt -> (response, confidence, timestamp)
         self._cache_expiry = 3600  # 1 hour
 
         # Statistics tracking
@@ -84,7 +84,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         # Cache statistics
         cache_size = len(self._pattern_cache)
-        valid_cache_entries = sum(1 for _, (_, timestamp) in self._pattern_cache.items() if time.time() - timestamp < self._cache_expiry)
+        valid_cache_entries = sum(1 for _, (_, _, timestamp) in self._pattern_cache.items() if time.time() - timestamp < self._cache_expiry)
 
         return {
             "total_responses": total_responses,
@@ -223,10 +223,12 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         # Check cache first
         cache_key = f"{prompt_type}:{prompt_text}:{project_name}"
         if cache_key in self._pattern_cache:
-            response, confidence, timestamp = self._pattern_cache[cache_key]
-            if time.time() - timestamp < self._cache_expiry:
-                self._stats["cache_hits"] += 1
-                return response, confidence
+            cached_data = self._pattern_cache[cache_key]
+            if len(cached_data) == 3:
+                response, confidence, timestamp = cached_data
+                if time.time() - timestamp < self._cache_expiry:
+                    self._stats["cache_hits"] += 1
+                    return response, confidence
         else:
             self._stats["cache_misses"] += 1
 
@@ -259,6 +261,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         # Cache the result
         if best_match:
+            # Store as tuple[str, float, float] in cache but return only tuple[str, float]
             self._pattern_cache[cache_key] = (best_match, best_confidence, time.time())
             self._stats["predictions_made"] += 1
 
@@ -287,7 +290,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
             return {"error": "No records found"}
 
         # Analyze patterns
-        type_responses = {}
+        type_responses: dict[str, Counter[str]] = {}
         for record in records:
             if record.prompt_type not in type_responses:
                 type_responses[record.prompt_type] = Counter()

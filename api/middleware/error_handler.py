@@ -148,7 +148,7 @@ def create_error_response(
     request_id: str | None = None,
 ) -> JSONResponse:
     """Helper function to create standardized error responses."""
-    error_data = {
+    error_data: dict[str, Any] = {
         "code": code,
         "message": message,
         "category": category,

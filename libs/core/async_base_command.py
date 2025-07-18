@@ -3,6 +3,7 @@
 
 import asyncio
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 from .base_command import BaseCommand, CommandError
@@ -28,9 +29,9 @@ class AsyncBaseCommand(BaseCommand, ABC):
             try:
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
-                    # We're already in an async context, use create_task
-                    task = loop.create_task(self.execute_async(**kwargs))
-                    return asyncio.run_coroutine_threadsafe(task, loop).result()
+                    # We're already in an async context, use run_coroutine_threadsafe directly
+                    coro = self.execute_async(**kwargs)
+                    return asyncio.run_coroutine_threadsafe(coro, loop).result()
                 else:
                     return loop.run_until_complete(self.execute_async(**kwargs))
             except RuntimeError:
@@ -45,7 +46,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
         """Async sleep wrapper for better concurrency."""
         await asyncio.sleep(duration)
 
-    async def run_with_interval(self, async_func: callable, interval: float, max_iterations: int | None = None) -> None:
+    async def run_with_interval(self, async_func: Callable[[], Coroutine[Any, Any, None]], interval: float, max_iterations: int | None = None) -> None:
         """Run an async function repeatedly with specified interval."""
         self._running = True
         iterations = 0
@@ -86,7 +87,15 @@ class AsyncMonitoringMixin:
         self.update_interval = 1.0  # Default 1 second
         self._monitor_data = {}
 
-    async def start_monitoring(self, update_func: callable = None) -> None:
+    # Type hints for methods from BaseCommand that will be available when mixed
+    print_info: Callable[[str], None]
+    print_success: Callable[[str], None]
+    print_error: Callable[[str], None]
+    print_warning: Callable[[str], None]
+    stop: Callable[[], None]
+    run_with_interval: Callable
+
+    async def start_monitoring(self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None) -> None:
         """Start monitoring with regular updates."""
         if not isinstance(self, AsyncBaseCommand):
             raise CommandError("AsyncMonitoringMixin requires AsyncBaseCommand")
@@ -118,7 +127,12 @@ class AsyncProgressMixin:
         self._progress_total = 0
         self._progress_current = 0
 
-    async def with_progress(self, async_func: callable, total_steps: int, description: str = "Processing") -> Any:
+    # Type hints for methods from BaseCommand that will be available when mixed
+    print_info: Callable[[str], None]
+    print_success: Callable[[str], None]
+    print_error: Callable[[str], None]
+
+    async def with_progress(self, async_func: Callable[[], Coroutine[Any, Any, Any]], total_steps: int, description: str = "Processing") -> Any:
         """Execute async function with progress tracking."""
         self._progress_total = total_steps
         self._progress_current = 0
@@ -159,9 +173,13 @@ class AsyncRetryMixin:
         self.retry_delay = 1.0
         self.backoff_multiplier = 2.0
 
+    # Type hints for methods from BaseCommand that will be available when mixed
+    print_warning: Callable[[str], None]
+    print_error: Callable[[str], None]
+
     async def with_retry(
         self,
-        async_func: callable,
+        async_func: Callable[[], Coroutine[Any, Any, Any]],
         max_retries: int = None,
         retry_delay: float = None,
         backoff_multiplier: float = None,

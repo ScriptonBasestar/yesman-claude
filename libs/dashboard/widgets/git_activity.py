@@ -98,7 +98,7 @@ class GitActivityWidget:
 
     def _get_recent_commits(self, limit: int = 20) -> list[CommitInfo]:
         """Get recent commit information."""
-        commits = []
+        commits: list[CommitInfo] = []
 
         # Get commit information
         format_str = "%H|%an|%ad|%s"
@@ -205,7 +205,7 @@ class GitActivityWidget:
             ]
         )
 
-        activity = defaultdict(int)
+        activity: defaultdict[str, int] = defaultdict(int)
         for line in output.split("\\n"):
             if line:
                 activity[line] += 1
@@ -223,7 +223,7 @@ class GitActivityWidget:
             ]
         )
 
-        file_changes = defaultdict(int)
+        file_changes: defaultdict[str, int] = defaultdict(int)
         for raw_line in output.split("\\n"):
             line = raw_line.strip()
             if line and not line.startswith("commit"):
@@ -243,7 +243,7 @@ class GitActivityWidget:
 
         # Total branches
         all_branches = self._run_git_command(["branch", "-a"])
-        info["total_branches"] = len([b for b in all_branches.split("\\n") if b.strip()])
+        info["total_branches"] = str(len([b for b in all_branches.split("\\n") if b.strip()]))
 
         # Recent branches
         recent_branches = self._run_git_command(
@@ -255,7 +255,7 @@ class GitActivityWidget:
                 "--count=5",
             ]
         )
-        info["recent_branches"] = recent_branches.split("\\n") if recent_branches else []
+        info["recent_branches"] = ", ".join(recent_branches.split("\\n")[:5]) if recent_branches else ""
 
         return info
 

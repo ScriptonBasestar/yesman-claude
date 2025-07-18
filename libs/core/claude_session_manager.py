@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-import libtmux  # type: ignore
+import libtmux
 
 from ..utils import ensure_log_directory, get_default_log_path
 
@@ -15,7 +15,7 @@ class ClaudeSessionManager:
         self.session_name = session_name
         self.pane_id = pane_id
         self.server = libtmux.Server()
-        self.session = None
+        self.session: libtmux.Session | None = None
         self.claude_pane: Any = None
         self.logger = self._setup_logger()
 
@@ -128,7 +128,7 @@ class ClaudeSessionManager:
 
         try:
             cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
-            return cmd
+            return str(cmd) if cmd else ""
         except Exception as e:
             self.logger.error(f"Error getting current command: {e}")
             return ""

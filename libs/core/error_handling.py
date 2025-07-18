@@ -77,7 +77,7 @@ class YesmanError(Exception):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert error to dictionary for logging/serialization."""
-        result = {
+        result: dict[str, Any] = {
             "code": self.error_code,
             "message": self.message,
             "category": self.category.value,
@@ -87,7 +87,7 @@ class YesmanError(Exception):
 
         # Add context if available
         if self.context:
-            context_dict = {
+            context_dict: dict[str, Any] = {
                 "operation": self.context.operation,
                 "component": self.context.component,
             }
@@ -236,7 +236,7 @@ class ErrorHandler:
 
     def __init__(self, logger_name: str = "yesman.error_handler"):
         self.logger = logging.getLogger(logger_name)
-        self.error_stats = {
+        self.error_stats: dict[str, Any] = {
             "total_errors": 0,
             "by_category": {},
             "by_severity": {},
@@ -379,7 +379,7 @@ def handle_exceptions(func):
 def safe_execute(
     operation: str,
     component: str,
-    func: callable,
+    func: Any,  # Should be Callable but using Any to avoid complex type annotation
     *args,
     error_category: ErrorCategory = ErrorCategory.UNKNOWN,
     **kwargs,

@@ -1,5 +1,7 @@
 """TUI Session Selector using Rich."""
 
+from typing import Any
+
 import libtmux
 from rich.console import Console
 from rich.panel import Panel
@@ -15,16 +17,16 @@ class SessionSelector:
         self.sessions = sessions
         self.console = Console()
 
-    def _get_session_details(self, session_name: str) -> dict[str, str]:
+    def _get_session_details(self, session_name: str) -> dict[str, Any]:
         """Get session details from tmux."""
         try:
             server = libtmux.Server()
             session = server.find_where({"session_name": session_name})
             if session:
-                windows = session.windows
-                window_names = [w.name for w in windows]
+                windows = session.windows if hasattr(session, "windows") else []
+                window_names = [w.name for w in windows] if windows else []
                 # Get session info using format strings
-                attached_clients = session.attached
+                attached_clients = getattr(session, "attached", 0)
                 return {
                     "windows": len(windows),
                     "window_names": ", ".join(window_names[:3]) + ("..." if len(window_names) > 3 else ""),
@@ -40,7 +42,7 @@ class SessionSelector:
             "clients": 0,
         }
 
-    def _create_display(self, search_term: str = "") -> Table:
+    def _create_display(self, search_term: str = "") -> tuple[Table, list[dict[str, str]]]:
         """Create the display table."""
         table = Table(
             title="🖥️  Select a tmux session",

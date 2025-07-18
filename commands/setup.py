@@ -16,15 +16,17 @@ from libs.core.session_setup import SessionSetupService
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     """Create all tmux sessions defined in projects.yaml."""
 
-    def execute(self, session_name: str | None = None) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the setup command.
 
         Args:
-            session_name: Optional session name to set up only that session
+            **kwargs: Keyword arguments including:
+                session_name: Optional session name to set up only that session
 
         Returns:
             Dictionary with setup results
         """
+        session_name = kwargs.get("session_name")
         with with_startup_progress("🔧 Initializing session setup...") as update:
             setup_service = SessionSetupService(self.tmux_manager)
             update("🚀 Setting up tmux sessions...")

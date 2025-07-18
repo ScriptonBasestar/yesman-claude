@@ -908,3 +908,57 @@ class ConflictPredictor:
         # Implementation would compare predictions with actual conflicts
         # and update accuracy metrics
         pass
+
+    def analyze_conflict_patterns(self) -> dict[str, Any]:
+        """Analyze detailed conflict patterns and trends."""
+        if not self.predictions:
+            return {
+                "frequent_conflict_files": [],
+                "conflict_hotspots": [],
+                "pattern_distribution": {},
+                "temporal_trends": {},
+            }
+
+        # Analyze frequent conflict files
+        file_conflicts = Counter()
+        for prediction in self.predictions.values():
+            for file_path in prediction.affected_files:
+                file_conflicts[file_path] += 1
+
+        frequent_files = [
+            {"file": file_path, "conflict_count": count}
+            for file_path, count in file_conflicts.most_common(10)
+        ]
+
+        # Analyze conflict hotspots
+        branch_conflicts = Counter()
+        for prediction in self.predictions.values():
+            for branch in prediction.affected_branches:
+                branch_conflicts[branch] += prediction.likelihood_score
+
+        hotspots = [
+            {
+                "location": branch,
+                "severity": "high" if score > 5 else "medium" if score > 2 else "low",
+                "score": score,
+            }
+            for branch, score in branch_conflicts.most_common(5)
+        ]
+
+        # Pattern distribution
+        pattern_dist = Counter(p.pattern.value for p in self.predictions.values())
+
+        # Temporal trends (predictions by day)
+        temporal_trends = defaultdict(int)
+        for prediction in self.predictions.values():
+            day_key = prediction.predicted_at.strftime("%Y-%m-%d")
+            temporal_trends[day_key] += 1
+
+        return {
+            "frequent_conflict_files": frequent_files,
+            "conflict_hotspots": hotspots,
+            "pattern_distribution": dict(pattern_dist),
+            "temporal_trends": dict(temporal_trends),
+            "total_predictions": len(self.predictions),
+            "average_confidence": sum(p.likelihood_score for p in self.predictions.values()) / max(len(self.predictions), 1),
+        }

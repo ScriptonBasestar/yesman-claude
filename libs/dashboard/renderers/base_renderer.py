@@ -68,7 +68,7 @@ class BaseRenderer(ABC):
         """
         self.format_type = format_type
         self.theme = theme or self._get_default_theme()
-        self._cache = {}
+        self._cache: dict[str, Any] = {}
 
     @abstractmethod
     def render_widget(
@@ -155,12 +155,16 @@ class BaseRenderer(ABC):
 
         if isinstance(date, str):
             # Try to parse common date formats
+            parsed_date = None
             for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]:
                 try:
-                    date = datetime.strptime(date, fmt)
+                    parsed_date = datetime.strptime(date, fmt)
                     break
                 except ValueError:
                     continue
+
+            if parsed_date is not None:
+                date = parsed_date
             else:
                 return date  # Return as-is if parsing fails
 
@@ -196,12 +200,13 @@ class BaseRenderer(ABC):
         if bytes_value is None:
             return "N/A"
 
+        bytes_float = float(bytes_value)
         for unit in ["B", "KB", "MB", "GB", "TB"]:
-            if bytes_value < 1024.0:
-                return f"{bytes_value:.1f} {unit}"
-            bytes_value /= 1024.0
+            if bytes_float < 1024.0:
+                return f"{bytes_float:.1f} {unit}"
+            bytes_float /= 1024.0
 
-        return f"{bytes_value:.1f} PB"
+        return f"{bytes_float:.1f} PB"
 
     def format_duration(self, seconds: int | float) -> str:
         """Format duration in seconds to human-readable format.
@@ -238,7 +243,8 @@ class BaseRenderer(ABC):
         color_config = color_map.get(color_type.value, {})
 
         if isinstance(color_config, dict):
-            return color_config.get(variant, color_config.get("default", "#000000"))
+            result = color_config.get(variant, color_config.get("default", "#000000"))
+            return str(result)  # Ensure we always return a string
 
         return str(color_config)
 

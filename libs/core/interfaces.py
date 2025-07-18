@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from .models import PromptInfo, SessionInfo
+from .models import SessionInfo
+from .prompt_detector import PromptInfo
 
 
 class ControllerState(Enum):

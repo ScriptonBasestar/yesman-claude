@@ -3,6 +3,7 @@
 import logging
 import secrets
 from datetime import datetime
+from typing import TypedDict
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.templating import Jinja2Templates
@@ -13,6 +14,12 @@ from libs.dashboard.widgets.project_health import ProjectHealth
 from libs.yesman_config import YesmanConfig
 
 from ..shared import claude_manager
+
+
+class ActivityData(TypedDict):
+    """Type definition for activity data."""
+    date: str
+    activity_count: int
 
 logger = logging.getLogger(__name__)
 
@@ -173,6 +180,7 @@ async def get_activity_data():
         from collections import defaultdict
         from datetime import timedelta
 
+        activities: list[ActivityData]
         try:
             # Get git log for last 365 days
             cmd = [
@@ -199,10 +207,10 @@ async def get_activity_data():
             while current_date <= end_date:
                 date_str = current_date.isoformat()
                 activities.append(
-                    {
-                        "date": date_str,
-                        "activity_count": activity_counts.get(date_str, 0),
-                    }
+                    ActivityData(
+                        date=date_str,
+                        activity_count=activity_counts.get(date_str, 0),
+                    )
                 )
                 current_date += timedelta(days=1)
 
@@ -228,10 +236,10 @@ async def get_activity_data():
                 # Generate mock activity data
                 activity_count = secrets.randbelow(16) if secrets.randbelow(10) > 3 else 0
                 activities.append(
-                    {
-                        "date": current_date.isoformat(),
-                        "activity_count": activity_count,
-                    }
+                    ActivityData(
+                        date=current_date.isoformat(),
+                        activity_count=activity_count,
+                    )
                 )
                 current_date += timedelta(days=1)
 

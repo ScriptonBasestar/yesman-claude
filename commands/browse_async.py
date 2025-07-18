@@ -51,7 +51,7 @@ class AsyncInteractiveBrowser:
 
                 # Calculate and record activity
                 activity_level = self._calculate_session_activity(detailed_info)
-                self.activity_heatmap.add_activity_point(session_name, activity_level)
+                # Store activity for later heatmap generation
 
             # Update browser with new data
             self.session_browser.update_sessions(detailed_sessions)
@@ -153,7 +153,10 @@ class AsyncInteractiveBrowser:
             layout["progress"].update("[dim]Loading progress data...[/dim]")
 
         # Activity heatmap
-        heatmap_content = self.activity_heatmap.render_combined_heatmap()
+        # Generate heatmap from collected session data
+        session_names = [s.session_name for s in self.session_browser.sessions]
+        heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
+        heatmap_content = self._render_heatmap(heatmap_data)
         layout["activity"].update(heatmap_content)
 
         # Footer
@@ -199,6 +202,34 @@ class AsyncInteractiveBrowser:
             except asyncio.CancelledError:
                 pass
 
+    def _render_heatmap(self, heatmap_data: dict) -> str:
+        """Render activity heatmap visualization."""
+        from rich.text import Text
+
+        # Simple text representation of heatmap
+        output = Text()
+        output.append("Session Activity (Last 7 days)\n\n")
+
+        heatmap = heatmap_data.get("heatmap", {})
+        if not heatmap:
+            output.append("No activity data available", style="dim")
+        else:
+            # Days of week
+            days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            for day_idx, day_name in enumerate(days):
+                output.append(f"{day_name}: ")
+                for hour in range(24):
+                    count = heatmap.get(day_idx, {}).get(hour, 0)
+                    if count == 0:
+                        output.append("·", style="dim")
+                    elif count < 5:
+                        output.append("▪", style="yellow")
+                    else:
+                        output.append("█", style="red")
+                output.append("\n")
+
+        return str(output)
+
 
 class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
     """Async interactive session browser with enhanced performance."""
@@ -236,11 +267,8 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
         pass
 
 
-# Keep backward compatibility with sync version
-class BrowseCommand(AsyncBrowseCommand):
-    """Backward compatible browse command that uses async under the hood."""
-
-    pass
+# Create alias for backward compatibility
+BrowseCommand = AsyncBrowseCommand
 
 
 @click.command()
@@ -265,7 +293,7 @@ def browse(update_interval, async_mode):
         # Fallback to original implementation if needed
         from commands.browse import BrowseCommand as SyncBrowseCommand
 
-        command = SyncBrowseCommand()
+        command: AsyncBrowseCommand = SyncBrowseCommand()  # type: ignore
         command.print_warning("⚠️  Running in sync mode (consider using --async-mode)")
 
     command.run(update_interval=update_interval)

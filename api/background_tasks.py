@@ -140,7 +140,10 @@ class BackgroundTaskRunner:
                 from libs.yesman_config import YesmanConfig
 
                 config = YesmanConfig()
-                project_sessions = config.projects
+                # Load projects using tmux_manager
+                from libs.tmux_manager import TmuxManager
+                tmux_manager = TmuxManager(config)
+                project_sessions = tmux_manager.load_projects().get("sessions", {})
 
                 # Format session data
                 formatted_sessions = []
@@ -149,8 +152,8 @@ class BackgroundTaskRunner:
                         "session_name",
                         project_name,
                     )
-                    session_exists = any(s["session_name"] == session_name for s in sessions)
-                    session_detail = self.session_manager._get_session_info(session_name) if session_exists else None
+                    session_exists = any(s.session_name == session_name for s in sessions)
+                    session_detail = self.session_manager._get_session_info(project_name, project_config) if session_exists else None
 
                     formatted_sessions.append(
                         {
@@ -159,9 +162,9 @@ class BackgroundTaskRunner:
                             "template": project_config.get("template_name", "default"),
                             "status": "active" if session_exists else "stopped",
                             "exists": session_exists,
-                            "windows": (session_detail.get("windows", []) if session_detail else []),
-                            "panes": (sum(len(w.get("panes", [])) for w in session_detail.get("windows", [])) if session_detail else 0),
-                            "claude_active": (any(p.get("has_claude", False) for w in session_detail.get("windows", []) for p in w.get("panes", [])) if session_detail else False),
+                            "windows": (len(session_detail.windows) if session_detail else 0),
+                            "panes": (sum(len(w.panes) for w in session_detail.windows) if session_detail else 0),
+                            "claude_active": (any(p.is_claude for w in session_detail.windows for p in w.panes) if session_detail else False),
                         },
                     )
 
@@ -170,7 +173,7 @@ class BackgroundTaskRunner:
 
                 # Check if data has changed
                 if self.last_data["sessions"] != data_hash:
-                    self.last_data["sessions"] = data_hash
+                    self.last_data["sessions"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
                     from api.routers.websocket_router import manager
@@ -197,60 +200,63 @@ class BackgroundTaskRunner:
         async def check_health():
             try:
                 # Calculate health metrics
-                health_data = self.health_calculator.calculate_health()
+                health_data = await self.health_calculator.calculate_health()
+
+                # Get category scores from health data
+                category_scores = health_data.category_scores
 
                 # Format health data
                 formatted_health = {
-                    "overall_score": health_data.get("overall_score", 0),
+                    "overall_score": health_data.overall_score,
                     "categories": {
                         "build": {
-                            "score": health_data.get("build_score", 0),
+                            "score": category_scores.get("build", 0),
                             "status": self._get_status(
-                                health_data.get("build_score", 0),
+                                category_scores.get("build", 0),
                             ),
                         },
                         "tests": {
-                            "score": health_data.get("test_score", 0),
+                            "score": category_scores.get("tests", 0),
                             "status": self._get_status(
-                                health_data.get("test_score", 0),
+                                category_scores.get("tests", 0),
                             ),
                         },
                         "dependencies": {
-                            "score": health_data.get("deps_score", 0),
+                            "score": category_scores.get("dependencies", 0),
                             "status": self._get_status(
-                                health_data.get("deps_score", 0),
+                                category_scores.get("dependencies", 0),
                             ),
                         },
                         "security": {
-                            "score": health_data.get("security_score", 0),
+                            "score": category_scores.get("security", 0),
                             "status": self._get_status(
-                                health_data.get("security_score", 0),
+                                category_scores.get("security", 0),
                             ),
                         },
                         "performance": {
-                            "score": health_data.get("perf_score", 0),
+                            "score": category_scores.get("performance", 0),
                             "status": self._get_status(
-                                health_data.get("perf_score", 0),
+                                category_scores.get("performance", 0),
                             ),
                         },
                         "code_quality": {
-                            "score": health_data.get("quality_score", 0),
+                            "score": category_scores.get("code_quality", 0),
                             "status": self._get_status(
-                                health_data.get("quality_score", 0),
+                                category_scores.get("code_quality", 0),
                             ),
                         },
                         "git": {
-                            "score": health_data.get("git_score", 0),
-                            "status": self._get_status(health_data.get("git_score", 0)),
+                            "score": category_scores.get("git", 0),
+                            "status": self._get_status(category_scores.get("git", 0)),
                         },
                         "documentation": {
-                            "score": health_data.get("docs_score", 0),
+                            "score": category_scores.get("documentation", 0),
                             "status": self._get_status(
-                                health_data.get("docs_score", 0),
+                                category_scores.get("documentation", 0),
                             ),
                         },
                     },
-                    "suggestions": health_data.get("suggestions", []),
+                    "suggestions": [metric.description for metric in health_data.metrics if metric.description],
                     "last_updated": datetime.now().isoformat(),
                 }
 
@@ -259,7 +265,7 @@ class BackgroundTaskRunner:
 
                 # Check if data has changed
                 if self.last_data["health"] != data_hash:
-                    self.last_data["health"] = data_hash
+                    self.last_data["health"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
                     from api.routers.websocket_router import manager
@@ -285,7 +291,7 @@ class BackgroundTaskRunner:
                 from collections import defaultdict
 
                 # Get git activity data
-                activity_counts: dict[str, int] = defaultdict(int)
+                activity_counts: defaultdict[str, int] = defaultdict(int)
 
                 try:
                     # Get git log for last 365 days
@@ -314,7 +320,7 @@ class BackgroundTaskRunner:
                 end_date = datetime.now().date()
                 start_date = end_date - timedelta(days=364)
 
-                activities = []
+                activities: list[dict[str, Any]] = []
                 current_date = start_date
                 while current_date <= end_date:
                     date_str = current_date.isoformat()
@@ -327,9 +333,10 @@ class BackgroundTaskRunner:
                     current_date += timedelta(days=1)
 
                 # Calculate statistics
-                active_days = sum(1 for a in activities if a["activity_count"] > 0)
-                max_activity = max((a["activity_count"] for a in activities), default=0)
-                avg_activity = sum(a["activity_count"] for a in activities) / len(activities) if activities else 0
+                activity_counts_list = [int(a["activity_count"]) for a in activities]
+                active_days = sum(1 for count in activity_counts_list if count > 0)
+                max_activity = max(activity_counts_list, default=0)
+                avg_activity = sum(activity_counts_list) / len(activity_counts_list) if activity_counts_list else 0
 
                 formatted_activity = {
                     "activities": activities,
@@ -344,7 +351,7 @@ class BackgroundTaskRunner:
 
                 # Check if data has changed
                 if self.last_data["activity"] != data_hash:
-                    self.last_data["activity"] = data_hash
+                    self.last_data["activity"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
                     from api.routers.websocket_router import manager

@@ -107,7 +107,7 @@ class ContextDetector:
             ],
         }
 
-        self._last_git_hash = None
+        self._last_git_hash: str | None = None
         self._last_file_mtimes: dict[str, float] = {}
 
     def detect_context_from_content(self, content: str, session_name: str = None) -> list[ContextInfo]:
@@ -398,7 +398,7 @@ class ContextDetector:
 
     def get_current_context_summary(self) -> dict[str, Any]:
         """Get a summary of the current project context."""
-        summary = {
+        summary: dict[str, Any] = {
             "project_path": str(self.project_path),
             "timestamp": time.time(),
             "contexts": [],

@@ -2,6 +2,7 @@
 JSON-based renderer for Tauri desktop application integration.
 """
 
+import json
 import uuid
 from datetime import datetime
 from typing import Any
@@ -75,8 +76,66 @@ class TauriRenderer(BaseRenderer):
         widget_type: WidgetType,
         data: Any,
         options: dict[str, Any] | None = None,
+    ) -> str:
+        """Render a single widget as JSON string.
+
+        Args:
+            widget_type: Type of widget to render
+            data: Widget data (should be appropriate model instance)
+            options: Rendering options
+
+        Returns:
+            JSON string representing the widget
+        """
+        options = options or {}
+        widget_id = self._generate_widget_id()
+
+        # Base widget structure
+        widget_json = {
+            "type": "widget",
+            "widget_type": widget_type.value,
+            "id": widget_id,
+            "data": {},
+            "metadata": {
+                "created_at": datetime.now().isoformat(),
+                "format": "tauri",
+                "version": "1.0",
+            },
+            "style": self._get_default_style(),
+            "options": options,
+        }
+
+        # Route to specific widget processor
+        if widget_type == WidgetType.SESSION_BROWSER:
+            self._process_session_browser(widget_json, data, options)
+        elif widget_type == WidgetType.HEALTH_METER:
+            self._process_health_meter(widget_json, data, options)
+        elif widget_type == WidgetType.ACTIVITY_HEATMAP:
+            self._process_activity_heatmap(widget_json, data, options)
+        elif widget_type == WidgetType.PROGRESS_TRACKER:
+            self._process_progress_tracker(widget_json, data, options)
+        elif widget_type == WidgetType.LOG_VIEWER:
+            self._process_log_viewer(widget_json, data, options)
+        elif widget_type == WidgetType.METRIC_CARD:
+            self._process_metric_card(widget_json, data, options)
+        elif widget_type == WidgetType.STATUS_INDICATOR:
+            self._process_status_indicator(widget_json, data, options)
+        elif widget_type == WidgetType.CHART:
+            self._process_chart(widget_json, data, options)
+        elif widget_type == WidgetType.TABLE:
+            self._process_table(widget_json, data, options)
+        else:
+            self._process_generic_widget(widget_json, widget_type, data, options)
+
+        return json.dumps(widget_json, indent=2)
+
+    def _render_widget_as_dict(
+        self,
+        widget_type: WidgetType,
+        data: Any,
+        options: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Render a single widget as JSON structure.
+        """Internal method to render widget as dictionary.
 
         Args:
             widget_type: Type of widget to render
@@ -132,7 +191,7 @@ class TauriRenderer(BaseRenderer):
         self,
         widgets: list[dict[str, Any]],
         layout_config: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+    ) -> str:
         """Render a layout containing multiple widgets.
 
         Args:
@@ -140,7 +199,7 @@ class TauriRenderer(BaseRenderer):
             layout_config: Layout configuration
 
         Returns:
-            JSON layout object
+            JSON layout string
         """
         layout_config = layout_config or {}
 
@@ -151,8 +210,8 @@ class TauriRenderer(BaseRenderer):
             widget_data = widget.get("data", {})
             widget_options = widget.get("options", {})
 
-            rendered = self.render_widget(widget_type, widget_data, widget_options)
-            rendered_widgets.append(rendered)
+            rendered_json = self._render_widget_as_dict(widget_type, widget_data, widget_options)
+            rendered_widgets.append(rendered_json)
 
         # Create layout structure
         layout_json = {
@@ -167,28 +226,31 @@ class TauriRenderer(BaseRenderer):
             },
         }
 
-        return layout_json
+        return json.dumps(layout_json, indent=2)
 
     def render_container(
         self,
-        content: dict[str, Any] | list[dict[str, Any]],
+        content: str,
         container_config: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+    ) -> str:
         """Render a container wrapping content.
 
         Args:
-            content: Content to wrap (widget or layout)
+            content: Content to wrap (JSON string)
             container_config: Container configuration
 
         Returns:
-            JSON container object
+            JSON container string
         """
         container_config = container_config or {}
+
+        # Parse the content if it's a JSON string
+        parsed_content = json.loads(content) if isinstance(content, str) else content
 
         container_json = {
             "type": "container",
             "id": self._generate_widget_id(),
-            "content": content,
+            "content": parsed_content,
             "config": {
                 "title": container_config.get("title", ""),
                 "border": container_config.get("border", True),
@@ -203,7 +265,7 @@ class TauriRenderer(BaseRenderer):
             },
         }
 
-        return container_json
+        return json.dumps(container_json, indent=2)
 
     # Widget-specific processors
 
@@ -349,24 +411,31 @@ class TauriRenderer(BaseRenderer):
             return
 
         # Process activity entries for matrix display
-        activities_by_date = {}
+        activities_by_date: dict[str, dict[str, Any]] = {}
         for entry in data.entries:
             if hasattr(entry, "timestamp") and entry.timestamp:
                 date_key = entry.timestamp.strftime("%Y-%m-%d") if isinstance(entry.timestamp, datetime) else str(entry.timestamp)[:10]
                 if date_key not in activities_by_date:
                     activities_by_date[date_key] = {"count": 0, "types": set()}
-                activities_by_date[date_key]["count"] += 1
-                activities_by_date[date_key]["types"].add(entry.activity_type.value if hasattr(entry.activity_type, "value") else str(entry.activity_type))
+
+                # Explicitly type the activity info dict
+                activity_info = activities_by_date[date_key]
+                activity_info["count"] += 1
+                activity_types_set = activity_info["types"]
+                if isinstance(activity_types_set, set):
+                    activity_types_set.add(entry.activity_type.value if hasattr(entry.activity_type, "value") else str(entry.activity_type))
 
         # Convert to matrix format for heatmap
         heatmap_data = []
         for date, activity_info in activities_by_date.items():
+            count = activity_info.get("count", 0)
+            types_set = activity_info.get("types", set())
             heatmap_data.append(
                 {
                     "date": date,
-                    "value": activity_info["count"],
-                    "level": min(4, max(0, activity_info["count"] // 5)),  # 0-4 levels
-                    "types": list(activity_info["types"]),
+                    "value": count,
+                    "level": min(4, max(0, count // 5)) if isinstance(count, int) else 0,  # 0-4 levels
+                    "types": list(types_set) if isinstance(types_set, set) else [],
                 }
             )
 

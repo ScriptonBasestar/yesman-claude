@@ -263,13 +263,13 @@ class SystemThemeDetector:
             import winreg
 
             # Check Windows registry for theme preference
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
+            key = winreg.OpenKey(  # type: ignore[attr-defined]
+                winreg.HKEY_CURRENT_USER,  # type: ignore[attr-defined]
                 r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
             )
 
-            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
-            winreg.CloseKey(key)
+            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")  # type: ignore[attr-defined]
+            winreg.CloseKey(key)  # type: ignore[attr-defined]
 
             return ThemeMode.LIGHT if value else ThemeMode.DARK
 

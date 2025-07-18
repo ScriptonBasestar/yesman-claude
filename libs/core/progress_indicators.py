@@ -106,7 +106,7 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
         yield update_progress
 
 
-def track_items(items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Iterator[Any]:
+def track_items(items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Any:
     """Track progress through a list of items with rich progress bar.
 
     Args:

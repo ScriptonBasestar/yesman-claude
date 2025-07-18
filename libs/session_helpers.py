@@ -14,7 +14,7 @@ from typing import Any
 import libtmux
 from libtmux.exc import LibTmuxException
 
-from libs.core.error_handling import ErrorCategory, YesmanError
+from libs.core.error_handling import ErrorCategory, ErrorContext, YesmanError
 from libs.validation import validate_session_name
 
 logger = logging.getLogger(__name__)
@@ -47,10 +47,15 @@ class SessionConfigurationError(YesmanError):
     """Raised when session configuration is invalid."""
 
     def __init__(self, message: str, config: dict | None = None):
+        context = ErrorContext(
+            operation="session_configuration",
+            component="session_helpers",
+            additional_info={"config": config} if config else None
+        )
         super().__init__(
             message,
             category=ErrorCategory.CONFIGURATION,
-            context={"config": config} if config else None,
+            context=context,
         )
 
 

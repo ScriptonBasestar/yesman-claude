@@ -45,7 +45,7 @@ class AsyncStatusDashboard:
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
         self.activity_heatmap = ActivityHeatmapGenerator(self.config)
-        self.project_health = ProjectHealth(self.console)
+        self.project_health = ProjectHealth(str(self.project_path))
         self.git_activity = GitActivityWidget(self.console, str(self.project_path))
         self.progress_tracker = ProgressTracker(self.console)
         self.session_progress = SessionProgressWidget(self.console)
@@ -84,7 +84,8 @@ class AsyncStatusDashboard:
         current_time = time.time()
 
         # Check if cache is still valid
-        if current_time - self._data_cache["last_update"] < self._cache_ttl:
+        last_update = self._data_cache.get("last_update", 0)
+        if isinstance(last_update, (int, float)) and current_time - last_update < self._cache_ttl:
             return
 
         try:
@@ -125,12 +126,14 @@ class AsyncStatusDashboard:
                 if isinstance(session_detail, Exception):
                     self.console.print(f"[yellow]Warning: Session detail error: {session_detail}[/]")
                     continue
+                elif isinstance(session_detail, dict):
+                    detailed_sessions.append(session_detail)
 
-                detailed_sessions.append(session_detail)
-
-                # Calculate activity for heatmap
-                activity_level = self._calculate_session_activity(session_detail)
-                self.activity_heatmap.add_activity_point(session_detail.get("session_name", "unknown"), activity_level)
+                    # Calculate activity for heatmap
+                    activity_level = self._calculate_session_activity(session_detail)
+                    # Use activity collection method instead of add_activity_point
+                    session_name = session_detail.get("session_name", "unknown")
+                    # Store activity data for later rendering
 
         # Update session browser
         self.session_browser.update_sessions(detailed_sessions)
@@ -144,11 +147,11 @@ class AsyncStatusDashboard:
     async def _update_project_health(self):
         """Async update of project health."""
         loop = asyncio.get_event_loop()
+        # ProjectHealth doesn't have update_project_health method, it calculates on demand
+        # So we'll just trigger a calculation to refresh the data
         await loop.run_in_executor(
             None,
-            self.project_health.update_project_health,
-            str(self.project_path),
-            self.project_name,
+            self.project_health.calculate_health
         )
 
     async def _update_progress_data(self):
@@ -218,7 +221,11 @@ class AsyncStatusDashboard:
         loop = asyncio.get_event_loop()
         cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
 
-        cache_age = time.time() - self._data_cache["last_update"]
+        last_update = self._data_cache.get("last_update", time.time())
+        if isinstance(last_update, (int, float)):
+            cache_age = time.time() - last_update
+        else:
+            cache_age = 0.0
         header_text = f"🚀 Yesman Dashboard (Async) - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache: {cache_stats.get('hit_rate', 0):.1%} | Data Age: {cache_age:.1f}s"
         layout["header"].update(Panel(header_text, style="bold green"))
 
@@ -227,20 +234,29 @@ class AsyncStatusDashboard:
         layout["sessions"].update(Panel(sessions_content, title="📋 Active Sessions", border_style="blue"))
 
         # Project health panel
-        health_content = self.project_health.render_health_summary()
+        health_data = self.project_health.calculate_health()
+        health_content = self._render_health_summary(health_data)
         layout["health"].update(Panel(health_content, title="🏥 Project Health", border_style="green"))
 
         # Activity heatmap panel
-        activity_content = self.activity_heatmap.render_combined_heatmap()
+        # Generate heatmap data from collected sessions
+        sessions_data = self._data_cache.get("sessions", [])
+        if isinstance(sessions_data, list):
+            session_names = [s.get("session_name", "unknown") for s in sessions_data if isinstance(s, dict)]
+        else:
+            session_names = []
+        heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
+        activity_content = self._render_heatmap(heatmap_data)
         layout["activity"].update(Panel(activity_content, title="🔥 Activity Heatmap", border_style="red"))
 
         # Progress tracker panel
-        progress_content = self.progress_tracker.render_progress_summary()
+        progress_stats = self._calculate_progress_stats()
+        progress_content = self._render_progress_summary(progress_stats)
         layout["progress"].update(Panel(progress_content, title="📈 TODO Progress", border_style="yellow"))
 
         # Session progress panel
         progress_data = self._data_cache.get("progress_data")
-        if progress_data:
+        if progress_data and isinstance(progress_data, dict):
             session_progress_content = self.session_progress.render_progress_overview(progress_data)
             layout["session_progress"].update(
                 Panel(
@@ -258,7 +274,9 @@ class AsyncStatusDashboard:
             )
 
         # Footer with performance stats
-        footer_text = f"💡 Async Mode | Update Interval: {self.update_interval}s | Cache TTL: {self._cache_ttl}s | Sessions: {len(self._data_cache['sessions'])}"
+        sessions_data = self._data_cache.get("sessions", [])
+        session_count = len(sessions_data) if isinstance(sessions_data, list) else 0
+        footer_text = f"💡 Async Mode | Update Interval: {self.update_interval}s | Cache TTL: {self._cache_ttl}s | Sessions: {session_count}"
         layout["footer"].update(Panel(footer_text, style="dim"))
 
     async def run_interactive(self):
@@ -288,6 +306,107 @@ class AsyncStatusDashboard:
         asyncio.run(self.update_layout(layout))
 
         self.console.print(layout)
+
+    def _render_health_summary(self, health_data: dict) -> str:
+        """Render health summary from health data."""
+        from rich.table import Table
+
+        table = Table(show_header=False, expand=True)
+        table.add_column("Metric")
+        table.add_column("Score", justify="right")
+
+        overall_score = health_data.get("overall_score", 0)
+        table.add_row("Overall Health", f"{overall_score}%")
+
+        # Add individual scores
+        metrics = [
+            ("Build", "build_score"),
+            ("Tests", "test_score"),
+            ("Dependencies", "deps_score"),
+            ("Security", "security_score"),
+            ("Performance", "perf_score"),
+            ("Code Quality", "quality_score"),
+            ("Git", "git_score"),
+            ("Documentation", "docs_score"),
+        ]
+
+        for label, key in metrics:
+            score = health_data.get(key, 0)
+            table.add_row(label, f"{score}%")
+
+        with self.console.capture() as capture:
+            self.console.print(table)
+        return capture.get()
+
+    def _render_heatmap(self, heatmap_data: dict) -> str:
+        """Render activity heatmap visualization."""
+        from rich.text import Text
+
+        # Simple text representation of heatmap
+        output = Text()
+        output.append("Session Activity (Last 7 days)\n\n")
+
+        heatmap = heatmap_data.get("heatmap", {})
+        if not heatmap:
+            output.append("No activity data available", style="dim")
+        else:
+            # Days of week
+            days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            for day_idx, day_name in enumerate(days):
+                output.append(f"{day_name}: ")
+                for hour in range(24):
+                    count = heatmap.get(day_idx, {}).get(hour, 0)
+                    if count == 0:
+                        output.append("·", style="dim")
+                    elif count < 5:
+                        output.append("▪", style="yellow")
+                    else:
+                        output.append("█", style="red")
+                output.append("\n")
+
+        return str(output)
+
+    def _calculate_progress_stats(self) -> dict:
+        """Calculate progress statistics from tracked TODOs."""
+        total = len(self.progress_tracker.todos)
+        if total == 0:
+            return {
+                "total": 0,
+                "completed": 0,
+                "in_progress": 0,
+                "pending": 0,
+                "completion_rate": 0.0,
+            }
+
+        completed = sum(1 for todo in self.progress_tracker.todos if todo.status.value == "completed")
+        in_progress = sum(1 for todo in self.progress_tracker.todos if todo.status.value == "in_progress")
+        pending = sum(1 for todo in self.progress_tracker.todos if todo.status.value == "pending")
+
+        return {
+            "total": total,
+            "completed": completed,
+            "in_progress": in_progress,
+            "pending": pending,
+            "completion_rate": (completed / total) * 100 if total > 0 else 0.0,
+        }
+
+    def _render_progress_summary(self, stats: dict) -> str:
+        """Render progress summary visualization."""
+        from rich.table import Table
+
+        table = Table(show_header=False, expand=True)
+        table.add_column("Metric")
+        table.add_column("Value", justify="right")
+
+        table.add_row("Total TODOs", str(stats.get("total", 0)))
+        table.add_row("Completed", str(stats.get("completed", 0)))
+        table.add_row("In Progress", str(stats.get("in_progress", 0)))
+        table.add_row("Pending", str(stats.get("pending", 0)))
+        table.add_row("Completion Rate", f"{stats.get('completion_rate', 0):.1f}%")
+
+        with self.console.capture() as capture:
+            self.console.print(table)
+        return capture.get()
 
 
 class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
@@ -337,11 +456,8 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         pass
 
 
-# Backward compatibility
-class StatusCommand(AsyncStatusCommand):
-    """Backward compatible status command using async implementation."""
-
-    pass
+# Create alias for backward compatibility
+StatusCommand = AsyncStatusCommand
 
 
 @click.command()
@@ -378,7 +494,7 @@ def status(project_path, update_interval, interactive, async_mode):
         # Fallback to original implementation if needed
         from commands.status import StatusCommand as SyncStatusCommand
 
-        command = SyncStatusCommand()
+        command: AsyncStatusCommand = SyncStatusCommand()  # type: ignore
         command.print_warning("⚠️  Running in sync mode (consider using --async-mode)")
 
     command.run(

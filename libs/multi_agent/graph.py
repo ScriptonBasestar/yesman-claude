@@ -42,6 +42,10 @@ class DirectedGraph:
         """Check if edge exists."""
         return source in self.edges and target in self.edges[source]
 
+    def __contains__(self, node_id: str) -> bool:
+        """Check if node exists in the graph."""
+        return node_id in self.nodes
+
     def nodes_iter(self) -> list[str]:
         """Iterate over nodes."""
         return list(self.nodes.keys())

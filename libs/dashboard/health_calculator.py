@@ -107,7 +107,7 @@ class ProjectHealth:
     @property
     def category_scores(self) -> dict[str, float]:
         """Get average scores by category."""
-        category_metrics = {}
+        category_metrics: dict[str, list[float]] = {}
         for metric in self.metrics:
             category = metric.category.value
             if category not in category_metrics:
@@ -658,12 +658,12 @@ class HealthCalculator:
             HealthCategory.DOCUMENTATION: 5,
         }
 
-        weighted_sum = 0
+        weighted_sum = 0.0
         total_weight = 0
 
         for metric in metrics:
             weight = category_weights.get(metric.category, 5)
-            weighted_sum += metric.percentage * weight
+            weighted_sum += float(metric.percentage * weight)
             total_weight += weight
 
         return int(weighted_sum / total_weight) if total_weight > 0 else 0

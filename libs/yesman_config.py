@@ -62,7 +62,7 @@ class YesmanConfig:
         log_file = log_path / "yesman.log"
 
         # Configure logging
-        handlers = [logging.FileHandler(log_file)]
+        handlers: list[logging.Handler] = [logging.FileHandler(log_file)]
 
         # Add console handler in development mode
         if self._config_schema.logging.level == "DEBUG":
@@ -162,7 +162,7 @@ class YesmanConfig:
     def get_cache_stats(self) -> dict[str, Any] | None:
         """Get cache statistics if using cached loader."""
         if hasattr(self._loader, "get_cache_stats"):
-            return self._loader.get_cache_stats()
+            return self._loader.get_cache_stats()  # type: ignore[no-any-return]
         return None
 
     def invalidate_cache(self) -> None:
