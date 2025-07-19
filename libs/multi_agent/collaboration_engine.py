@@ -174,7 +174,7 @@ class CollaborationEngine:
 
         # Background tasks
         self._running = False
-        self._tasks = []
+        self._tasks: list[asyncio.Task[Any]] = []
 
     async def start(self):
         """Start the collaboration engine."""
@@ -255,8 +255,8 @@ class CollaborationEngine:
         else:
             # Broadcast to all agents
             for agent in self.agent_pool.agents.values():
-                if agent.id != sender_id:
-                    self.message_queues[agent.id].append(message)
+                if agent.agent_id != sender_id:
+                    self.message_queues[agent.agent_id].append(message)
 
         # Track pending acknowledgments
         if requires_ack:
@@ -619,7 +619,7 @@ class CollaborationEngine:
                 if hasattr(agent, "assigned_files"):
                     for file in agent.assigned_files:
                         if file in affected_files:
-                            affected_agents.add(agent.id)
+                            affected_agents.add(agent.agent_id)
 
             # Send notifications
             for agent_id in affected_agents:
@@ -657,7 +657,7 @@ class CollaborationEngine:
         best_score = 0.0
 
         for agent in self.agent_pool.agents.values():
-            if agent.id == requester_id or agent.state != AgentState.IDLE:
+            if agent.agent_id == requester_id or agent.state != AgentState.IDLE:
                 continue
 
             # Calculate suitability score
@@ -669,7 +669,7 @@ class CollaborationEngine:
                 score += len(matching_expertise) / len(expertise_needed)
 
             # Check recent related knowledge contributions
-            agent_knowledge = [k for k in self.shared_knowledge.values() if k.contributor_id == agent.id]
+            agent_knowledge = [k for k in self.shared_knowledge.values() if k.contributor_id == agent.agent_id]
 
             for knowledge in agent_knowledge:
                 if problem_type in knowledge.tags:
@@ -677,7 +677,7 @@ class CollaborationEngine:
 
             if score > best_score:
                 best_score = score
-                helper_id = agent.id
+                helper_id = agent.agent_id
 
         if helper_id:
             # Send help request
@@ -725,12 +725,12 @@ class CollaborationEngine:
         reviewers = []
 
         for agent in self.agent_pool.agents.values():
-            if agent.id == author_id:
+            if agent.agent_id == author_id:
                 continue
 
             # Check if agent is available for review
             if agent.state in [AgentState.IDLE, AgentState.WORKING]:
-                reviewers.append(agent.id)
+                reviewers.append(agent.agent_id)
 
                 if len(reviewers) >= 2:  # Maximum 2 reviewers
                     break
@@ -783,9 +783,9 @@ class CollaborationEngine:
         for agent in self.agent_pool.agents.values():
             if hasattr(agent, "current_branch"):
                 if agent.current_branch == branch1:
-                    agents_branch1.append(agent.id)
+                    agents_branch1.append(agent.agent_id)
                 elif agent.current_branch == branch2:
-                    agents_branch2.append(agent.id)
+                    agents_branch2.append(agent.agent_id)
 
         if agents_branch1 and agents_branch2:
             # Create collaboration session
@@ -810,7 +810,7 @@ class CollaborationEngine:
                     content={
                         "conflict": conflict.__dict__,
                         "branches": [branch1, branch2],
-                        "file_path": conflict.file_path,
+                        "files": conflict.files,
                     },
                     tags=["conflict_prevention", conflict.conflict_type.value],
                 )
@@ -964,7 +964,7 @@ class CollaborationEngine:
 
                 for agent in self.agent_pool.agents.values():
                     if agent.state == AgentState.WORKING:
-                        sync_needed.append(agent.id)
+                        sync_needed.append(agent.agent_id)
 
                 if len(sync_needed) >= 2:
                     # Create sync session
@@ -1024,7 +1024,7 @@ class CollaborationEngine:
 
     def _count_knowledge_by_type(self) -> dict[str, int]:
         """Count knowledge items by type."""
-        counts = defaultdict(int)
+        counts: dict[str, int] = defaultdict(int)
         for knowledge in self.shared_knowledge.values():
             counts[knowledge.knowledge_type] += 1
         return dict(counts)

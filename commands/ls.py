@@ -11,7 +11,16 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
     """List all available projects and templates."""
 
-    def execute(self, output_format: str = "table") -> dict[str, Any]:
+    def execute(self, **kwargs) -> dict[str, Any]:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        output_format = kwargs.get("output_format", "table")
         """Execute the ls command.
 
         Args:

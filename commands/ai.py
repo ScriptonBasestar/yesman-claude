@@ -115,13 +115,22 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
         except Exception as e:
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
-    def execute(
-        self,
-        threshold: float | None = None,
-        auto_response: bool | None = None,
-        learning: bool | None = None,
-        **kwargs,
-    ) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        threshold = kwargs.get("threshold", None)
+
+
+        auto_response = kwargs.get("auto_response", None)
+
+
+        learning = kwargs.get("learning", None)
         """Execute the config command."""
         changes = []
 
@@ -168,13 +177,22 @@ class AIHistoryCommand(BaseCommand):
         except Exception as e:
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
-    def execute(
-        self,
-        limit: int = 10,
-        type: str | None = None,
-        project: str | None = None,
-        **kwargs,
-    ) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        limit = kwargs.get("limit", 10)
+
+
+        type = kwargs.get("type", None)
+
+
+        project = kwargs.get("project", None)
         """Execute the history command."""
         # Get filtered response history
         history = self.analyzer.response_history[-limit:]
@@ -231,7 +249,16 @@ class AIExportCommand(BaseCommand):
         except Exception as e:
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
-    def execute(self, output: str | None = None, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        output = kwargs.get("output", None)
         """Execute the export command."""
         if not output:
             timestamp = int(time.time())
@@ -262,7 +289,16 @@ class AICleanupCommand(BaseCommand):
         except Exception as e:
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
-    def execute(self, days: int = 30, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        days = kwargs.get("days", 30)
         """Execute the cleanup command."""
         removed_count = self.analyzer.cleanup_old_data(days_to_keep=days)
 
@@ -291,7 +327,22 @@ class AIPredictCommand(BaseCommand):
         except Exception as e:
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
-    def execute(self, prompt_text: str, context: str = "", project: str | None = None, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        prompt_text = kwargs["prompt_text"]
+
+
+        context = kwargs.get("context", "")
+
+
+        project = kwargs.get("project", None)
         """Execute the predict command."""
         # Get prediction (run async function synchronously)
         should_respond, predicted_response, confidence = asyncio.run(

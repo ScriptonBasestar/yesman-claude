@@ -55,7 +55,7 @@ class TmuxManager:
 
     def load_projects(self) -> dict[str, Any]:
         """Load project sessions from individual session files in sessions/ directory."""
-        projects = {"sessions": {}}
+        projects: dict[str, Any] = {"sessions": {}}
 
         # 새로운 sessions/ 디렉토리에서 개별 세션 파일들 로드
         if self.sessions_path.exists():
@@ -206,7 +206,7 @@ class TmuxManager:
     def get_session_info(self, session_name: str) -> dict[str, Any]:
         """Get session information directly from tmux."""
 
-        def fetch_session_info():
+        def fetch_session_info() -> dict[str, Any]:
             """Fetch session information from tmux."""
             try:
                 server = libtmux.Server()
@@ -324,7 +324,7 @@ class TmuxManager:
             from datetime import datetime, timedelta
 
             # Activity per hour for the last 7 days
-            activity_counts = defaultdict(int)
+            activity_counts: dict[str, int] = defaultdict(int)
 
             now = datetime.now()
             seven_days_ago = now - timedelta(days=7)

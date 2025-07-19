@@ -4,6 +4,7 @@ import asyncio
 import json
 import time
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -23,18 +24,18 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict:
+    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:
         """Execute the status command."""
         try:
-            project_path = Path(project_path).resolve()
-            automation_manager = AutomationManager(project_path)
+            project_path_obj = Path(project_path).resolve()
+            automation_manager = AutomationManager(project_path_obj)
 
             # Get current status
-            stats = automation_manager.get_statistics()
+            stats = automation_manager.stats
 
             # Create status overview
             overview = Panel(
-                f"Project: {project_path.name}\n"
+                f"Project: {project_path_obj.name}\n"
                 f"Monitoring: {'✅ Active' if automation_manager.is_monitoring else '❌ Inactive'}\n"
                 f"Uptime: {self._format_duration(time.time() - stats['start_time'])}\n"
                 f"Contexts Detected: {stats['contexts_detected']}\n"
@@ -62,9 +63,9 @@ class AutomateStatusCommand(BaseCommand):
                     "Detects failing tests",
                     "test output, CI status",
                 ),
-                ContextType.BUILD_EVENT: (
-                    "Build Event",
-                    "Detects build starts/completion",
+                ContextType.BUILD_FAILURE: (
+                    "Build Failure",
+                    "Detects build failures",
                     "build scripts, CI",
                 ),
                 ContextType.DEPENDENCY_UPDATE: (
@@ -72,19 +73,19 @@ class AutomateStatusCommand(BaseCommand):
                     "Detects dependency changes",
                     "package files",
                 ),
-                ContextType.ERROR_OCCURRENCE: (
+                ContextType.ERROR_DETECTED: (
                     "Error",
                     "Detects runtime errors",
                     "log analysis",
                 ),
-                ContextType.PERFORMANCE_ISSUE: (
-                    "Performance",
-                    "Detects performance issues",
-                    "metrics, profiling",
+                ContextType.FILE_CHANGE: (
+                    "File Change",
+                    "Detects file modifications",
+                    "file system events",
                 ),
-                ContextType.DEPLOYMENT: (
-                    "Deployment",
-                    "Detects deployment events",
+                ContextType.DEPLOYMENT_READY: (
+                    "Deployment Ready",
+                    "Detects deployment readiness",
                     "deploy scripts",
                 ),
                 ContextType.CODE_REVIEW: (
@@ -100,10 +101,10 @@ class AutomateStatusCommand(BaseCommand):
             self.console.print(context_table)
 
             # Show workflow chains
-            chains = automation_manager.workflow_engine.get_available_chains()
-            if chains:
+            workflows = automation_manager.workflow_engine.workflows
+            if workflows:
                 self.console.print("\n🔗 Available Workflow Chains:")
-                for chain_name in chains:
+                for chain_name in workflows:
                     self.console.print(f"  • {chain_name}")
             else:
                 self.console.print("\n📝 No workflow chains configured")
@@ -132,13 +133,13 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict:
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, Any]:
         """Execute the monitor command."""
         try:
-            project_path = Path(project_path).resolve()
-            automation_manager = AutomationManager(project_path)
+            project_path_obj = Path(project_path).resolve()
+            automation_manager = AutomationManager(project_path_obj)
 
-            self.console.print(f"🚀 Starting automation monitoring for {project_path.name}")
+            self.console.print(f"🚀 Starting automation monitoring for {project_path_obj.name}")
             self.console.print(f"Detection interval: {interval} seconds")
             self.console.print("Press Ctrl+C to stop monitoring")
             self.console.print("=" * 60)
@@ -164,7 +165,7 @@ class AutomateMonitorCommand(BaseCommand):
 
             # Start monitoring
             async def run_monitoring():
-                await automation_manager.start_monitoring(detection_interval=interval)
+                await automation_manager.start_monitoring(monitor_interval=interval)
 
             asyncio.run(run_monitoring())
             return {"monitoring_started": True}
@@ -189,14 +190,14 @@ class AutomateTriggerCommand(BaseCommand):
         context_type: str = None,
         description: str = "Manual trigger",
         **kwargs,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Execute the trigger command."""
         if not context_type:
             raise CommandError("Context type is required")
 
         try:
-            project_path = Path(project_path).resolve()
-            automation_manager = AutomationManager(project_path)
+            project_path_obj = Path(project_path).resolve()
+            automation_manager = AutomationManager(project_path_obj)
 
             # Convert string to enum
             context_enum = ContextType(context_type)
@@ -206,11 +207,21 @@ class AutomateTriggerCommand(BaseCommand):
 
             # Simulate context detection
             async def trigger_automation():
-                result = await automation_manager.trigger_automation_for_context(
-                    context_enum,
-                    {"description": description, "manual": True},
+                import time
+
+                from libs.automation.context_detector import ContextInfo
+
+                # Create a context info object
+                context_info = ContextInfo(
+                    context_type=context_enum,
+                    confidence=1.0,
+                    details={"description": description, "manual": True},
+                    timestamp=time.time()
                 )
-                return result
+
+                # Trigger workflows for this context
+                triggered_workflows = automation_manager.workflow_engine.trigger_workflows(context_info)
+                return {"triggered_workflows": triggered_workflows}
 
             result = asyncio.run(trigger_automation())
 
@@ -236,23 +247,43 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, workflow_name: str, project_path: str = ".", **kwargs) -> dict:
+    def execute(self, workflow_name: str = None, project_path: str = ".", **kwargs) -> dict[str, Any]:
         """Execute the workflow command."""
+        # Handle workflow_name from kwargs if not provided as positional argument
+        if workflow_name is None:
+            workflow_name = kwargs.get("workflow_name")
+
+        if not workflow_name:
+            raise CommandError("workflow_name is required")
+
         try:
-            project_path = Path(project_path).resolve()
-            automation_manager = AutomationManager(project_path)
+            project_path_obj = Path(project_path).resolve()
+            automation_manager = AutomationManager(project_path_obj)
 
             self.console.print(f"⚡ Executing workflow: {workflow_name}")
 
             async def run_workflow():
-                (
-                    success,
-                    results,
-                ) = await automation_manager.workflow_engine.execute_chain(
-                    workflow_name,
-                    {},
+                import time
+
+                from libs.automation.context_detector import ContextInfo, ContextType
+
+                # Create a dummy context for manual execution
+                context_info = ContextInfo(
+                    context_type=ContextType.UNKNOWN,
+                    confidence=1.0,
+                    details={"manual_execution": True, "workflow_name": workflow_name},
+                    timestamp=time.time()
                 )
-                return success, results
+
+                # Use manual trigger workflow
+                execution_id = await automation_manager.manual_trigger_workflow(
+                    workflow_name, context_info
+                )
+
+                if execution_id:
+                    return True, {"execution_id": execution_id}
+                else:
+                    return False, {"error": "Failed to start workflow"}
 
             success, results = asyncio.run(run_workflow())
 
@@ -279,11 +310,11 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict:
+    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:
         """Execute the detect command."""
         try:
-            project_path = Path(project_path).resolve()
-            automation_manager = AutomationManager(project_path)
+            project_path_obj = Path(project_path).resolve()
+            automation_manager = AutomationManager(project_path_obj)
 
             # Add progress indicator for context detection
             with Progress(
@@ -293,12 +324,12 @@ class AutomateDetectCommand(BaseCommand):
                 transient=True,
             ) as progress:
                 detection_task = progress.add_task(
-                    f"🔍 Running context detection for {project_path.name}...",
+                    f"🔍 Running context detection for {project_path_obj.name}...",
                     total=None,
                 )
 
                 async def run_detection():
-                    contexts = await automation_manager.context_detector.detect_all_contexts()
+                    contexts = await automation_manager._detect_all_contexts()
                     return contexts
 
                 contexts = asyncio.run(run_detection())
@@ -316,10 +347,10 @@ class AutomateDetectCommand(BaseCommand):
             table.add_column("Data", style="yellow")
 
             for context in contexts:
-                data_summary = str(context.metadata)[:50] + "..." if len(str(context.metadata)) > 50 else str(context.metadata)
+                data_summary = str(context.details)[:50] + "..." if len(str(context.details)) > 50 else str(context.details)
                 table.add_row(
                     context.context_type.value,
-                    context.description,
+                    context.details.get("description", "No description"),
                     f"{context.confidence:.1%}",
                     data_summary,
                 )
@@ -329,9 +360,14 @@ class AutomateDetectCommand(BaseCommand):
             # Show potential workflows
             self.console.print("\n🔗 Potential Workflows:")
             for context in contexts:
-                workflows = automation_manager.workflow_engine.get_workflows_for_context(context.context_type)
-                if workflows:
-                    self.console.print(f"  {context.context_type.value}: {', '.join(workflows)}")
+                # Find workflows that match this context type
+                matching_workflows = []
+                for workflow_name, workflow in automation_manager.workflow_engine.workflows.items():
+                    if context.context_type in workflow.trigger_contexts:
+                        matching_workflows.append(workflow_name)
+
+                if matching_workflows:
+                    self.console.print(f"  {context.context_type.value}: {', '.join(matching_workflows)}")
                 else:
                     self.console.print(f"  {context.context_type.value}: No workflows configured")
 
@@ -348,7 +384,7 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict:
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict[str, Any]:
         """Execute the config command."""
         try:
             # Generate sample workflow configuration

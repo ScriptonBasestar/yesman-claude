@@ -9,6 +9,7 @@ from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
 from commands.enter import enter
+from commands.fix_lint import fix_lint
 from commands.logs import logs
 from commands.ls import ls
 from commands.multi_agent import multi_agent_cli
@@ -49,6 +50,7 @@ cli.add_command(cleanup)
 cli.add_command(task_runner)
 cli.add_command(multi_agent_cli)
 cli.add_command(validate)
+cli.add_command(fix_lint)
 
 if __name__ == "__main__":
     cli()

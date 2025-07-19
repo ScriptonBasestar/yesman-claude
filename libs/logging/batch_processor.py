@@ -130,7 +130,7 @@ class BatchProcessor:
             return
 
         # Create batch
-        entries = []
+        entries: list[dict[str, Any]] = []
         while self.pending_entries and len(entries) < self.max_batch_size:
             entries.append(self.pending_entries.popleft())
 

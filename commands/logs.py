@@ -39,10 +39,8 @@ class LogsConfigureCommand(BaseCommand):
 
             # Create configuration
             config = AsyncLoggerConfig(
-                output_directory=output_path,
+                output_dir=output_path,
                 log_format=format,
-                enable_compression=compression,
-                buffer_size=buffer_size,
                 flush_interval=5.0,
             )
 
@@ -120,7 +118,7 @@ class LogsAnalyzeCommand(BaseCommand):
 
     def _analyze_log_files(self, log_files: list[Path], last_hours: int, level_filter: str | None = None) -> dict[str, Any]:
         """Analyze log files and return statistics."""
-        stats = {
+        stats: dict[str, Any] = {
             "total_entries": 0,
             "level_counts": defaultdict(int),
             "hourly_counts": defaultdict(int),

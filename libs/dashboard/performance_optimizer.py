@@ -147,7 +147,7 @@ class PerformanceProfiler:
             with self.lock:
                 self.measurements[operation_name].append(duration)
 
-    def measure_function(self, operation_name: str | None = None):
+    def measure_function(self, operation_name: str | None = None) -> Callable[[Callable], Callable]:
         """Decorator for measuring function execution time."""
 
         def decorator(func: Callable) -> Callable:
@@ -641,7 +641,7 @@ class AsyncPerformanceOptimizer:
         self.optimizer = PerformanceOptimizer(monitoring_interval)
 
         # Rate limiting
-        self.rate_limiter = defaultdict(float)
+        self.rate_limiter: dict[str, float] = defaultdict(float)
         self.rate_limit_window = 60.0  # 1 minute
 
     async def start_monitoring(self) -> bool:
@@ -734,10 +734,7 @@ class AsyncPerformanceOptimizer:
     async def get_performance_report(self) -> dict[str, Any]:
         """Get async performance report."""
         # For simplicity, delegate to sync implementation for now
-        with self.lock:
-            history = list(self.metrics_history)
-            current = self.current_metrics
-        return self.optimizer._generate_performance_report(current, history)
+        return self.optimizer.get_performance_report()
 
 
 def get_performance_optimizer() -> PerformanceOptimizer:

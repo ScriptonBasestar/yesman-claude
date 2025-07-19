@@ -39,7 +39,7 @@ class AgentPool:
         # Agent and task management
         self.agents: dict[str, Agent] = {}
         self.tasks: dict[str, Task] = {}
-        self.task_queue = asyncio.Queue()
+        self.task_queue: asyncio.Queue[Task] = asyncio.Queue()
         self.completed_tasks: list[str] = []
 
         # Intelligent task scheduling - import here to avoid circular import
@@ -336,7 +336,7 @@ class AgentPool:
                 stderr=asyncio.subprocess.PIPE,
             )
 
-            agent.process = process
+            agent.process = process  # type: ignore[assignment]
 
             try:
                 # Wait for completion with timeout
@@ -424,10 +424,10 @@ class AgentPool:
             agent.failed_tasks += 1
             agent.state = AgentState.ERROR
 
-            # Notify error callbacks
-            for callback in self.agent_error_callbacks:
+            # Notify task failure callbacks
+            for callback in self.task_failed_callbacks:
                 try:
-                    await callback(agent, e)
+                    await callback(task)
                 except Exception as cb_error:
                     logger.error(f"Error in agent error callback: {cb_error}")
 
@@ -478,7 +478,7 @@ class AgentPool:
         if agent.process:
             try:
                 agent.process.terminate()
-                await asyncio.wait_for(agent.process.wait(), timeout=5)
+                await asyncio.wait_for(agent.process.wait(), timeout=5.0)  # type: ignore[arg-type]
             except:
                 with contextlib.suppress(Exception):
                     agent.process.kill()
@@ -515,7 +515,8 @@ class AgentPool:
         tasks = self.tasks.values()
 
         if status:
-            tasks = [t for t in tasks if t.status == status]
+            filtered_tasks = [t for t in tasks if t.status == status]
+            return [task.to_dict() for task in filtered_tasks]
 
         return [task.to_dict() for task in tasks]
 
@@ -688,7 +689,7 @@ class AgentPool:
             repo_path = repo_path or "."
             results_dir = results_dir or ".scripton/yesman/test_results"
 
-            self.branch_test_manager = BranchTestManager(
+            self.branch_test_manager = BranchTestManager(  # type: ignore[assignment]
                 repo_path=repo_path,
                 results_dir=results_dir,
                 agent_pool=self,
@@ -830,7 +831,7 @@ class AgentPool:
     def get_all_branch_test_status(self) -> dict[str, dict[str, Any]]:
         """Get test status for all active branches."""
         if not self._test_integration_enabled or not self.branch_test_manager:
-            return {"error": "Branch testing not enabled"}
+            return {"error": "Branch testing not enabled"}  # type: ignore[dict-item]
 
         try:
             return self.branch_test_manager.get_all_branch_summaries()
@@ -845,7 +846,7 @@ class AgentPool:
 
             work_dir = work_dir or ".scripton/yesman"
 
-            self.recovery_engine = RecoveryEngine(
+            self.recovery_engine = RecoveryEngine(  # type: ignore[assignment]
                 work_dir=work_dir,
                 max_snapshots=max_snapshots,
             )

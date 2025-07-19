@@ -15,13 +15,22 @@ logger = logging.getLogger(__name__)
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(
-        self,
-        branches: list[str],
-        repo_path: str | None = None,
-        auto_resolve: bool = False,
-        **kwargs,
-    ) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        branches = kwargs["branches"]
+
+
+        repo_path = kwargs.get("repo_path", None)
+
+
+        auto_resolve = kwargs.get("auto_resolve", False)
         """Execute the detect conflicts command."""
         try:
             # Create progress indicator for conflict detection
@@ -110,13 +119,22 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(
-        self,
-        conflict_id: str,
-        strategy: str | None = None,
-        repo_path: str | None = None,
-        **kwargs,
-    ) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        conflict_id = kwargs["conflict_id"]
+
+
+        strategy = kwargs.get("strategy", None)
+
+
+        repo_path = kwargs.get("repo_path", None)
         """Execute the resolve conflict command."""
         try:
             self.print_info(f"🔧 Resolving conflict: {conflict_id}")
@@ -176,7 +194,16 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:
+
+
+        """Execute the command."""
+
+
+        # Extract parameters from kwargs
+
+
+        repo_path = kwargs.get("repo_path", None)
         """Execute the conflict summary command."""
         try:
             self.print_info("📊 Conflict Resolution Summary")

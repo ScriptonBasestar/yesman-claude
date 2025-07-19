@@ -117,7 +117,7 @@ class ConflictPredictor:
 
         # Machine learning components (simplified heuristics for now)
         self.historical_patterns = defaultdict(list)
-        self.conflict_vectors = {}
+        self.conflict_vectors: dict[str, list[float]] = {}
 
         # Configuration
         self.prediction_window = timedelta(days=7)  # Look ahead window

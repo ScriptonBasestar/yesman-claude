@@ -652,7 +652,7 @@ class ConflictPreventionSystem:
         # For now, return a placeholder
         try:
             # Get branches with recent activity
-            branches = []
+            branches: list[str] = []
             # This would be implemented based on git activity, agent assignments, etc.
             return branches
         except Exception as e:

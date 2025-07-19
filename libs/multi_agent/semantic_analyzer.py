@@ -206,7 +206,7 @@ class SemanticAnalyzer:
         branch2: str,
     ) -> list[SemanticConflict]:
         """Analyze semantic conflicts in a specific file."""
-        conflicts = []
+        conflicts: list[SemanticConflict] = []
 
         try:
             # Get semantic contexts for both branches
@@ -620,7 +620,7 @@ class SemanticAnalyzer:
         func2: FunctionSignature,
     ) -> dict[str, Any]:
         """Analyze the impact of function signature changes."""
-        impact = {
+        impact: dict[str, Any] = {
             "breaking_change": False,
             "parameter_changes": [],
             "return_type_change": func1.return_type != func2.return_type,

@@ -211,37 +211,37 @@ class ConditionEvaluator:
 
     def _equals(self, left: Any, right: Any) -> bool:
         """Equality comparison."""
-        return left == right
+        return bool(left == right)
 
     def _not_equals(self, left: Any, right: Any) -> bool:
         """Inequality comparison."""
-        return left != right
+        return bool(left != right)
 
     def _greater_than(self, left: Any, right: Any) -> bool:
         """Greater than comparison."""
         try:
-            return left > right
+            return bool(left > right)
         except TypeError:
             return False
 
     def _less_than(self, left: Any, right: Any) -> bool:
         """Less than comparison."""
         try:
-            return left < right
+            return bool(left < right)
         except TypeError:
             return False
 
     def _greater_equal(self, left: Any, right: Any) -> bool:
         """Greater than or equal comparison."""
         try:
-            return left >= right
+            return bool(left >= right)
         except TypeError:
             return False
 
     def _less_equal(self, left: Any, right: Any) -> bool:
         """Less than or equal comparison."""
         try:
-            return left <= right
+            return bool(left <= right)
         except TypeError:
             return False
 

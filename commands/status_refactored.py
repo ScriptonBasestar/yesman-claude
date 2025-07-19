@@ -26,7 +26,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             "show_details": True,
         }
 
-    def execute(self, session_name: str | None = None) -> dict[str, Any]:
+    def execute(self, **kwargs) -> dict[str, Any]:
         """Execute the status command.
 
         Args:
@@ -35,6 +35,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         Returns:
             Dictionary with session status information
         """
+        session_name = kwargs.get("session_name")
         self.update_status("checking")
 
         try:

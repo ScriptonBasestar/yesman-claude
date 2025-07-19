@@ -85,7 +85,7 @@ class AsyncStatusDashboard:
 
         # Check if cache is still valid
         last_update = self._data_cache.get("last_update", 0)
-        if isinstance(last_update, (int, float)) and current_time - last_update < self._cache_ttl:
+        if isinstance(last_update, int | float) and current_time - last_update < self._cache_ttl:
             return
 
         try:
@@ -222,7 +222,7 @@ class AsyncStatusDashboard:
         cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
 
         last_update = self._data_cache.get("last_update", time.time())
-        if isinstance(last_update, (int, float)):
+        if isinstance(last_update, int | float):
             cache_age = time.time() - last_update
         else:
             cache_age = 0.0

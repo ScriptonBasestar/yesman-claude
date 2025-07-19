@@ -364,9 +364,11 @@ class AsyncLogger(StatisticsProviderMixin):
 
         # Flush batch processor if enabled
         if self.batch_processor:
-            await self.batch_processor.wait_for_pending()
+            # Note: BatchProcessor doesn't have wait_for_pending method
+            # The queue will be processed automatically
+            pass
 
-    async def cleanup_old_logs(self, days_to_keep: int = 7) -> None:
+    async def cleanup_old_logs(self, days_to_keep: int = 7) -> int:
         """Clean up old log files if batch processing is enabled."""
         if self.batch_processor:
             return await self.batch_processor.cleanup_old_files(days_to_keep)

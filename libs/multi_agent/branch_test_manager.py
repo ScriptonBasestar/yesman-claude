@@ -475,7 +475,7 @@ class BranchTestManager:
                 tasks = [self.run_test_suite(branch_name, suite_name) for suite_name in parallel_suites]
                 parallel_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                for result in parallel_results:
+                for result in parallel_results:  # type: ignore[assignment]
                     if isinstance(result, TestResult):
                         results.append(result)
                     else:
@@ -561,7 +561,7 @@ class BranchTestManager:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
 
         # Get latest results for each test type
-        latest_results = {}
+        latest_results: dict[str, Any] = {}
         for result in results:
             key = f"{result.test_type.value}"
             if key not in latest_results or result.start_time > latest_results[key].start_time:

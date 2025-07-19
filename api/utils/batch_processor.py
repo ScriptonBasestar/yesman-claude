@@ -5,7 +5,7 @@ import json
 import logging
 import time
 from collections import deque
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any

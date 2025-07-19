@@ -94,13 +94,27 @@ class DashboardWidget(Static):
 
             # Update the content container
             content_container = self.query_one("#widget-content", Container)
-            await content_container.update(rendered_content.get("content", ""))
+            if hasattr(content_container, "update"):
+                content_text = rendered_content.get("content", "") if isinstance(rendered_content, dict) else str(rendered_content)
+                await content_container.update(content_text)
+            else:
+                # Fallback for containers without update method
+                content_container.remove_children()
+                from textual.widgets import Static
+                content_text = rendered_content.get("content", "") if isinstance(rendered_content, dict) else str(rendered_content)
+                content_container.mount(Static(content_text))
 
         except Exception as e:
             # Show error state
             error_msg = f"Error rendering {self.widget_type.value}: {str(e)}"
             content_container = self.query_one("#widget-content", Container)
-            await content_container.update(f"[red]{error_msg}[/red]")
+            if hasattr(content_container, "update"):
+                await content_container.update(f"[red]{error_msg}[/red]")
+            else:
+                # Fallback for containers without update method
+                content_container.remove_children()
+                from textual.widgets import Static
+                content_container.mount(Static(f"[red]{error_msg}[/red]"))
 
     async def auto_update(self) -> None:
         """Auto-update callback - override in subclasses for custom data fetching."""
@@ -125,16 +139,18 @@ class SessionsView(DashboardWidget):
         mock_sessions = [
             SessionData(
                 name="yesman-dev",
+                id="yesman-dev-1",
                 status=SessionStatus.ACTIVE,
-                uptime=7200,  # 2 hours
-                windows=3,
+                created_at=datetime.now(),
+                windows=[],  # Empty list of WindowData
                 last_activity=datetime.now(),
             ),
             SessionData(
                 name="claude-test",
+                id="claude-test-1",
                 status=SessionStatus.IDLE,
-                uptime=1800,  # 30 minutes
-                windows=2,
+                created_at=datetime.now(),
+                windows=[],  # Empty list of WindowData
                 last_activity=datetime.now(),
             ),
         ]
@@ -155,19 +171,21 @@ class HealthView(DashboardWidget):
     async def auto_update(self) -> None:
         """Fetch and update health data."""
         # Mock health data
+        from .renderers.widget_models import HealthCategoryData
+        mock_categories = [
+            HealthCategoryData(category="build", score=90, level=HealthLevel.EXCELLENT),
+            HealthCategoryData(category="tests", score=85, level=HealthLevel.GOOD),
+            HealthCategoryData(category="dependencies", score=95, level=HealthLevel.EXCELLENT),
+            HealthCategoryData(category="security", score=80, level=HealthLevel.GOOD),
+            HealthCategoryData(category="performance", score=85, level=HealthLevel.GOOD),
+            HealthCategoryData(category="code_quality", score=75, level=HealthLevel.GOOD),
+            HealthCategoryData(category="git", score=88, level=HealthLevel.GOOD),
+            HealthCategoryData(category="documentation", score=70, level=HealthLevel.GOOD),
+        ]
         mock_health = HealthData(
             overall_score=85,
             overall_level=HealthLevel.GOOD,
-            categories={
-                "build": 90,
-                "tests": 85,
-                "dependencies": 95,
-                "security": 80,
-                "performance": 85,
-                "code_quality": 75,
-                "git": 88,
-                "documentation": 70,
-            },
+            categories=mock_categories,
             last_updated=datetime.now(),
         )
         await self.update_data(mock_health)
@@ -188,11 +206,13 @@ class ActivityView(DashboardWidget):
         """Fetch and update activity data."""
         # Mock activity data
         mock_activity = ActivityData(
-            hourly_stats={f"{i:02d}:00": i * 10 for i in range(24)},
-            daily_stats={"Mon": 120, "Tue": 95, "Wed": 110, "Thu": 85, "Fri": 130},
-            peak_hours=["09:00", "14:00", "16:00"],
-            total_sessions=15,
-            avg_session_time=45.5,
+            entries=[],  # Empty list of ActivityEntry
+            total_activities=15,
+            active_days=5,
+            activity_rate=0.75,
+            current_streak=3,
+            longest_streak=7,
+            avg_per_day=3.0,
         )
         await self.update_data(mock_activity)
 
@@ -246,7 +266,7 @@ class SettingsView(Static):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.settings = {
+        self.settings: dict[str, Any] = {
             "auto_refresh": True,
             "refresh_interval": 3.0,
             "dark_mode": True,
@@ -259,17 +279,17 @@ class SettingsView(Static):
         yield Vertical(
             Horizontal(
                 Label("Auto Refresh: "),
-                Switch(value=self.settings["auto_refresh"], id="auto-refresh-switch"),
+                Switch(value=bool(self.settings["auto_refresh"]), id="auto-refresh-switch"),
                 classes="setting-row",
             ),
             Horizontal(
                 Label("Dark Mode: "),
-                Switch(value=self.settings["dark_mode"], id="dark-mode-switch"),
+                Switch(value=bool(self.settings["dark_mode"]), id="dark-mode-switch"),
                 classes="setting-row",
             ),
             Horizontal(
                 Label("Show Timestamps: "),
-                Switch(value=self.settings["show_timestamps"], id="timestamps-switch"),
+                Switch(value=bool(self.settings["show_timestamps"]), id="timestamps-switch"),
                 classes="setting-row",
             ),
             classes="settings-container",
@@ -444,7 +464,8 @@ class TUIDashboard(App):
 
     def action_toggle_dark(self) -> None:
         """Toggle dark mode."""
-        self.dark = not self.dark
+        current_dark: bool = getattr(self, "dark", True)
+        self.dark = not current_dark
         if self.logs_view:
             mode = "dark" if self.dark else "light"
             self.logs_view.add_log("INFO", f"Switched to {mode} mode")

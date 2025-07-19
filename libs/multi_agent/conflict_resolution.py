@@ -117,7 +117,7 @@ class ConflictResolutionEngine:
             "average_resolution_time": 0.0,
         }
 
-    def _load_conflict_patterns(self) -> dict[str, Any]:
+    def _load_conflict_patterns(self) -> dict[str, dict[str, Any]]:
         """Load known conflict patterns and their resolutions."""
         return {
             "import_conflicts": {
@@ -225,7 +225,7 @@ class ConflictResolutionEngine:
         lines = output.strip().split("\n")
 
         current_file = None
-        conflict_content = []
+        conflict_content: list[str] = []
 
         for line in lines:
             if line.startswith("@@"):
@@ -306,7 +306,7 @@ class ConflictResolutionEngine:
         # Check against known patterns
         for pattern_name, pattern_info in self.conflict_patterns.items():
             if re.search(pattern_info["pattern"], content):
-                return pattern_info["strategy"]
+                return ResolutionStrategy(pattern_info["strategy"])
 
         # Default strategies based on file type
         if file_path.endswith(".py"):
@@ -405,7 +405,7 @@ class ConflictResolutionEngine:
         branch2: str,
     ) -> list[ConflictInfo]:
         """Analyze semantic changes in a Python file."""
-        conflicts = []
+        conflicts: list[ConflictInfo] = []
 
         try:
             # Get file content from both branches
@@ -738,7 +738,7 @@ class ConflictResolutionEngine:
     def _resolve_import_conflicts(self, content: str) -> str | None:
         """Resolve import statement conflicts."""
         # Simple approach: merge unique imports
-        import_lines = []
+        import_lines: list[str] = []
 
         # Extract imports from conflict markers
         parts = content.split("=======")
@@ -823,7 +823,7 @@ class ConflictResolutionEngine:
     async def _get_merge_base(self, branch1: str, branch2: str) -> str:
         """Get the merge base of two branches."""
         result = await self._run_git_command(["merge-base", branch1, branch2])
-        return result.stdout.strip()
+        return str(result.stdout).strip()
 
     async def _get_changed_files(self, branch: str) -> dict[str, str]:
         """Get files changed in a branch with their change types."""
@@ -851,7 +851,7 @@ class ConflictResolutionEngine:
         """Get file content from a specific branch."""
         try:
             result = await self._run_git_command(["show", f"{branch}:{file_path}"])
-            return result.stdout if result.returncode == 0 else None
+            return str(result.stdout) if result.returncode == 0 else None
         except Exception:
             return None
 
