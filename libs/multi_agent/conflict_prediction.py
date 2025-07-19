@@ -116,8 +116,8 @@ class ConflictPredictor:
         }
 
         # Machine learning components (simplified heuristics for now)
-        self.historical_patterns = defaultdict(list)
-        self.conflict_vectors: dict[str, list[float]] = {}
+        self.historical_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.conflict_vectors: dict[str, ConflictVector] = {}
 
         # Configuration
         self.prediction_window = timedelta(days=7)  # Look ahead window
@@ -582,7 +582,7 @@ class ConflictPredictor:
 
         for prediction in predictions:
             # Adjust confidence based on historical accuracy
-            pattern_history = self.historical_patterns.get(prediction.pattern, [])
+            pattern_history = self.historical_patterns.get(prediction.pattern.value, [])
             if pattern_history:
                 avg_accuracy = sum(p.get("accurate", 0) for p in pattern_history) / len(
                     pattern_history,
@@ -920,21 +920,18 @@ class ConflictPredictor:
             }
 
         # Analyze frequent conflict files
-        file_conflicts = Counter()
+        file_conflicts: Counter[str] = Counter()
         for prediction in self.predictions.values():
             for file_path in prediction.affected_files:
                 file_conflicts[file_path] += 1
 
-        frequent_files = [
-            {"file": file_path, "conflict_count": count}
-            for file_path, count in file_conflicts.most_common(10)
-        ]
+        frequent_files = [{"file": file_path, "conflict_count": count} for file_path, count in file_conflicts.most_common(10)]
 
         # Analyze conflict hotspots
-        branch_conflicts = Counter()
+        branch_conflicts: Counter[str] = Counter()
         for prediction in self.predictions.values():
             for branch in prediction.affected_branches:
-                branch_conflicts[branch] += prediction.likelihood_score
+                branch_conflicts[branch] += int(prediction.likelihood_score * 10)  # Scale to avoid losing precision
 
         hotspots = [
             {
@@ -949,7 +946,7 @@ class ConflictPredictor:
         pattern_dist = Counter(p.pattern.value for p in self.predictions.values())
 
         # Temporal trends (predictions by day)
-        temporal_trends = defaultdict(int)
+        temporal_trends: defaultdict[str, int] = defaultdict(int)
         for prediction in self.predictions.values():
             day_key = prediction.predicted_at.strftime("%Y-%m-%d")
             temporal_trends[day_key] += 1

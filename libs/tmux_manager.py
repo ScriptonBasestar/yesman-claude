@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any
 
 import click
-import libtmux  # type: ignore
+import libtmux
 import yaml
-from tmuxp.workspace.builder import WorkspaceBuilder  # type: ignore
-from tmuxp.workspace.loader import expand  # type: ignore
+from tmuxp.workspace.builder import WorkspaceBuilder
+from tmuxp.workspace.loader import expand
 
 from libs.yesman_config import YesmanConfig
 

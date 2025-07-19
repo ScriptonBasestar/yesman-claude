@@ -250,7 +250,7 @@ class DashboardController:
 
     def clear_prompt_state(self) -> None:
         """Clear prompt state (deprecated - use monitor methods)."""
-        self.monitor.clear_prompt_state()
+        self.monitor._clear_prompt_state()
 
 
 class ClaudeManager:

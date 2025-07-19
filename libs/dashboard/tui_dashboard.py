@@ -101,6 +101,7 @@ class DashboardWidget(Static):
                 # Fallback for containers without update method
                 content_container.remove_children()
                 from textual.widgets import Static
+
                 content_text = rendered_content.get("content", "") if isinstance(rendered_content, dict) else str(rendered_content)
                 content_container.mount(Static(content_text))
 
@@ -114,6 +115,7 @@ class DashboardWidget(Static):
                 # Fallback for containers without update method
                 content_container.remove_children()
                 from textual.widgets import Static
+
                 content_container.mount(Static(f"[red]{error_msg}[/red]"))
 
     async def auto_update(self) -> None:
@@ -172,6 +174,7 @@ class HealthView(DashboardWidget):
         """Fetch and update health data."""
         # Mock health data
         from .renderers.widget_models import HealthCategoryData
+
         mock_categories = [
             HealthCategoryData(category="build", score=90, level=HealthLevel.EXCELLENT),
             HealthCategoryData(category="tests", score=85, level=HealthLevel.GOOD),

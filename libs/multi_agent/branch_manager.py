@@ -43,7 +43,7 @@ class BranchInfo:
 class BranchManager:
     """Manages git branches for multi-agent parallel development."""
 
-    def __init__(self, repo_path: str = ".", branch_prefix: str = "feat/multi-agent"):
+    def __init__(self, repo_path: str = ".", branch_prefix: str = "feat/multi-agent") -> None:
         """Initialize branch manager.
 
         Args:
@@ -61,11 +61,11 @@ class BranchManager:
         check: bool = True,
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result."""
-        cmd = ["git"] + args
+        cmd = ["git", *args]
         logger.debug(f"Running git command: {' '.join(cmd)}")
 
         try:
-            result = subprocess.run(
+            return subprocess.run(
                 cmd,
                 cwd=self.repo_path,
                 capture_output=True,
@@ -73,12 +73,11 @@ class BranchManager:
                 check=check,
                 timeout=30,
             )
-            return result
         except subprocess.CalledProcessError as e:
-            logger.error(f"Git command failed: {e.stderr}")
+            logger.exception("Git command failed: %s", e.stderr)
             raise
         except subprocess.TimeoutExpired:
-            logger.error(f"Git command timed out: {' '.join(cmd)}")
+            logger.exception("Git command timed out: %s", " ".join(cmd))
             raise
 
     def _get_current_branch(self) -> str:
@@ -106,7 +105,7 @@ class BranchManager:
                     self.branches = {name: BranchInfo.from_dict(info) for name, info in data.items()}
                 logger.info(f"Loaded {len(self.branches)} branch metadata entries")
             except Exception as e:
-                logger.error(f"Failed to load branch metadata: {e}")
+                logger.exception("Failed to load branch metadata: %s", e)
                 self.branches = {}
         else:
             self.branches = {}
@@ -124,7 +123,7 @@ class BranchManager:
 
             logger.debug(f"Saved branch metadata for {len(self.branches)} branches")
         except Exception as e:
-            logger.error(f"Failed to save branch metadata: {e}")
+            logger.exception("Failed to save branch metadata: %s", e)
 
     def create_feature_branch(
         self,
@@ -145,12 +144,13 @@ class BranchManager:
         safe_issue_name = re.sub(r"-+", "-", safe_issue_name).strip("-")
 
         # Generate branch name
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
         branch_name = f"{self.branch_prefix}/{safe_issue_name}-{timestamp}"
 
         # Ensure base branch exists
         if not self._branch_exists(base_branch):
-            raise ValueError(f"Base branch '{base_branch}' does not exist")
+            msg = f"Base branch '{base_branch}' does not exist"
+            raise ValueError(msg)
 
         # Fetch latest changes
         logger.info(f"Fetching latest changes for {base_branch}")
@@ -164,7 +164,7 @@ class BranchManager:
         branch_info = BranchInfo(
             name=branch_name,
             base_branch=base_branch,
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             metadata={
                 "issue_name": issue_name,
                 "agent_id": None,  # Will be set when agent claims the branch
@@ -198,7 +198,7 @@ class BranchManager:
                     info = BranchInfo(
                         name=branch_name,
                         base_branch="unknown",
-                        created_at=datetime.now(),
+                        created_at=datetime.now(UTC),
                     )
                     self.branches[branch_name] = info
 
@@ -210,7 +210,8 @@ class BranchManager:
     def get_branch_status(self, branch_name: str) -> dict[str, Any]:
         """Get detailed status of a branch."""
         if not self._branch_exists(branch_name):
-            raise ValueError(f"Branch '{branch_name}' does not exist")
+            msg = f"Branch '{branch_name}' does not exist"
+            raise ValueError(msg)
 
         # Get branch info
         info = self.branches.get(branch_name)
@@ -218,7 +219,7 @@ class BranchManager:
             info = BranchInfo(
                 name=branch_name,
                 base_branch="unknown",
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC),
             )
 
         # Get commits ahead/behind base
@@ -279,7 +280,7 @@ class BranchManager:
             logger.info(f"Switched to branch: {branch_name}")
             return True
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to switch branch: {e}")
+            logger.exception("Failed to switch branch: %s", e)
             return False
 
     def update_branch_metadata(
@@ -293,7 +294,7 @@ class BranchManager:
             self.branches[branch_name] = BranchInfo(
                 name=branch_name,
                 base_branch="unknown",
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC),
             )
 
         self.branches[branch_name].metadata.update(metadata)
@@ -325,7 +326,7 @@ class BranchManager:
                         )
 
                     except subprocess.CalledProcessError as e:
-                        logger.error(f"Failed to delete branch {branch_name}: {e}")
+                        logger.exception("Failed to delete branch %s: %s", branch_name, e)
                         continue
 
                 cleaned.append(branch_name)
@@ -341,11 +342,12 @@ class BranchManager:
     def get_branch_conflicts(
         self,
         branch_name: str,
-        target_branch: str = None,
+        target_branch: str | None = None,
     ) -> dict[str, Any]:
         """Check for potential conflicts with target branch."""
         if not self._branch_exists(branch_name):
-            raise ValueError(f"Branch '{branch_name}' does not exist")
+            msg = f"Branch '{branch_name}' does not exist"
+            raise ValueError(msg)
 
         if target_branch is None:
             # Use base branch as target

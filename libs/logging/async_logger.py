@@ -166,7 +166,7 @@ class AsyncLogger:
         self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="async_logger")
 
         # Thread-safe logging from sync code
-        self._sync_queue = asyncio.Queue()
+        self._sync_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
 
     async def start(self):
         """Start the async logger."""

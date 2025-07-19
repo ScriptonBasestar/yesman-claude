@@ -197,7 +197,7 @@ class MetricsVerifier:
                         working_directory=task_data.get("working_directory", "."),
                         dependencies=task_data.get("dependencies", []),
                     )
-                    await agent_pool.add_task(task)
+                    agent_pool.add_task(task)
 
                 # Start agent pool and wait for completion
                 await agent_pool.start()
@@ -266,7 +266,7 @@ class MetricsVerifier:
                     working_directory=task_data.get("working_directory", "."),
                     dependencies=task_data.get("dependencies", []),
                 )
-                await agent_pool.add_task(task)
+                agent_pool.add_task(task)
 
             # Start agent pool and wait for completion
             await agent_pool.start()

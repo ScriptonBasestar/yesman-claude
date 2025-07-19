@@ -256,10 +256,14 @@ class BaseCommand(ABC):
 class SessionCommandMixin:
     """Mixin for commands that work with sessions."""
 
+    # Expected attributes from BaseCommand
+    tmux_manager: "TmuxManager"
+    logger: logging.Logger
+
     def get_session_list(self) -> list[str]:
         """Get list of available sessions."""
         try:
-            sessions = self.tmux_manager.get_all_sessions()
+            sessions = self.tmux_manager.get_cached_sessions_list()
             return [session.get("session_name", "unknown") for session in sessions]
         except Exception as e:
             self.logger.error(f"Failed to get session list: {e}")
@@ -290,6 +294,9 @@ class SessionCommandMixin:
 
 class ConfigCommandMixin:
     """Mixin for commands that work with configuration."""
+
+    # Expected attributes from BaseCommand
+    logger: logging.Logger
 
     def load_projects_config(self) -> dict[str, Any]:
         """Load projects configuration with error handling."""

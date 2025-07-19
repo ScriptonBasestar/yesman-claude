@@ -5,20 +5,15 @@ from typing import Any
 
 import click
 
-from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin
+from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
 
 
-class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin):
+class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
     def execute(self, **kwargs) -> dict[str, Any]:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
-
 
         output_format = kwargs.get("output_format", "table")
         """Execute the ls command.

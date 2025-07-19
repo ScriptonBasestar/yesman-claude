@@ -153,8 +153,8 @@ class DependencyPropagationSystem:
 
         # Background tasks
         self._running = False
-        self._propagation_task = None
-        self._analysis_task = None
+        self._propagation_task: asyncio.Task[Any] | None = None
+        self._analysis_task: asyncio.Task[Any] | None = None
 
     async def start(self):
         """Start the dependency propagation system."""
@@ -266,8 +266,8 @@ class DependencyPropagationSystem:
 
         if file_paths is None:
             # Find all Python files in the repository
-            file_paths = list(self.repo_path.rglob("*.py"))
-            file_paths = [str(p.relative_to(self.repo_path)) for p in file_paths]
+            py_files = list(self.repo_path.rglob("*.py"))
+            file_paths = [str(p.relative_to(self.repo_path)) for p in py_files]
 
         # Analyze each file
         for file_path in file_paths:
@@ -404,50 +404,50 @@ class DependencyPropagationSystem:
             imports = {}
             exports = {}
 
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import | ast.ImportFrom):
+            for ast_node in ast.walk(tree):
+                if isinstance(ast_node, ast.Import | ast.ImportFrom):
                     # Import statements
-                    if isinstance(node, ast.Import):
-                        for alias in node.names:
+                    if isinstance(ast_node, ast.Import):
+                        for alias in ast_node.names:
                             module_name = alias.name
                             dependencies.add(module_name)
                             imports[alias.asname or alias.name] = {
                                 "type": "import",
                                 "module": module_name,
-                                "line": node.lineno,
+                                "line": ast_node.lineno,
                             }
 
-                    elif isinstance(node, ast.ImportFrom) and node.module:
-                        module_name = node.module
+                    elif isinstance(ast_node, ast.ImportFrom) and ast_node.module:
+                        module_name = ast_node.module
                         dependencies.add(module_name)
-                        for alias in node.names:
+                        for alias in ast_node.names:
                             imports[alias.asname or alias.name] = {
                                 "type": "from_import",
                                 "module": module_name,
                                 "name": alias.name,
-                                "line": node.lineno,
+                                "line": ast_node.lineno,
                             }
 
-                elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                elif isinstance(ast_node, ast.FunctionDef | ast.AsyncFunctionDef):
                     # Function definitions (exports)
-                    exports[node.name] = {
+                    exports[ast_node.name] = {
                         "type": "function",
-                        "line": node.lineno,
-                        "args": [arg.arg for arg in node.args.args],
-                        "is_async": isinstance(node, ast.AsyncFunctionDef),
+                        "line": ast_node.lineno,
+                        "args": [arg.arg for arg in ast_node.args.args],
+                        "is_async": isinstance(ast_node, ast.AsyncFunctionDef),
                     }
 
-                elif isinstance(node, ast.ClassDef):
+                elif isinstance(ast_node, ast.ClassDef):
                     # Class definitions (exports)
                     base_classes = []
-                    for base in node.bases:
+                    for base in ast_node.bases:
                         if isinstance(base, ast.Name):
                             base_classes.append(base.id)
                             dependencies.add(base.id)  # Inheritance dependency
 
-                    exports[node.name] = {
+                    exports[ast_node.name] = {
                         "type": "class",
-                        "line": node.lineno,
+                        "line": ast_node.lineno,
                         "bases": base_classes,
                     }
 

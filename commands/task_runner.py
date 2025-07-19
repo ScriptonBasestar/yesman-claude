@@ -73,7 +73,7 @@ class TaskRunnerRunCommand(BaseCommand):
                 ):
                     from libs.task_runner import TodoFile
 
-                    todo_file = TodoFile(file_path)
+                    todo_file = TodoFile(str(file_path))
                     incomplete_tasks = [t for t in todo_file.tasks if not t.completed and not t.skipped]
                     if incomplete_tasks:
                         self.print_info(f"  📁 {file_path.relative_to(runner.todo_dir.parent)}: {len(incomplete_tasks)} tasks")
@@ -131,7 +131,7 @@ class TaskRunnerStatusCommand(BaseCommand):
             for file_path in todo_files:
                 from libs.task_runner import TodoFile
 
-                todo_file = TodoFile(file_path)
+                todo_file = TodoFile(str(file_path))
 
                 file_total = len(todo_file.tasks)
                 file_completed = sum(1 for t in todo_file.tasks if t.completed)
@@ -201,16 +201,16 @@ class TaskRunnerAddCommand(BaseCommand):
             runner = TaskRunner()
 
             # Resolve file path
-            file_path = runner.todo_dir / file_path if not file_path.startswith("/") else Path(file_path)
+            resolved_path: Path = runner.todo_dir / file_path if not file_path.startswith("/") else Path(file_path)
 
-            if not file_path.exists():
-                raise CommandError(f"File not found: {file_path}")
+            if not resolved_path.exists():
+                raise CommandError(f"File not found: {resolved_path}")
 
             # Add task to file
-            with open(file_path, "a", encoding="utf-8") as f:
+            with open(resolved_path, "a", encoding="utf-8") as f:
                 f.write(f"\n- [ ] {task}\n")
 
-            self.print_success(f"✅ Added task to {file_path.relative_to(runner.todo_dir.parent)}")
+            self.print_success(f"✅ Added task to {resolved_path.relative_to(runner.todo_dir.parent)}")
             self.print_info(f"   Task: {task}")
 
             return {"success": True, "task": task, "file_path": str(file_path)}

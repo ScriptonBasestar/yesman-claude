@@ -321,7 +321,7 @@ class ClaudeMonitor:
                 return self._handle_numbered_selection(prompt_info)
             elif prompt_info.type == PromptType.BINARY_CHOICE:
                 return self._handle_binary_choice(prompt_info)
-            elif prompt_info.type == PromptType.BINARY_SELECTION:
+            elif prompt_info.type == PromptType.CONFIRMATION:
                 return self._handle_binary_selection(prompt_info)
             elif prompt_info.type == PromptType.LOGIN_REDIRECT:
                 return self._handle_login_redirect(prompt_info)
@@ -425,7 +425,7 @@ class ClaudeMonitor:
                 else:
                     return getattr(prompt_info, "recommended_response", None) or "y"
 
-            elif prompt_info.type == PromptType.BINARY_SELECTION:
+            elif prompt_info.type == PromptType.CONFIRMATION:
                 if self.mode12 == "Manual":
                     return self.mode12_response
                 else:
@@ -607,3 +607,16 @@ class ClaudeMonitor:
         """Force flush all pending async logs."""
         if self.async_logger:
             await self.async_logger.flush()
+
+    def _detect_trust_prompt(self, content: str) -> bool:
+        """Detect trust prompt in content (legacy compatibility method)."""
+        # Check if content contains trust-related prompts
+        trust_keywords = ["trust", "certificate", "security", "authenticate", "verify"]
+        content_lower = content.lower()
+        return any(keyword in content_lower for keyword in trust_keywords)
+
+    def _auto_trust_if_needed(self) -> bool:
+        """Auto-respond to trust prompts if detected (legacy compatibility method)."""
+        # For safety, this method returns False by default
+        # Individual implementations should override based on security requirements
+        return False

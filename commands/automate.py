@@ -212,12 +212,7 @@ class AutomateTriggerCommand(BaseCommand):
                 from libs.automation.context_detector import ContextInfo
 
                 # Create a context info object
-                context_info = ContextInfo(
-                    context_type=context_enum,
-                    confidence=1.0,
-                    details={"description": description, "manual": True},
-                    timestamp=time.time()
-                )
+                context_info = ContextInfo(context_type=context_enum, confidence=1.0, details={"description": description, "manual": True}, timestamp=time.time())
 
                 # Trigger workflows for this context
                 triggered_workflows = automation_manager.workflow_engine.trigger_workflows(context_info)
@@ -268,17 +263,10 @@ class AutomateExecuteCommand(BaseCommand):
                 from libs.automation.context_detector import ContextInfo, ContextType
 
                 # Create a dummy context for manual execution
-                context_info = ContextInfo(
-                    context_type=ContextType.UNKNOWN,
-                    confidence=1.0,
-                    details={"manual_execution": True, "workflow_name": workflow_name},
-                    timestamp=time.time()
-                )
+                context_info = ContextInfo(context_type=ContextType.UNKNOWN, confidence=1.0, details={"manual_execution": True, "workflow_name": workflow_name}, timestamp=time.time())
 
                 # Use manual trigger workflow
-                execution_id = await automation_manager.manual_trigger_workflow(
-                    workflow_name, context_info
-                )
+                execution_id = await automation_manager.manual_trigger_workflow(workflow_name, context_info)
 
                 if execution_id:
                     return True, {"execution_id": execution_id}

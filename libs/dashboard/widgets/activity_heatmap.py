@@ -28,7 +28,7 @@ class ActivityHeatmapGenerator:
                     logger.warning(f"Log file not found for session {session_name}. Returning empty activity.")
                     return {}
 
-            activity_counts = defaultdict(int)
+            activity_counts: defaultdict[str, int] = defaultdict(int)
 
             now = datetime.now()
             start_time_filter = now - timedelta(days=days)
@@ -54,7 +54,7 @@ class ActivityHeatmapGenerator:
     def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str, Any]:
         """24x7 그리드 형태의 히트맵 데이터 생성."""
         start_time_generate = datetime.now()
-        heatmap_data = defaultdict(lambda: defaultdict(int))
+        heatmap_data: defaultdict[int, defaultdict[int, int]] = defaultdict(lambda: defaultdict(int))
 
         for session_name in sessions:
             activity = self.collect_session_activity(session_name, days)

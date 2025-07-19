@@ -47,11 +47,7 @@ class SessionConfigurationError(YesmanError):
     """Raised when session configuration is invalid."""
 
     def __init__(self, message: str, config: dict | None = None):
-        context = ErrorContext(
-            operation="session_configuration",
-            component="session_helpers",
-            additional_info={"config": config} if config else None
-        )
+        context = ErrorContext(operation="session_configuration", component="session_helpers", additional_info={"config": config} if config else None)
         super().__init__(
             message,
             category=ErrorCategory.CONFIGURATION,

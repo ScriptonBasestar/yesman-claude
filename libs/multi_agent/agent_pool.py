@@ -1132,3 +1132,35 @@ class AgentPool:
                     return False, str(e)
 
         return False, "Max retries exceeded"
+
+    def all_tasks_completed(self) -> bool:
+        """Check if all tasks have been completed."""
+        if not self.tasks:
+            return True
+
+        incomplete_tasks = [task for task in self.tasks.values() if task.status not in [TaskStatus.COMPLETED, TaskStatus.FAILED]]
+        return len(incomplete_tasks) == 0
+
+    def reset(self) -> None:
+        """Reset the agent pool state."""
+        # Clear all tasks and completed task list
+        self.tasks.clear()
+        self.completed_tasks.clear()
+
+        # Clear task queue
+        while not self.task_queue.empty():
+            try:
+                self.task_queue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+
+        # Reset scheduler if using intelligent scheduling
+        if hasattr(self.scheduler, "reset"):
+            self.scheduler.reset()
+        else:
+            # Recreate scheduler if reset method doesn't exist
+            from .task_scheduler import TaskScheduler
+
+            self.scheduler = TaskScheduler()
+
+        logger.info("Agent pool reset completed")

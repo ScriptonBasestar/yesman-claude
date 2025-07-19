@@ -34,6 +34,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             self.print_info(f"   Language: {language}")
 
             from libs.multi_agent.branch_manager import BranchManager
+
             branch_manager = BranchManager(repo_path or ".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
 
@@ -97,6 +98,7 @@ class SemanticSummaryCommand(BaseCommand):
             self.print_info("=" * 40)
 
             from libs.multi_agent.branch_manager import BranchManager
+
             branch_manager = BranchManager(repo_path or ".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
             summary = analyzer.get_analysis_summary()
@@ -130,16 +132,12 @@ class FunctionDiffCommand(BaseCommand):
             self.print_info(f"🔍 Function-level diff: {file1} vs {file2}")
 
             from libs.multi_agent.branch_manager import BranchManager
+
             branch_manager = BranchManager(".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager)
 
             # Since get_function_diff doesn't exist, create basic diff info
-            diff = {
-                "file1": file1,
-                "file2": file2,
-                "function_differences": [],
-                "summary": f"Function differences between {file1} and {file2}"
-            }
+            diff = {"file1": file1, "file2": file2, "function_differences": [], "summary": f"Function differences between {file1} and {file2}"}
 
             self.print_info("📋 Function Differences:")
             self.print_info("=" * 50)
@@ -195,11 +193,7 @@ class SemanticMergeCommand(BaseCommand):
             branch_manager = BranchManager(".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager)
             conflict_engine = ConflictResolutionEngine(branch_manager=branch_manager)
-            merger = SemanticMerger(
-                semantic_analyzer=analyzer,
-                conflict_engine=conflict_engine,
-                branch_manager=branch_manager
-            )
+            merger = SemanticMerger(semantic_analyzer=analyzer, conflict_engine=conflict_engine, branch_manager=branch_manager)
 
             # Convert strategy string to enum if possible
             try:
@@ -208,12 +202,7 @@ class SemanticMergeCommand(BaseCommand):
                 merge_strategy = MergeStrategy.INTELLIGENT_MERGE  # Default fallback
 
             async def run_merge():
-                result = await merger.perform_semantic_merge(
-                    file_path=target_file,
-                    branch1="current",
-                    branch2="other",
-                    strategy=merge_strategy
-                )
+                result = await merger.perform_semantic_merge(file_path=target_file, branch1="current", branch2="other", strategy=merge_strategy)
 
                 success = result.resolution.value in ["auto_resolved", "partial_resolution"]
                 if success:

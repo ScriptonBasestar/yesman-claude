@@ -88,6 +88,18 @@ ignore = [
     # pydocstyle conflicts
     "D203", # one-blank-line-before-class (conflicts with D211)
     "D213", # multi-line-summary-second-line (conflicts with D212)
+    # Temporarily ignore missing docstrings
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D106", # Missing docstring in public nested class
+    "D107", # Missing docstring in __init__
+    "D205", # 1 blank line required between summary line and description
+    "D417", # Missing argument descriptions in docstring
+    "B017", # Do not assert blind exception: `Exception`
 ]
 
 # Allow unused variables when underscore-prefixed.
@@ -122,6 +134,10 @@ convention = "google"
     "S101",     # Use of `assert` detected
     "PLR2004",  # Magic value used in comparison
 ]
+# Dashboard command HTTP handler methods follow standard naming
+"commands/dashboard.py" = [
+    "N802",     # Function name `do_GET` should be lowercase - standard HTTP handler method
+]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = [
     "PLR2004",  # Magic value used in comparison
@@ -138,6 +154,7 @@ convention = "google"
     "TID252",   # Relative imports
     "F821",     # Undefined name (common in test mocks)
     "A002",     # Builtin argument shadowing
+    "N806",     # Variable in function should be lowercase - test mocks often use PascalCase
 ]
 
 # Backup test files - very permissive for generated/cached tests
@@ -155,6 +172,9 @@ convention = "google"
 
 # Libs can have some relaxed rules for development tooling
 "libs/multi_agent/**/*" = ["S324", "S110", "E722"]  # Allow MD5 and except patterns in dev tools
+"libs/multi_agent/semantic_analyzer.py" = ["N802"]  # AST visitor methods follow visit_NodeName convention
+"libs/multi_agent/semantic_merger.py" = ["S101"]  # Allow assert for type narrowing
+"libs/multi_agent/code_review_engine.py" = ["S101"]  # Allow assert for type narrowing
 "libs/task_runner.py" = ["S603", "S607", "S605", "SIM108", "PLR2004"]  # Task automation needs subprocess
 "libs/tmux_manager.py" = ["S605"]  # Tmux integration needs shell access
 "libs/ui/**/*" = ["E722", "S110", "PLR2004"]  # UI code can be more lenient

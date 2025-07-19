@@ -165,7 +165,7 @@ class ConflictPreventionSystem:
 
         # Background monitoring
         self._running = False
-        self._prevention_monitor_task = None
+        self._prevention_monitor_task: asyncio.Task[Any] | None = None
 
     async def start_prevention_monitoring(self, monitoring_interval: float = 300.0):
         """Start continuous conflict prevention monitoring."""
@@ -233,7 +233,8 @@ class ConflictPreventionSystem:
         failed_measures = []
         conflicts_prevented = 0
 
-        for measure in prevention_measures[: self.prevention_config["max_prevention_measures"]]:
+        max_measures = int(self.prevention_config["max_prevention_measures"])
+        for measure in prevention_measures[:max_measures]:
             try:
                 success = await self._apply_prevention_measure(measure)
                 if success:

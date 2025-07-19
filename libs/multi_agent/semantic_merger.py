@@ -114,8 +114,8 @@ class SemanticMerger:
         self.enable_ast_validation = True
 
         # Machine learning components for merge decisions
-        self.merge_patterns = defaultdict(list)
-        self.success_rate_by_strategy = defaultdict(list)
+        self.merge_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.success_rate_by_strategy: defaultdict[str, list[float]] = defaultdict(list)
 
         # Performance tracking
         self.merge_stats = {
@@ -236,7 +236,7 @@ class SemanticMerger:
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Filter out exceptions and convert to MergeResults
-        merge_results = []
+        merge_results: list[MergeResult] = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
                 logger.error(f"Error merging {file_paths[i]}: {result}")
@@ -250,6 +250,7 @@ class SemanticMerger:
                     ),
                 )
             else:
+                assert isinstance(result, MergeResult)  # Type narrowing for mypy
                 merge_results.append(result)
 
         logger.info(f"Batch merge completed: {len(merge_results)} results")
@@ -825,7 +826,7 @@ class SemanticMerger:
     ) -> MergeStrategy:
         """Select optimal merge strategy based on conflict types and patterns."""
         # Count conflict types
-        conflict_type_counts = defaultdict(int)
+        conflict_type_counts: defaultdict[SemanticConflictType, int] = defaultdict(int)
         for conflict in conflicts:
             conflict_type_counts[conflict.conflict_type] += 1
 

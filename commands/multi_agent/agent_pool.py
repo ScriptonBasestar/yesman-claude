@@ -100,6 +100,7 @@ class MonitorAgentsCommand(BaseCommand):
                     self.print_warning("⚠️  No active agent pool found. Showing demo mode.")
                     # Add some demo data for visualization
                     from libs.dashboard.widgets.agent_monitor import AgentMetrics
+
                     monitor.agent_metrics = {
                         "agent-1": AgentMetrics(
                             agent_id="agent-1",

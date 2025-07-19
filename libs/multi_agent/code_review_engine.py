@@ -168,7 +168,7 @@ class CodeReviewEngine:
         self.quality_profiles: dict[str, dict] = {}  # file -> quality profile
 
         # Review configuration
-        self.review_config = {
+        self.review_config: dict[str, Any] = {
             "require_approval_for_critical": True,
             "auto_approve_threshold": 8.5,  # Out of 10
             "max_concurrent_reviews": 10,
@@ -207,8 +207,8 @@ class CodeReviewEngine:
 
         # Background tasks
         self._running = False
-        self._review_monitor_task = None
-        self._quality_monitor_task = None
+        self._review_monitor_task: asyncio.Task[Any] | None = None
+        self._quality_monitor_task: asyncio.Task[Any] | None = None
 
     async def start(self):
         """Start the code review engine."""
@@ -271,10 +271,12 @@ class CodeReviewEngine:
 
         # Find reviewers if not specified
         if reviewer_ids is None:
+            default_reviewers = self.review_config["default_reviewers"]
+            assert isinstance(default_reviewers, int)
             reviewer_ids = await self._find_suitable_reviewers(
                 agent_id,
                 files_changed,
-                self.review_config["default_reviewers"],
+                default_reviewers,
             )
 
         # Create review object
@@ -1035,9 +1037,11 @@ class CodeReviewEngine:
         if metric_types is None:
             metric_types = list(QualityMetric)
 
+        quality_thresholds = self.review_config["quality_thresholds"]
+        assert isinstance(quality_thresholds, dict)
         metrics = QualityMetrics(
             file_path=file_path,
-            thresholds=self.review_config["quality_thresholds"].copy(),
+            thresholds=quality_thresholds.copy(),
         )
 
         full_path = self.repo_path / file_path
@@ -1147,7 +1151,9 @@ class CodeReviewEngine:
     def _can_auto_approve(self, review: CodeReview) -> bool:
         """Determine if a review can be automatically approved."""
         # Check overall score threshold
-        if review.overall_score < self.review_config["auto_approve_threshold"]:
+        threshold = self.review_config["auto_approve_threshold"]
+        assert isinstance(threshold, int | float)
+        if review.overall_score < threshold:
             return False
 
         # Check for critical or high severity findings
@@ -1184,11 +1190,11 @@ class CodeReviewEngine:
         # Get all available agents
         available_agents = []
         for agent in self.collaboration_engine.agent_pool.agents.values():
-            if agent.id != requester_id and agent.state in [
+            if agent.agent_id != requester_id and agent.state in [
                 AgentState.IDLE,
                 AgentState.WORKING,
             ]:
-                available_agents.append(agent.id)
+                available_agents.append(agent.agent_id)
 
         # For now, just return the first available agents
         return available_agents[:num_reviewers]

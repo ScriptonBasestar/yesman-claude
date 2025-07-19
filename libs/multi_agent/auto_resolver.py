@@ -119,8 +119,8 @@ class AutoResolver:
 
         # Resolution history and learning
         self.resolution_history: list[AutoResolutionResult] = []
-        self.success_patterns = defaultdict(list)
-        self.failure_patterns = defaultdict(list)
+        self.success_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.failure_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
 
         # Performance tracking
         self.resolution_stats = {
@@ -551,10 +551,10 @@ class AutoResolver:
         strategies = []
 
         for prediction in predictions:
-            strategy = {
+            strategy: dict[str, Any] = {
                 "prediction_id": prediction.prediction_id,
                 "pattern": prediction.pattern.value,
-                "prevention_suggestions": prediction.prevention_suggestions,
+                "prevention_suggestions": prediction.prevention_suggestions[:],  # Copy the list
                 "automated_measures": [],
                 "manual_actions": [],
             }
@@ -699,7 +699,7 @@ class AutoResolver:
 
     def _analyze_mode_performance(self) -> dict[str, Any]:
         """Analyze performance by resolution mode."""
-        mode_stats = defaultdict(
+        mode_stats: defaultdict[str, dict[str, float]] = defaultdict(
             lambda: {
                 "sessions": 0,
                 "success_rate": 0.0,

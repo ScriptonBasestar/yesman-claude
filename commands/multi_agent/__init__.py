@@ -17,15 +17,15 @@ Modules:
 
 # Import the main CLI group
 # Import all command classes for easy access
-from .agent_pool import *
-from .batch_operations import *
+from .agent_pool import AddTaskCommand, ListTasksCommand, MonitorAgentsCommand, StartAgentsCommand, StatusCommand, StopAgentsCommand
+from .batch_operations import AutoResolveCommand, BatchMergeCommand, PreventConflictsCommand
 from .cli import multi_agent
-from .code_review import *
-from .collaboration import *
-from .conflict_prediction import *
-from .conflict_resolution import *
-from .dependency_tracking import *
-from .semantic_analysis import *
+from .code_review import QualityCheckCommand, ReviewApproveCommand, ReviewInitiateCommand, ReviewRejectCommand, ReviewStatusCommand, ReviewSummaryCommand
+from .collaboration import BranchInfoCommand, CollaborateCommand, SendMessageCommand, ShareKnowledgeCommand
+from .conflict_prediction import AnalyzeConflictPatternsCommand, PredictConflictsCommand, PredictionSummaryCommand
+from .conflict_resolution import ConflictSummaryCommand, DetectConflictsCommand, ResolveConflictCommand
+from .dependency_tracking import DependencyImpactCommand, DependencyPropagateCommand, DependencyStatusCommand, DependencyTrackCommand
+from .semantic_analysis import AnalyzeSemanticConflictsCommand, FunctionDiffCommand, SemanticMergeCommand, SemanticSummaryCommand
 
 __all__ = [
     # Main CLI group

@@ -3,6 +3,7 @@
 import asyncio
 import time
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -35,7 +36,7 @@ class AIStatusCommand(BaseCommand):
         """Execute the status command."""
         try:
             # Get statistics
-            stats = self.adaptive.get_learning_statistics()
+            stats: dict[str, Any] = self.adaptive.get_learning_statistics()
 
             # Create status table
             table = Table(title="🤖 AI Learning System Status", show_header=True)
@@ -116,21 +117,14 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
 
+        threshold = kwargs.get("threshold")
 
-        threshold = kwargs.get("threshold", None)
+        auto_response = kwargs.get("auto_response")
 
-
-        auto_response = kwargs.get("auto_response", None)
-
-
-        learning = kwargs.get("learning", None)
+        learning = kwargs.get("learning")
         """Execute the config command."""
         changes = []
 
@@ -178,21 +172,14 @@ class AIHistoryCommand(BaseCommand):
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
-
 
         limit = kwargs.get("limit", 10)
 
+        type = kwargs.get("type")
 
-        type = kwargs.get("type", None)
-
-
-        project = kwargs.get("project", None)
+        project = kwargs.get("project")
         """Execute the history command."""
         # Get filtered response history
         history = self.analyzer.response_history[-limit:]
@@ -250,15 +237,10 @@ class AIExportCommand(BaseCommand):
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
 
-
-        output = kwargs.get("output", None)
+        output = kwargs.get("output")
         """Execute the export command."""
         if not output:
             timestamp = int(time.time())
@@ -290,13 +272,8 @@ class AICleanupCommand(BaseCommand):
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
-
 
         days = kwargs.get("days", 30)
         """Execute the cleanup command."""
@@ -328,21 +305,14 @@ class AIPredictCommand(BaseCommand):
             raise CommandError(f"Failed to initialize AI components: {e}") from e
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
-
 
         prompt_text = kwargs["prompt_text"]
 
-
         context = kwargs.get("context", "")
 
-
-        project = kwargs.get("project", None)
+        project = kwargs.get("project")
         """Execute the predict command."""
         # Get prediction (run async function synchronously)
         should_respond, predicted_response, confidence = asyncio.run(

@@ -142,6 +142,7 @@ class BackgroundTaskRunner:
                 config = YesmanConfig()
                 # Load projects using tmux_manager
                 from libs.tmux_manager import TmuxManager
+
                 tmux_manager = TmuxManager(config)
                 project_sessions = tmux_manager.load_projects().get("sessions", {})
 

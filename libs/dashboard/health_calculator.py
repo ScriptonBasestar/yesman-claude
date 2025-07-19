@@ -34,7 +34,7 @@ class HealthLevel(Enum):
     CRITICAL = (0, 49, "critical", "🔴")
     UNKNOWN = (-1, -1, "unknown", "⚪")
 
-    def __init__(self, min_score: int, max_score: int, label: str, emoji: str):
+    def __init__(self, min_score: int, max_score: int, label: str, emoji: str) -> None:
         self.min_score = min_score
         self.max_score = max_score
         self.label = label
@@ -133,7 +133,7 @@ class ProjectHealth:
 class HealthCalculator:
     """Calculates project health scores based on various metrics."""
 
-    def __init__(self, project_path: Path | None = None):
+    def __init__(self, project_path: Path | None = None) -> None:
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.health_calculator")
 
@@ -150,7 +150,7 @@ class HealthCalculator:
             if time.time() - cached_data["timestamp"] < self._cache_ttl:
                 return ProjectHealth(**cached_data["health"])
 
-        self.logger.info(f"Calculating health for project: {self.project_path}")
+        self.logger.info("Calculating health for project: %s", self.project_path)
 
         metrics = []
 
@@ -256,7 +256,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Build health assessment error: {e}")
+            self.logger.debug("Build health assessment error: %s", e)
 
         return metrics
 
@@ -306,7 +306,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Test health assessment error: {e}")
+            self.logger.debug("Test health assessment error: %s", e)
 
         return metrics
 
@@ -354,7 +354,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Dependency health assessment error: {e}")
+            self.logger.debug("Dependency health assessment error: %s", e)
 
         return metrics
 
@@ -408,7 +408,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Performance health assessment error: {e}")
+            self.logger.debug("Performance health assessment error: %s", e)
 
         return metrics
 
@@ -461,7 +461,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Security health assessment error: {e}")
+            self.logger.debug("Security health assessment error: %s", e)
 
         return metrics
 
@@ -514,7 +514,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Code quality health assessment error: {e}")
+            self.logger.debug("Code quality health assessment error: %s", e)
 
         return metrics
 
@@ -583,7 +583,7 @@ class HealthCalculator:
                 )
 
         except Exception as e:
-            self.logger.debug(f"Git health assessment error: {e}")
+            self.logger.debug("Git health assessment error: %s", e)
 
         return metrics
 
@@ -637,7 +637,7 @@ class HealthCalculator:
             )
 
         except Exception as e:
-            self.logger.debug(f"Documentation health assessment error: {e}")
+            self.logger.debug("Documentation health assessment error: %s", e)
 
         return metrics
 
@@ -782,11 +782,11 @@ class HealthCalculator:
                 in_deps_section = True
                 in_dev_deps_section = False
                 continue
-            elif line == "[dev-dependencies]":
+            if line == "[dev-dependencies]":
                 in_dev_deps_section = True
                 in_deps_section = False
                 continue
-            elif line.startswith("["):
+            if line.startswith("["):
                 in_deps_section = False
                 in_dev_deps_section = False
                 continue
@@ -837,14 +837,13 @@ class HealthCalculator:
                             ):  # General comments
                                 documented_files += 1
                         except Exception as e:
-                            self.logger.warning(f"Could not parse file {file_path}: {e}")
+                            self.logger.warning("Could not parse file %s: %s", file_path, e)
                             continue
 
             if total_files > 0:
                 doc_ratio = documented_files / total_files
                 return int(doc_ratio * 100)
-            else:
-                return 80  # Default if no source files found
+            return 80  # Default if no source files found
 
         except Exception:
             return 50  # Default on error

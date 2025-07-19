@@ -1,7 +1,9 @@
 """Enter (attach to) a tmux session command."""
 
+import os
 import subprocess
 import sys
+from typing import Any
 
 import click
 import libtmux
@@ -95,7 +97,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             try:
                 choice = click.prompt("Select session number", type=int)
                 if 1 <= choice <= len(running_sessions):
-                    return running_sessions[choice - 1]["session"]
+                    session_data: dict[str, Any] = running_sessions[choice - 1]
+                    return str(session_data["session"])
                 else:
                     self.print_error("Invalid selection")
                     return None
@@ -115,7 +118,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         for project_name, project_conf in projects.items():
             if project_name == session_name:
                 override = project_conf.get("override", {})
-                actual_session_name = override.get("session_name", project_name)
+                actual_session_name: str = override.get("session_name", project_name)
                 if self.server.find_where({"session_name": actual_session_name}):
                     return actual_session_name
                 break
@@ -125,7 +128,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
     def _attach_to_session(self, session_name: str) -> None:
         """Attach to the specified tmux session."""
         # Check if we're already in a tmux session
-        if "TMUX" in subprocess.os.environ:
+        if "TMUX" in os.environ:
             # Switch to the session
             subprocess.run(["tmux", "switch-client", "-t", session_name], check=False)
         else:

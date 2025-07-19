@@ -83,14 +83,14 @@ class SessionManager:
     def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
         """Get information for a single session with mode-aware caching."""
 
-        def compute_session_info():
+        def compute_session_info() -> SessionInfo:
             override = project_conf.get("override", {})
             session_name = override.get("session_name", project_name)
 
             # Check if session exists
             session = self.server.find_where({"session_name": session_name})
 
-            windows = []
+            windows: list[WindowInfo] = []
             controller_status = "unknown"
 
             if session:
@@ -114,7 +114,7 @@ class SessionManager:
                 template_display = "none"
             else:
                 # Check if template file actually exists
-                template_path = Path(self.config.get_config_dir()) / "templates" / f"{template_name}.yaml"
+                template_path = self.config.get_templates_dir() / f"{template_name}.yaml"
                 if template_path.exists():
                     template_display = template_name
                 else:
@@ -125,17 +125,17 @@ class SessionManager:
             if session:
                 # Collect output from all Claude panes
                 claude_output = []
-                for window in windows:
-                    for pane in window.panes:
-                        if pane.is_claude and pane.last_output:
+                for window_info in windows:
+                    for pane_info in window_info.panes:
+                        if pane_info.is_claude and pane_info.last_output:
                             # Get full pane content for better analysis
                             try:
-                                tmux_pane = session.find_where({"pane_id": pane.id})
+                                tmux_pane = session.find_where({"pane_id": pane_info.id})
                                 if tmux_pane:
                                     pane_content = tmux_pane.cmd("capture-pane", "-p").stdout
                                     claude_output.extend(pane_content)
                             except Exception as e:
-                                self.logger.warning(f"Could not get pane content for {pane.id}: {e}")
+                                self.logger.warning(f"Could not get pane content for {pane_info.id}: {e}")
 
                 # Analyze progress
                 if claude_output:
@@ -156,7 +156,7 @@ class SessionManager:
 
     def _get_window_info(self, window) -> WindowInfo:
         """Get information for a single window with detailed pane metrics."""
-        panes = []
+        panes: list[PaneInfo] = []
 
         for pane in window.list_panes():
             try:

@@ -149,10 +149,7 @@ class AsyncStatusDashboard:
         loop = asyncio.get_event_loop()
         # ProjectHealth doesn't have update_project_health method, it calculates on demand
         # So we'll just trigger a calculation to refresh the data
-        await loop.run_in_executor(
-            None,
-            self.project_health.calculate_health
-        )
+        await loop.run_in_executor(None, self.project_health.calculate_health)
 
     async def _update_progress_data(self):
         """Async update of progress data."""

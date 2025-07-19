@@ -2,6 +2,7 @@
 
 import threading
 import time
+from typing import Any
 
 import click
 from rich.console import Console
@@ -35,7 +36,8 @@ class InteractiveBrowser:
         self.update_interval = update_interval
         self.running = False
         self.update_thread: threading.Thread | None = None
-        self.progress_data = None
+        self.progress_data: dict[str, Any] | None = None
+        self.session_data: list[dict[str, Any]] = []
 
     def update_data(self):
         """Update session data and activity metrics."""
@@ -51,10 +53,12 @@ class InteractiveBrowser:
 
                 # Calculate and record activity
                 activity_level = self._calculate_session_activity(detailed_info)
-                self.activity_heatmap.add_activity_point(session_name, activity_level)
+                # Note: Recording activity for potential future use
+                # Activity is collected on-demand in generate_heatmap_data
 
             # Update browser with new data
             self.session_browser.update_sessions(detailed_sessions)
+            self.session_data = detailed_sessions
 
             # Update progress data
             self.progress_data = self.session_manager.get_progress_overview()
@@ -134,7 +138,9 @@ class InteractiveBrowser:
             layout["progress"].update("[dim]Loading progress data...[/dim]")
 
         # Activity heatmap
-        heatmap_content = self.activity_heatmap.render_combined_heatmap()
+        session_names = [s["name"] for s in self.session_data if "name" in s]
+        heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
+        heatmap_content = self._render_heatmap_display(heatmap_data)
         layout["activity"].update(heatmap_content)
 
         # Footer
@@ -177,6 +183,22 @@ class InteractiveBrowser:
         self.running = False
         if self.update_thread:
             self.update_thread.join(timeout=1.0)
+
+    def _render_heatmap_display(self, heatmap_data: dict[str, Any]) -> str:
+        """Render heatmap data as a simple text display."""
+        if not heatmap_data or "heatmap" not in heatmap_data:
+            return "[dim]No activity data available[/dim]"
+
+        lines = ["📊 Activity Heatmap (Last 7 days)"]
+        heatmap = heatmap_data["heatmap"]
+
+        # Simple text representation
+        for day, hours in heatmap.items():
+            day_name = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][day]
+            activity_count = sum(hours.values())
+            lines.append(f"{day_name}: {activity_count} events")
+
+        return "\n".join(lines)
 
 
 class BrowseCommand(BaseCommand, SessionCommandMixin):

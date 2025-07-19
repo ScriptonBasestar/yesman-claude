@@ -309,7 +309,7 @@ class SessionSetupService:
 
     def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
         """Load sessions configuration with optional filter."""
-        all_sessions = self.tmux_manager.load_projects().get("sessions", {})
+        all_sessions: dict[str, Any] = self.tmux_manager.load_projects().get("sessions", {})
 
         if not all_sessions:
             return {}

@@ -18,8 +18,10 @@ from ..shared import claude_manager
 
 class ActivityData(TypedDict):
     """Type definition for activity data."""
+
     date: str
     activity_count: int
+
 
 logger = logging.getLogger(__name__)
 

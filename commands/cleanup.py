@@ -163,11 +163,12 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         if size_bytes == 0:
             return "0 B"
 
+        size: float = float(size_bytes)
         for unit in ["B", "KB", "MB", "GB"]:
-            if size_bytes < 1024:
-                return f"{size_bytes:.1f} {unit}"
-            size_bytes /= 1024
-        return f"{size_bytes:.1f} TB"
+            if size < 1024:
+                return f"{size:.1f} {unit}"
+            size = size / 1024
+        return f"{size:.1f} TB"
 
 
 @click.command()

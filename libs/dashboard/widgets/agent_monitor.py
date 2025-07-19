@@ -22,14 +22,14 @@ try:
     from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 except ImportError:
     # For development/testing when multi_agent is not available
-    class AgentState(Enum):
+    class AgentState(Enum):  # type: ignore[no-redef]
         IDLE = "idle"
         WORKING = "working"
         SUSPENDED = "suspended"
         TERMINATED = "terminated"
         ERROR = "error"
 
-    class TaskStatus(Enum):
+    class TaskStatus(Enum):  # type: ignore[no-redef]
         PENDING = "pending"
         ASSIGNED = "assigned"
         RUNNING = "running"
@@ -38,17 +38,20 @@ except ImportError:
         CANCELLED = "cancelled"
 
     @dataclass
-    class Agent:
+    class Agent:  # type: ignore[no-redef]
         agent_id: str
         state: str
 
     @dataclass
-    class Task:
+    class Task:  # type: ignore[no-redef]
         task_id: str
         title: str
         status: str
 
-    AgentPool = None
+    class AgentPool:  # type: ignore[no-redef]
+        """Fallback AgentPool class for when multi_agent is not available."""
+
+        pass
 
 
 class MonitorDisplayMode(Enum):
@@ -219,7 +222,7 @@ class AgentMonitor:
             # Estimate progress based on elapsed time and timeout
             start = datetime.fromisoformat(start_time)
             elapsed = (datetime.now() - start).total_seconds()
-            timeout = task_data.get("timeout", 300)
+            timeout: float = task_data.get("timeout", 300)
             return min(0.9, elapsed / timeout)  # Cap at 90% for running tasks
         elif status == "assigned":
             return 0.1
@@ -400,10 +403,11 @@ class AgentMonitor:
                     5,
                     len(history),
                 )
-                older_avg = sum(score for _, score in history[-10:-5]) / min(
-                    5,
-                    len(history[-10:-5]) if len(history) >= 10 else history[:-5],
-                )
+                older_slice = history[-10:-5] if len(history) >= 10 else history[:-5]
+                if older_slice:
+                    older_avg = sum(score for _, score in older_slice) / len(older_slice)
+                else:
+                    older_avg = recent_avg
                 trend = "↗" if recent_avg > older_avg else "↘" if recent_avg < older_avg else "→"
             else:
                 trend = "→"

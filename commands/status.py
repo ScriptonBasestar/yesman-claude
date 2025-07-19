@@ -170,7 +170,7 @@ class StatusDashboard:
         try:
             health_data = self.project_health.calculate_health()
             health_content = Panel(f"Project Health: {health_data.get('overall_score', 'Unknown')}", title="Health")
-        except:
+        except Exception:
             health_content = Panel("Health data unavailable", title="Health")
         layout["health"].update(health_content)
 
@@ -200,7 +200,7 @@ class StatusDashboard:
         try:
             health_data = self.project_health.calculate_health()
             footer_parts.append(f"Health: {health_data.get('overall_score', 'N/A')}")
-        except:
+        except Exception:
             footer_parts.append("Health: N/A")
         footer_parts.append(str(self.git_activity.render_compact_status()))
         footer_parts.append(str(self.progress_tracker.render_compact_progress()))
@@ -238,7 +238,7 @@ class StatusDashboard:
         try:
             health_data = self.project_health.calculate_health()
             health_detailed = Panel(f"Project Health Details: {health_data}", title="Health Details")
-        except:
+        except Exception:
             health_detailed = Panel("Health details unavailable", title="Health Details")
         panels.append(health_detailed)
 
@@ -307,7 +307,7 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
                 try:
                     health_data = dashboard.project_health.calculate_health()
                     health_status = f"Health: {health_data.get('overall_score', 'N/A')}"
-                except:
+                except Exception:
                     health_status = "Health: N/A"
                 git_status = str(dashboard.git_activity.render_compact_status())
                 progress_status = str(dashboard.progress_tracker.render_compact_progress())

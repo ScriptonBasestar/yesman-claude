@@ -130,7 +130,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         # Check if session exists
         try:
-            tmux_sessions = self.tmux_manager.get_all_sessions()
+            tmux_sessions = self.tmux_manager.get_cached_sessions_list()
             for tmux_session in tmux_sessions:
                 if tmux_session.get("session_name") == session_name:
                     info["exists"] = True
@@ -139,7 +139,8 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                     info["created_time"] = tmux_session.get("created")
 
                     # Get window and pane count
-                    windows = self.tmux_manager.get_session_windows(session_name)
+                    session_info = self.tmux_manager.get_session_info(session_name)
+                    windows = session_info.get("windows", [])
                     info["windows"] = len(windows)
                     info["panes"] = sum(len(w.get("panes", [])) for w in windows)
                     break
@@ -171,6 +172,8 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         # Add columns based on layout config
         columns = self._layout_config.get("columns", ["project", "session", "status"])
+        if not isinstance(columns, list):
+            columns = ["project", "session", "status"]
         column_map = {
             "project": ("Project", "cyan"),
             "session": ("Session", "green"),

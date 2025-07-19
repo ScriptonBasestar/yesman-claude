@@ -196,7 +196,7 @@ def _display_tree_format(console: Console, missing: list, valid_count: int, tota
         session_branch = tree.add(f"[cyan bold]🎯 {session_name}[/cyan bold]")
 
         # Group by type
-        by_type = {"session": [], "window": [], "pane": []}
+        by_type: dict[str, list[tuple[str, str]]] = {"session": [], "window": [], "pane": []}
         for target_type, target_name, path in session_missing:
             by_type[target_type].append((target_name, path))
 

@@ -16,19 +16,12 @@ class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
-
 
         branches = kwargs["branches"]
 
-
-        repo_path = kwargs.get("repo_path", None)
-
+        repo_path = kwargs.get("repo_path")
 
         auto_resolve = kwargs.get("auto_resolve", False)
         """Execute the detect conflicts command."""
@@ -120,21 +113,14 @@ class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
-
 
         conflict_id = kwargs["conflict_id"]
 
+        strategy = kwargs.get("strategy")
 
-        strategy = kwargs.get("strategy", None)
-
-
-        repo_path = kwargs.get("repo_path", None)
+        repo_path = kwargs.get("repo_path")
         """Execute the resolve conflict command."""
         try:
             self.print_info(f"🔧 Resolving conflict: {conflict_id}")
@@ -195,15 +181,10 @@ class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
     def execute(self, **kwargs) -> dict:
-
-
         """Execute the command."""
-
-
         # Extract parameters from kwargs
 
-
-        repo_path = kwargs.get("repo_path", None)
+        repo_path = kwargs.get("repo_path")
         """Execute the conflict summary command."""
         try:
             self.print_info("📊 Conflict Resolution Summary")

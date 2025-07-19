@@ -127,7 +127,7 @@ class BranchInfoProtocol:
 
         # Background tasks
         self._running = False
-        self._sync_task = None
+        self._sync_task: asyncio.Task[Any] | None = None
 
     async def start(self):
         """Start the branch info protocol."""
