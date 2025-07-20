@@ -8,7 +8,7 @@ import os
 import time
 import uuid
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Import scheduler types after main types to avoid circular imports
@@ -17,7 +17,9 @@ from typing import TYPE_CHECKING, Any
 from .types import Agent, AgentState, Task, TaskStatus
 
 if TYPE_CHECKING:
-    from .task_scheduler import AgentCapability
+    from .task_scheduler import AgentCapability, TaskScheduler
+else:
+    from .task_scheduler import TaskScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,7 @@ logger = logging.getLogger(__name__)
 class AgentPool:
     """Manages a pool of agents for parallel task execution."""
 
-    def __init__(self, max_agents: int = 3, work_dir: str | None = None):
+    def __init__(self, max_agents: int = 3, work_dir: str | None = None) -> None:
         """Initialize agent pool.
 
         Args:
@@ -42,9 +44,7 @@ class AgentPool:
         self.task_queue: asyncio.Queue[Task] = asyncio.Queue()
         self.completed_tasks: list[str] = []
 
-        # Intelligent task scheduling - import here to avoid circular import
-        from .task_scheduler import TaskScheduler
-
+        # Intelligent task scheduling
         self.scheduler = TaskScheduler()
         self.intelligent_scheduling = True
 
@@ -83,7 +83,7 @@ class AgentPool:
 
         if state_file.exists():
             try:
-                with open(state_file) as f:
+                with state_file.open() as f:
                     data = json.load(f)
 
                 # Load agents (without active processes)
@@ -103,11 +103,12 @@ class AgentPool:
                 self.completed_tasks = data.get("completed_tasks", [])
 
                 logger.info(
-                    f"Loaded {len(self.agents)} agents and {len(self.tasks)} tasks",
+                    "Loaded %d agents and %d tasks",
+                    len(self.agents), len(self.tasks),
                 )
 
-            except Exception as e:
-                logger.error(f"Failed to load agent pool state: {e}")
+            except Exception:
+                logger.exception("Failed to load agent pool state:")
 
     def _save_state(self) -> None:
         """Save agent pool state to disk."""
@@ -118,14 +119,14 @@ class AgentPool:
                 "agents": [agent.to_dict() for agent in self.agents.values()],
                 "tasks": [task.to_dict() for task in self.tasks.values()],
                 "completed_tasks": self.completed_tasks,
-                "saved_at": datetime.now().isoformat(),
+                "saved_at": datetime.now(UTC).isoformat(),
             }
 
-            with open(state_file, "w") as f:
+            with state_file.open("w") as f:
                 json.dump(data, f, indent=2)
 
-        except Exception as e:
-            logger.error(f"Failed to save agent pool state: {e}")
+        except Exception:
+            logger.exception("Failed to save agent pool state:")
 
     async def start(self) -> None:
         """Start the agent pool."""
@@ -136,7 +137,7 @@ class AgentPool:
         self._running = True
         self._shutdown_event.clear()
 
-        logger.info(f"Starting agent pool with max {self.max_agents} agents")
+        logger.info("Starting agent pool with max %d agents", self.max_agents)
 
         # Start task dispatcher
         asyncio.create_task(self._task_dispatcher())
@@ -184,9 +185,9 @@ class AgentPool:
             # Add to simple queue (non-blocking)
             try:
                 self.task_queue.put_nowait(task)
-                logger.info(f"Added task {task.task_id} to queue")
+                logger.info("Added task %s to queue", task.task_id)
             except asyncio.QueueFull:
-                logger.error(f"Task queue is full, cannot add task {task.task_id}")
+                logger.exception("Task queue is full, cannot add task %s", task.task_id)
 
     def create_task(
         self,
@@ -220,8 +221,8 @@ class AgentPool:
 
                 await asyncio.sleep(1)  # Brief pause between dispatch cycles
 
-            except Exception as e:
-                logger.error(f"Error in task dispatcher: {e}")
+            except Exception:
+                logger.exception("Error in task dispatcher:")
                 await asyncio.sleep(1)
 
     async def _intelligent_dispatch(self) -> None:
@@ -287,7 +288,7 @@ class AgentPool:
         if self.intelligent_scheduling:
             self.scheduler.register_agent(agent)
 
-        logger.info(f"Created agent {agent_id}")
+        logger.info("Created agent %s", agent_id)
         return agent
 
     async def _assign_task_to_agent(self, agent: Agent, task: Task) -> None:
@@ -299,9 +300,9 @@ class AgentPool:
         # Update agent
         agent.state = AgentState.WORKING
         agent.current_task = task.task_id
-        agent.last_heartbeat = datetime.now()
+        agent.last_heartbeat = datetime.now(UTC)
 
-        logger.info(f"Assigned task {task.task_id} to agent {agent.agent_id}")
+        logger.info("Assigned task %s to agent %s", task.task_id, agent.agent_id)
 
         # Start task execution
         asyncio.create_task(self._execute_task(agent, task))
@@ -310,16 +311,16 @@ class AgentPool:
         """Execute a task on an agent."""
         try:
             task.status = TaskStatus.RUNNING
-            task.start_time = datetime.now()
+            task.start_time = datetime.now(UTC)
 
             # Notify callbacks
             for callback in self.task_started_callbacks:
                 try:
                     await callback(task)
-                except Exception as e:
-                    logger.error(f"Error in task started callback: {e}")
+                except Exception:
+                    logger.exception("Error in task started callback:")
 
-            logger.info(f"Agent {agent.agent_id} starting task {task.task_id}")
+            logger.info("Agent %s starting task %s", agent.agent_id, task.task_id)
 
             # Prepare environment
             env = os.environ.copy()
@@ -349,7 +350,7 @@ class AgentPool:
                 task.output = stdout.decode("utf-8")
                 task.error = stderr.decode("utf-8")
                 task.exit_code = process.returncode
-                task.end_time = datetime.now()
+                task.end_time = datetime.now(UTC)
 
                 if process.returncode == 0:
                     task.status = TaskStatus.COMPLETED
@@ -360,10 +361,10 @@ class AgentPool:
                     for callback in self.task_completed_callbacks:
                         try:
                             await callback(task)
-                        except Exception as e:
-                            logger.error(f"Error in task completed callback: {e}")
+                        except Exception:
+                            logger.exception("Error in task completed callback:")
 
-                    logger.info(f"Task {task.task_id} completed successfully")
+                    logger.info("Task %s completed successfully", task.task_id)
 
                 else:
                     task.status = TaskStatus.FAILED
@@ -373,17 +374,19 @@ class AgentPool:
                     for callback in self.task_failed_callbacks:
                         try:
                             await callback(task)
-                        except Exception as e:
-                            logger.error(f"Error in task failed callback: {e}")
+                        except Exception:
+                            logger.exception("Error in task failed callback:")
 
                     logger.error(
-                        f"Task {task.task_id} failed with exit code {process.returncode}",
+                        "Task %s failed with exit code %d",
+                        task.task_id, process.returncode,
                     )
 
             except TimeoutError:
                 # Task timed out
-                logger.error(
-                    f"Task {task.task_id} timed out after {task.timeout} seconds",
+                logger.exception(
+                    "Task %s timed out after %d seconds",
+                    task.task_id, task.timeout,
                 )
 
                 # Terminate process
@@ -397,7 +400,7 @@ class AgentPool:
 
                 task.status = TaskStatus.FAILED
                 task.error = f"Task timed out after {task.timeout} seconds"
-                task.end_time = datetime.now()
+                task.end_time = datetime.now(UTC)
                 agent.failed_tasks += 1
 
             # Update execution time
@@ -416,11 +419,11 @@ class AgentPool:
                     )
 
         except Exception as e:
-            logger.error(f"Error executing task {task.task_id}: {e}")
+            logger.exception("Error executing task %s:", task.task_id)
 
             task.status = TaskStatus.FAILED
             task.error = str(e)
-            task.end_time = datetime.now()
+            task.end_time = datetime.now(UTC)
             agent.failed_tasks += 1
             agent.state = AgentState.ERROR
 
@@ -428,8 +431,8 @@ class AgentPool:
             for callback in self.task_failed_callbacks:
                 try:
                     await callback(task)
-                except Exception as cb_error:
-                    logger.error(f"Error in agent error callback: {cb_error}")
+                except Exception:
+                    logger.exception("Error in agent error callback:")
 
         finally:
             # Reset agent state
@@ -445,13 +448,14 @@ class AgentPool:
         """Monitor agent health and status."""
         while self._running:
             try:
-                current_time = datetime.now()
+                current_time = datetime.now(UTC)
 
                 for agent in list(self.agents.values()):
                     # Check for stale agents (no heartbeat in 5 minutes)
                     if (current_time - agent.last_heartbeat).total_seconds() > 300:
                         logger.warning(
-                            f"Agent {agent.agent_id} appears stale, terminating",
+                            "Agent %s appears stale, terminating",
+                            agent.agent_id,
                         )
                         await self._terminate_agent(agent.agent_id)
 
@@ -464,8 +468,8 @@ class AgentPool:
 
                 await asyncio.sleep(30)  # Check every 30 seconds
 
-            except Exception as e:
-                logger.error(f"Error in agent monitor: {e}")
+            except Exception:
+                logger.exception("Error in agent monitor:")
                 await asyncio.sleep(30)
 
     async def _terminate_agent(self, agent_id: str) -> None:
@@ -488,7 +492,7 @@ class AgentPool:
         agent.current_task = None
         agent.process = None
 
-        logger.info(f"Terminated agent {agent_id}")
+        logger.info("Terminated agent %s", agent_id)
 
     def get_agent_status(self, agent_id: str) -> dict[str, Any] | None:
         """Get status of a specific agent."""
@@ -578,11 +582,10 @@ class AgentPool:
         """Get intelligent scheduling metrics."""
         if self.intelligent_scheduling:
             return self.scheduler.get_scheduling_metrics()
-        else:
-            return {
-                "intelligent_scheduling": False,
-                "queue_size": self.task_queue.qsize(),
-            }
+        return {
+            "intelligent_scheduling": False,
+            "queue_size": self.task_queue.qsize(),
+        }
 
     def set_intelligent_scheduling(self, enabled: bool) -> None:
         """Enable or disable intelligent scheduling."""
@@ -593,7 +596,7 @@ class AgentPool:
             for agent in self.agents.values():
                 self.scheduler.register_agent(agent)
 
-        logger.info(f"Intelligent scheduling {'enabled' if enabled else 'disabled'}")
+        logger.info("Intelligent scheduling %s", "enabled" if enabled else "disabled")
 
     def update_agent_capability(
         self,
@@ -603,7 +606,7 @@ class AgentPool:
         """Update an agent's capability profile."""
         if self.intelligent_scheduling and agent_id in self.agents:
             self.scheduler.agent_capabilities[agent_id] = capability
-            logger.info(f"Updated capability for agent {agent_id}")
+            logger.info("Updated capability for agent %s", agent_id)
 
     def rebalance_workload(self) -> list[tuple[str, str]]:
         """Trigger workload rebalancing."""
@@ -640,11 +643,12 @@ class AgentPool:
                     to_cap.current_load = min(1.0, to_cap.current_load + load_transfer)
 
                     logger.info(
-                        f"Rebalanced load: {from_agent_id} ({from_cap.current_load:.2f}) -> {to_agent_id} ({to_cap.current_load:.2f})",
+                        "Rebalanced load: %s (%.2f) -> %s (%.2f)",
+                        from_agent_id, from_cap.current_load, to_agent_id, to_cap.current_load,
                     )
 
-        except Exception as e:
-            logger.error(f"Error executing rebalancing: {e}")
+        except Exception:
+            logger.exception("Error executing rebalancing:")
 
     def enable_auto_rebalancing(self, interval_seconds: int = 300) -> None:
         """Enable automatic workload rebalancing."""
@@ -657,7 +661,7 @@ class AgentPool:
 
         # Start auto-rebalancing task
         asyncio.create_task(self._auto_rebalancing_loop())
-        logger.info(f"Auto-rebalancing enabled with {interval_seconds}s interval")
+        logger.info("Auto-rebalancing enabled with %ds interval", interval_seconds)
 
     async def _auto_rebalancing_loop(self) -> None:
         """Automatic rebalancing loop."""
@@ -669,19 +673,19 @@ class AgentPool:
 
                 # Trigger rebalancing if score is below threshold (0.7)
                 if load_balancing_score < 0.7:
-                    logger.info(f"Load balancing score low ({load_balancing_score:.3f}), triggering rebalancing")
+                    logger.info("Load balancing score low (%.3f), triggering rebalancing", load_balancing_score)
                     rebalancing_actions = self.rebalance_workload()
 
                     if rebalancing_actions:
-                        logger.info(f"Executed {len(rebalancing_actions)} rebalancing actions")
+                        logger.info("Executed %d rebalancing actions", len(rebalancing_actions))
 
                 await asyncio.sleep(getattr(self, "_auto_rebalancing_interval", 300))
 
-            except Exception as e:
-                logger.error(f"Error in auto-rebalancing loop: {e}")
+            except Exception:
+                logger.exception("Error in auto-rebalancing loop:")
                 await asyncio.sleep(60)  # Wait before retrying
 
-    def enable_branch_testing(self, repo_path: str = None, results_dir: str = None) -> None:
+    def enable_branch_testing(self, repo_path: str | None = None, results_dir: str | None = None) -> None:
         """Enable automatic branch testing integration."""
         try:
             from .branch_test_manager import BranchTestManager
@@ -698,14 +702,14 @@ class AgentPool:
             self._test_integration_enabled = True
             logger.info("Branch testing integration enabled")
 
-        except Exception as e:
-            logger.error(f"Failed to enable branch testing: {e}")
+        except Exception:
+            logger.exception("Failed to enable branch testing:")
             self._test_integration_enabled = False
 
     def create_test_task(
         self,
         branch_name: str,
-        test_suite_name: str = None,
+        test_suite_name: str | None = None,
         priority: int = 7,
         timeout: int = 600,
     ) -> Task:
@@ -721,7 +725,8 @@ class AgentPool:
             Task object for test execution
         """
         if not self._test_integration_enabled or not self.branch_test_manager:
-            raise RuntimeError("Branch testing is not enabled")
+            msg = "Branch testing is not enabled"
+            raise RuntimeError(msg)
 
         task_id = f"test-{branch_name}-{test_suite_name or 'all'}-{int(time.time())}"
 
@@ -749,7 +754,7 @@ class AgentPool:
                 f"print(f'Completed {{len(results)}} tests on {branch_name}')",
             ]
 
-        task = Task(
+        return Task(
             task_id=task_id,
             title=f"Test {test_suite_name or 'All'} on {branch_name}",
             description=f"Execute {'specific' if test_suite_name else 'all'} tests on branch {branch_name}",
@@ -766,7 +771,6 @@ class AgentPool:
             },
         )
 
-        return task
 
     async def auto_test_branch(self, branch_name: str) -> list[str]:
         """Automatically create and schedule test tasks for a branch.
@@ -810,10 +814,10 @@ class AgentPool:
                 self.add_task(task)
                 task_ids.append(task.task_id)
 
-            logger.info(f"Created {len(task_ids)} test tasks for branch {branch_name}")
+            logger.info("Created %d test tasks for branch %s", len(task_ids), branch_name)
 
-        except Exception as e:
-            logger.error(f"Error creating test tasks for {branch_name}: {e}")
+        except Exception:
+            logger.exception("Error creating test tasks for %s:", branch_name)
 
         return task_ids
 
@@ -825,7 +829,7 @@ class AgentPool:
         try:
             return self.branch_test_manager.get_branch_test_summary(branch_name)
         except Exception as e:
-            logger.error(f"Error getting test status for {branch_name}: {e}")
+            logger.exception("Error getting test status for %s:", branch_name)
             return {"error": str(e)}
 
     def get_all_branch_test_status(self) -> dict[str, dict[str, Any]]:
@@ -836,10 +840,10 @@ class AgentPool:
         try:
             return self.branch_test_manager.get_all_branch_summaries()
         except Exception as e:
-            logger.error(f"Error getting all branch test status: {e}")
+            logger.exception("Error getting all branch test status:")
             return {"error": str(e)}
 
-    def enable_recovery_system(self, work_dir: str = None, max_snapshots: int = 50) -> None:
+    def enable_recovery_system(self, work_dir: str | None = None, max_snapshots: int = 50) -> None:
         """Enable automatic rollback and error recovery system."""
         try:
             from .recovery_engine import RecoveryEngine
@@ -858,8 +862,8 @@ class AgentPool:
 
             logger.info("Recovery and rollback system enabled")
 
-        except Exception as e:
-            logger.error(f"Failed to enable recovery system: {e}")
+        except Exception:
+            logger.exception("Failed to enable recovery system:")
             self._recovery_enabled = False
 
     def _setup_recovery_callbacks(self) -> None:
@@ -912,8 +916,8 @@ class AgentPool:
         self,
         operation_type: str,
         description: str,
-        files_to_backup: list[str] = None,
-        context: dict[str, Any] = None,
+        files_to_backup: list[str] | None = None,
+        context: dict[str, Any] | None = None,
     ) -> str | None:
         """Create a snapshot before a critical operation.
 
@@ -945,7 +949,7 @@ class AgentPool:
 
             op_type = op_type_map.get(operation_type, OperationType.TASK_EXECUTION)
 
-            snapshot_id = await self.recovery_engine.create_snapshot(
+            return await self.recovery_engine.create_snapshot(
                 operation_type=op_type,
                 description=description,
                 agent_pool=self,
@@ -954,10 +958,9 @@ class AgentPool:
                 operation_context=context,
             )
 
-            return snapshot_id
 
-        except Exception as e:
-            logger.error(f"Failed to create operation snapshot: {e}")
+        except Exception:
+            logger.exception("Failed to create operation snapshot:")
             return None
 
     async def rollback_to_snapshot(self, snapshot_id: str) -> bool:
@@ -981,14 +984,14 @@ class AgentPool:
             )
 
             if success:
-                logger.info(f"Successfully rolled back to snapshot {snapshot_id}")
+                logger.info("Successfully rolled back to snapshot %s", snapshot_id)
             else:
-                logger.error(f"Failed to rollback to snapshot {snapshot_id}")
+                logger.error("Failed to rollback to snapshot %s", snapshot_id)
 
             return success
 
-        except Exception as e:
-            logger.error(f"Error during rollback to snapshot {snapshot_id}: {e}")
+        except Exception:
+            logger.exception("Error during rollback to snapshot %s:", snapshot_id)
             return False
 
     def get_recovery_status(self) -> dict[str, Any]:
@@ -1008,7 +1011,7 @@ class AgentPool:
             }
 
         except Exception as e:
-            logger.error(f"Error getting recovery status: {e}")
+            logger.exception("Error getting recovery status:")
             return {"recovery_enabled": True, "error": str(e)}
 
     def list_recovery_snapshots(self) -> list[dict[str, Any]]:
@@ -1035,8 +1038,8 @@ class AgentPool:
             snapshots.sort(key=lambda x: x["timestamp"], reverse=True)
             return snapshots
 
-        except Exception as e:
-            logger.error(f"Error listing recovery snapshots: {e}")
+        except Exception:
+            logger.exception("Error listing recovery snapshots:")
             return []
 
     async def execute_with_recovery(
@@ -1044,9 +1047,9 @@ class AgentPool:
         operation_func: Callable[[], Awaitable[Any]],
         operation_type: str,
         description: str,
-        files_to_backup: list[str] = None,
+        files_to_backup: list[str] | None = None,
         max_retries: int = 3,
-        context: dict[str, Any] = None,
+        context: dict[str, Any] | None = None,
     ) -> tuple[bool, Any]:
         """Execute an operation with automatic snapshot and recovery.
 
@@ -1067,7 +1070,7 @@ class AgentPool:
                 result = await operation_func()
                 return True, result
             except Exception as e:
-                logger.error(f"Operation failed without recovery: {e}")
+                logger.exception("Operation failed without recovery:")
                 return False, str(e)
 
         # Create snapshot before operation
@@ -1096,11 +1099,11 @@ class AgentPool:
                 if self.recovery_engine:
                     self.recovery_engine.complete_operation(operation_id)
 
-                logger.info(f"Operation completed successfully: {description}")
+                logger.info("Operation completed successfully: %s", description)
                 return True, result
 
             except Exception as e:
-                logger.error(f"Operation failed (attempt {retry_count + 1}): {e}")
+                logger.exception("Operation failed (attempt %d):", retry_count + 1)
 
                 if retry_count < max_retries:
                     # Attempt recovery
@@ -1123,12 +1126,12 @@ class AgentPool:
                             continue
 
                     # Simple retry without recovery
-                    logger.info(f"Retrying operation without recovery (attempt {retry_count + 2})")
+                    logger.info("Retrying operation without recovery (attempt %d)", retry_count + 2)
                     retry_count += 1
                     await asyncio.sleep(2**retry_count)  # Exponential backoff
                 else:
                     # Max retries exceeded
-                    logger.error(f"Operation failed after {max_retries + 1} attempts: {description}")
+                    logger.exception("Operation failed after %d attempts: %s", max_retries + 1, description)
                     return False, str(e)
 
         return False, "Max retries exceeded"

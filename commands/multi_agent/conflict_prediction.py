@@ -28,7 +28,8 @@ class PredictConflictsCommand(BaseCommand):
         try:
             # Validate required parameters
             if not branches:
-                raise CommandError("Branches list is required for conflict prediction")
+                msg = "Branches list is required for conflict prediction"
+                raise CommandError(msg)
 
             self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
             self.print_info(f"   Time horizon: {time_horizon} days")
@@ -103,7 +104,8 @@ class PredictConflictsCommand(BaseCommand):
             return asyncio.run(run_prediction())
 
         except Exception as e:
-            raise CommandError(f"Error predicting conflicts: {e}") from e
+            msg = f"Error predicting conflicts: {e}"
+            raise CommandError(msg) from e
 
 
 class PredictionSummaryCommand(BaseCommand):
@@ -140,7 +142,8 @@ class PredictionSummaryCommand(BaseCommand):
             return {"success": True, "repo_path": repo_path, "summary": summary}
 
         except Exception as e:
-            raise CommandError(f"Error getting prediction summary: {e}") from e
+            msg = f"Error getting prediction summary: {e}"
+            raise CommandError(msg) from e
 
 
 class AnalyzeConflictPatternsCommand(BaseCommand):
@@ -175,4 +178,5 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
             return {"success": True, "repo_path": repo_path, "analysis": analysis}
 
         except Exception as e:
-            raise CommandError(f"Error analyzing conflict patterns: {e}") from e
+            msg = f"Error analyzing conflict patterns: {e}"
+            raise CommandError(msg) from e

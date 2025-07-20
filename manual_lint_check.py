@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manual lint check script to analyze files for common issues"""
+"""Manual lint check script to analyze files for common issues."""
 
 import ast
 from pathlib import Path
@@ -7,7 +7,7 @@ from typing import Any
 
 
 def check_file_for_issues(file_path: Path) -> list[dict[str, Any]]:
-    """Check a single Python file for common lint issues"""
+    """Check a single Python file for common lint issues."""
     issues = []
 
     try:
@@ -99,7 +99,7 @@ def check_file_for_issues(file_path: Path) -> list[dict[str, Any]]:
 
 
 def scan_directory(directory: Path) -> list[dict[str, Any]]:
-    """Scan directory for Python files and check for issues"""
+    """Scan directory for Python files and check for issues."""
     all_issues = []
 
     for file_path in directory.rglob("*.py"):
@@ -127,7 +127,7 @@ def scan_directory(directory: Path) -> list[dict[str, Any]]:
 
 
 def main():
-    """Main function to run lint check"""
+    """Main function to run lint check."""
     project_root = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     print("Manual Lint Check Results")

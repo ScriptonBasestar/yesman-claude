@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to fix lint issues using ruff"""
+"""Script to fix lint issues using ruff."""
 
 import os
 import subprocess
@@ -7,7 +7,7 @@ import sys
 
 
 def run_command(cmd, description):
-    """Run a command and print its output"""
+    """Run a command and print its output."""
     print(f"\n{'=' * 50}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -33,7 +33,7 @@ def run_command(cmd, description):
 
 
 def main():
-    """Main function to run lint fixes"""
+    """Main function to run lint fixes."""
     # Check if we're in the right directory
     if not os.path.exists("pyproject.toml"):
         print("Error: pyproject.toml not found. Please run from project root.")

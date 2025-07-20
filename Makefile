@@ -148,21 +148,21 @@ EXCLUDE_DIRS = --exclude migrations --exclude node_modules --exclude examples
 UNSAFE_FIXES ?=
 UNSAFE_FLAG = $(if $(UNSAFE_FIXES),--unsafe-fixes,)
 
-# lint-check: 변경 사항 미리보기 (diff 모드)
-# - ruff check --diff: 수정될 내용을 미리보기로 표시 (실제 수정 없음)
+# lint-check: pre-commit 수준의 검사 (자동 수정 없음)
+# - ruff check: 모든 활성화된 규칙 검사 (D415 포함)
 # - mypy: 타입 검사
 # - bandit: 보안 취약점 검사 (medium 레벨)
-# - mdformat: 마크다운 포맷팅 체크 (diff 모드)
+# - mdformat: 마크다운 포맷팅 체크
 lint-check:
-	@echo "Running lint checks only (no auto-fix)..."
+	@echo "Running lint checks (pre-commit level, no auto-fix)..."
 	@echo "Running ruff check..."
-	uv run ruff check $(LINT_DIRS) --diff $(EXCLUDE_DIRS)
+	uv run ruff check $(LINT_DIRS) $(EXCLUDE_DIRS)
 	@echo "Running mypy..."
 	uv run mypy $(LINT_DIRS_CORE) --ignore-missing-imports $(EXCLUDE_DIRS)
 	@echo "Running bandit security check..."
 	uv run bandit -r $(LINT_DIRS_SECURITY) --skip B101,B404,B603,B607,B602 --severity-level medium --quiet --exclude "*/tests/*,*/scripts/*,*/debug/*,*/examples/*" || echo "✅ Security check completed"
 	@echo "Running mdformat check..."
-	uv run mdformat --check --diff *.md docs/**/*.md --wrap 120 || echo "✅ Markdown format check completed"
+	uv run mdformat --check *.md docs/**/*.md --wrap 120 || echo "✅ Markdown format check completed"
 
 lint: lint-check
 

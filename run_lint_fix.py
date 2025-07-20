@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run lint-fix commands directly from Python"""
+"""Run lint-fix commands directly from Python."""
 
 import os
 import subprocess
@@ -10,6 +10,7 @@ def run_command(cmd, description):
     print(f"Running: {description}")
     print(f"Command: {cmd}")
     try:
+        # nosec B602 - shell=True is intentional for this debug script
         result = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True)
         print(f"Return code: {result.returncode}")
         if result.stdout:
@@ -39,7 +40,8 @@ def main():
             "MyPy type checking",
         ),
         (
-            "uv run bandit -r libs commands --skip B101,B404,B603,B607,B602 --severity-level medium --quiet --exclude '*/tests/*,*/scripts/*,*/debug/*,*/examples/*' || echo '✅ Security check completed'",
+            "uv run bandit -r libs commands --skip B101,B404,B603,B607,B602 --severity-level medium --quiet "
+            + "--exclude '*/tests/*,*/scripts/*,*/debug/*,*/examples/*' || echo '✅ Security check completed'",
             "Bandit security check",
         ),
         ("uv run mdformat *.md docs/**/*.md --wrap 120", "Markdown format"),

@@ -3,7 +3,7 @@
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -68,7 +68,7 @@ class AutoResolutionResult:
 
     # Metadata
     metadata: dict[str, Any] = field(default_factory=dict)
-    resolved_at: datetime = field(default_factory=datetime.now)
+    resolved_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class AutoResolver:
@@ -82,7 +82,7 @@ class AutoResolver:
         conflict_predictor: ConflictPredictor,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-    ):
+    ) -> None:
         """Initialize the auto resolver.
 
         Args:
@@ -152,13 +152,13 @@ class AutoResolver:
         Returns:
             AutoResolutionResult with comprehensive resolution details
         """
-        session_id = f"auto_resolve_{branch1}_{branch2}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        session_id = f"auto_resolve_{branch1}_{branch2}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         mode = mode or self.default_mode
         target_branch = target_branch or branch1
-        start_time = datetime.now()
+        start_time = datetime.now(UTC)
 
         logger.info(
-            f"Starting auto-resolution session {session_id} in {mode.value} mode",
+            "Starting auto-resolution session %s in %s mode", session_id, mode.value
         )
 
         try:
@@ -181,17 +181,17 @@ class AutoResolver:
                     outcome=ResolutionOutcome.FULLY_RESOLVED,
                     conflicts_detected=0,
                     conflicts_resolved=0,
-                    resolution_time=(datetime.now() - start_time).total_seconds(),
+                    resolution_time=(datetime.now(UTC) - start_time).total_seconds(),
                     confidence_score=1.0,
                 )
 
-            logger.info(f"Detected {len(conflicts)} semantic conflicts")
+            logger.info("Detected %d semantic conflicts", len(conflicts))
 
             # Step 2: Assess resolvability
             resolvable_conflicts, escalated_conflicts = self._assess_conflict_resolvability(conflicts, mode)
 
             logger.info(
-                f"Resolvable: {len(resolvable_conflicts)}, Escalated: {len(escalated_conflicts)}",
+                "Resolvable: %d, Escalated: %d", len(resolvable_conflicts), len(escalated_conflicts)
             )
 
             # Step 3: Perform automatic resolution
@@ -219,7 +219,7 @@ class AutoResolver:
             )
 
             confidence_score = self._calculate_session_confidence(applied_results)
-            resolution_time = (datetime.now() - start_time).total_seconds()
+            resolution_time = (datetime.now(UTC) - start_time).total_seconds()
 
             # Create result
             result = AutoResolutionResult(
@@ -231,7 +231,7 @@ class AutoResolver:
                 outcome=outcome,
                 conflicts_detected=len(conflicts),
                 conflicts_resolved=len(applied_results),
-                files_processed=len(set(r.file_path for r in applied_results)),
+                files_processed=len({r.file_path for r in applied_results}),
                 merge_results=applied_results,
                 resolution_time=resolution_time,
                 confidence_score=confidence_score,
@@ -250,11 +250,11 @@ class AutoResolver:
             self._update_resolution_stats(result)
             self._learn_from_resolution(result, conflicts)
 
-            logger.info(f"Auto-resolution completed: {outcome.value}")
+            logger.info("Auto-resolution completed: %s", outcome.value)
             return result
 
         except Exception as e:
-            logger.error(f"Error in auto-resolution session {session_id}: {e}")
+            logger.exception("Error in auto-resolution session %s: %s", session_id, e)
             return AutoResolutionResult(
                 session_id=session_id,
                 branch1=branch1,
@@ -262,7 +262,7 @@ class AutoResolver:
                 target_branch=target_branch,
                 mode=mode,
                 outcome=ResolutionOutcome.RESOLUTION_FAILED,
-                resolution_time=(datetime.now() - start_time).total_seconds(),
+                resolution_time=(datetime.now(UTC) - start_time).total_seconds(),
                 metadata={"error": str(e)},
             )
 
@@ -281,7 +281,7 @@ class AutoResolver:
             Dictionary with prevention results and recommendations
         """
         logger.info(
-            f"Starting predictive conflict prevention for {len(branches)} branches",
+            "Starting predictive conflict prevention for %d branches", len(branches)
         )
 
         try:
@@ -325,7 +325,7 @@ class AutoResolver:
             }
 
         except Exception as e:
-            logger.error(f"Error in predictive conflict prevention: {e}")
+            logger.exception("Error in predictive conflict prevention: %s", e)
             return {
                 "status": "prevention_failed",
                 "error": str(e),
@@ -338,7 +338,7 @@ class AutoResolver:
         mode: AutoResolutionMode,
     ) -> tuple[list[SemanticConflict], list[SemanticConflict]]:
         """Assess which conflicts can be auto-resolved based on mode and risk."""
-        threshold = self.confidence_thresholds[mode]
+        self.confidence_thresholds[mode]
         resolvable = []
         escalated = []
 
@@ -407,7 +407,7 @@ class AutoResolver:
         mode: AutoResolutionMode,
     ) -> list[MergeResult]:
         """Perform batch resolution of conflicts using semantic merger."""
-        logger.info(f"Performing batch resolution of {len(conflicts)} conflicts")
+        logger.info("Performing batch resolution of %d conflicts", len(conflicts))
 
         # Use semantic merger to auto-resolve conflicts
         merge_results = await self.semantic_merger.auto_resolve_conflicts(conflicts)
@@ -421,7 +421,8 @@ class AutoResolver:
                 filtered_results.append(result)
             else:
                 logger.info(
-                    f"Filtering out merge result for {result.file_path} due to low confidence or integrity issues",
+                    "Filtering out merge result for %s due to low confidence or integrity issues",
+                    result.file_path
                 )
 
         return filtered_results
@@ -431,14 +432,14 @@ class AutoResolver:
         merge_results: list[MergeResult],
     ) -> list[MergeResult]:
         """Validate merge results before application."""
-        logger.info(f"Validating {len(merge_results)} merge results")
+        logger.info("Validating %d merge results", len(merge_results))
         validated = []
 
         for result in merge_results:
             if await self._validate_single_merge_result(result):
                 validated.append(result)
             else:
-                logger.warning(f"Validation failed for merge result: {result.merge_id}")
+                logger.warning("Validation failed for merge result: %s", result.merge_id)
 
         return validated
 
@@ -470,18 +471,18 @@ class AutoResolver:
         target_branch: str,
     ) -> list[MergeResult]:
         """Apply validated merge results to target branch."""
-        logger.info(f"Applying {len(merge_results)} merge results to {target_branch}")
+        logger.info("Applying %d merge results to %s", len(merge_results), target_branch)
         applied = []
 
         for result in merge_results:
             try:
                 if await self._apply_single_merge_result(result, target_branch):
                     applied.append(result)
-                    logger.info(f"Successfully applied merge for {result.file_path}")
+                    logger.info("Successfully applied merge for %s", result.file_path)
                 else:
-                    logger.warning(f"Failed to apply merge for {result.file_path}")
+                    logger.warning("Failed to apply merge for %s", result.file_path)
             except Exception as e:
-                logger.error(f"Error applying merge result for {result.file_path}: {e}")
+                logger.exception("Error applying merge result for %s: %s", result.file_path, e)
 
         return applied
 
@@ -494,7 +495,7 @@ class AutoResolver:
         try:
             # This would write the merged content to the file in the target branch
             # For now, just simulate success
-            file_path = self.repo_path / result.file_path
+            self.repo_path / result.file_path
 
             # In a real implementation, this would:
             # 1. Checkout target branch
@@ -506,7 +507,7 @@ class AutoResolver:
             return True
 
         except Exception as e:
-            logger.error(f"Error applying merge result: {e}")
+            logger.exception("Error applying merge result: %s", e)
             return False
 
     def _determine_resolution_outcome(
@@ -525,12 +526,11 @@ class AutoResolver:
 
         if resolved_conflicts == total_conflicts:
             return ResolutionOutcome.FULLY_RESOLVED
-        elif resolved_conflicts > 0:
+        if resolved_conflicts > 0:
             return ResolutionOutcome.PARTIALLY_RESOLVED
-        elif escalated_count > 0:
+        if escalated_count > 0:
             return ResolutionOutcome.ESCALATED_TO_HUMAN
-        else:
-            return ResolutionOutcome.RESOLUTION_FAILED
+        return ResolutionOutcome.RESOLUTION_FAILED
 
     def _calculate_session_confidence(
         self,
@@ -613,7 +613,7 @@ class AutoResolver:
         # For now, just simulate success for certain measures
         return measure in ["standardize_import_order", "add_import_sorting_hooks"]
 
-    def _update_resolution_stats(self, result: AutoResolutionResult):
+    def _update_resolution_stats(self, result: AutoResolutionResult) -> None:
         """Update resolution statistics."""
         self.resolution_stats["total_sessions"] += 1
 
@@ -645,7 +645,7 @@ class AutoResolver:
         self,
         result: AutoResolutionResult,
         conflicts: list[SemanticConflict],
-    ):
+    ) -> None:
         """Learn from resolution results to improve future performance."""
         # Record successful patterns
         if result.outcome in [
@@ -763,7 +763,7 @@ class AutoResolver:
         for pattern, failures in common_failures:
             if len(failures) > 2:
                 recommendations.append(
-                    f"Improve resolution strategy for {pattern} conflicts (failed {len(failures)} times)",
+                    "Improve resolution strategy for %s conflicts (failed %d times)" % (pattern, len(failures))
                 )
 
         return recommendations

@@ -7,7 +7,7 @@ class TestThemeSwitching:
     """Tests for theme switching and CSS generation."""
 
     @pytest.fixture
-    def theme_manager(self):
+    def theme_manager(self) -> ThemeManager:
         """Create ThemeManager instance."""
         import tempfile
         from pathlib import Path
@@ -15,7 +15,7 @@ class TestThemeSwitching:
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 
-    def test_theme_switching(self, theme_manager):
+    def test_theme_switching(self, theme_manager: ThemeManager) -> None:
         """Test 3: Theme switching and CSS generation."""
         # Test built-in themes
         themes = theme_manager.get_all_themes()

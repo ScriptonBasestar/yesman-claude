@@ -9,10 +9,11 @@ from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
 from commands.enter import enter
-from commands.fix_lint import fix_lint
+
+# from commands.fix_lint import fix_lint  # File doesn't exist
 from commands.logs import logs
 from commands.ls import ls
-from commands.multi_agent import multi_agent_cli
+from commands.multi_agent import multi_agent as multi_agent_cli
 from commands.setup import setup, up  # setup is main, up is alias
 from commands.show import show
 from commands.status import status
@@ -50,7 +51,7 @@ cli.add_command(cleanup)
 cli.add_command(task_runner)
 cli.add_command(multi_agent_cli)
 cli.add_command(validate)
-cli.add_command(fix_lint)
+# cli.add_command(fix_lint)  # Command doesn't exist
 
 if __name__ == "__main__":
     cli()

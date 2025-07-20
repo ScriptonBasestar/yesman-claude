@@ -4,6 +4,7 @@
 
 import sys
 from pathlib import Path
+from typing import Any, Generator
 
 import pytest
 
@@ -86,7 +87,7 @@ def sample_prompts():
 
 
 @pytest.fixture
-def test_config_file(temp_dir):
+def test_config_file(temp_dir: str) -> Path:
     """테스트용 설정 파일 fixture."""
     config = {
         "yesman": {
@@ -123,7 +124,7 @@ def temp_project_root():
 
 
 @pytest.fixture
-def launcher(temp_project_root):
+def launcher(temp_project_root: Path) -> Any:
     """Create DashboardLauncher with temp project root."""
     from libs.dashboard import DashboardLauncher
 
@@ -167,7 +168,7 @@ def performance_optimizer():
 
 
 # pytest 설정
-def pytest_configure(config):
+def pytest_configure(config: Any) -> None:
     """Pytest 설정 커스터마이징."""
     config.addinivalue_line(
         "markers",
@@ -184,23 +185,22 @@ def pytest_configure(config):
 
 
 # 테스트 세션 시작/종료 훅
-def pytest_sessionstart(session):
+def pytest_sessionstart(session: Any) -> None:
     """테스트 세션 시작 시 실행."""
-    print("\n🧪 Starting Yesman-Claude test suite...")
 
 
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     """테스트 세션 종료 시 실행."""
-    print(f"\n✅ Test suite completed with exit status: {exitstatus}")
 
 
 # 테스트 결과 리포팅 커스터마이징
-def pytest_report_teststatus(report, config):
+def pytest_report_teststatus(report: Any, config: Any) -> Any:
     """테스트 상태 리포팅 커스터마이징."""
     if report.when == "call":
         if report.passed:
             return "passed", "✓", "PASSED"
-        elif report.failed:
+        if report.failed:
             return "failed", "✗", "FAILED"
-        elif report.skipped:
+        if report.skipped:
             return "skipped", "⊘", "SKIPPED"
+    return None

@@ -296,7 +296,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
 
 
 # Validation decorators for common use cases
-def validate_input(validation_func, field_name: str):
+def validate_input(validation_func: Any, field_name: str):
     """Decorator to validate function inputs.
 
     Args:
@@ -309,7 +309,7 @@ def validate_input(validation_func, field_name: str):
             pass
     """
 
-    def decorator(func):
+    def decorator(func: Any):
         def wrapper(*args, **kwargs):
             # Get the value to validate
             if field_name in kwargs:
@@ -318,7 +318,8 @@ def validate_input(validation_func, field_name: str):
             elif args:
                 value = args[0]
             else:
-                raise ValueError(f"Missing required argument: {field_name}")
+                msg = f"Missing required argument: {field_name}"
+                raise ValueError(msg)
 
             # Validate
             valid, error = validation_func(value)

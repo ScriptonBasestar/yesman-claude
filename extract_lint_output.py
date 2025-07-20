@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to extract lint output by running each command individually"""
+"""Script to extract lint output by running each command individually."""
 
 import os
 import subprocess
@@ -7,7 +7,7 @@ import sys
 
 
 def run_and_capture(cmd_list, description):
-    """Run command and return output"""
+    """Run command and return output."""
     try:
         result = subprocess.run(
             cmd_list,

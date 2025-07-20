@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class SessionNotFoundError(YesmanError):
     """Raised when a session is not found."""
 
-    def __init__(self, session_name: str):
+    def __init__(self, session_name: str) -> None:
         super().__init__(
             f"Session '{session_name}' not found",
             category=ErrorCategory.VALIDATION,
@@ -35,7 +35,7 @@ class SessionNotFoundError(YesmanError):
 class SessionAlreadyExistsError(YesmanError):
     """Raised when trying to create a session that already exists."""
 
-    def __init__(self, session_name: str):
+    def __init__(self, session_name: str) -> None:
         super().__init__(
             f"Session '{session_name}' already exists",
             category=ErrorCategory.VALIDATION,
@@ -46,7 +46,7 @@ class SessionAlreadyExistsError(YesmanError):
 class SessionConfigurationError(YesmanError):
     """Raised when session configuration is invalid."""
 
-    def __init__(self, message: str, config: dict | None = None):
+    def __init__(self, message: str, config: dict | None = None) -> None:
         context = ErrorContext(operation="session_configuration", component="session_helpers", additional_info={"config": config} if config else None)
         super().__init__(
             message,
@@ -67,8 +67,9 @@ def get_tmux_server() -> libtmux.Server:
     try:
         return libtmux.Server()
     except Exception as e:
+        msg = "Failed to connect to tmux server. Is tmux running?"
         raise YesmanError(
-            "Failed to connect to tmux server. Is tmux running?",
+            msg,
             category=ErrorCategory.SYSTEM,
             cause=e,
         ) from e
@@ -89,7 +90,7 @@ def check_session_exists(session_name: str, server: libtmux.Server | None = None
         session = server.find_where({"session_name": session_name})
         return session is not None
     except Exception as e:
-        logger.error(f"Error checking session existence: {e}")
+        logger.exception(f"Error checking session existence: {e}")
         return False
 
 
@@ -159,21 +160,21 @@ def get_session_info(session_name: str, server: libtmux.Server | None = None) ->
             panes = []
             for pane in window.list_panes():
                 pane_info = PaneInfo(
-                    pane_id=pane.pane_id,
-                    pane_index=int(pane.pane_index),
+                    pane_id=pane.pane_id or "",
+                    pane_index=int(pane.pane_index or 0),
                     command=pane.pane_current_command or "",
                     is_active=pane.pane_active == "1",
-                    width=int(pane.pane_width),
-                    height=int(pane.pane_height),
+                    width=int(pane.pane_width or 0),
+                    height=int(pane.pane_height or 0),
                     is_claude=False,  # Will be determined by command inspection
                     is_controller=False,  # Will be determined by command inspection
                 )
                 panes.append(pane_info)
 
             window_info = WindowInfo(
-                window_id=window.window_id,
-                window_index=int(window.window_index),
-                window_name=window.window_name,
+                window_id=window.window_id or "",
+                window_index=int(window.window_index or 0),
+                window_name=window.window_name or "",
                 layout=window.window_layout or "",
                 panes=panes,
                 is_active=window.window_active == "1",
@@ -182,19 +183,20 @@ def get_session_info(session_name: str, server: libtmux.Server | None = None) ->
 
         return SessionInfo(
             session_name=session_name,
-            session_id=session.session_id,
+            session_id=session.session_id or "",
             created_at=str(session.session_created),
-            attached=int(session.session_attached) > 0,
+            attached=int(session.session_attached or 0) > 0,
             windows=windows,
             project_name="",  # Would need to be looked up from config
             template="",  # Would need to be looked up from config
-            status="running" if int(session.session_attached) > 0 else "detached",
+            status="running" if int(session.session_attached or 0) > 0 else "detached",
         )
 
     except Exception as e:
-        logger.error(f"Error getting session info for {session_name}: {e}")
+        logger.exception(f"Error getting session info for {session_name}: {e}")
+        msg = f"Failed to get session information for '{session_name}'"
         raise YesmanError(
-            f"Failed to get session information for '{session_name}'",
+            msg,
             category=ErrorCategory.SYSTEM,
             cause=e,
         ) from e
@@ -224,7 +226,8 @@ def create_session_windows(
     # Validate session name
     valid, error = validate_session_name(session_name)
     if not valid:
-        raise SessionConfigurationError(f"Invalid session name: {error}")
+        msg = f"Invalid session name: {error}"
+        raise SessionConfigurationError(msg)
 
     server = server or get_tmux_server()
 
@@ -239,8 +242,9 @@ def create_session_windows(
                 kill_session=False,
             )
         except LibTmuxException as e:
+            msg = f"Failed to create session '{session_name}'"
             raise YesmanError(
-                f"Failed to create session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             ) from e
@@ -273,8 +277,8 @@ def create_session_windows(
             if command:
                 send_keys_to_pane(
                     session_name=session_name,
-                    window_index=int(window.window_index),
-                    pane_index=int(pane.pane_index),
+                    window_index=int(window.window_index or 0),
+                    pane_index=int(pane.pane_index or 0),
                     keys=command,
                     server=server,
                 )
@@ -316,8 +320,9 @@ def get_active_pane(
         if window_name:
             window = session.find_where({"window_name": window_name})
             if not window:
+                msg = f"Window '{window_name}' not found in session '{session_name}'"
                 raise YesmanError(
-                    f"Window '{window_name}' not found in session '{session_name}'",
+                    msg,
                     category=ErrorCategory.VALIDATION,
                 )
         else:
@@ -326,22 +331,29 @@ def get_active_pane(
 
         # Get active pane
         active_pane = window.active_pane
+        if not active_pane:
+            msg = "No active pane found"
+            raise YesmanError(
+                msg,
+                category=ErrorCategory.VALIDATION,
+            )
 
         return PaneInfo(
-            pane_id=active_pane.pane_id,
-            pane_index=int(active_pane.pane_index),
+            pane_id=active_pane.pane_id or "",
+            pane_index=int(active_pane.pane_index or 0),
             command=active_pane.pane_current_command or "",
             is_active=True,
-            width=int(active_pane.pane_width),
-            height=int(active_pane.pane_height),
+            width=int(active_pane.pane_width or 0),
+            height=int(active_pane.pane_height or 0),
             is_claude=False,
             is_controller=False,
         )
 
     except Exception as e:
-        logger.error(f"Error getting active pane: {e}")
+        logger.exception(f"Error getting active pane: {e}")
+        msg = "Failed to get active pane information"
         raise YesmanError(
-            "Failed to get active pane information",
+            msg,
             category=ErrorCategory.SYSTEM,
             cause=e,
         ) from e
@@ -379,26 +391,28 @@ def send_keys_to_pane(
         # Get window by index
         window = None
         for w in session.list_windows():
-            if int(w.window_index) == window_index:
+            if int(w.window_index or 0) == window_index:
                 window = w
                 break
 
         if not window:
+            msg = f"Window index {window_index} not found in session '{session_name}'"
             raise YesmanError(
-                f"Window index {window_index} not found in session '{session_name}'",
+                msg,
                 category=ErrorCategory.VALIDATION,
             )
 
         # Get pane by index
         pane = None
         for p in window.list_panes():
-            if int(p.pane_index) == pane_index:
+            if int(p.pane_index or 0) == pane_index:
                 pane = p
                 break
 
         if not pane:
+            msg = f"Pane index {pane_index} not found in window {window_index}"
             raise YesmanError(
-                f"Pane index {pane_index} not found in window {window_index}",
+                msg,
                 category=ErrorCategory.VALIDATION,
             )
 
@@ -408,9 +422,10 @@ def send_keys_to_pane(
 
     except Exception as e:
         if not isinstance(e, YesmanError):
-            logger.error(f"Error sending keys to pane: {e}")
+            logger.exception(f"Error sending keys to pane: {e}")
+            msg = "Failed to send keys to pane"
             raise YesmanError(
-                "Failed to send keys to pane",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             ) from e
@@ -486,14 +501,16 @@ def expand_and_validate_directory(directory: str, create_if_missing: bool = Fals
                 path.mkdir(parents=True, exist_ok=True)
                 logger.info(f"Created directory: {path}")
             else:
+                msg = f"Directory does not exist: {path}"
                 raise YesmanError(
-                    f"Directory does not exist: {path}",
+                    msg,
                     category=ErrorCategory.VALIDATION,
                 )
 
         if not path.is_dir():
+            msg = f"Path exists but is not a directory: {path}"
             raise YesmanError(
-                f"Path exists but is not a directory: {path}",
+                msg,
                 category=ErrorCategory.VALIDATION,
             )
 
@@ -502,8 +519,9 @@ def expand_and_validate_directory(directory: str, create_if_missing: bool = Fals
     except Exception as e:
         if isinstance(e, YesmanError):
             raise
+        msg = f"Failed to validate directory: {directory}"
         raise YesmanError(
-            f"Failed to validate directory: {directory}",
+            msg,
             category=ErrorCategory.SYSTEM,
             cause=e,
         ) from e

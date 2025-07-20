@@ -220,16 +220,15 @@ class SystemThemeDetector:
 
             if system == "Darwin":  # macOS
                 return SystemThemeDetector._get_macos_theme()
-            elif system == "Windows":
+            if system == "Windows":
                 return SystemThemeDetector._get_windows_theme()
-            elif system == "Linux":
+            if system == "Linux":
                 return SystemThemeDetector._get_linux_theme()
-            else:
-                logger.warning(f"Unknown system: {system}")
-                return ThemeMode.LIGHT
+            logger.warning("Unknown system: %s", system)
+            return ThemeMode.LIGHT
 
         except Exception as e:
-            logger.error(f"Error detecting system theme: {e}")
+            logger.exception("Error detecting system theme: %s", e)
             return ThemeMode.LIGHT
 
     @staticmethod
@@ -246,14 +245,13 @@ class SystemThemeDetector:
 
             if result.returncode == 0 and "Dark" in result.stdout:
                 return ThemeMode.DARK
-            else:
-                return ThemeMode.LIGHT
+            return ThemeMode.LIGHT
 
         except subprocess.TimeoutExpired:
             logger.warning("macOS theme detection timed out")
             return ThemeMode.LIGHT
         except Exception as e:
-            logger.warning(f"macOS theme detection failed: {e}")
+            logger.warning("macOS theme detection failed: %s", e)
             return ThemeMode.LIGHT
 
     @staticmethod
@@ -277,7 +275,7 @@ class SystemThemeDetector:
             logger.warning("winreg not available")
             return ThemeMode.LIGHT
         except Exception as e:
-            logger.warning(f"Windows theme detection failed: {e}")
+            logger.warning("Windows theme detection failed: %s", e)
             return ThemeMode.LIGHT
 
     @staticmethod
@@ -316,7 +314,7 @@ class SystemThemeDetector:
             return ThemeMode.LIGHT
 
         except Exception as e:
-            logger.warning(f"Linux theme detection failed: {e}")
+            logger.warning("Linux theme detection failed: %s", e)
             return ThemeMode.LIGHT
 
 
@@ -337,14 +335,15 @@ class ThemeManager:
         """Reset the singleton instance."""
         cls._instance = None
 
-    def __init__(self, config_dir: Path | None = None):
+    def __init__(self, config_dir: Path | None = None) -> None:
         """Initialize the theme manager.
 
         Args:
             config_dir: Directory for storing user themes
         """
         if ThemeManager._instance is not None:
-            raise RuntimeError("ThemeManager is a singleton, use get_instance()")
+            msg = "ThemeManager is a singleton, use get_instance()"
+            raise RuntimeError(msg)
 
         # Paths
         self.config_dir = config_dir or Path.home() / ".config" / "yesman" / "themes"
@@ -460,14 +459,14 @@ class ThemeManager:
         if isinstance(theme, str):
             theme_obj = self.get_theme(theme)
             if theme_obj is None:
-                logger.error(f"Theme not found: {theme}")
+                logger.error("Theme not found: %s", theme)
                 return False
             theme = theme_obj
 
         self.current_theme = theme
         self.current_mode = theme.mode
 
-        logger.info(f"Theme changed to: {theme.name}")
+        logger.info("Theme changed to: %s", theme.name)
         return True
 
     def set_mode(self, mode: ThemeMode) -> bool:
@@ -484,16 +483,15 @@ class ThemeManager:
         if mode == ThemeMode.AUTO:
             self.auto_theme_enabled = True
             return self.update_from_system()
-        else:
-            self.auto_theme_enabled = False
+        self.auto_theme_enabled = False
 
-            # Select appropriate built-in theme
-            if mode == ThemeMode.LIGHT:
-                return self.set_theme("default_light")
-            elif mode == ThemeMode.DARK:
-                return self.set_theme("default_dark")
-            elif mode == ThemeMode.HIGH_CONTRAST:
-                return self.set_theme("high_contrast")
+        # Select appropriate built-in theme
+        if mode == ThemeMode.LIGHT:
+            return self.set_theme("default_light")
+        if mode == ThemeMode.DARK:
+            return self.set_theme("default_dark")
+        if mode == ThemeMode.HIGH_CONTRAST:
+            return self.set_theme("high_contrast")
 
         return False
 
@@ -506,8 +504,7 @@ class ThemeManager:
 
         if system_mode == ThemeMode.DARK:
             return self.set_theme("default_dark")
-        else:
-            return self.set_theme("default_light")
+        return self.set_theme("default_light")
 
     def save_theme(self, name: str, theme: Theme) -> bool:
         """Save user theme to disk.
@@ -526,11 +523,11 @@ class ThemeManager:
                 json.dump(theme.to_dict(), f, indent=2, ensure_ascii=False)
 
             self.user_themes[name] = theme
-            logger.info(f"Theme saved: {name}")
+            logger.info("Theme saved: %s", name)
             return True
 
         except Exception as e:
-            logger.error(f"Error saving theme {name}: {e}")
+            logger.exception("Error saving theme %s: %s", name, e)
             return False
 
     def load_theme(self, name: str) -> Theme | None:
@@ -553,11 +550,11 @@ class ThemeManager:
 
             theme = Theme.from_dict(data)
             self.user_themes[name] = theme
-            logger.info(f"Theme loaded: {name}")
+            logger.info("Theme loaded: %s", name)
             return theme
 
         except Exception as e:
-            logger.error(f"Error loading theme {name}: {e}")
+            logger.exception("Error loading theme %s: %s", name, e)
             return None
 
     def load_user_themes(self) -> None:
@@ -568,7 +565,7 @@ class ThemeManager:
                 self.load_theme(theme_name)
 
         except Exception as e:
-            logger.error(f"Error loading user themes: {e}")
+            logger.exception("Error loading user themes: %s", e)
 
     def delete_theme(self, name: str) -> bool:
         """Delete user theme.
@@ -582,7 +579,7 @@ class ThemeManager:
         try:
             # Don't allow deleting built-in themes
             if name in self.built_in_themes:
-                logger.error(f"Cannot delete built-in theme: {name}")
+                logger.error("Cannot delete built-in theme: %s", name)
                 return False
 
             theme_file = self.config_dir / f"{name}.json"
@@ -593,11 +590,11 @@ class ThemeManager:
             if name in self.user_themes:
                 del self.user_themes[name]
 
-            logger.info(f"Theme deleted: {name}")
+            logger.info("Theme deleted: %s", name)
             return True
 
         except Exception as e:
-            logger.error(f"Error deleting theme {name}: {e}")
+            logger.exception("Error deleting theme %s: %s", name, e)
             return False
 
     def export_css(self, theme: Theme | None = None) -> str:

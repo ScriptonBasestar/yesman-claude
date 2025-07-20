@@ -38,7 +38,7 @@ class TUIRenderer(BaseRenderer):
     with colors, progress bars, tables, trees, and panels.
     """
 
-    def __init__(self, console: Console | None = None, theme: dict[str, Any] | None = None):
+    def __init__(self, console: Console | None = None, theme: dict[str, Any] | None = None) -> None:
         """Initialize TUI renderer.
 
         Args:
@@ -85,24 +85,23 @@ class TUIRenderer(BaseRenderer):
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
             return self._render_session_browser(data, options)
-        elif widget_type == WidgetType.HEALTH_METER:
+        if widget_type == WidgetType.HEALTH_METER:
             return self._render_health_meter(data, options)
-        elif widget_type == WidgetType.ACTIVITY_HEATMAP:
+        if widget_type == WidgetType.ACTIVITY_HEATMAP:
             return self._render_activity_heatmap(data, options)
-        elif widget_type == WidgetType.PROGRESS_TRACKER:
+        if widget_type == WidgetType.PROGRESS_TRACKER:
             return self._render_progress_tracker(data, options)
-        elif widget_type == WidgetType.LOG_VIEWER:
+        if widget_type == WidgetType.LOG_VIEWER:
             return self._render_log_viewer(data, options)
-        elif widget_type == WidgetType.METRIC_CARD:
+        if widget_type == WidgetType.METRIC_CARD:
             return self._render_metric_card(data, options)
-        elif widget_type == WidgetType.STATUS_INDICATOR:
+        if widget_type == WidgetType.STATUS_INDICATOR:
             return self._render_status_indicator(data, options)
-        elif widget_type == WidgetType.CHART:
+        if widget_type == WidgetType.CHART:
             return self._render_chart(data, options)
-        elif widget_type == WidgetType.TABLE:
+        if widget_type == WidgetType.TABLE:
             return self._render_table(data, options)
-        else:
-            return self._render_generic_widget(widget_type, data, options)
+        return self._render_generic_widget(widget_type, data, options)
 
     def render_layout(
         self,
@@ -132,10 +131,9 @@ class TUIRenderer(BaseRenderer):
 
         if layout_type == "horizontal":
             return self._render_horizontal_layout(rendered_widgets, layout_config)
-        elif layout_type == "grid":
+        if layout_type == "grid":
             return self._render_grid_layout(rendered_widgets, layout_config)
-        else:
-            return self._render_vertical_layout(rendered_widgets, layout_config)
+        return self._render_vertical_layout(rendered_widgets, layout_config)
 
     def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """Render a container wrapping content.
@@ -167,8 +165,7 @@ class TUIRenderer(BaseRenderer):
             with self.console.capture() as capture:
                 self.console.print(panel)
             return capture.get()
-        else:
-            return content
+        return content
 
     # Widget-specific renderers
 
@@ -186,10 +183,9 @@ class TUIRenderer(BaseRenderer):
 
         if view_mode == "tree":
             return self._render_session_tree(sessions, options)
-        elif view_mode == "cards":
+        if view_mode == "cards":
             return self._render_session_cards(sessions, options)
-        else:
-            return self._render_session_table(sessions, options)
+        return self._render_session_table(sessions, options)
 
     def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
         """Render sessions as table."""
@@ -310,8 +306,7 @@ class TUIRenderer(BaseRenderer):
             with self.console.capture() as capture:
                 self.console.print(columns)
             return capture.get()
-        else:
-            return "No sessions found"
+        return "No sessions found"
 
     def _render_health_meter(self, data: HealthData, options: dict[str, Any]) -> str:
         """Render health meter widget."""
@@ -330,7 +325,7 @@ class TUIRenderer(BaseRenderer):
             expand=True,
         )
 
-        task = progress.add_task("health", total=100, completed=data.overall_score)
+        progress.add_task("health", total=100, completed=data.overall_score)
 
         # Categories breakdown
         categories_text = Text()
@@ -429,7 +424,7 @@ class TUIRenderer(BaseRenderer):
         )
 
         # Overall progress
-        overall_task = progress.add_task(
+        progress.add_task(
             "overall",
             total=100,
             completed=int(data.overall_progress),
@@ -437,7 +432,7 @@ class TUIRenderer(BaseRenderer):
         )
 
         # Phase progress
-        phase_task = progress.add_task(
+        progress.add_task(
             "phase",
             total=100,
             completed=int(data.phase_progress),

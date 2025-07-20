@@ -12,13 +12,13 @@ class RendererRegistry:
     different renderer implementations for various formats.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry."""
         self._renderers: dict[RenderFormat, type[BaseRenderer]] = {}
         self._instances: dict[RenderFormat, BaseRenderer] = {}
         self._default_format: RenderFormat | None = None
 
-    def register(self, format_type: RenderFormat, renderer_class: type[BaseRenderer]):
+    def register(self, format_type: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
         """Register a renderer class for a specific format.
 
         Args:
@@ -29,7 +29,8 @@ class RendererRegistry:
             ValueError: If renderer_class is not a subclass of BaseRenderer
         """
         if not issubclass(renderer_class, BaseRenderer):
-            raise ValueError(f"Renderer class must be a subclass of BaseRenderer, got {renderer_class}")
+            msg = f"Renderer class must be a subclass of BaseRenderer, got {renderer_class}"
+            raise ValueError(msg)
 
         self._renderers[format_type] = renderer_class
 
@@ -37,7 +38,7 @@ class RendererRegistry:
         if self._default_format is None:
             self._default_format = format_type
 
-    def unregister(self, format_type: RenderFormat):
+    def unregister(self, format_type: RenderFormat) -> None:
         """Unregister a renderer for a specific format.
 
         Args:
@@ -105,7 +106,7 @@ class RendererRegistry:
 
         return self.get_renderer(self._default_format, **kwargs)
 
-    def set_default_format(self, format_type: RenderFormat):
+    def set_default_format(self, format_type: RenderFormat) -> None:
         """Set the default renderer format.
 
         Args:
@@ -115,7 +116,8 @@ class RendererRegistry:
             ValueError: If the format is not registered
         """
         if format_type not in self._renderers:
-            raise ValueError(f"Format {format_type} is not registered")
+            msg = f"Format {format_type} is not registered"
+            raise ValueError(msg)
 
         self._default_format = format_type
 
@@ -146,7 +148,7 @@ class RendererRegistry:
         """
         return format_type in self._renderers
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all registered renderers and instances."""
         self._renderers.clear()
         self._instances.clear()
@@ -171,7 +173,7 @@ class RendererRegistry:
 registry = RendererRegistry()
 
 
-def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRenderer]):
+def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
     """Convenience function to register a renderer globally.
 
     Args:

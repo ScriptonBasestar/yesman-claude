@@ -16,7 +16,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 
     def execute(
         self,
-        files: list[str] = None,
+        files: list[str] | None = None,
         language: str = "python",
         repo_path: str | None = None,
         **kwargs,
@@ -28,7 +28,8 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                 files = kwargs.get("files", [])
 
             if not files:
-                raise CommandError("Files parameter is required for conflict analysis")
+                msg = "Files parameter is required for conflict analysis"
+                raise CommandError(msg)
 
             self.print_info(f"🧠 Analyzing semantic conflicts in {len(files)} files...")
             self.print_info(f"   Language: {language}")
@@ -41,7 +42,8 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             async def run_analysis():
                 # For semantic conflict analysis, we need branches
                 if len(files) < 2:
-                    raise CommandError("At least 2 branches are required for conflict analysis")
+                    msg = "At least 2 branches are required for conflict analysis"
+                    raise CommandError(msg)
 
                 branch1, branch2 = files[0], files[1]
                 file_paths = files[2:] if len(files) > 2 else None
@@ -85,7 +87,8 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             return asyncio.run(run_analysis())
 
         except Exception as e:
-            raise CommandError(f"Error analyzing semantic conflicts: {e}") from e
+            msg = f"Error analyzing semantic conflicts: {e}"
+            raise CommandError(msg) from e
 
 
 class SemanticSummaryCommand(BaseCommand):
@@ -111,13 +114,14 @@ class SemanticSummaryCommand(BaseCommand):
             return {"success": True, "repo_path": repo_path, "summary": summary}
 
         except Exception as e:
-            raise CommandError(f"Error getting semantic summary: {e}") from e
+            msg = f"Error getting semantic summary: {e}"
+            raise CommandError(msg) from e
 
 
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str = None, file2: str = None, language: str = "python", **kwargs) -> dict[str, Any]:
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs) -> dict[str, Any]:
         """Execute the function diff command."""
         try:
             # Handle file parameters from kwargs if not provided as positional arguments
@@ -127,14 +131,15 @@ class FunctionDiffCommand(BaseCommand):
                 file2 = kwargs.get("file2")
 
             if not file1 or not file2:
-                raise CommandError("Both file1 and file2 parameters are required")
+                msg = "Both file1 and file2 parameters are required"
+                raise CommandError(msg)
 
             self.print_info(f"🔍 Function-level diff: {file1} vs {file2}")
 
             from libs.multi_agent.branch_manager import BranchManager
 
             branch_manager = BranchManager(".")
-            analyzer = SemanticAnalyzer(branch_manager=branch_manager)
+            SemanticAnalyzer(branch_manager=branch_manager)
 
             # Since get_function_diff doesn't exist, create basic diff info
             diff = {"file1": file1, "file2": file2, "function_differences": [], "summary": f"Function differences between {file1} and {file2}"}
@@ -158,7 +163,8 @@ class FunctionDiffCommand(BaseCommand):
             return {"success": True, "file1": file1, "file2": file2, "diff": diff}
 
         except Exception as e:
-            raise CommandError(f"Error getting function diff: {e}") from e
+            msg = f"Error getting function diff: {e}"
+            raise CommandError(msg) from e
 
 
 class SemanticMergeCommand(BaseCommand):
@@ -166,8 +172,8 @@ class SemanticMergeCommand(BaseCommand):
 
     def execute(
         self,
-        source_file: str = None,
-        target_file: str = None,
+        source_file: str | None = None,
+        target_file: str | None = None,
         language: str = "python",
         strategy: str = "auto",
         **kwargs,
@@ -181,7 +187,8 @@ class SemanticMergeCommand(BaseCommand):
                 target_file = kwargs.get("target_file")
 
             if not source_file or not target_file:
-                raise CommandError("Both source_file and target_file parameters are required")
+                msg = "Both source_file and target_file parameters are required"
+                raise CommandError(msg)
 
             self.print_info(f"🔀 Semantic merge: {source_file} → {target_file}")
             self.print_info(f"   Strategy: {strategy}")
@@ -228,4 +235,5 @@ class SemanticMergeCommand(BaseCommand):
             return asyncio.run(run_merge())
 
         except Exception as e:
-            raise CommandError(f"Error performing semantic merge: {e}") from e
+            msg = f"Error performing semantic merge: {e}"
+            raise CommandError(msg) from e

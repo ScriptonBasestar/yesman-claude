@@ -7,7 +7,7 @@ import logging
 import re
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -83,7 +83,7 @@ class ReviewFinding:
     rule_id: str | None = None
     tool_name: str | None = None
     context: dict[str, Any] = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass
@@ -94,7 +94,7 @@ class QualityMetrics:
     metrics: dict[QualityMetric, float] = field(default_factory=dict)
     thresholds: dict[QualityMetric, float] = field(default_factory=dict)
     violations: list[QualityMetric] = field(default_factory=list)
-    calculated_at: datetime = field(default_factory=datetime.now)
+    calculated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -114,7 +114,7 @@ class CodeReview:
     overall_score: float = 0.0
     approval_required: bool = True
     auto_approved: bool = False
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     started_at: datetime | None = None
     completed_at: datetime | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -146,7 +146,7 @@ class CodeReviewEngine:
         branch_manager: BranchManager,
         repo_path: str | None = None,
         enable_auto_review: bool = True,
-    ):
+    ) -> None:
         """Initialize the code review engine.
 
         Args:
@@ -210,7 +210,7 @@ class CodeReviewEngine:
         self._review_monitor_task: asyncio.Task[Any] | None = None
         self._quality_monitor_task: asyncio.Task[Any] | None = None
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the code review engine."""
         self._running = True
         logger.info("Starting code review engine")
@@ -219,7 +219,7 @@ class CodeReviewEngine:
         self._review_monitor_task = asyncio.create_task(self._review_monitor_loop())
         self._quality_monitor_task = asyncio.create_task(self._quality_monitor_loop())
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the code review engine."""
         self._running = False
         logger.info("Stopping code review engine")
@@ -257,7 +257,7 @@ class CodeReviewEngine:
         Returns:
             Review ID
         """
-        review_id = f"review_{branch_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(agent_id.encode()).hexdigest()[:8]}"
+        review_id = f"review_{branch_name}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(agent_id.encode()).hexdigest()[:8]}"
 
         # Default review types if not specified
         if review_types is None:
@@ -294,7 +294,10 @@ class CodeReviewEngine:
         self.review_stats["reviews_initiated"] += 1
 
         logger.info(
-            f"Initiated review {review_id} for branch {branch_name} by {agent_id}",
+            "Initiated review %s for branch %s by %s",
+            review_id,
+            branch_name,
+            agent_id,
         )
 
         # Start automated review process
@@ -374,15 +377,15 @@ class CodeReviewEngine:
         """
         review = self.active_reviews.get(review_id)
         if not review:
-            logger.warning(f"Review {review_id} not found")
+            logger.warning("Review %s not found", review_id)
             return False
 
         if reviewer_id not in review.reviewer_ids:
-            logger.warning(f"Reviewer {reviewer_id} not assigned to review {review_id}")
+            logger.warning("Reviewer %s not assigned to review %s", reviewer_id, review_id)
             return False
 
         review.status = ReviewStatus.APPROVED
-        review.completed_at = datetime.now()
+        review.completed_at = datetime.now(UTC)
 
         # Add approval metadata
         if "approvals" not in review.metadata:
@@ -391,7 +394,7 @@ class CodeReviewEngine:
         review.metadata["approvals"].append(
             {
                 "reviewer_id": reviewer_id,
-                "approved_at": datetime.now().isoformat(),
+                "approved_at": datetime.now(UTC).isoformat(),
                 "comments": comments,
             },
         )
@@ -418,7 +421,7 @@ class CodeReviewEngine:
             priority=MessagePriority.NORMAL,
         )
 
-        logger.info(f"Review {review_id} approved by {reviewer_id}")
+        logger.info("Review %s approved by %s", review_id, reviewer_id)
         return True
 
     async def reject_review(
@@ -441,20 +444,20 @@ class CodeReviewEngine:
         """
         review = self.active_reviews.get(review_id)
         if not review:
-            logger.warning(f"Review {review_id} not found")
+            logger.warning("Review %s not found", review_id)
             return False
 
         if reviewer_id not in review.reviewer_ids:
-            logger.warning(f"Reviewer {reviewer_id} not assigned to review {review_id}")
+            logger.warning("Reviewer %s not assigned to review %s", reviewer_id, review_id)
             return False
 
         review.status = ReviewStatus.REJECTED
-        review.completed_at = datetime.now()
+        review.completed_at = datetime.now(UTC)
 
         # Add rejection metadata
         review.metadata["rejection"] = {
             "reviewer_id": reviewer_id,
-            "rejected_at": datetime.now().isoformat(),
+            "rejected_at": datetime.now(UTC).isoformat(),
             "reasons": reasons,
             "suggestions": suggestions or [],
         }
@@ -482,18 +485,18 @@ class CodeReviewEngine:
             priority=MessagePriority.HIGH,
         )
 
-        logger.info(f"Review {review_id} rejected by {reviewer_id}")
+        logger.info("Review %s rejected by %s", review_id, reviewer_id)
         return True
 
     # Private methods
 
-    async def _perform_automated_review(self, review: CodeReview):
+    async def _perform_automated_review(self, review: CodeReview) -> None:
         """Perform automated review using various tools and analysis."""
         review.status = ReviewStatus.IN_PROGRESS
-        review.started_at = datetime.now()
+        review.started_at = datetime.now(UTC)
 
         try:
-            logger.info(f"Starting automated review for {review.review_id}")
+            logger.info("Starting automated review for %s", review.review_id)
 
             # Collect all findings from different review types
             all_findings = []
@@ -557,7 +560,7 @@ class CodeReviewEngine:
             if can_auto_approve and self.review_config["enable_ai_reviewer"]:
                 review.status = ReviewStatus.APPROVED
                 review.auto_approved = True
-                review.completed_at = datetime.now()
+                review.completed_at = datetime.now(UTC)
 
                 # Move to history
                 self.review_history.append(review)
@@ -583,7 +586,9 @@ class CodeReviewEngine:
                 )
 
                 logger.info(
-                    f"Review {review.review_id} auto-approved with score {review.overall_score}",
+                    "Review %s auto-approved with score %s",
+                    review.review_id,
+                    review.overall_score,
                 )
 
             else:
@@ -609,11 +614,13 @@ class CodeReviewEngine:
                     )
 
                 logger.info(
-                    f"Review {review.review_id} requires manual review - score: {review.overall_score}",
+                    "Review %s requires manual review - score: %s",
+                    review.review_id,
+                    review.overall_score,
                 )
 
         except Exception as e:
-            logger.error(f"Error in automated review for {review.review_id}: {e}")
+            logger.exception("Error in automated review for %s:", review.review_id)
             review.status = ReviewStatus.COMPLETED
             review.metadata["error"] = str(e)
 
@@ -646,7 +653,7 @@ class CodeReviewEngine:
                             findings.append(finding)
 
                 # Check line length
-                with open(full_path, encoding="utf-8") as f:
+                with full_path.open(encoding="utf-8") as f:
                     for line_num, line in enumerate(f, 1):
                         if len(line.rstrip()) > 88:  # Black default
                             finding = ReviewFinding(
@@ -660,8 +667,8 @@ class CodeReviewEngine:
                             )
                             findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking style for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking style for %s:", file_path)
 
         return findings
 
@@ -695,7 +702,7 @@ class CodeReviewEngine:
                             findings.append(finding)
 
                 # Basic security pattern checks
-                with open(full_path, encoding="utf-8") as f:
+                with full_path.open(encoding="utf-8") as f:
                     content = f.read()
 
                     # Check for hardcoded secrets
@@ -722,8 +729,8 @@ class CodeReviewEngine:
                             )
                             findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking security for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking security for %s:", file_path)
 
         return findings
 
@@ -740,7 +747,7 @@ class CodeReviewEngine:
                 continue
 
             try:
-                with open(full_path, encoding="utf-8") as f:
+                with full_path.open(encoding="utf-8") as f:
                     content = f.read()
 
                 # Parse AST for performance analysis
@@ -786,8 +793,8 @@ class CodeReviewEngine:
                         )
                         findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking performance for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking performance for %s:", file_path)
 
         return findings
 
@@ -807,7 +814,7 @@ class CodeReviewEngine:
                 continue
 
             try:
-                with open(full_path, encoding="utf-8") as f:
+                with full_path.open(encoding="utf-8") as f:
                     content = f.read()
 
                 # Basic maintainability checks
@@ -862,8 +869,8 @@ class CodeReviewEngine:
                     )
                     findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking maintainability for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking maintainability for %s:", file_path)
 
         return findings
 
@@ -899,8 +906,8 @@ class CodeReviewEngine:
                             )
                             findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking functionality for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking functionality for %s:", file_path)
 
         return findings
 
@@ -917,7 +924,7 @@ class CodeReviewEngine:
                 continue
 
             try:
-                with open(full_path, encoding="utf-8") as f:
+                with full_path.open(encoding="utf-8") as f:
                     content = f.read()
 
                 tree = ast.parse(content)
@@ -955,8 +962,8 @@ class CodeReviewEngine:
                             )
                             findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking documentation for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking documentation for %s:", file_path)
 
         return findings
 
@@ -1023,8 +1030,8 @@ class CodeReviewEngine:
                             )
                             findings.append(finding)
 
-            except Exception as e:
-                logger.error(f"Error checking complexity for {file_path}: {e}")
+            except Exception:
+                logger.exception("Error checking complexity for %s:", file_path)
 
         return findings
 
@@ -1049,7 +1056,7 @@ class CodeReviewEngine:
             return metrics
 
         try:
-            with open(full_path, encoding="utf-8") as f:
+            with full_path.open(encoding="utf-8") as f:
                 content = f.read()
 
             lines = content.split("\n")
@@ -1078,8 +1085,8 @@ class CodeReviewEngine:
                 if mi < metrics.thresholds[QualityMetric.MAINTAINABILITY_INDEX]:
                     metrics.violations.append(QualityMetric.MAINTAINABILITY_INDEX)
 
-        except Exception as e:
-            logger.error(f"Error calculating quality metrics for {file_path}: {e}")
+        except Exception:
+            logger.exception("Error calculating quality metrics for %s:", file_path)
 
         return metrics
 
@@ -1110,14 +1117,13 @@ class CodeReviewEngine:
             docstring_ratio = content.count('"""') / max(loc, 1) * 10
 
             # Simple heuristic: lower LOC and higher comment ratio = better maintainability
-            mi = max(
+            return max(
                 0,
                 min(
                     100,
                     100 - (loc / 10) + (comment_ratio * 20) + (docstring_ratio * 10),
                 ),
             )
-            return mi
         except:
             return 50.0  # Default neutral score
 
@@ -1207,15 +1213,15 @@ class CodeReviewEngine:
         """Run an external tool for code checking."""
         # This is a placeholder implementation
         # In a real system, this would actually run the tools
-        logger.debug(f"Would run {tool_name} on {file_path}")
+        logger.debug("Would run %s on %s", tool_name, file_path)
         return None
 
-    async def _review_monitor_loop(self):
+    async def _review_monitor_loop(self) -> None:
         """Background task to monitor review progress."""
         while self._running:
             try:
                 # Check for stale reviews
-                current_time = datetime.now()
+                current_time = datetime.now(UTC)
                 stale_reviews = []
 
                 for review_id, review in self.active_reviews.items():
@@ -1224,16 +1230,16 @@ class CodeReviewEngine:
 
                 # Handle stale reviews
                 for review_id in stale_reviews:
-                    logger.warning(f"Review {review_id} is stale, requiring attention")
+                    logger.warning("Review %s is stale, requiring attention", review_id)
                     # Could send notifications or escalate
 
                 await asyncio.sleep(300)  # Check every 5 minutes
 
-            except Exception as e:
-                logger.error(f"Error in review monitor loop: {e}")
+            except Exception:
+                logger.exception("Error in review monitor loop:")
                 await asyncio.sleep(300)
 
-    async def _quality_monitor_loop(self):
+    async def _quality_monitor_loop(self) -> None:
         """Background task to monitor code quality trends."""
         while self._running:
             try:
@@ -1242,8 +1248,8 @@ class CodeReviewEngine:
 
                 await asyncio.sleep(3600)  # Run every hour
 
-            except Exception as e:
-                logger.error(f"Error in quality monitor loop: {e}")
+            except Exception:
+                logger.exception("Error in quality monitor loop:")
                 await asyncio.sleep(3600)
 
     def get_review_summary(self) -> ReviewSummary:

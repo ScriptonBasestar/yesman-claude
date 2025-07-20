@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Basic syntax check for key files"""
+"""Basic syntax check for key files."""
 
 import ast
 import sys
@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def check_syntax(file_path):
-    """Check if a Python file has valid syntax"""
+    """Check if a Python file has valid syntax."""
     try:
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
@@ -21,7 +21,7 @@ def check_syntax(file_path):
 
 
 def main():
-    """Check syntax of key files"""
+    """Check syntax of key files."""
     base_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     files_to_check = ["api/routers/controllers.py", "api/background_tasks.py", "api/middleware/error_handler.py", "commands/multi_agent.py", "commands/multi_agent_main.py"]

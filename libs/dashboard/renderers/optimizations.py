@@ -26,7 +26,7 @@ class CacheStats:
     total_requests: int = 0
     hit_rate: float = 0.0
 
-    def update_hit_rate(self):
+    def update_hit_rate(self) -> None:
         """Update hit rate calculation."""
         if self.total_requests > 0:
             self.hit_rate = self.hits / self.total_requests
@@ -41,7 +41,7 @@ class RenderCache:
     automatic eviction, and performance tracking.
     """
 
-    def __init__(self, max_size: int = 1000, ttl: float | None = None):
+    def __init__(self, max_size: int = 1000, ttl: float | None = None) -> None:
         """Initialize render cache.
 
         Args:
@@ -216,7 +216,7 @@ def cached_render(cache: RenderCache | None = None):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(
-            self,
+            self: Any,
             widget_type: WidgetType,
             data: Any,
             options: dict[str, Any] | None = None,
@@ -252,7 +252,7 @@ def cached_layout(cache: RenderCache | None = None):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(
-            self,
+            self: Any,
             widgets: list[dict[str, Any]],
             layout_config: dict[str, Any] | None = None,
         ):
@@ -305,7 +305,7 @@ class LazyRenderer:
         widget_type: WidgetType,
         data: Any,
         options: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         """Initialize lazy renderer.
 
         Args:
@@ -361,7 +361,7 @@ class BatchRenderer:
     and potentially parallelizing work.
     """
 
-    def __init__(self, renderer: BaseRenderer, max_workers: int = 4):
+    def __init__(self, renderer: BaseRenderer, max_workers: int = 4) -> None:
         """Initialize batch renderer.
 
         Args:
@@ -391,8 +391,7 @@ class BatchRenderer:
 
         if parallel and len(render_requests) > 1:
             return self._render_parallel(render_requests)
-        else:
-            return self._render_sequential(render_requests)
+        return self._render_sequential(render_requests)
 
     def _render_sequential(self, render_requests: list[tuple]) -> list[Any]:
         """Render requests sequentially."""
@@ -451,7 +450,7 @@ class PerformanceProfiler:
     for optimization purposes.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.metrics: dict[str, list[float]] = {}
         self._lock = threading.Lock()
 
@@ -509,7 +508,7 @@ class PerformanceProfiler:
 class TimingContext:
     """Context manager for timing operations."""
 
-    def __init__(self, profiler: PerformanceProfiler, operation_name: str):
+    def __init__(self, profiler: PerformanceProfiler, operation_name: str) -> None:
         self.profiler = profiler
         self.operation_name = operation_name
         self.start_time: float | None = None
@@ -518,7 +517,7 @@ class TimingContext:
         self.start_time = time.time()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         if self.start_time is not None:
             duration = time.time() - self.start_time
             self.profiler.record_time(self.operation_name, duration)

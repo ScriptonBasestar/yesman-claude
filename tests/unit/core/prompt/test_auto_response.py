@@ -7,11 +7,11 @@ from libs.core.claude_manager import DashboardController
 
 
 class TestAutoResponse(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         with patch("libs.core.claude_manager.libtmux.Server"):
             self.controller = DashboardController("test_session")
 
-    def test_detect_claude_edit_prompt(self):
+    def test_detect_claude_edit_prompt(self) -> None:
         """Test detection of Claude edit confirmation prompts."""
         content = """
 Do you want to make this edit to VideoProcessingService.kt?
@@ -21,20 +21,20 @@ Do you want to make this edit to VideoProcessingService.kt?
 """
 
         prompt_info = self.controller.detect_prompt_type(content)
-        self.assertIsNotNone(prompt_info)
-        self.assertEqual(prompt_info["type"], "numbered")
-        self.assertEqual(prompt_info["count"], 3)
+        assert prompt_info is not None
+        assert prompt_info["type"] == "numbered"
+        assert prompt_info["count"] == 3
 
-    def test_detect_claude_suggestion_prompt(self):
+    def test_detect_claude_suggestion_prompt(self) -> None:
         """Test detection of Claude suggestion prompts."""
         content = "Would you like me to continue with the implementation?"
 
         prompt_info = self.controller.detect_prompt_type(content)
-        self.assertIsNotNone(prompt_info)
-        self.assertEqual(prompt_info["type"], "yn")
-        self.assertEqual(prompt_info.get("context"), "claude_suggestion")
+        assert prompt_info is not None
+        assert prompt_info["type"] == "yn"
+        assert prompt_info.get("context") == "claude_suggestion"
 
-    def test_detect_various_numbered_formats(self):
+    def test_detect_various_numbered_formats(self) -> None:
         """Test detection of different numbered selection formats."""
         test_cases = [
             # [1] format
@@ -50,11 +50,11 @@ Do you want to make this edit to VideoProcessingService.kt?
         for content in test_cases:
             with self.subTest(content=content):
                 prompt_info = self.controller.detect_prompt_type(content)
-                self.assertIsNotNone(prompt_info, f"Failed to detect: {content}")
-                self.assertEqual(prompt_info["type"], "numbered")
-                self.assertGreaterEqual(prompt_info["count"], 2)
+                assert prompt_info is not None, f"Failed to detect: {content}"
+                assert prompt_info["type"] == "numbered"
+                assert prompt_info["count"] >= 2
 
-    def test_detect_claude_question_prompts(self):
+    def test_detect_claude_question_prompts(self) -> None:
         """Test detection of various Claude question formats."""
         test_cases = [
             "Do you want to make this edit?",
@@ -70,11 +70,11 @@ Do you want to make this edit to VideoProcessingService.kt?
         for content in test_cases:
             with self.subTest(content=content):
                 prompt_info = self.controller.detect_prompt_type(content)
-                self.assertIsNotNone(prompt_info, f"Failed to detect: {content}")
-                self.assertEqual(prompt_info["type"], "yn")
-                self.assertEqual(prompt_info.get("context"), "claude_suggestion")
+                assert prompt_info is not None, f"Failed to detect: {content}"
+                assert prompt_info["type"] == "yn"
+                assert prompt_info.get("context") == "claude_suggestion"
 
-    def test_auto_respond_numbered_selection(self):
+    def test_auto_respond_numbered_selection(self) -> None:
         """Test auto response for numbered selections."""
         prompt_info = {
             "type": "numbered",
@@ -83,9 +83,9 @@ Do you want to make this edit to VideoProcessingService.kt?
         }
 
         response = self.controller.auto_respond(prompt_info)
-        self.assertEqual(response, "1")
+        assert response == "1"
 
-    def test_auto_respond_claude_suggestion(self):
+    def test_auto_respond_claude_suggestion(self) -> None:
         """Test auto response for Claude suggestions."""
         prompt_info = {
             "type": "yn",
@@ -93,18 +93,18 @@ Do you want to make this edit to VideoProcessingService.kt?
         }
 
         response = self.controller.auto_respond(prompt_info)
-        self.assertEqual(response, "yes")
+        assert response == "yes"
 
-    def test_no_detection_for_regular_text(self):
+    def test_no_detection_for_regular_text(self) -> None:
         """Test that regular text doesn't trigger detection."""
         content = "This is just regular text without any prompts or questions."
 
         prompt_info = self.controller.detect_prompt_type(content)
-        self.assertIsNone(prompt_info)
+        assert prompt_info is None
 
-    def test_single_numbered_item_not_detected(self):
+    def test_single_numbered_item_not_detected(self) -> None:
         """Test that single numbered items are not detected as selections."""
         content = "1. This is just a list item"
 
         prompt_info = self.controller.detect_prompt_type(content)
-        self.assertIsNone(prompt_info)
+        assert prompt_info is None

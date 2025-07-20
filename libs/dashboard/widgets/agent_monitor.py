@@ -6,16 +6,18 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from rich.align import Align
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
-from rich.progress import Progress, TaskID
 from rich.table import Table
 from rich.text import Text
+
+if TYPE_CHECKING:
+    from rich.progress import Progress, TaskID
 
 try:
     from libs.multi_agent.agent_pool import AgentPool
@@ -51,7 +53,6 @@ except ImportError:
     class AgentPool:  # type: ignore[no-redef]
         """Fallback AgentPool class for when multi_agent is not available."""
 
-        pass
 
 
 class MonitorDisplayMode(Enum):
@@ -105,7 +106,7 @@ class AgentMonitor:
         self,
         agent_pool: AgentPool | None = None,
         console: Console | None = None,
-    ):
+    ) -> None:
         self.console = console or Console()
         self.logger = logging.getLogger("yesman.dashboard.agent_monitor")
         self.agent_pool = agent_pool
@@ -207,7 +208,7 @@ class AgentMonitor:
             )
 
         except Exception as e:
-            self.logger.error(f"Error updating metrics: {e}")
+            self.logger.exception(f"Error updating metrics: {e}")
 
     def _calculate_task_progress(self, task_data: dict[str, Any]) -> float:
         """Calculate task progress percentage."""
@@ -216,18 +217,18 @@ class AgentMonitor:
 
         if status == "completed":
             return 1.0
-        elif status in {"failed", "cancelled"}:
+        if status in {"failed", "cancelled"}:
             return 0.0
-        elif status == "running" and start_time:
+        if status == "running" and start_time:
             # Estimate progress based on elapsed time and timeout
             start = datetime.fromisoformat(start_time)
             elapsed = (datetime.now() - start).total_seconds()
             timeout: float = task_data.get("timeout", 300)
             return min(0.9, elapsed / timeout)  # Cap at 90% for running tasks
-        elif status == "assigned":
+        if status == "assigned":
             return 0.1
-        else:  # pending
-            return 0.0
+        # pending
+        return 0.0
 
     def render_overview(self) -> Panel:
         """Render overview dashboard."""
@@ -275,11 +276,11 @@ class AgentMonitor:
                 "working": "yellow",
                 "error": "red",
                 "terminated": "dim",
-            }.get(metrics.current_task and "working" or "idle", "white")
+            }.get((metrics.current_task and "working") or "idle", "white")
 
             agent_table.add_row(
                 agent_id,
-                Text(metrics.current_task and "WORKING" or "IDLE", style=state_color),
+                Text((metrics.current_task and "WORKING") or "IDLE", style=state_color),
                 metrics.current_task or "-",
                 str(metrics.tasks_completed),
                 str(metrics.tasks_failed),
@@ -404,10 +405,7 @@ class AgentMonitor:
                     len(history),
                 )
                 older_slice = history[-10:-5] if len(history) >= 10 else history[:-5]
-                if older_slice:
-                    older_avg = sum(score for _, score in older_slice) / len(older_slice)
-                else:
-                    older_avg = recent_avg
+                older_avg = sum(score for _, score in older_slice) / len(older_slice) if older_slice else recent_avg
                 trend = "↗" if recent_avg > older_avg else "↘" if recent_avg < older_avg else "→"
             else:
                 trend = "→"
@@ -433,14 +431,13 @@ class AgentMonitor:
         """Render the current view based on display mode."""
         if self.display_mode == MonitorDisplayMode.OVERVIEW:
             return self.render_overview()
-        elif self.display_mode == MonitorDisplayMode.DETAILED:
+        if self.display_mode == MonitorDisplayMode.DETAILED:
             return self.render_detailed()
-        elif self.display_mode == MonitorDisplayMode.TASKS:
+        if self.display_mode == MonitorDisplayMode.TASKS:
             return self.render_tasks()
-        elif self.display_mode == MonitorDisplayMode.PERFORMANCE:
+        if self.display_mode == MonitorDisplayMode.PERFORMANCE:
             return self.render_performance()
-        else:
-            return Panel("Unknown display mode", title="Error")
+        return Panel("Unknown display mode", title="Error")
 
     def set_display_mode(self, mode: MonitorDisplayMode) -> None:
         """Change display mode."""
@@ -482,7 +479,7 @@ Keyboard Shortcuts:
         except KeyboardInterrupt:
             self.logger.info("Monitoring stopped by user")
         except Exception as e:
-            self.logger.error(f"Error in monitoring loop: {e}")
+            self.logger.exception(f"Error in monitoring loop: {e}")
             raise
 
 

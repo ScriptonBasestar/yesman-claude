@@ -13,7 +13,7 @@ from .prompt_detector import PromptInfo
 class DashboardController:
     """Main controller that orchestrates Claude session management, process control, and monitoring."""
 
-    def __init__(self, session_name: str, pane_id: str | None = None):
+    def __init__(self, session_name: str, pane_id: str | None = None) -> None:
         """Initialize the dashboard controller."""
         self.session_name = session_name
         self.pane_id = pane_id
@@ -59,11 +59,11 @@ class DashboardController:
         """Get selected model."""
         return self.process_controller.selected_model
 
-    def set_status_callback(self, callback: Callable):
+    def set_status_callback(self, callback: Callable) -> None:
         """Set callback for status updates."""
         self.status_manager.set_status_callback(callback)
 
-    def set_activity_callback(self, callback: Callable):
+    def set_activity_callback(self, callback: Callable) -> None:
         """Set callback for activity updates."""
         self.status_manager.set_activity_callback(callback)
 
@@ -90,23 +90,23 @@ class DashboardController:
         """Restart Claude pane."""
         return self.process_controller.restart_claude_pane()
 
-    def set_model(self, model: str):
+    def set_model(self, model: str) -> None:
         """Set the selected model."""
         self.process_controller.set_model(model)
 
-    def set_auto_next(self, enabled: bool):
+    def set_auto_next(self, enabled: bool) -> None:
         """Enable or disable auto-next responses."""
         self.monitor.set_auto_next(enabled)
 
-    def set_mode_yn(self, mode: str, response: str):
+    def set_mode_yn(self, mode: str, response: str) -> None:
         """Set manual override for Y/N prompts."""
         self.monitor.set_mode_yn(mode, response)
 
-    def set_mode_12(self, mode: str, response: str):
+    def set_mode_12(self, mode: str, response: str) -> None:
         """Set manual override for 1/2 prompts."""
         self.monitor.set_mode_12(mode, response)
 
-    def set_mode_123(self, mode: str, response: str):
+    def set_mode_123(self, mode: str, response: str) -> None:
         """Set manual override for 1/2/3 prompts."""
         self.monitor.set_mode_123(mode, response)
 
@@ -118,7 +118,7 @@ class DashboardController:
             self.status_manager.save_capture_to_file(content, self.pane_id)
         return content
 
-    def send_input(self, text: str):
+    def send_input(self, text: str) -> None:
         """Send input to Claude pane."""
         self.process_controller.send_input(text)
 
@@ -147,15 +147,15 @@ class DashboardController:
         """Get statistics from the adaptive response system."""
         return self.monitor.get_adaptive_statistics()
 
-    def set_adaptive_confidence_threshold(self, threshold: float):
+    def set_adaptive_confidence_threshold(self, threshold: float) -> None:
         """Adjust the confidence threshold for adaptive responses."""
         self.monitor.set_adaptive_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True):
+    def enable_adaptive_response(self, enabled: bool = True) -> None:
         """Enable or disable adaptive response functionality."""
         self.monitor.enable_adaptive_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True):
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:
         """Enable or disable adaptive learning functionality."""
         self.monitor.enable_adaptive_learning(enabled)
 
@@ -168,7 +168,7 @@ class DashboardController:
         prompt_text: str,
         user_response: str,
         context: str = "",
-    ):
+    ) -> None:
         """Learn from manual user input for future improvements."""
         self.monitor.learn_from_user_input(prompt_text, user_response, context)
 
@@ -185,7 +185,7 @@ class DashboardController:
         """Get automation system status."""
         return self.monitor.get_automation_status()
 
-    def register_automation_workflow(self, workflow):
+    def register_automation_workflow(self, workflow: Any) -> None:
         """Register a custom automation workflow."""
         self.monitor.register_automation_workflow(workflow)
 
@@ -227,7 +227,7 @@ class DashboardController:
         """Get async logging statistics."""
         return self.monitor.get_async_logging_stats()
 
-    async def flush_async_logs(self):
+    async def flush_async_logs(self) -> None:
         """Force flush all pending async logs."""
         await self.monitor.flush_async_logs()
 
@@ -256,7 +256,7 @@ class DashboardController:
 class ClaudeManager:
     """Manages multiple DashboardController instances, one for each session."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Claude manager."""
         self.controllers: dict[str, DashboardController] = {}
         self.logger = logging.getLogger("yesman.dashboard.claude_manager")
@@ -271,14 +271,14 @@ class ClaudeManager:
             self.controllers[session_name] = DashboardController(session_name, pane_id)
         return self.controllers[session_name]
 
-    def remove_controller(self, session_name: str):
+    def remove_controller(self, session_name: str) -> None:
         """Remove controller for session."""
         if session_name in self.controllers:
             controller = self.controllers[session_name]
             controller.stop()
             del self.controllers[session_name]
 
-    def stop_all(self):
+    def stop_all(self) -> None:
         """Stop all controllers."""
         for controller in self.controllers.values():
             controller.stop()

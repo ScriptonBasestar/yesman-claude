@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run auto-fixes for lint issues"""
+"""Run auto-fixes for lint issues."""
 
 import os
 import subprocess
@@ -8,7 +8,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_command(cmd, description):
-    """Run command and show results"""
+    """Run command and show results."""
     print(f"\n{'=' * 60}")
     print(f"{description}")
     print(f"{'=' * 60}")

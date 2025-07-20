@@ -25,7 +25,7 @@ class LogLevel(Enum):
     ERROR = (40, "ERROR")
     CRITICAL = (50, "CRITICAL")
 
-    def __init__(self, value: int, name: str):
+    def __init__(self, value: int, name: str) -> None:
         """Initialize LogLevel enum members."""
         self.level_value = value
         self.level_name = name
@@ -80,7 +80,7 @@ class AsyncLoggerConfig:
         enable_batch_processor: bool = True,
         log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
         output_dir: Path | None = None,
-    ):
+    ) -> None:
         """Initialize the async logger configuration."""
         self.name = name
         self.level = level
@@ -111,16 +111,17 @@ class AsyncLogger:
         return cls._instance
 
     @classmethod
-    async def reset_instance(cls):
+    async def reset_instance(cls) -> None:
         """Reset and stop the singleton instance."""
         if cls._instance:
             await cls._instance.stop()
         cls._instance = None
 
-    def __init__(self, config: AsyncLoggerConfig = None):
+    def __init__(self, config: AsyncLoggerConfig = None) -> None:
         """Initialize the async logger singleton instance."""
         if AsyncLogger._instance is not None:
-            raise RuntimeError("AsyncLogger is a singleton. Use get_instance().")
+            msg = "AsyncLogger is a singleton. Use get_instance()."
+            raise RuntimeError(msg)
 
         self.config = config or AsyncLoggerConfig()
 
@@ -168,7 +169,7 @@ class AsyncLogger:
         # Thread-safe logging from sync code
         self._sync_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the async logger."""
         if self._processing_task and not self._processing_task.done():
             return
@@ -184,7 +185,7 @@ class AsyncLogger:
 
         self.standard_logger.info(f"AsyncLogger '{self.config.name}' started")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the async logger."""
         if not self._processing_task:
             return
@@ -214,7 +215,7 @@ class AsyncLogger:
 
         self.standard_logger.info(f"AsyncLogger '{self.config.name}' stopped")
 
-    async def _processing_loop(self):
+    async def _processing_loop(self) -> None:
         """Main processing loop."""
         try:
             while not self._stop_event.is_set():
@@ -234,7 +235,7 @@ class AsyncLogger:
         except Exception as e:
             self.standard_logger.error(f"Error in async logger processing loop: {e}", exc_info=True)
 
-    async def _process_entry(self, entry: LogEntry):
+    async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
         try:
             self.stats["entries_processed"] += 1
@@ -249,9 +250,9 @@ class AsyncLogger:
                 self.batch_processor.add_entry(entry.to_dict())
 
         except Exception as e:
-            self.standard_logger.error(f"Error processing log entry: {e}")
+            self.standard_logger.exception(f"Error processing log entry: {e}")
 
-    async def _log_to_standard(self, entry: LogEntry):
+    async def _log_to_standard(self, entry: LogEntry) -> None:
         """Log entry to standard Python logging."""
         # Format message
         message = entry.message
@@ -267,7 +268,7 @@ class AsyncLogger:
         standard_level = entry.level.level_value
         self.standard_logger.log(standard_level, message)
 
-    def _queue_entry(self, entry: LogEntry):
+    def _queue_entry(self, entry: LogEntry) -> None:
         """Queue a log entry (thread-safe)."""
         try:
             # Try to put entry in queue
@@ -285,9 +286,9 @@ class AsyncLogger:
 
         except Exception as e:
             # Fallback to standard logging
-            self.standard_logger.error(f"Failed to queue log entry: {e}")
+            self.standard_logger.exception(f"Failed to queue log entry: {e}")
 
-    def log(self, level: LogLevel, message: str, **kwargs):
+    def log(self, level: LogLevel, message: str, **kwargs) -> None:
         """Log a message at specified level."""
         # Extract caller information
         frame = None
@@ -331,27 +332,27 @@ class AsyncLogger:
         self._queue_entry(entry)
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs):
+    def trace(self, message: str, **kwargs) -> None:
         """Log a trace message."""
         self.log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs):
+    def debug(self, message: str, **kwargs) -> None:
         """Log a debug message."""
         self.log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs):
+    def info(self, message: str, **kwargs) -> None:
         """Log an info message."""
         self.log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs):
+    def warning(self, message: str, **kwargs) -> None:
         """Log a warning message."""
         self.log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs):
+    def error(self, message: str, **kwargs) -> None:
         """Log an error message."""
         self.log(LogLevel.ERROR, message, **kwargs)
 
-    def critical(self, message: str, **kwargs):
+    def critical(self, message: str, **kwargs) -> None:
         """Log a critical message."""
         self.log(LogLevel.CRITICAL, message, **kwargs)
 
@@ -361,7 +362,7 @@ class AsyncLogger:
         await self.start()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit."""
         await self.stop()
 
@@ -382,12 +383,12 @@ class AsyncLogger:
             "batch_processor_stats": batch_stats,
         }
 
-    def set_level(self, level: LogLevel):
+    def set_level(self, level: LogLevel) -> None:
         """Change the logging level."""
         self.config.level = level
         self.standard_logger.setLevel(level.level_value)
 
-    async def flush(self):
+    async def flush(self) -> None:
         """Force flush all pending log entries."""
         # Wait for queue to be empty
         await self.log_queue.join()

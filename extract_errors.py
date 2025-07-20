@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract common lint errors from code analysis"""
+"""Extract common lint errors from code analysis."""
 
 import ast
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def analyze_common_issues():
-    """Analyze common lint issues in the codebase"""
+    """Analyze common lint issues in the codebase."""
     project_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     print("LINT ANALYSIS REPORT")
@@ -87,7 +87,7 @@ def analyze_common_issues():
                 content = py_file.read_text()
                 if "from commands.multi_agent" in content:
                     print(f"  • Potential circular import in {py_file.name}")
-            except:
+            except Exception:
                 pass
 
     # 4. Long lines
@@ -107,7 +107,7 @@ def analyze_common_issues():
                             if long_line_count <= 10:  # Show first 10
                                 relative_path = py_file.relative_to(project_path)
                                 print(f"  • {relative_path}:{i} - {len(line)} chars")
-                except:
+                except Exception:
                     pass
 
     if long_line_count > 10:
@@ -138,7 +138,7 @@ def analyze_common_issues():
                                 if missing_hints_count <= 10:
                                     relative_path = py_file.relative_to(project_path)
                                     print(f"  • {relative_path}:{node.lineno} - Function '{node.name}' missing return type")
-                except:
+                except Exception:
                     pass
 
     if missing_hints_count > 10:
@@ -169,7 +169,7 @@ def analyze_common_issues():
                                     if unused_count <= 10:
                                         relative_path = py_file.relative_to(project_path)
                                         print(f"  • {relative_path}:{i} - Potentially unused import '{module_name}'")
-                except:
+                except Exception:
                     pass
 
     if unused_count > 10:
@@ -202,7 +202,7 @@ def analyze_common_issues():
                             if security_issues <= 5:
                                 relative_path = py_file.relative_to(project_path)
                                 print(f"  • {relative_path}:{i} - Use of eval/exec")
-                except:
+                except Exception:
                     pass
 
     if security_issues > 5:

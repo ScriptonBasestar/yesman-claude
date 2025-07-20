@@ -5,7 +5,7 @@ import logging
 import re
 import subprocess
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -62,7 +62,7 @@ class BranchManager:
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result."""
         cmd = ["git", *args]
-        logger.debug(f"Running git command: {' '.join(cmd)}")
+        logger.debug("Running git command: %s", " ".join(cmd))
 
         try:
             return subprocess.run(
@@ -103,9 +103,9 @@ class BranchManager:
                 with open(metadata_file) as f:
                     data = json.load(f)
                     self.branches = {name: BranchInfo.from_dict(info) for name, info in data.items()}
-                logger.info(f"Loaded {len(self.branches)} branch metadata entries")
-            except Exception as e:
-                logger.exception("Failed to load branch metadata: %s", e)
+                logger.info("Loaded %d branch metadata entries", len(self.branches))
+            except Exception:
+                logger.exception("Failed to load branch metadata")
                 self.branches = {}
         else:
             self.branches = {}
@@ -121,9 +121,9 @@ class BranchManager:
             with open(metadata_file, "w") as f:
                 json.dump(data, f, indent=2)
 
-            logger.debug(f"Saved branch metadata for {len(self.branches)} branches")
-        except Exception as e:
-            logger.exception("Failed to save branch metadata: %s", e)
+            logger.debug("Saved branch metadata for %d branches", len(self.branches))
+        except Exception:
+            logger.exception("Failed to save branch metadata")
 
     def create_feature_branch(
         self,
@@ -153,11 +153,11 @@ class BranchManager:
             raise ValueError(msg)
 
         # Fetch latest changes
-        logger.info(f"Fetching latest changes for {base_branch}")
+        logger.info("Fetching latest changes for %s", base_branch)
         self._run_git_command(["fetch", "origin", base_branch])
 
         # Create and checkout new branch
-        logger.info(f"Creating branch: {branch_name} from {base_branch}")
+        logger.info("Creating branch: %s from %s", branch_name, base_branch)
         self._run_git_command(["checkout", "-b", branch_name, f"origin/{base_branch}"])
 
         # Record branch metadata
@@ -174,7 +174,7 @@ class BranchManager:
         self.branches[branch_name] = branch_info
         self._save_branch_metadata()
 
-        logger.info(f"Successfully created branch: {branch_name}")
+        logger.info("Successfully created branch: %s", branch_name)
         return branch_name
 
     def list_active_branches(self) -> list[BranchInfo]:
@@ -272,15 +272,15 @@ class BranchManager:
     def switch_branch(self, branch_name: str) -> bool:
         """Switch to a specific branch."""
         if not self._branch_exists(branch_name):
-            logger.error(f"Branch '{branch_name}' does not exist")
+            logger.error("Branch '%s' does not exist", branch_name)
             return False
 
         try:
             self._run_git_command(["checkout", branch_name])
-            logger.info(f"Switched to branch: {branch_name}")
+            logger.info("Switched to branch: %s", branch_name)
             return True
-        except subprocess.CalledProcessError as e:
-            logger.exception("Failed to switch branch: %s", e)
+        except subprocess.CalledProcessError:
+            logger.exception("Failed to switch branch")
             return False
 
     def update_branch_metadata(
@@ -290,7 +290,7 @@ class BranchManager:
     ) -> None:
         """Update metadata for a branch."""
         if branch_name not in self.branches:
-            logger.warning(f"Branch '{branch_name}' not in metadata, creating entry")
+            logger.warning("Branch '%s' not in metadata, creating entry", branch_name)
             self.branches[branch_name] = BranchInfo(
                 name=branch_name,
                 base_branch="unknown",
@@ -305,7 +305,7 @@ class BranchManager:
         if branch_name in self.branches:
             self.branches[branch_name].status = "merged"
             self._save_branch_metadata()
-            logger.info(f"Marked branch '{branch_name}' as merged")
+            logger.info("Marked branch '%s' as merged", branch_name)
 
     def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:
         """Clean up merged branches."""
@@ -317,7 +317,7 @@ class BranchManager:
                     try:
                         # Delete local branch
                         self._run_git_command(["branch", "-d", branch_name])
-                        logger.info(f"Deleted local branch: {branch_name}")
+                        logger.info("Deleted local branch: %s", branch_name)
 
                         # Try to delete remote branch
                         self._run_git_command(
@@ -325,8 +325,8 @@ class BranchManager:
                             check=False,
                         )
 
-                    except subprocess.CalledProcessError as e:
-                        logger.exception("Failed to delete branch %s: %s", branch_name, e)
+                    except subprocess.CalledProcessError:
+                        logger.exception("Failed to delete branch %s", branch_name)
                         continue
 
                 cleaned.append(branch_name)

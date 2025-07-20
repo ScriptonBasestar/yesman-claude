@@ -7,7 +7,7 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 class TestMemoryStability:
     """Tests for memory stability during intensive operations."""
 
-    def test_memory_stability(self):
+    def test_memory_stability(self) -> None:
         """Test 14: Memory stability during intensive operations."""
         factory = RendererFactory()
         initial_objects = len(gc.get_objects())

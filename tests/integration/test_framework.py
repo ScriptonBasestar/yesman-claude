@@ -10,7 +10,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 import yaml
@@ -22,7 +22,7 @@ from libs.yesman_config import YesmanConfig
 class IntegrationTestBase:
     """Base class for integration tests with common setup and utilities."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test method."""
         # Create temporary test environment
         self.test_dir = Path(tempfile.mkdtemp(prefix="yesman_test_"))
@@ -41,7 +41,7 @@ class IntegrationTestBase:
         self.created_sessions = []
         self.created_processes = []
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Cleanup after each test method."""
         # Stop any created processes
         for process in self.created_processes:
@@ -95,7 +95,7 @@ class IntegrationTestBase:
             },
         }
 
-    def _write_test_config(self):
+    def _write_test_config(self) -> None:
         """Write test configuration to file."""
         config_file = self.test_config_dir / "yesman.yaml"
         with open(config_file, "w") as f:
@@ -112,7 +112,7 @@ class IntegrationTestBase:
     def get_session_manager(self) -> SessionManager:
         """Get SessionManager instance for testing."""
         if not self.session_manager:
-            config = self.get_test_config()
+            self.get_test_config()
             self.session_manager = SessionManager()
         return self.session_manager
 
@@ -148,7 +148,7 @@ class IntegrationTestBase:
         self.created_sessions.append(session_name)
         return config
 
-    def wait_for_condition(self, condition_func, timeout: float = 5.0, interval: float = 0.1) -> bool:
+    def wait_for_condition(self, condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
         """Wait for a condition to become true."""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -157,14 +157,14 @@ class IntegrationTestBase:
             time.sleep(interval)
         return False
 
-    def assert_session_exists(self, session_name: str):
+    def assert_session_exists(self, session_name: str) -> None:
         """Assert that a session exists."""
         session_manager = self.get_session_manager()
         sessions = session_manager.list_sessions()
         session_names = [s.get("name") for s in sessions]
         assert session_name in session_names, f"Session {session_name} not found in {session_names}"
 
-    def assert_session_state(self, session_name: str, expected_state: str):
+    def assert_session_state(self, session_name: str, expected_state: str) -> None:
         """Assert that a session is in the expected state."""
         session_manager = self.get_session_manager()
         session_info = session_manager.get_session_info(session_name)
@@ -175,19 +175,19 @@ class IntegrationTestBase:
 class AsyncIntegrationTestBase(IntegrationTestBase):
     """Base class for async integration tests."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for async tests."""
         super().setup_method()
         self.event_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.event_loop)
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Cleanup for async tests."""
         if hasattr(self, "event_loop") and self.event_loop:
             self.event_loop.close()
         super().teardown_method()
 
-    async def async_wait_for_condition(self, condition_func, timeout: float = 5.0, interval: float = 0.1) -> bool:
+    async def async_wait_for_condition(self, condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
         """Async version of wait_for_condition."""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -200,12 +200,12 @@ class AsyncIntegrationTestBase(IntegrationTestBase):
 class MockClaudeEnvironment:
     """Mock Claude environment for testing without actual Claude processes."""
 
-    def __init__(self, test_dir: Path):
+    def __init__(self, test_dir: Path) -> None:
         self.test_dir = test_dir
         self.mock_responses = {}
         self.interaction_history = []
 
-    def add_mock_response(self, prompt_pattern: str, response: str):
+    def add_mock_response(self, prompt_pattern: str, response: str) -> None:
         """Add a mock response for a prompt pattern."""
         self.mock_responses[prompt_pattern] = response
 
@@ -226,7 +226,7 @@ class MockClaudeEnvironment:
         """Get total number of interactions."""
         return len(self.interaction_history)
 
-    def clear_history(self):
+    def clear_history(self) -> None:
         """Clear interaction history."""
         self.interaction_history.clear()
 
@@ -276,7 +276,7 @@ class IntegrationTestFixtures:
 class CommandTestRunner:
     """Utility for running and testing CLI commands in integration tests."""
 
-    def __init__(self, test_base: IntegrationTestBase):
+    def __init__(self, test_base: IntegrationTestBase) -> None:
         self.test_base = test_base
         self.command_results = []
 
@@ -314,7 +314,7 @@ class CommandTestRunner:
         """Get history of executed commands."""
         return self.command_results.copy()
 
-    def assert_command_succeeded(self, command_class: type):
+    def assert_command_succeeded(self, command_class: type) -> None:
         """Assert that the most recent command of given type succeeded."""
         matching_results = [r for r in self.command_results if r["command"] == command_class.__name__]
         assert matching_results, f"No {command_class.__name__} command found in history"
@@ -326,18 +326,19 @@ class CommandTestRunner:
 class PerformanceMonitor:
     """Monitor performance metrics during integration tests."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.metrics = {}
         self.start_times = {}
 
-    def start_timing(self, operation: str):
+    def start_timing(self, operation: str) -> None:
         """Start timing an operation."""
         self.start_times[operation] = time.time()
 
     def end_timing(self, operation: str) -> float:
         """End timing an operation and return duration."""
         if operation not in self.start_times:
-            raise ValueError(f"No start time recorded for operation: {operation}")
+            msg = f"No start time recorded for operation: {operation}"
+            raise ValueError(msg)
 
         duration = time.time() - self.start_times[operation]
 
@@ -354,7 +355,7 @@ class PerformanceMonitor:
             return 0.0
         return sum(self.metrics[operation]) / len(self.metrics[operation])
 
-    def assert_performance_threshold(self, operation: str, max_time: float):
+    def assert_performance_threshold(self, operation: str, max_time: float) -> None:
         """Assert that operation average time is below threshold."""
         avg_time = self.get_average_time(operation)
         assert avg_time <= max_time, f"Operation {operation} average time {avg_time:.3f}s exceeds threshold {max_time}s"
@@ -362,10 +363,10 @@ class PerformanceMonitor:
 
 # Export main classes for easy importing
 __all__ = [
-    "IntegrationTestBase",
     "AsyncIntegrationTestBase",
-    "MockClaudeEnvironment",
-    "IntegrationTestFixtures",
     "CommandTestRunner",
+    "IntegrationTestBase",
+    "IntegrationTestFixtures",
+    "MockClaudeEnvironment",
     "PerformanceMonitor",
 ]

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ProjectHealth:
     """Calculates project health metrics across multiple categories."""
 
-    def __init__(self, project_path: str = "."):
+    def __init__(self, project_path: str = ".") -> None:
         self.project_path = project_path
         self.categories = [
             "build",
@@ -50,7 +50,7 @@ class ProjectHealth:
             return scores
 
         except Exception as e:
-            logger.error(f"Error calculating project health: {e}")
+            logger.exception(f"Error calculating project health: {e}")
             return {
                 "overall_score": 50,
                 "build_score": 50,
@@ -73,8 +73,7 @@ class ProjectHealth:
 
             if has_build_config:
                 return 85
-            else:
-                return 60
+            return 60
         except Exception:
             return 50
 
@@ -87,8 +86,7 @@ class ProjectHealth:
 
             if has_tests:
                 return 75
-            else:
-                return 40
+            return 40
         except Exception:
             return 50
 
@@ -101,8 +99,7 @@ class ProjectHealth:
 
             if has_deps:
                 return 90
-            else:
-                return 30
+            return 30
         except Exception:
             return 50
 
@@ -142,8 +139,7 @@ class ProjectHealth:
 
             if has_quality_config:
                 return 85
-            else:
-                return 60
+            return 60
         except Exception:
             return 50
 
@@ -166,8 +162,7 @@ class ProjectHealth:
                     # Log subprocess execution errors if needed
                     logger.warning(f"Failed to check git log: {e}")
                 return 80
-            else:
-                return 30
+            return 30
         except Exception:
             return 50
 
@@ -180,8 +175,7 @@ class ProjectHealth:
 
             if has_docs:
                 return 70
-            else:
-                return 30
+            return 30
         except Exception:
             return 50
 

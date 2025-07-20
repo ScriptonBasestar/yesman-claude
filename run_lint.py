@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simple script to run lint commands and capture output"""
+"""Simple script to run lint commands and capture output."""
 
 import os
 import subprocess
@@ -7,7 +7,7 @@ import sys
 
 
 def run_command(command, description):
-    """Run a command and capture output"""
+    """Run a command and capture output."""
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(command)}")

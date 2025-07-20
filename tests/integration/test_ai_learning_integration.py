@@ -19,7 +19,7 @@ from .test_framework import (
 class TestAILearningIntegration(AsyncIntegrationTestBase):
     """Test AI learning system integration with real session interactions."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for AI learning tests."""
         super().setup_method()
         self.mock_claude = MockClaudeEnvironment(self.test_dir)
@@ -29,7 +29,7 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         # Setup mock Claude responses for learning scenarios
         self._setup_claude_responses()
 
-    def _setup_claude_responses(self):
+    def _setup_claude_responses(self) -> None:
         """Setup mock Claude responses for different learning scenarios."""
         # Code-related responses
         self.mock_claude.add_mock_response("write a function", "def example_function():\n    return 'Hello World'")
@@ -52,7 +52,7 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
             "Here's your project status: 5 completed tasks, 3 in progress.",
         )
 
-    async def test_learning_from_session_interactions(self):
+    async def test_learning_from_session_interactions(self) -> None:
         """Test that AI learns patterns from session interactions."""
         # Create test session for learning
         session_name = "ai-learning-session"
@@ -110,7 +110,7 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         assert learning_duration < 5.0, f"Learning phase took {learning_duration:.2f}s, should be < 5s"
         assert detection_duration < 2.0, f"Pattern detection took {detection_duration:.2f}s, should be < 2s"
 
-    async def test_prediction_accuracy_improvement(self):
+    async def test_prediction_accuracy_improvement(self) -> None:
         """Test that prediction accuracy improves with more data."""
         session_name = "prediction-accuracy-session"
         self.create_test_session(session_name)
@@ -166,7 +166,7 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
         assert improved_confidence > initial_confidence, f"Confidence didn't improve: {initial_confidence} -> {improved_confidence}"
         assert improved_confidence > 0.7, f"Final confidence {improved_confidence} should be > 0.7"
 
-    async def test_cross_session_learning(self):
+    async def test_cross_session_learning(self) -> None:
         """Test that learning transfers across multiple sessions."""
         # Create multiple sessions
         sessions = ["session-1", "session-2", "session-3"]
@@ -223,13 +223,13 @@ class TestAILearningIntegration(AsyncIntegrationTestBase):
 class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
     """Test integration between AI learning and automation workflows."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for automation learning tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
 
-    async def test_context_detection_learning(self):
+    async def test_context_detection_learning(self) -> None:
         """Test that AI learns to better detect contexts for automation."""
         # Create test project directory with various file types
         project_dir = self.test_dir / "test_project"
@@ -286,7 +286,7 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
         assert initial_duration < 3.0, f"Initial detection took {initial_duration:.2f}s, should be < 3s"
         assert improved_duration < 3.0, f"Improved detection took {improved_duration:.2f}s, should be < 3s"
 
-    async def test_workflow_optimization_learning(self):
+    async def test_workflow_optimization_learning(self) -> None:
         """Test that AI learns to optimize automation workflows."""
         project_dir = self.test_dir / "workflow_project"
         project_dir.mkdir()
@@ -348,7 +348,7 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
 class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
     """Test that AI learning data persists correctly across sessions."""
 
-    async def test_learning_data_persistence(self):
+    async def test_learning_data_persistence(self) -> None:
         """Test that learned patterns persist across system restarts."""
         session_name = "persistence-test-session"
         self.create_test_session(session_name)
@@ -394,7 +394,7 @@ class TestLearningPersistenceIntegration(AsyncIntegrationTestBase):
         assert prediction is not None, "No prediction from persisted patterns"
         assert prediction.get("confidence", 0.0) > 0.5, "Low confidence from persisted patterns"
 
-    async def test_incremental_learning_persistence(self):
+    async def test_incremental_learning_persistence(self) -> None:
         """Test that incremental learning updates are persisted correctly."""
         session_name = "incremental-learning-session"
         self.create_test_session(session_name)

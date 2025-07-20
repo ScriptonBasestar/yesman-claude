@@ -53,7 +53,7 @@ class ContextInfo:
 class ContextDetector:
     """Detects workflow contexts from various sources."""
 
-    def __init__(self, project_path: Path | None = None):
+    def __init__(self, project_path: Path | None = None) -> None:
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.context_detector")
 
@@ -110,7 +110,7 @@ class ContextDetector:
         self._last_git_hash: str | None = None
         self._last_file_mtimes: dict[str, float] = {}
 
-    def detect_context_from_content(self, content: str, session_name: str = None) -> list[ContextInfo]:
+    def detect_context_from_content(self, content: str, session_name: str | None = None) -> list[ContextInfo]:
         """Detect context from content (e.g., tmux pane output)."""
         detected_contexts = []
 
@@ -177,7 +177,7 @@ class ContextDetector:
 
         return None
 
-    def detect_file_changes(self, watched_patterns: list[str] = None) -> list[ContextInfo]:
+    def detect_file_changes(self, watched_patterns: list[str] | None = None) -> list[ContextInfo]:
         """Detect file system changes."""
         if not watched_patterns:
             watched_patterns = [

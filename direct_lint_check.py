@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Direct lint checks without make"""
+"""Direct lint checks without make."""
 
 import os
 import subprocess
@@ -9,7 +9,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_command(cmd, description):
-    """Run command and return results"""
+    """Run command and return results."""
     print(f"\n{'=' * 60}")
     print(f"{description}")
     print(f"{'=' * 60}")

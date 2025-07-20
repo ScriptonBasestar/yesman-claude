@@ -106,7 +106,8 @@ class DetectConflictsCommand(BaseCommand):
                 return asyncio.run(run_detection())
 
         except Exception as e:
-            raise CommandError(f"Error detecting conflicts: {e}") from e
+            msg = f"Error detecting conflicts: {e}"
+            raise CommandError(msg) from e
 
 
 class ResolveConflictCommand(BaseCommand):
@@ -137,8 +138,9 @@ class ResolveConflictCommand(BaseCommand):
 
                     resolution_strategy = ResolutionStrategy(strategy)
                 except ValueError as e:
+                    msg = f"Invalid strategy: {strategy}"
                     raise CommandError(
-                        f"Invalid strategy: {strategy}",
+                        msg,
                         recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis",
                     ) from e
 
@@ -174,7 +176,8 @@ class ResolveConflictCommand(BaseCommand):
             return asyncio.run(run_resolution())
 
         except Exception as e:
-            raise CommandError(f"Error resolving conflict: {e}") from e
+            msg = f"Error resolving conflict: {e}"
+            raise CommandError(msg) from e
 
 
 class ConflictSummaryCommand(BaseCommand):
@@ -242,4 +245,5 @@ class ConflictSummaryCommand(BaseCommand):
             return {"success": True, "repo_path": repo_path, "summary": summary}
 
         except Exception as e:
-            raise CommandError(f"Error getting conflict summary: {e}") from e
+            msg = f"Error getting conflict summary: {e}"
+            raise CommandError(msg) from e

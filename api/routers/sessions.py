@@ -2,8 +2,8 @@
 """Improved sessions router with dependency injection and proper error handling."""
 
 import logging
-from typing import Any
 
+# Note: Removed typing.Any usage to fix ANN401 errors
 from fastapi import APIRouter, HTTPException, status
 
 from api import models
@@ -20,7 +20,7 @@ logger = logging.getLogger("yesman.api.sessions")
 class SessionService:
     """Service class for session operations."""
 
-    def __init__(self, session_manager: SessionManager, tmux_manager: TmuxManager):
+    def __init__(self, session_manager: SessionManager, tmux_manager: TmuxManager) -> None:
         self.session_manager = session_manager
         self.tmux_manager = tmux_manager
         self.logger = logging.getLogger("yesman.api.sessions.service")
@@ -31,9 +31,10 @@ class SessionService:
             sessions_data = self.session_manager.get_all_sessions()
             return [self._convert_session_to_api_data(session) for session in sessions_data]
         except Exception as e:
-            self.logger.error(f"Failed to get sessions: {e}")
+            self.logger.exception("Failed to get sessions")
+            msg = "Failed to retrieve sessions"
             raise YesmanError(
-                "Failed to retrieve sessions",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
@@ -63,28 +64,31 @@ class SessionService:
                 return self._convert_session_to_api_data(session_data)
             return None
         except Exception as e:
-            self.logger.error(f"Failed to get session {session_name}: {e}")
+            self.logger.exception("Failed to get session {session_name}: {e}")
+            msg = f"Failed to retrieve session '{session_name}'"
             raise YesmanError(
-                f"Failed to retrieve session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def setup_session(self, session_name: str) -> dict[str, Any]:
+    def setup_session(self, session_name: str) -> dict[str, object]:
         """Set up a specific session."""
         try:
             # Check if session already exists
             if self._session_exists(session_name):
+                msg = f"Session '{session_name}' already exists"
                 raise YesmanError(
-                    f"Session '{session_name}' already exists",
+                    msg,
                     category=ErrorCategory.VALIDATION,
                 )
 
             # Load projects configuration
             projects = self.tmux_manager.load_projects().get("sessions", {})
             if session_name not in projects:
+                msg = f"Session '{session_name}' not found in projects configuration"
                 raise YesmanError(
-                    f"Session '{session_name}' not found in projects configuration",
+                    msg,
                     category=ErrorCategory.CONFIGURATION,
                 )
 
@@ -100,19 +104,21 @@ class SessionService:
         except YesmanError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to setup session {session_name}: {e}")
+            self.logger.exception("Failed to setup session {session_name}: {e}")
+            msg = f"Failed to setup session '{session_name}'"
             raise YesmanError(
-                f"Failed to setup session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def teardown_session(self, session_name: str) -> dict[str, Any]:
+    def teardown_session(self, session_name: str) -> dict[str, object]:
         """Teardown a specific session."""
         try:
             if not self._session_exists(session_name):
+                msg = f"Session '{session_name}' not found"
                 raise YesmanError(
-                    f"Session '{session_name}' not found",
+                    msg,
                     category=ErrorCategory.VALIDATION,
                 )
 
@@ -127,14 +133,15 @@ class SessionService:
         except YesmanError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to teardown session {session_name}: {e}")
+            self.logger.exception("Failed to teardown session {session_name}: {e}")
+            msg = f"Failed to teardown session '{session_name}'"
             raise YesmanError(
-                f"Failed to teardown session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def get_session_status(self, session_name: str) -> dict[str, Any]:
+    def get_session_status(self, session_name: str) -> dict[str, object]:
         """Get session status information."""
         try:
             # Load projects configuration to get project_conf
@@ -175,14 +182,15 @@ class SessionService:
             }
 
         except Exception as e:
-            self.logger.error(f"Failed to get status for session {session_name}: {e}")
+            self.logger.exception("Failed to get status for session {session_name}: {e}")
+            msg = f"Failed to get status for session '{session_name}'"
             raise YesmanError(
-                f"Failed to get status for session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def setup_all_sessions(self) -> dict[str, Any]:
+    def setup_all_sessions(self) -> dict[str, object]:
         """Setup all sessions defined in projects.yaml."""
         try:
             projects = self.tmux_manager.load_projects().get("sessions", {})
@@ -197,7 +205,7 @@ class SessionService:
                     else:
                         self.logger.info(f"Session '{session_name}' already exists, skipping")
                 except Exception as e:
-                    self.logger.error(f"Failed to setup session '{session_name}': {e}")
+                    self.logger.exception("Failed to setup session '{session_name}': {e}")
                     failed.append({"session_name": session_name, "error": str(e)})
 
             return {
@@ -208,14 +216,15 @@ class SessionService:
             }
 
         except Exception as e:
-            self.logger.error(f"Failed to setup all sessions: {e}")
+            self.logger.exception("Failed to setup all sessions: {e}")
+            msg = "Failed to setup all sessions"
             raise YesmanError(
-                "Failed to setup all sessions",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def teardown_all_sessions(self) -> dict[str, Any]:
+    def teardown_all_sessions(self) -> dict[str, object]:
         """Teardown all managed sessions."""
         try:
             sessions = self.session_manager.get_all_sessions()
@@ -228,7 +237,7 @@ class SessionService:
                     self._teardown_session_internal(session_name)
                     successful.append(session_name)
                 except Exception as e:
-                    self.logger.error(f"Failed to teardown session '{session_name}': {e}")
+                    self.logger.exception("Failed to teardown session '{session_name}': {e}")
                     failed.append({"session_name": session_name, "error": str(e)})
 
             return {
@@ -239,19 +248,21 @@ class SessionService:
             }
 
         except Exception as e:
-            self.logger.error(f"Failed to teardown all sessions: {e}")
+            self.logger.exception("Failed to teardown all sessions: {e}")
+            msg = "Failed to teardown all sessions"
             raise YesmanError(
-                "Failed to teardown all sessions",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def start_session(self, session_name: str) -> dict[str, Any]:
+    def start_session(self, session_name: str) -> dict[str, object]:
         """Start an existing session."""
         try:
             if self._session_exists(session_name):
+                msg = f"Session '{session_name}' is already running"
                 raise YesmanError(
-                    f"Session '{session_name}' is already running",
+                    msg,
                     category=ErrorCategory.VALIDATION,
                 )
 
@@ -268,19 +279,21 @@ class SessionService:
         except YesmanError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to start session {session_name}: {e}")
+            self.logger.exception("Failed to start session {session_name}: {e}")
+            msg = f"Failed to start session '{session_name}'"
             raise YesmanError(
-                f"Failed to start session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def stop_session(self, session_name: str) -> dict[str, Any]:
+    def stop_session(self, session_name: str) -> dict[str, object]:
         """Stop a running session."""
         try:
             if not self._session_exists(session_name):
+                msg = f"Session '{session_name}' not found"
                 raise YesmanError(
-                    f"Session '{session_name}' not found",
+                    msg,
                     category=ErrorCategory.VALIDATION,
                 )
 
@@ -295,14 +308,15 @@ class SessionService:
         except YesmanError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to stop session {session_name}: {e}")
+            self.logger.exception("Failed to stop session {session_name}: {e}")
+            msg = f"Failed to stop session '{session_name}'"
             raise YesmanError(
-                f"Failed to stop session '{session_name}'",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
 
-    def _convert_session_to_api_data(self, session_data) -> SessionAPIData:
+    def _convert_session_to_api_data(self, session_data: object) -> SessionAPIData:
         """Convert internal session data to API format."""
         try:
             return {
@@ -327,9 +341,10 @@ class SessionService:
                 "last_activity": getattr(session_data, "last_activity", None),
             }
         except Exception as e:
-            self.logger.error(f"Failed to convert session data: {e}")
+            self.logger.exception("Failed to convert session data: {e}")
+            msg = "Failed to convert session data format"
             raise YesmanError(
-                "Failed to convert session data format",
+                msg,
                 category=ErrorCategory.SYSTEM,
                 cause=e,
             )
@@ -342,7 +357,7 @@ class SessionService:
         except Exception:
             return False
 
-    def _setup_session_internal(self, session_name: str, session_config: dict[str, Any]) -> dict[str, Any]:
+    def _setup_session_internal(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
         """Internal session setup logic."""
         # This would integrate with the improved SessionSetupService
         # For now, return a placeholder
@@ -359,7 +374,8 @@ class SessionService:
                 capture_output=True,
             )
         except subprocess.CalledProcessError as e:
-            raise YesmanError(f"Failed to kill session: {e}")
+            msg = f"Failed to kill session: {e}"
+            raise YesmanError(msg)
 
 
 # Router with dependency injection
@@ -407,13 +423,13 @@ def get_all_sessions():
         ]
 
     except YesmanError as e:
-        logger.error(f"YesmanError in get_all_sessions: {e.message}")
+        logger.exception("YesmanError in get_all_sessions: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=e.message,
         )
-    except Exception as e:
-        logger.error(f"Unexpected error in get_all_sessions: {e}")
+    except Exception:
+        logger.exception("Unexpected error in get_all_sessions: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -466,13 +482,13 @@ def get_session(session_name: str):
     except HTTPException:
         raise
     except YesmanError as e:
-        logger.error(f"YesmanError in get_session: {e.message}")
+        logger.exception("YesmanError in get_session: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=e.message,
         )
-    except Exception as e:
-        logger.error(f"Unexpected error in get_session: {e}")
+    except Exception:
+        logger.exception("Unexpected error in get_session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -490,15 +506,14 @@ def setup_session(session_name: str):
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.setup_session(session_name)
-        return result
+        return service.setup_session(session_name)
 
     except YesmanError as e:
-        logger.error(f"YesmanError in setup_session: {e.message}")
+        logger.exception("YesmanError in setup_session: {e.message}")
         status_code = status.HTTP_400_BAD_REQUEST if e.category == ErrorCategory.VALIDATION else status.HTTP_500_INTERNAL_SERVER_ERROR
         raise HTTPException(status_code=status_code, detail=e.message)
-    except Exception as e:
-        logger.error(f"Unexpected error in setup_session: {e}")
+    except Exception:
+        logger.exception("Unexpected error in setup_session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -516,15 +531,14 @@ def teardown_session(session_name: str):
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.teardown_session(session_name)
-        return result
+        return service.teardown_session(session_name)
 
     except YesmanError as e:
-        logger.error(f"YesmanError in teardown_session: {e.message}")
+        logger.exception("YesmanError in teardown_session: {e.message}")
         status_code = status.HTTP_404_NOT_FOUND if e.category == ErrorCategory.VALIDATION else status.HTTP_500_INTERNAL_SERVER_ERROR
         raise HTTPException(status_code=status_code, detail=e.message)
-    except Exception as e:
-        logger.error(f"Unexpected error in teardown_session: {e}")
+    except Exception:
+        logger.exception("Unexpected error in teardown_session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -542,17 +556,16 @@ def get_session_status(session_name: str):
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.get_session_status(session_name)
-        return result
+        return service.get_session_status(session_name)
 
     except YesmanError as e:
-        logger.error(f"YesmanError in get_session_status: {e.message}")
+        logger.exception("YesmanError in get_session_status: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=e.message,
         )
-    except Exception as e:
-        logger.error(f"Unexpected error in get_session_status: {e}")
+    except Exception:
+        logger.exception("Unexpected error in get_session_status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -570,17 +583,16 @@ def setup_all_sessions():
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.setup_all_sessions()
-        return result
+        return service.setup_all_sessions()
 
     except YesmanError as e:
-        logger.error(f"YesmanError in setup_all_sessions: {e.message}")
+        logger.exception("YesmanError in setup_all_sessions: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=e.message,
         )
-    except Exception as e:
-        logger.error(f"Unexpected error in setup_all_sessions: {e}")
+    except Exception:
+        logger.exception("Unexpected error in setup_all_sessions: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -598,17 +610,16 @@ def teardown_all_sessions():
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.teardown_all_sessions()
-        return result
+        return service.teardown_all_sessions()
 
     except YesmanError as e:
-        logger.error(f"YesmanError in teardown_all_sessions: {e.message}")
+        logger.exception("YesmanError in teardown_all_sessions: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=e.message,
         )
-    except Exception as e:
-        logger.error(f"Unexpected error in teardown_all_sessions: {e}")
+    except Exception:
+        logger.exception("Unexpected error in teardown_all_sessions: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -626,15 +637,14 @@ def start_session(session_name: str):
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.start_session(session_name)
-        return result
+        return service.start_session(session_name)
 
     except YesmanError as e:
-        logger.error(f"YesmanError in start_session: {e.message}")
+        logger.exception("YesmanError in start_session: {e.message}")
         status_code = status.HTTP_400_BAD_REQUEST if e.category == ErrorCategory.VALIDATION else status.HTTP_500_INTERNAL_SERVER_ERROR
         raise HTTPException(status_code=status_code, detail=e.message)
-    except Exception as e:
-        logger.error(f"Unexpected error in start_session: {e}")
+    except Exception:
+        logger.exception("Unexpected error in start_session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -652,15 +662,14 @@ def stop_session(session_name: str):
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
         service = SessionService(session_manager, tmux_manager)
-        result = service.stop_session(session_name)
-        return result
+        return service.stop_session(session_name)
 
     except YesmanError as e:
-        logger.error(f"YesmanError in stop_session: {e.message}")
+        logger.exception("YesmanError in stop_session: {e.message}")
         status_code = status.HTTP_404_NOT_FOUND if e.category == ErrorCategory.VALIDATION else status.HTTP_500_INTERNAL_SERVER_ERROR
         raise HTTPException(status_code=status_code, detail=e.message)
-    except Exception as e:
-        logger.error(f"Unexpected error in stop_session: {e}")
+    except Exception:
+        logger.exception("Unexpected error in stop_session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",

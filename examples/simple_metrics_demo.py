@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simplified demo script for metrics verification system"""
+"""Simplified demo script for metrics verification system."""
 
 import tempfile
 from pathlib import Path
@@ -8,7 +8,7 @@ from libs.multi_agent.metrics_verifier import MetricsVerifier
 
 
 def demo_simple_metrics_verification():
-    """Demonstrate metrics verification with simulated data"""
+    """Demonstrate metrics verification with simulated data."""
     print("🎯 Simplified Multi-Agent Metrics Verification Demo")
     print("=" * 60)
 

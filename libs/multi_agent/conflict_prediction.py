@@ -6,7 +6,7 @@ import logging
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -84,7 +84,7 @@ class ConflictPredictor:
         conflict_engine: ConflictResolutionEngine,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-    ):
+    ) -> None:
         """Initialize the conflict predictor.
 
         Args:
@@ -147,7 +147,7 @@ class ConflictPredictor:
         Returns:
             List of conflict predictions sorted by likelihood
         """
-        logger.info(f"Predicting conflicts for branches: {branches}")
+        logger.info("Predicting conflicts for branches: %s", branches)
 
         time_horizon = time_horizon or self.prediction_window
         predictions = []
@@ -160,7 +160,7 @@ class ConflictPredictor:
                     self.conflict_vectors[f"{branch1}:{branch2}"] = vector
 
                     # Run pattern detection
-                    for pattern, detector in self.pattern_detectors.items():
+                    for detector in self.pattern_detectors.values():
                         prediction = await detector(branch1, branch2, vector)
                         if prediction and prediction.likelihood_score >= self.min_confidence_threshold:
                             predictions.append(prediction)
@@ -183,10 +183,10 @@ class ConflictPredictor:
                 self.prediction_history.append(prediction)
 
             self.prediction_stats["total_predictions"] += len(predictions)
-            logger.info(f"Generated {len(predictions)} conflict predictions")
+            logger.info("Generated %d conflict predictions", len(predictions))
 
-        except Exception as e:
-            logger.error(f"Error predicting conflicts: {e}")
+        except Exception:
+            logger.exception("Error predicting conflicts:")
 
         return predictions
 
@@ -198,8 +198,8 @@ class ConflictPredictor:
         """Calculate multi-dimensional conflict probability vector."""
         try:
             # File overlap analysis
-            files1 = await self.conflict_engine._get_changed_files(branch1)
-            files2 = await self.conflict_engine._get_changed_files(branch2)
+            files1 = await self.conflict_engine._get_changed_files(branch1)  # noqa: SLF001
+            files2 = await self.conflict_engine._get_changed_files(branch2)  # noqa: SLF001
 
             common_files = set(files1.keys()) & set(files2.keys())
             file_overlap_score = len(common_files) / max(
@@ -235,8 +235,8 @@ class ConflictPredictor:
                 temporal_proximity_score=temporal_score,
             )
 
-        except Exception as e:
-            logger.error(f"Error calculating conflict vector: {e}")
+        except Exception:
+            logger.exception("Error calculating conflict vector:")
             return ConflictVector(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
     async def _detect_import_conflicts(
@@ -292,15 +292,15 @@ class ConflictPredictor:
                     "Coordinate import additions through team communication",
                     "Consider using automated import sorting tools",
                 ],
-                timeline_prediction=datetime.now() + timedelta(days=2),
+                timeline_prediction=datetime.now(UTC) + timedelta(days=2),
                 metadata={
                     "import_overlap_count": len(affected_files),
-                    "vector_components": vector._asdict(),
+                    "vector_components": vector._asdict(),  # noqa: SLF001
                 },
             )
 
-        except Exception as e:
-            logger.error(f"Error detecting import conflicts: {e}")
+        except Exception:
+            logger.exception("Error detecting import conflicts:")
             return None
 
     async def _detect_signature_drift(
@@ -349,7 +349,7 @@ class ConflictPredictor:
                 pattern=ConflictPattern.FUNCTION_SIGNATURE_DRIFT,
                 affected_branches=[branch1, branch2],
                 affected_files=list(
-                    set(f.split(":")[0] for f in affected_functions if ":" in f),
+                    {f.split(":")[0] for f in affected_functions if ":" in f},
                 ),
                 predicted_conflict_type=ConflictType.SEMANTIC,
                 predicted_severity=severity,
@@ -360,15 +360,15 @@ class ConflictPredictor:
                     "Use versioned APIs during development",
                     "Implement automated signature compatibility checks",
                 ],
-                timeline_prediction=datetime.now() + timedelta(days=1),
+                timeline_prediction=datetime.now(UTC) + timedelta(days=1),
                 metadata={
                     "affected_functions": affected_functions[:10],  # Limit for storage
                     "drift_severity": severity.value,
                 },
             )
 
-        except Exception as e:
-            logger.error(f"Error detecting signature drift: {e}")
+        except Exception:
+            logger.exception("Error detecting signature drift:")
             return None
 
     async def _detect_naming_collisions(
@@ -417,12 +417,12 @@ class ConflictPredictor:
                     "Implement namespace prefixing for new symbols",
                     "Review symbol visibility and scope design",
                 ],
-                timeline_prediction=datetime.now() + timedelta(days=3),
+                timeline_prediction=datetime.now(UTC) + timedelta(days=3),
                 metadata={"collision_symbols": potential_collisions[:20]},
             )
 
-        except Exception as e:
-            logger.error(f"Error detecting naming collisions: {e}")
+        except Exception:
+            logger.exception("Error detecting naming collisions:")
             return None
 
     async def _detect_hierarchy_changes(
@@ -475,12 +475,12 @@ class ConflictPredictor:
                     "Use composition over inheritance where possible",
                     "Implement automated hierarchy compatibility tests",
                 ],
-                timeline_prediction=datetime.now() + timedelta(days=1),
+                timeline_prediction=datetime.now(UTC) + timedelta(days=1),
                 metadata={"affected_classes": hierarchy_conflicts},
             )
 
-        except Exception as e:
-            logger.error(f"Error detecting hierarchy changes: {e}")
+        except Exception:
+            logger.exception("Error detecting hierarchy changes:")
             return None
 
     async def _detect_version_conflicts(
@@ -533,12 +533,12 @@ class ConflictPredictor:
                     "Coordinate major version upgrades",
                     "Implement automated dependency compatibility testing",
                 ],
-                timeline_prediction=datetime.now() + timedelta(hours=12),
+                timeline_prediction=datetime.now(UTC) + timedelta(hours=12),
                 metadata={"version_conflicts": version_conflicts},
             )
 
-        except Exception as e:
-            logger.error(f"Error detecting version conflicts: {e}")
+        except Exception:
+            logger.exception("Error detecting version conflicts:")
             return None
 
     async def _detect_api_changes(
@@ -598,19 +598,18 @@ class ConflictPredictor:
         """Convert likelihood score to confidence enum."""
         if likelihood >= 0.9:
             return PredictionConfidence.CRITICAL
-        elif likelihood >= 0.7:
+        if likelihood >= 0.7:
             return PredictionConfidence.HIGH
-        elif likelihood >= 0.4:
+        if likelihood >= 0.4:
             return PredictionConfidence.MEDIUM
-        else:
-            return PredictionConfidence.LOW
+        return PredictionConfidence.LOW
 
     # Helper methods for analysis
 
     async def _get_change_frequency(self, branch: str) -> float:
         """Get change frequency for a branch (commits per day)."""
         try:
-            result = await self.conflict_engine._run_git_command(
+            result = await self.conflict_engine._run_git_command(  # noqa: SLF001
                 ["rev-list", "--count", "--since=1 week ago", branch],
             )
             commit_count = int(result.stdout.strip())
@@ -622,7 +621,7 @@ class ConflictPredictor:
         """Calculate complexity score for a branch."""
         try:
             # Simple complexity metric based on lines changed
-            result = await self.conflict_engine._run_git_command(
+            result = await self.conflict_engine._run_git_command(  # noqa: SLF001
                 ["diff", "--stat", f"HEAD..{branch}"],
             )
 
@@ -662,17 +661,17 @@ class ConflictPredictor:
         """Get Python files and their import statements."""
         files = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(
+                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
                     branch,
                 )
                 if content:
                     imports = self._extract_imports(content)
                     files[file_path] = imports
-        except Exception as e:
-            logger.error(f"Error getting Python files with imports: {e}")
+        except Exception:
+            logger.exception("Error getting Python files with imports:")
         return files
 
     def _extract_imports(self, content: str) -> list[str]:
@@ -731,29 +730,29 @@ class ConflictPredictor:
         """Get all function signatures from a branch."""
         signatures = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(
+                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
                     branch,
                 )
                 if content:
-                    file_sigs = self.conflict_engine._extract_function_signatures(
+                    file_sigs = self.conflict_engine._extract_function_signatures(  # noqa: SLF001
                         content,
                     )
                     for func_name, signature in file_sigs.items():
                         signatures[f"{file_path}:{func_name}"] = signature
-        except Exception as e:
-            logger.error(f"Error getting function signatures: {e}")
+        except Exception:
+            logger.exception("Error getting function signatures:")
         return signatures
 
     async def _extract_symbol_definitions(self, branch: str) -> dict[str, str]:
         """Extract symbol definitions from a branch."""
         symbols = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(
+                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
                     branch,
                 )
@@ -768,17 +767,17 @@ class ConflictPredictor:
                                 symbols[node.name] = f"{file_path}:{node.lineno}"
                     except SyntaxError:
                         pass
-        except Exception as e:
-            logger.error(f"Error extracting symbol definitions: {e}")
+        except Exception:
+            logger.exception("Error extracting symbol definitions:")
         return symbols
 
     async def _extract_class_hierarchies(self, branch: str) -> dict[str, list[str]]:
         """Extract class inheritance hierarchies."""
         hierarchies = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(
+                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
                     branch,
                 )
@@ -796,8 +795,8 @@ class ConflictPredictor:
                                 hierarchies[node.name] = bases
                     except SyntaxError:
                         pass
-        except Exception as e:
-            logger.error(f"Error extracting class hierarchies: {e}")
+        except Exception:
+            logger.exception("Error extracting class hierarchies:")
         return hierarchies
 
     async def _get_dependency_versions(self, branch: str) -> dict[str, str]:
@@ -805,7 +804,7 @@ class ConflictPredictor:
         versions = {}
         try:
             # Check requirements.txt
-            req_content = await self.conflict_engine._get_file_content(
+            req_content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                 "requirements.txt",
                 branch,
             )
@@ -817,7 +816,7 @@ class ConflictPredictor:
                         versions[pkg.strip()] = ver.strip()
 
             # Check pyproject.toml
-            pyproject_content = await self.conflict_engine._get_file_content(
+            pyproject_content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                 "pyproject.toml",
                 branch,
             )
@@ -839,15 +838,15 @@ class ConflictPredictor:
                             ver = parts[1].strip().strip("\"'")
                             versions[pkg] = ver
 
-        except Exception as e:
-            logger.error(f"Error getting dependency versions: {e}")
+        except Exception:
+            logger.exception("Error getting dependency versions:")
         return versions
 
     def _calculate_version_distance(self, ver1: str, ver2: str) -> float:
         """Calculate semantic distance between version strings."""
         try:
             # Simple version comparison
-            def parse_version(v):
+            def parse_version(v: str) -> list[int]:
                 return [int(x) for x in v.split(".") if x.isdigit()]
 
             v1_parts = parse_version(ver1)
@@ -883,7 +882,7 @@ class ConflictPredictor:
         return {
             "total_predictions": len(self.predictions),
             "active_predictions": len(
-                [p for p in self.predictions.values() if p.timeline_prediction and p.timeline_prediction > datetime.now()],
+                [p for p in self.predictions.values() if p.timeline_prediction and p.timeline_prediction > datetime.now(UTC)],
             ),
             "by_confidence": dict(confidence_counts),
             "by_pattern": dict(pattern_counts),
@@ -903,11 +902,10 @@ class ConflictPredictor:
             ],
         }
 
-    def validate_prediction_accuracy(self, actual_conflicts: list[ConflictInfo]):
+    def validate_prediction_accuracy(self, actual_conflicts: list[ConflictInfo]) -> None:
         """Validate prediction accuracy against actual conflicts."""
         # Implementation would compare predictions with actual conflicts
         # and update accuracy metrics
-        pass
 
     def analyze_conflict_patterns(self) -> dict[str, Any]:
         """Analyze detailed conflict patterns and trends."""

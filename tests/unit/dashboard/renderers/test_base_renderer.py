@@ -1,6 +1,7 @@
 """Tests for BaseRenderer and related components."""
 
 from datetime import datetime
+from typing import Any
 
 import pytest
 
@@ -16,10 +17,10 @@ from libs.dashboard.renderers.registry import RendererRegistry
 class TestRenderer(BaseRenderer):
     """Test implementation of BaseRenderer for testing."""
 
-    def render_widget(self, widget_type, data, options=None):
+    def render_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any] | None = None) -> str:
         return f"<widget type='{widget_type.value}' data='{data}' />"
 
-    def render_layout(self, widgets, layout_config=None):
+    def render_layout(self, widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None) -> str:
         rendered_widgets = []
         for widget in widgets:
             widget_html = self.render_widget(
@@ -30,25 +31,25 @@ class TestRenderer(BaseRenderer):
             rendered_widgets.append(widget_html)
         return f"<layout>{' '.join(rendered_widgets)}</layout>"
 
-    def render_container(self, content, container_config=None):
+    def render_container(self, content: Any, container_config: dict[str, Any] | None = None) -> str:
         return f"<container>{content}</container>"
 
 
 class TestBaseRenderer:
     """Test cases for BaseRenderer abstract class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup test renderer."""
         self.renderer = TestRenderer(RenderFormat.WEB)
 
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test renderer initialization."""
         assert self.renderer.format_type == RenderFormat.WEB
         assert self.renderer.theme is not None
         assert isinstance(self.renderer.theme, dict)
         assert "colors" in self.renderer.theme
 
-    def test_initialization_with_custom_theme(self):
+    def test_initialization_with_custom_theme(self) -> None:
         """Test renderer initialization with custom theme."""
         custom_theme = {
             "colors": {"primary": "#FF0000"},
@@ -59,7 +60,7 @@ class TestBaseRenderer:
         assert renderer.theme == custom_theme
         assert renderer.theme["custom_setting"] == "test"
 
-    def test_format_number(self):
+    def test_format_number(self) -> None:
         """Test number formatting."""
         # Integer
         assert self.renderer.format_number(1000) == "1,000"
@@ -72,7 +73,7 @@ class TestBaseRenderer:
         # None value
         assert self.renderer.format_number(None) == "N/A"
 
-    def test_format_date(self):
+    def test_format_date(self) -> None:
         """Test date formatting."""
         # Datetime object
         dt = datetime(2023, 12, 25, 15, 30, 45)
@@ -86,27 +87,27 @@ class TestBaseRenderer:
         # None value
         assert self.renderer.format_date(None) == "N/A"
 
-    def test_format_percentage(self):
+    def test_format_percentage(self) -> None:
         """Test percentage formatting."""
         assert self.renderer.format_percentage(85.5) == "85.5%"
         assert self.renderer.format_percentage(85.567, precision=2) == "85.57%"
         assert self.renderer.format_percentage(None) == "N/A"
 
-    def test_format_bytes(self):
+    def test_format_bytes(self) -> None:
         """Test bytes formatting."""
         assert self.renderer.format_bytes(1024) == "1.0 KB"
         assert self.renderer.format_bytes(1024 * 1024) == "1.0 MB"
         assert self.renderer.format_bytes(1024 * 1024 * 1024) == "1.0 GB"
         assert self.renderer.format_bytes(None) == "N/A"
 
-    def test_format_duration(self):
+    def test_format_duration(self) -> None:
         """Test duration formatting."""
         assert self.renderer.format_duration(30) == "30.0s"
         assert self.renderer.format_duration(90) == "1m 30s"
         assert self.renderer.format_duration(3661) == "1h 1m"
         assert self.renderer.format_duration(None) == "N/A"
 
-    def test_get_color(self):
+    def test_get_color(self) -> None:
         """Test color retrieval from theme."""
         color = self.renderer.get_color(ThemeColor.PRIMARY)
         assert color == "#3B82F6"  # Default primary color
@@ -114,7 +115,7 @@ class TestBaseRenderer:
         light_color = self.renderer.get_color(ThemeColor.PRIMARY, "light")
         assert light_color == "#93C5FD"
 
-    def test_truncate_text(self):
+    def test_truncate_text(self) -> None:
         """Test text truncation."""
         text = "This is a very long text that should be truncated"
 
@@ -125,7 +126,7 @@ class TestBaseRenderer:
         # Custom suffix
         assert self.renderer.truncate_text(text, 20, ">>") == "This is a very lon>>"
 
-    def test_sanitize_text(self):
+    def test_sanitize_text(self) -> None:
         """Test text sanitization."""
         # Control characters should be removed
         text_with_controls = "Hello\x00\x01World\x1f"
@@ -137,7 +138,7 @@ class TestBaseRenderer:
 
         assert self.renderer.sanitize_text(None) == ""
 
-    def test_get_status_color(self):
+    def test_get_status_color(self) -> None:
         """Test status color mapping."""
         assert self.renderer.get_status_color("active") == ThemeColor.SUCCESS
         assert self.renderer.get_status_color("RUNNING") == ThemeColor.SUCCESS
@@ -146,7 +147,7 @@ class TestBaseRenderer:
         assert self.renderer.get_status_color("loading") == ThemeColor.INFO
         assert self.renderer.get_status_color("unknown") == ThemeColor.NEUTRAL
 
-    def test_calculate_health_score(self):
+    def test_calculate_health_score(self) -> None:
         """Test health score calculation."""
         # Empty metrics
         assert self.renderer.calculate_health_score({}) == 0.0
@@ -169,7 +170,7 @@ class TestBaseRenderer:
         score = self.renderer.calculate_health_score(bad_metrics)
         assert score < 30  # Should be low
 
-    def test_set_theme(self):
+    def test_set_theme(self) -> None:
         """Test theme setting."""
         new_theme = {"colors": {"primary": "#FF0000"}}
         self.renderer.set_theme(new_theme)
@@ -177,7 +178,7 @@ class TestBaseRenderer:
         assert self.renderer.theme == new_theme
         assert len(self.renderer._cache) == 0  # Cache should be cleared
 
-    def test_clear_cache(self):
+    def test_clear_cache(self) -> None:
         """Test cache clearing."""
         self.renderer._cache["test"] = "value"
         assert len(self.renderer._cache) == 1
@@ -185,7 +186,7 @@ class TestBaseRenderer:
         self.renderer.clear_cache()
         assert len(self.renderer._cache) == 0
 
-    def test_abstract_methods(self):
+    def test_abstract_methods(self) -> None:
         """Test that abstract methods are implemented."""
         # These should work without raising NotImplementedError
         result = self.renderer.render_widget(WidgetType.METRIC_CARD, {"value": 100})
@@ -202,11 +203,11 @@ class TestBaseRenderer:
 class TestRendererRegistry:
     """Test cases for RendererRegistry."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup test registry."""
         self.registry = RendererRegistry()
 
-    def test_register_renderer(self):
+    def test_register_renderer(self) -> None:
         """Test renderer registration."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
 
@@ -214,7 +215,7 @@ class TestRendererRegistry:
         assert RenderFormat.WEB in self.registry.get_registered_formats()
         assert self.registry.get_default_format() == RenderFormat.WEB
 
-    def test_register_invalid_renderer(self):
+    def test_register_invalid_renderer(self) -> None:
         """Test registration of invalid renderer."""
 
         class NotARenderer:
@@ -223,7 +224,7 @@ class TestRendererRegistry:
         with pytest.raises(ValueError):
             self.registry.register(RenderFormat.WEB, NotARenderer)
 
-    def test_get_renderer_class(self):
+    def test_get_renderer_class(self) -> None:
         """Test getting renderer class."""
         self.registry.register(RenderFormat.TUI, TestRenderer)
 
@@ -232,7 +233,7 @@ class TestRendererRegistry:
 
         assert self.registry.get_renderer_class(RenderFormat.JSON) is None
 
-    def test_get_renderer_instance(self):
+    def test_get_renderer_instance(self) -> None:
         """Test getting renderer instance."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
 
@@ -244,7 +245,7 @@ class TestRendererRegistry:
         renderer2 = self.registry.get_renderer(RenderFormat.WEB)
         assert renderer is renderer2
 
-    def test_get_renderer_with_kwargs(self):
+    def test_get_renderer_with_kwargs(self) -> None:
         """Test getting renderer with custom arguments."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
 
@@ -257,7 +258,7 @@ class TestRendererRegistry:
         renderer2 = self.registry.get_renderer(RenderFormat.WEB)
         assert renderer is not renderer2
 
-    def test_unregister_renderer(self):
+    def test_unregister_renderer(self) -> None:
         """Test renderer unregistration."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
         self.registry.register(RenderFormat.TUI, TestRenderer)
@@ -269,7 +270,7 @@ class TestRendererRegistry:
         assert not self.registry.is_registered(RenderFormat.WEB)
         assert self.registry.get_default_format() == RenderFormat.TUI
 
-    def test_set_default_format(self):
+    def test_set_default_format(self) -> None:
         """Test setting default format."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
         self.registry.register(RenderFormat.TUI, TestRenderer)
@@ -280,7 +281,7 @@ class TestRendererRegistry:
         with pytest.raises(ValueError):
             self.registry.set_default_format(RenderFormat.JSON)
 
-    def test_get_default_renderer(self):
+    def test_get_default_renderer(self) -> None:
         """Test getting default renderer."""
         assert self.registry.get_default_renderer() is None
 
@@ -290,7 +291,7 @@ class TestRendererRegistry:
         assert isinstance(renderer, TestRenderer)
         assert renderer.format_type == RenderFormat.WEB
 
-    def test_registry_methods(self):
+    def test_registry_methods(self) -> None:
         """Test registry utility methods."""
         assert len(self.registry) == 0
         assert RenderFormat.WEB not in self.registry
@@ -305,7 +306,7 @@ class TestRendererRegistry:
             RenderFormat.TUI,
         }
 
-    def test_clear_registry(self):
+    def test_clear_registry(self) -> None:
         """Test clearing registry."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
         self.registry.register(RenderFormat.TUI, TestRenderer)
@@ -317,7 +318,7 @@ class TestRendererRegistry:
         assert len(self.registry) == 0
         assert self.registry.get_default_format() is None
 
-    def test_registry_repr(self):
+    def test_registry_repr(self) -> None:
         """Test registry string representation."""
         self.registry.register(RenderFormat.WEB, TestRenderer)
         repr_str = repr(self.registry)
@@ -330,7 +331,7 @@ class TestRendererRegistry:
 class TestEnums:
     """Test cases for enum definitions."""
 
-    def test_render_format_enum(self):
+    def test_render_format_enum(self) -> None:
         """Test RenderFormat enum."""
         assert RenderFormat.TUI.value == "tui"
         assert RenderFormat.WEB.value == "web"
@@ -338,7 +339,7 @@ class TestEnums:
         assert RenderFormat.JSON.value == "json"
         assert RenderFormat.MARKDOWN.value == "markdown"
 
-    def test_widget_type_enum(self):
+    def test_widget_type_enum(self) -> None:
         """Test WidgetType enum."""
         assert WidgetType.SESSION_BROWSER.value == "session_browser"
         assert WidgetType.HEALTH_METER.value == "health_meter"
@@ -366,7 +367,7 @@ class TestEnums:
         for widget in expected_widgets:
             assert hasattr(WidgetType, widget)
 
-    def test_theme_color_enum(self):
+    def test_theme_color_enum(self) -> None:
         """Test ThemeColor enum."""
         assert ThemeColor.PRIMARY.value == "primary"
         assert ThemeColor.SUCCESS.value == "success"

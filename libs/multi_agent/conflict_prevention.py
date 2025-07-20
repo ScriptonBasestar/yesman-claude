@@ -113,7 +113,7 @@ class ConflictPreventionSystem:
         collaboration_engine: CollaborationEngine,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-    ):
+    ) -> None:
         """Initialize the conflict prevention system.
 
         Args:
@@ -167,7 +167,7 @@ class ConflictPreventionSystem:
         self._running = False
         self._prevention_monitor_task: asyncio.Task[Any] | None = None
 
-    async def start_prevention_monitoring(self, monitoring_interval: float = 300.0):
+    async def start_prevention_monitoring(self, monitoring_interval: float = 300.0) -> None:
         """Start continuous conflict prevention monitoring."""
         self._running = True
         self._prevention_monitor_task = asyncio.create_task(
@@ -175,7 +175,7 @@ class ConflictPreventionSystem:
         )
         logger.info("Started conflict prevention monitoring")
 
-    async def stop_prevention_monitoring(self):
+    async def stop_prevention_monitoring(self) -> None:
         """Stop conflict prevention monitoring."""
         self._running = False
         if self._prevention_monitor_task:
@@ -203,7 +203,7 @@ class ConflictPreventionSystem:
         start_time = datetime.now()
         session_id = f"prevention_{start_time.strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(''.join(branches).encode()).hexdigest()[:8]}"
 
-        logger.info(f"Starting conflict prevention analysis for session {session_id}")
+        logger.info("Starting conflict prevention analysis for session %s", session_id)
 
         # Set default time horizon
         if time_horizon is None:
@@ -219,7 +219,7 @@ class ConflictPreventionSystem:
         significant_predictions = [p for p in predictions if p.likelihood_score >= self.prevention_config["prediction_threshold"]]
 
         logger.info(
-            f"Found {len(significant_predictions)} significant conflict predictions",
+            "Found %d significant conflict predictions", len(significant_predictions)
         )
 
         # Generate prevention measures
@@ -243,8 +243,8 @@ class ConflictPreventionSystem:
                 else:
                     failed_measures.append(measure)
             except Exception as e:
-                logger.error(
-                    f"Failed to apply prevention measure {measure.measure_id}: {e}",
+                logger.exception(
+                    "Failed to apply prevention measure %s: %s", measure.measure_id, e
                 )
                 measure.status = "failed"
                 measure.metadata["error"] = str(e)
@@ -288,7 +288,8 @@ class ConflictPreventionSystem:
 
         self.prevention_history.append(result)
         logger.info(
-            f"Prevention session {session_id} completed: {conflicts_prevented} conflicts prevented",
+            "Prevention session %s completed: %d conflicts prevented",
+            session_id, conflicts_prevented
         )
 
         return result
@@ -315,9 +316,8 @@ class ConflictPreventionSystem:
             measures.extend(await self._generate_generic_measures(prediction))
 
         # Filter by effort threshold
-        feasible_measures = [m for m in measures if m.estimated_effort <= self.prevention_config["effort_threshold"]]
+        return [m for m in measures if m.estimated_effort <= self.prevention_config["effort_threshold"]]
 
-        return feasible_measures
 
     async def _generate_dependency_measures(
         self,
@@ -472,13 +472,13 @@ class ConflictPreventionSystem:
 
     async def _apply_prevention_measure(self, measure: PreventionMeasure) -> bool:
         """Apply a specific prevention measure."""
-        logger.info(f"Applying prevention measure: {measure.measure_id}")
+        logger.info("Applying prevention measure: %s", measure.measure_id)
 
         try:
             # Get strategy handler
             handler = self.strategy_handlers.get(measure.strategy)
             if not handler:
-                logger.warning(f"No handler for strategy: {measure.strategy}")
+                logger.warning("No handler for strategy: %s", measure.strategy)
                 return False
 
             # Apply the measure
@@ -488,15 +488,15 @@ class ConflictPreventionSystem:
                 measure.status = "applied"
                 measure.applied_at = datetime.now()
                 self.active_measures[measure.measure_id] = measure
-                logger.info(f"Successfully applied measure: {measure.measure_id}")
+                logger.info("Successfully applied measure: %s", measure.measure_id)
             else:
                 measure.status = "failed"
-                logger.warning(f"Failed to apply measure: {measure.measure_id}")
+                logger.warning("Failed to apply measure: %s", measure.measure_id)
 
             return success
 
         except Exception as e:
-            logger.error(f"Error applying measure {measure.measure_id}: {e}")
+            logger.exception("Error applying measure %s: %s", measure.measure_id, e)
             measure.status = "failed"
             measure.metadata["error"] = str(e)
             return False
@@ -507,7 +507,7 @@ class ConflictPreventionSystem:
         """Apply branch isolation strategy."""
         # This is a placeholder - in a real implementation, this would
         # create separate working directories or use git worktrees
-        logger.info(f"Applying branch isolation for {measure.target_branches}")
+        logger.info("Applying branch isolation for %s", measure.target_branches)
         return True
 
     async def _apply_work_reallocation(self, measure: PreventionMeasure) -> bool:
@@ -560,7 +560,7 @@ class ConflictPreventionSystem:
                 )
                 return result.outcome in ["fully_resolved", "partially_resolved"]
         except Exception as e:
-            logger.error(f"Early merge failed: {e}")
+            logger.exception("Early merge failed: %s", e)
         return False
 
     async def _apply_agent_coordination(self, measure: PreventionMeasure) -> bool:
@@ -625,7 +625,7 @@ class ConflictPreventionSystem:
             )
         return True
 
-    async def _prevention_monitor_loop(self, interval: float):
+    async def _prevention_monitor_loop(self, interval: float) -> None:
         """Background loop for continuous conflict prevention monitoring."""
         while self._running:
             try:
@@ -638,13 +638,13 @@ class ConflictPreventionSystem:
 
                     if result.measures_applied > 0:
                         logger.info(
-                            f"Prevention monitor applied {result.measures_applied} measures",
+                            "Prevention monitor applied %d measures", result.measures_applied
                         )
 
                 await asyncio.sleep(interval)
 
             except Exception as e:
-                logger.error(f"Error in prevention monitor loop: {e}")
+                logger.exception("Error in prevention monitor loop: %s", e)
                 await asyncio.sleep(interval)
 
     async def _get_active_branches(self) -> list[str]:
@@ -657,7 +657,7 @@ class ConflictPreventionSystem:
             # This would be implemented based on git activity, agent assignments, etc.
             return branches
         except Exception as e:
-            logger.error(f"Error getting active branches: {e}")
+            logger.exception("Error getting active branches: %s", e)
             return []
 
     def get_prevention_summary(self) -> dict[str, Any]:

@@ -29,30 +29,30 @@ from libs.dashboard.renderers.widget_models import (
 class TestTauriRenderer:
     """Test cases for Tauri renderer."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup test renderer."""
         self.renderer = TauriRenderer()
 
-    def test_renderer_initialization(self):
+    def test_renderer_initialization(self) -> None:
         """Test Tauri renderer initialization."""
         assert self.renderer.format_type == RenderFormat.TAURI
         assert self.renderer.widget_id_counter == 0
-        assert "success" in self.renderer._style_classes
-        assert isinstance(self.renderer._style_classes["success"], dict)
+        assert "success" in self.renderer._style_classes  # noqa: SLF001
+        assert isinstance(self.renderer._style_classes["success"], dict)  # noqa: SLF001
 
-    def test_widget_id_generation(self):
+    def test_widget_id_generation(self) -> None:
         """Test unique widget ID generation."""
-        id1 = self.renderer._generate_widget_id()
-        id2 = self.renderer._generate_widget_id()
+        id1 = self.renderer._generate_widget_id()  # noqa: SLF001
+        id2 = self.renderer._generate_widget_id()  # noqa: SLF001
 
         assert id1 != id2
         assert id1.startswith("tauri-widget-1-")
         assert id2.startswith("tauri-widget-2-")
         assert self.renderer.widget_id_counter == 2
 
-    def test_default_style(self):
+    def test_default_style(self) -> None:
         """Test default style generation."""
-        style = self.renderer._get_default_style()
+        style = self.renderer._get_default_style()  # noqa: SLF001
 
         assert isinstance(style, dict)
         assert style["background"] == "surface"
@@ -60,7 +60,7 @@ class TestTauriRenderer:
         assert style["shadow"] is True
         assert style["rounded"] is True
 
-    def test_supports_feature(self):
+    def test_supports_feature(self) -> None:
         """Test feature support checking."""
         assert self.renderer.supports_feature("json") is True
         assert self.renderer.supports_feature("charts") is True
@@ -70,7 +70,7 @@ class TestTauriRenderer:
         assert self.renderer.supports_feature("serializable") is True
         assert self.renderer.supports_feature("nonexistent") is False
 
-    def test_render_session_browser(self):
+    def test_render_session_browser(self) -> None:
         """Test session browser rendering."""
         now = datetime.now()
         window = WindowData(id="1", name="test-window", active=True, panes=2)
@@ -115,7 +115,7 @@ class TestTauriRenderer:
         assert "refresh" in action_ids
         assert "new_session" in action_ids
 
-    def test_render_health_meter(self):
+    def test_render_health_meter(self) -> None:
         """Test health meter rendering."""
         now = datetime.now()
         category = HealthCategoryData(
@@ -159,7 +159,7 @@ class TestTauriRenderer:
         assert len(result["chart_data"]["labels"]) == 1
         assert result["chart_data"]["labels"][0] == "Build"
 
-    def test_render_activity_heatmap(self):
+    def test_render_activity_heatmap(self) -> None:
         """Test activity heatmap rendering."""
         now = datetime.now()
         entry = ActivityEntry(
@@ -210,7 +210,7 @@ class TestTauriRenderer:
             assert "color" in level
             assert "label" in level
 
-    def test_render_progress_tracker(self):
+    def test_render_progress_tracker(self) -> None:
         """Test progress tracker rendering."""
         now = datetime.now()
 
@@ -254,7 +254,7 @@ class TestTauriRenderer:
         assert result["chart_data"]["labels"] == ["Completed", "Remaining"]
         assert result["chart_data"]["datasets"][0]["data"] == [50.0, 50.0]
 
-    def test_render_log_viewer(self):
+    def test_render_log_viewer(self) -> None:
         """Test log viewer rendering."""
         logs = [
             {
@@ -312,7 +312,7 @@ class TestTauriRenderer:
         assert "clear" in action_ids
         assert "filter" in action_ids
 
-    def test_render_metric_card(self):
+    def test_render_metric_card(self) -> None:
         """Test metric card rendering."""
         metric = MetricCardData(
             title="CPU Usage",
@@ -353,7 +353,7 @@ class TestTauriRenderer:
         # Check style update based on color
         assert "warning" in str(result["style"])
 
-    def test_render_status_indicator(self):
+    def test_render_status_indicator(self) -> None:
         """Test status indicator rendering."""
         status = StatusIndicatorData(
             status="running",
@@ -387,7 +387,7 @@ class TestTauriRenderer:
         assert result["animation"]["duration"] == 2000
         assert result["animation"]["infinite"] is True
 
-    def test_render_chart(self):
+    def test_render_chart(self) -> None:
         """Test chart rendering."""
         now = datetime.now()
         points = [
@@ -430,7 +430,7 @@ class TestTauriRenderer:
         assert result["chart_data"]["datasets"][0]["data"] == [10, 20, 30]
         assert result["chart_data"]["datasets"][0]["backgroundColor"] == "#3b82f6"
 
-    def test_render_table(self):
+    def test_render_table(self) -> None:
         """Test table rendering."""
         table_data = {
             "headers": ["Name", "Status", "Count"],
@@ -472,7 +472,7 @@ class TestTauriRenderer:
         assert "filter" in action_ids
         assert "export" in action_ids
 
-    def test_render_generic_widget(self):
+    def test_render_generic_widget(self) -> None:
         """Test generic widget rendering."""
         result = self.renderer.render_widget(
             WidgetType.METRIC_CARD,
@@ -485,7 +485,7 @@ class TestTauriRenderer:
         assert result["widget_type"] == "metric_card"
         assert "error" in result["data"]
 
-    def test_render_layout(self):
+    def test_render_layout(self) -> None:
         """Test layout rendering."""
         widgets = [
             {
@@ -516,7 +516,7 @@ class TestTauriRenderer:
         # Check metadata
         assert result["metadata"]["widget_count"] == 2
 
-    def test_render_container(self):
+    def test_render_container(self) -> None:
         """Test container rendering."""
         content = {"type": "widget", "widget_type": "metric_card", "data": {}}
 
@@ -547,7 +547,7 @@ class TestTauriRenderer:
         # Check content
         assert result["content"] == content
 
-    def test_json_serialization(self):
+    def test_json_serialization(self) -> None:
         """Test that rendered output is JSON serializable."""
         now = datetime.now()
         session = SessionData(
@@ -573,19 +573,19 @@ class TestTauriRenderer:
         except (TypeError, ValueError) as e:
             pytest.fail(f"JSON serialization failed: {e}")
 
-    def test_helper_methods(self):
+    def test_helper_methods(self) -> None:
         """Test helper methods."""
         # Test health color mapping
-        assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"
-        assert self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"
+        assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"  # noqa: SLF001
+        assert self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"  # noqa: SLF001
 
         # Test phase emoji mapping
-        assert self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"
-        assert self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"
+        assert self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"  # noqa: SLF001
+        assert self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"  # noqa: SLF001
 
         # Test log level color mapping
-        assert self.renderer._get_log_level_color("ERROR") == "#ef4444"
-        assert self.renderer._get_log_level_color("INFO") == "#3b82f6"
+        assert self.renderer._get_log_level_color("ERROR") == "#ef4444"  # noqa: SLF001
+        assert self.renderer._get_log_level_color("INFO") == "#3b82f6"  # noqa: SLF001
 
         # Test log level counting
         logs = [
@@ -594,13 +594,13 @@ class TestTauriRenderer:
             {"level": "INFO"},
             {"level": "WARNING"},
         ]
-        counts = self.renderer._count_log_levels(logs)
+        counts = self.renderer._count_log_levels(logs)  # noqa: SLF001
         assert counts["ERROR"] == 2
         assert counts["INFO"] == 1
         assert counts["WARNING"] == 1
         assert counts["DEBUG"] == 0
 
-    def test_error_handling(self):
+    def test_error_handling(self) -> None:
         """Test error handling with invalid data."""
         # Test with invalid health data
         result = self.renderer.render_widget(
@@ -620,7 +620,7 @@ class TestTauriRenderer:
 
         assert result["data"]["error"] == "Invalid progress data"
 
-    def test_trend_calculations(self):
+    def test_trend_calculations(self) -> None:
         """Test trend direction calculations."""
         # Positive trend
         metric_up = MetricCardData(title="Test", value=100, trend=5.0)
@@ -646,11 +646,11 @@ class TestTauriRenderer:
 class TestTauriRendererIntegration:
     """Integration tests for Tauri renderer."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup test environment."""
         self.renderer = TauriRenderer()
 
-    def test_full_dashboard_json(self):
+    def test_full_dashboard_json(self) -> None:
         """Test rendering a complete dashboard as JSON."""
         now = datetime.now()
 
@@ -721,7 +721,7 @@ class TestTauriRendererIntegration:
         except (TypeError, ValueError) as e:
             pytest.fail(f"Dashboard JSON serialization failed: {e}")
 
-    def test_chart_data_compatibility(self):
+    def test_chart_data_compatibility(self) -> None:
         """Test that chart data is compatible with Chart.js."""
         # Test different chart types
         chart_types = ["line", "bar", "radar", "doughnut", "pie"]
@@ -750,7 +750,7 @@ class TestTauriRendererIntegration:
             assert "data" in chart_data["datasets"][0]
             assert len(chart_data["datasets"][0]["data"]) == 3
 
-    def test_actions_structure(self):
+    def test_actions_structure(self) -> None:
         """Test that actions have consistent structure."""
         # Test widgets with actions
         log_result = self.renderer.render_widget(

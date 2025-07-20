@@ -8,7 +8,7 @@ import os
 import subprocess
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -111,8 +111,8 @@ class BranchTestManager:
         self,
         repo_path: str = ".",
         results_dir: str = ".scripton/yesman/test_results",
-        agent_pool=None,
-    ):
+        agent_pool: Any = None,
+    ) -> None:
         """Initialize branch test manager.
 
         Args:
@@ -160,7 +160,7 @@ class BranchTestManager:
 
         if config_file.exists():
             try:
-                with open(config_file) as f:
+                with config_file.open() as f:
                     config = json.load(f)
 
                 # Load test suites
@@ -175,10 +175,10 @@ class BranchTestManager:
                 self.test_on_push = settings.get("test_on_push", True)
                 self.parallel_test_limit = settings.get("parallel_test_limit", 3)
 
-                logger.info(f"Loaded {len(self.test_suites)} test suites")
+                logger.info("Loaded %d test suites", len(self.test_suites))
 
             except Exception as e:
-                logger.error(f"Failed to load test configuration: {e}")
+                logger.exception("Failed to load test configuration: %s", e)
                 self._create_default_configuration()
         else:
             self._create_default_configuration()
@@ -249,11 +249,11 @@ class BranchTestManager:
                 },
             }
 
-            with open(config_file, "w") as f:
+            with config_file.open("w") as f:
                 json.dump(config, f, indent=2)
 
         except Exception as e:
-            logger.error(f"Failed to save test configuration: {e}")
+            logger.exception("Failed to save test configuration: %s", e)
 
     def _load_test_results(self) -> None:
         """Load test results for all branches."""
@@ -266,16 +266,16 @@ class BranchTestManager:
 
                 if results_file.exists():
                     try:
-                        with open(results_file) as f:
+                        with results_file.open() as f:
                             results_data = json.load(f)
 
                         results = [TestResult.from_dict(r) for r in results_data]
                         self.branch_results[branch_info.name] = results
 
                     except Exception as e:
-                        logger.error(f"Failed to load results for {branch_info.name}: {e}")
+                        logger.exception("Failed to load results for %s: %s", branch_info.name, e)
         except Exception as e:
-            logger.warning(f"Failed to list active branches for test results loading: {e}")
+            logger.warning("Failed to list active branches for test results loading: %s", e)
             # Continue without loading existing results
 
     def _save_test_results(self, branch_name: str) -> None:
@@ -288,11 +288,11 @@ class BranchTestManager:
         try:
             results_data = [r.to_dict() for r in self.branch_results[branch_name]]
 
-            with open(results_file, "w") as f:
+            with results_file.open("w") as f:
                 json.dump(results_data, f, indent=2)
 
         except Exception as e:
-            logger.error(f"Failed to save results for {branch_name}: {e}")
+            logger.exception("Failed to save results for %s: %s", branch_name, e)
 
     async def run_test_suite(
         self,
@@ -311,7 +311,8 @@ class BranchTestManager:
             TestResult with execution details
         """
         if suite_name not in self.test_suites:
-            raise ValueError(f"Test suite '{suite_name}' not found")
+            msg = f"Test suite '{suite_name}' not found"
+            raise ValueError(msg)
 
         suite = self.test_suites[suite_name]
         test_id = f"{branch_name}:{suite_name}:{int(time.time())}"
@@ -322,7 +323,7 @@ class BranchTestManager:
             test_type=suite.test_type,
             branch_name=branch_name,
             status=TestStatus.PENDING,
-            start_time=datetime.now(),
+            start_time=datetime.now(UTC),
         )
 
         # Switch to branch if needed
@@ -332,7 +333,7 @@ class BranchTestManager:
             if not success:
                 result.status = TestStatus.ERROR
                 result.error = f"Failed to switch to branch {branch_name}"
-                result.end_time = datetime.now()
+                result.end_time = datetime.now(UTC)
                 return result
 
         # Check if build is required
@@ -341,7 +342,7 @@ class BranchTestManager:
             if not build_result:
                 result.status = TestStatus.ERROR
                 result.error = "Build failed before running tests"
-                result.end_time = datetime.now()
+                result.end_time = datetime.now(UTC)
                 return result
 
         # Execute test
@@ -361,7 +362,7 @@ class BranchTestManager:
             )
 
             # Run command
-            logger.info(f"Running {suite_name} on {branch_name}: {' '.join(suite.command)}")
+            logger.info("Running %s on %s: %s", suite_name, branch_name, " ".join(suite.command))
 
             start_time = time.time()
             process = await asyncio.create_subprocess_exec(
@@ -383,7 +384,7 @@ class BranchTestManager:
                 result.output = stdout.decode("utf-8")
                 result.error = stderr.decode("utf-8")
                 result.exit_code = process.returncode
-                result.end_time = datetime.now()
+                result.end_time = datetime.now(UTC)
 
                 # Determine status
                 if process.returncode == 0:
@@ -395,7 +396,7 @@ class BranchTestManager:
                 await self._parse_test_output(result, suite)
 
             except TimeoutError:
-                logger.warning(f"Test {test_id} timed out after {suite.timeout}s")
+                logger.warning("Test %s timed out after %ds", test_id, suite.timeout)
 
                 # Terminate process
                 try:
@@ -407,14 +408,14 @@ class BranchTestManager:
 
                 result.status = TestStatus.ERROR
                 result.error = f"Test timed out after {suite.timeout} seconds"
-                result.end_time = datetime.now()
+                result.end_time = datetime.now(UTC)
                 result.duration = suite.timeout
 
         except Exception as e:
-            logger.error(f"Error running test {test_id}: {e}")
+            logger.exception("Error running test %s: %s", test_id, e)
             result.status = TestStatus.ERROR
             result.error = str(e)
-            result.end_time = datetime.now()
+            result.end_time = datetime.now(UTC)
 
         finally:
             # Clean up
@@ -429,7 +430,8 @@ class BranchTestManager:
         self._save_test_results(branch_name)
 
         logger.info(
-            f"Test {suite_name} on {branch_name} completed: {result.status.value} (duration: {result.duration:.2f}s)",
+            "Test %s on %s completed: %s (duration: %.2fs)",
+            suite_name, branch_name, result.status.value, result.duration,
         )
 
         return result
@@ -461,7 +463,7 @@ class BranchTestManager:
 
             # Stop if critical test fails
             if result.status == TestStatus.FAILED:
-                logger.warning(f"Critical test {suite_name} failed, skipping remaining tests")
+                logger.warning("Critical test %s failed, skipping remaining tests", suite_name)
                 return results
 
         # Run non-critical tests
@@ -479,7 +481,7 @@ class BranchTestManager:
                     if isinstance(result, TestResult):
                         results.append(result)
                     else:
-                        logger.error(f"Error in parallel test execution: {result}")
+                        logger.error("Error in parallel test execution: %s", result)
 
             # Run sequential tests
             for suite_name in sequential_suites:
@@ -529,7 +531,7 @@ class BranchTestManager:
                     result.metadata["violation_count"] = violation_count
 
         except Exception as e:
-            logger.debug(f"Error parsing test output: {e}")
+            logger.debug("Error parsing test output: %s", e)
 
     async def _run_build(self, branch_name: str) -> bool:
         """Run build process for a branch."""
@@ -548,7 +550,7 @@ class BranchTestManager:
             return process.returncode == 0
 
         except Exception as e:
-            logger.error(f"Build failed for {branch_name}: {e}")
+            logger.exception("Build failed for %s: %s", branch_name, e)
             return False
 
     def get_branch_test_summary(self, branch_name: str) -> dict[str, Any]:
@@ -602,7 +604,7 @@ class BranchTestManager:
             for branch_info in self.branch_manager.list_active_branches():
                 summaries[branch_info.name] = self.get_branch_test_summary(branch_info.name)
         except Exception as e:
-            logger.warning(f"Failed to get active branches for summaries: {e}")
+            logger.warning("Failed to get active branches for summaries: %s", e)
             # Return summaries for branches we have results for
             for branch_name in self.branch_results:
                 summaries[branch_name] = self.get_branch_test_summary(branch_name)
@@ -614,7 +616,7 @@ class BranchTestManager:
         if not self.auto_testing_enabled or not self.test_on_commit:
             return []
 
-        logger.info(f"Auto-testing triggered for {branch_name} on commit")
+        logger.info("Auto-testing triggered for %s on commit", branch_name)
         return await self.run_all_tests(branch_name, parallel=True)
 
     def configure_test_suite(
@@ -632,13 +634,13 @@ class BranchTestManager:
             **kwargs,
         )
         self._save_test_configuration()
-        logger.info(f"Configured test suite: {name}")
+        logger.info("Configured test suite: %s", name)
 
     def enable_auto_testing(self, enabled: bool = True) -> None:
         """Enable or disable automatic testing."""
         self.auto_testing_enabled = enabled
         self._save_test_configuration()
-        logger.info(f"Auto-testing {'enabled' if enabled else 'disabled'}")
+        logger.info("Auto-testing %s", "enabled" if enabled else "disabled")
 
     async def start_test_monitor(self) -> None:
         """Start monitoring for automatic test execution."""
@@ -656,7 +658,7 @@ class BranchTestManager:
                 try:
                     active_branches = self.branch_manager.list_active_branches()
                 except Exception as e:
-                    logger.warning(f"Failed to get active branches for monitoring: {e}")
+                    logger.warning("Failed to get active branches for monitoring: %s", e)
                     await asyncio.sleep(60)
                     continue
 
@@ -682,26 +684,26 @@ class BranchTestManager:
                         )
 
                         if result.returncode == 0 and result.stdout.strip():
-                            last_commit_time = datetime.fromtimestamp(int(result.stdout.strip()))
+                            last_commit_time = datetime.fromtimestamp(int(result.stdout.strip()), tz=UTC)
 
                             # Run tests if there are new commits
                             if last_commit_time > last_test_time:
-                                logger.info(f"New commits detected on {branch_info.name}, running tests")
+                                logger.info("New commits detected on %s, running tests", branch_info.name)
                                 await self.auto_test_on_commit(branch_info.name)
 
                     except Exception as e:
-                        logger.debug(f"Error checking commits for {branch_info.name}: {e}")
+                        logger.debug("Error checking commits for %s: %s", branch_info.name, e)
 
                 # Wait before next check
                 await asyncio.sleep(60)  # Check every minute
 
             except Exception as e:
-                logger.error(f"Error in test monitor: {e}")
+                logger.exception("Error in test monitor: %s", e)
                 await asyncio.sleep(60)
 
     def _get_last_test_time(self, branch_name: str) -> datetime:
         """Get the time of the last test run for a branch."""
         if branch_name not in self.branch_results or not self.branch_results[branch_name]:
-            return datetime.min
+            return datetime.min.replace(tzinfo=UTC)
 
         return max(result.start_time for result in self.branch_results[branch_name])

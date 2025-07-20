@@ -29,7 +29,7 @@ class WebRenderer(BaseRenderer):
     and JavaScript data binding for interactive dashboard widgets.
     """
 
-    def __init__(self, theme: dict[str, Any] | None = None):
+    def __init__(self, theme: dict[str, Any] | None = None) -> None:
         """Initialize web renderer.
 
         Args:
@@ -79,24 +79,23 @@ class WebRenderer(BaseRenderer):
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
             return self._render_session_browser(data, options, component_id)
-        elif widget_type == WidgetType.HEALTH_METER:
+        if widget_type == WidgetType.HEALTH_METER:
             return self._render_health_meter(data, options, component_id)
-        elif widget_type == WidgetType.ACTIVITY_HEATMAP:
+        if widget_type == WidgetType.ACTIVITY_HEATMAP:
             return self._render_activity_heatmap(data, options, component_id)
-        elif widget_type == WidgetType.PROGRESS_TRACKER:
+        if widget_type == WidgetType.PROGRESS_TRACKER:
             return self._render_progress_tracker(data, options, component_id)
-        elif widget_type == WidgetType.LOG_VIEWER:
+        if widget_type == WidgetType.LOG_VIEWER:
             return self._render_log_viewer(data, options, component_id)
-        elif widget_type == WidgetType.METRIC_CARD:
+        if widget_type == WidgetType.METRIC_CARD:
             return self._render_metric_card(data, options, component_id)
-        elif widget_type == WidgetType.STATUS_INDICATOR:
+        if widget_type == WidgetType.STATUS_INDICATOR:
             return self._render_status_indicator(data, options, component_id)
-        elif widget_type == WidgetType.CHART:
+        if widget_type == WidgetType.CHART:
             return self._render_chart(data, options, component_id)
-        elif widget_type == WidgetType.TABLE:
+        if widget_type == WidgetType.TABLE:
             return self._render_table(data, options, component_id)
-        else:
-            return self._render_generic_widget(widget_type, data, options, component_id)
+        return self._render_generic_widget(widget_type, data, options, component_id)
 
     def render_layout(
         self,
@@ -128,10 +127,9 @@ class WebRenderer(BaseRenderer):
         # Apply layout
         if layout_type == "grid":
             return self._render_grid_layout(rendered_widgets, layout_config)
-        elif layout_type == "flex":
+        if layout_type == "flex":
             return self._render_flex_layout(rendered_widgets, layout_config)
-        else:
-            return self._render_vertical_layout(rendered_widgets, layout_config)
+        return self._render_vertical_layout(rendered_widgets, layout_config)
 
     def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """Render a container wrapping content.
@@ -194,10 +192,9 @@ class WebRenderer(BaseRenderer):
 
         if view_mode == "cards":
             return self._render_session_cards(sessions, options, component_id)
-        elif view_mode == "list":
+        if view_mode == "list":
             return self._render_session_list(sessions, options, component_id)
-        else:
-            return self._render_session_table(sessions, options, component_id)
+        return self._render_session_table(sessions, options, component_id)
 
     def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
         """Render sessions as table."""
@@ -436,7 +433,7 @@ class WebRenderer(BaseRenderer):
         ]
 
         for category in data.categories:
-            cat_color = self._get_health_color_class(category.level)
+            self._get_health_color_class(category.level)
             html_parts.extend(
                 [
                     '<div class="flex items-center justify-between py-2">',

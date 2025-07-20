@@ -2,11 +2,11 @@
 
 import traceback
 import uuid
-from typing import Any
+from collections.abc import Awaitable, Callable
 
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from libs.core.error_handling import (
@@ -26,15 +26,15 @@ def error_to_status_code(error: YesmanError) -> int:
     # Map by error type
     if isinstance(error, ValidationError):
         return status.HTTP_400_BAD_REQUEST
-    elif isinstance(error, ConfigurationError):
+    if isinstance(error, ConfigurationError):
         return status.HTTP_500_INTERNAL_SERVER_ERROR
-    elif isinstance(error, SessionError):
+    if isinstance(error, SessionError):
         return status.HTTP_404_NOT_FOUND
-    elif isinstance(error, YesmanPermissionError):
+    if isinstance(error, YesmanPermissionError):
         return status.HTTP_403_FORBIDDEN
-    elif isinstance(error, NetworkError):
+    if isinstance(error, NetworkError):
         return status.HTTP_502_BAD_GATEWAY
-    elif isinstance(error, YesmanTimeoutError):
+    if isinstance(error, YesmanTimeoutError):
         return status.HTTP_504_GATEWAY_TIMEOUT
 
     # Map by severity
@@ -64,7 +64,7 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
         )
 
     # Handle Starlette HTTP exceptions
-    elif isinstance(exc, StarletteHTTPException):
+    if isinstance(exc, StarletteHTTPException):
         return JSONResponse(
             status_code=exc.status_code,
             content={
@@ -79,7 +79,7 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
         )
 
     # Handle FastAPI validation errors
-    elif isinstance(exc, RequestValidationError):
+    if isinstance(exc, RequestValidationError):
         errors = []
         for error in exc.errors():
             field = ".".join(str(x) for x in error["loc"])
@@ -101,28 +101,29 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
         )
 
     # Handle unexpected errors
-    else:
-        # Log the full traceback for debugging
-        tb = traceback.format_exc()
-        print(f"Unexpected error (request_id: {request_id}):\n{tb}")
+    # Log the full traceback for debugging
+    traceback.format_exc()
 
-        # Return generic error response
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "An unexpected error occurred",
-                    "category": "system",
-                    "severity": "high",
-                    "recovery_hint": ("Please try again later or contact support if the problem persists"),
-                    "request_id": request_id,
-                }
-            },
-        )
+    # Return generic error response
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected error occurred",
+                "category": "system",
+                "severity": "high",
+                "recovery_hint": ("Please try again later or contact support if the problem persists"),
+                "request_id": request_id,
+            }
+        },
+    )
 
 
-async def add_request_id_middleware(request: Request, call_next):
+async def add_request_id_middleware(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
     """Middleware to add request ID to all requests."""
     # Generate or extract request ID
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
@@ -144,11 +145,11 @@ def create_error_response(
     category: str = "application",
     severity: str = "medium",
     recovery_hint: str | None = None,
-    context: dict[str, Any] | None = None,
+    context: dict[str, object] | None = None,
     request_id: str | None = None,
 ) -> JSONResponse:
     """Helper function to create standardized error responses."""
-    error_data: dict[str, Any] = {
+    error_data: dict[str, object] = {
         "code": code,
         "message": message,
         "category": category,

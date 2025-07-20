@@ -4,44 +4,41 @@ import datetime
 import logging
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from ..utils import ensure_log_directory, get_default_log_path
-
-if TYPE_CHECKING:
-    pass
+from libs.utils import ensure_log_directory, get_default_log_path
 
 
 class ClaudeStatusManager:
     """Manages status updates, callbacks, and response history."""
 
-    def __init__(self, session_name: str):
+    def __init__(self, session_name: str) -> None:
         self.session_name = session_name
         self.status_callback: Callable | None = None
         self.activity_callback: Callable | None = None
         self.response_history: list[dict[str, Any]] = []
         self.logger = logging.getLogger(f"yesman.claude_status.{session_name}")
 
-    def set_status_callback(self, callback: Callable):
+    def set_status_callback(self, callback: Callable) -> None:
         """Set callback for status updates."""
         self.status_callback = callback
 
-    def set_activity_callback(self, callback: Callable):
+    def set_activity_callback(self, callback: Callable) -> None:
         """Set callback for activity updates."""
         self.activity_callback = callback
 
-    def update_status(self, message: str):
+    def update_status(self, message: str) -> None:
         """Update status through callback."""
         if self.status_callback:
             self.status_callback(message)
         self.logger.info(message)
 
-    def update_activity(self, activity: str):
+    def update_activity(self, activity: str) -> None:
         """Update activity through callback."""
         if self.activity_callback:
             self.activity_callback(activity)
 
-    def record_response(self, prompt_type: str, response: str, content: str):
+    def record_response(self, prompt_type: str, response: str, content: str) -> None:
         """Record auto-response in history."""
         record = {
             "timestamp": datetime.datetime.now().isoformat(),
@@ -64,7 +61,7 @@ class ClaudeStatusManager:
         """Save captured content to file and return file path."""
         try:
             # Import here to avoid circular import
-            from ..yesman_config import YesmanConfig
+            from libs.yesman_config import YesmanConfig
 
             config = YesmanConfig()
             log_base = config.get("log_path", str(get_default_log_path()))
@@ -83,5 +80,5 @@ class ClaudeStatusManager:
             return str(file_path)
 
         except Exception as e:
-            self.logger.error(f"Error saving capture to file: {e}")
+            self.logger.exception(f"Error saving capture to file: {e}")
             return ""

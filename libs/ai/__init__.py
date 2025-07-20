@@ -4,6 +4,6 @@ from .adaptive_response import AdaptiveResponse
 from .response_analyzer import ResponseAnalyzer
 
 __all__ = [
-    "ResponseAnalyzer",
     "AdaptiveResponse",
+    "ResponseAnalyzer",
 ]

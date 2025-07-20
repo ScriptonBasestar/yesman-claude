@@ -8,10 +8,10 @@ from .project_health import ProjectHealth
 from .session_browser import SessionBrowser
 
 __all__ = [
-    "SessionBrowser",
     "ActivityHeatmapGenerator",
-    "ProjectHealth",
+    "AgentMonitor",
     "GitActivityWidget",
     "ProgressTracker",
-    "AgentMonitor",
+    "ProjectHealth",
+    "SessionBrowser",
 ]

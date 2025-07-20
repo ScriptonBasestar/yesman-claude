@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demo script showing branch testing integration capabilities"""
+"""Demo script showing branch testing integration capabilities."""
 
 import asyncio
 import tempfile
@@ -10,7 +10,7 @@ from libs.multi_agent.branch_test_manager import BranchTestManager, TestType
 
 
 async def demo_branch_testing():
-    """Demonstrate branch testing functionality"""
+    """Demonstrate branch testing functionality."""
     print("🧪 Branch Testing Integration Demo")
     print("=" * 50)
 

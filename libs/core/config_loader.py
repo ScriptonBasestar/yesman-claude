@@ -17,18 +17,16 @@ class ConfigSource(ABC):
     @abstractmethod
     def load(self) -> dict[str, Any]:
         """Load configuration from this source."""
-        pass
 
     @abstractmethod
     def exists(self) -> bool:
         """Check if this source exists/is available."""
-        pass
 
 
 class YamlFileSource(ConfigSource):
     """YAML file configuration source."""
 
-    def __init__(self, path: Path | str):
+    def __init__(self, path: Path | str) -> None:
         self.path = Path(path).expanduser()
         self.file_path = self.path  # For cache compatibility
 
@@ -56,7 +54,7 @@ class YamlFileSource(ConfigSource):
 class EnvironmentSource(ConfigSource):
     """Environment variable configuration source."""
 
-    def __init__(self, prefix: str = "YESMAN_"):
+    def __init__(self, prefix: str = "YESMAN_") -> None:
         self.prefix = prefix
 
     def load(self) -> dict[str, Any]:
@@ -126,7 +124,7 @@ class EnvironmentSource(ConfigSource):
 class DictSource(ConfigSource):
     """Dictionary configuration source (for programmatic config)."""
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
 
     def load(self) -> dict[str, Any]:
@@ -150,7 +148,7 @@ class DictSource(ConfigSource):
 class ConfigLoader:
     """Centralized configuration loader with validation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._sources: list[ConfigSource] = []
         self._cached_config: YesmanConfigSchema | None = None
 

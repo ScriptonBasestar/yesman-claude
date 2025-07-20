@@ -255,7 +255,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as e:
             self.logger.debug("Build health assessment error: %s", e)
 
         return metrics
@@ -305,7 +305,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError, ValueError) as e:
             self.logger.debug("Test health assessment error: %s", e)
 
         return metrics
@@ -353,7 +353,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, json.JSONDecodeError, ValueError) as e:
             self.logger.debug("Dependency health assessment error: %s", e)
 
         return metrics
@@ -407,7 +407,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, ValueError) as e:
             self.logger.debug("Performance health assessment error: %s", e)
 
         return metrics
@@ -460,7 +460,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, UnicodeDecodeError) as e:
             self.logger.debug("Security health assessment error: %s", e)
 
         return metrics
@@ -513,7 +513,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, ValueError) as e:
             self.logger.debug("Code quality health assessment error: %s", e)
 
         return metrics
@@ -582,7 +582,7 @@ class HealthCalculator:
                     )
                 )
 
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError, subprocess.TimeoutExpired) as e:
             self.logger.debug("Git health assessment error: %s", e)
 
         return metrics
@@ -620,7 +620,7 @@ class HealthCalculator:
                         else:  # Minimal documentation
                             doc_score += 5
                         found_docs.append(doc_file)
-                    except Exception:
+                    except (OSError, UnicodeDecodeError):
                         doc_score += 5
                         found_docs.append(doc_file)
 
@@ -636,7 +636,7 @@ class HealthCalculator:
                 )
             )
 
-        except Exception as e:
+        except (OSError, UnicodeDecodeError) as e:
             self.logger.debug("Documentation health assessment error: %s", e)
 
         return metrics
@@ -736,7 +736,7 @@ class HealthCalculator:
 
             return total_deps, outdated_deps
 
-        except Exception:
+        except (OSError, json.JSONDecodeError, KeyError):
             return 0, 0
 
     async def _check_python_dependencies(self, requirements_path: Path) -> tuple[int, int]:
@@ -751,7 +751,7 @@ class HealthCalculator:
 
             return total_deps, outdated_deps
 
-        except Exception:
+        except (OSError, UnicodeDecodeError):
             return 0, 0
 
     async def _check_rust_dependencies(self, cargo_toml_path: Path) -> tuple[int, int]:
@@ -766,7 +766,7 @@ class HealthCalculator:
                 len(deps) + len(dev_deps),
                 0,
             )  # Assuming no easy way to check outdated
-        except (ImportError, Exception):
+        except (ImportError, OSError, ValueError, KeyError):
             return 0, 0
 
     def _get_dependencies_from_toml(self, content: str) -> tuple[list[str], list[str]]:
@@ -809,7 +809,7 @@ class HealthCalculator:
 
             return deps_count, outdated_deps
 
-        except Exception:
+        except (OSError, UnicodeDecodeError):
             return 0, 0
 
     async def _assess_code_documentation(self) -> int:
@@ -836,7 +836,7 @@ class HealthCalculator:
                                 or "// " in content
                             ):  # General comments
                                 documented_files += 1
-                        except Exception as e:
+                        except (OSError, UnicodeDecodeError) as e:
                             self.logger.warning("Could not parse file %s: %s", file_path, e)
                             continue
 
@@ -845,7 +845,7 @@ class HealthCalculator:
                 return int(doc_ratio * 100)
             return 80  # Default if no source files found
 
-        except Exception:
+        except (OSError, ValueError):
             return 50  # Default on error
 
     def get_health_summary(self, health: ProjectHealth) -> dict[str, Any]:

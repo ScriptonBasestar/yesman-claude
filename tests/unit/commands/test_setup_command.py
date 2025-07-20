@@ -1,6 +1,7 @@
 """Test for setup command - Migrated to use centralized mock factories."""
 
 from unittest.mock import patch
+from typing import Any
 
 from click.testing import CliRunner
 
@@ -11,11 +12,11 @@ from tests.fixtures.mock_factories import PatchContextFactory
 class TestSetupCommand:
     """Migrated to pytest-style with centralized mocks - Fixed for actual setup command."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.runner = CliRunner()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_creates_all_sessions(self, mock_config):
+    def test_setup_creates_all_sessions(self, mock_config: Any) -> None:
         """Test setup command creates all sessions from projects.yaml."""
         projects = {
             "sessions": {
@@ -37,7 +38,7 @@ class TestSetupCommand:
             mock_manager.list_running_sessions.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_specific_project(self, mock_config):
+    def test_setup_with_specific_project(self, mock_config: Any) -> None:
         """Test setup command with specific project name."""
         projects = {
             "sessions": {
@@ -57,7 +58,7 @@ class TestSetupCommand:
             mock_manager.create_session.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_handles_session_creation_failure(self, mock_config):
+    def test_setup_handles_session_creation_failure(self, mock_config: Any) -> None:
         """Test setup handles session creation failure gracefully."""
         projects = {
             "sessions": {
@@ -68,7 +69,7 @@ class TestSetupCommand:
         with PatchContextFactory.patch_setup_tmux_manager(
             load_projects_result=projects,
             create_session_result=False,  # Simulate failure
-        ) as mock_manager:
+        ):
             # Run command
             result = self.runner.invoke(setup, ["existing"])
 
@@ -77,7 +78,7 @@ class TestSetupCommand:
             assert "already exists" in result.output or "failed to create" in result.output
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_nonexistent_project(self, mock_config):
+    def test_setup_with_nonexistent_project(self, mock_config: Any) -> None:
         """Test setup with nonexistent project name."""
         projects = {
             "sessions": {
@@ -97,7 +98,7 @@ class TestSetupCommand:
             mock_manager.create_session.assert_not_called()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_no_projects_found(self, mock_config):
+    def test_setup_no_projects_found(self, mock_config: Any) -> None:
         """Test setup when no projects are configured."""
         projects = {"sessions": {}}  # Empty sessions
 

@@ -13,7 +13,7 @@ class ShowCommand(BaseCommand, SessionCommandMixin):
 
 
 @click.command()
-def show():
+def show() -> None:
     """List all running tmux sessions."""
     command = ShowCommand()
     command.run()

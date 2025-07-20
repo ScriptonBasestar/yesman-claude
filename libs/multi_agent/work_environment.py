@@ -43,7 +43,7 @@ class WorkEnvironment:
 class WorkEnvironmentManager:
     """Manages isolated work environments for branches."""
 
-    def __init__(self, repo_path: str = ".", work_dir: str | None = None):
+    def __init__(self, repo_path: str = ".", work_dir: str | None = None) -> None:
         """Initialize work environment manager.
 
         Args:
@@ -64,7 +64,7 @@ class WorkEnvironmentManager:
         env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
         """Run a command with optional working directory and environment."""
-        logger.debug(f"Running command: {' '.join(cmd)} in {cwd or 'current dir'}")
+        logger.debug("Running command: {' '.join(cmd)} in {cwd or 'current dir'}")
 
         try:
             result = subprocess.run(
@@ -78,12 +78,12 @@ class WorkEnvironmentManager:
             )
 
             if result.returncode != 0:
-                logger.error(f"Command failed: {result.stderr}")
+                logger.error("Command failed: {result.stderr}")
 
             return result
 
         except subprocess.TimeoutExpired:
-            logger.error(f"Command timed out: {' '.join(cmd)}")
+            logger.exception("Command timed out: %s", " ".join(cmd))
             raise
 
     def _get_environments_file(self) -> Path:
@@ -99,9 +99,9 @@ class WorkEnvironmentManager:
                 with open(metadata_file) as f:
                     data = json.load(f)
                     self.environments = {name: WorkEnvironment.from_dict(info) for name, info in data.items()}
-                logger.info(f"Loaded {len(self.environments)} work environments")
+                logger.info("Loaded {len(self.environments)} work environments")
             except Exception as e:
-                logger.error(f"Failed to load environments: {e}")
+                logger.exception("Failed to load environments: %s", e)
                 self.environments = {}
 
     def _save_environments(self) -> None:
@@ -114,9 +114,9 @@ class WorkEnvironmentManager:
             with open(metadata_file, "w") as f:
                 json.dump(data, f, indent=2)
 
-            logger.debug(f"Saved {len(self.environments)} work environments")
+            logger.debug("Saved {len(self.environments)} work environments")
         except Exception as e:
-            logger.error(f"Failed to save environments: {e}")
+            logger.exception("Failed to save environments: %s", e)
 
     def create_work_environment(
         self,
@@ -133,7 +133,7 @@ class WorkEnvironmentManager:
             WorkEnvironment object
         """
         if branch_name in self.environments:
-            logger.warning(f"Environment for branch {branch_name} already exists")
+            logger.warning("Environment for branch {branch_name} already exists")
             return self.environments[branch_name]
 
         # Default configuration
@@ -168,7 +168,7 @@ class WorkEnvironmentManager:
         self.environments[branch_name] = env
         self._save_environments()
 
-        logger.info(f"Created work environment for branch: {branch_name}")
+        logger.info("Created work environment for branch: {branch_name}")
         return env
 
     def _create_worktree(self, branch_name: str) -> Path:
@@ -178,7 +178,7 @@ class WorkEnvironmentManager:
         worktree_path = self.work_dir / "worktrees" / safe_name
 
         if worktree_path.exists():
-            logger.warning(f"Worktree already exists at {worktree_path}")
+            logger.warning("Worktree already exists at {worktree_path}")
             return worktree_path
 
         # Create worktree
@@ -189,9 +189,10 @@ class WorkEnvironmentManager:
         )
 
         if result.returncode != 0:
-            raise RuntimeError(f"Failed to create worktree: {result.stderr}")
+            msg = f"Failed to create worktree: {result.stderr}"
+            raise RuntimeError(msg)
 
-        logger.info(f"Created worktree at {worktree_path}")
+        logger.info("Created worktree at {worktree_path}")
         return worktree_path
 
     def _create_venv(
@@ -205,14 +206,14 @@ class WorkEnvironmentManager:
         venv_path = self.work_dir / "venvs" / safe_name
 
         if venv_path.exists():
-            logger.warning(f"Virtual environment already exists at {venv_path}")
+            logger.warning("Virtual environment already exists at {venv_path}")
             return venv_path
 
         # Create virtual environment
         venv_path.parent.mkdir(parents=True, exist_ok=True)
         venv.create(venv_path, with_pip=True)
 
-        logger.info(f"Created virtual environment at {venv_path}")
+        logger.info("Created virtual environment at {venv_path}")
 
         # Install dependencies if requested
         if config.get("install_deps", True):
@@ -240,13 +241,13 @@ class WorkEnvironmentManager:
         for req_file in requirements_files:
             req_path = worktree_path / req_file
             if req_path.exists():
-                logger.info(f"Installing dependencies from {req_file}")
+                logger.info("Installing dependencies from {req_file}")
                 result = self._run_command(
                     [str(pip_path), "install", "-r", str(req_path)],
                 )
 
                 if result.returncode != 0:
-                    logger.error(f"Failed to install dependencies: {result.stderr}")
+                    logger.error("Failed to install dependencies: {result.stderr}")
 
         # Check for pyproject.toml
         pyproject_path = worktree_path / "pyproject.toml"
@@ -283,7 +284,7 @@ class WorkEnvironmentManager:
                 dst = env.worktree_path / config_file
                 if not dst.exists():
                     shutil.copy2(src, dst)
-                    logger.debug(f"Copied {config_file} to work environment")
+                    logger.debug("Copied {config_file} to work environment")
 
     def _create_activation_script(self, env: WorkEnvironment) -> None:
         """Create custom activation script with environment variables."""
@@ -305,8 +306,7 @@ class WorkEnvironmentManager:
             f.write(f"export YESMAN_BRANCH={env.branch_name}\n")
             f.write(f"export YESMAN_WORKTREE={env.worktree_path}\n")
 
-            for key, value in env.config.get("env_vars", {}).items():
-                f.write(f"export {key}={value}\n")
+            f.writelines(f"export {key}={value}\n" for key, value in env.config.get("env_vars", {}).items())
 
             f.write("\n# Change to worktree directory\n")
             f.write(f"cd {env.worktree_path}\n")
@@ -319,11 +319,11 @@ class WorkEnvironmentManager:
         setup_commands = env.config.get("setup_commands", [])
 
         for cmd in setup_commands:
-            logger.info(f"Running setup command: {cmd}")
+            logger.info("Running setup command: {cmd}")
             result = self._run_command(cmd.split(), cwd=env.worktree_path)
 
             if result.returncode != 0:
-                logger.error(f"Setup command failed: {cmd}")
+                logger.error("Setup command failed: {cmd}")
 
     def get_environment(self, branch_name: str) -> WorkEnvironment | None:
         """Get work environment for a branch."""
@@ -337,7 +337,8 @@ class WorkEnvironmentManager:
         """
         env = self.get_environment(branch_name)
         if not env:
-            raise ValueError(f"No environment found for branch {branch_name}")
+            msg = f"No environment found for branch {branch_name}"
+            raise ValueError(msg)
 
         # Build environment variables
         env_vars = os.environ.copy()
@@ -389,7 +390,7 @@ class WorkEnvironmentManager:
         if env:
             env.status = "suspended"
             self._save_environments()
-            logger.info(f"Suspended environment for branch: {branch_name}")
+            logger.info("Suspended environment for branch: {branch_name}")
 
     def terminate_environment(
         self,
@@ -399,7 +400,7 @@ class WorkEnvironmentManager:
         """Terminate a work environment."""
         env = self.get_environment(branch_name)
         if not env:
-            logger.warning(f"No environment found for branch {branch_name}")
+            logger.warning("No environment found for branch {branch_name}")
             return
 
         # Update status
@@ -415,18 +416,18 @@ class WorkEnvironmentManager:
                 if env.worktree_path.exists():
                     shutil.rmtree(env.worktree_path)
 
-                logger.info(f"Removed worktree: {env.worktree_path}")
+                logger.info("Removed worktree: {env.worktree_path}")
 
             # Remove virtual environment
             if env.venv_path.exists():
                 shutil.rmtree(env.venv_path)
-                logger.info(f"Removed virtual environment: {env.venv_path}")
+                logger.info("Removed virtual environment: {env.venv_path}")
 
             # Remove from environments
             del self.environments[branch_name]
 
         self._save_environments()
-        logger.info(f"Terminated environment for branch: {branch_name}")
+        logger.info("Terminated environment for branch: {branch_name}")
 
     def cleanup_terminated(self) -> list[str]:
         """Clean up all terminated environments."""

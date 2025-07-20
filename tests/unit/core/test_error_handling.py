@@ -3,42 +3,47 @@
 import os
 import shutil
 import tempfile
+import threading
 import unittest
+from typing import Any
 from unittest.mock import MagicMock, patch
+
+import pytest
+
+from libs.core.content_collector import ContentCollector
+from libs.core.prompt_detector import ClaudePromptDetector
+from libs.core.session_manager import SessionManager
+from libs.dashboard.renderers.optimizations import RenderCache
+from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
 
 
 class TestErrorHandling(unittest.TestCase):
     """Test error handling and edge cases across the application."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.temp_dir = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     # --- Input Validation Tests ---
 
-    def test_empty_string_inputs(self):
+    def test_empty_string_inputs(self) -> None:
         """Test handling of empty string inputs."""
-        from libs.core.prompt_detector import ClaudePromptDetector
-
         detector = ClaudePromptDetector()
         result = detector.detect_prompt("")
         assert result is None, "Empty string should return None"
 
-    def test_none_inputs(self):
+    def test_none_inputs(self) -> None:
         """Test handling of None inputs."""
-        from libs.core.content_collector import ContentCollector
-
         collector = ContentCollector()
         # Should handle None gracefully
         result = collector.process_content(None)
         assert result == "" or result is None
 
-    def test_invalid_session_names(self):
+    def test_invalid_session_names(self) -> None:
         """Test handling of invalid session names."""
-        from libs.core.session_manager import SessionManager
-
         manager = SessionManager()
 
         # Test various invalid names
@@ -52,22 +57,20 @@ class TestErrorHandling(unittest.TestCase):
         ]
 
         for name in invalid_names:
-            with self.assertRaises((ValueError, TypeError)):
+            with pytest.raises((ValueError, TypeError)):
                 manager.validate_session_name(name)
 
     # --- File System Error Tests ---
 
-    def test_missing_config_file(self):
+    def test_missing_config_file(self) -> None:
         """Test handling of missing configuration files."""
-        from libs.yesman_config import YesmanConfig
-
         # Try to load non-existent config
         config = YesmanConfig(config_path="/non/existent/path.yaml")
 
         # Should use defaults
         assert config.get("log_level") is not None
 
-    def test_permission_denied_error(self):
+    def test_permission_denied_error(self) -> None:
         """Test handling of permission denied errors."""
         # Create a read-only file
         readonly_file = os.path.join(self.temp_dir, "readonly.txt")
@@ -84,10 +87,8 @@ class TestErrorHandling(unittest.TestCase):
         # Cleanup
         os.chmod(readonly_file, 0o644)
 
-    def test_disk_full_simulation(self):
+    def test_disk_full_simulation(self) -> None:
         """Test handling of disk full errors with current RenderCache."""
-        from libs.dashboard.renderers.optimizations import RenderCache
-
         # Test with RenderCache (current cache implementation)
         cache = RenderCache(max_size=10, ttl=60)
 
@@ -106,7 +107,7 @@ class TestErrorHandling(unittest.TestCase):
     # --- Network Error Tests ---
 
     @patch("requests.get")
-    def test_network_timeout(self, mock_get):
+    def test_network_timeout(self, mock_get: Any) -> None:
         """Test handling of network timeouts."""
         # Mock the non-existent APIClient
         with patch("libs.api.client.APIClient") as MockAPIClient:
@@ -123,7 +124,7 @@ class TestErrorHandling(unittest.TestCase):
         assert result is None or "error" in result
 
     @patch("websocket.WebSocket")
-    def test_websocket_disconnection(self, mock_ws):
+    def test_websocket_disconnection(self, mock_ws: Any) -> None:
         """Test handling of WebSocket disconnections."""
         # Mock the non-existent WebSocketClient
         with patch("libs.api.websocket_client.WebSocketClient") as MockWebSocketClient:
@@ -147,10 +148,8 @@ class TestErrorHandling(unittest.TestCase):
     # --- Tmux Error Tests ---
 
     @patch("libtmux.Server")
-    def test_tmux_not_running(self, mock_server):
+    def test_tmux_not_running(self, mock_server: Any) -> None:
         """Test handling when tmux server is not running."""
-        from libs.tmux_manager import TmuxManager
-
         # Simulate tmux not running
         mock_server.side_effect = Exception("tmux server not found")
 
@@ -159,10 +158,8 @@ class TestErrorHandling(unittest.TestCase):
 
         assert sessions == [], "Should return empty list when tmux not running"
 
-    def test_tmux_session_not_found(self):
+    def test_tmux_session_not_found(self) -> None:
         """Test handling of non-existent tmux session."""
-        from libs.core.session_manager import SessionManager
-
         manager = SessionManager()
         result = manager.get_session_info("non-existent-session-xyz")
 
@@ -170,16 +167,12 @@ class TestErrorHandling(unittest.TestCase):
 
     # --- Race Condition Tests ---
 
-    def test_concurrent_cache_access(self):
+    def test_concurrent_cache_access(self) -> None:
         """Test handling of concurrent cache access with RenderCache."""
-        import threading
-
-        from libs.dashboard.renderers.optimizations import RenderCache
-
         cache = RenderCache(max_size=100, ttl=60)
         results = []
 
-        def access_cache(key, value):
+        def access_cache(key: str, value: str) -> None:
             cache.set(key, value)
             result = cache.get(key)
             results.append(result)
@@ -200,10 +193,8 @@ class TestErrorHandling(unittest.TestCase):
 
     # --- Resource Limit Tests ---
 
-    def test_memory_limit_handling(self):
+    def test_memory_limit_handling(self) -> None:
         """Test handling of memory limits with RenderCache."""
-        from libs.dashboard.renderers.optimizations import RenderCache
-
         cache = RenderCache(max_size=10, ttl=60)  # Very small cache
 
         # Try to add more than limit
@@ -215,7 +206,7 @@ class TestErrorHandling(unittest.TestCase):
         # RenderCache should limit size or handle overflow gracefully
         assert stats is not None  # Cache should remain functional
 
-    def test_file_handle_limit(self):
+    def test_file_handle_limit(self) -> None:
         """Test handling of file handle limits."""
         # Mock the non-existent FileHandlePool class
         with patch("libs.utils.file_utils.FileHandlePool") as MockFileHandlePool:
@@ -237,10 +228,8 @@ class TestErrorHandling(unittest.TestCase):
 
     # --- Data Corruption Tests ---
 
-    def test_corrupted_cache_data(self):
+    def test_corrupted_cache_data(self) -> None:
         """Test handling of corrupted cache data with RenderCache."""
-        from libs.dashboard.renderers.optimizations import RenderCache
-
         cache = RenderCache(max_size=10, ttl=60)
 
         # Test with various problematic data types
@@ -262,10 +251,8 @@ class TestErrorHandling(unittest.TestCase):
                 # If cache raises exception for invalid data, that's acceptable
                 pass
 
-    def test_partial_data_handling(self):
+    def test_partial_data_handling(self) -> None:
         """Test handling of partial/incomplete data."""
-        from libs.core.prompt_detector import ClaudePromptDetector
-
         detector = ClaudePromptDetector()
 
         # Partial prompt

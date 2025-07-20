@@ -14,7 +14,8 @@ class DependencyTrackCommand(BaseCommand):
         """Execute the dependency track command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Tracking dependencies across branches...")
-        raise NotImplementedError("Dependency tracking implementation pending extraction from original file")
+        msg = "Dependency tracking implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class DependencyStatusCommand(BaseCommand):
@@ -24,7 +25,8 @@ class DependencyStatusCommand(BaseCommand):
         """Execute the dependency status command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Showing dependency status...")
-        raise NotImplementedError("Dependency status implementation pending extraction from original file")
+        msg = "Dependency status implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class DependencyImpactCommand(BaseCommand):
@@ -34,7 +36,8 @@ class DependencyImpactCommand(BaseCommand):
         """Execute the dependency impact command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Analyzing dependency impact...")
-        raise NotImplementedError("Dependency impact implementation pending extraction from original file")
+        msg = "Dependency impact implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class DependencyPropagateCommand(BaseCommand):
@@ -44,4 +47,5 @@ class DependencyPropagateCommand(BaseCommand):
         """Execute the dependency propagate command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Propagating dependency changes...")
-        raise NotImplementedError("Dependency propagate implementation pending extraction from original file")
+        msg = "Dependency propagate implementation pending extraction from original file"
+        raise NotImplementedError(msg)

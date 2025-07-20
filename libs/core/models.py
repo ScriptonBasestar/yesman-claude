@@ -1,7 +1,7 @@
 """Data models for dashboard."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -47,14 +47,14 @@ class TaskProgress:
     todos_identified: int = 0
     todos_completed: int = 0
 
-    def update_phase(self, new_phase: TaskPhase):
+    def update_phase(self, new_phase: TaskPhase) -> None:
         """Update to a new phase."""
         self.phase = new_phase
-        self.phase_start_time = datetime.now()
+        self.phase_start_time = datetime.now(UTC)
         self.phase_progress = 0.0
         self._recalculate_overall_progress()
 
-    def _recalculate_overall_progress(self):
+    def _recalculate_overall_progress(self) -> None:
         """Recalculate overall progress based on phase."""
         phase_weights = {
             TaskPhase.STARTING: 0.1,
@@ -125,11 +125,11 @@ class SessionProgress:
     def add_task(self) -> TaskProgress:
         """Add a new task and make it current."""
         task = TaskProgress()
-        task.start_time = datetime.now()
+        task.start_time = datetime.now(UTC)
         self.tasks.append(task)
         self.current_task_index = len(self.tasks) - 1
         if not self.session_start_time:
-            self.session_start_time = datetime.now()
+            self.session_start_time = datetime.now(UTC)
         return task
 
     def calculate_overall_progress(self) -> float:
@@ -140,12 +140,12 @@ class SessionProgress:
         total_progress = sum(task.overall_progress for task in self.tasks)
         return total_progress / len(self.tasks)
 
-    def update_aggregates(self):
+    def update_aggregates(self) -> None:
         """Update aggregate metrics from all tasks."""
         self.total_files_changed = sum(task.files_created + task.files_modified for task in self.tasks)
         self.total_commands = sum(task.commands_executed for task in self.tasks)
         self.total_todos_completed = sum(task.todos_completed for task in self.tasks)
-        self.last_update_time = datetime.now()
+        self.last_update_time = datetime.now(UTC)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -188,11 +188,11 @@ class PaneInfo:
 
     def __post_init__(self):
         if self.last_activity is None:
-            self.last_activity = datetime.now()
+            self.last_activity = datetime.now(UTC)
 
-    def update_activity(self, new_output: str = None):
+    def update_activity(self, new_output: str | None = None) -> None:
         """Update activity tracking."""
-        self.last_activity = datetime.now()
+        self.last_activity = datetime.now(UTC)
         self.idle_time = 0.0
         if new_output:
             self.last_output = new_output
@@ -201,7 +201,7 @@ class PaneInfo:
     def calculate_idle_time(self) -> float:
         """Calculate current idle time in seconds."""
         if self.last_activity:
-            self.idle_time = (datetime.now() - self.last_activity).total_seconds()
+            self.idle_time = (datetime.now(UTC) - self.last_activity).total_seconds()
         return self.idle_time
 
 

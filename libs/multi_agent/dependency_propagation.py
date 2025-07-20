@@ -6,7 +6,7 @@ import hashlib
 import logging
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -62,7 +62,7 @@ class DependencyNode:
     dependents: set[str] = field(default_factory=set)  # What depends on this
     exports: dict[str, Any] = field(default_factory=dict)  # What this exports
     imports: dict[str, Any] = field(default_factory=dict)  # What this imports
-    last_analyzed: datetime = field(default_factory=datetime.now)
+    last_analyzed: datetime = field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -82,7 +82,7 @@ class DependencyChange:
     propagated_to: set[str] = field(default_factory=set)
     propagation_attempts: int = 0
     max_propagation_attempts: int = 3
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     processed_at: datetime | None = None
     requires_manual_review: bool = False
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -112,7 +112,7 @@ class DependencyPropagationSystem:
         branch_manager: BranchManager,
         repo_path: str | None = None,
         auto_propagate: bool = True,
-    ):
+    ) -> None:
         """Initialize the dependency propagation system.
 
         Args:
@@ -156,7 +156,7 @@ class DependencyPropagationSystem:
         self._propagation_task: asyncio.Task[Any] | None = None
         self._analysis_task: asyncio.Task[Any] | None = None
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the dependency propagation system."""
         self._running = True
         logger.info("Starting dependency propagation system")
@@ -165,7 +165,7 @@ class DependencyPropagationSystem:
         self._propagation_task = asyncio.create_task(self._propagation_loop())
         self._analysis_task = asyncio.create_task(self._dependency_analysis_loop())
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the dependency propagation system."""
         self._running = False
         logger.info("Stopping dependency propagation system")
@@ -203,7 +203,7 @@ class DependencyPropagationSystem:
         Returns:
             Change ID
         """
-        change_id = f"dep_change_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(file_path.encode()).hexdigest()[:8]}"
+        change_id = f"dep_change_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(file_path.encode()).hexdigest()[:8]}"
 
         # Auto-detect impact level if not provided
         if impact_level is None:
@@ -241,7 +241,7 @@ class DependencyPropagationSystem:
         self.propagation_stats["changes_tracked"] += 1
 
         logger.info(
-            f"Tracked dependency change {change_id} in {file_path} by {changed_by}",
+            "Tracked dependency change %s in %s by %s", change_id, file_path, changed_by
         )
 
         # Immediate propagation for critical changes
@@ -273,7 +273,7 @@ class DependencyPropagationSystem:
         for file_path in file_paths:
             await self._analyze_file_dependencies(file_path)
 
-        logger.info(f"Built dependency graph with {len(self.dependency_graph)} nodes")
+        logger.info("Built dependency graph with %d nodes", len(self.dependency_graph))
         return self.dependency_graph
 
     async def get_dependency_impact_report(self, file_path: str) -> dict[str, Any]:
@@ -342,7 +342,7 @@ class DependencyPropagationSystem:
                 None,
             )
             if not change:
-                logger.warning(f"Change {change_id} not found")
+                logger.warning("Change %s not found", change_id)
                 continue
 
             # Determine target branches
@@ -385,7 +385,7 @@ class DependencyPropagationSystem:
 
     # Private methods
 
-    async def _analyze_file_dependencies(self, file_path: str):
+    async def _analyze_file_dependencies(self, file_path: str) -> None:
         """Analyze dependencies for a single file."""
         full_path = self.repo_path / file_path
 
@@ -459,7 +459,7 @@ class DependencyPropagationSystem:
                 dependencies=dependencies,
                 imports=imports,
                 exports=exports,
-                last_analyzed=datetime.now(),
+                last_analyzed=datetime.now(UTC),
             )
 
             self.dependency_graph[file_path] = node
@@ -467,14 +467,14 @@ class DependencyPropagationSystem:
             # Update reverse dependencies
             await self._update_reverse_dependencies(file_path, dependencies)
 
-        except Exception as e:
-            logger.error(f"Error analyzing dependencies for {file_path}: {e}")
+        except Exception:
+            logger.exception("Error analyzing dependencies for %s", file_path)
 
     async def _update_reverse_dependencies(
         self,
         file_path: str,
         dependencies: set[str],
-    ):
+    ) -> None:
         """Update reverse dependency relationships."""
         for dep in dependencies:
             # Find files that match this dependency
@@ -550,7 +550,7 @@ class DependencyPropagationSystem:
 
         # For breaking changes, include indirect dependents
         if await self._analyze_change_impact(file_path, change_type, change_details) == ChangeImpact.BREAKING:
-            indirect = await self._calculate_indirect_dependents(file_path)
+            await self._calculate_indirect_dependents(file_path)
             affected.extend(self._get_indirect_dependent_files(file_path))
 
         return list(set(affected))
@@ -628,17 +628,16 @@ class DependencyPropagationSystem:
         """Calculate risk level based on complexity and impact."""
         if complexity_score > 7 or total_impact > 10:
             return "high"
-        elif complexity_score > 4 or total_impact > 5:
+        if complexity_score > 4 or total_impact > 5:
             return "medium"
-        else:
-            return "low"
+        return "low"
 
     async def _process_single_change(
         self,
         change: DependencyChange,
     ) -> PropagationResult:
         """Process a single dependency change."""
-        start_time = datetime.now()
+        start_time = datetime.now(UTC)
 
         try:
             # Update branch info protocol with dependency change
@@ -660,10 +659,10 @@ class DependencyPropagationSystem:
             await self._notify_affected_agents(change)
 
             # Mark as processed
-            change.processed_at = datetime.now()
+            change.processed_at = datetime.now(UTC)
             change.propagated_to.update(change.affected_branches)
 
-            processing_time = (datetime.now() - start_time).total_seconds()
+            processing_time = (datetime.now(UTC) - start_time).total_seconds()
 
             # Update statistics
             self.propagation_stats["changes_propagated"] += 1
@@ -678,8 +677,8 @@ class DependencyPropagationSystem:
             )
 
         except Exception as e:
-            logger.error(f"Error processing change {change.change_id}: {e}")
-            processing_time = (datetime.now() - start_time).total_seconds()
+            logger.exception("Error processing change %s", change.change_id)
+            processing_time = (datetime.now(UTC) - start_time).total_seconds()
             self._update_propagation_stats(processing_time, False)
 
             return PropagationResult(
@@ -691,7 +690,7 @@ class DependencyPropagationSystem:
                 processing_time=processing_time,
             )
 
-    async def _notify_affected_agents(self, change: DependencyChange):
+    async def _notify_affected_agents(self, change: DependencyChange) -> None:
         """Notify agents affected by a dependency change."""
         # Find agents working on affected branches
         affected_agents = set()
@@ -738,12 +737,12 @@ class DependencyPropagationSystem:
             try:
                 # Simulate propagation (in real implementation, would apply changes)
                 logger.info(
-                    f"Propagating change {change.change_id} to branch {branch_name}",
+                    "Propagating change %s to branch %s", change.change_id, branch_name
                 )
                 propagated_to.append(branch_name)
 
-            except Exception as e:
-                logger.error(f"Failed to propagate to {branch_name}: {e}")
+            except Exception:
+                logger.exception("Failed to propagate to %s", branch_name)
                 failed_targets.append(branch_name)
 
         return PropagationResult(
@@ -753,7 +752,7 @@ class DependencyPropagationSystem:
             failed_targets=failed_targets,
         )
 
-    def _update_propagation_stats(self, processing_time: float, success: bool):
+    def _update_propagation_stats(self, processing_time: float, success: bool) -> None:
         """Update propagation statistics."""
         # Update average processing time
         total_changes = self.propagation_stats["changes_propagated"]
@@ -766,7 +765,7 @@ class DependencyPropagationSystem:
 
         self.propagation_stats["propagation_success_rate"] = successful / total_changes
 
-    async def _propagation_loop(self):
+    async def _propagation_loop(self) -> None:
         """Background task for processing dependency changes."""
         while self._running:
             try:
@@ -782,11 +781,11 @@ class DependencyPropagationSystem:
 
                 await asyncio.sleep(5)  # Process every 5 seconds
 
-            except Exception as e:
-                logger.error(f"Error in propagation loop: {e}")
+            except Exception:
+                logger.exception("Error in propagation loop")
                 await asyncio.sleep(10)
 
-    async def _dependency_analysis_loop(self):
+    async def _dependency_analysis_loop(self) -> None:
         """Background task for dependency analysis."""
         while self._running:
             try:
@@ -794,8 +793,8 @@ class DependencyPropagationSystem:
                 await self.build_dependency_graph()
                 await asyncio.sleep(3600)  # Run every hour
 
-            except Exception as e:
-                logger.error(f"Error in dependency analysis loop: {e}")
+            except Exception:
+                logger.exception("Error in dependency analysis loop")
                 await asyncio.sleep(3600)
 
     def get_propagation_summary(self) -> dict[str, Any]:

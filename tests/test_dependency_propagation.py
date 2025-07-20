@@ -2,6 +2,7 @@
 
 import asyncio
 import tempfile
+from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
@@ -25,7 +26,7 @@ from libs.multi_agent.dependency_propagation import (
 class TestDependencyNode:
     """Test cases for DependencyNode dataclass."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test DependencyNode initialization."""
         node = DependencyNode(
             file_path="src/main.py",
@@ -51,7 +52,7 @@ class TestDependencyNode:
 class TestDependencyChange:
     """Test cases for DependencyChange dataclass."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test DependencyChange initialization."""
         change = DependencyChange(
             change_id="change-123",
@@ -84,7 +85,7 @@ class TestDependencyChange:
 class TestPropagationResult:
     """Test cases for PropagationResult dataclass."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test PropagationResult initialization."""
         result = PropagationResult(
             change_id="change-123",
@@ -110,7 +111,7 @@ class TestDependencyPropagationSystem:
     """Test cases for DependencyPropagationSystem."""
 
     @pytest.fixture
-    def temp_repo(self):
+    def temp_repo(self) -> Iterator[Path]:
         """Create temporary repository for testing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_path = Path(tmpdir)
@@ -161,14 +162,14 @@ def test_processor():
             yield repo_path
 
     @pytest.fixture
-    def mock_collaboration_engine(self):
+    def mock_collaboration_engine(self) -> Mock:
         """Create mock collaboration engine."""
         engine = Mock(spec=CollaborationEngine)
         engine.send_message = AsyncMock(return_value="message-123")
         return engine
 
     @pytest.fixture
-    def mock_branch_info_protocol(self):
+    def mock_branch_info_protocol(self) -> Mock:
         """Create mock branch info protocol."""
         protocol = Mock(spec=BranchInfoProtocol)
         protocol.update_branch_info = AsyncMock()
@@ -184,18 +185,18 @@ def test_processor():
         return protocol
 
     @pytest.fixture
-    def mock_branch_manager(self):
+    def mock_branch_manager(self) -> Mock:
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
     def propagation_system(
         self,
-        mock_collaboration_engine,
-        mock_branch_info_protocol,
-        mock_branch_manager,
-        temp_repo,
-    ):
+        mock_collaboration_engine: Mock,
+        mock_branch_info_protocol: Mock,
+        mock_branch_manager: Mock,
+        temp_repo: Path,
+    ) -> DependencyPropagationSystem:
         """Create DependencyPropagationSystem instance."""
         return DependencyPropagationSystem(
             collaboration_engine=mock_collaboration_engine,
@@ -207,11 +208,11 @@ def test_processor():
 
     def test_init(
         self,
-        propagation_system,
-        mock_collaboration_engine,
-        mock_branch_info_protocol,
-        mock_branch_manager,
-    ):
+        propagation_system: DependencyPropagationSystem,
+        mock_collaboration_engine: Mock,
+        mock_branch_info_protocol: Mock,
+        mock_branch_manager: Mock,
+    ) -> None:
         """Test DependencyPropagationSystem initialization."""
         assert propagation_system.collaboration_engine == mock_collaboration_engine
         assert propagation_system.branch_info_protocol == mock_branch_info_protocol
@@ -222,23 +223,23 @@ def test_processor():
         assert len(propagation_system.change_history) == 0
         assert propagation_system.batch_size == 10
         assert propagation_system.batch_timeout == 300
-        assert propagation_system._running is False
+        assert propagation_system._running is False  # noqa: SLF001
 
     @pytest.mark.asyncio
-    async def test_start_stop(self, propagation_system):
+    async def test_start_stop(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test starting and stopping the system."""
         # Start system
         await propagation_system.start()
-        assert propagation_system._running is True
-        assert propagation_system._propagation_task is not None
-        assert propagation_system._analysis_task is not None
+        assert propagation_system._running is True  # noqa: SLF001
+        assert propagation_system._propagation_task is not None  # noqa: SLF001
+        assert propagation_system._analysis_task is not None  # noqa: SLF001
 
         # Stop system
         await propagation_system.stop()
-        assert propagation_system._running is False
+        assert propagation_system._running is False  # noqa: SLF001
 
     @pytest.mark.asyncio
-    async def test_track_dependency_change(self, propagation_system):
+    async def test_track_dependency_change(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test tracking a dependency change."""
         change_id = await propagation_system.track_dependency_change(
             file_path="src/utils.py",
@@ -266,8 +267,8 @@ def test_processor():
     @pytest.mark.asyncio
     async def test_track_dependency_change_auto_impact_detection(
         self,
-        propagation_system,
-    ):
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test auto-detection of change impact level."""
         # Breaking change keywords
         change_id = await propagation_system.track_dependency_change(
@@ -303,7 +304,7 @@ def test_processor():
         assert change.impact_level == ChangeImpact.ENHANCEMENT
 
     @pytest.mark.asyncio
-    async def test_build_dependency_graph(self, propagation_system):
+    async def test_build_dependency_graph(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test building dependency graph from source files."""
         dependency_graph = await propagation_system.build_dependency_graph()
 
@@ -322,7 +323,7 @@ def test_processor():
             assert len(main_node.imports) > 0  # Should have imports
 
     @pytest.mark.asyncio
-    async def test_get_dependency_impact_report(self, propagation_system):
+    async def test_get_dependency_impact_report(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test getting dependency impact report."""
         # Build dependency graph first
         await propagation_system.build_dependency_graph()
@@ -348,7 +349,7 @@ def test_processor():
         assert "error" in report
 
     @pytest.mark.asyncio
-    async def test_propagate_changes_to_branches(self, propagation_system):
+    async def test_propagate_changes_to_branches(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test propagating changes to target branches."""
         # Track some changes first
         change_id1 = await propagation_system.track_dependency_change(
@@ -379,7 +380,7 @@ def test_processor():
             assert result.change_id in [change_id1, change_id2]
 
     @pytest.mark.asyncio
-    async def test_get_pending_changes(self, propagation_system):
+    async def test_get_pending_changes(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test getting pending changes."""
         # Track some changes
         await propagation_system.track_dependency_change(
@@ -416,10 +417,10 @@ def test_processor():
         assert len(pending_branch) >= 0  # Depends on mock branch info
 
     @pytest.mark.asyncio
-    async def test_analyze_change_impact_detection(self, propagation_system):
+    async def test_analyze_change_impact_detection(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test impact level detection logic."""
         # Test breaking change detection
-        impact = await propagation_system._analyze_change_impact(
+        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"description": "remove old function"},
@@ -427,7 +428,7 @@ def test_processor():
         assert impact == ChangeImpact.BREAKING
 
         # Test security change detection
-        impact = await propagation_system._analyze_change_impact(
+        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
             "src/auth.py",
             DependencyType.API_USAGE,
             {"description": "update authentication logic"},
@@ -435,7 +436,7 @@ def test_processor():
         assert impact == ChangeImpact.SECURITY
 
         # Test function signature changes
-        impact = await propagation_system._analyze_change_impact(
+        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"signature": "changed", "parameters": ["new_param"]},
@@ -443,7 +444,7 @@ def test_processor():
         assert impact == ChangeImpact.BREAKING
 
         # Test class inheritance changes
-        impact = await propagation_system._analyze_change_impact(
+        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
             "src/main.py",
             DependencyType.CLASS_INHERITANCE,
             {"base_class": "changed"},
@@ -451,7 +452,7 @@ def test_processor():
         assert impact == ChangeImpact.BREAKING
 
         # Test enhancement detection
-        impact = await propagation_system._analyze_change_impact(
+        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"description": "add new functionality"},
@@ -459,7 +460,7 @@ def test_processor():
         assert impact == ChangeImpact.ENHANCEMENT
 
         # Test default compatible
-        impact = await propagation_system._analyze_change_impact(
+        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
             "src/utils.py",
             DependencyType.IMPORT,
             {"description": "update import statement"},
@@ -467,13 +468,13 @@ def test_processor():
         assert impact == ChangeImpact.COMPATIBLE
 
     @pytest.mark.asyncio
-    async def test_find_affected_files(self, propagation_system):
+    async def test_find_affected_files(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test finding files affected by changes."""
         # Build dependency graph first
         await propagation_system.build_dependency_graph()
 
         # Test finding affected files
-        affected = await propagation_system._find_affected_files(
+        affected = await propagation_system._find_affected_files(  # noqa: SLF001
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"function": "process_data"},
@@ -483,11 +484,11 @@ def test_processor():
         assert isinstance(affected, list)
 
     @pytest.mark.asyncio
-    async def test_find_affected_branches(self, propagation_system):
+    async def test_find_affected_branches(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test finding branches affected by file changes."""
         affected_files = ["src/main.py", "src/utils.py"]
 
-        affected_branches = await propagation_system._find_affected_branches(
+        affected_branches = await propagation_system._find_affected_branches(  # noqa: SLF001
             affected_files,
         )
 
@@ -495,19 +496,19 @@ def test_processor():
         assert isinstance(affected_branches, list)
 
     @pytest.mark.asyncio
-    async def test_calculate_indirect_dependents(self, propagation_system):
+    async def test_calculate_indirect_dependents(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test calculating indirect dependent count."""
         # Build dependency graph
         await propagation_system.build_dependency_graph()
 
         if "src/utils.py" in propagation_system.dependency_graph:
-            count = await propagation_system._calculate_indirect_dependents(
+            count = await propagation_system._calculate_indirect_dependents(  # noqa: SLF001
                 "src/utils.py",
             )
             assert isinstance(count, int)
             assert count >= 0
 
-    def test_calculate_complexity_score(self, propagation_system):
+    def test_calculate_complexity_score(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test complexity score calculation."""
         node = DependencyNode(
             file_path="test.py",
@@ -517,7 +518,7 @@ def test_processor():
             exports={"func1": {}, "func2": {}, "class1": {}},  # 3 exports
         )
 
-        score = propagation_system._calculate_complexity_score(node)
+        score = propagation_system._calculate_complexity_score(node)  # noqa: SLF001
         expected = (3 * 0.3) + (2 * 0.5) + (3 * 0.2)  # 0.9 + 1.0 + 0.6 = 2.5
         assert score == expected
 
@@ -525,27 +526,27 @@ def test_processor():
         large_node = DependencyNode(
             file_path="large.py",
             module_name="large",
-            dependencies=set(f"dep{i}" for i in range(50)),  # Many dependencies
-            dependents=set(f"dep{i}" for i in range(50)),  # Many dependents
+            dependencies={f"dep{i}" for i in range(50)},  # Many dependencies
+            dependents={f"dep{i}" for i in range(50)},  # Many dependents
         )
 
-        score = propagation_system._calculate_complexity_score(large_node)
+        score = propagation_system._calculate_complexity_score(large_node)  # noqa: SLF001
         assert score == 10.0  # Should be capped
 
-    def test_calculate_risk_level(self, propagation_system):
+    def test_calculate_risk_level(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test risk level calculation."""
         # High risk: high complexity or high impact
-        assert propagation_system._calculate_risk_level(8.0, 5) == "high"
-        assert propagation_system._calculate_risk_level(5.0, 15) == "high"
+        assert propagation_system._calculate_risk_level(8.0, 5) == "high"  # noqa: SLF001
+        assert propagation_system._calculate_risk_level(5.0, 15) == "high"  # noqa: SLF001
 
         # Medium risk: medium complexity or medium impact
-        assert propagation_system._calculate_risk_level(6.0, 3) == "medium"
-        assert propagation_system._calculate_risk_level(3.0, 8) == "medium"
+        assert propagation_system._calculate_risk_level(6.0, 3) == "medium"  # noqa: SLF001
+        assert propagation_system._calculate_risk_level(3.0, 8) == "medium"  # noqa: SLF001
 
         # Low risk: low complexity and low impact
-        assert propagation_system._calculate_risk_level(2.0, 2) == "low"
+        assert propagation_system._calculate_risk_level(2.0, 2) == "low"  # noqa: SLF001
 
-    def test_get_propagation_summary(self, propagation_system):
+    def test_get_propagation_summary(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test getting propagation system summary."""
         summary = propagation_system.get_propagation_summary()
 
@@ -562,7 +563,7 @@ def test_processor():
         assert len(summary["recent_changes"]) == 0
 
     @pytest.mark.asyncio
-    async def test_propagation_stats_tracking(self, propagation_system):
+    async def test_propagation_stats_tracking(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test that statistics are properly tracked."""
         initial_stats = propagation_system.propagation_stats.copy()
 
@@ -579,13 +580,13 @@ def test_processor():
         assert propagation_system.propagation_stats["changes_tracked"] == initial_stats["changes_tracked"] + 1
 
     @pytest.mark.asyncio
-    async def test_immediate_propagation_for_critical_changes(self, propagation_system):
+    async def test_immediate_propagation_for_critical_changes(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test that critical changes trigger immediate propagation."""
         # Start the system to enable processing
         await propagation_system.start()
 
         # Track a critical change
-        change_id = await propagation_system.track_dependency_change(
+        await propagation_system.track_dependency_change(
             file_path="src/utils.py",
             changed_by="agent-1",
             change_type=DependencyType.FUNCTION_CALL,
@@ -603,7 +604,7 @@ def test_processor():
         await propagation_system.stop()
 
     @pytest.mark.asyncio
-    async def test_notification_to_affected_agents(self, propagation_system):
+    async def test_notification_to_affected_agents(self, propagation_system: DependencyPropagationSystem) -> None:
         """Test that affected agents are notified of changes."""
         await propagation_system.start()
 

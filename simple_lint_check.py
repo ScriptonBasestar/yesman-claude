@@ -9,7 +9,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_ruff_check():
-    """Run ruff check command"""
+    """Run ruff check command."""
     try:
         cmd = [
             "uv",
@@ -47,7 +47,7 @@ def run_ruff_check():
 
 
 def run_mypy_check():
-    """Run mypy check command"""
+    """Run mypy check command."""
     try:
         cmd = [
             "uv",

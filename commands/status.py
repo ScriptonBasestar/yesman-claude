@@ -29,9 +29,9 @@ class StatusDashboard:
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        config=None,
-        tmux_manager=None,
-    ):
+        config: Any = None,
+        tmux_manager: Any = None,
+    ) -> None:
         self.console = Console()
         self.project_path = Path(project_path).resolve()
         self.project_name = self.project_path.name
@@ -56,7 +56,7 @@ class StatusDashboard:
         self._load_todo_data()
         self.progress_data: dict[str, Any] | None = None
 
-    def _load_todo_data(self):
+    def _load_todo_data(self) -> None:
         """Load TODO data from various sources."""
         # Try to load from common TODO file locations
         todo_files = [
@@ -70,7 +70,7 @@ class StatusDashboard:
             if todo_file.exists() and self.progress_tracker.load_todos_from_file(str(todo_file)):
                 break
 
-    def update_data(self):
+    def update_data(self) -> None:
         """Update all dashboard data."""
         try:
             # Update session data
@@ -83,14 +83,14 @@ class StatusDashboard:
                 detailed_sessions.append(detailed_info)
 
                 # Calculate activity for heatmap
-                activity_level = self._calculate_session_activity(detailed_info)
+                self._calculate_session_activity(detailed_info)
                 # Note: add_activity_point method not available, skip heatmap update
 
             # Update session browser
             self.session_browser.update_sessions(detailed_sessions)
 
             # Update project health - calculate health directly since update method not available
-            health_data = self.project_health.calculate_health()
+            self.project_health.calculate_health()
 
             # Update session progress
             self.progress_data = self.session_manager.get_progress_overview()
@@ -155,7 +155,7 @@ class StatusDashboard:
 
         return layout
 
-    def update_layout(self, layout: Layout):
+    def update_layout(self, layout: Layout) -> None:
         """Update layout with current data."""
         # Header
         cache_hit_rate = self.tmux_manager.get_cache_stats().get("hit_rate", 0)
@@ -209,7 +209,7 @@ class StatusDashboard:
         footer_text = " | ".join(str(part) for part in footer_parts)
         layout["footer"].update(Panel(footer_text, style="dim"))
 
-    def run_interactive(self):
+    def run_interactive(self) -> None:
         """Run interactive dashboard."""
         layout = self.create_layout()
 
@@ -223,7 +223,7 @@ class StatusDashboard:
         except KeyboardInterrupt:
             self.console.print("\\n[yellow]Dashboard stopped[/]")
 
-    def render_detailed_view(self):
+    def render_detailed_view(self) -> None:
         """Render detailed view with all components."""
         self.update_data()
 
@@ -286,45 +286,45 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
                     "mode": "interactive",
                     "project_path": project_path,
                 }
-            elif detailed:
+            if detailed:
                 dashboard.render_detailed_view()
                 return {
                     "success": True,
                     "mode": "detailed",
                     "project_path": project_path,
                 }
-            else:
-                # Quick status overview
-                dashboard.update_data()
+            # Quick status overview
+            dashboard.update_data()
 
-                console = Console()
+            console = Console()
 
-                # Quick summary
-                console.print(f"🎯 Project: {dashboard.project_name}", style="bold cyan")
-                console.print()
+            # Quick summary
+            console.print(f"🎯 Project: {dashboard.project_name}", style="bold cyan")
+            console.print()
 
-                # Compact status from each widget
-                try:
-                    health_data = dashboard.project_health.calculate_health()
-                    health_status = f"Health: {health_data.get('overall_score', 'N/A')}"
-                except Exception:
-                    health_status = "Health: N/A"
-                git_status = str(dashboard.git_activity.render_compact_status())
-                progress_status = str(dashboard.progress_tracker.render_compact_progress())
+            # Compact status from each widget
+            try:
+                health_data = dashboard.project_health.calculate_health()
+                health_status = f"Health: {health_data.get('overall_score', 'N/A')}"
+            except Exception:
+                health_status = "Health: N/A"
+            git_status = str(dashboard.git_activity.render_compact_status())
+            progress_status = str(dashboard.progress_tracker.render_compact_progress())
 
-                console.print("📊 Quick Status:")
-                console.print(f"  Health: {health_status}")
-                console.print(f"  Git: {git_status}")
-                console.print(f"  Progress: {progress_status}")
+            console.print("📊 Quick Status:")
+            console.print(f"  Health: {health_status}")
+            console.print(f"  Git: {git_status}")
+            console.print(f"  Progress: {progress_status}")
 
-                console.print("\n💡 Use --interactive for live dashboard or --detailed for full view")
-                return {"success": True, "mode": "quick", "project_path": project_path}
+            console.print("\n💡 Use --interactive for live dashboard or --detailed for full view")
+            return {"success": True, "mode": "quick", "project_path": project_path}
 
         except KeyboardInterrupt:
             self.print_warning("\nStatus dashboard stopped.")
             return {"success": True, "stopped_by_user": True}
         except Exception as e:
-            raise CommandError(f"Error running status dashboard: {e}") from e
+            msg = f"Error running status dashboard: {e}"
+            raise CommandError(msg) from e
 
 
 @click.command()
@@ -338,7 +338,7 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     help="Update interval in seconds",
 )
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
-def status(project_path, interactive, update_interval, detailed):
+def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:
     """Comprehensive project status dashboard."""
     command = StatusCommand()
     command.run(

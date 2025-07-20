@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demo script for multi-agent system metrics verification"""
+"""Demo script for multi-agent system metrics verification."""
 
 import asyncio
 import tempfile
@@ -12,7 +12,7 @@ from libs.multi_agent.metrics_verifier import (
 
 
 async def demo_metrics_verification():
-    """Demonstrate comprehensive metrics verification system"""
+    """Demonstrate comprehensive metrics verification system."""
     print("🎯 Multi-Agent System Metrics Verification Demo")
     print("=" * 60)
 

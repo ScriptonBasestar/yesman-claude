@@ -15,7 +15,7 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin
 class CleanupCommand(BaseCommand, ConfigCommandMixin):
     """Clean up excessive cache files and temporary data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
 
@@ -47,10 +47,9 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             }
 
         # Confirm cleanup
-        if not force:
-            if not self.confirm_action(f"Delete {len(cache_paths)} cache items ({self._human_readable_size(total_size)})?"):
-                self.print_warning("Cleanup cancelled")
-                return {"cancelled": True}
+        if not force and not self.confirm_action(f"Delete {len(cache_paths)} cache items ({self._human_readable_size(total_size)})?"):
+            self.print_warning("Cleanup cancelled")
+            return {"cancelled": True}
 
         # Perform cleanup
         cleaned_count, cleaned_size, errors = self._perform_cleanup(cache_paths)
@@ -180,7 +179,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 )
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
-def cleanup(dry_run: bool, force: bool, cleanup_all: bool):
+def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:
     """Clean up excessive cache files and temporary data."""
     command = CleanupCommand()
     command.run(dry_run=dry_run, force=force, cleanup_all=cleanup_all)

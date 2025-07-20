@@ -28,7 +28,7 @@ class HealthLevel(Enum):
     CRITICAL = (0, 49, "critical", "🔴")
     UNKNOWN = (-1, -1, "unknown", "⚪")
 
-    def __init__(self, min_score: int, max_score: int, label: str, emoji: str):
+    def __init__(self, min_score: int, max_score: int, label: str, emoji: str) -> None:
         self.min_score = min_score
         self.max_score = max_score
         self.label = label
@@ -126,11 +126,11 @@ class SessionData:
         # Parse datetime fields
         created_at = None
         if data.get("created_at"):
-            created_at = datetime.fromisoformat(data["created_at"].replace("Z", "+00:00"))
+            created_at = datetime.fromisoformat(data["created_at"])
 
         last_activity = None
         if data.get("last_activity"):
-            last_activity = datetime.fromisoformat(data["last_activity"].replace("Z", "+00:00"))
+            last_activity = datetime.fromisoformat(data["last_activity"])
 
         # Parse status
         status = SessionStatus(data.get("status", SessionStatus.IDLE.value))
@@ -219,7 +219,7 @@ class HealthData:
         # Parse datetime
         last_updated = None
         if data.get("last_updated"):
-            last_updated = datetime.fromisoformat(data["last_updated"].replace("Z", "+00:00"))
+            last_updated = datetime.fromisoformat(data["last_updated"])
 
         # Parse overall level
         overall_level = HealthLevel.from_score(data.get("overall_score", 0))
@@ -229,7 +229,7 @@ class HealthData:
         for cat_data in data.get("categories", []):
             last_checked = None
             if cat_data.get("last_checked"):
-                last_checked = datetime.fromisoformat(cat_data["last_checked"].replace("Z", "+00:00"))
+                last_checked = datetime.fromisoformat(cat_data["last_checked"])
 
             level = HealthLevel.from_score(cat_data.get("score", 0))
 
@@ -299,7 +299,7 @@ class ActivityData:
         # Parse entries
         entries = []
         for entry_data in data.get("entries", []):
-            timestamp = datetime.fromisoformat(entry_data["timestamp"].replace("Z", "+00:00"))
+            timestamp = datetime.fromisoformat(entry_data["timestamp"])
             activity_type = ActivityType(entry_data.get("activity_type", ActivityType.FILE_MODIFIED.value))
 
             entries.append(
@@ -370,11 +370,11 @@ class ProgressData:
         # Parse datetime fields
         start_time = None
         if data.get("start_time"):
-            start_time = datetime.fromisoformat(data["start_time"].replace("Z", "+00:00"))
+            start_time = datetime.fromisoformat(data["start_time"])
 
         phase_start_time = None
         if data.get("phase_start_time"):
-            phase_start_time = datetime.fromisoformat(data["phase_start_time"].replace("Z", "+00:00"))
+            phase_start_time = datetime.fromisoformat(data["phase_start_time"])
 
         # Parse phase
         phase = ProgressPhase(data.get("phase", ProgressPhase.IDLE.value))
@@ -490,7 +490,7 @@ class ChartData:
             # Try to parse datetime if it's a string
             if isinstance(x_value, str):
                 try:
-                    x_value = datetime.fromisoformat(x_value.replace("Z", "+00:00"))
+                    x_value = datetime.fromisoformat(x_value)
                 except (ValueError, AttributeError):
                     pass  # Keep as string
 

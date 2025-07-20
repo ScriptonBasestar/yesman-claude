@@ -20,7 +20,7 @@ from .settings import settings
 class SessionValidator:
     """Validates session configuration using centralized validation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.validation_errors = []
 
     def validate_session_config(self, session_name: str, config_dict: dict[str, Any]) -> bool:
@@ -178,7 +178,7 @@ class SessionValidator:
 class SessionConfigBuilder:
     """Builds session configuration from template and overrides."""
 
-    def __init__(self, tmux_manager):
+    def __init__(self, tmux_manager: Any) -> None:
         self.tmux_manager = tmux_manager
 
     def build_session_config(self, session_name: str, session_conf: dict[str, Any]) -> dict[str, Any]:
@@ -229,21 +229,23 @@ class SessionConfigBuilder:
         template_file = self.tmux_manager.templates_path / f"{template_name}.yaml"
 
         if not template_file.is_file():
+            msg = f"Template '{template_name}' not found at {template_file}"
             raise CommandError(
-                f"Template '{template_name}' not found at {template_file}",
+                msg,
             )
 
         try:
             with open(template_file, encoding="utf-8") as tf:
                 return yaml.safe_load(tf) or {}
         except Exception as e:
-            raise CommandError(f"Failed to read template {template_file}: {e}") from e
+            msg = f"Failed to read template {template_file}: {e}"
+            raise CommandError(msg) from e
 
 
 class SessionSetupService:
     """Service for setting up tmux sessions."""
 
-    def __init__(self, tmux_manager):
+    def __init__(self, tmux_manager: Any) -> None:
         self.tmux_manager = tmux_manager
         self.config_builder = SessionConfigBuilder(tmux_manager)
         self.validator = SessionValidator()
@@ -293,7 +295,8 @@ class SessionSetupService:
 
         if session_filter:
             if session_filter not in all_sessions:
-                raise CommandError(f"Session '{session_filter}' not defined in projects.yaml")
+                msg = f"Session '{session_filter}' not defined in projects.yaml"
+                raise CommandError(msg)
             return {session_filter: all_sessions[session_filter]}
 
         return dict(all_sessions)
@@ -326,8 +329,7 @@ class SessionSetupService:
                 if not click.confirm("Do you want to kill the existing session and recreate it?"):
                     click.echo(f"⏭️  Skipping session '{session_name}'")
                     return False
-                else:
-                    self._kill_session(session_name)
+                self._kill_session(session_name)
 
             # Create session
             self._create_session(config_dict)
@@ -360,11 +362,13 @@ class SessionSetupService:
                 capture_output=True,
             )
         except subprocess.CalledProcessError as e:
-            raise CommandError(f"Failed to kill existing session: {e}") from e
+            msg = f"Failed to kill existing session: {e}"
+            raise CommandError(msg) from e
 
     def _create_session(self, config_dict: dict[str, Any]) -> None:
         """Create tmux session from configuration."""
         try:
             self.tmux_manager.create_session_from_config(config_dict)
         except Exception as e:
-            raise CommandError(f"Failed to create tmux session: {e}") from e
+            msg = f"Failed to create tmux session: {e}"
+            raise CommandError(msg) from e

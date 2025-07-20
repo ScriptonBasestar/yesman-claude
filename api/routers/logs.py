@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
@@ -48,7 +49,7 @@ def get_session_logs(session_name: str, limit: int = 100):
             return lines[-limit:]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to read log file: {e!s}")
 
 
 def parse_log_line(line: str) -> LogEntry | None:
@@ -97,10 +98,10 @@ def parse_log_line(line: str) -> LogEntry | None:
 
 @router.get("/logs", response_model=list[LogEntry])
 def get_logs(
-    limit: int = Query(default=100, ge=1, le=1000),
-    level: str | None = Query(default=None),
-    source: str | None = Query(default=None),
-    search: str | None = Query(default=None),
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
+    level: Annotated[str | None, Query()] = None,
+    source: Annotated[str | None, Query()] = None,
+    search: Annotated[str | None, Query()] = None,
 ):
     """Get parsed log entries with optional filtering."""
     try:
@@ -123,8 +124,7 @@ def get_logs(
                             log_entry = parse_log_line(line)
                             if log_entry:
                                 all_logs.append(log_entry)
-                except Exception as e:
-                    print(f"Error reading {log_file}: {e}")
+                except Exception:
                     continue
 
         # Sort by timestamp (newest first)
@@ -146,7 +146,7 @@ def get_logs(
         return filtered_logs[:limit]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read logs: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to read logs: {e!s}")
 
 
 @router.get("/logs/sources")
@@ -178,10 +178,10 @@ def get_log_sources():
                     logger.warning(f"Failed to parse log file {log_file}: {e}")
                     continue
 
-        return {"sources": sorted(list(sources))}
+        return {"sources": sorted(sources)}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get log sources: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get log sources: {e!s}")
 
 
 @router.post("/logs/test")

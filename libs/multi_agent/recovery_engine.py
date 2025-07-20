@@ -10,7 +10,7 @@ import time
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -104,7 +104,7 @@ class RecoveryEngine:
         work_dir: str = ".scripton/yesman",
         max_snapshots: int = 50,
         auto_cleanup_hours: int = 24,
-    ):
+    ) -> None:
         """Initialize recovery engine.
 
         Args:
@@ -155,7 +155,7 @@ class RecoveryEngine:
 
         if state_file.exists():
             try:
-                with open(state_file) as f:
+                with state_file.open() as f:
                     data = json.load(f)
 
                 # Load snapshots
@@ -167,23 +167,23 @@ class RecoveryEngine:
                 self.failure_counts = data.get("failure_counts", {})
                 self.recovery_metrics = data.get("recovery_metrics", self.recovery_metrics)
 
-                logger.info(f"Loaded {len(self.snapshots)} recovery snapshots")
+                logger.info("Loaded {len(self.snapshots)} recovery snapshots")
 
             except Exception as e:
-                logger.error(f"Failed to load recovery state: {e}")
+                logger.exception(f"Failed to load recovery state: {e}")
 
         # Also load individual snapshot files
         try:
             for snapshot_file in self.snapshots_dir.glob("*.json"):
                 if snapshot_file.stem not in self.snapshots:
                     try:
-                        with open(snapshot_file) as f:
+                        with snapshot_file.open() as f:
                             snapshot_data = json.load(f)
                         snapshot = OperationSnapshot.from_dict(snapshot_data)
                         self.snapshots[snapshot.snapshot_id] = snapshot
-                    except Exception as e:
+                    except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
                         logger.warning(f"Failed to load snapshot file {snapshot_file}: {e}")
-        except Exception as e:
+        except (OSError, PermissionError) as e:
             logger.warning(f"Failed to load snapshot files: {e}")
 
     def _save_state(self) -> None:
@@ -196,14 +196,14 @@ class RecoveryEngine:
                 "operation_history": self.operation_history[-1000:],  # Keep last 1000
                 "failure_counts": self.failure_counts,
                 "recovery_metrics": self.recovery_metrics,
-                "saved_at": datetime.now().isoformat(),
+                "saved_at": datetime.now(UTC).isoformat(),
             }
 
-            with open(state_file, "w") as f:
+            with state_file.open("w") as f:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
-            logger.error(f"Failed to save recovery state: {e}")
+            logger.exception(f"Failed to save recovery state: {e}")
 
     def _setup_default_strategies(self) -> None:
         """Setup default recovery strategies."""
@@ -262,7 +262,7 @@ class RecoveryEngine:
         error_pattern: str,
         max_retries: int = 3,
         retry_delay: float = 1.0,
-        recovery_actions: list[RecoveryAction] = None,
+        recovery_actions: list[RecoveryAction] | None = None,
         escalation_threshold: int = 5,
         custom_handler: Callable | None = None,
     ) -> None:
@@ -280,16 +280,16 @@ class RecoveryEngine:
         )
 
         self.recovery_strategies[name] = strategy
-        logger.info(f"Registered recovery strategy: {name}")
+        logger.info("Registered recovery strategy: {name}")
 
     async def create_snapshot(
         self,
         operation_type: OperationType,
         description: str,
-        agent_pool=None,
-        branch_manager=None,
-        files_to_backup: list[str] = None,
-        operation_context: dict[str, Any] = None,
+        agent_pool: Any = None,
+        branch_manager: Any = None,
+        files_to_backup: list[str] | None = None,
+        operation_context: dict[str, Any] | None = None,
     ) -> str:
         """Create a snapshot before a critical operation.
 
@@ -309,7 +309,7 @@ class RecoveryEngine:
         snapshot = OperationSnapshot(
             snapshot_id=snapshot_id,
             operation_type=operation_type,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             description=description,
             operation_context=operation_context or {},
         )
@@ -331,7 +331,7 @@ class RecoveryEngine:
                         "status": branch_status,
                         "branches": {name: info.to_dict() for name, info in branch_manager.branches.items()},
                     }
-                except Exception as e:
+                except (AttributeError, KeyError, TypeError) as e:
                     logger.warning(f"Failed to snapshot branch state: {e}")
 
             # Backup files
@@ -341,7 +341,7 @@ class RecoveryEngine:
                         backup_path = await self._backup_file(snapshot_id, file_path)
                         if backup_path:
                             snapshot.file_states[file_path] = backup_path
-                    except Exception as e:
+                    except (OSError, PermissionError, shutil.Error) as e:
                         logger.warning(f"Failed to backup file {file_path}: {e}")
 
             # Store snapshot
@@ -349,12 +349,12 @@ class RecoveryEngine:
 
             # Save snapshot to disk
             snapshot_file = self.snapshots_dir / f"{snapshot_id}.json"
-            with open(snapshot_file, "w") as f:
+            with snapshot_file.open("w") as f:
                 json.dump(snapshot.to_dict(), f, indent=2)
 
             self.recovery_metrics["total_operations"] += 1
 
-            logger.info(f"Created snapshot {snapshot_id} for {operation_type.value}: {description}")
+            logger.info("Created snapshot {snapshot_id} for {operation_type.value}: {description}")
 
             # Cleanup old snapshots
             await self._cleanup_old_snapshots()
@@ -362,7 +362,7 @@ class RecoveryEngine:
             return snapshot_id
 
         except Exception as e:
-            logger.error(f"Failed to create snapshot: {e}")
+            logger.exception(f"Failed to create snapshot: {e}")
             raise
 
     async def _backup_file(self, snapshot_id: str, file_path: str) -> str | None:
@@ -379,14 +379,14 @@ class RecoveryEngine:
             return str(backup_path)
 
         except Exception as e:
-            logger.error(f"Failed to backup file {file_path}: {e}")
+            logger.exception(f"Failed to backup file {file_path}: {e}")
             return None
 
     async def rollback_operation(
         self,
         snapshot_id: str,
-        agent_pool=None,
-        branch_manager=None,
+        agent_pool: Any = None,
+        branch_manager: Any = None,
         restore_files: bool = True,
     ) -> bool:
         """Rollback to a previous snapshot.
@@ -401,13 +401,13 @@ class RecoveryEngine:
             True if rollback successful, False otherwise
         """
         if snapshot_id not in self.snapshots:
-            logger.error(f"Snapshot {snapshot_id} not found")
+            logger.error("Snapshot {snapshot_id} not found")
             return False
 
         snapshot = self.snapshots[snapshot_id]
 
         try:
-            logger.info(f"Rolling back to snapshot {snapshot_id}: {snapshot.description}")
+            logger.info("Rolling back to snapshot {snapshot_id}: {snapshot.description}")
 
             # Restore agent states
             if agent_pool and snapshot.agent_states:
@@ -431,14 +431,14 @@ class RecoveryEngine:
 
             self.recovery_metrics["rollbacks_performed"] += 1
 
-            logger.info(f"Successfully rolled back to snapshot {snapshot_id}")
+            logger.info("Successfully rolled back to snapshot {snapshot_id}")
             return True
 
         except Exception as e:
-            logger.error(f"Failed to rollback to snapshot {snapshot_id}: {e}")
+            logger.exception(f"Failed to rollback to snapshot {snapshot_id}: {e}")
             return False
 
-    async def _restore_agent_states(self, agent_pool, agent_states: dict[str, dict[str, Any]]) -> None:
+    async def _restore_agent_states(self, agent_pool: Any, agent_states: dict[str, dict[str, Any]]) -> None:
         """Restore agent states from snapshot."""
         for agent_id, agent_data in agent_states.items():
             try:
@@ -454,7 +454,7 @@ class RecoveryEngine:
                         try:
                             agent.process.terminate()
                             await asyncio.wait_for(agent.process.wait(), timeout=5)
-                        except:
+                        except (TimeoutError, ProcessLookupError):
                             with contextlib.suppress(Exception):
                                 agent.process.kill()
                         agent.process = None
@@ -464,10 +464,10 @@ class RecoveryEngine:
                     agent.process = None  # Don't restore processes
                     agent_pool.agents[agent_id] = agent
 
-            except Exception as e:
+            except (KeyError, AttributeError, TypeError, ValueError) as e:
                 logger.warning(f"Failed to restore agent {agent_id}: {e}")
 
-    async def _restore_task_states(self, agent_pool, task_states: dict[str, dict[str, Any]]) -> None:
+    async def _restore_task_states(self, agent_pool: Any, task_states: dict[str, dict[str, Any]]) -> None:
         """Restore task states from snapshot."""
         # Clear current tasks and restore from snapshot
         agent_pool.tasks.clear()
@@ -485,17 +485,17 @@ class RecoveryEngine:
 
                 agent_pool.tasks[task_id] = task
 
-            except Exception as e:
+            except (KeyError, AttributeError, TypeError, ValueError) as e:
                 logger.warning(f"Failed to restore task {task_id}: {e}")
 
-    async def _restore_branch_state(self, branch_manager, branch_state: dict[str, Any]) -> None:
+    async def _restore_branch_state(self, branch_manager: Any, branch_state: dict[str, Any]) -> None:
         """Restore branch state from snapshot."""
         try:
             current_branch = branch_state.get("current_branch")
             if current_branch:
                 success = branch_manager.switch_branch(current_branch)
                 if not success:
-                    logger.warning(f"Failed to switch to branch {current_branch}")
+                    logger.warning("Failed to switch to branch {current_branch}")
 
             # Restore branch metadata
             branches_data = branch_state.get("branches", {})
@@ -505,13 +505,13 @@ class RecoveryEngine:
 
                     branch_info = BranchInfo.from_dict(branch_data)
                     branch_manager.branches[branch_name] = branch_info
-                except Exception as e:
+                except (KeyError, AttributeError, TypeError, ImportError) as e:
                     logger.warning(f"Failed to restore branch {branch_name}: {e}")
 
             # Save restored branch metadata
             branch_manager._save_branch_metadata()
 
-        except Exception as e:
+        except (AttributeError, KeyError, ImportError, OSError) as e:
             logger.warning(f"Failed to restore branch state: {e}")
 
     async def _restore_files(self, file_states: dict[str, str]) -> None:
@@ -520,10 +520,10 @@ class RecoveryEngine:
             try:
                 if Path(backup_path).exists():
                     shutil.copy2(backup_path, original_path)
-                    logger.debug(f"Restored file {original_path}")
+                    logger.debug("Restored file {original_path}")
                 else:
-                    logger.warning(f"Backup file {backup_path} not found")
-            except Exception as e:
+                    logger.warning("Backup file {backup_path} not found")
+            except (OSError, PermissionError, shutil.Error) as e:
                 logger.warning(f"Failed to restore file {original_path}: {e}")
 
     async def _execute_rollback_instruction(self, instruction: dict[str, Any]) -> None:
@@ -542,7 +542,7 @@ class RecoveryEngine:
                         timeout=30,
                     )
                     if result.returncode != 0:
-                        logger.warning(f"Rollback git command failed: {result.stderr}")
+                        logger.warning("Rollback git command failed: {result.stderr}")
 
             elif instruction_type == "file_operation":
                 operation = instruction.get("operation")
@@ -555,16 +555,16 @@ class RecoveryEngine:
 
             # Add more instruction types as needed
 
-        except Exception as e:
+        except (OSError, subprocess.CalledProcessError, KeyError, TypeError) as e:
             logger.warning(f"Failed to execute rollback instruction {instruction}: {e}")
 
     async def handle_operation_failure(
         self,
         operation_id: str,
         exception: Exception,
-        context: dict[str, Any] = None,
-        agent_pool=None,
-        branch_manager=None,
+        context: dict[str, Any] | None = None,
+        agent_pool: Any = None,
+        branch_manager: Any = None,
     ) -> bool:
         """Handle an operation failure with automatic recovery.
 
@@ -586,15 +586,15 @@ class RecoveryEngine:
         # Track failure count
         self.failure_counts[operation_key] = self.failure_counts.get(operation_key, 0) + 1
 
-        logger.error(f"Operation {operation_id} failed: {error_message}")
+        logger.error("Operation {operation_id} failed: {error_message}")
 
         # Find matching recovery strategy
         strategy = self._find_recovery_strategy(error_message)
         if not strategy:
-            logger.warning(f"No recovery strategy found for error: {error_message}")
+            logger.warning("No recovery strategy found for error: {error_message}")
             return False
 
-        logger.info(f"Applying recovery strategy for {operation_id}")
+        logger.info("Applying recovery strategy for {operation_id}")
 
         # Get snapshot for rollback
         snapshot_id = self.active_operations.get(operation_id)
@@ -620,11 +620,11 @@ class RecoveryEngine:
 
                 if success:
                     self.recovery_metrics["successful_recoveries"] += 1
-                    logger.info(f"Recovery action {action.value} succeeded for {operation_id}")
+                    logger.info("Recovery action {action.value} succeeded for {operation_id}")
                     return True
 
             # If all recovery actions failed
-            logger.error(f"All recovery actions failed for operation {operation_id}")
+            logger.error("All recovery actions failed for operation {operation_id}")
             self.recovery_metrics["failed_recoveries"] += 1
 
             # Check if we should escalate
@@ -634,7 +634,7 @@ class RecoveryEngine:
             return False
 
         except Exception as recovery_error:
-            logger.error(f"Recovery process failed for {operation_id}: {recovery_error}")
+            logger.exception(f"Recovery process failed for {operation_id}: {recovery_error}")
             self.recovery_metrics["failed_recoveries"] += 1
             return False
 
@@ -647,7 +647,7 @@ class RecoveryEngine:
             self.operation_history.append(
                 {
                     "operation_id": operation_id,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "error": error_message,
                     "recovery_attempted": True,
                     "context": context,
@@ -674,8 +674,8 @@ class RecoveryEngine:
         snapshot_id: str | None,
         exception: Exception,
         context: dict[str, Any],
-        agent_pool=None,
-        branch_manager=None,
+        agent_pool: Any = None,
+        branch_manager: Any = None,
     ) -> bool:
         """Execute a specific recovery action."""
         try:
@@ -683,18 +683,17 @@ class RecoveryEngine:
                 # Retry logic should be handled by the caller
                 return False
 
-            elif action == RecoveryAction.ROLLBACK:
+            if action == RecoveryAction.ROLLBACK:
                 if snapshot_id:
                     return await self.rollback_operation(
                         snapshot_id,
                         agent_pool,
                         branch_manager,
                     )
-                else:
-                    logger.warning("No snapshot available for rollback")
-                    return False
+                logger.warning("No snapshot available for rollback")
+                return False
 
-            elif action == RecoveryAction.RESET_AGENT:
+            if action == RecoveryAction.RESET_AGENT:
                 if agent_pool and context.get("agent_id"):
                     agent_id = context["agent_id"]
                     if agent_id in agent_pool.agents:
@@ -705,7 +704,7 @@ class RecoveryEngine:
                             try:
                                 agent.process.terminate()
                                 await asyncio.wait_for(agent.process.wait(), timeout=5)
-                            except:
+                            except (TimeoutError, ProcessLookupError):
                                 with contextlib.suppress(Exception):
                                     agent.process.kill()
                             agent.process = None
@@ -714,11 +713,11 @@ class RecoveryEngine:
                         agent.state = AgentState.IDLE
                         agent.current_task = None
 
-                        logger.info(f"Reset agent {agent_id}")
+                        logger.info("Reset agent {agent_id}")
                         return True
                 return False
 
-            elif action == RecoveryAction.RESTORE_STATE:
+            if action == RecoveryAction.RESTORE_STATE:
                 if snapshot_id:
                     return await self.rollback_operation(
                         snapshot_id,
@@ -728,19 +727,19 @@ class RecoveryEngine:
                     )
                 return False
 
-            elif action == RecoveryAction.SKIP:
+            if action == RecoveryAction.SKIP:
                 # Mark operation as skipped
                 logger.info("Skipping failed operation")
                 return True
 
-            elif action == RecoveryAction.ESCALATE:
+            if action == RecoveryAction.ESCALATE:
                 await self._escalate_failure(context.get("operation_id", "unknown"), exception, context)
                 return False
 
             return False
 
         except Exception as e:
-            logger.error(f"Failed to execute recovery action {action.value}: {e}")
+            logger.exception(f"Failed to execute recovery action {action.value}: {e}")
             return False
 
     async def _escalate_failure(
@@ -754,7 +753,7 @@ class RecoveryEngine:
             "operation_id": operation_id,
             "error": str(exception),
             "context": context,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "failure_count": self.failure_counts.get(context.get("operation_type", "unknown"), 0),
         }
 
@@ -764,9 +763,9 @@ class RecoveryEngine:
 
         if escalation_file.exists():
             try:
-                with open(escalation_file) as f:
+                with escalation_file.open() as f:
                     escalations = json.load(f)
-            except:
+            except (OSError, json.JSONDecodeError):
                 pass
 
         escalations.append(escalation_data)
@@ -774,15 +773,15 @@ class RecoveryEngine:
         # Keep only last 100 escalations
         escalations = escalations[-100:]
 
-        with open(escalation_file, "w") as f:
+        with escalation_file.open("w") as f:
             json.dump(escalations, f, indent=2)
 
-        logger.critical(f"Escalated failure for operation {operation_id}: {exception}")
+        logger.critical("Escalated failure for operation {operation_id}: {exception}")
 
     async def _cleanup_old_snapshots(self) -> None:
         """Clean up old snapshots to prevent disk space issues."""
         try:
-            current_time = datetime.now()
+            current_time = datetime.now(UTC)
             cutoff_time = current_time - timedelta(hours=self.auto_cleanup_hours)
 
             # Find snapshots to remove
@@ -808,10 +807,10 @@ class RecoveryEngine:
                 await self._remove_snapshot(snapshot_id)
 
             if to_remove:
-                logger.info(f"Cleaned up {len(to_remove)} old snapshots")
+                logger.info("Cleaned up {len(to_remove)} old snapshots")
 
         except Exception as e:
-            logger.error(f"Failed to cleanup old snapshots: {e}")
+            logger.exception(f"Failed to cleanup old snapshots: {e}")
 
     async def _remove_snapshot(self, snapshot_id: str) -> None:
         """Remove a snapshot and its associated backups."""
@@ -830,7 +829,7 @@ class RecoveryEngine:
             if backup_dir.exists():
                 shutil.rmtree(backup_dir)
 
-        except Exception as e:
+        except (OSError, PermissionError, shutil.Error) as e:
             logger.warning(f"Failed to remove snapshot {snapshot_id}: {e}")
 
     def start_operation(self, operation_id: str, snapshot_id: str) -> None:
@@ -860,7 +859,7 @@ class RecoveryEngine:
                 if file_path.is_file():
                     total_size += file_path.stat().st_size
             return total_size / (1024 * 1024)  # Convert to MB
-        except:
+        except (OSError, PermissionError):
             return 0.0
 
     def get_recent_operations(self, limit: int = 20) -> list[dict[str, Any]]:
@@ -876,9 +875,9 @@ class RecoveryEngine:
     async def manual_rollback(
         self,
         snapshot_id: str,
-        agent_pool=None,
-        branch_manager=None,
+        agent_pool: Any = None,
+        branch_manager: Any = None,
     ) -> bool:
         """Manually trigger a rollback to a specific snapshot."""
-        logger.info(f"Manual rollback requested to snapshot {snapshot_id}")
+        logger.info("Manual rollback requested to snapshot {snapshot_id}")
         return await self.rollback_operation(snapshot_id, agent_pool, branch_manager)

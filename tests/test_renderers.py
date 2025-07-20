@@ -47,13 +47,13 @@ from libs.dashboard.renderers.widget_models import (
 class TestRendererSystemIntegration:
     """Integration tests for the complete renderer system."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         clear_all_caches()
         RendererFactory.reset()
         self.test_data = self._create_comprehensive_test_data()
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Cleanup after each test."""
         clear_all_caches()
         RendererFactory.reset()
@@ -176,7 +176,7 @@ class TestRendererSystemIntegration:
             },
         }
 
-    def test_all_formats_render_all_widgets(self):
+    def test_all_formats_render_all_widgets(self) -> None:
         """Test that all formats can render all widget types."""
         widget_tests = [
             (WidgetType.SESSION_BROWSER, [self.test_data["session"]]),
@@ -213,7 +213,7 @@ class TestRendererSystemIntegration:
                 except Exception as e:
                     pytest.fail(f"Failed to render {widget_type.value} with {render_format.value}: {e}")
 
-    def test_cross_format_consistency(self):
+    def test_cross_format_consistency(self) -> None:
         """Test that different formats produce consistent data structures."""
         metric = self.test_data["metric"]
 
@@ -238,7 +238,7 @@ class TestRendererSystemIntegration:
         assert "92.5" in web_result or "92.50" in web_result
         assert tauri_result["data"]["value"] == 92.5
 
-    def test_data_transformation_pipeline(self):
+    def test_data_transformation_pipeline(self) -> None:
         """Test complete data transformation from models to rendered output."""
         # Start with raw data
         raw_health_data = {
@@ -264,7 +264,7 @@ class TestRendererSystemIntegration:
                 assert "75" in str(result)
                 assert "build" in str(result).lower()
 
-    def test_error_handling_scenarios(self):
+    def test_error_handling_scenarios(self) -> None:
         """Test error handling across different scenarios."""
         # Test with None data
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
@@ -301,7 +301,7 @@ class TestRendererSystemIntegration:
             result = render_widget(WidgetType.SESSION_BROWSER, [incomplete_session], render_format)
             assert result is not None
 
-    def test_edge_cases_and_boundaries(self):
+    def test_edge_cases_and_boundaries(self) -> None:
         """Test edge cases and boundary conditions."""
         # Empty collections
         empty_sessions = []
@@ -343,12 +343,12 @@ class TestRendererSystemIntegration:
                 assert result["data"]["value"] == 999999.99
                 assert result["data"]["trend"] == -50.0
 
-    def test_concurrent_rendering(self):
+    def test_concurrent_rendering(self) -> None:
         """Test concurrent rendering across multiple threads."""
         results = []
         errors = []
 
-        def render_worker(worker_id):
+        def render_worker(worker_id: int) -> None:
             try:
                 metric = MetricCardData(
                     title=f"Worker {worker_id}",
@@ -404,7 +404,7 @@ class TestRendererSystemIntegration:
 class TestRendererPerformance:
     """Performance and benchmark tests for renderer system."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for performance tests."""
         clear_all_caches()
         self.metric = MetricCardData(
@@ -413,11 +413,11 @@ class TestRendererPerformance:
             suffix="%",
         )
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Cleanup after performance tests."""
         clear_all_caches()
 
-    def test_single_widget_render_performance(self):
+    def test_single_widget_render_performance(self) -> None:
         """Test single widget rendering performance."""
 
         def render_single():
@@ -436,7 +436,7 @@ class TestRendererPerformance:
         # Performance assertions (50ms threshold)
         assert avg_time < 0.05, f"Average render time {avg_time:.4f}s exceeds 50ms threshold"
 
-    def test_multi_format_render_performance(self):
+    def test_multi_format_render_performance(self) -> None:
         """Test multi-format rendering performance."""
 
         def render_all():
@@ -455,7 +455,7 @@ class TestRendererPerformance:
         # Performance assertions (150ms threshold for 3 formats)
         assert avg_time < 0.15, f"Average multi-format render time {avg_time:.4f}s exceeds 150ms threshold"
 
-    def test_batch_rendering_performance(self):
+    def test_batch_rendering_performance(self) -> None:
         """Test batch rendering performance vs individual rendering."""
         metrics = [MetricCardData(title=f"Batch Test {i}", value=i * 10) for i in range(20)]
 
@@ -481,10 +481,9 @@ class TestRendererPerformance:
         assert len(individual_results) == len(batch_results)
 
         # Batch should be faster or comparable (overhead might make it slower for small sets)
-        print(f"Individual: {individual_time:.4f}s, Batch: {batch_time:.4f}s")
         assert batch_time < individual_time * 2  # Allow some overhead
 
-    def test_caching_performance_improvement(self):
+    def test_caching_performance_improvement(self) -> None:
         """Test that caching significantly improves performance."""
         cache = RenderCache(max_size=100)
 
@@ -521,13 +520,13 @@ class TestRendererPerformance:
 class TestRendererMemoryStability:
     """Memory usage and stability tests."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for memory tests."""
         clear_all_caches()
         gc.collect()
         self.initial_memory = self._get_memory_usage()
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Cleanup for memory tests."""
         clear_all_caches()
         gc.collect()
@@ -537,7 +536,7 @@ class TestRendererMemoryStability:
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
 
-    def test_memory_usage_large_dataset(self):
+    def test_memory_usage_large_dataset(self) -> None:
         """Test memory usage with large datasets."""
         initial_memory = self._get_memory_usage()
 
@@ -586,7 +585,7 @@ class TestRendererMemoryStability:
         # Most memory should be released (allow some overhead)
         assert memory_after_cleanup < memory_increase * 0.5, f"Memory not properly released: {memory_after_cleanup:.2f}MB remaining"
 
-    def test_cache_memory_limits(self):
+    def test_cache_memory_limits(self) -> None:
         """Test that cache respects memory limits."""
         # Create small cache
         cache = RenderCache(max_size=10, ttl=None)
@@ -604,7 +603,7 @@ class TestRendererMemoryStability:
         stats = cache.get_stats()
         assert stats.evictions > 0
 
-    def test_memory_leak_prevention(self):
+    def test_memory_leak_prevention(self) -> None:
         """Test for memory leaks in repeated rendering."""
         initial_memory = self._get_memory_usage()
 
@@ -645,7 +644,7 @@ class TestRendererMemoryStability:
 class TestRendererCompatibility:
     """Compatibility tests for different data formats and edge cases."""
 
-    def test_data_format_compatibility(self):
+    def test_data_format_compatibility(self) -> None:
         """Test compatibility with different data input formats."""
         # Test with dataclass instance
         metric_dataclass = MetricCardData(title="Dataclass Test", value=100)
@@ -676,7 +675,7 @@ class TestRendererCompatibility:
         assert result3["data"]["headers"] == ["String", "Number", "Boolean"]
         assert len(result3["data"]["rows"]) == 3
 
-    def test_unicode_and_special_characters(self):
+    def test_unicode_and_special_characters(self) -> None:
         """Test handling of unicode and special characters."""
         # Unicode characters
         unicode_metric = MetricCardData(
@@ -708,7 +707,7 @@ class TestRendererCompatibility:
         # Web format should escape dangerous characters
         assert "<script>" not in web_result or "&lt;script&gt;" in web_result
 
-    def test_timezone_and_datetime_handling(self):
+    def test_timezone_and_datetime_handling(self) -> None:
         """Test handling of different datetime formats and timezones."""
         # Different datetime objects
         now = datetime.now()
@@ -732,7 +731,7 @@ class TestRendererCompatibility:
                 # Should be ISO format string
                 assert isinstance(session_data["created_at"], str)
 
-    def test_empty_and_null_data_handling(self):
+    def test_empty_and_null_data_handling(self) -> None:
         """Test handling of empty and null data."""
         empty_data_tests = [
             # Empty strings

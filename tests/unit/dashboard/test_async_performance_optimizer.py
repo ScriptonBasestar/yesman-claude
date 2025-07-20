@@ -9,7 +9,7 @@ class TestAsyncPerformanceOptimizer:
     """Tests for async performance optimizer."""
 
     @pytest.mark.asyncio
-    async def test_async_performance_optimizer(self):
+    async def test_async_performance_optimizer(self) -> None:
         """Test 17: Async performance optimizer."""
         async_optimizer = AsyncPerformanceOptimizer(monitoring_interval=0.1)
 

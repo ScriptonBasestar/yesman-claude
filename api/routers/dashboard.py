@@ -3,7 +3,7 @@
 import logging
 import secrets
 from datetime import datetime
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.templating import Jinja2Templates
@@ -88,8 +88,8 @@ async def get_sessions():
 
         return web_sessions
     except Exception as e:
-        logger.error(f"Failed to get sessions: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get sessions: {str(e)}")
+        logger.exception(f"Failed to get sessions: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Failed to get sessions: {e!s}")
 
 
 @router.get("/api/dashboard/health")
@@ -169,8 +169,8 @@ async def get_project_health():
                 "last_updated": datetime.now().isoformat(),
             }
     except Exception as e:
-        logger.error(f"Failed to get health data: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get health data: {str(e)}")
+        logger.exception(f"Failed to get health data: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Failed to get health data: {e!s}")
 
 
 @router.get("/api/dashboard/activity")
@@ -255,19 +255,18 @@ async def get_activity_data():
                 "avg_activity": sum(a["activity_count"] for a in activities) / len(activities) if activities else 0,
             }
     except Exception as e:
-        logger.error(f"Failed to get activity data: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get activity data: {str(e)}")
+        logger.exception(f"Failed to get activity data: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Failed to get activity data: {e!s}")
 
 
 @router.get("/api/dashboard/heatmap/{session_name}")
-async def get_session_heatmap(session_name: str, days: int = Query(7, ge=1, le=30)):
+async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1, le=30)] = 7):
     """세션별 히트맵 데이터 반환."""
     try:
-        heatmap_data = heatmap_generator.generate_heatmap_data([session_name], days=days)
-        return heatmap_data
+        return heatmap_generator.generate_heatmap_data([session_name], days=days)
     except Exception as e:
-        logger.error(f"Failed to get heatmap data for {session_name}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {str(e)}")
+        logger.exception(f"Failed to get heatmap data for {session_name}: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {e!s}")
 
 
 @router.get("/api/dashboard/stats")
@@ -287,5 +286,5 @@ async def get_dashboard_stats():
             "last_update": datetime.now().isoformat(),
         }
     except Exception as e:
-        logger.error(f"Failed to get stats: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
+        logger.exception(f"Failed to get stats: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {e!s}")

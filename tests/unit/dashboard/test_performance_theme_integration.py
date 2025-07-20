@@ -1,4 +1,5 @@
 import pytest
+from typing import Any
 
 from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
 
@@ -24,7 +25,7 @@ class TestPerformanceThemeIntegration:
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 
-    def test_performance_theme_integration(self, performance_optimizer, theme_manager):
+    def test_performance_theme_integration(self, performance_optimizer: Any, theme_manager: Any) -> None:
         """Test 9: Performance optimization affects theme rendering."""
         # Set aggressive optimization
         performance_optimizer.set_optimization_level(OptimizationLevel.AGGRESSIVE)

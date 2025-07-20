@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quick ruff check to see current status"""
+"""Quick ruff check to see current status."""
 
 import os
 import subprocess

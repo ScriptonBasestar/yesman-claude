@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test script to verify lint fixes are working"""
+"""Test script to verify lint fixes are working."""
 
 import os
 import subprocess
@@ -7,7 +7,7 @@ import sys
 
 
 def run_command(cmd, description):
-    """Run a command and return results"""
+    """Run a command and return results."""
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -44,7 +44,7 @@ def run_command(cmd, description):
 
 
 def main():
-    """Main test function"""
+    """Main test function."""
     print("🔍 Testing lint fixes...")
 
     # Change to project directory

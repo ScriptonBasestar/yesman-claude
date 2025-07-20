@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class ActivityHeatmapGenerator:
-    def __init__(self, config: YesmanConfig):
+    def __init__(self, config: YesmanConfig) -> None:
         self.config = config
 
     def collect_session_activity(self, session_name: str, days: int = 7) -> dict[str, int]:
@@ -48,7 +48,7 @@ class ActivityHeatmapGenerator:
             logger.info(f"Collected activity for {session_name} in {(datetime.now() - start_time_collect).total_seconds():.4f} seconds.")
             return activity_counts
         except Exception as e:
-            logger.error(f"Error collecting session activity for {session_name}: {e}")
+            logger.exception(f"Error collecting session activity for {session_name}: {e}")
             return {}
 
     def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str, Any]:

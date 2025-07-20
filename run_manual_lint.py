@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run manual lint check and save results to file"""
+"""Run manual lint check and save results to file."""
 
 import os
 import subprocess

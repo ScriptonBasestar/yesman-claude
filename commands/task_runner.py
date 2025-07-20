@@ -35,12 +35,12 @@ class TaskRunnerNextCommand(BaseCommand):
             if success:
                 self.print_success("✅ Task processed successfully")
                 return {"success": True, "task_processed": True}
-            else:
-                self.print_info("ℹ️ No more tasks to process")
-                return {"success": True, "task_processed": False}
+            self.print_info("ℹ️ No more tasks to process")
+            return {"success": True, "task_processed": False}
 
         except Exception as e:
-            raise CommandError(f"Error processing task: {e}") from e
+            msg = f"Error processing task: {e}"
+            raise CommandError(msg) from e
 
 
 class TaskRunnerRunCommand(BaseCommand):
@@ -103,7 +103,8 @@ class TaskRunnerRunCommand(BaseCommand):
             self.print_warning("\n⏹️ Task runner interrupted by user")
             return {"success": True, "interrupted": True}
         except Exception as e:
-            raise CommandError(f"Error running task processor: {e}") from e
+            msg = f"Error running task processor: {e}"
+            raise CommandError(msg) from e
 
 
 class TaskRunnerStatusCommand(BaseCommand):
@@ -186,7 +187,8 @@ class TaskRunnerStatusCommand(BaseCommand):
             }
 
         except Exception as e:
-            raise CommandError(f"Error getting status: {e}") from e
+            msg = f"Error getting status: {e}"
+            raise CommandError(msg) from e
 
 
 class TaskRunnerAddCommand(BaseCommand):
@@ -195,7 +197,8 @@ class TaskRunnerAddCommand(BaseCommand):
     def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:
         """Execute the add command."""
         if not task or not file_path:
-            raise CommandError("Both --task and --file options are required")
+            msg = "Both --task and --file options are required"
+            raise CommandError(msg)
 
         try:
             runner = TaskRunner()
@@ -204,7 +207,8 @@ class TaskRunnerAddCommand(BaseCommand):
             resolved_path: Path = runner.todo_dir / file_path if not file_path.startswith("/") else Path(file_path)
 
             if not resolved_path.exists():
-                raise CommandError(f"File not found: {resolved_path}")
+                msg = f"File not found: {resolved_path}"
+                raise CommandError(msg)
 
             # Add task to file
             with open(resolved_path, "a", encoding="utf-8") as f:
@@ -216,18 +220,18 @@ class TaskRunnerAddCommand(BaseCommand):
             return {"success": True, "task": task, "file_path": str(file_path)}
 
         except Exception as e:
-            raise CommandError(f"Error adding task: {e}") from e
+            msg = f"Error adding task: {e}"
+            raise CommandError(msg) from e
 
 
 @click.group()
-def task_runner():
+def task_runner() -> None:
     """Automated TODO task processor.
 
     Processes TODO files in tasks/todo/ directory according to TASK_RUNNER.todo workflow.
     Automatically finds next incomplete task, analyzes dependencies, implements solutions,
     runs tests, commits changes, and moves completed files.
     """
-    pass
 
 
 @task_runner.command()
@@ -238,7 +242,7 @@ def task_runner():
     help="Specific directory to process (e.g. /tasks/todo/phase3)",
 )
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
-def next(directory, verbose):
+def next(directory: str | None, verbose: bool) -> None:
     """Process the next available task.
 
     Finds and processes the next uncompleted task in todo files.
@@ -272,7 +276,7 @@ def next(directory, verbose):
     is_flag=True,
     help="Show what would be processed without making changes",
 )
-def run(directory, max_iterations, dry_run):
+def run(directory: str | None, max_iterations: int, dry_run: bool) -> None:
     """Run task processor continuously.
 
     Processes all available tasks until none remain or max iterations reached.
@@ -291,7 +295,7 @@ def run(directory, max_iterations, dry_run):
 @task_runner.command()
 @click.option("--dir", "-d", "directory", help="Specific directory to show status for")
 @click.option("--detailed", is_flag=True, help="Show detailed task breakdown")
-def status(directory, detailed):
+def status(directory: str | None, detailed: bool) -> None:
     """Show current task status.
 
     Displays overview of todo files and task completion status.
@@ -309,7 +313,7 @@ def status(directory, detailed):
 @task_runner.command()
 @click.option("--task", "-t", help="Task content to add")
 @click.option("--file", "-f", "file_path", help="File to add task to")
-def add(task, file_path):
+def add(task: str | None, file_path: str | None) -> None:
     """Add a new task to a todo file.
 
     Adds a new uncompleted task to the specified todo file.

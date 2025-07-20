@@ -119,7 +119,7 @@ class WorkflowExecution:
 class ConditionEvaluator:
     """Safe condition evaluator that replaces eval() with regex-based parsing."""
 
-    def __init__(self, context_info: ContextInfo):
+    def __init__(self, context_info: ContextInfo) -> None:
         self.context = {
             "context_type": context_info.context_type.value,
             "confidence": context_info.confidence,
@@ -150,20 +150,20 @@ class ConditionEvaluator:
         condition_lower = condition.strip().lower()
         if condition_lower in ("true", "1"):
             return True
-        elif condition_lower in ("false", "0"):
+        if condition_lower in ("false", "0"):
             return False
 
         # Parse complex conditions
         match = self.condition_pattern.match(condition)
         if not match:
-            logger.warning(f"Invalid condition format: {condition}")
+            logger.warning("Invalid condition format: %s", condition)
             return False
 
         variable, operator, value_str = match.groups()
 
         # Check if variable exists in context
         if variable not in self.context:
-            logger.warning(f"Unknown variable in condition: {variable}")
+            logger.warning("Unknown variable in condition: %s", variable)
             return False
 
         # Get variable value
@@ -174,7 +174,7 @@ class ConditionEvaluator:
 
         # Apply operator
         if operator not in self.operators:
-            logger.warning(f"Unsupported operator: {operator}")
+            logger.warning("Unsupported operator: %s", operator)
             return False
 
         return self.operators[operator](var_value, expected_value)
@@ -190,7 +190,7 @@ class ConditionEvaluator:
         # Boolean
         if value_str.lower() == "true":
             return True
-        elif value_str.lower() == "false":
+        if value_str.lower() == "false":
             return False
 
         # None
@@ -201,8 +201,7 @@ class ConditionEvaluator:
         try:
             if "." in value_str:
                 return float(value_str)
-            else:
-                return int(value_str)
+            return int(value_str)
         except ValueError:
             pass
 
@@ -263,7 +262,7 @@ class ConditionEvaluator:
 class WorkflowEngine:
     """Engine for executing workflow automation chains."""
 
-    def __init__(self, project_path: Path | None = None):
+    def __init__(self, project_path: Path | None = None) -> None:
         self.project_path = project_path or Path.cwd()
         self.logger = logging.getLogger("yesman.workflow_engine")
 
@@ -277,7 +276,7 @@ class WorkflowEngine:
     def register_workflow(self, workflow: WorkflowChain) -> None:
         """Register a new workflow chain."""
         self.workflows[workflow.name] = workflow
-        self.logger.info(f"Registered workflow: {workflow.name}")
+        self.logger.info("Registered workflow: %s", workflow.name)
 
     def trigger_workflows(self, context_info: ContextInfo) -> list[str]:
         """Trigger workflows based on detected context."""
@@ -310,7 +309,7 @@ class WorkflowEngine:
         execution = self.active_executions[execution_id]
         execution.status = WorkflowStatus.RUNNING
 
-        self.logger.info(f"Starting workflow execution: {workflow.name}")
+        self.logger.info("Starting workflow execution: %s", workflow.name)
 
         try:
             for i, action in enumerate(workflow.actions):
@@ -318,7 +317,7 @@ class WorkflowEngine:
 
                 # Check condition if specified
                 if action.condition and not self._evaluate_condition(action.condition, execution.context_info):
-                    self.logger.debug(f"Skipping action {i} due to condition: {action.condition}")
+                    self.logger.debug("Skipping action %s due to condition: %s", i, action.condition)
                     continue
 
                 # Execute action with retries
@@ -336,7 +335,7 @@ class WorkflowEngine:
         except Exception as e:
             execution.status = WorkflowStatus.FAILED
             execution.error_message = str(e)
-            self.logger.error(f"Workflow {workflow.name} failed: {e}", exc_info=True)
+            self.logger.error("Workflow %s failed: %s", workflow.name, e, exc_info=True)
 
         finally:
             execution.end_time = time.time()
@@ -349,7 +348,7 @@ class WorkflowEngine:
             if len(self.execution_history) > 100:
                 self.execution_history = self.execution_history[-100:]
 
-            self.logger.info(f"Workflow {workflow.name} completed with status: {execution.status.value}")
+            self.logger.info("Workflow %s completed with status: %s", workflow.name, execution.status.value)
 
     async def _execute_action_with_retry(self, action: WorkflowAction, execution: WorkflowExecution) -> bool:
         """Execute an action with retry logic."""
@@ -378,43 +377,43 @@ class WorkflowEngine:
                 execution.results.append(error_info)
 
                 if attempt < action.retry_count:
-                    self.logger.warning(f"Action failed (attempt {attempt + 1}), retrying in {action.retry_delay}s: {e}")
+                    self.logger.warning("Action failed (attempt %s), retrying in %ss: %s", attempt + 1, action.retry_delay, e)
                     await asyncio.sleep(action.retry_delay)
                 else:
-                    self.logger.error(f"Action failed after {attempt + 1} attempts: {e}")
+                    self.logger.exception("Action failed after %s attempts: %s", attempt + 1, e)
 
         return False
 
     async def _execute_single_action(self, action: WorkflowAction, execution: WorkflowExecution) -> Any:
         """Execute a single action."""
-        self.logger.debug(f"Executing action: {action.action_type.value} - {action.command}")
+        self.logger.debug("Executing action: %s - %s", action.action_type.value, action.command)
 
         if action.action_type == ActionType.SHELL_COMMAND:
             return await self._execute_shell_command(action)
 
-        elif action.action_type == ActionType.TMUX_COMMAND:
+        if action.action_type == ActionType.TMUX_COMMAND:
             return await self._execute_tmux_command(action, execution)
 
-        elif action.action_type == ActionType.CLAUDE_INPUT:
+        if action.action_type == ActionType.CLAUDE_INPUT:
             return await self._execute_claude_input(action, execution)
 
-        elif action.action_type == ActionType.FILE_OPERATION:
+        if action.action_type == ActionType.FILE_OPERATION:
             return await self._execute_file_operation(action)
 
-        elif action.action_type == ActionType.NOTIFICATION:
+        if action.action_type == ActionType.NOTIFICATION:
             return await self._execute_notification(action)
 
-        elif action.action_type == ActionType.DELAY:
+        if action.action_type == ActionType.DELAY:
             return await self._execute_delay(action)
 
-        elif action.action_type == ActionType.CONDITION_CHECK:
+        if action.action_type == ActionType.CONDITION_CHECK:
             return await self._execute_condition_check(action, execution)
 
-        elif action.action_type == ActionType.PARALLEL_EXECUTION:
+        if action.action_type == ActionType.PARALLEL_EXECUTION:
             return await self._execute_parallel_actions(action, execution)
 
-        else:
-            raise ValueError(f"Unsupported action type: {action.action_type}")
+        msg = f"Unsupported action type: {action.action_type}"
+        raise ValueError(msg)
 
     async def _execute_shell_command(self, action: WorkflowAction) -> dict[str, Any]:
         """Execute shell command."""
@@ -439,14 +438,16 @@ class WorkflowEngine:
 
         except TimeoutError as e:
             process.kill()
-            raise TimeoutError(f"Command timed out after {action.timeout}s: {action.command}") from e
+            msg = f"Command timed out after {action.timeout}s: {action.command}"
+            raise TimeoutError(msg) from e
 
     async def _execute_tmux_command(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
         """Execute tmux command."""
         session_name = execution.context_info.session_name or action.parameters.get("session_name")
 
         if not session_name:
-            raise ValueError("No session name provided for tmux command")
+            msg = "No session name provided for tmux command"
+            raise ValueError(msg)
 
         tmux_cmd = f"tmux send-keys -t {session_name} '{action.command}' Enter"
 
@@ -484,17 +485,17 @@ class WorkflowEngine:
             content = file_path.read_text()
             return {"operation": "read", "content_length": len(content)}
 
-        elif operation == "write":
+        if operation == "write":
             content = action.parameters.get("content", "")
             file_path.write_text(content)
             return {"operation": "write", "bytes_written": len(content)}
 
-        elif operation == "delete":
+        if operation == "delete":
             file_path.unlink()
             return {"operation": "delete", "file_deleted": str(file_path)}
 
-        else:
-            raise ValueError(f"Unsupported file operation: {operation}")
+        msg = f"Unsupported file operation: {operation}"
+        raise ValueError(msg)
 
     async def _execute_notification(self, action: WorkflowAction) -> dict[str, Any]:
         """Send notification."""
@@ -509,7 +510,7 @@ class WorkflowEngine:
 
         except Exception:
             # Fallback to logging
-            self.logger.info(f"NOTIFICATION: {title} - {action.command}")
+            self.logger.info("NOTIFICATION: %s - %s", title, action.command)
 
         return {"notification_sent": action.command}
 
@@ -544,7 +545,7 @@ class WorkflowEngine:
             evaluator = ConditionEvaluator(context_info)
             return evaluator.evaluate(condition)
         except Exception as e:
-            self.logger.warning(f"Condition evaluation failed: {condition} - {e}")
+            self.logger.warning("Condition evaluation failed: %s - %s", condition, e)
             return False
 
     def _load_default_workflows(self) -> None:
@@ -653,7 +654,7 @@ class WorkflowEngine:
         with open(file_path) as f:
             config = json.load(f)
 
-        for workflow_name, workflow_data in config.get("workflows", {}).items():
+        for workflow_data in config.get("workflows", {}).values():
             # Convert back to objects
             actions = []
             for action_data in workflow_data["actions"]:

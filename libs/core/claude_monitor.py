@@ -5,10 +5,11 @@ import logging
 import threading
 import time
 
-from ..ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
-from ..automation.automation_manager import AutomationManager
-from ..dashboard.health_calculator import HealthCalculator
-from ..logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
+from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
+from libs.automation.automation_manager import AutomationManager
+from libs.dashboard.health_calculator import HealthCalculator
+from libs.logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
+
 from .content_collector import ClaudeContentCollector
 from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 
@@ -16,7 +17,7 @@ from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 class ClaudeMonitor:
     """Handles Claude monitoring and auto-response logic."""
 
-    def __init__(self, session_manager, process_controller, status_manager):
+    def __init__(self, session_manager: Any, process_controller: Any, status_manager: Any) -> None:
         self.session_manager = session_manager
         self.process_controller = process_controller
         self.status_manager = status_manager
@@ -67,23 +68,23 @@ class ClaudeMonitor:
 
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
 
-    def set_auto_next(self, enabled: bool):
+    def set_auto_next(self, enabled: bool) -> None:
         """Enable or disable auto-next responses."""
         self.is_auto_next_enabled = enabled
         status = "enabled" if enabled else "disabled"
         self.status_manager.update_status(f"[cyan]Auto next {status}[/]")
 
-    def set_mode_yn(self, mode: str, response: str):
+    def set_mode_yn(self, mode: str, response: str) -> None:
         """Set manual override for Y/N prompts."""
         self.yn_mode = mode
         self.yn_response = response
 
-    def set_mode_12(self, mode: str, response: str):
+    def set_mode_12(self, mode: str, response: str) -> None:
         """Set manual override for 1/2 prompts."""
         self.mode12 = mode
         self.mode12_response = response
 
-    def set_mode_123(self, mode: str, response: str):
+    def set_mode_123(self, mode: str, response: str) -> None:
         """Set manual override for 1/2/3 prompts."""
         self.mode123 = mode
         self.mode123_response = response
@@ -111,7 +112,7 @@ class ClaudeMonitor:
         except Exception as e:
             self.is_running = False
             self.status_manager.update_status(f"[red]Failed to start claude monitor: {e}[/]")
-            self.logger.error(f"Failed to start claude monitor: {e}", exc_info=True)
+            self.logger.error("Failed to start claude monitor: {e}", exc_info=True)
             return False
 
     def stop_monitoring(self) -> bool:
@@ -133,27 +134,27 @@ class ClaudeMonitor:
         self.status_manager.update_status(f"[red]Stopped claude monitor for {self.session_name}[/]")
         return True
 
-    def _run_monitor_loop(self):
+    def _run_monitor_loop(self) -> None:
         """Run the monitor loop in its own thread with event loop."""
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
 
         try:
             self._loop.run_until_complete(self._monitor_loop())
-        except Exception as e:
-            self.logger.error(f"Monitor loop error: {e}", exc_info=True)
+        except Exception:
+            self.logger.error("Monitor loop error: {e}", exc_info=True)
         finally:
             self._loop.close()
             self.is_running = False
 
-    async def _monitor_loop(self):
+    async def _monitor_loop(self) -> None:
         """Main monitoring loop that runs in background."""
         if not self.session_manager.get_claude_pane():
-            self.logger.error(f"Cannot start monitoring: no Claude pane for {self.session_name}")
+            self.logger.error("Cannot start monitoring: no Claude pane for {self.session_name}")
             self.is_running = False
             return
 
-        self.logger.info(f"Starting monitoring loop for {self.session_name}")
+        self.logger.info("Starting monitoring loop for {self.session_name}")
         last_content = ""
 
         try:
@@ -169,9 +170,8 @@ class ClaudeMonitor:
                             self.status_manager.update_activity("🔄 Auto-restarting Claude...")
                             self.process_controller.restart_claude_pane()
                             continue
-                        else:
-                            self.status_manager.update_status("[yellow]Claude not running. Auto-restart disabled.[/]")
-                            continue
+                        self.status_manager.update_status("[yellow]Claude not running. Auto-restart disabled.[/]")
+                        continue
 
                     # Check for prompts and auto-respond if enabled
                     prompt_info = self._check_for_prompt(content)
@@ -231,7 +231,7 @@ class ClaudeMonitor:
 
                         # If auto-response didn't handle it, show waiting status
                         self.status_manager.update_activity(f"⏳ Waiting for input: {prompt_info.type.value}")
-                        self.logger.debug(f"Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
+                        self.logger.debug("Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
                     elif self.waiting_for_input:
                         self.status_manager.update_activity("⏳ Waiting for user input...")
                     else:
@@ -245,7 +245,7 @@ class ClaudeMonitor:
                     if content != last_content and len(content.strip()) > 0:
                         automation_contexts = self.automation_manager.analyze_content_for_context(content, self.session_name)
                         for auto_context in automation_contexts:
-                            self.logger.info(f"Automation context detected: {auto_context.context_type.value} (confidence: {auto_context.confidence:.2f})")
+                            self.logger.info("Automation context detected: {auto_context.context_type.value} (confidence: {auto_context.confidence:.2f})")
 
                     # Check for Claude idle automation opportunities
                     if hasattr(self.status_manager, "last_activity_time"):
@@ -254,7 +254,7 @@ class ClaudeMonitor:
                             idle_threshold=60,
                         )
                         if idle_context:
-                            self.logger.debug(f"Claude idle context: {idle_context.confidence:.2f}")
+                            self.logger.debug("Claude idle context: {idle_context.confidence:.2f}")
 
                     # Collect content for pattern analysis
                     if content != last_content and len(content.strip()) > 0:
@@ -269,22 +269,22 @@ class ClaudeMonitor:
                                     "confidence": prompt_info.confidence,
                                 }
                             self.content_collector.collect_interaction(content, prompt_dict, None)
-                        except Exception as e:
-                            self.logger.error(f"Failed to collect content: {e}")
+                        except Exception:
+                            self.logger.exception("Failed to collect content: {e}")
 
                     # Update activity if content changed
                     if content != last_content:
                         self.status_manager.update_activity("📝 Content updated")
                         last_content = content
 
-                except Exception as e:
-                    self.logger.error(f"Error in monitoring loop: {e}")
+                except Exception:
+                    self.logger.exception("Error in monitoring loop: {e}")
                     await asyncio.sleep(5)  # Wait longer on errors
 
         except asyncio.CancelledError:
             self.logger.info("Monitoring loop cancelled")
-        except Exception as e:
-            self.logger.error(f"Monitoring loop error: {e}")
+        except Exception:
+            self.logger.exception("Monitoring loop error: {e}")
         finally:
             self.is_running = False
             self.status_manager.update_status("[red]Claude monitor stopped[/]")
@@ -296,7 +296,7 @@ class ClaudeMonitor:
         if prompt_info:
             self.current_prompt = prompt_info
             self.waiting_for_input = True
-            self.logger.info(f"Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
+            self.logger.info("Prompt detected: {prompt_info.type.value} - {prompt_info.question}")
         else:
             # Check if we're still waiting for input based on content patterns
             self.waiting_for_input = self.prompt_detector.is_waiting_for_input(content)
@@ -314,20 +314,20 @@ class ClaudeMonitor:
             self.logger.debug("Auto-response disabled, skipping")
             return False
 
-        self.logger.info(f"Attempting auto-response for prompt type: {prompt_info.type.value}")
+        self.logger.info("Attempting auto-response for prompt type: {prompt_info.type.value}")
 
         try:
             if prompt_info.type == PromptType.NUMBERED_SELECTION:
                 return self._handle_numbered_selection(prompt_info)
-            elif prompt_info.type == PromptType.BINARY_CHOICE:
+            if prompt_info.type == PromptType.BINARY_CHOICE:
                 return self._handle_binary_choice(prompt_info)
-            elif prompt_info.type == PromptType.CONFIRMATION:
+            if prompt_info.type == PromptType.CONFIRMATION:
                 return self._handle_binary_selection(prompt_info)
-            elif prompt_info.type == PromptType.LOGIN_REDIRECT:
+            if prompt_info.type == PromptType.LOGIN_REDIRECT:
                 return self._handle_login_redirect(prompt_info)
 
-        except Exception as e:
-            self.logger.error(f"Error in auto_respond_to_selection: {e}")
+        except Exception:
+            self.logger.exception("Error in auto_respond_to_selection: {e}")
 
         return False
 
@@ -346,7 +346,7 @@ class ClaudeMonitor:
 
         self.process_controller.send_input(response)
         self.status_manager.record_response(prompt_info.type.value, response, prompt_info.question)
-        self.logger.info(f"Auto-responding to numbered selection with: {response}")
+        self.logger.info("Auto-responding to numbered selection with: {response}")
         return True
 
     def _handle_binary_choice(self, prompt_info: PromptInfo) -> bool:
@@ -360,7 +360,7 @@ class ClaudeMonitor:
 
         self.process_controller.send_input(response)
         self.status_manager.record_response(prompt_info.type.value, response, prompt_info.question)
-        self.logger.info(f"Auto-responding to binary choice with: {response}")
+        self.logger.info("Auto-responding to binary choice with: {response}")
         return True
 
     def _handle_binary_selection(self, prompt_info: PromptInfo) -> bool:
@@ -374,7 +374,7 @@ class ClaudeMonitor:
 
         self.process_controller.send_input(response)
         self.status_manager.record_response(prompt_info.type.value, response, prompt_info.question)
-        self.logger.info(f"Auto-responding to binary selection with: {response}")
+        self.logger.info("Auto-responding to binary selection with: {response}")
         return True
 
     def _handle_login_redirect(self, prompt_info: PromptInfo) -> bool:
@@ -414,30 +414,27 @@ class ClaudeMonitor:
                 opts_count = prompt_info.metadata.get("option_count", len(prompt_info.options))
                 if opts_count == 2 and self.mode12 == "Manual":
                     return self.mode12_response
-                elif opts_count >= 3 and self.mode123 == "Manual":
+                if opts_count >= 3 and self.mode123 == "Manual":
                     return self.mode123_response
-                else:
-                    return getattr(prompt_info, "recommended_response", None) or "1"
+                return getattr(prompt_info, "recommended_response", None) or "1"
 
-            elif prompt_info.type == PromptType.BINARY_CHOICE:
+            if prompt_info.type == PromptType.BINARY_CHOICE:
                 if self.yn_mode == "Manual":
                     return self.yn_response.lower() if isinstance(self.yn_response, str) else str(self.yn_response)
-                else:
-                    return getattr(prompt_info, "recommended_response", None) or "y"
+                return getattr(prompt_info, "recommended_response", None) or "y"
 
-            elif prompt_info.type == PromptType.CONFIRMATION:
+            if prompt_info.type == PromptType.CONFIRMATION:
                 if self.mode12 == "Manual":
                     return self.mode12_response
-                else:
-                    return getattr(prompt_info, "recommended_response", None) or "1"
+                return getattr(prompt_info, "recommended_response", None) or "1"
 
-            elif prompt_info.type == PromptType.LOGIN_REDIRECT:
+            if prompt_info.type == PromptType.LOGIN_REDIRECT:
                 question = prompt_info.question.lower()
                 if "continue" in question or "press enter" in question:
                     return ""  # Just press Enter
 
-        except Exception as e:
-            self.logger.error(f"Error getting legacy response: {e}")
+        except Exception:
+            self.logger.exception("Error getting legacy response: {e}")
 
         return "1"  # Safe fallback
 
@@ -446,15 +443,15 @@ class ClaudeMonitor:
         """Get statistics from the adaptive response system."""
         return self.adaptive_response.get_learning_statistics()
 
-    def set_adaptive_confidence_threshold(self, threshold: float):
+    def set_adaptive_confidence_threshold(self, threshold: float) -> None:
         """Adjust the confidence threshold for adaptive responses."""
         self.adaptive_response.adjust_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True):
+    def enable_adaptive_response(self, enabled: bool = True) -> None:
         """Enable or disable adaptive response functionality."""
         self.adaptive_response.enable_auto_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True):
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:
         """Enable or disable adaptive learning functionality."""
         self.adaptive_response.enable_learning(enabled)
 
@@ -464,7 +461,7 @@ class ClaudeMonitor:
 
         return self.adaptive_response.export_learning_data(Path(output_path))
 
-    def learn_from_user_input(self, prompt_text: str, user_response: str, context: str = ""):
+    def learn_from_user_input(self, prompt_text: str, user_response: str, context: str = "") -> None:
         """Learn from manual user input for future improvements."""
         self.adaptive_response.learn_from_manual_response(
             prompt_text,
@@ -486,13 +483,13 @@ class ClaudeMonitor:
         """Get automation system status."""
         return self.automation_manager.get_automation_status()
 
-    def register_automation_workflow(self, workflow):
+    def register_automation_workflow(self, workflow: Any) -> None:
         """Register a custom automation workflow."""
         self.automation_manager.register_custom_workflow(workflow)
 
     async def test_automation(self, context_type_name: str) -> dict:
         """Test automation with simulated context."""
-        from ..automation.context_detector import ContextType
+        from libs.automation.context_detector import ContextType
 
         try:
             context_type = ContextType(context_type_name)
@@ -531,11 +528,11 @@ class ClaudeMonitor:
                 "project_path": str(self.health_calculator.project_path),
             }
         except Exception as e:
-            self.logger.error(f"Error getting health summary: {e}")
+            self.logger.exception("Error getting health summary: {e}")
             return {"error": str(e)}
 
     # Asynchronous logging methods
-    async def _start_async_logging(self):
+    async def _start_async_logging(self) -> None:
         """Start the async logging system."""
         if self.async_logger:
             return
@@ -555,14 +552,14 @@ class ClaudeMonitor:
         await self.async_logger.start()
         self.logger.info("Async logging system started")
 
-    async def _stop_async_logging(self):
+    async def _stop_async_logging(self) -> None:
         """Stop the async logging system."""
         if self.async_logger:
             await self.async_logger.stop()
             self.async_logger = None
             self.logger.info("Async logging system stopped")
 
-    def _async_log(self, level: LogLevel, message: str, **kwargs):
+    def _async_log(self, level: LogLevel, message: str, **kwargs) -> None:
         """Log message to async logger (safe for sync contexts)."""
         if self.async_logger:
             self.async_logger.log(level, message, **kwargs)
@@ -582,8 +579,8 @@ class ClaudeMonitor:
                     session=self.session_name,
                 )
             return result
-        except Exception as e:
-            self.logger.error(f"Failed to start async monitoring: {e}")
+        except Exception:
+            self.logger.exception("Failed to start async monitoring: {e}")
             return False
 
     async def stop_async_monitoring(self) -> bool:
@@ -592,18 +589,17 @@ class ClaudeMonitor:
             result = self.stop_monitoring()
             await self._stop_async_logging()
             return result
-        except Exception as e:
-            self.logger.error(f"Failed to stop async monitoring: {e}")
+        except Exception:
+            self.logger.exception("Failed to stop async monitoring: {e}")
             return False
 
     def get_async_logging_stats(self) -> dict:
         """Get async logging statistics."""
         if self.async_logger:
             return self.async_logger.get_statistics()
-        else:
-            return {"error": "Async logging not enabled"}
+        return {"error": "Async logging not enabled"}
 
-    async def flush_async_logs(self):
+    async def flush_async_logs(self) -> None:
         """Force flush all pending async logs."""
         if self.async_logger:
             await self.async_logger.flush()

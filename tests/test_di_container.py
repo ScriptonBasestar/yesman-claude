@@ -11,11 +11,11 @@ from libs.yesman_config import YesmanConfig
 class TestDIContainer:
     """Test cases for DIContainer."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test environment before each test."""
         self.container = DIContainer()
 
-    def test_register_and_resolve_singleton(self):
+    def test_register_and_resolve_singleton(self) -> None:
         """Test singleton registration and resolution."""
         config = YesmanConfig()
         self.container.register_singleton(YesmanConfig, config)
@@ -27,7 +27,7 @@ class TestDIContainer:
         resolved2 = self.container.resolve(YesmanConfig)
         assert resolved2 is config
 
-    def test_register_and_resolve_factory(self):
+    def test_register_and_resolve_factory(self) -> None:
         """Test factory registration and resolution."""
         call_count = 0
 
@@ -48,7 +48,7 @@ class TestDIContainer:
         assert call_count == 1  # Should not call factory again
         assert resolved2 is resolved1
 
-    def test_register_and_resolve_transient(self):
+    def test_register_and_resolve_transient(self) -> None:
         """Test transient service registration and resolution."""
         call_count = 0
 
@@ -68,12 +68,12 @@ class TestDIContainer:
         assert call_count == 2  # Should call factory again
         assert resolved2 is not resolved1  # Should be different instances
 
-    def test_service_not_registered(self):
+    def test_service_not_registered(self) -> None:
         """Test error when resolving unregistered service."""
         with pytest.raises(ValueError, match="Service YesmanConfig is not registered"):
             self.container.resolve(YesmanConfig)
 
-    def test_circular_dependency_detection(self):
+    def test_circular_dependency_detection(self) -> None:
         """Test circular dependency detection."""
 
         def factory_a():
@@ -88,14 +88,14 @@ class TestDIContainer:
         with pytest.raises(ValueError, match="Circular dependency detected"):
             self.container.resolve(YesmanConfig)
 
-    def test_is_registered(self):
+    def test_is_registered(self) -> None:
         """Test is_registered method."""
         assert not self.container.is_registered(YesmanConfig)
 
         self.container.register_singleton(YesmanConfig, YesmanConfig())
         assert self.container.is_registered(YesmanConfig)
 
-    def test_clear_container(self):
+    def test_clear_container(self) -> None:
         """Test clearing the container."""
         config = YesmanConfig()
         self.container.register_singleton(YesmanConfig, config)
@@ -104,7 +104,7 @@ class TestDIContainer:
         self.container.clear()
         assert not self.container.is_registered(YesmanConfig)
 
-    def test_get_registered_services(self):
+    def test_get_registered_services(self) -> None:
         """Test getting information about registered services."""
         config = YesmanConfig()
         self.container.register_singleton(YesmanConfig, config)
@@ -120,14 +120,14 @@ class TestDIContainer:
 class TestServicesModule:
     """Test cases for the services module."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test environment before each test."""
         # Clear container before each test
         from libs.core.container import container
 
         container.clear()
 
-    def test_register_test_services(self):
+    def test_register_test_services(self) -> None:
         """Test registering mock services for testing."""
         mock_config = YesmanConfig()
         register_test_services(config=mock_config)
@@ -135,7 +135,7 @@ class TestServicesModule:
         resolved_config = get_config()
         assert resolved_config is mock_config
 
-    def test_get_convenience_functions(self):
+    def test_get_convenience_functions(self) -> None:
         """Test convenience functions for getting services."""
         register_test_services()
 
@@ -145,7 +145,7 @@ class TestServicesModule:
         tmux_manager = get_tmux_manager()
         assert isinstance(tmux_manager, TmuxManager)
 
-    def test_auto_initialization(self):
+    def test_auto_initialization(self) -> None:
         """Test that services are auto-initialized when module is imported."""
         # Since we cleared the container in setup_method, we need to trigger initialization
         from libs.core.services import initialize_services

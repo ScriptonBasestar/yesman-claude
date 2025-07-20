@@ -13,7 +13,7 @@ from rich.text import Text
 class SessionProgressWidget:
     """Widget for displaying session progress overview."""
 
-    def __init__(self, console: Console | None = None):
+    def __init__(self, console: Console | None = None) -> None:
         self.console = console or Console()
 
     def render_progress_overview(self, progress_data: dict[str, Any]) -> Panel:

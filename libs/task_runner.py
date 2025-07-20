@@ -24,14 +24,14 @@ class TodoTask:
         completed: bool = False,
         skipped: bool = False,
         line_num: int = 0,
-    ):
+    ) -> None:
         self.content = content.strip()
         self.completed = completed
         self.skipped = skipped  # [>] marker for skipped tasks
         self.line_num = line_num
         self.original_line = content
 
-    def __str__(self):
+    def __str__(self) -> str:
         marker = "[x]" if self.completed else "[>]" if self.skipped else "[ ]"
         return f"{marker} {self.content}"
 
@@ -39,13 +39,13 @@ class TodoTask:
 class TodoFile:
     """Represents a todo file with multiple tasks."""
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str) -> None:
         self.file_path = Path(file_path)
         self.tasks: list[TodoTask] = []
         self.content_lines: list[str] = []
         self._load_file()
 
-    def _load_file(self):
+    def _load_file(self) -> None:
         """Load and parse the todo file."""
         with open(self.file_path, encoding="utf-8") as f:
             self.content_lines = f.readlines()
@@ -78,12 +78,12 @@ class TodoFile:
                 return task
         return None
 
-    def mark_task_completed(self, task: TodoTask):
+    def mark_task_completed(self, task: TodoTask) -> None:
         """Mark a task as completed and update the file."""
         task.completed = True
         self._update_file()
 
-    def mark_task_skipped(self, task: TodoTask, reason: str):
+    def mark_task_skipped(self, task: TodoTask, reason: str) -> None:
         """Mark a task as skipped with reason."""
         task.skipped = True
         # Add reason at the end of the file
@@ -91,7 +91,7 @@ class TodoFile:
         self.content_lines.append(f"**Reason**: {reason}\n")
         self._update_file()
 
-    def add_subtasks(self, parent_task: TodoTask, subtasks: list[str]):
+    def add_subtasks(self, parent_task: TodoTask, subtasks: list[str]) -> None:
         """Add subtasks before the parent task."""
         parent_line = parent_task.line_num
         new_lines = []
@@ -108,7 +108,7 @@ class TodoFile:
         self._update_file()
         self._load_file()  # Reload to get updated line numbers
 
-    def _update_file(self):
+    def _update_file(self) -> None:
         """Update the file with current task states."""
         updated_lines = []
         task_index = 0
@@ -135,7 +135,7 @@ class TodoFile:
 class TaskRunner:
     """Main task runner that processes todo files automatically."""
 
-    def __init__(self, todo_dir: str = "tasks/todo"):
+    def __init__(self, todo_dir: str = "tasks/todo") -> None:
         # Use relative paths from current working directory
         self.todo_dir = Path(todo_dir).resolve()
         self.done_dir = self.todo_dir.parent / "done"
@@ -177,7 +177,7 @@ class TaskRunner:
 
         return None
 
-    def move_completed_file(self, todo_file: TodoFile):
+    def move_completed_file(self, todo_file: TodoFile) -> bool:
         """Move completed file to done directory."""
         if not todo_file.is_all_completed():
             return False
@@ -191,10 +191,9 @@ class TaskRunner:
         done_path = self.done_dir / new_name
         todo_file.file_path.rename(done_path)
 
-        print(f"✅ Moved completed file: {new_name}")
         return True
 
-    def move_failed_file(self, todo_file: TodoFile, reason: str):
+    def move_failed_file(self, todo_file: TodoFile, reason: str) -> bool:
         """Move failed file to alert directory."""
         today = datetime.now().strftime("%Y%m%d")
         original_name = todo_file.file_path.stem
@@ -210,7 +209,6 @@ class TaskRunner:
         alert_path = self.alert_dir / new_name
         todo_file.file_path.rename(alert_path)
 
-        print(f"⚠️ Moved failed file to alert: {new_name}")
         return True
 
     def analyze_task_dependencies(self, task: TodoTask) -> list[str]:
@@ -243,7 +241,7 @@ class TaskRunner:
 
         return []
 
-    def commit_changes(self, task: TodoTask, file_changes: list[str]):
+    def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:
         """Commit changes with appropriate message."""
         try:
             # Stage changes
@@ -263,11 +261,9 @@ class TaskRunner:
                 cwd=self.todo_dir.parent,
             )
 
-            print(f"✅ Committed: {commit_msg}")
             return True
 
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Commit failed: {e}")
+        except subprocess.CalledProcessError:
             return False
 
     def run_tests(self) -> bool:
@@ -282,39 +278,28 @@ class TaskRunner:
                 cwd=self.todo_dir.parent,
             )
 
-            if result.returncode == 0:
-                print("✅ Tests passed")
-                return True
-            else:
-                print(f"❌ Tests failed:\n{result.stdout}\n{result.stderr}")
-                return False
+            return result.returncode == 0
 
-        except Exception as e:
-            print(f"⚠️ Could not run tests: {e}")
+        except Exception:
             return True  # Don't fail if tests can't run
 
     def process_next_task(self, specific_dir: str | None = None) -> bool:
         """Process the next available task."""
         result = self.get_next_task(specific_dir)
         if not result:
-            print("✅ No more tasks to process!")
             return False
 
         todo_file, task = result
 
-        print(f"\n🔄 Processing: {task.content}")
-        print(f"📁 File: {todo_file.file_path.relative_to(self.todo_dir.parent)}")
 
         # Check if task needs to be broken down
         subtasks = self.analyze_task_dependencies(task)
         if subtasks:
-            print(f"🔧 Breaking down complex task into {len(subtasks)} subtasks...")
             todo_file.add_subtasks(task, subtasks)
             return True
 
         # At this point, we would implement the actual task
         # For now, we'll mark it as requiring manual implementation
-        print("⚠️ Task requires manual implementation")
         todo_file.mark_task_skipped(
             task,
             "Requires manual implementation - automated execution not yet supported",
@@ -326,7 +311,7 @@ class TaskRunner:
 
         return True
 
-    def run_continuously(self, specific_dir: str | None = None, max_iterations: int = 100):
+    def run_continuously(self, specific_dir: str | None = None, max_iterations: int = 100) -> None:
         """Run task processor continuously until no more tasks."""
         iterations = 0
 
@@ -336,13 +321,11 @@ class TaskRunner:
             iterations += 1
 
             if iterations >= max_iterations:
-                print(f"⚠️ Reached maximum iterations ({max_iterations})")
                 break
 
-        print(f"\n🎉 Task runner completed after {iterations} iterations")
 
 
-def main():
+def main() -> None:
     """CLI entry point for task runner."""
     import argparse
 

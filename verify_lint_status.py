@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify lint status based on current codebase analysis"""
+"""Verify lint status based on current codebase analysis."""
 
 import subprocess
 import sys
@@ -7,12 +7,12 @@ from pathlib import Path
 
 
 def check_file_exists(file_path):
-    """Check if a file exists"""
+    """Check if a file exists."""
     return Path(file_path).exists()
 
 
 def analyze_current_status():
-    """Analyze the current lint status based on available information"""
+    """Analyze the current lint status based on available information."""
     print("=== LINT STATUS VERIFICATION ===")
     print()
 

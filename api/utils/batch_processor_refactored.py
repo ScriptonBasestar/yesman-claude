@@ -47,7 +47,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         handler: Callable,
         config: BatchConfig,
         parent_stats: dict[str, Any],
-    ):
+    ) -> None:
         """Initialize channel-specific batch processor."""
         super().__init__(
             batch_size=config.max_batch_size,
@@ -151,7 +151,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
                 combined_data.update(msg["data"])
 
         # Create combined message
-        combined = {
+        return {
             **latest_message,
             "data": combined_data,
             "batch_info": {
@@ -161,7 +161,6 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
             },
         }
 
-        return combined
 
     def _combine_log_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple log messages into a batched log message."""
@@ -174,7 +173,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
                 log_entries.append(msg["data"])
 
         # Create batched log message
-        combined = {
+        return {
             "type": "log_batch",
             "timestamp": datetime.now().isoformat(),
             "data": {
@@ -184,13 +183,12 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
             },
         }
 
-        return combined
 
 
 class WebSocketBatchProcessor:
     """Manages batch processors for multiple WebSocket channels."""
 
-    def __init__(self, config: BatchConfig | None = None):
+    def __init__(self, config: BatchConfig | None = None) -> None:
         """Initialize the WebSocket batch processor."""
         self.config = config or BatchConfig()
 
@@ -213,12 +211,12 @@ class WebSocketBatchProcessor:
 
         self.logger = logging.getLogger("yesman.websocket_batch")
 
-    def register_message_handler(self, channel: str, handler: Callable):
+    def register_message_handler(self, channel: str, handler: Callable) -> None:
         """Register a message handler for a specific channel."""
         self._message_handlers[channel] = handler
         self.logger.info(f"Registered message handler for channel: {channel}")
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the batch processing system."""
         if self._running:
             self.logger.warning("Batch processor already running")
@@ -232,7 +230,7 @@ class WebSocketBatchProcessor:
 
         self.logger.info("WebSocket batch processor started")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the batch processing system."""
         if not self._running:
             return
@@ -245,7 +243,7 @@ class WebSocketBatchProcessor:
 
         self.logger.info("WebSocket batch processor stopped")
 
-    def queue_message(self, channel: str, message: dict[str, Any]):
+    def queue_message(self, channel: str, message: dict[str, Any]) -> None:
         """Queue a message for batch processing."""
         # Create channel processor if it doesn't exist
         if channel not in self._channel_processors:
@@ -271,7 +269,7 @@ class WebSocketBatchProcessor:
         # Add message to channel processor
         self._channel_processors[channel].add(message)
 
-    async def send_immediate(self, channel: str, message: dict[str, Any]):
+    async def send_immediate(self, channel: str, message: dict[str, Any]) -> None:
         """Send a message immediately without batching (for urgent messages)."""
         handler = self._message_handlers.get(channel)
         if handler:
@@ -279,7 +277,7 @@ class WebSocketBatchProcessor:
                 await handler([message])
                 self.stats["messages_processed"] += 1
             except Exception as e:
-                self.logger.error(f"Error sending immediate message to {channel}: {e}")
+                self.logger.exception(f"Error sending immediate message to {channel}: {e}")
         else:
             self.logger.warning(f"No handler registered for channel: {channel}")
 
@@ -313,7 +311,7 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def update_config(self, **kwargs):
+    def update_config(self, **kwargs) -> None:
         """Update batch processing configuration."""
         for key, value in kwargs.items():
             if hasattr(self.config, key):
@@ -327,7 +325,7 @@ class WebSocketBatchProcessor:
             else:
                 self.logger.warning(f"Unknown config key: {key}")
 
-    def clear_channel(self, channel: str):
+    def clear_channel(self, channel: str) -> None:
         """Clear all pending messages for a specific channel."""
         if channel in self._channel_processors:
             processor = self._channel_processors[channel]

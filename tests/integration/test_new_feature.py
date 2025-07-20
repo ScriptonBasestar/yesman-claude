@@ -1,7 +1,7 @@
 """Integration test for new feature development workflow."""
 
 
-def test_new_feature_creation_workflow_should_pass_quality_checks():
+def test_new_feature_creation_workflow_should_pass_quality_checks() -> None:
     """Test that new feature development passes all quality checks."""
     # 새 기능 개발 시뮬레이션
     feature_code = '''
@@ -27,7 +27,6 @@ def calculate_session_health(session_data):
     assert "Returns:" in feature_code
 
     # 이 테스트는 pre-commit hook을 통과해야 함
-    print("✅ 새 기능 개발 워크플로우 테스트 통과")
 
 
 if __name__ == "__main__":

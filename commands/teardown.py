@@ -49,12 +49,13 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
             }
 
         except Exception as e:
-            raise CommandError(f"Error tearing down sessions: {e}") from e
+            msg = f"Error tearing down sessions: {e}"
+            raise CommandError(msg) from e
 
 
 @click.command()
 @click.argument("session_name", required=False)
-def teardown(session_name):
+def teardown(session_name: str | None) -> None:
     """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
     command = TeardownCommand()
     command.run(session_name=session_name)
@@ -63,10 +64,10 @@ def teardown(session_name):
 # Alias
 @click.command()
 @click.argument("session_name", required=False)
-def down(session_name):
+def down(session_name: str | None) -> None:
     """Alias for 'teardown' command."""
     command = TeardownCommand()
     command.run(session_name=session_name)
 
 
-__all__ = ["teardown", "down"]
+__all__ = ["down", "teardown"]

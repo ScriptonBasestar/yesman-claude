@@ -5,14 +5,13 @@ Provides comprehensive project monitoring with multiple views and real-time upda
 """
 
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.message import Message
 from textual.reactive import reactive
-from textual.timer import Timer
 from textual.widgets import (
     Footer,
     Header,
@@ -34,6 +33,9 @@ from .renderers.widget_models import (
     SessionStatus,
 )
 
+if TYPE_CHECKING:
+    from textual.timer import Timer
+
 
 class DashboardWidget(Static):
     """Base dashboard widget component for Textual UI.
@@ -48,7 +50,7 @@ class DashboardWidget(Static):
         title: str = "",
         update_interval: float = 2.0,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize dashboard widget.
 
         Args:
@@ -107,7 +109,7 @@ class DashboardWidget(Static):
 
         except Exception as e:
             # Show error state
-            error_msg = f"Error rendering {self.widget_type.value}: {str(e)}"
+            error_msg = f"Error rendering {self.widget_type.value}: {e!s}"
             content_container = self.query_one("#widget-content", Container)
             if hasattr(content_container, "update"):
                 await content_container.update(f"[red]{error_msg}[/red]")
@@ -127,7 +129,7 @@ class DashboardWidget(Static):
 class SessionsView(DashboardWidget):
     """Sessions monitoring view."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             widget_type=WidgetType.SESSION_BROWSER,
             title="Active Sessions",
@@ -162,7 +164,7 @@ class SessionsView(DashboardWidget):
 class HealthView(DashboardWidget):
     """Project health monitoring view."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             widget_type=WidgetType.PROJECT_HEALTH,
             title="Project Health",
@@ -197,7 +199,7 @@ class HealthView(DashboardWidget):
 class ActivityView(DashboardWidget):
     """Activity monitoring view."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             widget_type=WidgetType.ACTIVITY_HEATMAP,
             title="Activity Heatmap",
@@ -223,7 +225,7 @@ class ActivityView(DashboardWidget):
 class LogsView(Static):
     """Logs monitoring view."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.log_buffer: list[str] = []
         self.max_logs = 100
@@ -267,7 +269,7 @@ class LogsView(Static):
 class SettingsView(Static):
     """Settings and configuration view."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.settings: dict[str, Any] = {
             "auto_refresh": True,
@@ -345,7 +347,7 @@ class TUIDashboard(App):
     auto_refresh_enabled = reactive(True)
     refresh_interval = reactive(3.0)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """Initialize TUI Dashboard."""
         super().__init__(**kwargs)
         self.title = "Yesman-Claude TUI Dashboard"
@@ -457,7 +459,7 @@ class TUIDashboard(App):
 
         except Exception as e:
             if self.logs_view:
-                self.logs_view.add_log("ERROR", f"Auto-refresh failed: {str(e)}")
+                self.logs_view.add_log("ERROR", f"Auto-refresh failed: {e!s}")
 
     # Action handlers
     def action_quit(self) -> None:
@@ -524,7 +526,7 @@ class TUIDashboard(App):
             self.logs_view.add_log("INFO", f"Setting changed: {message.setting} = {message.value}")
 
 
-def run_tui_dashboard():
+def run_tui_dashboard() -> None:
     """Convenience function to run the TUI dashboard."""
     app = TUIDashboard()
     app.run()

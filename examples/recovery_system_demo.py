@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demo script showing rollback and error recovery capabilities"""
+"""Demo script showing rollback and error recovery capabilities."""
 
 import asyncio
 import tempfile
@@ -9,7 +9,7 @@ from libs.multi_agent.agent_pool import AgentPool
 
 
 async def demo_recovery_system():
-    """Demonstrate recovery and rollback functionality"""
+    """Demonstrate recovery and rollback functionality."""
     print("🔄 Recovery and Rollback System Demo")
     print("=" * 50)
 

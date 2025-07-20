@@ -86,7 +86,7 @@ class BranchInfoProtocol:
         collaboration_engine: CollaborationEngine,
         repo_path: str | None = None,
         sync_strategy: SyncStrategy = SyncStrategy.SMART,
-    ):
+    ) -> None:
         """Initialize the branch info protocol.
 
         Args:
@@ -129,7 +129,7 @@ class BranchInfoProtocol:
         self._running = False
         self._sync_task: asyncio.Task[Any] | None = None
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the branch info protocol."""
         self._running = True
         logger.info("Starting branch info protocol")
@@ -138,7 +138,7 @@ class BranchInfoProtocol:
         if self.sync_strategy in [SyncStrategy.PERIODIC, SyncStrategy.SMART]:
             self._sync_task = asyncio.create_task(self._periodic_sync_loop())
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the branch info protocol."""
         self._running = False
         logger.info("Stopping branch info protocol")
@@ -188,7 +188,7 @@ class BranchInfoProtocol:
             {"action": "branch_created", "work_items": work_items},
         )
 
-        logger.info(f"Registered branch {branch_name} for agent {agent_id}")
+        logger.info("Registered branch %s for agent %s", branch_name, agent_id)
         return branch_info
 
     async def update_branch_info(
@@ -197,7 +197,7 @@ class BranchInfoProtocol:
         info_type: BranchInfoType,
         update_data: dict[str, Any],
         requires_immediate_sync: bool = False,
-    ):
+    ) -> None:
         """Update branch information and potentially trigger sync.
 
         Args:
@@ -207,7 +207,7 @@ class BranchInfoProtocol:
             requires_immediate_sync: Force immediate synchronization
         """
         if branch_name not in self.branch_info:
-            logger.warning(f"Branch {branch_name} not registered")
+            logger.warning("Branch %s not registered", branch_name)
             return
 
         branch_info = self.branch_info[branch_name]
@@ -261,12 +261,12 @@ class BranchInfoProtocol:
         """Get information about all branches."""
         return self.branch_info.copy()
 
-    async def subscribe_to_branch(self, agent_id: str, branch_name: str):
+    async def subscribe_to_branch(self, agent_id: str, branch_name: str) -> None:
         """Subscribe an agent to receive updates about a branch."""
         self.branch_subscriptions[branch_name].add(agent_id)
         self.protocol_stats["subscriptions_active"] += 1
 
-        logger.info(f"Agent {agent_id} subscribed to branch {branch_name}")
+        logger.info("Agent %s subscribed to branch %s", agent_id, branch_name)
 
         # Send current branch info to new subscriber
         if branch_name in self.branch_info:
@@ -277,18 +277,18 @@ class BranchInfoProtocol:
                 {"subscription": "initial"},
             )
 
-    async def unsubscribe_from_branch(self, agent_id: str, branch_name: str):
+    async def unsubscribe_from_branch(self, agent_id: str, branch_name: str) -> None:
         """Unsubscribe an agent from branch updates."""
         if agent_id in self.branch_subscriptions[branch_name]:
             self.branch_subscriptions[branch_name].remove(agent_id)
             self.protocol_stats["subscriptions_active"] -= 1
-            logger.info(f"Agent {agent_id} unsubscribed from branch {branch_name}")
+            logger.info("Agent %s unsubscribed from branch %s", agent_id, branch_name)
 
     async def request_branch_sync(
         self,
         requester_id: str,
         branch_names: list[str] | None = None,
-    ):
+    ) -> None:
         """Request synchronization of branch information.
 
         Args:
@@ -415,7 +415,7 @@ class BranchInfoProtocol:
         branch_info: BranchInfo,
         info_type: BranchInfoType,
         event_data: dict[str, Any],
-    ):
+    ) -> None:
         """Share branch information with subscribed agents."""
         # Create sync event
         event = BranchSyncEvent(
@@ -436,7 +436,7 @@ class BranchInfoProtocol:
         self.protocol_stats["syncs_performed"] += 1
 
         # Share as knowledge in collaboration engine
-        knowledge_id = await self.collaboration_engine.share_knowledge(
+        await self.collaboration_engine.share_knowledge(
             contributor_id=branch_info.agent_id,
             knowledge_type=f"branch_info_{info_type.value}",
             content={
@@ -466,7 +466,7 @@ class BranchInfoProtocol:
                     event_data,
                 )
 
-        logger.info(f"Shared {info_type.value} for branch {branch_info.branch_name}")
+        logger.info("Shared %s for branch %s", info_type.value, branch_info.branch_name)
 
     async def _send_branch_update_to_agent(
         self,
@@ -474,7 +474,7 @@ class BranchInfoProtocol:
         branch_info: BranchInfo,
         info_type: BranchInfoType,
         event_data: dict[str, Any],
-    ):
+    ) -> None:
         """Send branch update to specific agent."""
         message_type = MessageType.STATUS_UPDATE
         if info_type == BranchInfoType.CONFLICT_INFO:
@@ -534,14 +534,14 @@ class BranchInfoProtocol:
         }
         return relevance_map.get(info_type, 0.5)
 
-    async def _periodic_sync_loop(self):
+    async def _periodic_sync_loop(self) -> None:
         """Background task for periodic synchronization."""
         while self._running:
             try:
                 await asyncio.sleep(self.sync_interval)
 
                 # Sync all active branches
-                for branch_name, branch_info in self.branch_info.items():
+                for branch_info in self.branch_info.values():
                     # Check if branch needs sync
                     time_since_update = datetime.now() - branch_info.last_updated
 
@@ -566,7 +566,7 @@ class BranchInfoProtocol:
                         )
 
             except Exception as e:
-                logger.error(f"Error in periodic sync: {e}")
+                logger.exception("Error in periodic sync: %s", e)
 
     def get_protocol_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of protocol activity."""

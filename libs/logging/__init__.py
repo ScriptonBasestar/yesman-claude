@@ -6,7 +6,7 @@ from .batch_processor import BatchProcessor
 __all__ = [
     "AsyncLogger",
     "AsyncLoggerConfig",
-    "LogLevel",
-    "LogEntry",
     "BatchProcessor",
+    "LogEntry",
+    "LogLevel",
 ]

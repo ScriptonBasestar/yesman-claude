@@ -7,7 +7,7 @@ from libs.ui.session_selector import SessionSelector
 
 
 class TestSessionSelector(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.test_sessions = [
             {"project": "project1", "session": "session1"},
             {"project": "project2", "session": "session2"},
@@ -15,7 +15,7 @@ class TestSessionSelector(unittest.TestCase):
         ]
 
     @patch("libs.ui.session_selector.libtmux.Server")
-    def test_get_session_details(self, mock_server_class):
+    def test_get_session_details(self, mock_server_class: MagicMock) -> None:
         """Test getting session details from tmux."""
         # Mock tmux session
         mock_session = MagicMock()
@@ -29,11 +29,11 @@ class TestSessionSelector(unittest.TestCase):
         selector = SessionSelector(self.test_sessions)
         details = selector._get_session_details("session1")
 
-        self.assertEqual(details["windows"], 2)
-        self.assertTrue(details["attached"])
-        self.assertEqual(details["clients"], 1)
+        assert details["windows"] == 2
+        assert details["attached"]
+        assert details["clients"] == 1
 
-    def test_create_display_no_filter(self):
+    def test_create_display_no_filter(self) -> None:
         """Test creating display without filter."""
         selector = SessionSelector(self.test_sessions)
 
@@ -48,10 +48,10 @@ class TestSessionSelector(unittest.TestCase):
             table, filtered = selector._create_display()
 
             # Should return all sessions
-            self.assertEqual(len(filtered), 3)
-            self.assertEqual(filtered, self.test_sessions)
+            assert len(filtered) == 3
+            assert filtered == self.test_sessions
 
-    def test_create_display_with_filter(self):
+    def test_create_display_with_filter(self) -> None:
         """Test creating display with search filter."""
         selector = SessionSelector(self.test_sessions)
 
@@ -67,23 +67,23 @@ class TestSessionSelector(unittest.TestCase):
             table, filtered = selector._create_display("app")
 
             # Should only return myapp session
-            self.assertEqual(len(filtered), 1)
-            self.assertEqual(filtered[0]["project"], "myapp")
+            assert len(filtered) == 1
+            assert filtered[0]["project"] == "myapp"
 
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
-    def test_select_session_quit(self, mock_console_class, mock_prompt):
+    def test_select_session_quit(self, mock_console_class: MagicMock, mock_prompt: MagicMock) -> None:
         """Test quitting the selector."""
         mock_prompt.return_value = "q"
 
         selector = SessionSelector(self.test_sessions)
         result = selector.select_session()
 
-        self.assertIsNone(result)
+        assert result is None
 
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
-    def test_select_session_valid_choice(self, mock_console_class, mock_prompt):
+    def test_select_session_valid_choice(self, mock_console_class: MagicMock, mock_prompt: MagicMock) -> None:
         """Test selecting a valid session."""
         mock_prompt.return_value = "2"  # Select second session
 
@@ -98,7 +98,7 @@ class TestSessionSelector(unittest.TestCase):
 
             result = selector.select_session()
 
-            self.assertEqual(result, "session2")
+            assert result == "session2"
 
 
 if __name__ == "__main__":

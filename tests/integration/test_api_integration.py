@@ -16,7 +16,7 @@ def client():
 
 
 @pytest.fixture(autouse=True)
-def setup_test_services():
+def setup_test_services() -> None:
     """Setup test services before each test."""
     mock_config = MagicMock()
     mock_config.get.return_value = "test_value"
@@ -31,7 +31,7 @@ def setup_test_services():
 class TestHealthEndpoints:
     """Test health and info endpoints."""
 
-    def test_health_check(self, client):
+    def test_health_check(self, client: TestClient) -> None:
         """Test health check endpoint."""
         response = client.get("/healthz")
 
@@ -41,7 +41,7 @@ class TestHealthEndpoints:
         assert data["service"] == "yesman-claude-api"
         assert "timestamp" in data
 
-    def test_api_info(self, client):
+    def test_api_info(self, client: TestClient) -> None:
         """Test API info endpoint."""
         response = client.get("/api")
 
@@ -55,7 +55,7 @@ class TestHealthEndpoints:
 class TestConfigAPI:
     """Test configuration API endpoints."""
 
-    def test_get_config(self, client):
+    def test_get_config(self, client: TestClient) -> None:
         """Test get configuration endpoint."""
         with patch("api.routers.config.get_config") as mock_get_config:
             mock_config = MagicMock()
@@ -68,7 +68,7 @@ class TestConfigAPI:
             data = response.json()
             assert data["log_level"] == "INFO"
 
-    def test_get_config_error_handling(self, client):
+    def test_get_config_error_handling(self, client: TestClient) -> None:
         """Test configuration error handling."""
         with patch("api.routers.config.get_config") as mock_get_config:
             mock_get_config.side_effect = Exception("Config error")
@@ -80,7 +80,7 @@ class TestConfigAPI:
             assert "error" in data
             assert data["error"]["category"] == "system"
 
-    def test_get_available_projects(self, client):
+    def test_get_available_projects(self, client: TestClient) -> None:
         """Test get available projects endpoint."""
         with patch("api.routers.config.get_tmux_manager") as mock_get_tmux:
             mock_tmux = MagicMock()
@@ -103,7 +103,7 @@ class TestConfigAPI:
 class TestSessionsAPI:
     """Test sessions API endpoints."""
 
-    def test_get_sessions(self, client):
+    def test_get_sessions(self, client: TestClient) -> None:
         """Test get sessions endpoint."""
         with patch("api.routers.sessions.get_tmux_manager") as mock_get_tmux:
             mock_tmux = MagicMock()
@@ -120,7 +120,7 @@ class TestSessionsAPI:
             assert len(data) == 2
             assert data[0]["name"] == "session1"
 
-    def test_create_session(self, client):
+    def test_create_session(self, client: TestClient) -> None:
         """Test create session endpoint."""
         with patch("api.routers.sessions.get_tmux_manager") as mock_get_tmux:
             mock_tmux = MagicMock()
@@ -140,7 +140,7 @@ class TestSessionsAPI:
 class TestErrorHandling:
     """Test API error handling."""
 
-    def test_validation_error_response(self, client):
+    def test_validation_error_response(self, client: TestClient) -> None:
         """Test validation error response format."""
         # Send invalid data to trigger validation error
         response = client.post("/api/sessions", json={"invalid_field": "invalid_value"})
@@ -152,7 +152,7 @@ class TestErrorHandling:
         assert data["error"]["category"] == "validation"
         assert "request_id" in data["error"]
 
-    def test_custom_error_response(self, client):
+    def test_custom_error_response(self, client: TestClient) -> None:
         """Test custom YesmanError response format."""
         with patch("api.routers.config.get_config") as mock_get_config:
             from libs.core.error_handling import ConfigurationError
@@ -170,7 +170,7 @@ class TestErrorHandling:
             assert error["recovery_hint"] is not None
             assert "context" in error
 
-    def test_request_id_header(self, client):
+    def test_request_id_header(self, client: TestClient) -> None:
         """Test that request ID is added to response headers."""
         response = client.get("/healthz")
 
@@ -182,7 +182,7 @@ class TestAPIAuthentication:
     """Test API authentication (if implemented)."""
 
     @pytest.mark.skip(reason="Authentication not implemented yet")
-    def test_protected_endpoint(self, client):
+    def test_protected_endpoint(self, client: TestClient) -> None:
         """Test protected endpoint access."""
         response = client.get("/api/protected")
         assert response.status_code == 401
@@ -191,7 +191,7 @@ class TestAPIAuthentication:
 class TestAPIPerformance:
     """Test API performance."""
 
-    def test_health_endpoint_performance(self, client):
+    def test_health_endpoint_performance(self, client: TestClient) -> None:
         """Test health endpoint response time."""
         import time
 
@@ -202,13 +202,13 @@ class TestAPIPerformance:
         assert response.status_code == 200
         assert (end_time - start_time) < 0.1  # Should respond within 100ms
 
-    def test_concurrent_requests(self, client):
+    def test_concurrent_requests(self, client: TestClient) -> None:
         """Test handling multiple concurrent requests."""
         import threading
 
         results = []
 
-        def make_request():
+        def make_request() -> None:
             response = client.get("/healthz")
             results.append(response.status_code)
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Check for lines longer than 88 characters"""
+"""Check for lines longer than 88 characters."""
 
 from pathlib import Path
 
 
 def check_file_line_lengths(file_path, max_length=88):
-    """Check a file for lines exceeding max_length"""
+    """Check a file for lines exceeding max_length."""
     try:
         with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
@@ -22,7 +22,7 @@ def check_file_line_lengths(file_path, max_length=88):
 
 
 def main():
-    """Check key Python files for long lines"""
+    """Check key Python files for long lines."""
     base_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     # Key files to check

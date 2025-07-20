@@ -4,14 +4,19 @@ import asyncio
 import hashlib
 import json
 import logging
+import subprocess  # nosec
 import traceback
+from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Any
+from datetime import UTC, datetime, timedelta
 
+# Note: Removed typing.Any usage to fix ANN401 errors
+from api.routers.websocket_router import manager
 from libs.core.session_manager import SessionManager
 from libs.dashboard.health_calculator import HealthCalculator
+from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +35,7 @@ class TaskState:
 class BackgroundTaskRunner:
     """Manages background tasks for real-time monitoring."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the background task runner."""
         self.tasks: list[asyncio.Task] = []
         self.is_running = False
@@ -51,7 +56,7 @@ class BackgroundTaskRunner:
         # Data caches for change detection
         self.last_data = {"sessions": None, "health": None, "activity": None}
 
-    async def start(self):
+    async def start(self) -> None:
         """Start all background tasks."""
         if self.is_running:
             logger.warning("Background tasks are already running")
@@ -68,9 +73,9 @@ class BackgroundTaskRunner:
             asyncio.create_task(self.cleanup_task()),
         ]
 
-        logger.info(f"Started {len(self.tasks)} background tasks")
+        logger.info("Started %d background tasks", len(self.tasks))
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop all background tasks gracefully."""
         logger.info("Stopping background tasks...")
         self.is_running = False
@@ -86,7 +91,7 @@ class BackgroundTaskRunner:
         self.tasks = []
         logger.info("Background tasks stopped")
 
-    def _calculate_data_hash(self, data: Any) -> str:
+    def _calculate_data_hash(self, data: object) -> str:
         """Calculate hash of data for change detection."""
         json_str = json.dumps(data, sort_keys=True, default=str)
         return hashlib.md5(json_str.encode(), usedforsecurity=False).hexdigest()
@@ -96,7 +101,7 @@ class BackgroundTaskRunner:
         task_name: str,
         task_func: Callable,
         interval: int,
-    ):
+    ) -> None:
         """Run a task with error handling and state tracking."""
         state = TaskState(name=task_name)
         self.task_states[task_name] = state
@@ -105,16 +110,16 @@ class BackgroundTaskRunner:
             try:
                 state.is_running = True
                 await task_func()
-                state.last_run = datetime.now()
+                state.last_run = datetime.now(UTC)
                 state.error_count = 0
 
             except asyncio.CancelledError:
-                logger.info(f"Task {task_name} cancelled")
+                logger.info("Task %s cancelled", task_name)
                 break
 
-            except Exception as e:
+            except Exception:
                 state.error_count += 1
-                logger.error(f"Error in task {task_name}: {str(e)}")
+                logger.exception("Error in task %s", task_name)
                 logger.debug(traceback.format_exc())
 
                 # Exponential backoff on errors
@@ -128,20 +133,17 @@ class BackgroundTaskRunner:
             # Wait for next iteration
             await asyncio.sleep(interval)
 
-    async def monitor_sessions(self):
+    async def monitor_sessions(self) -> None:
         """Monitor session changes and broadcast updates."""
 
-        async def check_sessions():
+        async def check_sessions() -> None:
             try:
                 # Get current session data
                 sessions = self.session_manager.get_all_sessions()
 
                 # Get project configuration
-                from libs.yesman_config import YesmanConfig
-
                 config = YesmanConfig()
                 # Load projects using tmux_manager
-                from libs.tmux_manager import TmuxManager
 
                 tmux_manager = TmuxManager(config)
                 project_sessions = tmux_manager.load_projects().get("sessions", {})
@@ -177,16 +179,15 @@ class BackgroundTaskRunner:
                     self.last_data["sessions"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
-                    from api.routers.websocket_router import manager
-
                     await manager.broadcast_session_update({"sessions": formatted_sessions})
 
                     logger.debug(
-                        f"Session data updated and broadcast ({len(formatted_sessions)} sessions)",
+                        "Session data updated and broadcast (%d sessions)",
+                        len(formatted_sessions),
                     )
 
-            except Exception as e:
-                logger.error(f"Error monitoring sessions: {str(e)}")
+            except Exception:
+                logger.exception("Error monitoring sessions")
                 raise
 
         await self._run_task_safely(
@@ -195,10 +196,10 @@ class BackgroundTaskRunner:
             self.intervals["sessions"],
         )
 
-    async def monitor_health(self):
+    async def monitor_health(self) -> None:
         """Monitor project health and broadcast updates."""
 
-        async def check_health():
+        async def check_health() -> None:
             try:
                 # Calculate health metrics
                 health_data = await self.health_calculator.calculate_health()
@@ -258,7 +259,7 @@ class BackgroundTaskRunner:
                         },
                     },
                     "suggestions": [metric.description for metric in health_data.metrics if metric.description],
-                    "last_updated": datetime.now().isoformat(),
+                    "last_updated": datetime.now(UTC).isoformat(),
                 }
 
                 # Calculate data hash
@@ -269,28 +270,24 @@ class BackgroundTaskRunner:
                     self.last_data["health"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
-                    from api.routers.websocket_router import manager
-
                     await manager.broadcast_health_update(formatted_health)
 
                     logger.debug(
-                        f"Health data updated and broadcast (score: {formatted_health['overall_score']})",
+                        "Health data updated and broadcast (score: %s)",
+                        formatted_health["overall_score"],
                     )
 
-            except Exception as e:
-                logger.error(f"Error monitoring health: {str(e)}")
+            except Exception:
+                logger.exception("Error monitoring health")
                 raise
 
         await self._run_task_safely("health", check_health, self.intervals["health"])
 
-    async def monitor_activity(self):
+    async def monitor_activity(self) -> None:
         """Monitor activity data and broadcast updates."""
 
-        async def check_activity():
+        async def check_activity() -> None:
             try:
-                import subprocess  # nosec
-                from collections import defaultdict
-
                 # Get git activity data
                 activity_counts: defaultdict[str, int] = defaultdict(int)
 
@@ -318,10 +315,10 @@ class BackgroundTaskRunner:
                     logger.warning("Could not get git activity data")
 
                 # Generate complete date range
-                end_date = datetime.now().date()
+                end_date = datetime.now(UTC).date()
                 start_date = end_date - timedelta(days=364)
 
-                activities: list[dict[str, Any]] = []
+                activities: list[dict[str, str | int]] = []
                 current_date = start_date
                 while current_date <= end_date:
                     date_str = current_date.isoformat()
@@ -355,16 +352,15 @@ class BackgroundTaskRunner:
                     self.last_data["activity"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
-                    from api.routers.websocket_router import manager
-
                     await manager.broadcast_activity_update(formatted_activity)
 
                     logger.debug(
-                        f"Activity data updated and broadcast ({active_days} active days)",
+                        "Activity data updated and broadcast (%d active days)",
+                        active_days,
                     )
 
-            except Exception as e:
-                logger.error(f"Error monitoring activity: {str(e)}")
+            except Exception:
+                logger.exception("Error monitoring activity")
                 raise
 
         await self._run_task_safely(
@@ -373,17 +369,16 @@ class BackgroundTaskRunner:
             self.intervals["activity"],
         )
 
-    async def cleanup_task(self):
+    async def cleanup_task(self) -> None:
         """Periodic cleanup of resources."""
 
-        async def cleanup():
+        async def cleanup() -> None:
             try:
                 # Clean up old connections
-                from api.routers.websocket_router import manager
 
                 # Get connection statistics
                 stats = manager.get_connection_stats()
-                logger.debug(f"Active connections: {stats['total_connections']}")
+                logger.debug("Active connections: %d", stats["total_connections"])
 
                 # Clean up stale session cache
                 self.session_manager._cleanup_cache()
@@ -391,13 +386,14 @@ class BackgroundTaskRunner:
                 # Log task states
                 for name, state in self.task_states.items():
                     if state.last_run:
-                        age = (datetime.now() - state.last_run).total_seconds()
+                        age = (datetime.now(UTC) - state.last_run).total_seconds()
                         logger.debug(
-                            f"Task {name}: last run {age:.1f}s ago, errors: {state.error_count}",
+                            "Task %s: last run %.1fs ago, errors: %d",
+                            name, age, state.error_count,
                         )
 
-            except Exception as e:
-                logger.error(f"Error in cleanup task: {str(e)}")
+            except Exception:
+                logger.exception("Error in cleanup task")
                 raise
 
         await self._run_task_safely("cleanup", cleanup, self.intervals["cleanup"])
@@ -406,12 +402,11 @@ class BackgroundTaskRunner:
         """Get status string based on score."""
         if score >= 90:
             return "excellent"
-        elif score >= 80:
+        if score >= 80:
             return "good"
-        elif score >= 60:
+        if score >= 60:
             return "warning"
-        else:
-            return "poor"
+        return "poor"
 
     def get_task_states(self) -> dict[str, dict]:
         """Get current state of all tasks."""

@@ -24,11 +24,11 @@ class TestDashboardLaunch:
             yield project_root
 
     @pytest.fixture
-    def launcher(self, temp_project_root):
+    def launcher(self, temp_project_root: Path) -> DashboardLauncher:
         """Create DashboardLauncher with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
-    def test_end_to_end_dashboard_launch(self, launcher, temp_project_root):
+    def test_end_to_end_dashboard_launch(self, launcher: DashboardLauncher, temp_project_root: Path) -> None:
         """Test 6: End-to-end dashboard launch process."""
         # 1. Interface detection
         interface = launcher.detect_best_interface()

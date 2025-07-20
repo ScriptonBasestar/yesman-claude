@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Analyze common lint issues by examining the codebase"""
+"""Analyze common lint issues by examining the codebase."""
 
 import ast
 import re
@@ -13,7 +13,7 @@ class LintAnalyzer:
         self.issues = []
 
     def analyze_file(self, file_path: Path) -> list[dict[str, Any]]:
-        """Analyze a single Python file for common lint issues"""
+        """Analyze a single Python file for common lint issues."""
         issues = []
 
         try:
@@ -143,7 +143,7 @@ class LintAnalyzer:
         return issues
 
     def analyze_directory(self, directory: Path) -> list[dict[str, Any]]:
-        """Analyze all Python files in a directory"""
+        """Analyze all Python files in a directory."""
         all_issues = []
 
         for file_path in directory.rglob("*.py"):
@@ -172,7 +172,7 @@ class LintAnalyzer:
         return all_issues
 
     def run_analysis(self) -> dict[str, Any]:
-        """Run complete analysis"""
+        """Run complete analysis."""
         # Analyze libs directory
         libs_issues = []
         libs_dir = self.project_path / "libs"
@@ -212,7 +212,7 @@ class LintAnalyzer:
 
 
 def main():
-    """Main function"""
+    """Main function."""
     project_path = "/Users/archmagece/myopen/scripton/yesman-claude"
     analyzer = LintAnalyzer(project_path)
 

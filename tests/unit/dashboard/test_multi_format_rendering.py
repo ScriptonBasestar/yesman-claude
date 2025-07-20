@@ -9,7 +9,7 @@ from libs.dashboard.renderers.widget_models import (
 class TestMultiFormatRendering:
     """Tests for multi-format rendering across all interfaces."""
 
-    def test_multi_format_rendering(self):
+    def test_multi_format_rendering(self) -> None:
         """Test 2: Multi-format rendering across all interfaces."""
         factory = RendererFactory()
 

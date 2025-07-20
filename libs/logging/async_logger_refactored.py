@@ -1,6 +1,7 @@
 """Asynchronous logger with queue-based processing for high performance - Refactored version."""
 
 import asyncio
+import contextlib
 import logging
 import os
 import threading
@@ -27,7 +28,7 @@ class LogLevel(Enum):
     ERROR = (40, "ERROR")
     CRITICAL = (50, "CRITICAL")
 
-    def __init__(self, value: int, name: str):
+    def __init__(self, value: int, name: str) -> None:
         """Initialize LogLevel enum members."""
         self.level_value = value
         self.level_name = name
@@ -80,7 +81,7 @@ class AsyncLogger(StatisticsProviderMixin):
         output_dir: Path | None = None,
         max_queue_size: int = 10000,
         thread_pool_size: int = 2,
-    ):
+    ) -> None:
         """Initialize async logger.
 
         Args:
@@ -182,10 +183,8 @@ class AsyncLogger(StatisticsProviderMixin):
         self._stop_event.set()
 
         # Put sentinel value to unblock queue
-        try:
+        with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(self.log_queue.put(None), timeout=1.0)
-        except TimeoutError:
-            pass
 
         # Wait for processing to complete
         try:
@@ -225,12 +224,12 @@ class AsyncLogger(StatisticsProviderMixin):
                 except TimeoutError:
                     continue
                 except Exception as e:
-                    self.fallback_logger.error(f"Error processing log entry: {e}")
+                    self.fallback_logger.exception(f"Error processing log entry: {e}")
                     with self._stats_lock:
                         self.stats["errors"] += 1
 
         except Exception as e:
-            self.fallback_logger.error(f"Fatal error in processing loop: {e}")
+            self.fallback_logger.exception(f"Fatal error in processing loop: {e}")
 
     async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
@@ -253,11 +252,11 @@ class AsyncLogger(StatisticsProviderMixin):
                 self.stats["processing_time_ms"] += processing_time
 
         except Exception as e:
-            self.fallback_logger.error(f"Error processing entry: {e}")
+            self.fallback_logger.exception(f"Error processing entry: {e}")
             with self._stats_lock:
                 self.stats["errors"] += 1
 
-    def _log_to_standard(self, entry: LogEntry):
+    def _log_to_standard(self, entry: LogEntry) -> None:
         """Log entry to standard Python logger."""
         # Format message with context
         formatted_message = f"[{entry.module}:{entry.function}:{entry.line_number}] {entry.message}"
@@ -280,7 +279,7 @@ class AsyncLogger(StatisticsProviderMixin):
         message: str,
         exc_info: Exception | None = None,
         **kwargs,
-    ):
+    ) -> None:
         """Internal method to queue a log entry."""
         if level.level_value < self.min_level.level_value:
             return
@@ -352,7 +351,7 @@ class AsyncLogger(StatisticsProviderMixin):
         """Log a critical message."""
         await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 
-    def set_min_level(self, level: LogLevel):
+    def set_min_level(self, level: LogLevel) -> None:
         """Set minimum log level."""
         self.min_level = level
 

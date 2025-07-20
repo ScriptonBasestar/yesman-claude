@@ -45,7 +45,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         try:
             return self.tmux_manager.get_templates()
         except Exception as e:
-            self.logger.error(f"Failed to get templates: {e}")
+            self.logger.exception(f"Failed to get templates: {e}")
             return []
 
     def _get_projects(self) -> list[dict[str, Any]]:
@@ -73,7 +73,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
             return projects
 
         except Exception as e:
-            self.logger.error(f"Failed to get projects: {e}")
+            self.logger.exception(f"Failed to get projects: {e}")
             return []
 
     def _get_project_status(self, session_name: str) -> str:
@@ -81,8 +81,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         try:
             if self.session_exists(session_name):
                 return "running"
-            else:
-                return "stopped"
+            return "stopped"
         except Exception:
             return "unknown"
 
@@ -91,7 +90,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         if output_format == "json":
             click.echo(self.format_json(data))
             return
-        elif output_format == "yaml":
+        if output_format == "yaml":
             click.echo(self.format_yaml(data))
             return
 
@@ -131,7 +130,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
     default="table",
     help="Output format",
 )
-def ls(output_format: str):
+def ls(output_format: str) -> None:
     """List all available projects and templates."""
     command = LsCommand()
     command.run(output_format=output_format)

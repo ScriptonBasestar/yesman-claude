@@ -3,7 +3,7 @@
 import logging
 import os
 import tempfile
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +18,8 @@ except ImportError:
     PSUTIL_AVAILABLE = False
     psutil = None
 
-from ..utils import ensure_log_directory
+from libs.utils import ensure_log_directory
+
 from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
 from .progress_tracker import ProgressAnalyzer
 
@@ -26,7 +27,7 @@ from .progress_tracker import ProgressAnalyzer
 class SessionManager:
     """Manages tmux session information for dashboard."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Import here to avoid circular import
         from libs.yesman_config import YesmanConfig
 
@@ -68,7 +69,7 @@ class SessionManager:
         try:
             # Load project configurations
             projects = self.tmux_manager.load_projects().get("sessions", {})
-            self.logger.info(f"Loaded {len(projects)} projects")
+            self.logger.info("Loaded %d projects", len(projects))
 
             for project_name, project_conf in projects.items():
                 session_info = self._get_session_info(project_name, project_conf)
@@ -76,8 +77,8 @@ class SessionManager:
 
             return sessions_info
 
-        except Exception as e:
-            self.logger.error(f"Error getting sessions: {e}", exc_info=True)
+        except Exception:
+            self.logger.error("Error getting sessions", exc_info=True)
             return []
 
     def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
@@ -135,7 +136,7 @@ class SessionManager:
                                     pane_content = tmux_pane.cmd("capture-pane", "-p").stdout
                                     claude_output.extend(pane_content)
                             except Exception as e:
-                                self.logger.warning(f"Could not get pane content for {pane_info.id}: {e}")
+                                self.logger.warning("Could not get pane content for %s: %s", pane_info.id, e)
 
                 # Analyze progress
                 if claude_output:
@@ -154,7 +155,7 @@ class SessionManager:
 
         return compute_session_info()
 
-    def _get_window_info(self, window) -> WindowInfo:
+    def _get_window_info(self, window: Any) -> WindowInfo:
         """Get information for a single window with detailed pane metrics."""
         panes: list[PaneInfo] = []
 
@@ -162,8 +163,8 @@ class SessionManager:
             try:
                 pane_info = self._get_detailed_pane_info(pane)
                 panes.append(pane_info)
-            except Exception as e:
-                self.logger.error(f"Error getting pane info: {e}")
+            except Exception:
+                self.logger.exception("Error getting pane info")
                 # Fallback to basic pane info
                 try:
                     cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
@@ -175,7 +176,7 @@ class SessionManager:
                     )
                     panes.append(basic_pane)
                 except Exception as e:
-                    self.logger.debug(f"Could not get basic pane info: {e}")
+                    self.logger.debug("Could not get basic pane info: %s", e)
 
         return WindowInfo(
             name=window.get("window_name"),
@@ -183,7 +184,7 @@ class SessionManager:
             panes=panes,
         )
 
-    def _get_detailed_pane_info(self, pane) -> PaneInfo:
+    def _get_detailed_pane_info(self, pane: Any) -> PaneInfo:
         """Get detailed information for a single pane including metrics."""
         try:
             # Get basic pane information
@@ -211,7 +212,7 @@ class SessionManager:
 
                     # Calculate running time
                     create_time = process.create_time()
-                    running_time = datetime.now().timestamp() - create_time
+                    running_time = datetime.now(UTC).timestamp() - create_time
 
                     # Determine process status
                     status = process.status()
@@ -241,7 +242,7 @@ class SessionManager:
                 activity_timestamp = int(pane_activity) if pane_activity.isdigit() else 0
 
                 # Calculate idle time and activity score
-                current_time = datetime.now().timestamp()
+                current_time = datetime.now(UTC).timestamp()
                 idle_time = current_time - activity_timestamp if activity_timestamp > 0 else 0
 
                 # Activity score: higher for recent activity, lower for idle panes
@@ -263,17 +264,17 @@ class SessionManager:
                     if lines:
                         last_output = lines[-1][:100]  # Last line, truncated
             except Exception as e:
-                self.logger.debug(f"Could not capture pane output: {e}")
+                self.logger.debug("Could not capture pane output: %s", e)
 
             # Create enhanced PaneInfo
-            pane_info = PaneInfo(
+            return PaneInfo(
                 id=pane_id,
                 command=cmd,
                 is_claude="claude" in cmd.lower(),
                 is_controller="controller" in cmd.lower() or "yesman" in cmd.lower(),
                 current_task=current_task,
                 idle_time=idle_time,
-                last_activity=(datetime.fromtimestamp(activity_timestamp) if activity_timestamp > 0 else datetime.now()),
+                last_activity=(datetime.fromtimestamp(activity_timestamp, UTC) if activity_timestamp > 0 else datetime.now(UTC)),
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
                 pid=pid,
@@ -284,10 +285,9 @@ class SessionManager:
                 output_lines=output_lines,
             )
 
-            return pane_info
 
-        except Exception as e:
-            self.logger.error(f"Error getting detailed pane info: {e}")
+        except Exception:
+            self.logger.exception("Error getting detailed pane info")
             # Return basic pane info as fallback
             return PaneInfo(
                 id=pane.get("pane_id", "unknown"),
@@ -308,41 +308,38 @@ class SessionManager:
         if "claude" in full_cmd.lower():
             if "--read" in full_cmd:
                 return "Reading files"
-            elif "--edit" in full_cmd or "--write" in full_cmd:
+            if "--edit" in full_cmd or "--write" in full_cmd:
                 return "Editing code"
-            elif "dashboard" in full_cmd:
+            if "dashboard" in full_cmd:
                 return "Running dashboard"
-            else:
-                return "Claude interactive"
+            return "Claude interactive"
 
         # Controller-specific task detection
-        elif "yesman" in full_cmd.lower() or "controller" in full_cmd.lower():
+        if "yesman" in full_cmd.lower() or "controller" in full_cmd.lower():
             if "dashboard" in full_cmd:
                 return "Dashboard controller"
-            elif "setup" in full_cmd:
+            if "setup" in full_cmd:
                 return "Setting up sessions"
-            elif "teardown" in full_cmd:
+            if "teardown" in full_cmd:
                 return "Tearing down sessions"
-            else:
-                return "Yesman controller"
+            return "Yesman controller"
 
         # Common development tasks
-        elif any(term in full_cmd.lower() for term in ["vim", "nano", "code", "nvim"]):
+        if any(term in full_cmd.lower() for term in ["vim", "nano", "code", "nvim"]):
             return "Editing files"
-        elif any(term in full_cmd.lower() for term in ["python", "node", "npm", "pip"]):
+        if any(term in full_cmd.lower() for term in ["python", "node", "npm", "pip"]):
             return "Running application"
-        elif any(term in full_cmd.lower() for term in ["git", "commit", "push", "pull"]):
+        if any(term in full_cmd.lower() for term in ["git", "commit", "push", "pull"]):
             return "Git operations"
-        elif any(term in full_cmd.lower() for term in ["test", "pytest", "jest"]):
+        if any(term in full_cmd.lower() for term in ["test", "pytest", "jest"]):
             return "Running tests"
-        elif any(term in full_cmd.lower() for term in ["build", "compile", "make"]):
+        if any(term in full_cmd.lower() for term in ["build", "compile", "make"]):
             return "Building project"
-        elif "bash" in full_cmd.lower() or "zsh" in full_cmd.lower():
+        if "bash" in full_cmd.lower() or "zsh" in full_cmd.lower():
             return "Terminal session"
-        else:
-            # Extract the main command (first meaningful part)
-            main_cmd = cmdline[0].split("/")[-1] if cmdline else command
-            return f"Running {main_cmd}"
+        # Extract the main command (first meaningful part)
+        main_cmd = cmdline[0].split("/")[-1] if cmdline else command
+        return f"Running {main_cmd}"
 
     def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """Attach to a specific tmux pane.
@@ -397,10 +394,10 @@ class SessionManager:
             }
 
         except Exception as e:
-            self.logger.error(f"Error attaching to pane: {e}")
+            self.logger.exception("Error attaching to pane")
             return {
                 "success": False,
-                "error": f"Attachment failed: {str(e)}",
+                "error": f"Attachment failed: {e!s}",
                 "action": "error",
             }
 
@@ -463,7 +460,7 @@ class SessionManager:
             "sessions": session_progress_list,
         }
 
-    def create_terminal_script(self, attach_command: str, script_path: str = None) -> str:
+    def create_terminal_script(self, attach_command: str, script_path: str | None = None) -> str:
         """Create a terminal script for pane attachment.
 
         Args:
@@ -479,7 +476,7 @@ class SessionManager:
 
         script_content = f"""#!/bin/bash
 # Auto-generated tmux attachment script
-# Generated at: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+# Generated at: {datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")}
 
 echo "Attaching to tmux pane..."
 {attach_command}
@@ -492,11 +489,11 @@ echo "Attaching to tmux pane..."
             # Make script executable
             os.chmod(script_path, 0o700)
 
-            self.logger.info(f"Created attachment script: {script_path}")
+            self.logger.info("Created attachment script: %s", script_path)
             return script_path
 
-        except Exception as e:
-            self.logger.error(f"Error creating attachment script: {e}")
+        except Exception:
+            self.logger.exception("Error creating attachment script")
             raise
 
     def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
@@ -533,10 +530,10 @@ echo "Attaching to tmux pane..."
             }
 
         except Exception as e:
-            self.logger.error(f"Error executing pane attachment: {e}")
+            self.logger.exception("Error executing pane attachment")
             return {
                 "success": False,
-                "error": f"Execution failed: {str(e)}",
+                "error": f"Execution failed: {e!s}",
                 "action": "error",
             }
 
@@ -544,4 +541,3 @@ echo "Attaching to tmux pane..."
         """Clean up stale cached session data."""
         # This is a placeholder method to satisfy the API contract
         # The actual SessionManager doesn't use caching currently
-        pass

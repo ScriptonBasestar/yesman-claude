@@ -24,7 +24,7 @@ class YesmanConfig:
     centralized configuration management system.
     """
 
-    def __init__(self, config_loader: ConfigLoader | None = None):
+    def __init__(self, config_loader: ConfigLoader | None = None) -> None:
         """Initialize YesmanConfig.
 
         Args:
@@ -55,7 +55,7 @@ class YesmanConfig:
         self.logger = logging.getLogger("yesman")
         self.logger.info("Yesman configuration loaded successfully")
 
-    def _setup_logging(self):
+    def _setup_logging(self) -> None:
         """Setup logging based on configuration."""
         log_config = self._config_schema.logging
         log_path = ensure_log_directory(Path(log_config.log_path))
@@ -74,7 +74,7 @@ class YesmanConfig:
             handlers=handlers,
         )
 
-    def _ensure_directories(self):
+    def _ensure_directories(self) -> None:
         """Create necessary directories."""
         directories = [
             self.root_dir,
@@ -103,7 +103,7 @@ class YesmanConfig:
 
         return value
 
-    def save(self, new_config_data: dict[str, Any]):
+    def save(self, new_config_data: dict[str, Any]) -> None:
         """Save configuration updates to local file."""
         # Load current local config
         current_local_cfg: dict[str, Any] = {}
@@ -139,7 +139,7 @@ class YesmanConfig:
         """Get projects file path."""
         return self.get_sessions_dir() / self._config_schema.session.projects_file
 
-    def reload(self):
+    def reload(self) -> None:
         """Reload configuration from all sources."""
         self._config_schema = self._loader.reload()
         self.config = self._config_schema.model_dump()
@@ -151,7 +151,7 @@ class YesmanConfig:
             self._loader.validate(self.config)
             return True
         except ValueError as e:
-            self.logger.error(f"Configuration validation failed: {e}")
+            self.logger.exception(f"Configuration validation failed: {e}")
             return False
 
     @property

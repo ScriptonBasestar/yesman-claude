@@ -9,7 +9,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_command(cmd, description):
-    """Run a command and capture output"""
+    """Run a command and capture output."""
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")

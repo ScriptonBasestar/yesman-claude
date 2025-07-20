@@ -31,7 +31,8 @@ class StatisticsProviderMixin(ABC):
                 "last_updated": "2025-07-16T10:30:00"
             }
         """
-        raise NotImplementedError("Subclasses must implement get_statistics()")
+        msg = "Subclasses must implement get_statistics()"
+        raise NotImplementedError(msg)
 
 
 class StatusManagerMixin(ABC):
@@ -48,7 +49,8 @@ class StatusManagerMixin(ABC):
         Raises:
             ValueError: If the status value is invalid
         """
-        raise NotImplementedError("Subclasses must implement update_status()")
+        msg = "Subclasses must implement update_status()"
+        raise NotImplementedError(msg)
 
     @abstractmethod
     def update_activity(self, activity: str) -> None:
@@ -62,7 +64,8 @@ class StatusManagerMixin(ABC):
             update_activity("Processing batch 5 of 10")
             update_activity("Waiting for user input")
         """
-        raise NotImplementedError("Subclasses must implement update_activity()")
+        msg = "Subclasses must implement update_activity()"
+        raise NotImplementedError(msg)
 
 
 class LayoutManagerMixin(ABC):
@@ -77,7 +80,8 @@ class LayoutManagerMixin(ABC):
                 For Rich console apps, this might be a Layout object.
                 For web apps, this might be a dictionary describing the layout.
         """
-        raise NotImplementedError("Subclasses must implement create_layout()")
+        msg = "Subclasses must implement create_layout()"
+        raise NotImplementedError(msg)
 
     @abstractmethod
     def update_layout(self, layout: Any) -> None:
@@ -91,14 +95,15 @@ class LayoutManagerMixin(ABC):
             TypeError: If the layout type doesn't match expected type
             ValueError: If the layout configuration is invalid
         """
-        raise NotImplementedError("Subclasses must implement update_layout()")
+        msg = "Subclasses must implement update_layout()"
+        raise NotImplementedError(msg)
 
 
 # Optional: Concrete mixin implementations with default behavior
 class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
     """Default implementation of StatisticsProviderMixin with basic functionality."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._statistics = {
             "total_operations": 0,
             "successful_operations": 0,
@@ -126,20 +131,22 @@ class DefaultStatusManagerMixin(StatusManagerMixin):
 
     VALID_STATUSES = {"running", "stopped", "paused", "error", "initializing", "idle"}
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._status = "idle"
         self._activity = "No activity"
 
     def update_status(self, status: str) -> None:
         """Update status with validation."""
         if status not in self.VALID_STATUSES:
-            raise ValueError(f"Invalid status: {status}. Must be one of {self.VALID_STATUSES}")
+            msg = f"Invalid status: {status}. Must be one of {self.VALID_STATUSES}"
+            raise ValueError(msg)
         self._status = status
 
     def update_activity(self, activity: str) -> None:
         """Update current activity description."""
         if not activity or not isinstance(activity, str):
-            raise ValueError("Activity must be a non-empty string")
+            msg = "Activity must be a non-empty string"
+            raise ValueError(msg)
         self._activity = activity
 
     @property

@@ -6,6 +6,7 @@ batch processing various types of items with configurable size and time limits.
 """
 
 import asyncio
+import contextlib
 import logging
 import threading
 import time
@@ -58,7 +59,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         batch_size: int = 100,
         flush_interval: float = 1.0,
         max_pending_batches: int = 1000,
-    ):
+    ) -> None:
         """Initialize the batch processor.
 
         Args:
@@ -170,16 +171,14 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
             try:
                 await self.process_batch(batch)
             except Exception as e:
-                self.logger.error(f"Error processing final batch: {e}")
+                self.logger.exception(f"Error processing final batch: {e}")
                 self._stats.failed_batches += 1
 
         # Wait for processing task to complete
         if self._processing_task:
             self._processing_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._processing_task
-            except asyncio.CancelledError:
-                pass
 
         self.logger.info("Batch processor stopped")
 

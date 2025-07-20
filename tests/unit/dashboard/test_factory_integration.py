@@ -5,7 +5,7 @@ from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
 class TestFactoryIntegration:
     """Tests for renderer factory with all formats."""
 
-    def test_factory_integration(self):
+    def test_factory_integration(self) -> None:
         """Test 11: Renderer factory with all formats."""
         factory = RendererFactory()
 

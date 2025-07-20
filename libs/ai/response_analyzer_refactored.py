@@ -43,7 +43,7 @@ class PromptPattern:
 class ResponseAnalyzer(StatisticsProviderMixin):
     """Analyzes user response patterns and learns optimal responses."""
 
-    def __init__(self, data_dir: Path | None = None):
+    def __init__(self, data_dir: Path | None = None) -> None:
         self.data_dir = data_dir or Path.home() / ".scripton" / "yesman" / "ai_data"
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -108,7 +108,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 data = json.load(f)
                 return [ResponseRecord(**item) for item in data]
         except Exception as e:
-            logger.error(f"Failed to load response history: {e}")
+            logger.exception(f"Failed to load response history: {e}")
             return []
 
     def _load_patterns(self) -> dict[str, PromptPattern]:
@@ -121,10 +121,10 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 data = json.load(f)
                 return {k: PromptPattern(**v) for k, v in data.items()}
         except Exception as e:
-            logger.error(f"Failed to load patterns: {e}")
+            logger.exception(f"Failed to load patterns: {e}")
             return {}
 
-    def save_data(self):
+    def save_data(self) -> None:
         """Save responses and patterns to disk."""
         try:
             # Save response history
@@ -140,7 +140,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 )
 
         except Exception as e:
-            logger.error(f"Failed to save data: {e}")
+            logger.exception(f"Failed to save data: {e}")
 
     def record_response(
         self,
@@ -149,7 +149,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         prompt_type: str,
         context: str = "",
         project_name: str | None = None,
-    ):
+    ) -> None:
         """Record a user response for learning."""
         record = ResponseRecord(
             timestamp=time.time(),
@@ -170,7 +170,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         if len(self.response_history) % 10 == 0:
             self.save_data()
 
-    def _learn_from_response(self, record: ResponseRecord):
+    def _learn_from_response(self, record: ResponseRecord) -> None:
         """Learn patterns from a response record."""
         pattern_id = f"{record.prompt_type}_{hash(record.prompt_text) % 10000}"
 

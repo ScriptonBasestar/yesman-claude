@@ -23,22 +23,22 @@ def get_app_config():
         config_manager = get_config()
         current_config = config_manager.config
         return AppConfig(**current_config)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get config: {str(e)}")
+    except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get config: {e!s}")
 
 
 # TODO: POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
 #       YesmanConfig에 save 메서드를 추가해야 합니다.
 @router.post("/config", status_code=204)
-def save_app_config(config: AppConfig):
+def save_app_config(config: AppConfig) -> None:
     """애플리케이션 설정을 저장합니다."""
     try:
         config_manager = get_config()
         config_data = config.dict(exclude_unset=True)
         config_manager.save(config_data)
         return
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save config: {str(e)}")
+    except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save config: {e!s}")
 
 
 @router.get("/config/projects", response_model=list[str])
@@ -48,8 +48,8 @@ def get_available_projects():
         tm = get_tmux_manager()
         projects = tm.load_projects().get("sessions", {})
         return list(projects.keys())
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get projects: {str(e)}")
+    except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get projects: {e!s}")
 
 
 @router.get("/config/session-files", response_model=list[str])
@@ -58,8 +58,8 @@ def list_session_files():
     try:
         tm = get_tmux_manager()
         return tm.list_session_configs()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list session files: {str(e)}")
+    except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list session files: {e!s}")
 
 
 @router.get("/config/paths", response_model=dict[str, str])
@@ -75,5 +75,5 @@ def get_config_paths():
             "global_config": str(config_manager.global_path),
             "local_config": str(config_manager.local_path),
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get config paths: {str(e)}")
+    except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get config paths: {e!s}")

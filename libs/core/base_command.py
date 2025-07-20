@@ -9,8 +9,9 @@ from typing import Any
 
 import click
 
-from ..tmux_manager import TmuxManager
-from ..yesman_config import YesmanConfig
+from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
+
 from .claude_manager import ClaudeManager
 from .error_handling import (
     ConfigurationError,
@@ -32,7 +33,7 @@ class CommandError(YesmanError):
         exit_code: int = 1,
         recovery_hint: str | None = None,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(
             message=message,
             severity=ErrorSeverity.MEDIUM,
@@ -50,7 +51,7 @@ class BaseCommand(ABC):
         config: YesmanConfig | None = None,
         tmux_manager: TmuxManager | None = None,
         claude_manager: ClaudeManager | None = None,
-    ):
+    ) -> None:
         """Initialize base command with dependency injection support.
 
         Args:
@@ -94,8 +95,9 @@ class BaseCommand(ABC):
                 operation="resolve_config",
                 component=self.__class__.__name__,
             )
+            msg = f"Failed to resolve configuration from DI container: {e}"
             raise ConfigurationError(
-                f"Failed to resolve configuration from DI container: {e}",
+                msg,
                 context=context,
                 cause=e,
                 recovery_hint="Check if the DI container is properly initialized",
@@ -106,44 +108,49 @@ class BaseCommand(ABC):
         try:
             return get_tmux_manager()
         except Exception as e:
-            self.logger.error(f"Failed to resolve tmux manager from DI container: {e}")
-            raise CommandError(f"Tmux manager error: {e}") from e
+            self.logger.exception("Failed to resolve tmux manager from DI container")
+            msg = f"Tmux manager error: {e}"
+            raise CommandError(msg) from e
 
     def _create_config(self) -> YesmanConfig:
         """Create YesmanConfig instance with error handling (fallback method)."""
         try:
             return YesmanConfig()
         except Exception as e:
-            self.logger.error(f"Failed to load configuration: {e}")
-            raise CommandError(f"Configuration error: {e}") from e
+            self.logger.exception("Failed to load configuration")
+            msg = f"Configuration error: {e}"
+            raise CommandError(msg) from e
 
     def _create_tmux_manager(self) -> TmuxManager:
         """Create TmuxManager instance with error handling (fallback method)."""
         try:
             return TmuxManager(self.config)
         except Exception as e:
-            self.logger.error(f"Failed to initialize tmux manager: {e}")
-            raise CommandError(f"Tmux manager error: {e}") from e
+            self.logger.exception("Failed to initialize tmux manager")
+            msg = f"Tmux manager error: {e}"
+            raise CommandError(msg) from e
 
     def _create_claude_manager(self) -> ClaudeManager:
         """Create ClaudeManager instance with error handling."""
         try:
             return ClaudeManager()
         except Exception as e:
-            self.logger.error(f"Failed to initialize claude manager: {e}")
-            raise CommandError(f"Claude manager error: {e}") from e
+            self.logger.exception("Failed to initialize claude manager")
+            msg = f"Claude manager error: {e}"
+            raise CommandError(msg) from e
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions (can be overridden)."""
         # Check if tmux is available
         if not self._is_tmux_available():
-            raise CommandError("tmux is not available or not properly installed")
+            msg = "tmux is not available or not properly installed"
+            raise CommandError(msg)
 
         # Check if required directories exist
         required_paths = [settings.paths.home_dir]
         for path in required_paths:
             if not Path(path).exists():
-                self.logger.warning(f"Creating missing directory: {path}")
+                self.logger.warning("Creating missing directory: %s", path)
                 Path(path).mkdir(parents=True, exist_ok=True)
 
     def _is_tmux_available(self) -> bool:
@@ -172,7 +179,7 @@ class BaseCommand(ABC):
     def log_command_end(self, command_name: str, success: bool = True) -> None:
         """Log command completion."""
         status = "completed successfully" if success else "failed"
-        self.logger.info(f"Command {command_name} {status}")
+        self.logger.info("Command %s %s", command_name, status)
 
     def confirm_action(self, message: str, default: bool = False) -> bool:
         """Ask for user confirmation."""
@@ -201,7 +208,6 @@ class BaseCommand(ABC):
     @abstractmethod
     def execute(self, **kwargs) -> Any:
         """Execute the command (must be implemented by subclasses)."""
-        pass
 
     def run(self, **kwargs) -> Any:
         """Main execution wrapper with error handling."""
@@ -227,9 +233,8 @@ class BaseCommand(ABC):
     def handle_success(self, result: Any) -> None:
         """Handle successful command execution."""
         # Default implementation - can be overridden
-        if result and isinstance(result, dict):
-            if result.get("message"):
-                self.print_success(result["message"])
+        if result and isinstance(result, dict) and result.get("message"):
+            self.print_success(result["message"])
 
     def handle_yesman_error(self, error: YesmanError) -> None:
         """Handle YesmanError with recovery hints."""
@@ -265,24 +270,27 @@ class SessionCommandMixin:
         try:
             sessions = self.tmux_manager.get_cached_sessions_list()
             return [session.get("session_name", "unknown") for session in sessions]
-        except Exception as e:
-            self.logger.error(f"Failed to get session list: {e}")
+        except Exception:
+            self.logger.exception("Failed to get session list")
             return []
 
     def validate_session_name(self, session_name: str) -> None:
         """Validate session name format."""
         if not session_name:
-            raise CommandError("Session name cannot be empty")
+            msg = "Session name cannot be empty"
+            raise CommandError(msg)
 
         if len(session_name) > settings.sessions.session_name_max_length:
-            raise CommandError(f"Session name too long (max {settings.sessions.session_name_max_length} characters)")
+            msg = f"Session name too long (max {settings.sessions.session_name_max_length} characters)"
+            raise CommandError(msg)
 
         import re
 
         from .settings import ValidationPatterns
 
         if not re.match(ValidationPatterns.SESSION_NAME, session_name):
-            raise CommandError("Session name can only contain letters, numbers, underscores, and hyphens")
+            msg = "Session name can only contain letters, numbers, underscores, and hyphens"
+            raise CommandError(msg)
 
     def session_exists(self, session_name: str) -> bool:
         """Check if session exists."""
@@ -306,10 +314,11 @@ class ConfigCommandMixin:
             with open(settings.paths.projects_file) as f:
                 return yaml.safe_load(f) or {}
         except FileNotFoundError:
-            self.logger.warning(f"Projects file not found: {settings.paths.projects_file}")
+            self.logger.warning("Projects file not found: %s", settings.paths.projects_file)
             return {}
         except Exception as e:
-            raise CommandError(f"Failed to load projects configuration: {e}") from e
+            msg = f"Failed to load projects configuration: {e}"
+            raise CommandError(msg) from e
 
     def save_projects_config(self, config: dict[str, Any]) -> None:
         """Save projects configuration with error handling."""
@@ -319,20 +328,21 @@ class ConfigCommandMixin:
             with open(settings.paths.projects_file, "w") as f:
                 yaml.dump(config, f, default_flow_style=False)
         except Exception as e:
-            raise CommandError(f"Failed to save projects configuration: {e}") from e
+            msg = f"Failed to save projects configuration: {e}"
+            raise CommandError(msg) from e
 
     def backup_config(self, config_path: str) -> str:
         """Create backup of configuration file."""
         import shutil
-        from datetime import datetime
+        from datetime import UTC, datetime
 
-        backup_path = f"{config_path}.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        backup_path = f"{config_path}.backup.{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         try:
             shutil.copy2(config_path, backup_path)
-            self.logger.info(f"Configuration backed up to: {backup_path}")
+            self.logger.info("Configuration backed up to: %s", backup_path)
             return backup_path
         except Exception as e:
-            self.logger.warning(f"Failed to create backup: {e}")
+            self.logger.warning("Failed to create backup: %s", e)
             return ""
 
 

@@ -54,7 +54,7 @@ class ProgressStats:
 class ProgressTracker:
     """TODO progress tracking and visualization."""
 
-    def __init__(self, console: Console | None = None):
+    def __init__(self, console: Console | None = None) -> None:
         self.console = console or Console()
         self.todos: list[TodoItem] = []
 

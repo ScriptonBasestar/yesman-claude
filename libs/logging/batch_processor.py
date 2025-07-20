@@ -36,7 +36,7 @@ class BatchProcessor:
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
         compression_enabled: bool = True,
         output_dir: Path | None = None,
-    ):
+    ) -> None:
         self.max_batch_size = max_batch_size
         self.max_batch_time = max_batch_time
         self.max_file_size = max_file_size
@@ -69,7 +69,7 @@ class BatchProcessor:
 
         self.logger = logging.getLogger("yesman.batch_processor")
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the batch processing task."""
         if self._processing_task and not self._processing_task.done():
             self.logger.warning("Batch processor already running")
@@ -79,7 +79,7 @@ class BatchProcessor:
         self._processing_task = asyncio.create_task(self._processing_loop())
         self.logger.info("Batch processor started")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the batch processing task."""
         if not self._processing_task:
             return
@@ -97,7 +97,7 @@ class BatchProcessor:
 
         self.logger.info("Batch processor stopped")
 
-    def add_entry(self, entry: dict[str, Any]):
+    def add_entry(self, entry: dict[str, Any]) -> None:
         """Add a log entry to the processing queue."""
         # Add timestamp if not present
         if "timestamp" not in entry:
@@ -110,7 +110,7 @@ class BatchProcessor:
             # We can't await here, so we'll let the processing loop handle it
             pass
 
-    async def _processing_loop(self):
+    async def _processing_loop(self) -> None:
         """Main processing loop that handles batching and flushing."""
         try:
             while not self._stop_event.is_set():
@@ -124,7 +124,7 @@ class BatchProcessor:
         except Exception as e:
             self.logger.error(f"Error in batch processing loop: {e}", exc_info=True)
 
-    async def _flush_pending_entries(self):
+    async def _flush_pending_entries(self) -> None:
         """Flush pending entries to storage."""
         if not self.pending_entries:
             return
@@ -155,11 +155,11 @@ class BatchProcessor:
             self.batch_counter += 1
 
         except Exception as e:
-            self.logger.error(f"Failed to write batch {batch.batch_id}: {e}")
+            self.logger.exception(f"Failed to write batch {batch.batch_id}: {e}")
             # Re-queue entries for retry
             self.pending_entries.extendleft(reversed(entries))
 
-    async def _write_batch(self, batch: LogBatch):
+    async def _write_batch(self, batch: LogBatch) -> None:
         """Write a batch to storage."""
         # Check if we need a new log file
         if not self.current_log_file or self.current_file_size >= self.max_file_size:
@@ -197,7 +197,7 @@ class BatchProcessor:
 
         self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")
 
-    async def _rotate_log_file(self):
+    async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
         timestamp = int(time.time())
         file_extension = ".jsonl.gz" if self.compression_enabled else ".jsonl"
@@ -239,7 +239,7 @@ class BatchProcessor:
                 self.logger.info(f"Cleaned up {removed_count} old log files")
 
         except Exception as e:
-            self.logger.error(f"Error cleaning up old log files: {e}")
+            self.logger.exception(f"Error cleaning up old log files: {e}")
 
         return removed_count
 
@@ -268,7 +268,7 @@ class BatchProcessor:
                     batches.append(batch)
 
         except Exception as e:
-            self.logger.error(f"Error reading batch file {file_path}: {e}")
+            self.logger.exception(f"Error reading batch file {file_path}: {e}")
 
         return batches
 

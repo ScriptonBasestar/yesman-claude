@@ -14,7 +14,7 @@ from collections import defaultdict, deque
 from collections.abc import Callable
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from functools import wraps
 from typing import Any, Optional
@@ -92,12 +92,11 @@ class PerformanceMetrics:
         """Get performance threshold level based on metrics."""
         if self.cpu_usage >= 70 or self.memory_usage >= 80:
             return PerformanceThreshold.CRITICAL
-        elif self.cpu_usage >= 50 or self.memory_usage >= 60:
+        if self.cpu_usage >= 50 or self.memory_usage >= 60:
             return PerformanceThreshold.WARNING
-        elif self.cpu_usage >= 30 or self.memory_usage >= 40:
+        if self.cpu_usage >= 30 or self.memory_usage >= 40:
             return PerformanceThreshold.GOOD
-        else:
-            return PerformanceThreshold.EXCELLENT
+        return PerformanceThreshold.EXCELLENT
 
 
 @dataclass
@@ -129,7 +128,7 @@ class OptimizationStrategy:
 class PerformanceProfiler:
     """Performance profiling and measurement utilities."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.measurements: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=100))
         self.start_times: dict[str, float] = {}
         self.lock = threading.Lock()
@@ -213,14 +212,15 @@ class PerformanceOptimizer:
             cls._instance.stop_monitoring()
         cls._instance = None
 
-    def __init__(self, monitoring_interval: float = 1.0):
+    def __init__(self, monitoring_interval: float = 1.0) -> None:
         """Initialize performance optimizer.
 
         Args:
             monitoring_interval: Interval between performance measurements in seconds
         """
         if PerformanceOptimizer._instance is not None:
-            raise RuntimeError("PerformanceOptimizer is a singleton, use get_instance()")
+            msg = "PerformanceOptimizer is a singleton, use get_instance()"
+            raise RuntimeError(msg)
 
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
@@ -362,14 +362,14 @@ class PerformanceOptimizer:
                 for callback in self.metrics_callbacks:
                     try:
                         callback(metrics)
-                    except Exception as e:
-                        logger.error(f"Error in metrics callback: {e}")
+                    except Exception:
+                        logger.exception("Error in metrics callback")
 
                 # Sleep until next measurement
                 time.sleep(self.monitoring_interval)
 
-            except Exception as e:
-                logger.error(f"Error in monitoring loop: {e}")
+            except Exception:
+                logger.exception("Error in monitoring loop")
                 time.sleep(self.monitoring_interval)
 
         logger.debug("Performance monitoring loop stopped")
@@ -379,7 +379,7 @@ class PerformanceOptimizer:
         try:
             # System metrics
             cpu_usage = self.process.cpu_percent()
-            memory_info = self.process.memory_info()
+            self.process.memory_info()
             memory_percent = self.process.memory_percent()
 
             # System-wide memory
@@ -408,8 +408,8 @@ class PerformanceOptimizer:
                 update_frequency=1.0 / self.monitoring_interval,
             )
 
-        except Exception as e:
-            logger.error(f"Error collecting metrics: {e}")
+        except Exception:
+            logger.exception("Error collecting metrics")
             return PerformanceMetrics()
 
     def _get_cache_stats(self) -> dict[str, Any]:
@@ -452,7 +452,7 @@ class PerformanceOptimizer:
     def _apply_optimization(self, level: OptimizationLevel) -> None:
         """Apply optimization strategy."""
         if level not in self.optimization_strategies:
-            logger.error(f"Unknown optimization level: {level}")
+            logger.error("Unknown optimization level: %s", level)
             return
 
         strategy = self.optimization_strategies[level]
@@ -462,7 +462,7 @@ class PerformanceOptimizer:
             self.current_optimization_level = level
             self.applied_optimizations = []
 
-        logger.info(f"Applying optimization: {strategy.name}")
+        logger.info("Applying optimization: %s", strategy.name)
 
         # Apply optimizations
         if strategy.reduce_update_frequency:
@@ -489,16 +489,16 @@ class PerformanceOptimizer:
         for callback in self.optimization_callbacks:
             try:
                 callback(level)
-            except Exception as e:
-                logger.error(f"Error in optimization callback: {e}")
+            except Exception:
+                logger.exception("Error in optimization callback")
 
-        logger.info(f"Optimization applied: {previous_level.value} -> {level.value}")
+        logger.info("Optimization applied: %s -> %s", previous_level.value, level.value)
 
     def _optimize_update_frequency(self, strategy: OptimizationStrategy) -> None:
         """Optimize update frequency based on strategy."""
         new_interval = min(strategy.min_update_interval, strategy.max_update_interval)
         self.monitoring_interval = new_interval
-        logger.debug(f"Update frequency optimized: {new_interval}s interval")
+        logger.debug("Update frequency optimized: %ss interval", new_interval)
 
     def _optimize_caching(self, strategy: OptimizationStrategy) -> None:
         """Optimize caching behavior."""
@@ -508,7 +508,7 @@ class PerformanceOptimizer:
     def _optimize_widget_count(self, strategy: OptimizationStrategy) -> None:
         """Optimize widget count."""
         # This would integrate with widget management system
-        logger.debug(f"Widget count limited to: {strategy.max_widget_count}")
+        logger.debug("Widget count limited to: %d", strategy.max_widget_count)
 
     def _optimize_animations(self, strategy: OptimizationStrategy) -> None:
         """Optimize animations."""
@@ -518,7 +518,7 @@ class PerformanceOptimizer:
     def _force_garbage_collection(self) -> None:
         """Force garbage collection."""
         collected = gc.collect()
-        logger.debug(f"Garbage collection forced: {collected} objects collected")
+        logger.debug("Garbage collection forced: %d objects collected", collected)
 
     def measure_render_time(self, func: Callable) -> Callable:
         """Decorator to measure render time."""
@@ -531,7 +531,7 @@ class PerformanceOptimizer:
 
     def get_metrics_history(self, duration_minutes: int = 5) -> list[PerformanceMetrics]:
         """Get metrics history for specified duration."""
-        cutoff_time = datetime.now() - timedelta(minutes=duration_minutes)
+        cutoff_time = datetime.now(UTC) - timedelta(minutes=duration_minutes)
 
         with self.lock:
             return [metrics for metrics in self.metrics_history if metrics.timestamp >= cutoff_time]
@@ -554,7 +554,7 @@ class PerformanceOptimizer:
         recommendations = self._generate_recommendations(current, history)
 
         return {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "current": current.to_dict(),
             "averages": {
                 "cpu_usage": avg_cpu,
@@ -628,7 +628,7 @@ class AsyncPerformanceOptimizer:
     and concurrent optimization strategies.
     """
 
-    def __init__(self, monitoring_interval: float = 1.0, max_concurrent_tasks: int = 10):
+    def __init__(self, monitoring_interval: float = 1.0, max_concurrent_tasks: int = 10) -> None:
         """Initialize async performance optimizer.
 
         Args:
@@ -692,8 +692,8 @@ class AsyncPerformanceOptimizer:
 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
-                logger.error(f"Error in async monitoring loop: {e}")
+            except Exception:
+                logger.exception("Error in async monitoring loop")
                 await asyncio.sleep(self.monitoring_interval)
 
     def _should_update_metrics(self) -> bool:

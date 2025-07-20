@@ -65,7 +65,8 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
         # Check if projects.yaml exists
         projects_config = self.load_projects_config()
         if not projects_config.get("sessions"):
-            raise CommandError("No sessions defined in projects.yaml")
+            msg = "No sessions defined in projects.yaml"
+            raise CommandError(msg)
 
 
 @click.command()
@@ -80,7 +81,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     is_flag=True,
     help="Force recreation of existing sessions without prompting",
 )
-def setup(session_name: str | None, dry_run: bool, force: bool):
+def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
     """Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
 
     Args:

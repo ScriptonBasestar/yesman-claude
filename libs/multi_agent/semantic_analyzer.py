@@ -4,7 +4,7 @@ import ast
 import hashlib
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -94,7 +94,7 @@ class SemanticContext:
     global_variables: dict[str, str] = field(default_factory=dict)
     constants: dict[str, str] = field(default_factory=dict)
     ast_hash: str = ""
-    last_modified: datetime = field(default_factory=datetime.now)
+    last_modified: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass
@@ -114,13 +114,13 @@ class SemanticConflict:
     impact_analysis: dict[str, Any] = field(default_factory=dict)
     suggested_resolution: ResolutionStrategy = ResolutionStrategy.HUMAN_REQUIRED
     metadata: dict[str, Any] = field(default_factory=dict)
-    detected_at: datetime = field(default_factory=datetime.now)
+    detected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class SemanticAnalyzer:
     """Advanced AST-based semantic conflict analysis engine."""
 
-    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None):
+    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None) -> None:
         """Initialize the semantic analyzer.
 
         Args:
@@ -164,9 +164,9 @@ class SemanticAnalyzer:
         Returns:
             List of detected semantic conflicts
         """
-        logger.info(f"Analyzing semantic conflicts between {branch1} and {branch2}")
+        logger.info("Analyzing semantic conflicts between %s and %s", branch1, branch2)
 
-        start_time = datetime.now()
+        start_time = datetime.now(UTC)
         conflicts = []
 
         try:
@@ -190,12 +190,12 @@ class SemanticAnalyzer:
             conflicts = self._merge_related_conflicts(conflicts)
 
             self.analysis_stats["conflicts_detected"] += len(conflicts)
-            self.analysis_stats["analysis_time"] += (datetime.now() - start_time).total_seconds()
+            self.analysis_stats["analysis_time"] += (datetime.now(UTC) - start_time).total_seconds()
 
-            logger.info(f"Found {len(conflicts)} semantic conflicts")
+            logger.info("Found %d semantic conflicts", len(conflicts))
 
         except Exception as e:
-            logger.error(f"Error analyzing semantic conflicts: {e}")
+            logger.exception("Error analyzing semantic conflicts: %s", e)
 
         return conflicts
 
@@ -253,7 +253,7 @@ class SemanticAnalyzer:
             conflicts.extend(var_conflicts)
 
         except Exception as e:
-            logger.error(f"Error analyzing file {file_path}: {e}")
+            logger.exception("Error analyzing file %s: %s", file_path, e)
 
         return conflicts
 
@@ -285,8 +285,8 @@ class SemanticAnalyzer:
             return context
 
         except Exception as e:
-            logger.error(
-                f"Error getting semantic context for {file_path} in {branch}: {e}",
+            logger.exception(
+                "Error getting semantic context for %s in %s: %s", file_path, branch, e
             )
             return None
 
@@ -316,9 +316,9 @@ class SemanticAnalyzer:
             context.constants = visitor.constants
 
         except SyntaxError as e:
-            logger.warning(f"Syntax error in {file_path}: {e}")
+            logger.warning("Syntax error in %s: %s", file_path, e)
         except Exception as e:
-            logger.error(f"Error extracting semantic context: {e}")
+            logger.exception("Error extracting semantic context: %s", e)
 
         return context
 
@@ -371,7 +371,7 @@ class SemanticAnalyzer:
         deleted_functions = set(context1.functions.keys()) - set(
             context2.functions.keys(),
         )
-        added_functions = set(context2.functions.keys()) - set(
+        set(context2.functions.keys()) - set(
             context1.functions.keys(),
         )
 
@@ -454,8 +454,8 @@ class SemanticAnalyzer:
         conflicts = []
 
         # Compare imports
-        imports1 = {(imp.module, imp.name, imp.alias) for imp in context1.imports}
-        imports2 = {(imp.module, imp.name, imp.alias) for imp in context2.imports}
+        {(imp.module, imp.name, imp.alias) for imp in context1.imports}
+        {(imp.module, imp.name, imp.alias) for imp in context2.imports}
 
         # Check for conflicting imports (same name, different module)
         names1 = {imp.alias or imp.name or imp.module.split(".")[-1]: imp for imp in context1.imports}
@@ -701,7 +701,7 @@ class SemanticAnalyzer:
     ) -> list[SemanticConflict]:
         """Rank conflicts by their potential impact."""
 
-        def conflict_priority(conflict):
+        def conflict_priority(conflict: Any) -> int:
             priority = 0
 
             # Severity weight
@@ -761,7 +761,7 @@ class SemanticAnalyzer:
                 with open(full_path, encoding="utf-8") as f:
                     return f.read()
         except Exception as e:
-            logger.error(f"Error reading file {file_path}: {e}")
+            logger.exception("Error reading file %s: %s", file_path, e)
         return None
 
     def get_analysis_summary(self) -> dict[str, Any]:
@@ -778,7 +778,7 @@ class SemanticAnalyzer:
 class SemanticVisitor(ast.NodeVisitor):
     """AST visitor for extracting semantic information."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.functions: dict[str, FunctionSignature] = {}
         self.classes: dict[str, ClassDefinition] = {}
         self.imports: list[ImportInfo] = []
@@ -786,7 +786,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.constants: dict[str, str] = {}
         self._current_class: str | None = None
 
-    def visit_FunctionDef(self, node: ast.FunctionDef):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Visit function definition."""
         signature = self._extract_function_signature(node)
 
@@ -803,7 +803,7 @@ class SemanticVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         """Visit async function definition."""
         signature = self._extract_function_signature(node)
         signature.name = f"async {signature.name}"
@@ -819,7 +819,7 @@ class SemanticVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def visit_ClassDef(self, node: ast.ClassDef):
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Visit class definition."""
         old_class = self._current_class
         self._current_class = node.name
@@ -854,7 +854,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
         self._current_class = old_class
 
-    def visit_Import(self, node: ast.Import):
+    def visit_Import(self, node: ast.Import) -> None:
         """Visit import statement."""
         for alias in node.names:
             import_info = ImportInfo(
@@ -864,7 +864,7 @@ class SemanticVisitor(ast.NodeVisitor):
             )
             self.imports.append(import_info)
 
-    def visit_ImportFrom(self, node: ast.ImportFrom):
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         """Visit from import statement."""
         module = node.module or ""
         level = node.level
@@ -879,7 +879,7 @@ class SemanticVisitor(ast.NodeVisitor):
             )
             self.imports.append(import_info)
 
-    def visit_Assign(self, node: ast.Assign):
+    def visit_Assign(self, node: ast.Assign) -> None:
         """Visit assignment for global variables."""
         if self._current_class is None:  # Only global assignments
             for target in node.targets:
@@ -896,7 +896,7 @@ class SemanticVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def visit_AnnAssign(self, node: ast.AnnAssign):
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
         """Visit annotated assignment."""
         if self._current_class is None and isinstance(node.target, ast.Name):
             var_name = node.target.id
@@ -986,26 +986,25 @@ class SemanticVisitor(ast.NodeVisitor):
         """Determine symbol visibility based on naming convention."""
         if name.startswith("__") and name.endswith("__"):
             return SymbolVisibility.MAGIC
-        elif name.startswith("__"):
+        if name.startswith("__"):
             return SymbolVisibility.PRIVATE
-        elif name.startswith("_"):
+        if name.startswith("_"):
             return SymbolVisibility.PROTECTED
-        else:
-            return SymbolVisibility.PUBLIC
+        return SymbolVisibility.PUBLIC
 
     def _infer_type(self, node: ast.expr) -> str:
         """Simple type inference for AST nodes."""
         if isinstance(node, ast.Constant):
             return type(node.value).__name__
-        elif isinstance(node, ast.List):
+        if isinstance(node, ast.List):
             return "list"
-        elif isinstance(node, ast.Dict):
+        if isinstance(node, ast.Dict):
             return "dict"
-        elif isinstance(node, ast.Set):
+        if isinstance(node, ast.Set):
             return "set"
-        elif isinstance(node, ast.Tuple):
+        if isinstance(node, ast.Tuple):
             return "tuple"
-        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
             return node.func.id
 
         return "unknown"

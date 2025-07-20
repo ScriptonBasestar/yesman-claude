@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture lint output by running commands manually"""
+"""Capture lint output by running commands manually."""
 
 import os
 import subprocess
@@ -7,13 +7,14 @@ from pathlib import Path
 
 
 def run_command_safely(cmd, description, cwd=None):
-    """Run a command and capture output safely"""
+    """Run a command and capture output safely."""
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {cmd}")
     print(f"{'=' * 60}")
 
     try:
+        # nosec B602 - shell=True is intentional for this debug script
         result = subprocess.run(
             cmd,
             check=False,
@@ -49,7 +50,7 @@ def run_command_safely(cmd, description, cwd=None):
 
 
 def main():
-    """Main function to capture lint output"""
+    """Main function to capture lint output."""
     project_path = "/Users/archmagece/myopen/scripton/yesman-claude"
     os.chdir(project_path)
 

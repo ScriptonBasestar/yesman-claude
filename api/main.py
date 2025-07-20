@@ -55,10 +55,10 @@ if os.path.exists(sveltekit_build_path):
     from fastapi.staticfiles import StaticFiles
 
     class CacheControlStaticFiles(StaticFiles):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
 
-        async def get_response(self, path: str, scope):
+        async def get_response(self, path: str, scope: Any):
             response = await super().get_response(path, scope)
             if hasattr(response, "headers"):
                 # Add cache-busting headers for JavaScript files
@@ -138,14 +138,14 @@ if os.path.exists(sveltekit_build_path):
 
 # Startup event
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Start background tasks on application startup."""
     asyncio.create_task(task_runner.start())
 
 
 # Shutdown event
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     """Stop background tasks on application shutdown."""
     await task_runner.stop()
 

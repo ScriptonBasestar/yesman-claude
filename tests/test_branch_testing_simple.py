@@ -9,7 +9,7 @@ from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_test_manager import BranchTestManager, TestSuite, TestType
 
 
-def test_agent_pool_test_integration():
+def test_agent_pool_test_integration() -> None:
     """Test AgentPool test integration without git dependency."""
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create agent pool
@@ -52,7 +52,7 @@ def test_agent_pool_test_integration():
 
 
 @pytest.mark.asyncio
-async def test_auto_test_branch_creation():
+async def test_auto_test_branch_creation() -> None:
     """Test automatic test task creation."""
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create agent pool
@@ -96,7 +96,7 @@ async def test_auto_test_branch_creation():
         assert combined_task.priority == 6  # Medium priority for combined
 
 
-def test_branch_test_status_retrieval():
+def test_branch_test_status_retrieval() -> None:
     """Test retrieving branch test status."""
     with tempfile.TemporaryDirectory() as tmpdir:
         agent_pool = AgentPool(max_agents=2, work_dir=tmpdir)
@@ -123,7 +123,7 @@ def test_branch_test_status_retrieval():
         assert status["status"] == "failed"
 
 
-def test_error_handling_when_testing_disabled():
+def test_error_handling_when_testing_disabled() -> None:
     """Test error handling when branch testing is not enabled."""
     with tempfile.TemporaryDirectory() as tmpdir:
         agent_pool = AgentPool(max_agents=2, work_dir=tmpdir)

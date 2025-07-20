@@ -2,6 +2,7 @@
 
 import threading
 import time
+from typing import Any
 
 from libs.dashboard.renderers.base_renderer import (
     BaseRenderer,
@@ -30,13 +31,13 @@ from libs.dashboard.renderers.widget_models import MetricCardData
 class MockRenderer(BaseRenderer):
     """Mock renderer for testing."""
 
-    def __init__(self, render_format=RenderFormat.TUI, delay=0.0):
+    def __init__(self, render_format: RenderFormat = RenderFormat.TUI, delay: float = 0.0) -> None:
         super().__init__(render_format)
         self.delay = delay
         self.render_count = 0
         self.last_params = None
 
-    def render_widget(self, widget_type, data, options=None):
+    def render_widget(self, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
         self.render_count += 1
         self.last_params = (widget_type, data, options)
 
@@ -45,31 +46,31 @@ class MockRenderer(BaseRenderer):
 
         return f"mock-{widget_type.value}-{self.render_count}"
 
-    def render_layout(self, widgets, layout_config=None):
+    def render_layout(self, widgets: list, layout_config: dict | None = None) -> str:
         return f"mock-layout-{len(widgets)}"
 
-    def render_container(self, content, container_config=None):
+    def render_container(self, content: str, container_config: dict | None = None) -> str:
         return "mock-container"
 
-    def supports_feature(self, feature):
+    def supports_feature(self, feature: str) -> bool:
         return True
 
 
 class TestRenderCache:
     """Test cases for RenderCache."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         self.cache = RenderCache(max_size=3)
 
-    def test_cache_initialization(self):
+    def test_cache_initialization(self) -> None:
         """Test cache initialization."""
         assert self.cache.max_size == 3
         assert self.cache.ttl is None
         assert self.cache.get_size() == 0
         assert isinstance(self.cache.stats, CacheStats)
 
-    def test_cache_key_generation(self):
+    def test_cache_key_generation(self) -> None:
         """Test cache key generation."""
         metric = MetricCardData(title="Test", value=100)
 
@@ -104,7 +105,7 @@ class TestRenderCache:
         assert isinstance(key1, str)
         assert len(key1) == 32  # MD5 hex length
 
-    def test_cache_set_get(self):
+    def test_cache_set_get(self) -> None:
         """Test basic cache set and get operations."""
         key = "test-key"
         value = "test-value"
@@ -117,7 +118,7 @@ class TestRenderCache:
         assert self.cache.get(key) == value
         assert self.cache.get_size() == 1
 
-    def test_cache_lru_eviction(self):
+    def test_cache_lru_eviction(self) -> None:
         """Test LRU eviction when cache is full."""
         # Fill cache to capacity
         for i in range(3):
@@ -137,7 +138,7 @@ class TestRenderCache:
         assert self.cache.get("key-2") == "value-2"  # Still there
         assert self.cache.get("key-3") == "value-3"  # New item
 
-    def test_cache_ttl_expiry(self):
+    def test_cache_ttl_expiry(self) -> None:
         """Test TTL-based cache expiry."""
         cache_with_ttl = RenderCache(max_size=10, ttl=0.1)  # 100ms TTL
 
@@ -149,7 +150,7 @@ class TestRenderCache:
 
         assert cache_with_ttl.get("key") is None
 
-    def test_cache_stats(self):
+    def test_cache_stats(self) -> None:
         """Test cache statistics tracking."""
         # Initially no stats
         stats = self.cache.get_stats()
@@ -172,7 +173,7 @@ class TestRenderCache:
         assert stats.total_requests == 2
         assert stats.hit_rate == 0.5
 
-    def test_cache_invalidation(self):
+    def test_cache_invalidation(self) -> None:
         """Test cache invalidation."""
         self.cache.set("key", "value")
         assert self.cache.get("key") == "value"
@@ -184,7 +185,7 @@ class TestRenderCache:
         # Invalidating non-existent key
         assert self.cache.invalidate("nonexistent") is False
 
-    def test_cache_clear(self):
+    def test_cache_clear(self) -> None:
         """Test cache clearing."""
         for i in range(3):
             self.cache.set(f"key-{i}", f"value-{i}")
@@ -198,12 +199,12 @@ class TestRenderCache:
         assert stats.hits == 0
         assert stats.misses == 0
 
-    def test_cache_thread_safety(self):
+    def test_cache_thread_safety(self) -> None:
         """Test cache thread safety."""
         results = []
         errors = []
 
-        def cache_worker(worker_id):
+        def cache_worker(worker_id: int) -> None:
             try:
                 for i in range(10):
                     key = f"worker-{worker_id}-{i}"
@@ -236,16 +237,16 @@ class TestRenderCache:
 class TestCachedDecorators:
     """Test cases for caching decorators."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         self.cache = RenderCache(max_size=10)
         self.renderer = MockRenderer()
 
-    def test_cached_render_decorator(self):
+    def test_cached_render_decorator(self) -> None:
         """Test cached_render decorator."""
 
         @cached_render(self.cache)
-        def mock_render(self, widget_type, data, options=None):
+        def mock_render(self: MockRenderer, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
             self.render_count += 1
             return f"render-{self.render_count}"
 
@@ -263,11 +264,11 @@ class TestCachedDecorators:
         assert result2 == "render-1"
         assert self.renderer.render_count == 1  # Function called only once
 
-    def test_cached_layout_decorator(self):
+    def test_cached_layout_decorator(self) -> None:
         """Test cached_layout decorator."""
 
         @cached_layout(self.cache)
-        def mock_render_layout(self, widgets, layout_config=None):
+        def mock_render_layout(self: MockRenderer, widgets: list, layout_config: dict | None = None) -> str:
             return f"layout-{len(widgets)}-{id(layout_config)}"
 
         # Bind method to renderer
@@ -297,12 +298,12 @@ class TestCachedDecorators:
 class TestLazyRenderer:
     """Test cases for LazyRenderer."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         self.renderer = MockRenderer(delay=0.01)  # Small delay to test timing
         self.metric = MetricCardData(title="Test", value=100)
 
-    def test_lazy_renderer_initialization(self):
+    def test_lazy_renderer_initialization(self) -> None:
         """Test lazy renderer initialization."""
         lazy = LazyRenderer(
             self.renderer,
@@ -317,7 +318,7 @@ class TestLazyRenderer:
         assert lazy.options == {"option": "value"}
         assert not lazy.is_rendered()
 
-    def test_lazy_rendering_deferred(self):
+    def test_lazy_rendering_deferred(self) -> None:
         """Test that rendering is deferred until needed."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
 
@@ -332,7 +333,7 @@ class TestLazyRenderer:
         assert lazy.is_rendered()
         assert result == "mock-metric_card-1"
 
-    def test_lazy_rendering_cached(self):
+    def test_lazy_rendering_cached(self) -> None:
         """Test that lazy rendering caches result."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
 
@@ -343,7 +344,7 @@ class TestLazyRenderer:
         assert result1 == result2
         assert self.renderer.render_count == 1
 
-    def test_lazy_renderer_string_conversion(self):
+    def test_lazy_renderer_string_conversion(self) -> None:
         """Test string conversion triggers rendering."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
 
@@ -356,12 +357,12 @@ class TestLazyRenderer:
         assert self.renderer.render_count == 1
         assert "mock-metric_card-1" in string_result
 
-    def test_lazy_renderer_thread_safety(self):
+    def test_lazy_renderer_thread_safety(self) -> None:
         """Test lazy renderer thread safety."""
         lazy = LazyRenderer(self.renderer, WidgetType.METRIC_CARD, self.metric)
         results = []
 
-        def render_worker():
+        def render_worker() -> None:
             results.append(lazy.render())
 
         threads = []
@@ -381,18 +382,18 @@ class TestLazyRenderer:
 class TestBatchRenderer:
     """Test cases for BatchRenderer."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         self.base_renderer = MockRenderer(delay=0.01)
         self.batch_renderer = BatchRenderer(self.base_renderer, max_workers=2)
 
-    def test_batch_renderer_initialization(self):
+    def test_batch_renderer_initialization(self) -> None:
         """Test batch renderer initialization."""
         assert self.batch_renderer.renderer is self.base_renderer
         assert self.batch_renderer.max_workers == 2
         assert isinstance(self.batch_renderer._batch_cache, RenderCache)
 
-    def test_batch_sequential_rendering(self):
+    def test_batch_sequential_rendering(self) -> None:
         """Test sequential batch rendering."""
         requests = [
             (WidgetType.METRIC_CARD, MetricCardData(title="Test1", value=100), None),
@@ -406,7 +407,7 @@ class TestBatchRenderer:
         assert all("mock-metric_card" in result for result in results)
         assert self.base_renderer.render_count == 3
 
-    def test_batch_parallel_rendering(self):
+    def test_batch_parallel_rendering(self) -> None:
         """Test parallel batch rendering."""
         requests = [
             (WidgetType.METRIC_CARD, MetricCardData(title="Test1", value=100), None),
@@ -427,12 +428,12 @@ class TestBatchRenderer:
         parallel_time = end_time - start_time
         assert parallel_time < sequential_time * 0.8  # Allow some overhead
 
-    def test_batch_empty_requests(self):
+    def test_batch_empty_requests(self) -> None:
         """Test batch rendering with empty requests."""
         results = self.batch_renderer.render_batch([])
         assert results == []
 
-    def test_batch_lazy_rendering(self):
+    def test_batch_lazy_rendering(self) -> None:
         """Test lazy batch rendering."""
         requests = [
             (WidgetType.METRIC_CARD, MetricCardData(title="Test1", value=100), None),
@@ -454,16 +455,16 @@ class TestBatchRenderer:
 class TestPerformanceProfiler:
     """Test cases for PerformanceProfiler."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         self.profiler = PerformanceProfiler()
 
-    def test_profiler_initialization(self):
+    def test_profiler_initialization(self) -> None:
         """Test profiler initialization."""
         assert isinstance(self.profiler.metrics, dict)
         assert len(self.profiler.metrics) == 0
 
-    def test_timing_context(self):
+    def test_timing_context(self) -> None:
         """Test timing context manager."""
         with self.profiler.time_operation("test_op"):
             time.sleep(0.01)
@@ -474,7 +475,7 @@ class TestPerformanceProfiler:
         assert stats["max"] >= 0.01
         assert stats["avg"] >= 0.01
 
-    def test_manual_timing_recording(self):
+    def test_manual_timing_recording(self) -> None:
         """Test manual timing recording."""
         self.profiler.record_time("manual_op", 0.05)
         self.profiler.record_time("manual_op", 0.03)
@@ -485,7 +486,7 @@ class TestPerformanceProfiler:
         assert stats["max"] == 0.05
         assert stats["avg"] == 0.04
 
-    def test_nonexistent_operation_stats(self):
+    def test_nonexistent_operation_stats(self) -> None:
         """Test stats for non-existent operation."""
         stats = self.profiler.get_stats("nonexistent")
         assert stats["count"] == 0
@@ -493,7 +494,7 @@ class TestPerformanceProfiler:
         assert stats["max"] == 0
         assert stats["avg"] == 0
 
-    def test_profiler_clear(self):
+    def test_profiler_clear(self) -> None:
         """Test profiler clearing."""
         self.profiler.record_time("test_op", 0.01)
         assert len(self.profiler.metrics) == 1
@@ -501,11 +502,11 @@ class TestPerformanceProfiler:
         self.profiler.clear()
         assert len(self.profiler.metrics) == 0
 
-    def test_profile_render_decorator(self):
+    def test_profile_render_decorator(self) -> None:
         """Test profile_render decorator."""
 
         @profile_render("decorated_op")
-        def test_function():
+        def test_function() -> str:
             time.sleep(0.01)
             return "result"
 
@@ -520,18 +521,18 @@ class TestPerformanceProfiler:
 class TestOptimizationIntegration:
     """Integration tests for optimization features."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for each test."""
         clear_all_caches()
         clear_performance_stats()
         self.renderer = TUIRenderer()
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Cleanup after each test."""
         clear_all_caches()
         clear_performance_stats()
 
-    def test_cache_performance_improvement(self):
+    def test_cache_performance_improvement(self) -> None:
         """Test that caching improves performance."""
         metric = MetricCardData(title="Performance Test", value=75.5, suffix="%")
 
@@ -560,7 +561,7 @@ class TestOptimizationIntegration:
         # Verify the underlying method was called only once (second call was cached)
         assert mock_renderer.render_count == 1
 
-    def test_lazy_vs_eager_rendering(self):
+    def test_lazy_vs_eager_rendering(self) -> None:
         """Test performance difference between lazy and eager rendering."""
         metric = MetricCardData(title="Lazy Test", value=100)
 
@@ -581,7 +582,7 @@ class TestOptimizationIntegration:
         lazy_result = lazy_renderer.render()
         assert eager_result == lazy_result
 
-    def test_batch_vs_individual_rendering(self):
+    def test_batch_vs_individual_rendering(self) -> None:
         """Test batch rendering performance."""
         metrics = [MetricCardData(title=f"Metric {i}", value=i * 10) for i in range(5)]
 
@@ -593,14 +594,14 @@ class TestOptimizationIntegration:
         for metric in metrics:
             result = self.renderer.render_widget(WidgetType.METRIC_CARD, metric)
             individual_results.append(result)
-        individual_time = time.time() - start_individual
+        time.time() - start_individual
 
         # Batch rendering
         requests = [(WidgetType.METRIC_CARD, metric, None) for metric in metrics]
 
         start_batch = time.time()
         batch_results = batch_renderer.render_batch(requests, parallel=True)
-        batch_time = time.time() - start_batch
+        time.time() - start_batch
 
         # Results should be equivalent
         assert len(individual_results) == len(batch_results)
@@ -609,7 +610,7 @@ class TestOptimizationIntegration:
         assert all("Performance Test" in str(result) or "Metric" in str(result) for result in individual_results)
         assert all("Performance Test" in str(result) or "Metric" in str(result) for result in batch_results)
 
-    def test_global_cache_utilities(self):
+    def test_global_cache_utilities(self) -> None:
         """Test global cache utility functions."""
         # Initially empty stats
         stats = get_cache_stats()
@@ -636,7 +637,7 @@ class TestOptimizationIntegration:
         cleared_stats = get_cache_stats()
         assert cleared_stats["widget_cache"].total_requests == 0
 
-    def test_global_performance_utilities(self):
+    def test_global_performance_utilities(self) -> None:
         """Test global performance utility functions."""
         # Initially empty
         stats = get_performance_stats()
@@ -644,7 +645,7 @@ class TestOptimizationIntegration:
 
         # Create some profiled activity
         @profile_render("test_operation")
-        def test_operation():
+        def test_operation() -> str:
             time.sleep(0.001)
             return "done"
 

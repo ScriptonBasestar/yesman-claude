@@ -8,7 +8,7 @@ class TestKeyboardNavigation:
     """Tests for keyboard navigation system."""
 
     @pytest.fixture
-    def keyboard_manager(self):
+    def keyboard_manager(self) -> KeyboardNavigationManager:
         """Create KeyboardNavigationManager instance."""
         manager = KeyboardNavigationManager()
         yield manager
@@ -16,12 +16,12 @@ class TestKeyboardNavigation:
         manager.actions.clear()
         manager.bindings.clear()
 
-    def test_keyboard_navigation(self, keyboard_manager):
+    def test_keyboard_navigation(self, keyboard_manager: KeyboardNavigationManager) -> None:
         """Test 4: Keyboard navigation system."""
         # Test action registration
         test_called = False
 
-        def test_action():
+        def test_action() -> None:
             nonlocal test_called
             test_called = True
 

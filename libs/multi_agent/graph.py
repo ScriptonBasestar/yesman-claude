@@ -7,7 +7,7 @@ from typing import Any
 class DirectedGraph:
     """Simple directed graph implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize empty graph."""
         self.nodes: dict[str, dict[str, Any]] = {}
         self.edges: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
@@ -107,7 +107,7 @@ class DirectedGraph:
             if node in rec_stack:
                 # Found a cycle
                 idx = rec_stack.index(node)
-                cycle = rec_stack[idx:] + [node]
+                cycle = [*rec_stack[idx:], node]
                 cycles.append(cycle)
                 return
 
@@ -146,7 +146,8 @@ class DirectedGraph:
     def topological_sort(self) -> list[str]:
         """Return nodes in topological order."""
         if not self.is_directed_acyclic_graph():
-            raise ValueError("Graph contains cycles")
+            msg = "Graph contains cycles"
+            raise ValueError(msg)
 
         # Kahn's algorithm
         in_degree = {node: len(self.predecessors(node)) for node in self.nodes}

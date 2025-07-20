@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -24,11 +25,11 @@ class TestInterfaceDetection:
             yield project_root
 
     @pytest.fixture
-    def launcher(self, temp_project_root):
+    def launcher(self, temp_project_root: Any):
         """Create DashboardLauncher with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
-    def test_interface_detection(self, launcher):
+    def test_interface_detection(self, launcher: Any) -> None:
         """Test 1: Interface detection and availability checking."""
         # Test auto-detection
         best_interface = launcher.detect_best_interface()

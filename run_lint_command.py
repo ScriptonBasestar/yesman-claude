@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run make lint command and capture output"""
+"""Run make lint command and capture output."""
 
 import os
 import subprocess
@@ -9,7 +9,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_make_lint():
-    """Run make lint and capture all output"""
+    """Run make lint and capture all output."""
     try:
         # Run make lint command
         result = subprocess.run(["make", "lint"], check=False, capture_output=True, text=True, timeout=120)

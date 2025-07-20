@@ -22,7 +22,7 @@ class KeyModifier(Enum):
     ALT = "alt"
     META = "meta"  # Cmd on Mac, Windows key on Windows
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -59,7 +59,8 @@ class KeyBinding:
     def __post_init__(self):
         """Validate and normalize key binding."""
         if not self.key:
-            raise ValueError("Key cannot be empty")
+            msg = "Key cannot be empty"
+            raise ValueError(msg)
 
         # Normalize key to lowercase
         self.key = self.key.lower()
@@ -145,10 +146,11 @@ class KeyboardNavigationManager:
 
     _instance: Optional["KeyboardNavigationManager"] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize keyboard navigation manager."""
         if KeyboardNavigationManager._instance is not None:
-            raise RuntimeError("KeyboardNavigationManager is a singleton, use get_instance()")
+            msg = "KeyboardNavigationManager is a singleton, use get_instance()"
+            raise RuntimeError(msg)
         self.bindings: dict[str, list[KeyBinding]] = {}
         self.actions: dict[str, Callable] = {}
         self.focusable_elements: list[FocusableElement] = []
@@ -284,7 +286,7 @@ class KeyboardNavigationManager:
         self.bindings[key_combo].append(binding)
         self.bindings[key_combo].sort(key=lambda b: b.priority, reverse=True)
 
-        logger.debug(f"Registered key binding: {key_combo} -> {action}")
+        logger.debug("Registered key binding: %s -> %s", key_combo, action)
 
     def unregister_binding(
         self,
@@ -321,7 +323,7 @@ class KeyboardNavigationManager:
                 del self.bindings[key_combo]
 
         removed_count = original_count - len(self.bindings.get(key_combo, []))
-        logger.debug(f"Removed {removed_count} bindings for {key_combo}")
+        logger.debug("Removed %s bindings for %s", removed_count, key_combo)
         return removed_count > 0
 
     def register_action(self, action_name: str, handler: Callable) -> None:
@@ -332,7 +334,7 @@ class KeyboardNavigationManager:
             handler: Function to call when action is triggered
         """
         self.actions[action_name] = handler
-        logger.debug(f"Registered action: {action_name}")
+        logger.debug("Registered action: %s", action_name)
 
     def unregister_action(self, action_name: str) -> bool:
         """Unregister an action handler.
@@ -345,7 +347,7 @@ class KeyboardNavigationManager:
         """
         if action_name in self.actions:
             del self.actions[action_name]
-            logger.debug(f"Unregistered action: {action_name}")
+            logger.debug("Unregistered action: %s", action_name)
             return True
         return False
 
@@ -379,7 +381,7 @@ class KeyboardNavigationManager:
         key_combo = "+".join([mod.value for mod in modifiers] + [key.lower()])
 
         if key_combo not in self.bindings:
-            logger.debug(f"No bindings found for {key_combo}")
+            logger.debug("No bindings found for %s", key_combo)
             return False
 
         # Find best matching binding based on context and priority
@@ -394,7 +396,7 @@ class KeyboardNavigationManager:
                 best_binding = binding
 
         if best_binding is None:
-            logger.debug(f"No matching binding for {key_combo} in context {context}")
+            logger.debug("No matching binding for %s in context %s", key_combo, context)
             return False
 
         # Execute action
@@ -411,7 +413,7 @@ class KeyboardNavigationManager:
             True if action was executed, False otherwise
         """
         if action_name not in self.actions:
-            logger.warning(f"Unknown action: {action_name}")
+            logger.warning("Unknown action: %s", action_name)
             return False
 
         try:
@@ -423,17 +425,17 @@ class KeyboardNavigationManager:
             else:
                 handler(*args, **kwargs)
 
-            logger.debug(f"Executed action: {action_name}")
+            logger.debug("Executed action: %s", action_name)
             return True
 
         except Exception as e:
-            logger.error(f"Error executing action {action_name}: {e}")
+            logger.exception("Error executing action %s: %s", action_name, e)
             return False
 
     def set_context(self, context: NavigationContext) -> None:
         """Set the current navigation context."""
         self.current_context = context
-        logger.debug(f"Navigation context changed to: {context}")
+        logger.debug("Navigation context changed to: %s", context)
 
     def add_focusable_element(
         self,
@@ -465,7 +467,7 @@ class KeyboardNavigationManager:
                 break
 
         self.focusable_elements.insert(insert_index, element)
-        logger.debug(f"Added focusable element: {element_id}")
+        logger.debug("Added focusable element: %s", element_id)
 
     def remove_focusable_element(self, element_id: str) -> bool:
         """Remove a focusable element.
@@ -484,7 +486,7 @@ class KeyboardNavigationManager:
                 if i <= self.current_focus_index:
                     self.current_focus_index -= 1
 
-                logger.debug(f"Removed focusable element: {element_id}")
+                logger.debug("Removed focusable element: %s", element_id)
                 return True
 
         return False
@@ -554,7 +556,7 @@ class KeyboardNavigationManager:
 
     def _focus_element(self, element: FocusableElement) -> None:
         """Internal method to focus an element."""
-        logger.debug(f"Focusing element: {element.element_id}")
+        logger.debug("Focusing element: %s", element.element_id)
         # This would be implemented by subclasses or interface-specific handlers
 
     def get_current_focus(self) -> FocusableElement | None:
@@ -569,7 +571,7 @@ class KeyboardNavigationManager:
         """Activate the currently focused element."""
         element = self.get_current_focus()
         if element:
-            logger.debug(f"Activating element: {element.element_id}")
+            logger.debug("Activating element: %s", element.element_id)
 
     def cancel_action(self) -> None:
         """Handle cancel/escape action."""
@@ -585,7 +587,7 @@ class KeyboardNavigationManager:
 
     def navigate_direction(self, direction: str) -> None:
         """Handle directional navigation."""
-        logger.debug(f"Navigate {direction}")
+        logger.debug("Navigate %s", direction)
 
     # Vim mode methods
 
@@ -646,7 +648,7 @@ class KeyboardNavigationManager:
 
         valid_contexts = {None, context, NavigationContext.GLOBAL}
 
-        for key_combo, bindings in self.bindings.items():
+        for bindings in self.bindings.values():
             for binding in bindings:
                 if binding.context in valid_contexts and binding.action not in processed_actions:
                     help_lines.append(f"{binding.key_combination:<20} {binding.description}")

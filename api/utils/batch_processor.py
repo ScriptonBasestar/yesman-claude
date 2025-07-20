@@ -127,7 +127,7 @@ class WebSocketBatchProcessor:
             try:
                 await handler([message])
                 self.stats["messages_processed"] += 1
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error sending immediate message to %s", channel)
         else:
             self.logger.warning("No handler registered for channel: %s", channel)
@@ -159,7 +159,7 @@ class WebSocketBatchProcessor:
                 for channel in channels_to_flush:
                     await self._flush_channel(channel)
 
-        except Exception as e:
+        except Exception:
             self.logger.error("Error in batch processing loop", exc_info=True)
 
     async def _flush_channel(self, channel: str) -> None:
@@ -203,7 +203,7 @@ class WebSocketBatchProcessor:
 
             self.logger.debug("Flushed batch %s to %s: %d messages", batch.batch_id, channel, len(messages))
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to send batch %s to %s", batch.batch_id, channel)
             # Re-queue messages for retry (with retry limit to prevent infinite loops)
             retry_messages = []
@@ -240,7 +240,7 @@ class WebSocketBatchProcessor:
         # Send optimized batch
         try:
             await handler(optimized_messages)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Handler error for channel %s", batch.channel)
             raise
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Direct script to run lint commands and save output to file"""
+"""Direct script to run lint commands and save output to file."""
 
 import os
 import subprocess
 
 
 def run_command(command, description):
-    """Run a command and capture output"""
+    """Run a command and capture output."""
     output = []
     output.append(f"\n{'=' * 60}")
     output.append(f"Running: {description}")

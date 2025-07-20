@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demo: Mock Centralization Benefits
+"""Demo: Mock Centralization Benefits.
 
 Shows the difference between old duplicated mock patterns and new centralized approach
 """
@@ -16,7 +16,7 @@ from tests.fixtures.mock_factories import ManagerMockFactory
 
 
 def demo_old_vs_new_patterns():
-    """Demonstrate the difference between old and new mock patterns"""
+    """Demonstrate the difference between old and new mock patterns."""
     print("🔧 Mock Centralization Demo")
     print("=" * 50)
 
@@ -74,7 +74,7 @@ def demo_old_vs_new_patterns():
 
 
 def demo_customization_options():
-    """Show how to customize the centralized mocks"""
+    """Show how to customize the centralized mocks."""
     print("\n\n🎛️ Customization Examples")
     print("=" * 50)
 
@@ -134,7 +134,7 @@ def demo_customization_options():
 
 
 def demo_migration_example():
-    """Show a real migration example"""
+    """Show a real migration example."""
     print("\n\n📦 Migration Example")
     print("=" * 50)
 
@@ -184,7 +184,7 @@ def test_get_sessions_list(mock_session_manager):
 
 
 def demo_priority_targets():
-    """Show the highest impact migration targets"""
+    """Show the highest impact migration targets."""
     print("\n\n🎯 Priority Migration Targets")
     print("=" * 50)
 

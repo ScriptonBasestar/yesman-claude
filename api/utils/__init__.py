@@ -2,4 +2,4 @@
 
 from .batch_processor import BatchConfig, MessageBatch, WebSocketBatchProcessor
 
-__all__ = ["WebSocketBatchProcessor", "BatchConfig", "MessageBatch"]
+__all__ = ["BatchConfig", "MessageBatch", "WebSocketBatchProcessor"]

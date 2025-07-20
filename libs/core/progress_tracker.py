@@ -55,7 +55,7 @@ class ProgressAnalyzer:
         "completed": r"(?:✓|done|completed|finished).*?(?:todo|task)",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.session_progress: dict[str, SessionProgress] = {}
 
     def analyze_pane_output(self, session_name: str, pane_output: list[str]) -> SessionProgress | None:
@@ -111,7 +111,7 @@ class ProgressAnalyzer:
 
         return current_phase
 
-    def _analyze_file_activity(self, output_lines: list[str], task: TaskProgress):
+    def _analyze_file_activity(self, output_lines: list[str], task: TaskProgress) -> None:
         """Analyze file-related activity."""
         for line in output_lines:
             # Check for file creation
@@ -125,7 +125,7 @@ class ProgressAnalyzer:
             if match:
                 task.files_modified += 1
 
-    def _analyze_command_activity(self, output_lines: list[str], task: TaskProgress):
+    def _analyze_command_activity(self, output_lines: list[str], task: TaskProgress) -> None:
         """Analyze command execution activity."""
         for i, line in enumerate(output_lines):
             # Check for command execution
@@ -137,11 +137,11 @@ class ProgressAnalyzer:
                     if re.search(self.COMMAND_PATTERNS["success"], output_lines[j]):
                         task.commands_succeeded += 1
                         break
-                    elif re.search(self.COMMAND_PATTERNS["failure"], output_lines[j]):
+                    if re.search(self.COMMAND_PATTERNS["failure"], output_lines[j]):
                         task.commands_failed += 1
                         break
 
-    def _analyze_todo_activity(self, output_lines: list[str], task: TaskProgress):
+    def _analyze_todo_activity(self, output_lines: list[str], task: TaskProgress) -> None:
         """Analyze TODO-related activity."""
         for line in output_lines:
             # Check for TODO identification
@@ -152,7 +152,7 @@ class ProgressAnalyzer:
             if re.search(self.TODO_PATTERNS["completed"], line, re.IGNORECASE):
                 task.todos_completed += 1
 
-    def _update_phase_progress(self, task: TaskProgress):
+    def _update_phase_progress(self, task: TaskProgress) -> None:
         """Update phase progress based on activity indicators."""
         if task.phase == TaskPhase.STARTING:
             # Starting phase is quick
@@ -191,7 +191,7 @@ class ProgressAnalyzer:
         """Get progress for all sessions."""
         return self.session_progress.copy()
 
-    def reset_session_progress(self, session_name: str):
+    def reset_session_progress(self, session_name: str) -> None:
         """Reset progress for a specific session."""
         if session_name in self.session_progress:
             del self.session_progress[session_name]

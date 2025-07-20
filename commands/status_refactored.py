@@ -15,7 +15,7 @@ from libs.core.mixins import LayoutManagerMixin, StatusManagerMixin
 class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     """Show status of all or specific tmux sessions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize status command."""
         super().__init__()
         self.console = Console()
@@ -51,7 +51,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         except Exception as e:
             self.update_status("error")
-            self.logger.error(f"Error checking status: {e}")
+            self.logger.exception(f"Error checking status: {e}")
             raise
 
     def update_status(self, status: str) -> None:
@@ -146,7 +146,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                     break
 
         except Exception as e:
-            self.logger.error(f"Error getting tmux info for {session_name}: {e}")
+            self.logger.exception(f"Error getting tmux info for {session_name}: {e}")
             info["status"] = "error"
 
         return info
@@ -284,7 +284,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     default=True,
     help="Show detailed information",
 )
-def status(session_name: str | None, format: str, details: bool):
+def status(session_name: str | None, format: str, details: bool) -> None:
     """Show status of all or specific tmux sessions."""
     command = StatusCommand()
 

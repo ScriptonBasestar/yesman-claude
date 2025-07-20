@@ -74,9 +74,9 @@ class Task:
         if "status" in data:
             data["status"] = TaskStatus(data["status"])
         # Convert datetime strings back
-        if "start_time" in data and data["start_time"]:
+        if data.get("start_time"):
             data["start_time"] = datetime.fromisoformat(data["start_time"])
-        if "end_time" in data and data["end_time"]:
+        if data.get("end_time"):
             data["end_time"] = datetime.fromisoformat(data["end_time"])
         return cls(**data)
 

@@ -15,7 +15,7 @@ from libs.ui.session_selector import show_session_selector
 class EnterCommand(BaseCommand, SessionCommandMixin):
     """Enter (attach to) a tmux session."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.server = libtmux.Server()
 
@@ -25,7 +25,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 
         # Check if running in interactive terminal
         if not sys.stdin.isatty():
-            raise CommandError("Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts")
+            msg = "Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts"
+            raise CommandError(msg)
 
     def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:
         """Execute the enter command."""
@@ -83,9 +84,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             selected = show_session_selector(running_sessions)
             if selected:
                 return selected
-            else:
-                self.print_info("Selection cancelled")
-                return None
+            self.print_info("Selection cancelled")
+            return None
         except Exception:
             # Fallback to text-based selection
             self.print_warning("TUI unavailable, falling back to text selection...")
@@ -99,9 +99,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
                 if 1 <= choice <= len(running_sessions):
                     session_data: dict[str, Any] = running_sessions[choice - 1]
                     return str(session_data["session"])
-                else:
-                    self.print_error("Invalid selection")
-                    return None
+                self.print_error("Invalid selection")
+                return None
             except click.Abort:
                 self.print_info("Selection cancelled")
                 return None
@@ -139,7 +138,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 @click.command()
 @click.argument("session_name", required=False)
 @click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
-def enter(session_name, list_sessions):
+def enter(session_name: str | None, list_sessions: bool) -> None:
     """Enter (attach to) a tmux session."""
     command = EnterCommand()
     command.run(session_name=session_name, list_sessions=list_sessions)

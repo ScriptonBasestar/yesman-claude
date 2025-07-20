@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summary of lint fixes completed"""
+"""Summary of lint fixes completed."""
 
 
 def main():

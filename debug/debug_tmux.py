@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Debug tmux command issues"""
+"""Debug tmux command issues."""
 
 import libtmux
 

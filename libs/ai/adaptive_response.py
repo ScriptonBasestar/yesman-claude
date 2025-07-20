@@ -27,7 +27,7 @@ class AdaptiveConfig:
 class AdaptiveResponse:
     """Adaptive response system that learns from user patterns."""
 
-    def __init__(self, config: AdaptiveConfig | None = None, data_dir: Path | None = None):
+    def __init__(self, config: AdaptiveConfig | None = None, data_dir: Path | None = None) -> None:
         self.config = config or AdaptiveConfig()
         self.analyzer = ResponseAnalyzer(data_dir)
 
@@ -37,7 +37,7 @@ class AdaptiveResponse:
 
         logger.info("Adaptive response system initialized")
 
-    async def should_auto_respond(self, prompt_text: str, context: str = "", project_name: str = None) -> tuple[bool, str, float]:
+    async def should_auto_respond(self, prompt_text: str, context: str = "", project_name: str | None = None) -> tuple[bool, str, float]:
         """Determine if we should auto-respond to a prompt and what the response should be."""
         if not self.config.auto_response_enabled:
             return False, "", 0.0
@@ -52,10 +52,10 @@ class AdaptiveResponse:
         # Check if confidence meets threshold
         should_respond = confidence >= self.config.min_confidence_threshold
 
-        logger.debug(f"Auto-response decision: {should_respond} (confidence: {confidence:.2f}, threshold: {self.config.min_confidence_threshold:.2f})")
+        logger.debug("Auto-response decision: {should_respond} (confidence: {confidence:.2f}, threshold: {self.config.min_confidence_threshold:.2f})")
 
         if should_respond:
-            logger.info(f"Auto-responding with: '{predicted_response}' (confidence: {confidence:.2f})")
+            logger.info("Auto-responding with: '{predicted_response}' (confidence: {confidence:.2f})")
 
         return should_respond, predicted_response, confidence
 
@@ -65,7 +65,7 @@ class AdaptiveResponse:
         response: str,
         confidence: float,
         context: str = "",
-        project_name: str = None,
+        project_name: str | None = None,
     ) -> bool:
         """Send an adaptive response with appropriate delay and logging."""
         try:
@@ -77,12 +77,12 @@ class AdaptiveResponse:
             self._response_queue.append((prompt_text, response, context, project_name))
 
             # Log the response attempt
-            logger.info(f"Sent adaptive response: '{response}' for prompt type: {self.analyzer._classify_prompt_type(prompt_text)}")
+            logger.info("Sent adaptive response: '{response}' for prompt type: {self.analyzer._classify_prompt_type(prompt_text)}")
 
             return True
 
-        except Exception as e:
-            logger.error(f"Failed to send adaptive response: {e}")
+        except Exception:
+            logger.exception("Failed to send adaptive response: {e}")
             return False
 
     def confirm_response_success(
@@ -90,9 +90,9 @@ class AdaptiveResponse:
         prompt_text: str,
         response: str,
         context: str = "",
-        project_name: str = None,
+        project_name: str | None = None,
         success: bool = True,
-    ):
+    ) -> None:
         """Confirm whether a response was successful and record it for learning."""
         if not self.config.learning_enabled:
             return
@@ -101,21 +101,21 @@ class AdaptiveResponse:
             # Record the response for learning
             if success:
                 self.analyzer.record_response(prompt_text, response, context, project_name)
-                logger.debug(f"Recorded successful response: {response}")
+                logger.debug("Recorded successful response: {response}")
             else:
                 # For failed responses, we might want to adjust confidence
-                logger.warning(f"Response failed: {response} for prompt: {prompt_text}")
+                logger.warning("Response failed: {response} for prompt: {prompt_text}")
 
-        except Exception as e:
-            logger.error(f"Failed to record response: {e}")
+        except Exception:
+            logger.exception("Failed to record response: {e}")
 
     def learn_from_manual_response(
         self,
         prompt_text: str,
         user_response: str,
         context: str = "",
-        project_name: str = None,
-    ):
+        project_name: str | None = None,
+    ) -> None:
         """Learn from a manual user response that was not auto-generated."""
         if not self.config.learning_enabled:
             return
@@ -123,12 +123,12 @@ class AdaptiveResponse:
         try:
             # Record manual response for learning
             self.analyzer.record_response(prompt_text, user_response, context, project_name)
-            logger.debug(f"Learned from manual response: {user_response}")
+            logger.debug("Learned from manual response: {user_response}")
 
-        except Exception as e:
-            logger.error(f"Failed to learn from manual response: {e}")
+        except Exception:
+            logger.exception("Failed to learn from manual response: {e}")
 
-    async def update_patterns(self):
+    async def update_patterns(self) -> None:
         """Periodically update and optimize response patterns."""
         current_time = time.time()
 
@@ -141,11 +141,11 @@ class AdaptiveResponse:
             # Cleanup old data to keep learning fresh
             removed_count = self.analyzer.cleanup_old_data(days_to_keep=30)
             if removed_count > 0:
-                logger.info(f"Cleaned up {removed_count} old response records")
+                logger.info("Cleaned up {removed_count} old response records")
 
             # Get statistics
             stats = self.analyzer.get_statistics()
-            logger.info(f"Pattern statistics: {stats}")
+            logger.info("Pattern statistics: {stats}")
 
             # Update cache with new patterns
             self._learning_cache.update(
@@ -158,8 +158,8 @@ class AdaptiveResponse:
             self._last_pattern_update = current_time
             logger.info("Pattern update completed")
 
-        except Exception as e:
-            logger.error(f"Failed to update patterns: {e}")
+        except Exception:
+            logger.exception("Failed to update patterns: {e}")
 
     def get_learning_statistics(self) -> dict[str, Any]:
         """Get comprehensive learning statistics."""
@@ -183,8 +183,8 @@ class AdaptiveResponse:
 
             return {**base_stats, **adaptive_stats}
 
-        except Exception as e:
-            logger.error(f"Failed to get learning statistics: {e}")
+        except Exception:
+            logger.exception("Failed to get learning statistics: {e}")
             return {}
 
     def get_prompt_suggestions(self, partial_prompt: str, limit: int = 5) -> list[str]:
@@ -206,8 +206,8 @@ class AdaptiveResponse:
 
             return suggestions
 
-        except Exception as e:
-            logger.error(f"Failed to get prompt suggestions: {e}")
+        except Exception:
+            logger.exception("Failed to get prompt suggestions: {e}")
             return []
 
     def export_learning_data(self, output_path: Path) -> bool:
@@ -228,28 +228,27 @@ class AdaptiveResponse:
             with open(output_path, "w") as f:
                 json.dump(export_data, f, indent=2)
 
-            logger.info(f"Learning data exported to: {output_path}")
+            logger.info("Learning data exported to: {output_path}")
             return True
 
-        except Exception as e:
-            logger.error(f"Failed to export learning data: {e}")
+        except Exception:
+            logger.exception("Failed to export learning data: {e}")
             return False
 
-    def adjust_confidence_threshold(self, new_threshold: float):
+    def adjust_confidence_threshold(self, new_threshold: float) -> None:
         """Dynamically adjust the confidence threshold for auto-responses."""
         if 0.0 <= new_threshold <= 1.0:
-            old_threshold = self.config.min_confidence_threshold
             self.config.min_confidence_threshold = new_threshold
-            logger.info(f"Confidence threshold adjusted: {old_threshold:.2f} -> {new_threshold:.2f}")
+            logger.info("Confidence threshold adjusted: {old_threshold:.2f} -> {new_threshold:.2f}")
         else:
-            logger.warning(f"Invalid confidence threshold: {new_threshold}. Must be between 0.0 and 1.0")
+            logger.warning("Invalid confidence threshold: {new_threshold}. Must be between 0.0 and 1.0")
 
-    def enable_auto_response(self, enabled: bool = True):
+    def enable_auto_response(self, enabled: bool = True) -> None:
         """Enable or disable auto-response functionality."""
         self.config.auto_response_enabled = enabled
-        logger.info(f"Auto-response {'enabled' if enabled else 'disabled'}")
+        logger.info("Auto-response {'enabled' if enabled else 'disabled'}")
 
-    def enable_learning(self, enabled: bool = True):
+    def enable_learning(self, enabled: bool = True) -> None:
         """Enable or disable learning functionality."""
         self.config.learning_enabled = enabled
-        logger.info(f"Learning {'enabled' if enabled else 'disabled'}")
+        logger.info("Learning {'enabled' if enabled else 'disabled'}")

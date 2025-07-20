@@ -3,7 +3,7 @@
 import heapq
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from .types import Agent, Task
@@ -58,7 +58,7 @@ class PriorityTask:
     priority_score: float
     task: Task
 
-    def __lt__(self, other):
+    def __lt__(self, other: "PrioritizedTask") -> bool:
         # Higher priority score = higher priority (so negate for min-heap)
         return self.priority_score > other.priority_score
 
@@ -66,7 +66,7 @@ class PriorityTask:
 class TaskScheduler:
     """Intelligent task scheduler with priority and complexity-based distribution."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the task scheduler."""
         self.agent_capabilities: dict[str, AgentCapability] = {}
         self.priority_queue: list[PriorityTask] = []
@@ -100,7 +100,7 @@ class TaskScheduler:
         self.agent_capabilities[agent.agent_id] = capabilities
         self.task_history[agent.agent_id] = []
 
-        logger.info(f"Registered agent {agent.agent_id} with scheduler")
+        logger.info("Registered agent %s with scheduler", agent.agent_id)
 
     def add_task(self, task: Task) -> None:
         """Add a task to the priority queue."""
@@ -109,7 +109,8 @@ class TaskScheduler:
 
         heapq.heappush(self.priority_queue, priority_task)
         logger.debug(
-            f"Added task {task.task_id} with priority score {priority_score:.3f}",
+            "Added task %s with priority score %.3f",
+            task.task_id, priority_score,
         )
 
     def get_next_task_for_agent(self, agent: Agent) -> Task | None:
@@ -236,7 +237,8 @@ class TaskScheduler:
             self.task_history[agent_id] = self.task_history[agent_id][-100:]
 
         logger.debug(
-            f"Updated performance for agent {agent_id}: success_rate={capability.success_rate:.3f}, processing_power={capability.processing_power:.3f}",
+            "Updated performance for agent %s: success_rate=%.3f, processing_power=%.3f",
+            agent_id, capability.success_rate, capability.processing_power,
         )
 
     def _calculate_priority_score(self, task: Task) -> float:
@@ -250,7 +252,7 @@ class TaskScheduler:
         # Urgency based on how long task has been waiting
         age_hours = 0.0
         if hasattr(task, "created_at") and task.created_at:
-            age_hours = (datetime.now() - task.created_at).total_seconds() / 3600.0
+            age_hours = (datetime.now(UTC) - task.created_at).total_seconds() / 3600.0
 
         urgency_score = min(1.0, age_hours / 24.0) * self.urgency_weight  # Max urgency after 24h
 
@@ -259,8 +261,7 @@ class TaskScheduler:
         if task.metadata.get("blocks_tasks", 0) > 0:
             dependency_score = min(1.0, task.metadata["blocks_tasks"] / 5.0) * self.dependency_weight
 
-        total_score = priority_score + complexity_score + urgency_score + dependency_score
-        return total_score
+        return priority_score + complexity_score + urgency_score + dependency_score
 
     def _find_best_task_for_agent(
         self,
@@ -398,7 +399,8 @@ class TaskScheduler:
         # Perform load balancing adjustments
         if overloaded and underloaded:
             logger.info(
-                f"Rebalancing workload: {len(overloaded)} overloaded, {len(underloaded)} underloaded agents",
+                "Rebalancing workload: %d overloaded, %d underloaded agents",
+                len(overloaded), len(underloaded),
             )
 
             # Sort by load difference to prioritize most urgent rebalancing
@@ -424,7 +426,9 @@ class TaskScheduler:
 
                         rebalancing_actions.append((overloaded_agent_id, underloaded_agent_id))
                         logger.info(
-                            f"Redistributed {load_transfer:.2f} load from {overloaded_agent_id} ({overloaded_cap.current_load:.2f}) to {underloaded_agent_id} ({underloaded_cap.current_load:.2f})",
+                            "Redistributed %.2f load from %s (%.2f) to %s (%.2f)",
+                            load_transfer, overloaded_agent_id, overloaded_cap.current_load,
+                            underloaded_agent_id, underloaded_cap.current_load,
                         )
 
                         # Apply scheduling preference adjustment
@@ -444,7 +448,7 @@ class TaskScheduler:
         overloaded_cap.processing_power *= 0.8  # 20% penalty
 
         # The boost to underloaded agent was already applied in rebalance_tasks
-        logger.debug(f"Adjusted assignment preferences: {overloaded_agent_id} penalty, {underloaded_agent_id} boost")
+        logger.debug("Adjusted assignment preferences: %s penalty, %s boost", overloaded_agent_id, underloaded_agent_id)
 
     def reset_assignment_preferences(self, agent_id: str) -> None:
         """Reset assignment preferences for an agent to baseline values."""
@@ -460,7 +464,7 @@ class TaskScheduler:
             capability.processing_power = 1.0
             capability.processing_power = 1.0
 
-        logger.debug(f"Reset assignment preferences for agent {agent_id}")
+        logger.debug("Reset assignment preferences for agent %s", agent_id)
 
     def _estimate_task_load(self, task: Task, agent_capability: AgentCapability) -> float:
         """Estimate the load a task represents for an agent."""

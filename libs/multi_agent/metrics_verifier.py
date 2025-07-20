@@ -92,7 +92,7 @@ class SuccessCriteria:
 class MetricsVerifier:
     """Comprehensive metrics verification system."""
 
-    def __init__(self, work_dir: str = ".scripton/yesman"):
+    def __init__(self, work_dir: str = ".scripton/yesman") -> None:
         """Initialize metrics verifier.
 
         Args:
@@ -137,7 +137,7 @@ class MetricsVerifier:
                 logger.info("Loaded existing performance metrics")
 
             except Exception as e:
-                logger.error(f"Failed to load metrics: {e}")
+                logger.exception("Failed to load metrics: %s", e)
 
     def _save_metrics(self) -> None:
         """Save current metrics to disk."""
@@ -153,7 +153,7 @@ class MetricsVerifier:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
-            logger.error(f"Failed to save metrics: {e}")
+            logger.exception("Failed to save metrics: %s", e)
 
     async def measure_single_agent_performance(
         self,
@@ -171,12 +171,12 @@ class MetricsVerifier:
         Returns:
             Average execution time for single agent
         """
-        logger.info(f"Measuring single-agent performance with {len(benchmark_tasks)} tasks")
+        logger.info("Measuring single-agent performance with %s tasks", len(benchmark_tasks))
 
         execution_times = []
 
         for iteration in range(iterations):
-            logger.info(f"Single-agent benchmark iteration {iteration + 1}/{iterations}")
+            logger.info("Single-agent benchmark iteration %s/%s", iteration + 1, iterations)
 
             # Temporarily limit to single agent
             original_max_agents = agent_pool.max_agents
@@ -210,7 +210,7 @@ class MetricsVerifier:
                 execution_time = end_time - start_time
                 execution_times.append(execution_time)
 
-                logger.info(f"Single-agent iteration {iteration + 1} completed in {execution_time:.2f}s")
+                logger.info("Single-agent iteration %s completed in %.2fs", iteration + 1, execution_time)
 
                 # Stop and cleanup
                 await agent_pool.stop()
@@ -224,7 +224,7 @@ class MetricsVerifier:
         self.single_agent_benchmarks.append(average_time)
         self.current_metrics.single_agent_time = average_time
 
-        logger.info(f"Single-agent average performance: {average_time:.2f}s")
+        logger.info("Single-agent average performance: %.2fs", average_time)
         self._save_metrics()
 
         return average_time
@@ -245,12 +245,12 @@ class MetricsVerifier:
         Returns:
             Average execution time for multi-agent system
         """
-        logger.info(f"Measuring multi-agent performance with {agent_pool.max_agents} agents")
+        logger.info("Measuring multi-agent performance with %s agents", agent_pool.max_agents)
 
         execution_times = []
 
         for iteration in range(iterations):
-            logger.info(f"Multi-agent benchmark iteration {iteration + 1}/{iterations}")
+            logger.info("Multi-agent benchmark iteration %s/%s", iteration + 1, iterations)
 
             start_time = time.time()
 
@@ -279,7 +279,7 @@ class MetricsVerifier:
             execution_time = end_time - start_time
             execution_times.append(execution_time)
 
-            logger.info(f"Multi-agent iteration {iteration + 1} completed in {execution_time:.2f}s")
+            logger.info("Multi-agent iteration %s completed in %.2fs", iteration + 1, execution_time)
 
             # Stop and cleanup
             await agent_pool.stop()
@@ -293,8 +293,8 @@ class MetricsVerifier:
         if self.current_metrics.single_agent_time > 0:
             self.current_metrics.speed_improvement_ratio = self.current_metrics.single_agent_time / self.current_metrics.multi_agent_time
 
-        logger.info(f"Multi-agent average performance: {average_time:.2f}s")
-        logger.info(f"Speed improvement ratio: {self.current_metrics.speed_improvement_ratio:.2f}x")
+        logger.info("Multi-agent average performance: %.2fs", average_time)
+        logger.info("Speed improvement ratio: %.2fx", self.current_metrics.speed_improvement_ratio)
         self._save_metrics()
 
         return average_time
@@ -312,7 +312,10 @@ class MetricsVerifier:
             self.current_metrics.conflict_resolution_rate = self.current_metrics.auto_resolved_conflicts / self.current_metrics.total_conflicts
 
         logger.info(
-            f"Conflict resolution: {auto_resolved}/{total_conflicts} (rate: {self.current_metrics.conflict_resolution_rate:.2%})",
+            "Conflict resolution: %s/%s (rate: %.2%%)",
+            auto_resolved,
+            total_conflicts,
+            self.current_metrics.conflict_resolution_rate * 100,
         )
         self._save_metrics()
 
@@ -329,7 +332,10 @@ class MetricsVerifier:
             self.current_metrics.merge_success_rate = self.current_metrics.successful_merges / self.current_metrics.total_merge_attempts
 
         logger.info(
-            f"Merge success: {successful}/{total_attempts} (rate: {self.current_metrics.merge_success_rate:.2%})",
+            "Merge success: %s/%s (rate: %.2%%)",
+            successful,
+            total_attempts,
+            self.current_metrics.merge_success_rate * 100,
         )
         self._save_metrics()
 
@@ -344,7 +350,10 @@ class MetricsVerifier:
         self.current_metrics.quality_improvement = final_score - initial_score
 
         logger.info(
-            f"Code quality: {initial_score:.2f} -> {final_score:.2f} (change: {self.current_metrics.quality_improvement:+.2f})",
+            "Code quality: %.2f -> %.2f (change: %+.2f)",
+            initial_score,
+            final_score,
+            self.current_metrics.quality_improvement,
         )
         self._save_metrics()
 
@@ -532,6 +541,6 @@ async def run_comprehensive_verification(
 
     # Generate and log report
     report = verifier.generate_performance_report()
-    logger.info(f"\n{report}")
+    logger.info("\n%s", report)
 
     return results

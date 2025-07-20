@@ -10,10 +10,10 @@ from .prompt_detector import ClaudePromptDetector
 from .session_manager import SessionManager
 
 __all__ = [
-    "SessionManager",
-    "ClaudeManager",
-    "SessionInfo",
-    "DashboardStats",
     "ClaudeContentCollector",
+    "ClaudeManager",
     "ClaudePromptDetector",
+    "DashboardStats",
+    "SessionInfo",
+    "SessionManager",
 ]

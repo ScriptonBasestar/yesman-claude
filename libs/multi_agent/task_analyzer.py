@@ -53,7 +53,7 @@ class TaskDefinition:
 class TaskAnalyzer:
     """Analyzes tasks and generates dependency graphs."""
 
-    def __init__(self, repo_path: str = "."):
+    def __init__(self, repo_path: str = ".") -> None:
         """Initialize task analyzer.
 
         Args:
@@ -75,7 +75,7 @@ class TaskAnalyzer:
         """
         full_path = self.repo_path / file_path
         if not full_path.exists():
-            logger.warning(f"File not found: {file_path}")
+            logger.warning("File not found: %s", file_path)
             return []
 
         dependencies = []
@@ -115,7 +115,7 @@ class TaskAnalyzer:
             self.file_dependencies[file_path] = dependencies
 
         except Exception as e:
-            logger.error(f"Failed to analyze {file_path}: {e}")
+            logger.exception("Failed to analyze %s: %s", file_path, e)
 
         return dependencies
 
@@ -206,10 +206,8 @@ class TaskAnalyzer:
         module = str(path).replace("/", ".").replace("\\", ".")
 
         # Handle __init__.py files
-        if module.endswith(".__init__"):
-            module = module[:-9]  # Remove .__init__
+        return module.removesuffix(".__init__")  # Remove .__init__
 
-        return module
 
     def _module_to_file(self, module_name: str) -> str | None:
         """Convert module name to file path."""
@@ -269,7 +267,7 @@ class TaskAnalyzer:
             task_id=task_id,
             title=title,
             description=description,
-            file_paths=sorted(list(all_files)),
+            file_paths=sorted(all_files),
             **kwargs,
         )
 
@@ -351,7 +349,7 @@ class TaskAnalyzer:
         # Check for cycles
         if not graph.is_directed_acyclic_graph():
             cycles = graph.simple_cycles()
-            logger.warning(f"Dependency cycles detected: {cycles}")
+            logger.warning("Dependency cycles detected: %s", cycles)
 
             # Break cycles by removing edges with lowest weight
             while not graph.is_directed_acyclic_graph():
@@ -445,4 +443,4 @@ class TaskAnalyzer:
         with open(output_file, "w") as f:
             json.dump(data, f, indent=2)
 
-        logger.info(f"Exported dependency graph to {output_path}")
+        logger.info("Exported dependency graph to %s", output_path)

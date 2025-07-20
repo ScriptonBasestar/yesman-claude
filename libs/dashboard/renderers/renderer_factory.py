@@ -16,19 +16,16 @@ from .web_renderer import WebRenderer
 class RendererFactoryError(Exception):
     """Base exception for renderer factory errors."""
 
-    pass
 
 
 class UnsupportedFormatError(RendererFactoryError):
     """Raised when unsupported format is requested."""
 
-    pass
 
 
 class RendererInitializationError(RendererFactoryError):
     """Raised when renderer initialization fails."""
 
-    pass
 
 
 class RendererFactory:
@@ -61,7 +58,8 @@ class RendererFactory:
                 cls.register_all()
                 cls._initialized = True
             except Exception as e:
-                raise RendererInitializationError(f"Failed to initialize renderer factory: {e}") from e
+                msg = f"Failed to initialize renderer factory: {e}"
+                raise RendererInitializationError(msg) from e
 
     @classmethod
     def register_all(cls) -> None:
@@ -73,8 +71,9 @@ class RendererFactory:
                 # Register the class itself
                 registry.register(render_format, renderer_class)
             except Exception as e:
+                msg = f"Failed to register {render_format.value} renderer: {e}"
                 raise RendererInitializationError(
-                    f"Failed to register {render_format.value} renderer: {e}",
+                    msg,
                 ) from e
 
     @classmethod
@@ -94,8 +93,9 @@ class RendererFactory:
                     registry = RendererRegistry()
                     registry.register(render_format, renderer_class)
                 except Exception as e:
+                    msg = f"Failed to register {render_format.value} renderer: {e}"
                     raise RendererInitializationError(
-                        f"Failed to register {render_format.value} renderer: {e}",
+                        msg,
                     ) from e
 
     @classmethod
@@ -117,16 +117,18 @@ class RendererFactory:
             cls.initialize()
 
         if render_format not in cls._renderer_classes:
+            msg = f"Unsupported render format: {render_format.value}. Available formats: {list(cls._renderer_classes.keys())}"
             raise UnsupportedFormatError(
-                f"Unsupported render format: {render_format.value}. Available formats: {list(cls._renderer_classes.keys())}",
+                msg,
             )
 
         try:
             renderer_class = cls._renderer_classes[render_format]
             return renderer_class(**kwargs)
         except Exception as e:
+            msg = f"Failed to create {render_format.value} renderer: {e}"
             raise RendererInitializationError(
-                f"Failed to create {render_format.value} renderer: {e}",
+                msg,
             ) from e
 
     @classmethod
@@ -175,8 +177,9 @@ class RendererFactory:
             try:
                 return renderer.render_widget(widget_type, data, options)
             except Exception as e:
+                msg = f"Rendering failed for {render_format.value}: {e}"
                 raise RendererFactoryError(
-                    f"Rendering failed for {render_format.value}: {e}",
+                    msg,
                 ) from e
         else:
             # Render with all available formats
@@ -191,7 +194,8 @@ class RendererFactory:
                     errors.append(f"{fmt.value}: {e}")
 
             if errors and not results:
-                raise RendererFactoryError(f"All renderers failed: {'; '.join(errors)}")
+                msg = f"All renderers failed: {'; '.join(errors)}"
+                raise RendererFactoryError(msg)
 
             return results
 
@@ -243,7 +247,8 @@ class RendererFactory:
                     results[fmt] = result
 
         if errors and not results:
-            raise RendererFactoryError(f"All parallel renders failed: {'; '.join(errors)}")
+            msg = f"All parallel renders failed: {'; '.join(errors)}"
+            raise RendererFactoryError(msg)
 
         return results
 
@@ -333,11 +338,10 @@ def render_formats(
     """
     if parallel:
         return RendererFactory.render_parallel(widget_type, data, formats, options)
-    else:
-        results = {}
-        for fmt in formats:
-            results[fmt] = render_widget(widget_type, data, fmt, options)
-        return results
+    results = {}
+    for fmt in formats:
+        results[fmt] = render_widget(widget_type, data, fmt, options)
+    return results
 
 
 def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:

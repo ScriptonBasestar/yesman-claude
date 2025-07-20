@@ -2,18 +2,19 @@
 
 import logging
 import time
+from typing import Any
 
 
 class ClaudeProcessController:
     """Controls Claude process lifecycle (start, stop, restart)."""
 
-    def __init__(self, session_manager, status_manager):
+    def __init__(self, session_manager: Any, status_manager: Any) -> None:
         self.session_manager = session_manager
         self.status_manager = status_manager
         self.selected_model = "default"
         self.logger = logging.getLogger(f"yesman.claude_process.{session_manager.session_name}")
 
-    def set_model(self, model: str):
+    def set_model(self, model: str) -> None:
         """Set the selected model."""
         self.selected_model = model
         self.status_manager.update_status(f"[cyan]Model set to: {model}[/]")
@@ -39,7 +40,7 @@ class ClaudeProcessController:
 
         except Exception as e:
             self.status_manager.update_status(f"[red]Failed to restart Claude pane: {e}[/]")
-            self.logger.error(f"Failed to restart Claude pane: {e}")
+            self.logger.exception(f"Failed to restart Claude pane: {e}")
             return False
 
     def _terminate_claude_process(self) -> None:
@@ -87,10 +88,9 @@ class ClaudeProcessController:
         """Get claude command based on selected model."""
         if self.selected_model == "opus":
             return "claude --model claude-3-5-opus-20241022"
-        elif self.selected_model == "sonnet":
+        if self.selected_model == "sonnet":
             return "claude --model claude-3-5-sonnet-20241022"
-        else:
-            return "claude"
+        return "claude"
 
     def is_claude_running(self) -> bool:
         """Check if Claude is currently running."""
@@ -100,6 +100,6 @@ class ClaudeProcessController:
         except Exception:
             return False
 
-    def send_input(self, text: str):
+    def send_input(self, text: str) -> None:
         """Send input to Claude pane."""
         self.session_manager.send_keys(text)

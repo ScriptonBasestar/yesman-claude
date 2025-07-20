@@ -80,46 +80,46 @@ from commands.multi_agent.semantic_analysis import (
 
 # Export the CLI group and classes
 __all__ = [
-    "multi_agent",
-    # Agent Pool Management
-    "StartAgentsCommand",
-    "MonitorAgentsCommand",
-    "StatusCommand",
-    "StopAgentsCommand",
     "AddTaskCommand",
-    "ListTasksCommand",
-    # Conflict Resolution
-    "DetectConflictsCommand",
-    "ResolveConflictCommand",
-    "ConflictSummaryCommand",
-    # Conflict Prediction
-    "PredictConflictsCommand",
-    "PredictionSummaryCommand",
     "AnalyzeConflictPatternsCommand",
     # Semantic Analysis
     "AnalyzeSemanticConflictsCommand",
-    "SemanticSummaryCommand",
-    "FunctionDiffCommand",
-    "SemanticMergeCommand",
+    "AutoResolveCommand",
     # Batch Operations
     "BatchMergeCommand",
-    "AutoResolveCommand",
-    "PreventConflictsCommand",
+    "BranchInfoCommand",
     # Collaboration
     "CollaborateCommand",
-    "SendMessageCommand",
-    "ShareKnowledgeCommand",
-    "BranchInfoCommand",
-    # Dependency Tracking
-    "DependencyTrackCommand",
-    "DependencyStatusCommand",
+    "ConflictSummaryCommand",
     "DependencyImpactCommand",
     "DependencyPropagateCommand",
+    "DependencyStatusCommand",
+    # Dependency Tracking
+    "DependencyTrackCommand",
+    # Conflict Resolution
+    "DetectConflictsCommand",
+    "FunctionDiffCommand",
+    "ListTasksCommand",
+    "MonitorAgentsCommand",
+    # Conflict Prediction
+    "PredictConflictsCommand",
+    "PredictionSummaryCommand",
+    "PreventConflictsCommand",
+    "QualityCheckCommand",
+    "ResolveConflictCommand",
+    "ReviewApproveCommand",
     # Code Review
     "ReviewInitiateCommand",
-    "ReviewApproveCommand",
     "ReviewRejectCommand",
     "ReviewStatusCommand",
-    "QualityCheckCommand",
     "ReviewSummaryCommand",
+    "SemanticMergeCommand",
+    "SemanticSummaryCommand",
+    "SendMessageCommand",
+    "ShareKnowledgeCommand",
+    # Agent Pool Management
+    "StartAgentsCommand",
+    "StatusCommand",
+    "StopAgentsCommand",
+    "multi_agent",
 ]

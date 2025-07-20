@@ -12,7 +12,7 @@ from .base_command import BaseCommand, CommandError
 class AsyncBaseCommand(BaseCommand, ABC):
     """Async-capable base class for commands with long-running operations."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._running = False
         self._loop = None
@@ -20,7 +20,6 @@ class AsyncBaseCommand(BaseCommand, ABC):
     @abstractmethod
     async def execute_async(self, **kwargs) -> dict:
         """Async version of execute method - must be implemented by subclasses."""
-        pass
 
     def execute(self, **kwargs) -> dict:
         """Sync wrapper that runs the async execute method."""
@@ -32,15 +31,15 @@ class AsyncBaseCommand(BaseCommand, ABC):
                     # We're already in an async context, use run_coroutine_threadsafe directly
                     coro = self.execute_async(**kwargs)
                     return asyncio.run_coroutine_threadsafe(coro, loop).result()
-                else:
-                    return loop.run_until_complete(self.execute_async(**kwargs))
+                return loop.run_until_complete(self.execute_async(**kwargs))
             except RuntimeError:
                 # No event loop exists, create a new one
                 return asyncio.run(self.execute_async(**kwargs))
         except Exception as e:
             if isinstance(e, CommandError):
                 raise
-            raise CommandError(f"Async command execution failed: {e}") from e
+            msg = f"Async command execution failed: {e}"
+            raise CommandError(msg) from e
 
     async def sleep(self, duration: float) -> None:
         """Async sleep wrapper for better concurrency."""
@@ -65,9 +64,10 @@ class AsyncBaseCommand(BaseCommand, ABC):
             self._running = False
             raise
         except Exception as e:
-            self.logger.error(f"Error in async loop: {e}")
+            self.logger.exception(f"Error in async loop: {e}")
             self._running = False
-            raise CommandError(f"Async operation failed: {e}") from e
+            msg = f"Async operation failed: {e}"
+            raise CommandError(msg) from e
 
     def stop(self) -> None:
         """Stop the running async operation."""
@@ -82,7 +82,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
 class AsyncMonitoringMixin:
     """Mixin for commands that need monitoring capabilities."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.update_interval = 1.0  # Default 1 second
         self._monitor_data = {}
@@ -98,7 +98,8 @@ class AsyncMonitoringMixin:
     async def start_monitoring(self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None) -> None:
         """Start monitoring with regular updates."""
         if not isinstance(self, AsyncBaseCommand):
-            raise CommandError("AsyncMonitoringMixin requires AsyncBaseCommand")
+            msg = "AsyncMonitoringMixin requires AsyncBaseCommand"
+            raise CommandError(msg)
 
         update_function = update_func or self.update_monitoring_data
 
@@ -110,19 +111,19 @@ class AsyncMonitoringMixin:
 
     async def update_monitoring_data(self) -> None:
         """Override this method to implement specific monitoring logic."""
-        pass
 
     def set_update_interval(self, interval: float) -> None:
         """Set the monitoring update interval."""
         if interval <= 0:
-            raise CommandError("Update interval must be positive")
+            msg = "Update interval must be positive"
+            raise CommandError(msg)
         self.update_interval = interval
 
 
 class AsyncProgressMixin:
     """Mixin for commands that need progress reporting."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._progress_total = 0
         self._progress_current = 0
@@ -147,7 +148,7 @@ class AsyncProgressMixin:
             self.print_error(f"❌ {description} failed: {e}")
             raise
 
-    async def update_progress(self, step: int = 1, message: str = None) -> None:
+    async def update_progress(self, step: int = 1, message: str | None = None) -> None:
         """Update progress counter."""
         self._progress_current += step
         progress_pct = (self._progress_current / self._progress_total) * 100
@@ -167,7 +168,7 @@ class AsyncProgressMixin:
 class AsyncRetryMixin:
     """Mixin for commands that need retry capabilities."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.max_retries = 3
         self.retry_delay = 1.0
@@ -180,9 +181,9 @@ class AsyncRetryMixin:
     async def with_retry(
         self,
         async_func: Callable[[], Coroutine[Any, Any, Any]],
-        max_retries: int = None,
-        retry_delay: float = None,
-        backoff_multiplier: float = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
+        backoff_multiplier: float | None = None,
     ) -> Any:
         """Execute async function with exponential backoff retry."""
         max_retries = max_retries or self.max_retries
@@ -206,16 +207,17 @@ class AsyncRetryMixin:
                     self.print_error(f"❌ All {max_retries + 1} attempts failed")
 
         # If we get here, all retries failed
+        msg = f"Operation failed after {max_retries + 1} attempts"
         raise CommandError(
-            f"Operation failed after {max_retries + 1} attempts",
+            msg,
             recovery_hint="Check your configuration and network connectivity",
         ) from last_exception
 
     def set_retry_config(
         self,
-        max_retries: int = None,
-        retry_delay: float = None,
-        backoff_multiplier: float = None,
+        max_retries: int | None = None,
+        retry_delay: float | None = None,
+        backoff_multiplier: float | None = None,
     ) -> None:
         """Configure retry behavior."""
         if max_retries is not None:
@@ -230,22 +232,18 @@ class AsyncRetryMixin:
 class AsyncMonitoringCommand(AsyncBaseCommand, AsyncMonitoringMixin):
     """Base class for async monitoring commands."""
 
-    pass
 
 
 class AsyncProgressCommand(AsyncBaseCommand, AsyncProgressMixin):
     """Base class for async commands with progress tracking."""
 
-    pass
 
 
 class AsyncRetryCommand(AsyncBaseCommand, AsyncRetryMixin):
     """Base class for async commands with retry capabilities."""
 
-    pass
 
 
 class AsyncFullFeaturedCommand(AsyncBaseCommand, AsyncMonitoringMixin, AsyncProgressMixin, AsyncRetryMixin):
     """Base class for async commands with all features."""
 
-    pass

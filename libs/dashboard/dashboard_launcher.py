@@ -32,7 +32,7 @@ class DashboardLauncher:
     user preferences, and environment constraints.
     """
 
-    def __init__(self, project_root: Path | None = None):
+    def __init__(self, project_root: Path | None = None) -> None:
         """Initialize the dashboard launcher.
 
         Args:
@@ -91,16 +91,14 @@ class DashboardLauncher:
             if self._interface_configs["tauri"].available:
                 return "tauri"
             # Fall back to web if terminal not capable
-            elif not self._is_terminal_capable():
+            if not self._is_terminal_capable():
                 return "web"
-            else:
-                return "tui"
+            return "tui"
 
         # Default based on terminal capability
         if self._is_terminal_capable():
             return "tui"
-        else:
-            return "web"
+        return "web"
 
     def get_available_interfaces(self) -> dict[str, InterfaceInfo]:
         """Get information about all available interfaces.
@@ -124,7 +122,8 @@ class DashboardLauncher:
             ValueError: If interface is not recognized
         """
         if interface not in self._interface_configs:
-            raise ValueError(f"Unknown interface: {interface}")
+            msg = f"Unknown interface: {interface}"
+            raise ValueError(msg)
 
         self._update_interface_availability()
         return self._interface_configs[interface]
@@ -170,7 +169,7 @@ class DashboardLauncher:
         if interface not in self._interface_configs:
             return False
 
-        config = self._interface_configs[interface]
+        self._interface_configs[interface]
 
         try:
             if interface == "web":
@@ -180,7 +179,6 @@ class DashboardLauncher:
             elif interface == "tauri":
                 # Check and install Node.js dependencies
                 if not self._is_node_available():
-                    print("❌ Node.js not found. Please install Node.js manually.")
                     return False
 
                 # Install npm dependencies in Tauri directory
@@ -189,18 +187,15 @@ class DashboardLauncher:
                     subprocess.run(["npm", "install"], check=True)
                     os.chdir(self.project_root)
                 else:
-                    print(f"❌ Tauri directory not found: {self.tauri_path}")
                     return False
 
             # Recheck availability
             self._update_interface_availability()
             return self._interface_configs[interface].available
 
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to install dependencies: {e}")
+        except subprocess.CalledProcessError:
             return False
-        except Exception as e:
-            print(f"❌ Installation error: {e}")
+        except Exception:
             return False
 
     # Private methods for environment detection
@@ -209,8 +204,8 @@ class DashboardLauncher:
         """Check if GUI environment is available."""
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
-        else:  # Linux/Unix
-            return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+        # Linux/Unix
+        return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
 
     def _is_ssh_session(self) -> bool:
         """Check if running in SSH session."""
@@ -294,7 +289,7 @@ class DashboardLauncher:
         if requirement == "python":
             return True, f"Python {sys.version.split()[0]}"
 
-        elif requirement == "rich":
+        if requirement == "rich":
             try:
                 import rich
 
@@ -356,8 +351,7 @@ class DashboardLauncher:
             tauri_available = self._is_tauri_available()
             if tauri_available:
                 return True, "Tauri project configured"
-            else:
-                return False, "Tauri not available"
+            return False, "Tauri not available"
 
         else:
             return False, f"Unknown requirement: {requirement}"
@@ -366,7 +360,6 @@ class DashboardLauncher:
         """Install Python packages using pip."""
         for package in packages:
             if not self._is_python_package_available(package):
-                print(f"📦 Installing {package}...")
                 subprocess.run(
                     [
                         sys.executable,

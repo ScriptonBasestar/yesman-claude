@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Final verification of lint status"""
+"""Final verification of lint status."""
 
 import os
 from pathlib import Path

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Final lint check to verify our fixes"""
+"""Final lint check to verify our fixes."""
 
 import os
 import subprocess
@@ -9,8 +9,9 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_command(cmd):
-    """Run a command and return output"""
+    """Run a command and return output."""
     try:
+        # nosec B602 - shell=True is intentional for this debug script
         result = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True, timeout=30)
         return result.returncode, result.stdout, result.stderr
     except Exception as e:

@@ -5,7 +5,7 @@ import logging
 import re
 import subprocess
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -58,7 +58,7 @@ class ConflictInfo:
     description: str
     suggested_strategy: ResolutionStrategy
     metadata: dict[str, Any] = field(default_factory=dict)
-    detected_at: datetime = field(default_factory=datetime.now)
+    detected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     resolved_at: datetime | None = None
     resolution_result: str | None = None
 
@@ -80,7 +80,7 @@ class ResolutionResult:
 class ConflictResolutionEngine:
     """Engine for detecting and resolving conflicts between branches."""
 
-    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None):
+    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None) -> None:
         """Initialize the conflict resolution engine.
 
         Args:
@@ -149,7 +149,7 @@ class ConflictResolutionEngine:
         Returns:
             List of detected conflicts
         """
-        logger.info(f"Detecting conflicts between branches: {branches}")
+        logger.info("Detecting conflicts between branches: %s", branches)
         conflicts = []
 
         try:
@@ -167,10 +167,10 @@ class ConflictResolutionEngine:
                 self.detected_conflicts[conflict.conflict_id] = conflict
 
             self.resolution_stats["total_conflicts"] += len(conflicts)
-            logger.info(f"Detected {len(conflicts)} potential conflicts")
+            logger.info("Detected %d potential conflicts", len(conflicts))
 
-        except Exception as e:
-            logger.error(f"Error detecting conflicts: {e}")
+        except Exception:
+            logger.exception("Error detecting conflicts")
 
         return conflicts
 
@@ -207,9 +207,9 @@ class ConflictResolutionEngine:
             semantic_conflicts = await self._detect_semantic_conflicts(branch1, branch2)
             conflicts.extend(semantic_conflicts)
 
-        except Exception as e:
-            logger.error(
-                f"Error detecting conflicts between {branch1} and {branch2}: {e}",
+        except Exception:
+            logger.exception(
+                "Error detecting conflicts between %s and %s", branch1, branch2
             )
 
         return conflicts
@@ -304,19 +304,18 @@ class ConflictResolutionEngine:
     ) -> ResolutionStrategy:
         """Suggest the best resolution strategy for a conflict."""
         # Check against known patterns
-        for pattern_name, pattern_info in self.conflict_patterns.items():
+        for pattern_info in self.conflict_patterns.values():
             if re.search(pattern_info["pattern"], content):
                 return ResolutionStrategy(pattern_info["strategy"])
 
         # Default strategies based on file type
         if file_path.endswith(".py"):
             return ResolutionStrategy.SEMANTIC_ANALYSIS
-        elif file_path.endswith((".md", ".txt", ".rst")):
+        if file_path.endswith((".md", ".txt", ".rst")):
             return ResolutionStrategy.AUTO_MERGE
-        elif file_path.endswith((".json", ".yaml", ".yml")):
+        if file_path.endswith((".json", ".yaml", ".yml")):
             return ResolutionStrategy.PREFER_LATEST
-        else:
-            return ResolutionStrategy.AUTO_MERGE
+        return ResolutionStrategy.AUTO_MERGE
 
     async def _detect_file_conflicts(
         self,
@@ -342,7 +341,7 @@ class ConflictResolutionEngine:
                 severity = ConflictSeverity.MEDIUM
 
                 # Determine conflict type
-                if change1 == "D" and change2 == "M" or change1 == "M" and change2 == "D":
+                if (change1 == "D" and change2 == "M") or (change1 == "M" and change2 == "D"):
                     conflict_type = ConflictType.FILE_DELETION
                     severity = ConflictSeverity.HIGH
                 elif change1 == "A" and change2 == "A":
@@ -364,8 +363,8 @@ class ConflictResolutionEngine:
                     ),
                 )
 
-        except Exception as e:
-            logger.error(f"Error detecting file conflicts: {e}")
+        except Exception:
+            logger.exception("Error detecting file conflicts")
 
         return conflicts
 
@@ -393,8 +392,8 @@ class ConflictResolutionEngine:
                 )
                 conflicts.extend(semantic_conflicts)
 
-        except Exception as e:
-            logger.error(f"Error detecting semantic conflicts: {e}")
+        except Exception:
+            logger.exception("Error detecting semantic conflicts")
 
         return conflicts
 
@@ -444,8 +443,8 @@ class ConflictResolutionEngine:
                         ),
                     )
 
-        except Exception as e:
-            logger.error(f"Error analyzing semantic changes in {file_path}: {e}")
+        except Exception:
+            logger.exception("Error analyzing semantic changes in %s", file_path)
 
         return conflicts
 
@@ -490,7 +489,7 @@ class ConflictResolutionEngine:
         conflict = self.detected_conflicts[conflict_id]
         strategy = strategy or conflict.suggested_strategy
 
-        start_time = datetime.now()
+        start_time = datetime.now(UTC)
 
         try:
             # Use appropriate resolution handler
@@ -506,12 +505,12 @@ class ConflictResolutionEngine:
                 )
 
             # Update resolution time
-            resolution_time = (datetime.now() - start_time).total_seconds()
+            resolution_time = (datetime.now(UTC) - start_time).total_seconds()
             result.resolution_time = resolution_time
 
             # Update conflict info
             if result.success:
-                conflict.resolved_at = datetime.now()
+                conflict.resolved_at = datetime.now(UTC)
                 conflict.resolution_result = result.message
                 self.resolution_stats["auto_resolved"] += 1
             else:
@@ -530,17 +529,17 @@ class ConflictResolutionEngine:
             self.resolution_stats["average_resolution_time"] = sum(times) / len(times) if times else 0.0
 
             logger.info(
-                f"Conflict resolution result: {result.success} using {strategy.value}",
+                "Conflict resolution result: %s using %s", result.success, strategy.value
             )
 
         except Exception as e:
-            logger.error(f"Error resolving conflict {conflict_id}: {e}")
+            logger.exception("Error resolving conflict %s", conflict_id)
             result = ResolutionResult(
                 conflict_id=conflict_id,
                 success=False,
                 strategy_used=strategy,
-                resolution_time=(datetime.now() - start_time).total_seconds(),
-                message=f"Resolution failed: {str(e)}",
+                resolution_time=(datetime.now(UTC) - start_time).total_seconds(),
+                message=f"Resolution failed: {e}",
             )
 
         return result
@@ -577,7 +576,7 @@ class ConflictResolutionEngine:
                 success=False,
                 strategy_used=ResolutionStrategy.AUTO_MERGE,
                 resolution_time=0.0,
-                message=f"Auto-merge failed: {str(e)}",
+                message=f"Auto-merge failed: {e}",
             )
 
     async def _prefer_latest_strategy(self, conflict: ConflictInfo) -> ResolutionResult:
@@ -611,7 +610,7 @@ class ConflictResolutionEngine:
                 success=False,
                 strategy_used=ResolutionStrategy.PREFER_LATEST,
                 resolution_time=0.0,
-                message=f"Latest preference failed: {str(e)}",
+                message=f"Latest preference failed: {e}",
             )
 
     async def _prefer_main_strategy(self, conflict: ConflictInfo) -> ResolutionResult:
@@ -645,7 +644,7 @@ class ConflictResolutionEngine:
                 success=False,
                 strategy_used=ResolutionStrategy.PREFER_MAIN,
                 resolution_time=0.0,
-                message=f"Main preference failed: {str(e)}",
+                message=f"Main preference failed: {e}",
             )
 
     async def _custom_merge_strategy(self, conflict: ConflictInfo) -> ResolutionResult:
@@ -683,7 +682,7 @@ class ConflictResolutionEngine:
                 success=False,
                 strategy_used=ResolutionStrategy.CUSTOM_MERGE,
                 resolution_time=0.0,
-                message=f"Custom merge failed: {str(e)}",
+                message=f"Custom merge failed: {e}",
             )
 
     async def _semantic_analysis_strategy(
@@ -732,13 +731,12 @@ class ConflictResolutionEngine:
                 success=False,
                 strategy_used=ResolutionStrategy.SEMANTIC_ANALYSIS,
                 resolution_time=0.0,
-                message=f"Semantic analysis failed: {str(e)}",
+                message=f"Semantic analysis failed: {e}",
             )
 
     def _resolve_import_conflicts(self, content: str) -> str | None:
         """Resolve import statement conflicts."""
         # Simple approach: merge unique imports
-        import_lines: list[str] = []
 
         # Extract imports from conflict markers
         parts = content.split("=======")
@@ -804,7 +802,7 @@ class ConflictResolutionEngine:
     # Git helper methods
     async def _run_git_command(self, args: list[str]) -> subprocess.CompletedProcess:
         """Run a git command and return the result."""
-        cmd = ["git"] + args
+        cmd = ["git", *args]
         result = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=self.repo_path,
@@ -871,7 +869,7 @@ class ConflictResolutionEngine:
                     latest_time = timestamp
                     latest_branch = branch
             except Exception as e:
-                logger.warning(f"Could not get commit time for branch {branch}: {e}")
+                logger.warning("Could not get commit time for branch %s: %s", branch, e)
                 continue
 
         return latest_branch

@@ -8,6 +8,7 @@ AI learning, session management, and dashboard coordination.
 from commands.automate import AutomateDetectCommand, AutomateMonitorCommand
 from commands.browse import BrowseCommand
 from commands.setup import SetupCommand
+from typing import Any
 from commands.status import StatusCommand
 from libs.ai.learning_engine import LearningEngine
 
@@ -22,7 +23,7 @@ from .test_framework import (
 class TestFullSystemIntegration(AsyncIntegrationTestBase):
     """Test complete system integration across all modules."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for full system integration tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
@@ -32,7 +33,7 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         # Setup comprehensive mock responses
         self._setup_comprehensive_responses()
 
-    def _setup_comprehensive_responses(self):
+    def _setup_comprehensive_responses(self) -> None:
         """Setup mock Claude responses for comprehensive testing."""
         responses = {
             "develop web application": "I'll help you develop a web application. Let me set up the project structure...",
@@ -48,7 +49,7 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         for prompt, response in responses.items():
             self.mock_claude.add_mock_response(prompt, response)
 
-    async def test_complete_development_workflow(self):
+    async def test_complete_development_workflow(self) -> None:
         """Test complete development workflow across all system modules."""
         # Phase 1: Project Setup and Session Management
         project_name = "full-system-project"
@@ -163,7 +164,7 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
 
         assert total_workflow_time < 45.0, f"Complete workflow took {total_workflow_time:.2f}s, should be < 45s"
 
-    def _create_comprehensive_project(self, project_dir):
+    def _create_comprehensive_project(self, project_dir: Any) -> None:
         """Create a comprehensive project with multiple contexts."""
         # Python web application
         (project_dir / "app.py").write_text("""
@@ -412,7 +413,7 @@ This project demonstrates a comprehensive web application with multiple technolo
 - `.github/workflows/` - CI/CD pipelines
 """)
 
-    async def test_cross_module_data_flow(self):
+    async def test_cross_module_data_flow(self) -> None:
         """Test data flow and communication between modules."""
         # Setup project and session
         project_dir = self.test_dir / "data_flow_project"
@@ -427,7 +428,7 @@ This project demonstrates a comprehensive web application with multiple technolo
         # Initialize all modules
         learning_engine = LearningEngine(config=self.get_test_config(), session_name=session_name)
 
-        session_manager = self.get_session_manager()
+        self.get_session_manager()
 
         # Test 1: Session → Automation data flow
         setup_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
@@ -474,7 +475,7 @@ This project demonstrates a comprehensive web application with multiple technolo
         assert "sessions" in status_result
         assert session_name in [s["name"] for s in status_result.get("sessions", [])]
 
-    async def test_error_propagation_and_recovery(self):
+    async def test_error_propagation_and_recovery(self) -> None:
         """Test error handling and recovery across modules."""
         # Create problematic project
         project_dir = self.test_dir / "error_test_project"
@@ -526,7 +527,7 @@ This project demonstrates a comprehensive web application with multiple technolo
         status_result = self.command_runner.run_command(StatusCommand)
         assert status_result["success"] is True
 
-    async def test_performance_under_concurrent_load(self):
+    async def test_performance_under_concurrent_load(self) -> None:
         """Test system performance under concurrent operations."""
         # Create multiple projects and sessions
         project_count = 5

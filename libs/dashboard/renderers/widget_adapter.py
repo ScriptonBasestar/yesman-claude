@@ -35,7 +35,7 @@ class WidgetDataAdapter:
     used by all renderers.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the adapter."""
         self.logger = logging.getLogger("yesman.dashboard.widget_adapter")
 
@@ -108,7 +108,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.error(f"Error adapting session data: {e}")
+            self.logger.exception(f"Error adapting session data: {e}")
             # Return a minimal session object
             return SessionData(
                 name=data.get("name", "unknown"),
@@ -189,7 +189,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.error(f"Error adapting health data: {e}")
+            self.logger.exception(f"Error adapting health data: {e}")
             return HealthData(
                 overall_score=0,
                 overall_level=HealthLevel.UNKNOWN,
@@ -244,7 +244,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.error(f"Error adapting activity data: {e}")
+            self.logger.exception(f"Error adapting activity data: {e}")
             return ActivityData(
                 entries=[],
                 total_activities=0,
@@ -296,7 +296,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.error(f"Error adapting progress data: {e}")
+            self.logger.exception(f"Error adapting progress data: {e}")
             return ProgressData(
                 phase=ProgressPhase.ERROR,
                 phase_progress=0.0,
@@ -420,7 +420,7 @@ class WidgetDataAdapter:
 
             # Try ISO format parsing
             try:
-                return datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+                return datetime.fromisoformat(timestamp)
             except (ValueError, AttributeError):
                 pass
 

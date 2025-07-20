@@ -41,7 +41,7 @@ class GitStats:
 class GitActivityWidget:
     """Git activity and metrics visualization."""
 
-    def __init__(self, console: Console | None = None, repo_path: str = "."):
+    def __init__(self, console: Console | None = None, repo_path: str = ".") -> None:
         self.console = console or Console()
         self.repo_path = repo_path
 
@@ -80,7 +80,7 @@ class GitActivityWidget:
         """Run a git command and return output."""
         try:
             result = subprocess.run(
-                ["git"] + command,
+                ["git", *command],
                 check=False,
                 cwd=self.repo_path,
                 capture_output=True,
@@ -397,8 +397,8 @@ class GitActivityWidget:
 
         # Calculate trends
         if len(stats.daily_activity) >= 7:
-            recent_week = list(sorted(stats.daily_activity.items()))[-7:]
-            prev_week = list(sorted(stats.daily_activity.items()))[-14:-7]
+            recent_week = sorted(stats.daily_activity.items())[-7:]
+            prev_week = sorted(stats.daily_activity.items())[-14:-7]
 
             recent_total = sum(count for _, count in recent_week)
             prev_total = sum(count for _, count in prev_week)

@@ -7,13 +7,13 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 class TestThreadSafety:
     """Tests for thread safety of components."""
 
-    def test_thread_safety(self):
+    def test_thread_safety(self) -> None:
         """Test 15: Thread safety of components."""
         factory = RendererFactory()
         results = []
         errors = []
 
-        def render_in_thread(thread_id):
+        def render_in_thread(thread_id: int) -> None:
             try:
                 renderer = factory.create_renderer(RenderFormat.TUI)
                 data = SessionData(

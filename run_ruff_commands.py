@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Script to run ruff commands using subprocess directly"""
+"""Script to run ruff commands using subprocess directly."""
 
 import subprocess
 
 
 def run_command(cmd, description=""):
-    """Run a command and return success status"""
+    """Run a command and return success status."""
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -41,7 +41,7 @@ def run_command(cmd, description=""):
 
 
 def main():
-    """Main function"""
+    """Main function."""
     print("Starting ruff lint fixes...")
 
     # 1. Fix import ordering

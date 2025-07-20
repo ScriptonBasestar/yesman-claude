@@ -30,9 +30,9 @@ class AsyncStatusDashboard:
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        config=None,
-        tmux_manager=None,
-    ):
+        config: Any = None,
+        tmux_manager: Any = None,
+    ) -> None:
         self.console = Console()
         self.project_path = Path(project_path).resolve()
         self.project_name = self.project_path.name
@@ -65,7 +65,7 @@ class AsyncStatusDashboard:
         # Load initial data
         self._load_todo_data()
 
-    def _load_todo_data(self):
+    def _load_todo_data(self) -> None:
         """Load TODO data from various sources."""
         # Try to load from common TODO file locations
         todo_files = [
@@ -79,7 +79,7 @@ class AsyncStatusDashboard:
             if todo_file.exists() and self.progress_tracker.load_todos_from_file(str(todo_file)):
                 break
 
-    async def update_data(self):
+    async def update_data(self) -> None:
         """Async update of all dashboard data with caching."""
         current_time = time.time()
 
@@ -104,7 +104,7 @@ class AsyncStatusDashboard:
         except Exception as e:
             self.console.print(f"[red]Error updating data: {e}[/]")
 
-    async def _update_session_data(self):
+    async def _update_session_data(self) -> None:
         """Async update of session data."""
         # Get session information using cached method
         loop = asyncio.get_event_loop()
@@ -126,11 +126,11 @@ class AsyncStatusDashboard:
                 if isinstance(session_detail, Exception):
                     self.console.print(f"[yellow]Warning: Session detail error: {session_detail}[/]")
                     continue
-                elif isinstance(session_detail, dict):
+                if isinstance(session_detail, dict):
                     detailed_sessions.append(session_detail)
 
                     # Calculate activity for heatmap
-                    activity_level = self._calculate_session_activity(session_detail)
+                    self._calculate_session_activity(session_detail)
                     # Use activity collection method instead of add_activity_point
                     session_name = session_detail.get("session_name", "unknown")
                     # Store activity data for later rendering
@@ -144,14 +144,14 @@ class AsyncStatusDashboard:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
 
-    async def _update_project_health(self):
+    async def _update_project_health(self) -> None:
         """Async update of project health."""
         loop = asyncio.get_event_loop()
         # ProjectHealth doesn't have update_project_health method, it calculates on demand
         # So we'll just trigger a calculation to refresh the data
         await loop.run_in_executor(None, self.project_health.calculate_health)
 
-    async def _update_progress_data(self):
+    async def _update_progress_data(self) -> None:
         """Async update of progress data."""
         loop = asyncio.get_event_loop()
         progress_data = await loop.run_in_executor(None, self.session_manager.get_progress_overview)
@@ -212,17 +212,14 @@ class AsyncStatusDashboard:
 
         return layout
 
-    async def update_layout(self, layout: Layout):
+    async def update_layout(self, layout: Layout) -> None:
         """Async update layout with current data."""
         # Header with performance indicators
         loop = asyncio.get_event_loop()
         cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
 
         last_update = self._data_cache.get("last_update", time.time())
-        if isinstance(last_update, int | float):
-            cache_age = time.time() - last_update
-        else:
-            cache_age = 0.0
+        cache_age = time.time() - last_update if isinstance(last_update, int | float) else 0.0
         header_text = f"🚀 Yesman Dashboard (Async) - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache: {cache_stats.get('hit_rate', 0):.1%} | Data Age: {cache_age:.1f}s"
         layout["header"].update(Panel(header_text, style="bold green"))
 
@@ -238,10 +235,7 @@ class AsyncStatusDashboard:
         # Activity heatmap panel
         # Generate heatmap data from collected sessions
         sessions_data = self._data_cache.get("sessions", [])
-        if isinstance(sessions_data, list):
-            session_names = [s.get("session_name", "unknown") for s in sessions_data if isinstance(s, dict)]
-        else:
-            session_names = []
+        session_names = [s.get("session_name", "unknown") for s in sessions_data if isinstance(s, dict)] if isinstance(sessions_data, list) else []
         heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
         activity_content = self._render_heatmap(heatmap_data)
         layout["activity"].update(Panel(activity_content, title="🔥 Activity Heatmap", border_style="red"))
@@ -276,7 +270,7 @@ class AsyncStatusDashboard:
         footer_text = f"💡 Async Mode | Update Interval: {self.update_interval}s | Cache TTL: {self._cache_ttl}s | Sessions: {session_count}"
         layout["footer"].update(Panel(footer_text, style="dim"))
 
-    async def run_interactive(self):
+    async def run_interactive(self) -> None:
         """Run the interactive dashboard."""
         # Initial data load
         await self.update_data()
@@ -293,7 +287,7 @@ class AsyncStatusDashboard:
         except KeyboardInterrupt:
             self.console.print("\n[yellow]📊 Async dashboard stopped[/]")
 
-    def render_detailed_view(self):
+    def render_detailed_view(self) -> None:
         """Render detailed static view (sync operation)."""
         # Synchronous version for detailed output
         layout = self.create_layout()
@@ -445,12 +439,12 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
             self.print_info("\n📊 Status dashboard stopped")
             return {"success": True, "stopped_by_user": True}
         except Exception as e:
-            raise CommandError(f"Error in async status dashboard: {e}") from e
+            msg = f"Error in async status dashboard: {e}"
+            raise CommandError(msg) from e
 
     async def update_monitoring_data(self) -> None:
         """Implement monitoring data updates."""
         # Dashboard handles its own monitoring
-        pass
 
 
 # Create alias for backward compatibility
@@ -481,7 +475,7 @@ StatusCommand = AsyncStatusCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def status(project_path, update_interval, interactive, async_mode):
+def status(project_path: str, update_interval: float, interactive: bool, async_mode: bool) -> None:
     """Comprehensive project status dashboard with async optimizations."""
     if async_mode:
         command = AsyncStatusCommand()
@@ -520,7 +514,7 @@ def status(project_path, update_interval, interactive, async_mode):
     default=True,
     help="Run in interactive mode with live updates (default: interactive)",
 )
-def status_async(project_path, update_interval, interactive):
+def status_async(project_path: str, update_interval: float, interactive: bool) -> None:
     """Async comprehensive project status dashboard (explicit async version)."""
     command = AsyncStatusCommand()
     command.run(

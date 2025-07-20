@@ -16,7 +16,7 @@ class DIContainer:
     - Lifecycle management
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._services: dict[type, Any] = {}
         self._factories: dict[type, Callable] = {}
         self._singletons: dict[type, Any] = {}
@@ -72,11 +72,12 @@ class DIContainer:
         """
         # Check for circular dependencies
         if service_type in self._resolving:
-            raise ValueError(f"Circular dependency detected for {service_type.__name__}")
+            msg = f"Circular dependency detected for {service_type.__name__}"
+            raise ValueError(msg)
 
         # Check singleton first
         if service_type in self._singletons:
-            return cast(T, self._singletons[service_type])
+            return cast("T", self._singletons[service_type])
 
         # Check factory (lazy singleton)
         if service_type in self._factories:
@@ -85,7 +86,7 @@ class DIContainer:
                 instance = self._factories[service_type]()
                 self._singletons[service_type] = instance
                 self._factories.pop(service_type)
-                return cast(T, instance)
+                return cast("T", instance)
             finally:
                 self._resolving.discard(service_type)
 
@@ -93,11 +94,12 @@ class DIContainer:
         if service_type in self._services:
             self._resolving.add(service_type)
             try:
-                return cast(T, self._services[service_type]())
+                return cast("T", self._services[service_type]())
             finally:
                 self._resolving.discard(service_type)
 
-        raise ValueError(f"Service {service_type.__name__} is not registered")
+        msg = f"Service {service_type.__name__} is not registered"
+        raise ValueError(msg)
 
     def is_registered(self, service_type: type[T]) -> bool:
         """Check if a service type is registered.

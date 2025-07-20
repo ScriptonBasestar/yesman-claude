@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Check all Python files for long lines"""
+"""Check all Python files for long lines."""
 
 from pathlib import Path
 
 
 def check_long_lines(file_path, max_length=88):
-    """Check file for long lines"""
+    """Check file for long lines."""
     try:
         with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
@@ -28,7 +28,7 @@ def check_long_lines(file_path, max_length=88):
 
 
 def main():
-    """Check all Python files"""
+    """Check all Python files."""
     base_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     # Key directories to check

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""실시간 Controller 로그 뷰어 - 디버깅용"""
+"""실시간 Controller 로그 뷰어 - 디버깅용."""
 
 import argparse
 import time
@@ -10,7 +10,7 @@ from libs.core.session_manager import SessionManager
 
 
 def print_header():
-    """헤더 출력"""
+    """헤더 출력."""
     print("=" * 80)
     print("🚀 YESMAN CONTROLLER REAL-TIME LOG VIEWER")
     print("=" * 80)
@@ -18,7 +18,7 @@ def print_header():
 
 
 def get_controller_status(claude_manager, session_name):
-    """컨트롤러 상태 확인"""
+    """컨트롤러 상태 확인."""
     try:
         controller = claude_manager.get_controller(session_name)
         if not controller:
@@ -35,7 +35,7 @@ def get_controller_status(claude_manager, session_name):
 
 
 def monitor_logs(session_name, follow=True):
-    """로그 실시간 모니터링"""
+    """로그 실시간 모니터링."""
     log_path = Path("~/tmp/logs/yesman/").expanduser()
     controller_log = log_path / f"claude_manager_{session_name}.log"
 
@@ -129,7 +129,7 @@ def monitor_logs(session_name, follow=True):
 
 
 def list_sessions():
-    """사용 가능한 세션 목록"""
+    """사용 가능한 세션 목록."""
     try:
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()

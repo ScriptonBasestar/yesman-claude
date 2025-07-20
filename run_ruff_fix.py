@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Simple script to run ruff fix commands"""
+"""Simple script to run ruff fix commands."""
 
 import os
 import subprocess
 
 
 def run_ruff_command(args):
-    """Run a ruff command with uv"""
+    """Run a ruff command with uv."""
     cmd = ["uv", "run", "ruff"] + args
     print(f"Running: {' '.join(cmd)}")
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Individual lint tool checks"""
+"""Individual lint tool checks."""
 
 import os
 import subprocess
@@ -9,7 +9,7 @@ os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
 def run_command(cmd, description):
-    """Run a command and capture output"""
+    """Run a command and capture output."""
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -38,7 +38,7 @@ def run_command(cmd, description):
 
 
 def main():
-    """Run all lint checks individually"""
+    """Run all lint checks individually."""
     # 1. Ruff check
     success1, stdout1, stderr1 = run_command(
         ["python", "-m", "ruff", "check", "libs", "commands", "api", "tests", "--diff", "--exclude", "migrations", "--exclude", "node_modules", "--exclude", "examples"], "Ruff check with diff"

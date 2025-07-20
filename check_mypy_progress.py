@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Check mypy progress by analyzing specific error patterns"""
+"""Check mypy progress by analyzing specific error patterns."""
 
 import subprocess
 import sys
 
 
 def run_mypy_check():
-    """Run mypy check on specific files to verify fixes"""
+    """Run mypy check on specific files to verify fixes."""
     print("=== MyPy Error Check ===")
 
     # Files we've fixed
@@ -36,7 +36,7 @@ def run_mypy_check():
 
 
 def analyze_common_patterns():
-    """Analyze common error patterns we've addressed"""
+    """Analyze common error patterns we've addressed."""
     print("\n=== Fixed Error Patterns ===")
 
     patterns = [

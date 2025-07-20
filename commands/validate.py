@@ -115,7 +115,8 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
             }
 
         except Exception as e:
-            raise CommandError(f"Error validating directories: {e}") from e
+            msg = f"Error validating directories: {e}"
+            raise CommandError(msg) from e
 
 
 @click.command()
@@ -127,13 +128,13 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
     default="table",
     help="Output format",
 )
-def validate(session_name, format):
+def validate(session_name: str | None, format: str) -> None:
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
     command = ValidateCommand()
     command.run(session_name=session_name, format=format)
 
 
-def _display_success(console: Console, valid_count: int, total_count: int):
+def _display_success(console: Console, valid_count: int, total_count: int) -> None:
     """Display success message when all directories exist."""
     success_panel = Panel(
         Text("✅ All directories exist!", style="bold green"),
@@ -145,7 +146,7 @@ def _display_success(console: Console, valid_count: int, total_count: int):
     console.print(success_panel)
 
 
-def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int):
+def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
     """Display results in table format."""
     table = Table(
         title="[red]Directory Validation Results[/red]",
@@ -185,7 +186,7 @@ def _display_table_format(console: Console, missing: list, valid_count: int, tot
     console.print(table)
 
 
-def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int):
+def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
     """Display results in tree format."""
     console.print("\n[red bold]❌ Directory Validation Issues[/red bold]")
     console.print(f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n")
@@ -221,7 +222,7 @@ def _display_tree_format(console: Console, missing: list, valid_count: int, tota
     console.print(tree)
 
 
-def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int):
+def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
     """Display results in simple format."""
     console.print("[red bold]❌ Missing Directories Found[/red bold]\n")
 
@@ -253,7 +254,7 @@ def _shorten_path(path: str, max_length: int = 60) -> str:
     parts = path.split("/")
     if len(parts) > 3:
         return f".../{'/'.join(parts[-3:])}"
-    elif len(path) > max_length:
+    if len(path) > max_length:
         return f"...{path[-(max_length - 3) :]}"
 
     return path

@@ -1,0 +1,187 @@
+
+============================================================
+COMMAND: Ruff Check
+============================================================
+Command: /opt/homebrew/Caskroom/miniforge/base/bin/python -m ruff check --target-version py311 libs commands
+Return Code: 1
+
+STDOUT:
+libs/multi_agent/auto_resolver.py:766:21: UP031 Use format specifiers instead of percent format
+    |
+764 |             if len(failures) > 2:
+765 |                 recommendations.append(
+766 |                     "Improve resolution strategy for %s conflicts (failed %d times)" % (pattern, len(failures))
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ UP031
+767 |                 )
+    |
+    = help: Replace with format specifiers
+
+Found 1 error.
+
+
+
+============================================================
+COMMAND: MyPy Check
+============================================================
+Command: /opt/homebrew/Caskroom/miniforge/base/bin/python -m mypy --config-file=pyproject.toml libs commands api
+Return Code: 1
+
+STDOUT:
+libs/core/settings.py:72: error: Incompatible types in assignment (expression has type "None", variable has type "list[Any]")  [assignment]
+libs/core/types.py:91: error: Incompatible types in assignment (expression has type "None", variable has type "list[PaneInfo]")  [assignment]
+libs/dashboard/renderers/widget_models.py:156: error: Argument "created_at" to "SessionData" has incompatible type "datetime | None"; expected "datetime"  [arg-type]
+libs/dashboard/renderers/tauri_renderer.py:306: error: Item "None" of "datetime | None" has no attribute "isoformat"  [union-attr]
+libs/multi_agent/branch_manager.py:24: error: Incompatible types in assignment (expression has type "None", variable has type "dict[str, Any]")  [assignment]
+libs/dashboard/health_calculator.py:760: error: Library stubs not installed for "toml"  [import-untyped]
+libs/dashboard/health_calculator.py:760: note: Hint: "python3 -m pip install types-toml"
+libs/dashboard/renderers/widget_adapter.py:359: error: Argument "x" to "ChartDataPoint" has incompatible type "datetime | str | Any | None"; expected "str | int | float | datetime"  [arg-type]
+libs/session_helpers.py:163: error: Argument "pane_id" to "PaneInfo" has incompatible type "str | None"; expected "str"  [arg-type]
+libs/session_helpers.py:164: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:167: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:168: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:175: error: Argument "window_id" to "WindowInfo" has incompatible type "str | None"; expected "str"  [arg-type]
+libs/session_helpers.py:176: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:177: error: Argument "window_name" to "WindowInfo" has incompatible type "str | None"; expected "str"  [arg-type]
+libs/session_helpers.py:186: error: Argument "session_id" to "SessionInfo" has incompatible type "str | None"; expected "str"  [arg-type]
+libs/session_helpers.py:188: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:192: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:280: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:281: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:336: error: Item "None" of "Pane | None" has no attribute "pane_id"  [union-attr]
+libs/session_helpers.py:336: error: Argument "pane_id" to "PaneInfo" has incompatible type "str | Any | None"; expected "str"  [arg-type]
+libs/session_helpers.py:337: error: Item "None" of "Pane | None" has no attribute "pane_index"  [union-attr]
+libs/session_helpers.py:337: error: Argument 1 to "int" has incompatible type "str | Any | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:338: error: Item "None" of "Pane | None" has no attribute "pane_current_command"  [union-attr]
+libs/session_helpers.py:340: error: Item "None" of "Pane | None" has no attribute "pane_width"  [union-attr]
+libs/session_helpers.py:340: error: Argument 1 to "int" has incompatible type "str | Any | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:341: error: Item "None" of "Pane | None" has no attribute "pane_height"  [union-attr]
+libs/session_helpers.py:341: error: Argument 1 to "int" has incompatible type "str | Any | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:388: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/session_helpers.py:402: error: Argument 1 to "int" has incompatible type "str | None"; expected "str | Buffer | SupportsInt | SupportsIndex | SupportsTrunc"  [arg-type]
+libs/ui/session_selector.py:32: error: Argument 1 to "join" of "str" has incompatible type "list[str | None]"; expected "Iterable[str]"  [arg-type]
+libs/multi_agent/recovery_engine.py:616: error: Argument 4 to "_execute_recovery_action" of "RecoveryEngine" has incompatible type "dict[str, Any] | None"; expected "dict[str, Any]"  [arg-type]
+libs/multi_agent/recovery_engine.py:632: error: Argument 3 to "_escalate_failure" of "RecoveryEngine" has incompatible type "dict[str, Any] | None"; expected "dict[str, Any]"  [arg-type]
+libs/multi_agent/conflict_resolution.py:816: error: Argument "returncode" to "CompletedProcess" has incompatible type "int | None"; expected "int"  [arg-type]
+libs/logging/batch_processor.py:181: error: Item "None" of "Path | None" has no attribute "suffix"  [union-attr]
+libs/logging/batch_processor.py:183: error: Item "None" of "Path | None" has no attribute "write_bytes"  [union-attr]
+libs/logging/batch_processor.py:192: error: Item "None" of "Path | None" has no attribute "write_text"  [union-attr]
+libs/dashboard/performance_optimizer.py:22: error: Library stubs not installed for "psutil"  [import-untyped]
+libs/ai/adaptive_response.py:77: error: Argument 1 to "append" of "list" has incompatible type "tuple[str, str, str, str | None]"; expected "tuple[str, str, str, str]"  [arg-type]
+libs/tmux.py:9: error: Skipping analyzing "tmuxp": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+libs/tmux.py:10: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/multi_agent/semantic_analyzer.py:943: error: Incompatible types in assignment (expression has type "expr | None", variable has type "expr")  [assignment]
+libs/logging/batch_processor_refactored.py:123: error: Item "None" of "Path | None" has no attribute "suffix"  [union-attr]
+libs/logging/batch_processor_refactored.py:127: error: Argument 1 to "open" has incompatible type "Path | None"; expected "int | str | bytes | PathLike[str] | PathLike[bytes]"  [arg-type]
+libs/logging/batch_processor_refactored.py:139: error: Argument 1 to "open" has incompatible type "Path | None"; expected "int | str | bytes | PathLike[str] | PathLike[bytes]"  [arg-type]
+libs/logging/async_logger.py:103: error: Incompatible default for argument "config" (default has type "None", argument has type "AsyncLoggerConfig")  [assignment]
+libs/logging/async_logger.py:103: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+libs/logging/async_logger.py:103: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+libs/logging/async_logger.py:120: error: Incompatible default for argument "config" (default has type "None", argument has type "AsyncLoggerConfig")  [assignment]
+libs/logging/async_logger.py:120: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+libs/logging/async_logger.py:120: note: Use https://github.com/hauntsaninja/no_implicit_optional to automatically upgrade your codebase
+libs/logging/async_logger.py:241: error: Unsupported operand types for + ("None" and "int")  [operator]
+libs/logging/async_logger.py:241: note: Left operand is of type "float | int | None"
+libs/logging/async_logger.py:276: error: Unsupported operand types for + ("None" and "int")  [operator]
+libs/logging/async_logger.py:276: note: Left operand is of type "float | int | None"
+libs/logging/async_logger.py:280: error: Unsupported operand types for + ("None" and "int")  [operator]
+libs/logging/async_logger.py:280: note: Left operand is of type "float | int | None"
+libs/logging/async_logger.py:285: error: Unsupported operand types for + ("None" and "int")  [operator]
+libs/logging/async_logger.py:285: note: Left operand is of type "float | int | None"
+libs/logging/async_logger.py:298: error: Item "None" of "FrameType | None" has no attribute "f_back"  [union-attr]
+libs/logging/async_logger.py:299: error: Item "None" of "FrameType | Any | None" has no attribute "f_globals"  [union-attr]
+libs/logging/async_logger.py:300: error: Item "None" of "FrameType | Any | None" has no attribute "f_code"  [union-attr]
+libs/logging/async_logger.py:301: error: Item "None" of "FrameType | Any | None" has no attribute "f_lineno"  [union-attr]
+libs/logging/async_logger.py:375: error: Unsupported operand types for - ("float" and "None")  [operator]
+libs/logging/async_logger.py:375: note: Right operand is of type "float | int | None"
+libs/logging/async_logger.py:376: error: Unsupported operand types for / ("None" and "float")  [operator]
+libs/logging/async_logger.py:376: note: Left operand is of type "float | int | None"
+libs/multi_agent/code_review_engine.py:1298: error: No overload variant of "__sub__" of "datetime" matches argument type "None"  [operator]
+libs/multi_agent/code_review_engine.py:1298: note: Possible overload variants:
+libs/multi_agent/code_review_engine.py:1298: note:     def __sub__(self, datetime, /) -> timedelta
+libs/multi_agent/code_review_engine.py:1298: note:     def __sub__(self, timedelta, /) -> datetime
+libs/multi_agent/code_review_engine.py:1298: error: Unsupported left operand type for - ("None")  [operator]
+libs/multi_agent/code_review_engine.py:1298: note: Both left and right operands are unions
+api/tests/test_websocket.py:139: error: "ClientConnection" has no attribute "closed"  [attr-defined]
+api/tests/test_background_tasks.py:9: error: Library stubs not installed for "requests"  [import-untyped]
+api/tests/test_background_tasks.py:9: note: Hint: "python3 -m pip install types-requests"
+libs/dashboard/tui_dashboard.py:465: error: Return type "None" of "action_quit" incompatible with return type "Coroutine[Any, Any, None]" in supertype "textual.app.App"  [override]
+libs/core/config_cache.py:317: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/core/config_loader.py:8: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/yesman_config.py:8: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/tmux_manager.py:8: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/tmux_manager.py:9: error: Skipping analyzing "tmuxp.workspace.builder": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+libs/tmux_manager.py:10: error: Skipping analyzing "tmuxp.workspace.loader": module is installed, but missing library stubs or py.typed marker  [import-untyped]
+libs/core/session_manager.py:14: error: Library stubs not installed for "psutil"  [import-untyped]
+libs/core/session_manager.py:14: note: Hint: "python3 -m pip install types-psutil"
+libs/core/session_manager.py:442: error: Item "None" of "TaskProgress | None" has no attribute "phase"  [union-attr]
+api/routers/sessions.py:62: error: Argument 2 to "_get_session_info" of "SessionManager" has incompatible type "Any | None"; expected "dict[str, Any]"  [arg-type]
+api/routers/sessions.py:168: error: Argument 2 to "_get_session_info" of "SessionManager" has incompatible type "Any | None"; expected "dict[str, Any]"  [arg-type]
+api/routers/dashboard.py:185: note: By default the bodies of untyped functions are not checked, consider using --check-untyped-defs  [annotation-unchecked]
+api/routers/dashboard.py:198: note: By default the bodies of untyped functions are not checked, consider using --check-untyped-defs  [annotation-unchecked]
+libs/core/base_command.py:312: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/core/base_command.py:312: note: Hint: "python3 -m pip install types-PyYAML"
+libs/core/base_command.py:312: note: (or run "mypy --install-types" to install all missing stub packages)
+libs/core/base_command.py:312: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+api/routers/websocket_router.py:289: note: By default the bodies of untyped functions are not checked, consider using --check-untyped-defs  [annotation-unchecked]
+commands/multi_agent_backup.py:399: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:494: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:561: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:639: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:751: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:831: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:935: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:1022: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:1090: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:1161: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:1418: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:1683: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:1820: error: Incompatible types in assignment (expression has type "TextIOWrapper[_WrappedBuffer]", variable has type "str")  [assignment]
+commands/multi_agent_backup.py:1878: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:2115: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:2292: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:2795: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:2917: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3020: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3181: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3263: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3341: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3412: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3567: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent_backup.py:3674: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/ai.py:31: error: Incompatible types in assignment (expression has type "AdaptiveResponse", variable has type "None")  [assignment]
+commands/ai.py:40: error: "None" has no attribute "get_learning_statistics"  [attr-defined]
+commands/ai.py:117: error: Incompatible types in assignment (expression has type "AdaptiveResponse", variable has type "None")  [assignment]
+commands/ai.py:136: error: "None" has no attribute "adjust_confidence_threshold"  [attr-defined]
+commands/ai.py:143: error: "None" has no attribute "enable_auto_response"  [attr-defined]
+commands/ai.py:148: error: "None" has no attribute "enable_learning"  [attr-defined]
+commands/ai.py:174: error: Incompatible types in assignment (expression has type "ResponseAnalyzer", variable has type "None")  [assignment]
+commands/ai.py:190: error: "None" has no attribute "response_history"  [attr-defined]
+commands/ai.py:240: error: Incompatible types in assignment (expression has type "AdaptiveResponse", variable has type "None")  [assignment]
+commands/ai.py:257: error: "None" has no attribute "export_learning_data"  [attr-defined]
+commands/ai.py:276: error: Incompatible types in assignment (expression has type "ResponseAnalyzer", variable has type "None")  [assignment]
+commands/ai.py:287: error: "None" has no attribute "cleanup_old_data"  [attr-defined]
+commands/ai.py:310: error: Incompatible types in assignment (expression has type "AdaptiveResponse", variable has type "None")  [assignment]
+commands/ai.py:327: error: "None" has no attribute "should_auto_respond"  [attr-defined]
+commands/multi_agent/conflict_resolution.py:42: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent/conflict_resolution.py:130: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent/conflict_resolution.py:197: error: Argument "repo_path" to "BranchManager" has incompatible type "Any | None"; expected "str"  [arg-type]
+commands/multi_agent/conflict_prediction.py:39: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent/conflict_prediction.py:121: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+commands/multi_agent/conflict_prediction.py:158: error: Argument "repo_path" to "BranchManager" has incompatible type "str | None"; expected "str"  [arg-type]
+libs/core/session_setup_refactored.py:8: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/core/session_setup_refactored.py:24: error: Need type annotation for "validation_errors" (hint: "validation_errors: list[<type>] = ...")  [var-annotated]
+libs/core/session_setup.py:8: error: Library stubs not installed for "yaml"  [import-untyped]
+libs/core/session_setup.py:19: error: Need type annotation for "validation_errors" (hint: "validation_errors: list[<type>] = ...")  [var-annotated]
+libs/core/async_base_command.py:88: error: Need type annotation for "_monitor_data" (hint: "_monitor_data: dict[<type>, <type>] = ...")  [var-annotated]
+commands/status_async.py:57: error: Need type annotation for "_data_cache"  [var-annotated]
+commands/status_async.py:102: error: Incompatible types in assignment (expression has type "float", target has type "int | list[Any] | None")  [assignment]
+commands/status_async.py:158: error: Incompatible types in assignment (expression has type "dict[str, Any]", target has type "int | list[Any] | None")  [assignment]
+Found 126 errors in 37 files (checked 145 source files)
+
+
+
+============================================================
+COMMAND: Bandit Security Check
+============================================================
+Command: /opt/homebrew/Caskroom/miniforge/base/bin/python -m bandit -r libs commands --skip B101,B404,B603,B607,B602 --severity-level medium --quiet
+Return Code: 0

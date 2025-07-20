@@ -28,7 +28,7 @@ class TauriRenderer(BaseRenderer):
     to render native UI components with chart data and interactive elements.
     """
 
-    def __init__(self, theme: dict[str, Any] | None = None):
+    def __init__(self, theme: dict[str, Any] | None = None) -> None:
         """Initialize Tauri renderer.
 
         Args:
@@ -274,7 +274,7 @@ class TauriRenderer(BaseRenderer):
         widget_json: dict[str, Any],
         data: SessionData | list[SessionData],
         options: dict[str, Any],
-    ):
+    ) -> None:
         """Process session browser widget."""
         view_mode = options.get("view_mode", "table")
 
@@ -337,7 +337,7 @@ class TauriRenderer(BaseRenderer):
             },
         ]
 
-    def _process_health_meter(self, widget_json: dict[str, Any], data: HealthData, options: dict[str, Any]):
+    def _process_health_meter(self, widget_json: dict[str, Any], data: HealthData, options: dict[str, Any]) -> None:
         """Process health meter widget."""
         if not isinstance(data, HealthData):
             widget_json["data"] = {"error": "Invalid health data"}
@@ -404,7 +404,7 @@ class TauriRenderer(BaseRenderer):
             )
         )
 
-    def _process_activity_heatmap(self, widget_json: dict[str, Any], data: ActivityData, options: dict[str, Any]):
+    def _process_activity_heatmap(self, widget_json: dict[str, Any], data: ActivityData, options: dict[str, Any]) -> None:
         """Process activity heatmap widget."""
         if not isinstance(data, ActivityData):
             widget_json["data"] = {"error": "Invalid activity data"}
@@ -465,7 +465,7 @@ class TauriRenderer(BaseRenderer):
             )
         )
 
-    def _process_progress_tracker(self, widget_json: dict[str, Any], data: ProgressData, options: dict[str, Any]):
+    def _process_progress_tracker(self, widget_json: dict[str, Any], data: ProgressData, options: dict[str, Any]) -> None:
         """Process progress tracker widget."""
         if not isinstance(data, ProgressData):
             widget_json["data"] = {"error": "Invalid progress data"}
@@ -506,7 +506,7 @@ class TauriRenderer(BaseRenderer):
         phase_color = "success" if data.phase == ProgressPhase.COMPLETED else "warning" if data.phase == ProgressPhase.ERROR else "info"
         widget_json["style"].update(self._style_classes.get(phase_color, self._style_classes["neutral"]))
 
-    def _process_log_viewer(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]):
+    def _process_log_viewer(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]) -> None:
         """Process log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 100)
@@ -562,7 +562,7 @@ class TauriRenderer(BaseRenderer):
             },
         ]
 
-    def _process_metric_card(self, widget_json: dict[str, Any], data: MetricCardData, options: dict[str, Any]):
+    def _process_metric_card(self, widget_json: dict[str, Any], data: MetricCardData, options: dict[str, Any]) -> None:
         """Process metric card widget."""
         if not isinstance(data, MetricCardData):
             widget_json["data"] = {"error": "Invalid metric data"}
@@ -614,7 +614,7 @@ class TauriRenderer(BaseRenderer):
         widget_json: dict[str, Any],
         data: StatusIndicatorData,
         options: dict[str, Any],
-    ):
+    ) -> None:
         """Process status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             widget_json["data"] = {"error": "Invalid status data"}
@@ -640,7 +640,7 @@ class TauriRenderer(BaseRenderer):
         # Color-based styling
         widget_json["style"].update(self._style_classes.get(data.color, self._style_classes["neutral"]))
 
-    def _process_chart(self, widget_json: dict[str, Any], data: ChartData, options: dict[str, Any]):
+    def _process_chart(self, widget_json: dict[str, Any], data: ChartData, options: dict[str, Any]) -> None:
         """Process chart widget."""
         if not isinstance(data, ChartData):
             widget_json["data"] = {"error": "Invalid chart data"}
@@ -689,7 +689,7 @@ class TauriRenderer(BaseRenderer):
             },
         }
 
-    def _process_table(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]):
+    def _process_table(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]) -> None:
         """Process table widget."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -722,7 +722,7 @@ class TauriRenderer(BaseRenderer):
         widget_type: WidgetType,
         data: Any,
         options: dict[str, Any],
-    ):
+    ) -> None:
         """Process generic widget fallback."""
         widget_json["data"] = {
             "raw_data": str(data)[:500],  # Limit size

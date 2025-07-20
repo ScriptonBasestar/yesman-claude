@@ -16,17 +16,17 @@ from .test_framework import CommandTestRunner, IntegrationTestBase, PerformanceM
 class TestSessionLifecycleIntegration(IntegrationTestBase):
     """Test complete session lifecycle with all components."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for session lifecycle tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
         self.performance_monitor = PerformanceMonitor()
 
-    def test_complete_session_creation_workflow(self):
+    def test_complete_session_creation_workflow(self) -> None:
         """Test end-to-end session creation workflow."""
         # Step 1: Create test session configuration
         session_name = "test-integration-session"
-        session_config = self.create_test_session(
+        self.create_test_session(
             session_name,
             description="Integration test session",
             windows=[
@@ -49,7 +49,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
 
         setup_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
 
-        setup_duration = self.performance_monitor.end_timing("session_setup")
+        self.performance_monitor.end_timing("session_setup")
 
         # Verify setup succeeded
         assert setup_result["success"] is True
@@ -71,7 +71,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
 
         status_result = self.command_runner.run_command(StatusCommand)
 
-        status_duration = self.performance_monitor.end_timing("session_status")
+        self.performance_monitor.end_timing("session_status")
 
         # Verify status includes our session
         assert status_result["success"] is True
@@ -81,7 +81,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         self.performance_monitor.assert_performance_threshold("session_setup", 10.0)
         self.performance_monitor.assert_performance_threshold("session_status", 2.0)
 
-    def test_session_modification_propagation(self):
+    def test_session_modification_propagation(self) -> None:
         """Test that session modifications propagate correctly."""
         session_name = "test-modification-session"
 
@@ -95,7 +95,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         initial_window_count = len(initial_info.get("windows", []))
 
         # Modify session configuration
-        modified_config = self.create_test_session(
+        self.create_test_session(
             session_name,
             description="Modified integration test session",
             windows=[
@@ -123,7 +123,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         assert updated_window_count > initial_window_count
         assert updated_window_count == 3
 
-    def test_multiple_session_coordination(self):
+    def test_multiple_session_coordination(self) -> None:
         """Test coordination between multiple sessions."""
         session_names = ["multi-session-1", "multi-session-2", "multi-session-3"]
 
@@ -150,7 +150,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         multi_setup_duration = self.performance_monitor.end_timing("multi_session_setup")
 
         # Verify all sessions exist
-        session_manager = self.get_session_manager()
+        self.get_session_manager()
         for session_name in session_names:
             self.assert_session_exists(session_name)
 
@@ -164,7 +164,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         # Performance check for multiple sessions
         assert multi_setup_duration < 30.0, f"Multi-session setup took {multi_setup_duration:.2f}s, should be < 30s"
 
-    def test_session_error_handling_integration(self):
+    def test_session_error_handling_integration(self) -> None:
         """Test error handling across session operations."""
         # Test 1: Invalid session configuration
         with pytest.raises(Exception):
@@ -189,7 +189,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         # Verify system is still functional
         self.assert_session_exists(valid_session)
 
-    def test_session_cleanup_integration(self):
+    def test_session_cleanup_integration(self) -> None:
         """Test session cleanup and resource management."""
         session_name = "cleanup-test-session"
 
@@ -202,7 +202,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
 
         # Test cleanup via session manager
         session_manager = self.get_session_manager()
-        cleanup_result = session_manager.cleanup_session(session_name)
+        session_manager.cleanup_session(session_name)
 
         # Verify session is cleaned up
         # Note: Actual cleanup depends on tmux integration
@@ -213,7 +213,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
 class TestSessionStateConsistency(IntegrationTestBase):
     """Test session state consistency across different access methods."""
 
-    def test_cli_api_state_consistency(self):
+    def test_cli_api_state_consistency(self) -> None:
         """Test that CLI and API views of session state are consistent."""
         session_name = "consistency-test-session"
 
@@ -245,7 +245,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
         # Both should report same basic structure
         assert len(cli_session_info.get("windows", [])) == len(api_session_info.get("windows", []))
 
-    def test_concurrent_session_access(self):
+    def test_concurrent_session_access(self) -> None:
         """Test concurrent access to session information."""
         session_name = "concurrent-test-session"
 
@@ -266,7 +266,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
         results = []
         threads = []
 
-        def worker():
+        def worker() -> None:
             info = get_session_info()
             results.append(info)
 
@@ -296,12 +296,12 @@ class TestSessionStateConsistency(IntegrationTestBase):
 class TestSessionPerformanceIntegration(IntegrationTestBase):
     """Test session performance under various conditions."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for performance tests."""
         super().setup_method()
         self.performance_monitor = PerformanceMonitor()
 
-    def test_session_setup_performance(self):
+    def test_session_setup_performance(self) -> None:
         """Test session setup performance."""
         session_name = "performance-test-session"
 
@@ -334,7 +334,7 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
         # Performance assertion - complex session should still setup quickly
         assert setup_duration < 15.0, f"Complex session setup took {setup_duration:.2f}s, should be < 15s"
 
-    def test_status_query_performance(self):
+    def test_status_query_performance(self) -> None:
         """Test status query performance with multiple sessions."""
         # Create multiple sessions
         session_count = 10
@@ -367,7 +367,7 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
         # Performance assertion
         assert status_duration < 5.0, f"Status query with {session_count} sessions took {status_duration:.2f}s, should be < 5s"
 
-    def test_memory_usage_stability(self):
+    def test_memory_usage_stability(self) -> None:
         """Test that session operations don't cause memory leaks."""
         import os
 

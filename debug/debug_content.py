@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Debug content capture and prompt detection"""
+"""Debug content capture and prompt detection."""
 
 from libs.core.claude_manager import ClaudeManager
 

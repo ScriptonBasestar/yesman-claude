@@ -36,7 +36,7 @@ class SessionNode:
 class SessionBrowser:
     """Interactive tmux session browser with file-browser-like navigation."""
 
-    def __init__(self, console: Console | None = None):
+    def __init__(self, console: Console | None = None) -> None:
         self.console = console or Console()
         self.logger = logging.getLogger("yesman.dashboard.session_browser")
 
@@ -108,8 +108,7 @@ class SessionBrowser:
 
         if active_processes > 0:
             return f"🟢 Running ({active_processes} processes)"
-        else:
-            return "🟡 Idle"
+        return "🟡 Idle"
 
     def _detect_claude_status(self, session_data: dict[str, Any]) -> str | None:
         """Detect Claude status in session."""
@@ -120,10 +119,9 @@ class SessionBrowser:
                     # Simple heuristic for Claude status
                     if "working" in command.lower():
                         return "📝 Writing"
-                    elif "waiting" in command.lower():
+                    if "waiting" in command.lower():
                         return "⏳ Waiting"
-                    else:
-                        return "🤖 Active"
+                    return "🤖 Active"
         return None
 
     def render_tree_view(self) -> Panel:

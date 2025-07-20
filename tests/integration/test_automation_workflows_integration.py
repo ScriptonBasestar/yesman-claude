@@ -6,7 +6,9 @@ workflow execution, and real-time monitoring across components.
 """
 
 import asyncio
+import contextlib
 import time
+from typing import Any
 
 from commands.automate import (
     AutomateConfigCommand,
@@ -26,7 +28,7 @@ from .test_framework import (
 class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
     """Test complete automation workflow integration."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Setup for automation workflow tests."""
         super().setup_method()
         self.command_runner = CommandTestRunner(self)
@@ -36,7 +38,7 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         # Setup mock responses for automation scenarios
         self._setup_automation_responses()
 
-    def _setup_automation_responses(self):
+    def _setup_automation_responses(self) -> None:
         """Setup mock Claude responses for automation scenarios."""
         self.mock_claude.add_mock_response(
             "setup development environment",
@@ -50,7 +52,7 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
             "Deploying to staging environment... Deployment completed successfully!",
         )
 
-    def test_end_to_end_automation_workflow(self):
+    def test_end_to_end_automation_workflow(self) -> None:
         """Test complete end-to-end automation workflow."""
         # Step 1: Create test project with various contexts
         project_dir = self.test_dir / "automation_project"
@@ -129,7 +131,7 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         assert workflow_duration < 10.0, f"Workflow execution took {workflow_duration:.2f}s, should be < 10s"
         assert monitoring_duration < 5.0, f"Monitoring setup took {monitoring_duration:.2f}s, should be < 5s"
 
-    def test_multi_project_automation_coordination(self):
+    def test_multi_project_automation_coordination(self) -> None:
         """Test automation coordination across multiple projects."""
         # Create multiple projects with different contexts
         projects = {
@@ -198,7 +200,7 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         monitored_projects = global_monitor_result.get("monitored_projects", [])
         assert len(monitored_projects) == len(projects)
 
-    def test_automation_error_recovery(self):
+    def test_automation_error_recovery(self) -> None:
         """Test automation system error recovery and resilience."""
         project_dir = self.test_dir / "error_recovery_project"
         project_dir.mkdir()
@@ -245,7 +247,7 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
 class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
     """Test real-time monitoring and reactive automation."""
 
-    async def test_file_change_detection_workflow(self):
+    async def test_file_change_detection_workflow(self) -> None:
         """Test that file changes trigger appropriate automation workflows."""
         project_dir = self.test_dir / "monitoring_project"
         project_dir.mkdir()
@@ -279,16 +281,14 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         # Stop monitoring
         monitor_task.cancel()
 
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await monitor_task
-        except asyncio.CancelledError:
-            pass
 
         # Verify that changes were detected and processed
         # (In a real implementation, this would check monitoring logs or events)
         assert True  # Placeholder - actual verification would depend on monitoring implementation
 
-    async def _run_async_monitor(self, command_runner, project_path):
+    async def _run_async_monitor(self, command_runner: Any, project_path: Any) -> None:
         """Helper to run monitoring in async context."""
         # This would be the actual async monitoring implementation
         # For now, we simulate it
@@ -296,7 +296,7 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         while time.time() - start_time < 5.0:  # Monitor for 5 seconds max
             await asyncio.sleep(0.1)
 
-    def test_performance_based_workflow_optimization(self):
+    def test_performance_based_workflow_optimization(self) -> None:
         """Test that workflows optimize based on performance metrics."""
         project_dir = self.test_dir / "performance_project"
         project_dir.mkdir()
@@ -345,7 +345,7 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
 class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
     """Test integration between automation system and AI learning."""
 
-    async def test_ai_guided_workflow_adaptation(self):
+    async def test_ai_guided_workflow_adaptation(self) -> None:
         """Test that AI learning guides workflow adaptation."""
         project_dir = self.test_dir / "ai_guided_project"
         project_dir.mkdir()
@@ -388,7 +388,7 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
         step_names = [step.get("name", "") for step in executed_steps]
         assert any("database" in name.lower() for name in step_names)
 
-    def test_predictive_automation_suggestions(self):
+    def test_predictive_automation_suggestions(self) -> None:
         """Test AI-powered predictive automation suggestions."""
         project_dir = self.test_dir / "predictive_project"
         project_dir.mkdir()

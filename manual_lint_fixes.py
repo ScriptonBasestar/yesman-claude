@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Manual lint fixes for common issues"""
+"""Manual lint fixes for common issues."""
 
 import re
 from pathlib import Path
 
 
 def fix_import_order(file_path):
-    """Fix basic import ordering issues"""
+    """Fix basic import ordering issues."""
     with open(file_path) as f:
         content = f.read()
 
@@ -79,7 +79,7 @@ def fix_import_order(file_path):
 
 
 def fix_long_lines(file_path):
-    """Fix some common long line issues"""
+    """Fix some common long line issues."""
     with open(file_path) as f:
         content = f.read()
 
@@ -118,7 +118,7 @@ def fix_long_lines(file_path):
 
 
 def main():
-    """Main function"""
+    """Main function."""
     project_root = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     # Find Python files

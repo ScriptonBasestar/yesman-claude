@@ -12,7 +12,7 @@ from typing import Any
 class MockTmuxSession:
     """Tmux 세션 Mock 객체."""
 
-    def __init__(self, name="test-session", windows=None):
+    def __init__(self, name: str = "test-session", windows: list[Any] | None = None) -> None:
         self.name = name
         self.windows = windows or []
         self.id = f"${name}:0"
@@ -21,7 +21,7 @@ class MockTmuxSession:
     def list_windows(self):
         return self.windows
 
-    def new_window(self, window_name):
+    def new_window(self, window_name: str) -> "MockTmuxWindow":
         window = MockTmuxWindow(window_name)
         self.windows.append(window)
         return window
@@ -30,7 +30,7 @@ class MockTmuxSession:
 class MockTmuxWindow:
     """Tmux 윈도우 Mock 객체."""
 
-    def __init__(self, name="test-window"):
+    def __init__(self, name: str = "test-window") -> None:
         self.name = name
         self.panes = []
 
@@ -41,7 +41,7 @@ class MockTmuxWindow:
 class MockTmuxPane:
     """Tmux 패인 Mock 객체."""
 
-    def __init__(self, index=0, content=""):
+    def __init__(self, index: int = 0, content: str = "") -> None:
         self.index = index
         self.content = content
 
@@ -53,12 +53,12 @@ class MockTmuxPane:
 class MockClaudeProcess:
     """Claude 프로세스 Mock 객체."""
 
-    def __init__(self, pid=12345, status="running"):
+    def __init__(self, pid: int = 12345, status: str = "running") -> None:
         self.pid = pid
         self.status = status
         self.start_time = datetime.now()
 
-    def terminate(self):
+    def terminate(self) -> None:
         self.status = "terminated"
 
     def is_running(self):
@@ -133,7 +133,8 @@ def get_factory_mock(mock_type: str, **kwargs) -> Any:
     }
 
     if mock_type not in factory_map:
-        raise ValueError(f"Unknown mock type: {mock_type}. Available: {list(factory_map.keys())}")
+        msg = f"Unknown mock type: {mock_type}. Available: {list(factory_map.keys())}"
+        raise ValueError(msg)
 
     return factory_map[mock_type](**kwargs)
 
@@ -178,12 +179,11 @@ def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
             ),
             "session_manager": get_factory_mock("session_manager"),
         }
-    else:
-        return {
-            "response": get_factory_mock(
-                "api_response",
-                status_code=500,
-                json_data=MOCK_API_RESPONSES["error_response"],
-            ),
-            "session_manager": get_factory_mock("session_manager", create_session_result=False),
-        }
+    return {
+        "response": get_factory_mock(
+            "api_response",
+            status_code=500,
+            json_data=MOCK_API_RESPONSES["error_response"],
+        ),
+        "session_manager": get_factory_mock("session_manager", create_session_result=False),
+    }

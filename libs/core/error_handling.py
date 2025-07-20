@@ -3,6 +3,7 @@
 
 import logging
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -56,7 +57,7 @@ class YesmanError(Exception):
         exit_code: int = 1,
         recovery_hint: str | None = None,
         error_code: str | None = None,
-    ):
+    ) -> None:
         self.message = message
         self.category = category
         self.severity = severity
@@ -111,7 +112,7 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, config_file: str | None = None, **kwargs):
+    def __init__(self, message: str, config_file: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -133,7 +134,7 @@ class ConfigurationError(YesmanError):
 class ValidationError(YesmanError):
     """Validation-related errors."""
 
-    def __init__(self, message: str, field_name: str | None = None, **kwargs):
+    def __init__(self, message: str, field_name: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -158,7 +159,7 @@ class ValidationError(YesmanError):
 class SessionError(YesmanError):
     """Session management related errors."""
 
-    def __init__(self, message: str, session_name: str | None = None, **kwargs):
+    def __init__(self, message: str, session_name: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -183,7 +184,7 @@ class SessionError(YesmanError):
 class NetworkError(YesmanError):
     """Network-related errors."""
 
-    def __init__(self, message: str, endpoint: str | None = None, **kwargs):
+    def __init__(self, message: str, endpoint: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -200,7 +201,7 @@ class NetworkError(YesmanError):
 class PermissionError(YesmanError):
     """Permission-related errors."""
 
-    def __init__(self, message: str, resource_path: str | None = None, **kwargs):
+    def __init__(self, message: str, resource_path: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -217,7 +218,7 @@ class PermissionError(YesmanError):
 class TimeoutError(YesmanError):
     """Timeout-related errors."""
 
-    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs):
+    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
@@ -234,7 +235,7 @@ class TimeoutError(YesmanError):
 class ErrorHandler:
     """Centralized error handling and reporting."""
 
-    def __init__(self, logger_name: str = "yesman.error_handler"):
+    def __init__(self, logger_name: str = "yesman.error_handler") -> None:
         self.logger = logging.getLogger(logger_name)
         self.error_stats: dict[str, Any] = {
             "total_errors": 0,
@@ -333,9 +334,8 @@ class ErrorHandler:
         self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")
 
         # Print user-friendly error message
-        print(f"❌ Critical Error: {error.message}")
         if error.context and error.context.operation:
-            print(f"   During: {error.context.operation}")
+            pass
 
         sys.exit(error.exit_code)
 
@@ -357,7 +357,7 @@ class ErrorHandler:
 error_handler = ErrorHandler()
 
 
-def handle_exceptions(func):
+def handle_exceptions(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator for automatic exception handling."""
 
     def wrapper(*args, **kwargs):
@@ -406,7 +406,7 @@ def safe_execute(
         )
 
         yesman_error = YesmanError(
-            message=f"Failed to execute {operation}: {str(e)}",
+            message=f"Failed to execute {operation}: {e!s}",
             category=error_category,
             context=context,
             cause=e,

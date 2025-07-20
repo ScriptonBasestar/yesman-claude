@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from pathlib import Path
+from typing import Never
 
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
@@ -40,7 +41,7 @@ class StartAgentsCommand(BaseCommand):
                 # Create agent pool
                 pool = AgentPool(max_agents=max_agents, work_dir=work_dir)
 
-                async def run_pool():
+                async def run_pool() -> None:
                     await pool.start()
                     progress.update(startup_task, description="✅ Agent pool started successfully")
 
@@ -66,7 +67,8 @@ class StartAgentsCommand(BaseCommand):
             return {"success": True, "max_agents": max_agents, "work_dir": work_dir}
 
         except Exception as e:
-            raise CommandError(f"Error starting agents: {e}") from e
+            msg = f"Error starting agents: {e}"
+            raise CommandError(msg) from e
 
 
 class MonitorAgentsCommand(BaseCommand):
@@ -92,7 +94,7 @@ class MonitorAgentsCommand(BaseCommand):
                     # Load existing state without starting
                     pool._load_state()
 
-            async def run_monitor():
+            async def run_monitor() -> None:
                 monitor = AgentMonitor(agent_pool=pool)
                 monitor.refresh_interval = refresh
 
@@ -115,8 +117,8 @@ class MonitorAgentsCommand(BaseCommand):
                     self.print_info(f"⏱️  Monitoring for {duration} seconds...")
                     import signal
 
-                    def timeout_handler(signum, frame):
-                        raise KeyboardInterrupt()
+                    def timeout_handler(signum: int, frame: Any) -> Never:
+                        raise KeyboardInterrupt
 
                     signal.signal(signal.SIGALRM, timeout_handler)
                     signal.alarm(int(duration))
@@ -130,7 +132,8 @@ class MonitorAgentsCommand(BaseCommand):
             return {"success": True, "work_dir": work_dir, "duration": duration}
 
         except Exception as e:
-            raise CommandError(f"Error monitoring agents: {e}") from e
+            msg = f"Error monitoring agents: {e}"
+            raise CommandError(msg) from e
 
 
 class StatusCommand(BaseCommand):
@@ -182,7 +185,8 @@ class StatusCommand(BaseCommand):
             }
 
         except Exception as e:
-            raise CommandError(f"Error getting agent pool status: {e}") from e
+            msg = f"Error getting agent pool status: {e}"
+            raise CommandError(msg) from e
 
 
 class StopAgentsCommand(BaseCommand):
@@ -195,7 +199,7 @@ class StopAgentsCommand(BaseCommand):
 
             pool = AgentPool(work_dir=work_dir)
 
-            async def stop_pool():
+            async def stop_pool() -> None:
                 await pool.stop()
                 self.print_success("✅ Agent pool stopped successfully")
 
@@ -208,7 +212,8 @@ class StopAgentsCommand(BaseCommand):
             }
 
         except Exception as e:
-            raise CommandError(f"Error stopping agents: {e}") from e
+            msg = f"Error stopping agents: {e}"
+            raise CommandError(msg) from e
 
 
 class AddTaskCommand(BaseCommand):
@@ -230,9 +235,11 @@ class AddTaskCommand(BaseCommand):
         try:
             # Validate required parameters
             if not title:
-                raise CommandError("Task title is required")
+                msg = "Task title is required"
+                raise CommandError(msg)
             if not command:
-                raise CommandError("Task command is required")
+                msg = "Task command is required"
+                raise CommandError(msg)
 
             pool = AgentPool(work_dir=work_dir)
 
@@ -261,7 +268,8 @@ class AddTaskCommand(BaseCommand):
             }
 
         except Exception as e:
-            raise CommandError(f"Error adding task: {e}") from e
+            msg = f"Error adding task: {e}"
+            raise CommandError(msg) from e
 
 
 class ListTasksCommand(BaseCommand):
@@ -279,8 +287,9 @@ class ListTasksCommand(BaseCommand):
                 try:
                     filter_status = TaskStatus(status.lower())
                 except ValueError as e:
+                    msg = f"Invalid status: {status}"
                     raise CommandError(
-                        f"Invalid status: {status}",
+                        msg,
                         recovery_hint="Valid statuses are: pending, assigned, running, completed, failed, cancelled",
                     ) from e
 
@@ -319,4 +328,5 @@ class ListTasksCommand(BaseCommand):
             }
 
         except Exception as e:
-            raise CommandError(f"Error listing tasks: {e}") from e
+            msg = f"Error listing tasks: {e}"
+            raise CommandError(msg) from e

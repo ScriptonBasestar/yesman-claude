@@ -17,7 +17,7 @@ from libs.validation import (
 class TestValidationFunctions:
     """Test validation functions."""
 
-    def test_validate_session_name_valid(self):
+    def test_validate_session_name_valid(self) -> None:
         """Test valid session names."""
         valid_names = [
             "my-session",
@@ -31,7 +31,7 @@ class TestValidationFunctions:
             assert valid is True, f"'{name}' should be valid"
             assert error is None
 
-    def test_validate_session_name_invalid(self):
+    def test_validate_session_name_invalid(self) -> None:
         """Test invalid session names."""
         invalid_cases = [
             ("", "Session name cannot be empty"),
@@ -46,7 +46,7 @@ class TestValidationFunctions:
             assert valid is False, f"'{name}' should be invalid"
             assert expected_error in error
 
-    def test_validate_window_name_valid(self):
+    def test_validate_window_name_valid(self) -> None:
         """Test valid window names."""
         valid_names = [
             "my-window",
@@ -59,7 +59,7 @@ class TestValidationFunctions:
             assert valid is True, f"'{name}' should be valid"
             assert error is None
 
-    def test_validate_window_name_invalid(self):
+    def test_validate_window_name_invalid(self) -> None:
         """Test invalid window names."""
         invalid_cases = [
             ("", "Window name cannot be empty"),
@@ -71,7 +71,7 @@ class TestValidationFunctions:
             assert valid is False, f"'{name}' should be invalid"
             assert expected_error in error
 
-    def test_validate_pane_command_valid(self):
+    def test_validate_pane_command_valid(self) -> None:
         """Test valid pane commands."""
         valid_commands = [
             "",  # empty is valid
@@ -84,7 +84,7 @@ class TestValidationFunctions:
             assert valid is True, f"'{cmd}' should be valid"
             assert error is None
 
-    def test_validate_pane_command_invalid(self):
+    def test_validate_pane_command_invalid(self) -> None:
         """Test invalid/dangerous pane commands."""
         invalid_cases = [
             ("rm -rf /", "dangerous pattern"),
@@ -96,14 +96,14 @@ class TestValidationFunctions:
             assert valid is False, f"'{cmd}' should be invalid"
             assert expected_error in error
 
-    def test_validate_port_number_valid(self):
+    def test_validate_port_number_valid(self) -> None:
         """Test valid port numbers."""
         valid_ports = ["80", "443", "8080", "3000", "65535"]
         for port in valid_ports:
             valid, error = validate_port_number(port)
             assert valid is True, f"'{port}' should be valid"
 
-    def test_validate_port_number_invalid(self):
+    def test_validate_port_number_invalid(self) -> None:
         """Test invalid port numbers."""
         invalid_cases = [
             ("", "cannot be empty"),
@@ -117,13 +117,13 @@ class TestValidationFunctions:
             assert valid is False, f"'{port}' should be invalid"
             assert expected_error in error
 
-    def test_validate_port_privileged_warning(self):
+    def test_validate_port_privileged_warning(self) -> None:
         """Test privileged port warning."""
         valid, message = validate_port_number("22")
         assert valid is True
         assert "root privileges" in message
 
-    def test_validate_log_level_valid(self):
+    def test_validate_log_level_valid(self) -> None:
         """Test valid log levels."""
         valid_levels = [
             "DEBUG",
@@ -139,7 +139,7 @@ class TestValidationFunctions:
             assert valid is True, f"'{level}' should be valid"
             assert error is None
 
-    def test_validate_log_level_invalid(self):
+    def test_validate_log_level_invalid(self) -> None:
         """Test invalid log levels."""
         invalid_cases = [
             ("", "cannot be empty"),
@@ -155,21 +155,21 @@ class TestValidationFunctions:
 class TestValidationDecorator:
     """Test validation decorator."""
 
-    def test_validate_input_decorator_success(self):
+    def test_validate_input_decorator_success(self) -> None:
         """Test decorator with valid input."""
 
         @validate_input(validate_session_name, "session_name")
-        def create_session(session_name: str):
+        def create_session(session_name: str) -> str:
             return f"Created {session_name}"
 
         result = create_session("my-session")
         assert result == "Created my-session"
 
-    def test_validate_input_decorator_failure(self):
+    def test_validate_input_decorator_failure(self) -> None:
         """Test decorator with invalid input."""
 
         @validate_input(validate_session_name, "session_name")
-        def create_session(session_name: str):
+        def create_session(session_name: str) -> str:
             return f"Created {session_name}"
 
         with pytest.raises(ValidationError) as exc_info:
@@ -178,11 +178,11 @@ class TestValidationDecorator:
         assert exc_info.value.field == "session_name"
         assert "invalid characters" in str(exc_info.value)
 
-    def test_validate_input_decorator_kwargs(self):
+    def test_validate_input_decorator_kwargs(self) -> None:
         """Test decorator with keyword arguments."""
 
         @validate_input(validate_port_number, "port")
-        def start_server(host: str = "localhost", port: str = "8080"):
+        def start_server(host: str = "localhost", port: str = "8080") -> str:
             return f"Server on {host}:{port}"
 
         result = start_server(port="3000")

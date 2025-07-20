@@ -7,13 +7,13 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from ..utils import ensure_log_directory, get_default_log_path
+from libs.utils import ensure_log_directory, get_default_log_path
 
 
 class ClaudeContentCollector:
     """Collects and stores Claude Code interactions for pattern analysis."""
 
-    def __init__(self, session_name: str):
+    def __init__(self, session_name: str) -> None:
         self.session_name = session_name
         self.logger = self._setup_logger()
         self.collection_path = self._setup_collection_directory()
@@ -106,7 +106,7 @@ class ClaudeContentCollector:
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to save interaction: {e}")
+            self.logger.exception(f"Failed to save interaction: {e}")
             return False
 
     def collect_raw_content(self, content: str, metadata: dict | None = None) -> bool:
@@ -151,7 +151,7 @@ class ClaudeContentCollector:
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to save raw content: {e}")
+            self.logger.exception(f"Failed to save raw content: {e}")
             return False
 
     def get_collection_stats(self) -> dict:
@@ -175,7 +175,7 @@ class ClaudeContentCollector:
             }
 
         except Exception as e:
-            self.logger.error(f"Failed to get collection stats: {e}")
+            self.logger.exception(f"Failed to get collection stats: {e}")
             return {"error": str(e)}
 
     def cleanup_old_files(self, days_to_keep: int = 7) -> int:
@@ -202,14 +202,14 @@ class ClaudeContentCollector:
             return files_deleted
 
         except Exception as e:
-            self.logger.error(f"Failed to cleanup old files: {e}")
+            self.logger.exception(f"Failed to cleanup old files: {e}")
             return 0
 
 
 class ContentCollectionManager:
     """Manages content collectors for multiple sessions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.collectors: dict[str, ClaudeContentCollector] = {}
         self.logger = logging.getLogger("yesman.dashboard.content_collection_manager")
 

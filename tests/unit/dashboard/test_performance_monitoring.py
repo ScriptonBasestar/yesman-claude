@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from typing import Any
 
 from libs.dashboard import OptimizationLevel, PerformanceOptimizer
 
@@ -17,7 +18,7 @@ class TestPerformanceMonitoring:
         if optimizer.monitoring:
             optimizer.stop_monitoring()
 
-    def test_performance_monitoring(self, performance_optimizer):
+    def test_performance_monitoring(self, performance_optimizer: Any) -> None:
         """Test 5: Performance monitoring and optimization."""
         # Test metrics collection
         metrics = performance_optimizer._collect_metrics()

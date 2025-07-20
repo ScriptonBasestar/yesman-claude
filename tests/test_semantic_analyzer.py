@@ -25,7 +25,7 @@ from libs.multi_agent.semantic_analyzer import (
 class TestFunctionSignature:
     """Test cases for FunctionSignature."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test FunctionSignature initialization."""
         signature = FunctionSignature(
             name="test_func",
@@ -47,7 +47,7 @@ class TestFunctionSignature:
 class TestClassDefinition:
     """Test cases for ClassDefinition."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test ClassDefinition initialization."""
         class_def = ClassDefinition(
             name="TestClass",
@@ -67,7 +67,7 @@ class TestClassDefinition:
 class TestSemanticContext:
     """Test cases for SemanticContext."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test SemanticContext initialization."""
         context = SemanticContext(file_path="test.py")
 
@@ -83,7 +83,7 @@ class TestSemanticContext:
 class TestSemanticConflict:
     """Test cases for SemanticConflict."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test SemanticConflict initialization."""
         conflict = SemanticConflict(
             conflict_id="test-conflict",
@@ -109,7 +109,7 @@ class TestSemanticConflict:
 class TestSemanticVisitor:
     """Test cases for SemanticVisitor."""
 
-    def test_visit_function_def(self):
+    def test_visit_function_def(self) -> None:
         """Test function definition parsing."""
         code = """
 def test_func(x: int, y: str = "default") -> bool:
@@ -129,7 +129,7 @@ def test_func(x: int, y: str = "default") -> bool:
         assert func.return_type == "bool"
         assert func.visibility == SymbolVisibility.PUBLIC
 
-    def test_visit_class_def(self):
+    def test_visit_class_def(self) -> None:
         """Test class definition parsing."""
         code = """
 class TestClass(BaseClass):
@@ -161,7 +161,7 @@ class TestClass(BaseClass):
         assert "_protected_method" in class_def.methods
         assert "__private_method" in class_def.methods
 
-    def test_visit_imports(self):
+    def test_visit_imports(self) -> None:
         """Test import statement parsing."""
         code = """
 import os
@@ -192,7 +192,7 @@ from typing import List, Dict as DictType
         import_dict = next(imp for imp in visitor.imports if imp.name == "Dict")
         assert import_dict.alias == "DictType"
 
-    def test_visit_global_variables(self):
+    def test_visit_global_variables(self) -> None:
         """Test global variable parsing."""
         code = """
 CONSTANT = "value"
@@ -212,54 +212,54 @@ another_var = [1, 2, 3]
         assert "another_var" in visitor.global_variables
         assert visitor.global_variables["another_var"] == "list"
 
-    def test_determine_visibility(self):
+    def test_determine_visibility(self) -> None:
         """Test visibility determination."""
         visitor = SemanticVisitor()
 
-        assert visitor._determine_visibility("public") == SymbolVisibility.PUBLIC
-        assert visitor._determine_visibility("_protected") == SymbolVisibility.PROTECTED
-        assert visitor._determine_visibility("__private") == SymbolVisibility.PRIVATE
-        assert visitor._determine_visibility("__magic__") == SymbolVisibility.MAGIC
+        assert visitor._determine_visibility("public") == SymbolVisibility.PUBLIC  # noqa: SLF001
+        assert visitor._determine_visibility("_protected") == SymbolVisibility.PROTECTED  # noqa: SLF001
+        assert visitor._determine_visibility("__private") == SymbolVisibility.PRIVATE  # noqa: SLF001
+        assert visitor._determine_visibility("__magic__") == SymbolVisibility.MAGIC  # noqa: SLF001
 
-    def test_infer_type(self):
+    def test_infer_type(self) -> None:
         """Test type inference."""
         visitor = SemanticVisitor()
 
         # Test constants
-        assert visitor._infer_type(ast.Constant(42)) == "int"
-        assert visitor._infer_type(ast.Constant("string")) == "str"
-        assert visitor._infer_type(ast.Constant(True)) == "bool"
+        assert visitor._infer_type(ast.Constant(42)) == "int"  # noqa: SLF001
+        assert visitor._infer_type(ast.Constant("string")) == "str"  # noqa: SLF001
+        assert visitor._infer_type(ast.Constant(True)) == "bool"  # noqa: SLF001
 
         # Test collections
-        assert visitor._infer_type(ast.List([], ast.Load())) == "list"
-        assert visitor._infer_type(ast.Dict([], [])) == "dict"
-        assert visitor._infer_type(ast.Set([])) == "set"
-        assert visitor._infer_type(ast.Tuple([], ast.Load())) == "tuple"
+        assert visitor._infer_type(ast.List([], ast.Load())) == "list"  # noqa: SLF001
+        assert visitor._infer_type(ast.Dict([], [])) == "dict"  # noqa: SLF001
+        assert visitor._infer_type(ast.Set([])) == "set"  # noqa: SLF001
+        assert visitor._infer_type(ast.Tuple([], ast.Load())) == "tuple"  # noqa: SLF001
 
 
 class TestSemanticAnalyzer:
     """Test cases for SemanticAnalyzer."""
 
     @pytest.fixture
-    def mock_branch_manager(self):
+    def mock_branch_manager(self) -> Mock:
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
-    def temp_repo(self):
+    def temp_repo(self) -> Path:
         """Create temporary repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
     @pytest.fixture
-    def analyzer(self, mock_branch_manager, temp_repo):
+    def analyzer(self, mock_branch_manager: Mock, temp_repo: Path) -> SemanticAnalyzer:
         """Create SemanticAnalyzer instance."""
         return SemanticAnalyzer(
             branch_manager=mock_branch_manager,
             repo_path=str(temp_repo),
         )
 
-    def test_init(self, analyzer, mock_branch_manager, temp_repo):
+    def test_init(self, analyzer: SemanticAnalyzer, mock_branch_manager: Mock, temp_repo: Path) -> None:
         """Test SemanticAnalyzer initialization."""
         assert analyzer.branch_manager == mock_branch_manager
         assert analyzer.repo_path == temp_repo
@@ -270,7 +270,7 @@ class TestSemanticAnalyzer:
         assert analyzer.check_docstring_changes is True
         assert analyzer.check_type_hints is True
 
-    def test_extract_semantic_context(self, analyzer):
+    def test_extract_semantic_context(self, analyzer: SemanticAnalyzer) -> None:
         """Test semantic context extraction."""
         code = """
 import os
@@ -286,7 +286,7 @@ class TestClass:
     def method(self):
         pass
 """
-        context = analyzer._extract_semantic_context("test.py", code)
+        context = analyzer._extract_semantic_context("test.py", code)  # noqa: SLF001
 
         assert context.file_path == "test.py"
         assert len(context.functions) == 1
@@ -297,7 +297,7 @@ class TestClass:
         assert "CONSTANT" in context.constants
         assert context.ast_hash != ""
 
-    def test_functions_have_signature_conflict(self, analyzer):
+    def test_functions_have_signature_conflict(self, analyzer: SemanticAnalyzer) -> None:
         """Test function signature conflict detection."""
         func1 = FunctionSignature(
             name="test",
@@ -313,7 +313,7 @@ class TestClass:
             return_type="int",
         )
 
-        assert analyzer._functions_have_signature_conflict(func1, func2) is True
+        assert analyzer._functions_have_signature_conflict(func1, func2) is True  # noqa: SLF001
 
         # Same signature
         func3 = FunctionSignature(
@@ -323,9 +323,9 @@ class TestClass:
             return_type="int",
         )
 
-        assert analyzer._functions_have_signature_conflict(func1, func3) is False
+        assert analyzer._functions_have_signature_conflict(func1, func3) is False  # noqa: SLF001
 
-    def test_assess_function_conflict_severity(self, analyzer):
+    def test_assess_function_conflict_severity(self, analyzer: SemanticAnalyzer) -> None:
         """Test function conflict severity assessment."""
         # Public function with removed parameters (breaking change)
         func1 = FunctionSignature(
@@ -340,7 +340,7 @@ class TestClass:
             visibility=SymbolVisibility.PUBLIC,
         )
 
-        severity = analyzer._assess_function_conflict_severity(func1, func2)
+        severity = analyzer._assess_function_conflict_severity(func1, func2)  # noqa: SLF001
         assert severity == ConflictSeverity.HIGH
 
         # Private function change (less severe)
@@ -356,10 +356,10 @@ class TestClass:
             visibility=SymbolVisibility.PROTECTED,
         )
 
-        severity = analyzer._assess_function_conflict_severity(func3, func4)
+        severity = analyzer._assess_function_conflict_severity(func3, func4)  # noqa: SLF001
         assert severity == ConflictSeverity.LOW
 
-    def test_analyze_function_impact(self, analyzer):
+    def test_analyze_function_impact(self, analyzer: SemanticAnalyzer) -> None:
         """Test function impact analysis."""
         func1 = FunctionSignature(name="test", args=["x", "y", "z"], defaults=["None"])
 
@@ -369,29 +369,29 @@ class TestClass:
             defaults=[],
         )
 
-        impact = analyzer._analyze_function_impact(func1, func2)
+        impact = analyzer._analyze_function_impact(func1, func2)  # noqa: SLF001
 
         assert impact["breaking_change"] is True
         assert len(impact["parameter_changes"]) > 0
         assert "Removed parameters" in impact["parameter_changes"][0]
 
-    def test_suggest_function_resolution(self, analyzer):
+    def test_suggest_function_resolution(self, analyzer: SemanticAnalyzer) -> None:
         """Test function resolution strategy suggestion."""
         # Breaking change should require human intervention
         func1 = FunctionSignature(name="test", args=["x", "y"])
         func2 = FunctionSignature(name="test", args=["x"])
 
-        strategy = analyzer._suggest_function_resolution(func1, func2)
+        strategy = analyzer._suggest_function_resolution(func1, func2)  # noqa: SLF001
         assert strategy == ResolutionStrategy.HUMAN_REQUIRED
 
         # Decorator change might be auto-resolvable
         func3 = FunctionSignature(name="test", args=["x"], decorators=["@decorator1"])
         func4 = FunctionSignature(name="test", args=["x"], decorators=["@decorator2"])
 
-        strategy = analyzer._suggest_function_resolution(func3, func4)
+        strategy = analyzer._suggest_function_resolution(func3, func4)  # noqa: SLF001
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
-    def test_signature_to_string(self, analyzer):
+    def test_signature_to_string(self, analyzer: SemanticAnalyzer) -> None:
         """Test function signature string conversion."""
         signature = FunctionSignature(
             name="test_func",
@@ -402,7 +402,7 @@ class TestClass:
             return_type="bool",
         )
 
-        sig_str = analyzer._signature_to_string(signature)
+        sig_str = analyzer._signature_to_string(signature)  # noqa: SLF001
 
         assert "def test_func(" in sig_str
         assert "y=None" in sig_str
@@ -411,7 +411,7 @@ class TestClass:
         assert "**kwargs" in sig_str
         assert "-> bool" in sig_str
 
-    def test_detect_function_conflicts(self, analyzer):
+    def test_detect_function_conflicts(self, analyzer: SemanticAnalyzer) -> None:
         """Test function conflict detection."""
         context1 = SemanticContext(file_path="test.py")
         context1.functions["test_func"] = FunctionSignature(
@@ -427,7 +427,7 @@ class TestClass:
             return_type="str",  # Different return type
         )
 
-        conflicts = analyzer._detect_function_conflicts(
+        conflicts = analyzer._detect_function_conflicts(  # noqa: SLF001
             context1,
             context2,
             "branch1",
@@ -441,7 +441,7 @@ class TestClass:
         assert "branch1" in conflict.branch1
         assert "branch2" in conflict.branch2
 
-    def test_detect_class_conflicts(self, analyzer):
+    def test_detect_class_conflicts(self, analyzer: SemanticAnalyzer) -> None:
         """Test class conflict detection."""
         context1 = SemanticContext(file_path="test.py")
         context1.classes["TestClass"] = ClassDefinition(
@@ -455,7 +455,7 @@ class TestClass:
             bases=["DifferentBase"],  # Different inheritance
         )
 
-        conflicts = analyzer._detect_class_conflicts(
+        conflicts = analyzer._detect_class_conflicts(  # noqa: SLF001
             context1,
             context2,
             "branch1",
@@ -467,7 +467,7 @@ class TestClass:
         assert conflict.conflict_type == SemanticConflictType.INHERITANCE_CONFLICT
         assert conflict.symbol_name == "TestClass"
 
-    def test_detect_import_conflicts(self, analyzer):
+    def test_detect_import_conflicts(self, analyzer: SemanticAnalyzer) -> None:
         """Test import conflict detection."""
         context1 = SemanticContext(file_path="test.py")
         context1.imports = [ImportInfo(module="os", name="path", alias="ospath")]
@@ -481,7 +481,7 @@ class TestClass:
             ),  # Same alias, different module
         ]
 
-        conflicts = analyzer._detect_import_conflicts(
+        conflicts = analyzer._detect_import_conflicts(  # noqa: SLF001
             context1,
             context2,
             "branch1",
@@ -493,7 +493,7 @@ class TestClass:
         assert conflict.conflict_type == SemanticConflictType.IMPORT_SEMANTIC_CONFLICT
         assert "ospath" in conflict.symbol_name
 
-    def test_detect_variable_conflicts(self, analyzer):
+    def test_detect_variable_conflicts(self, analyzer: SemanticAnalyzer) -> None:
         """Test variable conflict detection."""
         context1 = SemanticContext(file_path="test.py")
         context1.global_variables["my_var"] = "int"
@@ -501,7 +501,7 @@ class TestClass:
         context2 = SemanticContext(file_path="test.py")
         context2.global_variables["my_var"] = "str"  # Different type
 
-        conflicts = analyzer._detect_variable_conflicts(
+        conflicts = analyzer._detect_variable_conflicts(  # noqa: SLF001
             context1,
             context2,
             "branch1",
@@ -513,7 +513,7 @@ class TestClass:
         assert conflict.conflict_type == SemanticConflictType.VARIABLE_TYPE_CONFLICT
         assert conflict.symbol_name == "my_var"
 
-    def test_rank_conflicts_by_impact(self, analyzer):
+    def test_rank_conflicts_by_impact(self, analyzer: SemanticAnalyzer) -> None:
         """Test conflict ranking by impact."""
         conflicts = [
             SemanticConflict(
@@ -538,14 +538,14 @@ class TestClass:
             ),
         ]
 
-        ranked = analyzer._rank_conflicts_by_impact(conflicts)
+        ranked = analyzer._rank_conflicts_by_impact(conflicts)  # noqa: SLF001
 
         assert len(ranked) == 2
         assert ranked[0].conflict_id == "high"  # High impact should come first
         assert ranked[1].conflict_id == "low"  # Low impact should come second
 
     @pytest.mark.asyncio
-    async def test_get_semantic_context_caching(self, analyzer):
+    async def test_get_semantic_context_caching(self, analyzer: SemanticAnalyzer) -> None:
         """Test semantic context caching."""
         # Mock file content
         test_code = "def test(): pass"
@@ -558,21 +558,21 @@ class TestClass:
             mock_get.return_value = test_code
 
             # First call should fetch and cache
-            context1 = await analyzer._get_semantic_context("test.py", "branch1")
+            context1 = await analyzer._get_semantic_context("test.py", "branch1")  # noqa: SLF001
             assert context1 is not None
             assert mock_get.call_count == 1
 
             # Second call should use cache
-            context2 = await analyzer._get_semantic_context("test.py", "branch1")
+            context2 = await analyzer._get_semantic_context("test.py", "branch1")  # noqa: SLF001
             assert context2 is context1  # Same object reference
             assert mock_get.call_count == 1  # No additional call
 
             # Different branch should fetch again
-            context3 = await analyzer._get_semantic_context("test.py", "branch2")
+            context3 = await analyzer._get_semantic_context("test.py", "branch2")  # noqa: SLF001
             assert context3 is not context1
             assert mock_get.call_count == 2
 
-    def test_get_analysis_summary(self, analyzer):
+    def test_get_analysis_summary(self, analyzer: SemanticAnalyzer) -> None:
         """Test analysis summary generation."""
         # Set some test stats
         analyzer.analysis_stats["files_analyzed"] = 5
@@ -589,11 +589,11 @@ class TestClass:
         assert "cache_size" in summary
 
     @pytest.mark.asyncio
-    async def test_analyze_semantic_conflicts_integration(self, analyzer):
+    async def test_analyze_semantic_conflicts_integration(self, analyzer: SemanticAnalyzer) -> None:
         """Test full semantic conflict analysis integration."""
         # Mock the required methods
-        analyzer._get_changed_python_files = AsyncMock(return_value=["test.py"])
-        analyzer._analyze_file_semantic_conflicts = AsyncMock(
+        analyzer._get_changed_python_files = AsyncMock(return_value=["test.py"])  # noqa: SLF001
+        analyzer._analyze_file_semantic_conflicts = AsyncMock(  # noqa: SLF001
             return_value=[
                 SemanticConflict(
                     conflict_id="test-conflict",

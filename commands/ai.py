@@ -19,10 +19,10 @@ from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 class AIStatusCommand(BaseCommand):
     """Show AI learning system status."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
-        self.adaptive = None
+        self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions."""
@@ -30,7 +30,8 @@ class AIStatusCommand(BaseCommand):
         try:
             self.adaptive = AdaptiveResponse()
         except Exception as e:
-            raise CommandError(f"Failed to initialize AI components: {e}") from e
+            msg = f"Failed to initialize AI components: {e}"
+            raise CommandError(msg) from e
 
     def execute(self, **kwargs) -> dict:
         """Execute the status command."""
@@ -97,16 +98,17 @@ class AIStatusCommand(BaseCommand):
             return stats
 
         except Exception as e:
-            raise CommandError(f"Error getting AI status: {e}") from e
+            msg = f"Error getting AI status: {e}"
+            raise CommandError(msg) from e
 
 
 class AIConfigCommand(BaseCommand, ConfigCommandMixin):
     """Configure AI learning system settings."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
-        self.adaptive = None
+        self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions."""
@@ -114,7 +116,8 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
         try:
             self.adaptive = AdaptiveResponse()
         except Exception as e:
-            raise CommandError(f"Failed to initialize AI components: {e}") from e
+            msg = f"Failed to initialize AI components: {e}"
+            raise CommandError(msg) from e
 
     def execute(self, **kwargs) -> dict:
         """Execute the command."""
@@ -133,7 +136,8 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
                 self.adaptive.adjust_confidence_threshold(threshold)
                 changes.append(f"Confidence threshold set to {threshold:.2f}")
             else:
-                raise CommandError("Threshold must be between 0.0 and 1.0")
+                msg = "Threshold must be between 0.0 and 1.0"
+                raise CommandError(msg)
 
         if auto_response is not None:
             self.adaptive.enable_auto_response(auto_response)
@@ -158,10 +162,10 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
 class AIHistoryCommand(BaseCommand):
     """Show AI response history."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
-        self.analyzer = None
+        self.analyzer: ResponseAnalyzer | None = None
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions."""
@@ -169,7 +173,8 @@ class AIHistoryCommand(BaseCommand):
         try:
             self.analyzer = ResponseAnalyzer()
         except Exception as e:
-            raise CommandError(f"Failed to initialize AI components: {e}") from e
+            msg = f"Failed to initialize AI components: {e}"
+            raise CommandError(msg) from e
 
     def execute(self, **kwargs) -> dict:
         """Execute the command."""
@@ -223,10 +228,10 @@ class AIHistoryCommand(BaseCommand):
 class AIExportCommand(BaseCommand):
     """Export AI learning data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
-        self.adaptive = None
+        self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions."""
@@ -234,7 +239,8 @@ class AIExportCommand(BaseCommand):
         try:
             self.adaptive = AdaptiveResponse()
         except Exception as e:
-            raise CommandError(f"Failed to initialize AI components: {e}") from e
+            msg = f"Failed to initialize AI components: {e}"
+            raise CommandError(msg) from e
 
     def execute(self, **kwargs) -> dict:
         """Execute the command."""
@@ -251,17 +257,17 @@ class AIExportCommand(BaseCommand):
         if self.adaptive.export_learning_data(output_path):
             self.print_success(f"AI learning data exported to: {output_path}")
             return {"output_path": str(output_path), "success": True}
-        else:
-            raise CommandError("Failed to export AI learning data") from None
+        msg = "Failed to export AI learning data"
+        raise CommandError(msg) from None
 
 
 class AICleanupCommand(BaseCommand):
     """Clean up old AI learning data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
-        self.analyzer = None
+        self.analyzer: ResponseAnalyzer | None = None
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions."""
@@ -269,7 +275,8 @@ class AICleanupCommand(BaseCommand):
         try:
             self.analyzer = ResponseAnalyzer()
         except Exception as e:
-            raise CommandError(f"Failed to initialize AI components: {e}") from e
+            msg = f"Failed to initialize AI components: {e}"
+            raise CommandError(msg) from e
 
     def execute(self, **kwargs) -> dict:
         """Execute the command."""
@@ -291,10 +298,10 @@ class AICleanupCommand(BaseCommand):
 class AIPredictCommand(BaseCommand):
     """Predict response for a given prompt."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
-        self.adaptive = None
+        self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
         """Validate command preconditions."""
@@ -302,7 +309,8 @@ class AIPredictCommand(BaseCommand):
         try:
             self.adaptive = AdaptiveResponse()
         except Exception as e:
-            raise CommandError(f"Failed to initialize AI components: {e}") from e
+            msg = f"Failed to initialize AI components: {e}"
+            raise CommandError(msg) from e
 
     def execute(self, **kwargs) -> dict:
         """Execute the command."""
@@ -355,13 +363,12 @@ class AIPredictCommand(BaseCommand):
 
 
 @click.group()
-def ai():
+def ai() -> None:
     """AI learning system management."""
-    pass
 
 
 @ai.command()
-def status():
+def status() -> None:
     """Show AI learning system status."""
     command = AIStatusCommand()
     command.run()
@@ -375,7 +382,7 @@ def status():
     help="Enable/disable auto-response",
 )
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
-def config(threshold, auto_response, learning):
+def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:
     """Configure AI learning system settings."""
     command = AIConfigCommand()
     command.run(threshold=threshold, auto_response=auto_response, learning=learning)
@@ -385,7 +392,7 @@ def config(threshold, auto_response, learning):
 @click.option("--limit", "-l", default=10, type=int, help="Number of recent responses to show")
 @click.option("--type", "-t", help="Filter by prompt type")
 @click.option("--project", "-p", help="Filter by project name")
-def history(limit, type, project):
+def history(limit: int, type: str | None, project: str | None) -> None:
     """Show AI response history."""
     command = AIHistoryCommand()
     command.run(limit=limit, type=type, project=project)
@@ -393,7 +400,7 @@ def history(limit, type, project):
 
 @ai.command()
 @click.option("--output", "-o", help="Output file path for exported data")
-def export(output):
+def export(output: str | None) -> None:
     """Export AI learning data."""
     command = AIExportCommand()
     command.run(output=output)
@@ -401,7 +408,7 @@ def export(output):
 
 @ai.command()
 @click.option("--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)")
-def cleanup(days):
+def cleanup(days: int) -> None:
     """Clean up old AI learning data."""
     command = AICleanupCommand()
     command.run(days=days)
@@ -411,7 +418,7 @@ def cleanup(days):
 @click.argument("prompt_text")
 @click.option("--context", "-c", default="", help="Context for the prompt")
 @click.option("--project", "-p", help="Project name")
-def predict(prompt_text, context, project):
+def predict(prompt_text: str, context: str, project: str | None) -> None:
     """Predict response for a given prompt."""
     command = AIPredictCommand()
     command.run(prompt_text=prompt_text, context=context, project=project)

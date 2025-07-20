@@ -13,7 +13,7 @@ from rich.text import Text
 class SessionSelector:
     """Interactive TUI session selector."""
 
-    def __init__(self, sessions: list[dict[str, str]]):
+    def __init__(self, sessions: list[dict[str, str]]) -> None:
         self.sessions = sessions
         self.console = Console()
 
@@ -113,7 +113,7 @@ class SessionSelector:
 
             if choice.lower() == "q":
                 return None
-            elif choice.lower() == "s":
+            if choice.lower() == "s":
                 search_term = Prompt.ask("Search")
                 self.console.clear()
                 table, filtered_sessions = self._create_display(search_term)
@@ -134,8 +134,7 @@ class SessionSelector:
                 idx = int(choice) - 1
                 if 0 <= idx < len(filtered_sessions):
                     return filtered_sessions[idx]["session"]
-                else:
-                    self.console.print("[red]Invalid selection[/]")
+                self.console.print("[red]Invalid selection[/]")
             else:
                 self.console.print("[red]Invalid input. Enter a number, 's' to search, or 'q' to quit[/]")
 

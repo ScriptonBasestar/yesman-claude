@@ -10,7 +10,7 @@ cm = claude_manager
 
 
 @router.get("/sessions/{session_name}/controller/status", response_model=str)
-def get_controller_status(session_name: str):
+def get_controller_status(session_name: str) -> str | None:
     """지정된 세션의 컨트롤러 상태를 조회합니다 ('running' 또는 'stopped')."""
     try:
         controller = cm.get_controller(session_name)
@@ -18,12 +18,12 @@ def get_controller_status(session_name: str):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get controller status: {str(e)}",
+            detail=f"Failed to get controller status: {e!s}",
         )
 
 
 @router.post("/sessions/{session_name}/controller/start", status_code=204)
-def start_controller(session_name: str):
+def start_controller(session_name: str) -> None:
     """지정된 세션의 컨트롤러를 시작합니다."""
     try:
         controller = cm.get_controller(session_name)
@@ -73,14 +73,14 @@ def start_controller(session_name: str):
                                 pane_info.append(
                                     f"Window '{window.name}' Pane {pane.index}: {cmd}",
                                 )
-                            except Exception:
+                            except Exception as e:
                                 pane_info.append(
-                                    f"Window '{window.name}' Pane {pane.index}: <command unknown>",
+                                    f"Window '{window.name}' Pane {pane.index}: <command unknown> (error: {e!s})",
                                 )
                 else:
                     pane_info.append("❌ Could not access session information")
             except Exception as e:
-                pane_info.append(f"❌ Error accessing session: {str(e)}")
+                pane_info.append(f"❌ Error accessing session: {e!s}")
 
             detail_msg = (
                 f"❌ No Claude Code pane found in session '{session_name}'. "
@@ -118,7 +118,7 @@ def start_controller(session_name: str):
                         monitor_status = controller.monitor.is_running
                         error_details.append(f"📊 Monitor running: {monitor_status}")
                     except Exception as e:
-                        error_details.append(f"❌ Monitor error: {str(e)}")
+                        error_details.append(f"❌ Monitor error: {e!s}")
 
                 detail_msg = f"❌ Controller failed to start for session '{session_name}'. The system encountered an internal error.\n\n🔍 Diagnostic Information:\n"
 
@@ -142,7 +142,7 @@ def start_controller(session_name: str):
             # Detailed error information for start failures
             detail_msg = (
                 f"❌ Controller start failed for session '{session_name}': "
-                f"{str(start_error)}\n\n"
+                f"{start_error!s}\n\n"
                 f"🔍 Error Type: {type(start_error).__name__}\n"
                 f"📊 Session Status: {'Running' if session_exists else 'Not Running'}\n"
                 f"🔧 Claude Pane: {'Found' if controller.claude_pane else 'Not Found'}\n\n"
@@ -163,7 +163,7 @@ def start_controller(session_name: str):
         # Catch-all for unexpected errors
         detail_msg = (
             f"❌ Unexpected error starting controller for session '{session_name}': "
-            f"{str(e)}\n\n"
+            f"{e!s}\n\n"
             f"🔍 Error Type: {type(e).__name__}\n"
             f"📍 This is likely a system-level issue.\n\n"
             f"💡 Please try:\n"
@@ -180,7 +180,7 @@ def start_controller(session_name: str):
 
 
 @router.post("/sessions/{session_name}/controller/stop", status_code=204)
-def stop_controller(session_name: str):
+def stop_controller(session_name: str) -> None:
     """지정된 세션의 컨트롤러를 중지합니다."""
     try:
         controller = cm.get_controller(session_name)
@@ -215,7 +215,7 @@ def stop_controller(session_name: str):
         raise
     except Exception as e:
         detail_msg = (
-            f"❌ Failed to stop controller for session '{session_name}': {str(e)}\n\n"
+            f"❌ Failed to stop controller for session '{session_name}': {e!s}\n\n"
             f"🔍 Error Type: {type(e).__name__}\n\n"
             f"💡 This might be caused by:\n"
             f"1. Session no longer exists\n"
@@ -231,7 +231,7 @@ def stop_controller(session_name: str):
 
 
 @router.post("/sessions/{session_name}/controller/restart", status_code=204)
-def restart_claude_pane(session_name: str):
+def restart_claude_pane(session_name: str) -> None:
     """Claude가 실행 중인 pane을 재시작합니다."""
     try:
         controller = cm.get_controller(session_name)
@@ -275,7 +275,7 @@ def restart_claude_pane(session_name: str):
     except Exception as e:
         detail_msg = (
             f"❌ Failed to restart Claude pane for session '{session_name}': "
-            f"{str(e)}\n\n"
+            f"{e!s}\n\n"
             f"🔍 Error Type: {type(e).__name__}\n\n"
             f"💡 This might be caused by:\n"
             f"1. Session no longer exists\n"
@@ -325,7 +325,7 @@ def start_all_controllers():
                     # 이미 실행 중인 경우도 성공으로 카운트
                     started_count += 1
             except Exception as e:
-                errors.append(f"Error starting controller for session '{session.session_name}': {str(e)}")
+                errors.append(f"Error starting controller for session '{session.session_name}': {e!s}")
 
         if errors and started_count == 0:
             # 모든 요청이 실패한 경우
@@ -344,7 +344,7 @@ def start_all_controllers():
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to start all controllers: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to start all controllers: {e!s}")
 
 
 @router.post("/controllers/stop-all", status_code=200)
@@ -385,7 +385,7 @@ def stop_all_controllers():
                     # 이미 중지된 경우도 성공으로 카운트
                     stopped_count += 1
             except Exception as e:
-                errors.append(f"Error stopping controller for session '{session.session_name}': {str(e)}")
+                errors.append(f"Error stopping controller for session '{session.session_name}': {e!s}")
 
         if errors and stopped_count == 0:
             # 모든 요청이 실패한 경우
@@ -404,4 +404,4 @@ def stop_all_controllers():
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to stop all controllers: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to stop all controllers: {e!s}")

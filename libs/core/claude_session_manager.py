@@ -5,13 +5,13 @@ from typing import Any
 
 import libtmux
 
-from ..utils import ensure_log_directory, get_default_log_path
+from libs.utils import ensure_log_directory, get_default_log_path
 
 
 class ClaudeSessionManager:
     """Manages tmux session and Claude pane discovery."""
 
-    def __init__(self, session_name: str, pane_id: str | None = None):
+    def __init__(self, session_name: str, pane_id: str | None = None) -> None:
         self.session_name = session_name
         self.pane_id = pane_id
         self.server = libtmux.Server()
@@ -42,20 +42,20 @@ class ClaudeSessionManager:
         try:
             self.session = self.server.find_where({"session_name": self.session_name})
             if not self.session:
-                self.logger.error(f"Session '{self.session_name}' not found")
+                self.logger.error("Session '%s' not found", self.session_name)
                 return False
 
             # Find Claude pane
             self.claude_pane = self._find_claude_pane()
             if not self.claude_pane:
-                self.logger.warning(f"No Claude pane found in session '{self.session_name}'")
+                self.logger.warning("No Claude pane found in session '%s'", self.session_name)
                 return False
 
-            self.logger.info(f"Successfully initialized session '{self.session_name}'")
+            self.logger.info("Successfully initialized session '%s'", self.session_name)
             return True
 
-        except Exception as e:
-            self.logger.error(f"Could not initialize session: {e}")
+        except Exception:
+            self.logger.exception("Could not initialize session")
             return False
 
     def _find_claude_pane(self):
@@ -84,11 +84,11 @@ class ClaudeSessionManager:
                     ]
 
                     if any(claude_indicators):
-                        self.logger.info(f"Found Claude pane: {window.name}:{pane.index}")
+                        self.logger.info("Found Claude pane: %s:%s", window.name, pane.index)
                         return pane
 
                 except Exception as e:
-                    self.logger.debug(f"Error checking pane {window.name}:{pane.index}: {e}")
+                    self.logger.debug("Error checking pane %s:%s: %s", window.name, pane.index, e)
                     continue
 
         self.logger.warning("No Claude pane found in any window")
@@ -110,13 +110,12 @@ class ClaudeSessionManager:
         try:
             # Get the last N lines from the pane
             result = self.claude_pane.cmd("capture-pane", "-p", "-S", f"-{lines}")
-            content = "\n".join(result.stdout) if result.stdout else ""
-            return content
-        except Exception as e:
-            self.logger.error(f"Error capturing pane content: {e}")
+            return "\n".join(result.stdout) if result.stdout else ""
+        except Exception:
+            self.logger.exception("Error capturing pane content")
             return ""
 
-    def send_keys(self, keys: str):
+    def send_keys(self, keys: str) -> None:
         """Send keys to Claude pane."""
         if self.claude_pane:
             self.claude_pane.send_keys(keys)
@@ -129,6 +128,6 @@ class ClaudeSessionManager:
         try:
             cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
             return str(cmd) if cmd else ""
-        except Exception as e:
-            self.logger.error(f"Error getting current command: {e}")
+        except Exception:
+            self.logger.exception("Error getting current command")
             return ""

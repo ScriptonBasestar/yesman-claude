@@ -100,7 +100,7 @@ class ManagerMockFactory:
         # Status tracking
         controllers_status = kwargs.get("controllers_status", {"test-session": "running"})
         mock_manager.get_all_status.return_value = controllers_status
-        mock_manager.get_status.return_value = list(controllers_status.values())[0] if controllers_status else "stopped"
+        mock_manager.get_status.return_value = next(iter(controllers_status.values())) if controllers_status else "stopped"
 
         # Session operations
         mock_manager.start_session.return_value = True
@@ -237,7 +237,7 @@ class PatchContextFactory:
 
 # Convenience exports for easy importing
 __all__ = [
-    "ManagerMockFactory",
     "ComponentMockFactory",
+    "ManagerMockFactory",
     "PatchContextFactory",
 ]

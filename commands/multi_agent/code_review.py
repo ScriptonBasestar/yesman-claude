@@ -14,7 +14,8 @@ class ReviewInitiateCommand(BaseCommand):
         """Execute the review initiate command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Initiating code review...")
-        raise NotImplementedError("Review initiate implementation pending extraction from original file")
+        msg = "Review initiate implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class ReviewApproveCommand(BaseCommand):
@@ -24,7 +25,8 @@ class ReviewApproveCommand(BaseCommand):
         """Execute the review approve command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Approving code review...")
-        raise NotImplementedError("Review approve implementation pending extraction from original file")
+        msg = "Review approve implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class ReviewRejectCommand(BaseCommand):
@@ -34,7 +36,8 @@ class ReviewRejectCommand(BaseCommand):
         """Execute the review reject command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Rejecting code review...")
-        raise NotImplementedError("Review reject implementation pending extraction from original file")
+        msg = "Review reject implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class ReviewStatusCommand(BaseCommand):
@@ -44,7 +47,8 @@ class ReviewStatusCommand(BaseCommand):
         """Execute the review status command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Checking review status...")
-        raise NotImplementedError("Review status implementation pending extraction from original file")
+        msg = "Review status implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class QualityCheckCommand(BaseCommand):
@@ -54,7 +58,8 @@ class QualityCheckCommand(BaseCommand):
         """Execute the quality check command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Performing quality check...")
-        raise NotImplementedError("Quality check implementation pending extraction from original file")
+        msg = "Quality check implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class ReviewSummaryCommand(BaseCommand):
@@ -64,4 +69,5 @@ class ReviewSummaryCommand(BaseCommand):
         """Execute the review summary command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Generating review summary...")
-        raise NotImplementedError("Review summary implementation pending extraction from original file")
+        msg = "Review summary implementation pending extraction from original file"
+        raise NotImplementedError(msg)

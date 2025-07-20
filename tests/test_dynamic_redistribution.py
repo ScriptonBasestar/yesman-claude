@@ -16,15 +16,14 @@ class TestDynamicRedistribution:
     @pytest.fixture
     def agent_pool(self):
         """Create agent pool for testing."""
-        pool = AgentPool(max_agents=3, work_dir="/tmp/test-agents")
-        return pool
+        return AgentPool(max_agents=3, work_dir="/tmp/test-agents")
 
     @pytest.fixture
     def scheduler(self):
         """Create scheduler for testing."""
         return TaskScheduler()
 
-    def test_rebalance_detection(self, scheduler):
+    def test_rebalance_detection(self, scheduler: TaskScheduler) -> None:
         """Test detection of overloaded and underloaded agents."""
         # Create agents with different loads
         overloaded_agent = Agent(agent_id="agent-1")
@@ -59,7 +58,7 @@ class TestDynamicRedistribution:
         assert len(rebalancing_actions) > 0
         assert any(action[0] == "agent-1" and action[1] == "agent-3" for action in rebalancing_actions)
 
-    def test_assignment_preference_adjustment(self, scheduler):
+    def test_assignment_preference_adjustment(self, scheduler: TaskScheduler) -> None:
         """Test adjustment of task assignment preferences."""
         # Setup agents
         overloaded_agent = Agent(agent_id="agent-1")
@@ -93,7 +92,7 @@ class TestDynamicRedistribution:
         assert overloaded_cap.processing_power < initial_overloaded_power  # Penalty applied
         assert underloaded_cap.processing_power > initial_underloaded_power  # Boost applied
 
-    def test_load_estimation(self, scheduler):
+    def test_load_estimation(self, scheduler: TaskScheduler) -> None:
         """Test task load estimation."""
         agent_cap = AgentCapability(
             agent_id="test-agent",
@@ -117,7 +116,7 @@ class TestDynamicRedistribution:
         assert isinstance(load, float)
 
     @pytest.mark.asyncio
-    async def test_auto_rebalancing_loop(self, agent_pool):
+    async def test_auto_rebalancing_loop(self, agent_pool: AgentPool) -> None:
         """Test automatic rebalancing loop."""
         # Set the agent pool as running
         agent_pool._running = True
@@ -151,7 +150,7 @@ class TestDynamicRedistribution:
             # Verify rebalancing was called
             mock_scheduler.rebalance_tasks.assert_called()
 
-    def test_rebalancing_execution(self, agent_pool):
+    def test_rebalancing_execution(self, agent_pool: AgentPool) -> None:
         """Test execution of rebalancing actions."""
         # Create mock agents
         agent_1 = Agent(agent_id="agent-1")
@@ -180,7 +179,7 @@ class TestDynamicRedistribution:
         assert cap_1.current_load < 0.8  # Should be reduced
         assert cap_2.current_load > 0.2  # Should be increased
 
-    def test_scheduling_metrics_calculation(self, scheduler):
+    def test_scheduling_metrics_calculation(self, scheduler: TaskScheduler) -> None:
         """Test calculation of scheduling metrics."""
         # Add agents with different loads
         agents = [
@@ -205,7 +204,7 @@ class TestDynamicRedistribution:
         assert 0.0 <= metrics["load_balancing_score"] <= 1.0
         assert 0.0 <= metrics["efficiency_score"] <= 1.0
 
-    def test_no_rebalancing_when_balanced(self, scheduler):
+    def test_no_rebalancing_when_balanced(self, scheduler: TaskScheduler) -> None:
         """Test that no rebalancing occurs when loads are balanced."""
         # Create agents with similar loads
         for i in range(3):
@@ -221,7 +220,7 @@ class TestDynamicRedistribution:
         rebalancing_actions = scheduler.rebalance_tasks()
         assert len(rebalancing_actions) == 0
 
-    def test_preference_reset_functionality(self, scheduler):
+    def test_preference_reset_functionality(self, scheduler: TaskScheduler) -> None:
         """Test that assignment preferences can be reset."""
         # Setup agent
         agent = Agent(agent_id="agent-1")
@@ -240,7 +239,7 @@ class TestDynamicRedistribution:
         assert cap.processing_power == 1.0
         assert hasattr(cap, "_baseline_processing_power")
 
-    def test_load_balancing_with_specializations(self, scheduler):
+    def test_load_balancing_with_specializations(self, scheduler: TaskScheduler) -> None:
         """Test load balancing considers agent specializations."""
         # Setup agents with different specializations
         overloaded_agent = Agent(agent_id="agent-1")

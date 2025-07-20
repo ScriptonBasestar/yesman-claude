@@ -4,7 +4,7 @@ from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 class TestErrorHandlingIntegration:
     """Tests for error handling across components."""
 
-    def test_error_handling_integration(self):
+    def test_error_handling_integration(self) -> None:
         """Test 13: Error handling across components."""
         factory = RendererFactory()
 

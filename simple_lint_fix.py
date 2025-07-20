@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simple lint fix runner without subprocess"""
+"""Simple lint fix runner without subprocess."""
 
 import os
 import sys

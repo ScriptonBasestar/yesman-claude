@@ -59,7 +59,7 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None):
+    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None) -> None:
         """Initialize base renderer.
 
         Args:
@@ -87,7 +87,6 @@ class BaseRenderer(ABC):
         Returns:
             Rendered widget as string
         """
-        pass
 
     @abstractmethod
     def render_layout(
@@ -104,7 +103,6 @@ class BaseRenderer(ABC):
         Returns:
             Rendered layout as string
         """
-        pass
 
     @abstractmethod
     def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
@@ -117,11 +115,10 @@ class BaseRenderer(ABC):
         Returns:
             Rendered container as string
         """
-        pass
 
     # Common utility methods
 
-    def format_number(self, value: int | float, precision: int = 2, suffix: str = "") -> str:
+    def format_number(self, value: float, precision: int = 2, suffix: str = "") -> str:
         """Format a number with optional precision and suffix.
 
         Args:
@@ -173,7 +170,7 @@ class BaseRenderer(ABC):
 
         return str(date)
 
-    def format_percentage(self, value: int | float, precision: int = 1) -> str:
+    def format_percentage(self, value: float, precision: int = 1) -> str:
         """Format a percentage value.
 
         Args:
@@ -208,7 +205,7 @@ class BaseRenderer(ABC):
 
         return f"{bytes_float:.1f} PB"
 
-    def format_duration(self, seconds: int | float) -> str:
+    def format_duration(self, seconds: float) -> str:
         """Format duration in seconds to human-readable format.
 
         Args:
@@ -222,12 +219,11 @@ class BaseRenderer(ABC):
 
         if seconds < 60:
             return f"{seconds:.1f}s"
-        elif seconds < 3600:
+        if seconds < 3600:
             return f"{seconds // 60:.0f}m {seconds % 60:.0f}s"
-        else:
-            hours = seconds // 3600
-            minutes = (seconds % 3600) // 60
-            return f"{hours:.0f}h {minutes:.0f}m"
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return f"{hours:.0f}h {minutes:.0f}m"
 
     def get_color(self, color_type: ThemeColor, variant: str = "default") -> str:
         """Get color value from theme.
@@ -280,9 +276,8 @@ class BaseRenderer(ABC):
             return ""
 
         # Remove control characters except newline and tab
-        text = re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]", "", text)
+        return re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]", "", text)
 
-        return text
 
     def get_status_color(self, status: str) -> ThemeColor:
         """Get appropriate color for status.
@@ -297,14 +292,13 @@ class BaseRenderer(ABC):
 
         if status_lower in ["active", "running", "healthy", "online", "connected"]:
             return ThemeColor.SUCCESS
-        elif status_lower in ["warning", "degraded", "slow"]:
+        if status_lower in ["warning", "degraded", "slow"]:
             return ThemeColor.WARNING
-        elif status_lower in ["error", "failed", "stopped", "offline", "disconnected"]:
+        if status_lower in ["error", "failed", "stopped", "offline", "disconnected"]:
             return ThemeColor.ERROR
-        elif status_lower in ["loading", "pending", "connecting"]:
+        if status_lower in ["loading", "pending", "connecting"]:
             return ThemeColor.INFO
-        else:
-            return ThemeColor.NEUTRAL
+        return ThemeColor.NEUTRAL
 
     def calculate_health_score(self, metrics: dict[str, int | float]) -> float:
         """Calculate overall health score from metrics.
@@ -403,11 +397,11 @@ class BaseRenderer(ABC):
             },
         }
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """Clear the internal cache."""
         self._cache.clear()
 
-    def set_theme(self, theme: dict[str, Any]):
+    def set_theme(self, theme: dict[str, Any]) -> None:
         """Set new theme configuration.
 
         Args:

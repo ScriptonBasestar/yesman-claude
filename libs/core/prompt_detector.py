@@ -35,13 +35,13 @@ class PromptInfo:
 class ClaudePromptDetector:
     """Advanced prompt detector for Claude Code interactions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger("yesman.dashboard.prompt_detector")
 
         # Compile regex patterns for better performance
         self._compile_patterns()
 
-    def _compile_patterns(self):
+    def _compile_patterns(self) -> None:
         """Compile regex patterns for prompt detection."""
         # Numbered selection patterns
         self.numbered_patterns = [
@@ -134,7 +134,7 @@ class ClaudePromptDetector:
                     self.logger.debug(f"Detected prompt: {prompt_info.type.value}")
                     return prompt_info
             except Exception as e:
-                self.logger.error(f"Error in detector {detector.__name__}: {e}")
+                self.logger.exception(f"Error in detector {detector.__name__}: {e}")
 
         return None
 

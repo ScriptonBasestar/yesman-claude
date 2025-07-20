@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run make lint and capture output"""
+"""Run make lint and capture output."""
 
 import os
 import subprocess

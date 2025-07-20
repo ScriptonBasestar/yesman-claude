@@ -41,7 +41,7 @@ class PromptPattern:
 class ResponseAnalyzer:
     """Analyzes user response patterns and learns optimal responses."""
 
-    def __init__(self, data_dir: Path | None = None):
+    def __init__(self, data_dir: Path | None = None) -> None:
         self.data_dir = data_dir or Path.home() / ".scripton" / "yesman" / "ai_data"
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -53,7 +53,7 @@ class ResponseAnalyzer:
 
         self._load_data()
 
-    def _load_data(self):
+    def _load_data(self) -> None:
         """Load existing response history and patterns."""
         try:
             if self.responses_file.exists():
@@ -69,9 +69,9 @@ class ResponseAnalyzer:
                 logger.info(f"Loaded {len(self.learned_patterns)} learned patterns")
 
         except Exception as e:
-            logger.error(f"Error loading AI data: {e}")
+            logger.exception(f"Error loading AI data: {e}")
 
-    def _save_data(self):
+    def _save_data(self) -> None:
         """Save response history and patterns to disk."""
         try:
             # Save response history
@@ -87,15 +87,15 @@ class ResponseAnalyzer:
                 )
 
         except Exception as e:
-            logger.error(f"Error saving AI data: {e}")
+            logger.exception(f"Error saving AI data: {e}")
 
     def record_response(
         self,
         prompt_text: str,
         user_response: str,
         context: str = "",
-        project_name: str = None,
-    ):
+        project_name: str | None = None,
+    ) -> None:
         """Record a user response for learning."""
         prompt_type = self._classify_prompt_type(prompt_text)
 
@@ -126,20 +126,19 @@ class ResponseAnalyzer:
         # Common prompt patterns
         if re.search(r"\b(yes|no)\b.*\?", text):
             return "yes_no"
-        elif re.search(r"\b[1-9]\d*\)", text) or re.search(r"select.*[1-9]", text):
+        if re.search(r"\b[1-9]\d*\)", text) or re.search(r"select.*[1-9]", text):
             return "numbered_selection"
-        elif "overwrite" in text or "replace" in text:
+        if "overwrite" in text or "replace" in text:
             return "overwrite_confirmation"
-        elif "continue" in text or "proceed" in text:
+        if "continue" in text or "proceed" in text:
             return "proceed_confirmation"
-        elif "trust" in text and "code" in text:
+        if "trust" in text and "code" in text:
             return "trust_confirmation"
-        elif re.search(r"choose|select|pick", text):
+        if re.search(r"choose|select|pick", text):
             return "choice_selection"
-        else:
-            return "unknown"
+        return "unknown"
 
-    def _update_patterns(self, record: ResponseRecord):
+    def _update_patterns(self, record: ResponseRecord) -> None:
         """Update learned patterns based on new response record."""
         pattern_id = f"{record.prompt_type}_{record.project_name or 'global'}"
 
@@ -181,9 +180,8 @@ class ResponseAnalyzer:
         pattern = re.sub(r"\\d+", r"\\d+", pattern)
 
         # Replace file names/paths with wildcards
-        pattern = re.sub(r"[a-zA-Z0-9_\-\.]+\.(py|js|ts|md|txt)", r"[\\w\-\.]+", pattern)
+        return re.sub(r"[a-zA-Z0-9_\-\.]+\.(py|js|ts|md|txt)", r"[\\w\-\.]+", pattern)
 
-        return pattern
 
     def _extract_context_key(self, context: str) -> str:
         """Extract a key from context for pattern matching."""
@@ -192,16 +190,15 @@ class ResponseAnalyzer:
 
         if "error" in context:
             return "error_context"
-        elif "test" in context:
+        if "test" in context:
             return "test_context"
-        elif "build" in context:
+        if "build" in context:
             return "build_context"
-        elif "deploy" in context:
+        if "deploy" in context:
             return "deploy_context"
-        else:
-            return "general_context"
+        return "general_context"
 
-    def predict_response(self, prompt_text: str, context: str = "", project_name: str = None) -> tuple[str, float]:
+    def predict_response(self, prompt_text: str, context: str = "", project_name: str | None = None) -> tuple[str, float]:
         """Predict the best response for a given prompt."""
         prompt_type = self._classify_prompt_type(prompt_text)
         pattern_id = f"{prompt_type}_{project_name or 'global'}"
@@ -228,8 +225,7 @@ class ResponseAnalyzer:
         if pattern.common_responses:
             best_response = max(pattern.common_responses.items(), key=lambda x: x[1])[0]
             return best_response, confidence
-        else:
-            return self._get_default_response(prompt_type)
+        return self._get_default_response(prompt_type)
 
     def _calculate_confidence(self, pattern: PromptPattern, prompt_text: str, context: str) -> float:
         """Calculate confidence score for a prediction."""

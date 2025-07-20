@@ -19,7 +19,7 @@ from libs.logging import AsyncLogger, AsyncLoggerConfig, LogLevel
 class LogsConfigureCommand(BaseCommand):
     """Configure async logging system."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
 
@@ -74,13 +74,14 @@ class LogsConfigureCommand(BaseCommand):
             }
 
         except Exception as e:
-            raise CommandError(f"Error configuring logging: {e}") from e
+            msg = f"Error configuring logging: {e}"
+            raise CommandError(msg) from e
 
 
 class LogsAnalyzeCommand(BaseCommand):
     """Analyze log files and show statistics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
 
@@ -96,7 +97,8 @@ class LogsAnalyzeCommand(BaseCommand):
             log_path = Path(log_dir).expanduser()
 
             if not log_path.exists():
-                raise CommandError(f"Log directory not found: {log_path}")
+                msg = f"Log directory not found: {log_path}"
+                raise CommandError(msg)
 
             # Find log files
             log_files = list(log_path.glob("*.log")) + list(log_path.glob("*.jsonl")) + list(log_path.glob("*.log.gz"))
@@ -114,7 +116,8 @@ class LogsAnalyzeCommand(BaseCommand):
             return {"files_found": len(log_files), "stats": stats}
 
         except Exception as e:
-            raise CommandError(f"Error analyzing logs: {e}") from e
+            msg = f"Error analyzing logs: {e}"
+            raise CommandError(msg) from e
 
     def _analyze_log_files(self, log_files: list[Path], last_hours: int, level_filter: str | None = None) -> dict[str, Any]:
         """Analyze log files and return statistics."""
@@ -209,7 +212,7 @@ class LogsAnalyzeCommand(BaseCommand):
 class LogsTailCommand(BaseCommand):
     """Tail log files (like tail -f)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
 
@@ -226,7 +229,8 @@ class LogsTailCommand(BaseCommand):
             log_path = Path(log_dir).expanduser()
 
             if not log_path.exists():
-                raise CommandError(f"Log directory not found: {log_path}")
+                msg = f"Log directory not found: {log_path}"
+                raise CommandError(msg)
 
             # Find most recent log file
             log_files = list(log_path.glob("*.log")) + list(log_path.glob("*.jsonl"))
@@ -248,7 +252,8 @@ class LogsTailCommand(BaseCommand):
             self.print_warning("\nLog tail stopped")
             return {"success": True, "stopped_by_user": True}
         except Exception as e:
-            raise CommandError(f"Error tailing logs: {e}") from e
+            msg = f"Error tailing logs: {e}"
+            raise CommandError(msg) from e
 
     def _follow_log_file(self, log_file: Path, level_filter: str | None = None) -> None:
         """Follow a log file like tail -f."""
@@ -347,7 +352,7 @@ class LogsTailCommand(BaseCommand):
 class LogsCleanupCommand(BaseCommand):
     """Clean up old log files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.console = Console()
 
@@ -388,18 +393,17 @@ class LogsCleanupCommand(BaseCommand):
                     "files_deleted": len(old_files),
                     "size_freed": total_size,
                 }
-            else:
-                self.print_info("Cleanup cancelled")
-                return {"success": False, "cancelled": True}
+            self.print_info("Cleanup cancelled")
+            return {"success": False, "cancelled": True}
 
         except Exception as e:
-            raise CommandError(f"Error cleaning up logs: {e}") from e
+            msg = f"Error cleaning up logs: {e}"
+            raise CommandError(msg) from e
 
 
 @click.group()
-def logs():
+def logs() -> None:
     """Log management and analysis."""
-    pass
 
 
 @logs.command()
@@ -413,7 +417,7 @@ def logs():
 )
 @click.option("--compression", "-c", is_flag=True, help="Enable gzip compression")
 @click.option("--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching")
-def configure(output_dir, format, compression, buffer_size):
+def configure(output_dir: str, format: str, compression: bool, buffer_size: int) -> None:
     """Configure async logging system."""
     command = LogsConfigureCommand()
     command.run(
@@ -433,7 +437,7 @@ def configure(output_dir, format, compression, buffer_size):
 )
 @click.option("--last-hours", "-h", default=24, type=int, help="Analyze last N hours")
 @click.option("--level", "-l", help="Filter by log level")
-def analyze(log_dir, last_hours, level):
+def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
     """Analyze log files and show statistics."""
     command = LogsAnalyzeCommand()
     command.run(log_dir=log_dir, last_hours=last_hours, level=level)
@@ -444,7 +448,7 @@ def analyze(log_dir, last_hours, level):
 @click.option("--level", "-l", default="INFO", help="Log level filter")
 @click.option("--follow", "-f", is_flag=True, help="Follow log output")
 @click.option("--last-lines", "-n", default=50, type=int, help="Show last N lines")
-def tail(log_dir, level, follow, last_lines):
+def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:
     """Tail log files (like tail -f)."""
     command = LogsTailCommand()
     command.run(log_dir=log_dir, level=level, follow=follow, last_lines=last_lines)
@@ -453,7 +457,7 @@ def tail(log_dir, level, follow, last_lines):
 @logs.command()
 @click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
 @click.option("--days", default=7, type=int, help="Days of logs to keep")
-def cleanup(log_dir, days):
+def cleanup(log_dir: str, days: int) -> None:
     """Clean up old log files."""
     command = LogsCleanupCommand()
     command.run(log_dir=log_dir, days=days)

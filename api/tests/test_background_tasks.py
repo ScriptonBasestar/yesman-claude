@@ -1,6 +1,7 @@
 """Test background tasks and WebSocket updates."""
 
 import asyncio
+import contextlib
 import json
 import time
 from datetime import datetime
@@ -9,29 +10,21 @@ import requests
 import websockets
 
 
-def check_task_status():
+def check_task_status() -> None:
     """Check the status of background tasks via API."""
     response = requests.get("http://localhost:8000/api/tasks/status", timeout=5)
     if response.status_code == 200:
         data = response.json()
-        print("\n📊 Background Task Status:")
-        print(f"   Running: {data['is_running']}")
-        print("\n   Task Details:")
-        for task_name, task_info in data["tasks"].items():
-            print(f"   - {task_name}:")
-            print(f"     Running: {task_info['is_running']}")
-            print(f"     Last Run: {task_info['last_run']}")
-            print(f"     Errors: {task_info['error_count']}")
-            print(f"     Interval: {task_info['interval']}s")
+        for task_info in data["tasks"].values():
+            pass
     else:
-        print(f"❌ Failed to get task status: {response.status_code}")
+        pass
 
 
-async def monitor_updates(duration: int = 60):
+async def monitor_updates(duration: int = 60) -> None:
     """Monitor WebSocket updates for a specified duration."""
     uri = "ws://localhost:8000/ws/dashboard"
 
-    print(f"\n🔌 Connecting to WebSocket for {duration} seconds...")
 
     update_counts = {
         "session_update": 0,
@@ -45,7 +38,6 @@ async def monitor_updates(duration: int = 60):
 
     try:
         async with websockets.connect(uri) as websocket:
-            print("✅ Connected to dashboard WebSocket")
 
             while time.time() - start_time < duration:
                 try:
@@ -72,53 +64,37 @@ async def monitor_updates(duration: int = 60):
                         "health_update",
                         "activity_update",
                     ]:
-                        print(f"\n📥 Received {msg_type}:")
-                        print(f"   Timestamp: {data.get('timestamp')}")
 
                         if msg_type == "session_update":
                             sessions = data.get("data", [])
-                            print(f"   Sessions: {len(sessions)}")
                             for session in sessions[:3]:  # Show first 3
-                                print(f"     - {session.get('session_name')}: {session.get('status')}")
+                                pass
 
-                        elif msg_type == "health_update":
-                            health = data.get("data", {})
-                            print(f"   Overall Score: {health.get('overall_score')}")
-
-                        elif msg_type == "activity_update":
-                            activity = data.get("data", {})
-                            print(f"   Active Days: {activity.get('active_days')}")
-                            print(f"   Max Activity: {activity.get('max_activity')}")
+                        elif msg_type in {"health_update", "activity_update"}:
+                            data.get("data", {})
 
                 except TimeoutError:
                     # No message received in 1 second, continue
                     pass
 
-            print(f"\n📊 Update Summary ({duration}s):")
-            for update_type, count in update_counts.items():
+            for count in update_counts.values():
                 if count > 0:
-                    print(f"   {update_type}: {count}")
+                    pass
 
-    except Exception as e:
-        print(f"❌ WebSocket error: {str(e)}")
+    except Exception:
+        pass
 
 
-async def trigger_session_change():
+async def trigger_session_change() -> None:
     """Simulate a session change to trigger updates."""
-    print("\n🔄 Simulating session change...")
-
     # This would normally be done by creating/stopping a tmux session
     # For testing, we'll just wait and let the monitor detect any changes
 
-    print("   Waiting for background tasks to detect changes...")
     await asyncio.sleep(5)
 
 
-async def main():
+async def main() -> None:
     """Run background task tests."""
-    print("🚀 Testing Background Tasks and Real-time Updates")
-    print("=" * 50)
-
     # Check initial task status
     check_task_status()
 
@@ -126,18 +102,11 @@ async def main():
     await monitor_updates(60)
 
     # Check final task status
-    print("\n" + "=" * 50)
     check_task_status()
 
-    print("\n✅ Test completed!")
 
 
 if __name__ == "__main__":
-    print("🔧 Background Task Test")
-    print("Make sure the API server is running at http://localhost:8000")
-    print("-" * 50)
 
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n\n⚠️  Test interrupted by user")

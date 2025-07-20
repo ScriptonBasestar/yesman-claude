@@ -20,7 +20,7 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 class InteractiveBrowser:
     """Interactive session browser with live updates."""
 
-    def __init__(self, tmux_manager, config, update_interval: float = 2.0):
+    def __init__(self, tmux_manager: Any, config: Any, update_interval: float = 2.0) -> None:
         self.console = Console()
         self.config = config
         self.tmux_manager = tmux_manager
@@ -39,7 +39,7 @@ class InteractiveBrowser:
         self.progress_data: dict[str, Any] | None = None
         self.session_data: list[dict[str, Any]] = []
 
-    def update_data(self):
+    def update_data(self) -> None:
         """Update session data and activity metrics."""
         try:
             # Get session information using cached method
@@ -52,7 +52,7 @@ class InteractiveBrowser:
                 detailed_sessions.append(detailed_info)
 
                 # Calculate and record activity
-                activity_level = self._calculate_session_activity(detailed_info)
+                self._calculate_session_activity(detailed_info)
                 # Note: Recording activity for potential future use
                 # Activity is collected on-demand in generate_heatmap_data
 
@@ -118,7 +118,7 @@ class InteractiveBrowser:
 
         return layout
 
-    def update_layout(self, layout: Layout):
+    def update_layout(self, layout: Layout) -> None:
         """Update layout content."""
         # Header
         header_text = f"🚀 Yesman Session Browser - {time.strftime('%H:%M:%S')}"
@@ -146,13 +146,13 @@ class InteractiveBrowser:
         # Footer
         layout["footer"].update(status_bar)
 
-    def background_updater(self):
+    def background_updater(self) -> None:
         """Background thread for updating data."""
         while self.running:
             self.update_data()
             time.sleep(self.update_interval)
 
-    def start(self):
+    def start(self) -> None:
         """Start the interactive browser."""
         self.running = True
 
@@ -178,7 +178,7 @@ class InteractiveBrowser:
         except KeyboardInterrupt:
             self.stop()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the browser."""
         self.running = False
         if self.update_thread:
@@ -209,7 +209,8 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
         super().validate_preconditions()
         # Check if tmux is available and running
         if not self._is_tmux_available():
-            raise CommandError("tmux is not available or not properly installed")
+            msg = "tmux is not available or not properly installed"
+            raise CommandError(msg)
 
     def execute(self, update_interval: float = 2.0, **kwargs) -> dict:
         """Execute the browse command."""
@@ -228,7 +229,8 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
             self.print_info("\nSession browser stopped.")
             return {"success": True, "stopped_by_user": True}
         except Exception as e:
-            raise CommandError(f"Error during browsing: {e}") from e
+            msg = f"Error during browsing: {e}"
+            raise CommandError(msg) from e
 
 
 @click.command()
@@ -239,7 +241,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
     type=float,
     help="Update interval in seconds (default: 2.0)",
 )
-def browse(update_interval):
+def browse(update_interval: float) -> None:
     """Interactive session browser with activity monitoring."""
     command = BrowseCommand()
     command.run(update_interval=update_interval)

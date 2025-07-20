@@ -14,7 +14,8 @@ class BatchMergeCommand(BaseCommand):
         """Execute the batch merge command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Performing batch merge operations...")
-        raise NotImplementedError("Batch merge implementation pending extraction from original file")
+        msg = "Batch merge implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class AutoResolveCommand(BaseCommand):
@@ -24,7 +25,8 @@ class AutoResolveCommand(BaseCommand):
         """Execute the auto-resolve command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Auto-resolving conflicts with various strategies...")
-        raise NotImplementedError("Auto-resolve implementation pending extraction from original file")
+        msg = "Auto-resolve implementation pending extraction from original file"
+        raise NotImplementedError(msg)
 
 
 class PreventConflictsCommand(BaseCommand):
@@ -34,4 +36,5 @@ class PreventConflictsCommand(BaseCommand):
         """Execute the prevent conflicts command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Performing proactive conflict prevention...")
-        raise NotImplementedError("Conflict prevention implementation pending extraction from original file")
+        msg = "Conflict prevention implementation pending extraction from original file"
+        raise NotImplementedError(msg)

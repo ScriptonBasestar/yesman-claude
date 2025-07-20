@@ -11,6 +11,7 @@ from pathlib import Path
 def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
     """Run a shell command and return the result."""
     print(f"🔍 Running: {cmd}")
+    # nosec B602 - shell=True is intentional for this validation script
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
 
     if result.returncode != 0 and check:

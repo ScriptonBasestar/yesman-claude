@@ -36,7 +36,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
         compression_enabled: bool = True,
         output_dir: Path | None = None,
-    ):
+    ) -> None:
         """Initialize the batch processor.
 
         Args:
@@ -101,7 +101,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
                 total_batches = self._stats.total_batches
                 self.extended_stats["compression_ratio"] = (self.extended_stats["compression_ratio"] * (total_batches - 1) + self._last_compression_ratio) / total_batches
 
-    async def _write_batch(self, batch: LogBatch):
+    async def _write_batch(self, batch: LogBatch) -> None:
         """Write a batch to storage."""
         # Check if we need a new log file
         if not self.current_log_file or self.current_file_size >= self.max_file_size:
@@ -146,7 +146,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
 
         self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")
 
-    async def _rotate_log_file(self):
+    async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
         timestamp = int(time.time())
         file_extension = ".jsonl.gz" if self.compression_enabled else ".jsonl"
@@ -157,7 +157,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
 
         self.logger.info(f"Rotated to new log file: {self.current_log_file}")
 
-    def add_entry(self, entry: dict[str, Any]):
+    def add_entry(self, entry: dict[str, Any]) -> None:
         """Add a log entry to the processing queue."""
         self.add(entry)
 
@@ -192,7 +192,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
                 self.logger.info(f"Cleaned up {removed_count} old log files")
 
         except Exception as e:
-            self.logger.error(f"Error cleaning up old log files: {e}")
+            self.logger.exception(f"Error cleaning up old log files: {e}")
 
         return removed_count
 
@@ -221,7 +221,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
                     batches.append(batch)
 
         except Exception as e:
-            self.logger.error(f"Error reading batch file {file_path}: {e}")
+            self.logger.exception(f"Error reading batch file {file_path}: {e}")
 
         return batches
 
