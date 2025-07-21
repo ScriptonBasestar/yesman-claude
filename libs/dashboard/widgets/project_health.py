@@ -1,13 +1,15 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Project health calculator widget."""
+# Copyright notice.
 
 import logging
 import os
 import subprocess
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Project health calculator widget."""
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +30,14 @@ class ProjectHealth:
             "documentation",
         ]
 
-    def calculate_health(self) -> dict[str, Any]:
-        """Calculate overall project health score."""
+    def calculate_health(self) -> dict[str, object]:
+        """Calculate overall project health score.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
-            scores: dict[str, Any] = {}
+            scores: dict[str, object] = {}
 
             # Calculate individual category scores
             scores["build_score"] = self._check_build_health()
@@ -70,7 +76,11 @@ class ProjectHealth:
 
     @staticmethod
     def _check_build_health() -> int:
-        """Check if project builds successfully."""
+        """Check if project builds successfully.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             # Check for common build files
             build_files = ["Makefile", "build.py", "setup.py", "pyproject.toml"]
@@ -85,7 +95,11 @@ class ProjectHealth:
 
     @staticmethod
     def _check_test_health() -> int:
-        """Check test coverage and presence."""
+        """Check test coverage and presence.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             # Check for test directories/files
             test_indicators = ["tests/", "test_", "pytest", "unittest"]
@@ -100,7 +114,11 @@ class ProjectHealth:
 
     @staticmethod
     def _check_dependencies_health() -> int:
-        """Check dependency management."""
+        """Check dependency management.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             # Check for dependency files
             dep_files = ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"]
@@ -115,11 +133,15 @@ class ProjectHealth:
 
     @staticmethod
     def _check_security_health() -> int:
-        """Check security aspects."""
+        """Check security aspects.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             # Basic security checks
             has_gitignore = os.path.exists(".gitignore")
-            has_secrets = any(keyword in open(f).read().lower() for f in os.listdir(".") if f.endswith((".py", ".yaml", ".yml", ".json")) for keyword in ["password", "secret", "key", "token"])
+            has_secrets = any(keyword in open(f, encoding="utf-8").read().lower() for f in os.listdir(".") if f.endswith((".py", ".yaml", ".yml", ".json")) for keyword in ["password", "secret", "key", "token"])
 
             score = 70
             if has_gitignore:
@@ -128,18 +150,26 @@ class ProjectHealth:
                 score += 20
 
             return min(score, 100)
-        except (OSError, FileNotFoundError, IOError) as e:
+        except (OSError, FileNotFoundError) as e:
             return 80
 
     @staticmethod
     def _check_performance_health() -> int:
-        """Check performance indicators."""
+        """Check performance indicators.
+
+        Returns:
+        int: Description of return value.
+        """
         # Basic performance score
         return 65
 
     @staticmethod
     def _check_code_quality_health() -> int:
-        """Check code quality."""
+        """Check code quality.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             # Check for linting/formatting config
             quality_files = [
@@ -158,7 +188,11 @@ class ProjectHealth:
             return 60
 
     def _check_git_health(self) -> int:
-        """Check git repository health."""
+        """Check git repository health.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             if os.path.exists(".git"):
                 # Check for recent commits
@@ -184,7 +218,11 @@ class ProjectHealth:
 
     @staticmethod
     def _check_documentation_health() -> int:
-        """Check documentation coverage."""
+        """Check documentation coverage.
+
+        Returns:
+        int: Description of return value.
+        """
         try:
             # Check for documentation files
             doc_files = ["README.md", "README.rst", "docs/", "CHANGELOG.md"]
@@ -198,8 +236,12 @@ class ProjectHealth:
             return 30
 
     @staticmethod
-    def _generate_suggestions(scores: dict[str, Any]) -> list[str]:
-        """Generate improvement suggestions based on scores."""
+    def _generate_suggestions(scores: dict[str, object]) -> list[str]:
+        """Generate improvement suggestions based on scores.
+
+        Returns:
+        object: Description of return value.
+        """
         suggestions = []
 
         if scores.get("test_score", 0) < 70:

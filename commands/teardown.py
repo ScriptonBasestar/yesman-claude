@@ -1,20 +1,27 @@
-"""Copyright notice."""
+from typing import Any
+import subprocess
+import click
+import libtmux
+from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-import subprocess
 
-import click
-import libtmux
 
-from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 
 
 class TeardownCommand(BaseCommand, SessionCommandMixin):
     """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
 
-    def execute(self, session_name: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the teardown command."""
+    def execute(self, session_name: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the teardown command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             sessions = self.tmux_manager.load_projects().get("sessions", {})
             if not sessions:
@@ -60,7 +67,9 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
 @click.command()
 @click.argument("session_name", required=False)
 def teardown(session_name: str | None) -> None:
-    """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
+    """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다.
+
+    """
     command = TeardownCommand()
     command.run(session_name=session_name)
 
@@ -69,7 +78,9 @@ def teardown(session_name: str | None) -> None:
 @click.command()
 @click.argument("session_name", required=False)
 def down(session_name: str | None) -> None:
-    """Alias for 'teardown' command."""
+    """Alias for 'teardown' command.
+
+    """
     command = TeardownCommand()
     command.run(session_name=session_name)
 

@@ -1,17 +1,18 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Centralized error handling and exception management."""
-
+from typing import Any
 import hashlib
 import logging
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import TypeVar
+
+#!/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Centralized error handling and exception management."""
+
 
 
 class ErrorCategory(Enum):
@@ -46,7 +47,7 @@ class ErrorContext:
     session_name: str | None = None
     file_path: str | None = None
     line_number: int | None = None
-    additional_info: dict[str, Any] | None = None
+    additional_info: dict[str, object] | None = None
 
 
 class YesmanError(Exception):
@@ -79,9 +80,9 @@ class YesmanError(Exception):
         msg_hash = hashlib.sha256(self.message.encode()).hexdigest()[:8].upper()
         return f"{self.category.value.upper()}_{msg_hash}"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert error to dictionary for logging/serialization."""
-        result: dict[str, Any] = {
+        result: dict[str, object] = {
             "code": self.error_code,
             "message": self.message,
             "category": self.category.value,
@@ -91,7 +92,7 @@ class YesmanError(Exception):
 
         # Add context if available
         if self.context:
-            context_dict: dict[str, Any] = {
+            context_dict: dict[str, object] = {
                 "operation": self.context.operation,
                 "component": self.context.component,
             }
@@ -130,7 +131,7 @@ class ConfigurationError(YesmanError):
             message,
             category=ErrorCategory.CONFIGURATION,
             context=context,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -155,7 +156,7 @@ class ValidationError(YesmanError):
             message,
             category=ErrorCategory.VALIDATION,
             context=context,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -180,7 +181,7 @@ class SessionError(YesmanError):
             message,
             category=ErrorCategory.SYSTEM,
             context=context,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -197,7 +198,7 @@ class NetworkError(YesmanError):
             message,
             category=ErrorCategory.NETWORK,
             context=context,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -214,7 +215,7 @@ class PermissionError(YesmanError):
             message,
             category=ErrorCategory.PERMISSION,
             context=context,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -231,7 +232,7 @@ class TimeoutError(YesmanError):
             message,
             category=ErrorCategory.TIMEOUT,
             context=context,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -240,7 +241,7 @@ class ErrorHandler:
 
     def __init__(self, logger_name: str = "yesman.error_handler") -> None:
         self.logger = logging.getLogger(logger_name)
-        self.error_stats: dict[str, Any] = {
+        self.error_stats: dict[str, object] = {
             "total_errors": 0,
             "by_category": {},
             "by_severity": {},
@@ -342,7 +343,7 @@ class ErrorHandler:
 
         sys.exit(error.exit_code)
 
-    def get_error_summary(self) -> dict[str, Any]:
+    def get_error_summary(self) -> dict[str, object]:
         """Get error statistics summary."""
         return self.error_stats.copy()
 
@@ -360,12 +361,12 @@ class ErrorHandler:
 error_handler = ErrorHandler()
 
 
-def handle_exceptions(func: Callable[..., Any]) -> Callable[..., Any]:
+def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
     """Decorator for automatic exception handling."""
 
     def wrapper(*args: object, **kwargs: object) -> object:
         try:
-            return func(*args, **kwargs)
+            return func(*args: object, **kwargs)
         except YesmanError as e:
             error_handler.handle_error(e)
         except Exception as e:
@@ -401,7 +402,7 @@ def safe_execute(
         Function result or None on error
     """
     try:
-        return func(*args, **kwargs)
+        return func(*args: object, **kwargs)
     except Exception as e:
         context = ErrorContext(
             operation=operation,

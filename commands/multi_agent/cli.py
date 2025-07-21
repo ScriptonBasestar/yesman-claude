@@ -1,13 +1,22 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import click
+from .agent_pool import (
+from .batch_operations import (
+from .code_review import (
+from .collaboration import (
+from .conflict_prediction import (
+from .conflict_resolution import (
+from .dependency_tracking import (
+from .semantic_analysis import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Main CLI group registration for multi-agent commands."""
 
-import click
 
 # Import all command classes from the modular structure
-from .agent_pool import (
     AddTaskCommand,
     ListTasksCommand,
     MonitorAgentsCommand,
@@ -15,12 +24,10 @@ from .agent_pool import (
     StatusCommand,
     StopAgentsCommand,
 )
-from .batch_operations import (
     AutoResolveCommand,
     BatchMergeCommand,
     PreventConflictsCommand,
 )
-from .code_review import (
     QualityCheckCommand,
     ReviewApproveCommand,
     ReviewInitiateCommand,
@@ -28,29 +35,24 @@ from .code_review import (
     ReviewStatusCommand,
     ReviewSummaryCommand,
 )
-from .collaboration import (
     BranchInfoCommand,
     CollaborateCommand,
     SendMessageCommand,
     ShareKnowledgeCommand,
 )
-from .conflict_prediction import (
     AnalyzeConflictPatternsCommand,
     PredictConflictsCommand,
     PredictionSummaryCommand,
 )
-from .conflict_resolution import (
     ConflictSummaryCommand,
     DetectConflictsCommand,
     ResolveConflictCommand,
 )
-from .dependency_tracking import (
     DependencyImpactCommand,
     DependencyPropagateCommand,
     DependencyStatusCommand,
     DependencyTrackCommand,
 )
-from .semantic_analysis import (
     AnalyzeSemanticConflictsCommand,
     FunctionDiffCommand,
     SemanticMergeCommand,

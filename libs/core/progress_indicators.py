@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from rich.console import Console
+from rich.progress import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,12 +16,7 @@ Provides standardized progress indicators using Rich library
 for consistent user experience across all commands.
 """
 
-from collections.abc import Callable, Iterator
-from contextlib import contextmanager
-from typing import object
 
-from rich.console import Console
-from rich.progress import (
     BarColumn,
     Progress,
     SpinnerColumn,
@@ -110,7 +112,7 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
         yield update_progress
 
 
-def track_items(items: list[object], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Any:
+def track_items(items: list[object], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> object:
     """Track progress through a list of items with rich progress bar.
 
     Args:
@@ -125,7 +127,7 @@ def track_items(items: list[object], description: str, style: str = ProgressStyl
         files = get_files()
         for file_path in track_items(files, "🔧 Processing files", ProgressStyle.FILE_OPERATIONS):
             process_file(file_path)
-    
+
     Returns:
         Description of Any return value
     """
@@ -179,7 +181,7 @@ class ProgressManager:
     """
 
     @staticmethod
-    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str, object]:
+    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str]:
         """Execute a sequence of startup operations with progress tracking.
 
         Args:
@@ -214,7 +216,7 @@ class ProgressManager:
     @staticmethod
     def file_batch_operation(
         files: list[object],
-        operation: Callable[[object], object],
+        operation: Callable[[object]],
         description: str = "🔧 Processing files",
         style: str = ProgressStyle.FILE_OPERATIONS,
     ) -> list[object]:
@@ -250,16 +252,16 @@ class ProgressManager:
 
 
 # Convenience functions for common patterns
-def with_startup_progress(description: str):
+def with_startup_progress(description: str) -> object:
     """Decorator for startup operations."""
     return spinner_progress(description, ProgressStyle.STARTUP)
 
 
-def with_processing_progress(description: str):
+def with_processing_progress(description: str) -> object:
     """Decorator for processing operations."""
     return spinner_progress(description, ProgressStyle.PROCESSING)
 
 
-def with_analysis_progress(description: str):
+def with_analysis_progress(description: str) -> object:
     """Decorator for analysis operations."""
     return spinner_progress(description, ProgressStyle.ANALYZING)

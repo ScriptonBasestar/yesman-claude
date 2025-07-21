@@ -1,21 +1,21 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
+from typing import Any
 import asyncio
 import os
 from datetime import UTC, datetime
-
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
-
 from api.background_tasks import task_runner
 from api.middleware.error_handler import add_request_id_middleware, global_error_handler
 from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
 from libs.core.error_handling import YesmanError
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+
+
 
 app = FastAPI(title="Yesman Claude API", version="0.1.0")
 
@@ -56,10 +56,9 @@ app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="
 sveltekit_build_path = "tauri-dashboard/build"
 if os.path.exists(sveltekit_build_path):
     # Mount SvelteKit static assets with cache control headers
-    from fastapi.staticfiles import StaticFiles
 
     class CacheControlStaticFiles(StaticFiles):
-        def __init__(self, *args, **kwargs) -> None:
+        def __init__(self, *args: object, **kwargs: dict[str, object]) -> None:
             super().__init__(*args, **kwargs)
 
         @staticmethod
@@ -121,7 +120,6 @@ async def api_info():
 
 # SvelteKit dashboard route (serves at root)
 if os.path.exists(sveltekit_build_path):
-    from fastapi.responses import FileResponse
 
     @app.get("/")
     @app.get("/{path:path}")
@@ -129,7 +127,6 @@ if os.path.exists(sveltekit_build_path):
         """Serve SvelteKit dashboard at root."""
         # Skip API routes and specific endpoints
         if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
-            from fastapi import HTTPException
 
             raise HTTPException(status_code=404, detail="Not found")
 
@@ -155,7 +152,6 @@ async def shutdown_event() -> None:
     await task_runner.stop()
 
     # Shutdown WebSocket manager and batch processor
-    from api.routers.websocket_router import manager
 
     await manager.shutdown()
 
@@ -174,7 +170,6 @@ async def get_task_status():
 @app.get("/api/websocket/stats")
 async def get_websocket_stats():
     """Get WebSocket connection and batch processing statistics."""
-    from api.routers.websocket_router import manager
 
     connection_stats = manager.get_connection_stats()
     batch_stats = manager.get_batch_statistics()

@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""AST-based semantic conflict analysis engine for multi-agent development."""
+# Copyright notice.
 
 import ast
 import hashlib
@@ -11,10 +7,18 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictSeverity, ResolutionStrategy
+            # Check import conflicts
+        # Compare imports
+        # Check for conflicting imports (same name, different module)
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""AST-based semantic conflict analysis engine for multi-agent development."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -115,9 +119,9 @@ class SemanticConflict:
     description: str
     old_definition: str | None = None
     new_definition: str | None = None
-    impact_analysis: dict[str, object] = field(default_factory=dict)
+    impact_analysis: dict[str] = field(default_factory=dict)
     suggested_resolution: ResolutionStrategy = ResolutionStrategy.HUMAN_REQUIRED
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
     detected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -130,9 +134,7 @@ class SemanticAnalyzer:
         Args:
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
-        
-        Returns:
-            Description of return value
+
         """
         self.branch_manager = branch_manager
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
@@ -241,7 +243,6 @@ class SemanticAnalyzer:
             )
             conflicts.extend(class_conflicts)
 
-            # Check import conflicts
             import_conflicts = self._detect_import_conflicts(
                 context1,
                 context2,
@@ -295,13 +296,16 @@ class SemanticAnalyzer:
             logger.exception("Error getting semantic context for %s in %s")
             return None
 
-    @staticmethod
     def _extract_semantic_context(
         self,
         file_path: str,
         content: str,
     ) -> SemanticContext:
-        """Extract semantic context from Python source code."""
+        """Extract semantic context from Python source code.
+
+        Returns:
+        SemanticContext: Description of return value.
+        """
         context = SemanticContext(file_path=file_path)
 
         try:
@@ -335,7 +339,11 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect function-related semantic conflicts."""
+        """Detect function-related semantic conflicts.
+
+        Returns:
+        object: Description of return value.
+        """
         conflicts = []
 
         # Find common functions
@@ -409,7 +417,11 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect class-related semantic conflicts."""
+        """Detect class-related semantic conflicts.
+
+        Returns:
+        object: Description of return value.
+        """
         conflicts = []
 
         # Find common classes
@@ -449,7 +461,6 @@ class SemanticAnalyzer:
 
         return conflicts
 
-    @staticmethod
     def _detect_import_conflicts(
         self,
         context1: SemanticContext,
@@ -457,14 +468,16 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect import-related semantic conflicts."""
+        """Detect import-related semantic conflicts.
+
+        Returns:
+        object: Description of return value.
+        """
         conflicts = []
 
-        # Compare imports
         {(imp.module, imp.name, imp.alias) for imp in context1.imports}
         {(imp.module, imp.name, imp.alias) for imp in context2.imports}
 
-        # Check for conflicting imports (same name, different module)
         names1 = {imp.alias or imp.name or imp.module.split(".")[-1]: imp for imp in context1.imports}
         names2 = {imp.alias or imp.name or imp.module.split(".")[-1]: imp for imp in context2.imports}
 
@@ -492,7 +505,6 @@ class SemanticAnalyzer:
 
         return conflicts
 
-    @staticmethod
     def _detect_variable_conflicts(
         self,
         context1: SemanticContext,
@@ -500,7 +512,11 @@ class SemanticAnalyzer:
         branch1: str,
         branch2: str,
     ) -> list[SemanticConflict]:
-        """Detect variable-related semantic conflicts."""
+        """Detect variable-related semantic conflicts.
+
+        Returns:
+        object: Description of return value.
+        """
         conflicts = []
 
         # Check global variables
@@ -539,7 +555,11 @@ class SemanticAnalyzer:
         branch2: str,
         file_path: str,
     ) -> list[SemanticConflict]:
-        """Detect method conflicts within a class."""
+        """Detect method conflicts within a class.
+
+        Returns:
+        object: Description of return value.
+        """
         conflicts = []
 
         common_methods = set(class1.methods.keys()) & set(class2.methods.keys())
@@ -574,7 +594,11 @@ class SemanticAnalyzer:
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> bool:
-        """Check if two function signatures have conflicts."""
+        """Check if two function signatures have conflicts.
+
+        Returns:
+        bool: Description of return value.
+        """
         # Check argument changes
         if func1.args != func2.args:
             return True
@@ -594,13 +618,16 @@ class SemanticAnalyzer:
         # Check decorator changes
         return func1.decorators != func2.decorators
 
-    @staticmethod
     def _assess_function_conflict_severity(
         self,
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> ConflictSeverity:
-        """Assess the severity of a function signature conflict."""
+        """Assess the severity of a function signature conflict.
+
+        Returns:
+        ConflictSeverity: Description of return value.
+        """
         # Public functions with signature changes are more severe
         if func1.visibility == SymbolVisibility.PUBLIC:
             # Breaking changes (removed parameters, changed types)
@@ -623,14 +650,17 @@ class SemanticAnalyzer:
 
         return ConflictSeverity.LOW
 
-    @staticmethod
     def _analyze_function_impact(
         self,
         func1: FunctionSignature,
         func2: FunctionSignature,
-    ) -> dict[str, object]:
-        """Analyze the impact of function signature changes."""
-        impact: dict[str, object] = {
+    ) -> dict[str]:
+        """Analyze the impact of function signature changes.
+
+        Returns:
+        object: Description of return value.
+        """
+        impact: dict[str] = {
             "breaking_change": False,
             "parameter_changes": [],
             "return_type_change": func1.return_type != func2.return_type,
@@ -660,7 +690,11 @@ class SemanticAnalyzer:
         func1: FunctionSignature,
         func2: FunctionSignature,
     ) -> ResolutionStrategy:
-        """Suggest resolution strategy for function conflicts."""
+        """Suggest resolution strategy for function conflicts.
+
+        Returns:
+        ResolutionStrategy: Description of return value.
+        """
         # If it's a breaking change, require human intervention
         impact = self._analyze_function_impact(func1, func2)
         if impact["breaking_change"]:
@@ -675,7 +709,11 @@ class SemanticAnalyzer:
 
     @staticmethod
     def _signature_to_string(func: FunctionSignature) -> str:
-        """Convert function signature to string representation."""
+        """Convert function signature to string representation.
+
+        Returns:
+        str: Description of return value.
+        """
         args = func.args.copy()
 
         # Add defaults
@@ -706,12 +744,15 @@ class SemanticAnalyzer:
 
         return signature
 
-    @staticmethod
     def _rank_conflicts_by_impact(
         self,
         conflicts: list[SemanticConflict],
     ) -> list[SemanticConflict]:
-        """Rank conflicts by their potential impact."""
+        """Rank conflicts by their potential impact.
+
+        Returns:
+        object: Description of return value.
+        """
 
         def conflict_priority(conflict: object) -> int:
             priority = 0
@@ -744,19 +785,21 @@ class SemanticAnalyzer:
 
         return sorted(conflicts, key=conflict_priority, reverse=True)
 
-    @staticmethod
     def _merge_related_conflicts(
         self,
         conflicts: list[SemanticConflict],
     ) -> list[SemanticConflict]:
-        """Merge related conflicts to reduce noise."""
+        """Merge related conflicts to reduce noise.
+
+        Returns:
+        object: Description of return value.
+        """
         # Simple implementation - could be enhanced
         return conflicts
 
     # Helper methods
 
-    @staticmethod
-    async def _get_changed_python_files(branch1: str, branch2: str) -> list[str]:  # noqa: ARG002
+    async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:  # noqa: ARG002
         """Get list of Python files changed between branches."""
         try:
             # This would use git to find changed files
@@ -778,8 +821,12 @@ class SemanticAnalyzer:
             logger.exception("Error reading file %s")
         return None
 
-    def get_analysis_summary(self) -> dict[str, object]:
-        """Get summary of semantic analysis."""
+    def get_analysis_summary(self) -> dict[str]:
+        """Get summary of semantic analysis.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "files_analyzed": self.analysis_stats["files_analyzed"],
             "conflicts_detected": self.analysis_stats["conflicts_detected"],
@@ -801,7 +848,9 @@ class SemanticVisitor(ast.NodeVisitor):
         self._current_class: str | None = None
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        """Visit function definition."""
+        """Visit function definition.
+
+        """
         signature = self._extract_function_signature(node)
 
         if self._current_class:
@@ -818,7 +867,9 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        """Visit async function definition."""
+        """Visit async function definition.
+
+        """
         signature = self._extract_function_signature(node)
         signature.name = f"async {signature.name}"
 
@@ -834,7 +885,9 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """Visit class definition."""
+        """Visit class definition.
+
+        """
         old_class = self._current_class
         self._current_class = node.name
 
@@ -869,7 +922,9 @@ class SemanticVisitor(ast.NodeVisitor):
         self._current_class = old_class
 
     def visit_Import(self, node: ast.Import) -> None:
-        """Visit import statement."""
+        """Visit import statement.
+
+        """
         for alias in node.names:
             import_info = ImportInfo(
                 module=alias.name,
@@ -879,7 +934,9 @@ class SemanticVisitor(ast.NodeVisitor):
             self.imports.append(import_info)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        """Visit from import statement."""
+        """Visit from import statement.
+
+        """
         module = node.module or ""
         level = node.level
 
@@ -894,7 +951,9 @@ class SemanticVisitor(ast.NodeVisitor):
             self.imports.append(import_info)
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        """Visit assignment for global variables."""
+        """Visit assignment for global variables.
+
+        """
         if self._current_class is None:  # Only global assignments
             for target in node.targets:
                 if isinstance(target, ast.Name):
@@ -911,7 +970,9 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
-        """Visit annotated assignment."""
+        """Visit annotated assignment.
+
+        """
         if self._current_class is None and isinstance(node.target, ast.Name):
             var_name = node.target.id
             var_type = ast.unparse(node.annotation)
@@ -927,7 +988,13 @@ class SemanticVisitor(ast.NodeVisitor):
         self,
         node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> FunctionSignature:
-        """Extract detailed function signature."""
+        """Extract detailed function signature.
+        
+            Returns:
+                Functionsignature object.
+        
+                
+        """
         args = []
         defaults = []
         kwonlyargs = []
@@ -998,7 +1065,11 @@ class SemanticVisitor(ast.NodeVisitor):
 
     @staticmethod
     def _determine_visibility(name: str) -> SymbolVisibility:
-        """Determine symbol visibility based on naming convention."""
+        """Determine symbol visibility based on naming convention.
+
+        Returns:
+        SymbolVisibility: Description of return value.
+        """
         if name.startswith("__") and name.endswith("__"):
             return SymbolVisibility.MAGIC
         if name.startswith("__"):
@@ -1009,7 +1080,11 @@ class SemanticVisitor(ast.NodeVisitor):
 
     @staticmethod
     def _infer_type(node: ast.expr) -> str:
-        """Simple type inference for AST nodes."""
+        """Simple type inference for AST nodes.
+
+        Returns:
+        str: Description of return value.
+        """
         if isinstance(node, ast.Constant):
             return type(node.value).__name__
         if isinstance(node, ast.List):

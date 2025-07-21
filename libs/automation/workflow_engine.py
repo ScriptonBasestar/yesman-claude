@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Workflow engine for executing automation chains."""
+# Copyright notice.
 
 import asyncio
 import json
@@ -12,12 +8,17 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Union
+from .context_detector import ContextInfo, ContextType
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Workflow engine for executing automation chains."""
+
 
 # Type aliases for complex types
 WorkflowStatusType = dict[str, int | dict[str, str | int | bool | list[str]]]
 
-from .context_detector import ContextInfo, ContextType
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,11 @@ class WorkflowAction:
     condition: str | None = None  # Python expression to evaluate
 
     def to_dict(self) -> dict[str, str | int | bool | dict[str, str | int | float | bool | list[str] | dict[str, str]]]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "action_type": self.action_type.value,
             "command": self.command,
@@ -85,7 +90,11 @@ class WorkflowChain:
     description: str = ""
 
     def to_dict(self) -> dict[str, str | int | bool | list[str] | list[dict[str, str | int | bool | dict[str, str | int | float | bool | list[str] | dict[str, str]]]]]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "name": self.name,
             "trigger_contexts": [ctx.value for ctx in self.trigger_contexts],
@@ -110,7 +119,11 @@ class WorkflowExecution:
     error_message: str | None = None
 
     def to_dict(self) -> dict[str, str | float | int | list[dict[str, str | int | float | bool]] | dict[str, str | float | int | list[str]]]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "workflow_name": self.workflow_name,
             "context_info": self.context_info.to_dict(),
@@ -152,12 +165,16 @@ class ConditionEvaluator:
         self.condition_pattern = re.compile(r"^\s*(\w+)\s+(==|!=|>=|<=|>|<|not\s+in|in)\s+(.+?)\s*$")
 
     def evaluate(self, condition: str) -> bool:
-        """Evaluate a condition string safely."""
+        """Evaluate a condition string safely.
+
+        Returns:
+        bool: Description of return value.
+        """
         # Handle simple boolean literals
         condition_lower = condition.strip().lower()
-        if condition_lower in ("true", "1"):
+        if condition_lower in {"true", "1"}:
             return True
-        if condition_lower in ("false", "0"):
+        if condition_lower in {"false", "0"}:
             return False
 
         # Parse complex conditions
@@ -187,8 +204,12 @@ class ConditionEvaluator:
         return self.operators[operator](var_value, expected_value)
 
     @staticmethod
-    def _parse_value( value_str: str) -> str | int | float | bool | None:
-        """Parse a value string into appropriate Python type."""
+    def _parse_value(value_str: str) -> str | int | float | bool | None:
+        """Parse a value string into appropriate Python type.
+
+        Returns:
+        object: Description of return value.
+        """
         value_str = value_str.strip()
 
         # String literal (quoted)
@@ -218,17 +239,29 @@ class ConditionEvaluator:
 
     @staticmethod
     def _equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Equality comparison."""
+        """Equality comparison.
+
+        Returns:
+        bool: Description of return value.
+        """
         return bool(left == right)
 
     @staticmethod
     def _not_equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Inequality comparison."""
+        """Inequality comparison.
+
+        Returns:
+        bool: Description of return value.
+        """
         return bool(left != right)
 
     @staticmethod
     def _greater_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Greater than comparison."""
+        """Greater than comparison.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             return bool(left > right)
         except TypeError:
@@ -236,7 +269,11 @@ class ConditionEvaluator:
 
     @staticmethod
     def _less_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Less than comparison."""
+        """Less than comparison.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             return bool(left < right)
         except TypeError:
@@ -244,7 +281,11 @@ class ConditionEvaluator:
 
     @staticmethod
     def _greater_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Greater than or equal comparison."""
+        """Greater than or equal comparison.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             return bool(left >= right)
         except TypeError:
@@ -252,7 +293,11 @@ class ConditionEvaluator:
 
     @staticmethod
     def _less_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Less than or equal comparison."""
+        """Less than or equal comparison.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             return bool(left <= right)
         except TypeError:
@@ -260,7 +305,11 @@ class ConditionEvaluator:
 
     @staticmethod
     def _contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Containment check."""
+        """Containment check.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             return right in left
         except TypeError:
@@ -268,7 +317,11 @@ class ConditionEvaluator:
 
     @staticmethod
     def _not_contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
-        """Not containment check."""
+        """Not containment check.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             return right not in left
         except TypeError:
@@ -290,12 +343,18 @@ class WorkflowEngine:
         self._load_default_workflows()
 
     def register_workflow(self, workflow: WorkflowChain) -> None:
-        """Register a new workflow chain."""
+        """Register a new workflow chain.
+
+        """
         self.workflows[workflow.name] = workflow
         self.logger.info("Registered workflow: %s", workflow.name)
 
     def trigger_workflows(self, context_info: ContextInfo) -> list[str]:
-        """Trigger workflows based on detected context."""
+        """Trigger workflows based on detected context.
+
+        Returns:
+        object: Description of return value.
+        """
         triggered_workflows = []
 
         for workflow_name, workflow in self.workflows.items():
@@ -559,7 +618,11 @@ class WorkflowEngine:
         return {"parallel_results": results, "action_count": len(tasks)}
 
     def _evaluate_condition(self, condition: str, context_info: ContextInfo) -> bool:
-        """Evaluate a condition expression safely without using eval()."""
+        """Evaluate a condition expression safely without using eval().
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             evaluator = ConditionEvaluator(context_info)
             return evaluator.evaluate(condition)
@@ -568,7 +631,9 @@ class WorkflowEngine:
             return False
 
     def _load_default_workflows(self) -> None:
-        """Load default workflow configurations."""
+        """Load default workflow configurations.
+
+        """
         # Git commit → test → build workflow
         git_workflow = WorkflowChain(
             name="git_commit_validation",
@@ -646,7 +711,11 @@ class WorkflowEngine:
         self.register_workflow(claude_idle_workflow)
 
     def get_workflow_status(self) -> WorkflowStatusType:
-        """Get current workflow engine status."""
+        """Get current workflow engine status.
+
+        Returns:
+        WorkflowStatusType: Description of return value.
+        """
         return {
             "registered_workflows": len(self.workflows),
             "active_executions": len(self.active_executions),
@@ -656,21 +725,25 @@ class WorkflowEngine:
         }
 
     def save_workflows_config(self, file_path: Path) -> None:
-        """Save workflow configurations to file."""
+        """Save workflow configurations to file.
+
+        """
         config = {
             "workflows": {name: workflow.to_dict() for name, workflow in self.workflows.items()},
             "saved_at": time.time(),
         }
 
-        with open(file_path, "w") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2)
 
     def load_workflows_config(self, file_path: Path) -> None:
-        """Load workflow configurations from file."""
+        """Load workflow configurations from file.
+
+        """
         if not file_path.exists():
             return
 
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             config = json.load(f)
 
         for workflow_data in config.get("workflows", {}).values():

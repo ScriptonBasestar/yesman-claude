@@ -1,43 +1,44 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Session management for dashboard."""
+# Copyright notice.
 
 import logging
 import os
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import object
-
 import libtmux
-
 # Try to import psutil, fall back to basic functionality if not available
+import psutil
+from libs.utils import ensure_log_directory
+from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
+from .progress_tracker import ProgressAnalyzer
+        # Import here to avoid circular import
+from libs.yesman_config import YesmanConfig
+        # Lazy import to avoid circular dependency
+from libs.tmux_manager import TmuxManager
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Session management for dashboard."""
+
+
+
 try:
-    import psutil
 
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
     psutil = None
 
-from libs.utils import ensure_log_directory
 
-from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
-from .progress_tracker import ProgressAnalyzer
 
 
 class SessionManager:
     """Manages tmux session information for dashboard."""
 
     def __init__(self) -> None:
-        # Import here to avoid circular import
-        from libs.yesman_config import YesmanConfig
 
         self.config = YesmanConfig()
-        # Lazy import to avoid circular dependency
-        from libs.tmux_manager import TmuxManager
 
         self.tmux_manager = TmuxManager(self.config)
         self.server = libtmux.Server()
@@ -49,7 +50,10 @@ class SessionManager:
         self.logger.info("SessionManager initialized")
 
     def _setup_logger(self) -> logging.Logger:
-        """Setup logger with file-only output."""
+        """Setup logger with file-only output.
+
+    Returns:
+        Logging.Logger object."""
         logger = logging.getLogger("yesman.dashboard.session_manager")
         logger.setLevel(logging.INFO)
         logger.propagate = False
@@ -67,7 +71,10 @@ class SessionManager:
         return logger
 
     def get_all_sessions(self) -> list[SessionInfo]:
-        """Get information about all yesman sessions."""
+        """Get information about all yesman sessions.
+
+    Returns:
+        List of the requested data."""
         sessions_info = []
 
         try:
@@ -85,8 +92,11 @@ class SessionManager:
             self.logger.error("Error getting sessions", exc_info=True)
             return []
 
-    def _get_session_info(self, project_name: str, project_conf: dict[str, object]) -> SessionInfo:
-        """Get information for a single session with mode-aware caching."""
+    def _get_session_info(self, project_name: str, project_conf: dict[str]) -> SessionInfo:
+        """Get information for a single session with mode-aware caching.
+
+    Returns:
+        Dict containing service information."""
 
         def compute_session_info() -> SessionInfo:
             override = project_conf.get("override", {})
@@ -160,7 +170,10 @@ class SessionManager:
         return compute_session_info()
 
     def _get_window_info(self, window: object) -> WindowInfo:
-        """Get information for a single window with detailed pane metrics."""
+        """Get information for a single window with detailed pane metrics.
+
+    Returns:
+        Dict containing service information."""
         panes: list[PaneInfo] = []
 
         for pane in window.list_panes():
@@ -189,7 +202,10 @@ class SessionManager:
         )
 
     def _get_detailed_pane_info(self, pane: object) -> PaneInfo:
-        """Get detailed information for a single pane including metrics."""
+        """Get detailed information for a single pane including metrics.
+
+    Returns:
+        Dict containing service information."""
         try:
             # Get basic pane information
             cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
@@ -300,8 +316,11 @@ class SessionManager:
             )
 
     @staticmethod
-    def _analyze_current_task( cmdline: list[str], command: str) -> str:
-        """Analyze command line to determine current task."""
+    def _analyze_current_task(cmdline: list[str], command: str) -> str:
+        """Analyze command line to determine current task.
+
+    Returns:
+        String containing."""
         if not cmdline:
             return command
 
@@ -345,7 +364,7 @@ class SessionManager:
         main_cmd = cmdline[0].split("/")[-1] if cmdline else command
         return f"Running {main_cmd}"
 
-    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, object]:
+    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str]:
         """Attach to a specific tmux pane.
 
         Args:
@@ -405,8 +424,11 @@ class SessionManager:
                 "action": "error",
             }
 
-    def get_progress_overview(self) -> dict[str, object]:
-        """Get progress overview for all sessions."""
+    def get_progress_overview(self) -> dict[str]:
+        """Get progress overview for all sessions.
+
+    Returns:
+        Dict containing the requested data."""
         sessions = self.get_all_sessions()
 
         # Collect progress data
@@ -475,7 +497,7 @@ class SessionManager:
             Path to the created script file
         """
         if script_path is None:
-            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sh", prefix="yesman_attach_") as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sh", prefix="yesman_attach_", encoding="utf-8") as f:
                 script_path = f.name
 
         script_content = f"""#!/bin/bash
@@ -487,7 +509,7 @@ echo "Attaching to tmux pane..."
 """
 
         try:
-            with open(script_path, "w") as f:
+            with open(script_path, "w", encoding="utf-8") as f:
                 f.write(script_content)
 
             # Make script executable
@@ -500,7 +522,7 @@ echo "Attaching to tmux pane..."
             self.logger.exception("Error creating attachment script")
             raise
 
-    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, object]:
+    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str]:
         """Execute pane attachment with error handling.
 
         Args:

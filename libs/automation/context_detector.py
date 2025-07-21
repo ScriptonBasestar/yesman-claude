@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Context detection system for workflow automation."""
+# Copyright notice.
 
 import logging
 import re
@@ -12,6 +8,12 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Context detection system for workflow automation."""
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +39,17 @@ class ContextInfo:
 
     context_type: ContextType
     confidence: float  # 0.0 to 1.0
-    details: dict[str, Any]
+    details: dict[str, object]
     timestamp: float
     project_path: str | None = None
     session_name: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for serialization."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary for serialization.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "context_type": self.context_type.value,
             "confidence": self.confidence,
@@ -115,7 +121,11 @@ class ContextDetector:
         self._last_file_mtimes: dict[str, float] = {}
 
     def detect_context_from_content(self, content: str, session_name: str | None = None) -> list[ContextInfo]:
-        """Detect context from content (e.g., tmux pane output)."""
+        """Detect context from content (e.g., tmux pane output).
+
+        Returns:
+        object: Description of return value.
+        """
         detected_contexts = []
 
         for context_type, patterns in self.patterns.items():
@@ -142,7 +152,11 @@ class ContextDetector:
         return detected_contexts
 
     def detect_git_context(self) -> ContextInfo | None:
-        """Detect git-related context changes."""
+        """Detect git-related context changes.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             # Check current git status
             result = subprocess.run(
@@ -182,7 +196,11 @@ class ContextDetector:
         return None
 
     def detect_file_changes(self, watched_patterns: list[str] | None = None) -> list[ContextInfo]:
-        """Detect file system changes."""
+        """Detect file system changes.
+
+        Returns:
+        object: Description of return value.
+        """
         if not watched_patterns:
             watched_patterns = [
                 "*.py",
@@ -226,7 +244,11 @@ class ContextDetector:
         return detected_changes
 
     def detect_claude_idle_context(self, last_activity_time: float, idle_threshold: int = 30) -> ContextInfo | None:
-        """Detect when Claude has been idle for a while."""
+        """Detect when Claude has been idle for a while.
+
+        Returns:
+        object: Description of return value.
+        """
         current_time = time.time()
         idle_duration = current_time - last_activity_time
 
@@ -245,7 +267,11 @@ class ContextDetector:
         return None
 
     def detect_deployment_ready_context(self) -> ContextInfo | None:
-        """Detect when project is ready for deployment."""
+        """Detect when project is ready for deployment.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             # Check if tests are passing
             test_result = self._run_quick_test_check()
@@ -275,8 +301,12 @@ class ContextDetector:
         return None
 
     @staticmethod
-    def _calculate_confidence( context_type: ContextType, content: str, match: re.Match) -> float:
-        """Calculate confidence score for a detected context."""
+    def _calculate_confidence(context_type: ContextType, content: str, match: re.Match) -> float:
+        """Calculate confidence score for a detected context.
+
+        Returns:
+        float: Description of return value.
+        """
         base_confidence = 0.7
 
         # Boost confidence based on context specificity
@@ -297,8 +327,12 @@ class ContextDetector:
 
         return min(1.0, max(0.0, base_confidence))
 
-    def _get_commit_info(self, commit_hash: str) -> dict[str, Any]:
-        """Get detailed information about a commit."""
+    def _get_commit_info(self, commit_hash: str) -> dict[str, object]:
+        """Get detailed information about a commit.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             # Get commit message
             msg_result = subprocess.run(
@@ -337,7 +371,11 @@ class ContextDetector:
             return {}
 
     def _run_quick_test_check(self) -> bool:
-        """Run a quick test to see if tests are generally passing."""
+        """Run a quick test to see if tests are generally passing.
+
+        Returns:
+        bool: Description of return value.
+        """
         test_commands = [
             ["npm", "test", "--", "--passWithNoTests"],
             ["pytest", "--tb=no", "-q"],
@@ -362,7 +400,11 @@ class ContextDetector:
         return False
 
     def _run_quick_build_check(self) -> bool:
-        """Run a quick build check."""
+        """Run a quick build check.
+
+        Returns:
+        bool: Description of return value.
+        """
         build_commands = [
             ["npm", "run", "build"],
             ["yarn", "build"],
@@ -387,7 +429,11 @@ class ContextDetector:
         return False
 
     def _is_git_clean(self) -> bool:
-        """Check if git working directory is clean."""
+        """Check if git working directory is clean.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             result = subprocess.run(
                 ["git", "status", "--porcelain"],
@@ -401,9 +447,13 @@ class ContextDetector:
         except Exception:
             return False
 
-    def get_current_context_summary(self) -> dict[str, Any]:
-        """Get a summary of the current project context."""
-        summary: dict[str, Any] = {
+    def get_current_context_summary(self) -> dict[str, object]:
+        """Get a summary of the current project context.
+
+        Returns:
+        object: Description of return value.
+        """
+        summary: dict[str, object] = {
             "project_path": str(self.project_path),
             "timestamp": time.time(),
             "contexts": [],

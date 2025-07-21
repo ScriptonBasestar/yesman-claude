@@ -1,17 +1,19 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import logging
 import re
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
-
+from typing import Annotated, Any
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-
 from libs.core.services import get_config
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,13 +30,17 @@ router = APIRouter()
 
 
 @router.get("/sessions/{session_name}/logs", response_model=list[str])
-def get_session_logs(session_name: str, limit: int = 100):
-    """특정 세션의 최근 로그를 조회합니다."""
+def get_session_logs(session_name: str, limit: int = 100) -> object:
+    """특정 세션의 최근 로그를 조회합니다.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
         # 세션 이름에 유효하지 않은 문자가 있을 수 있으므로 정제합니다.
-        safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
+        safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
         log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 
         if not log_file.exists():
@@ -57,7 +63,13 @@ def get_session_logs(session_name: str, limit: int = 100):
 
 
 def parse_log_line(line: str) -> LogEntry | None:
-    """Parse a log line into a structured LogEntry."""
+    """Parse a log line into a structured LogEntry.
+    
+        Returns:
+            Logentry | None object.
+    
+        
+    """
     line = line.strip()
     if not line:
         return None
@@ -107,7 +119,11 @@ def get_logs(
     source: Annotated[str | None, Query()] = None,
     search: Annotated[str | None, Query()] = None,
 ):
-    """Get parsed log entries with optional filtering."""
+    """Get parsed log entries with optional filtering.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
@@ -154,8 +170,12 @@ def get_logs(
 
 
 @router.get("/logs/sources")
-def get_log_sources():
-    """Get available log sources."""
+def get_log_sources() -> object:
+    """Get available log sources.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         config = get_config()
         log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
@@ -189,8 +209,12 @@ def get_log_sources():
 
 
 @router.post("/logs/test")
-def add_test_log(level: str = "info", source: str = "test", message: str = "Test log message"):
-    """Add a test log entry (for development/testing)."""
+def add_test_log(level: str = "info", source: str = "test", message: str = "Test log message") -> object:
+    """Add a test log entry (for development/testing).
+
+    Returns:
+        object: Description of return value.
+    """
     # This is a simple test endpoint that could write to a test log file
     # or in a real implementation, emit through the logging system
 

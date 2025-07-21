@@ -1,14 +1,16 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Advanced prompt detection system for Claude Code interactions."""
+# Copyright notice.
 
 import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Advanced prompt detection system for Claude Code interactions."""
+
 
 
 class PromptType(Enum):
@@ -33,7 +35,7 @@ class PromptInfo:
     options: list[tuple[str, str]]  # (key, description) pairs
     context: str  # Original content where prompt was found
     confidence: float  # 0.0 to 1.0 confidence score
-    metadata: dict[str, Any]  # Additional information
+    metadata: dict[str, object]  # Additional information
 
 
 class ClaudePromptDetector:
@@ -46,7 +48,9 @@ class ClaudePromptDetector:
         self._compile_patterns()
 
     def _compile_patterns(self) -> None:
-        """Compile regex patterns for prompt detection."""
+        """Compile regex patterns for prompt detection.
+
+        """
         # Numbered selection patterns
         self.numbered_patterns = [
             # ❯ 1. Option format
@@ -107,12 +111,12 @@ class ClaudePromptDetector:
 
     def detect_prompt(self, content: str) -> PromptInfo | None:
         """Detect prompt type and extract information.
-
+        
         Args:
             content: The terminal content to analyze
-
-        Returns:
-            PromptInfo if prompt detected, None otherwise
+        
+            Returns:
+                Promptinfo | None object.
         """
         if not content or len(content.strip()) < 3:
             return None
@@ -143,8 +147,12 @@ class ClaudePromptDetector:
         return None
 
     @staticmethod
-    def _clean_content( content: str) -> str:
-        """Clean and normalize content for analysis."""
+    def _clean_content(content: str) -> str:
+        """Clean and normalize content for analysis.
+
+        Returns:
+        str: Description of return value.
+        """
         # Remove ANSI escape sequences
         ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
         cleaned = ansi_escape.sub("", content)
@@ -165,7 +173,11 @@ class ClaudePromptDetector:
         return cleaned.strip()
 
     def _detect_numbered_selection(self, content: str) -> PromptInfo | None:
-        """Detect numbered selection prompts (1, 2, 3, etc.)."""
+        """Detect numbered selection prompts (1, 2, 3, etc.).
+
+        Returns:
+        object: Description of return value.
+        """
         all_options = []
 
         for pattern in self.numbered_patterns:
@@ -200,7 +212,11 @@ class ClaudePromptDetector:
         return None
 
     def _detect_binary_choice(self, content: str) -> PromptInfo | None:
-        """Detect binary choice prompts (1/2, y/n, etc.)."""
+        """Detect binary choice prompts (1/2, y/n, etc.).
+
+        Returns:
+        object: Description of return value.
+        """
         for pattern in self.binary_patterns:
             if pattern.search(content):
                 # Find the question
@@ -226,7 +242,11 @@ class ClaudePromptDetector:
         return None
 
     def _detect_true_false(self, content: str) -> PromptInfo | None:
-        """Detect true/false prompts."""
+        """Detect true/false prompts.
+
+        Returns:
+        object: Description of return value.
+        """
         for pattern in self.true_false_patterns:
             if pattern.search(content):
                 question = self._extract_question(content)
@@ -244,7 +264,11 @@ class ClaudePromptDetector:
         return None
 
     def _detect_text_input(self, content: str) -> PromptInfo | None:
-        """Detect text input prompts."""
+        """Detect text input prompts.
+
+        Returns:
+        object: Description of return value.
+        """
         for pattern in self.text_input_patterns:
             match = pattern.search(content)
             if match:
@@ -263,7 +287,11 @@ class ClaudePromptDetector:
         return None
 
     def _detect_terminal_settings(self, content: str) -> PromptInfo | None:
-        """Detect terminal settings prompts."""
+        """Detect terminal settings prompts.
+
+        Returns:
+        object: Description of return value.
+        """
         for pattern in self.terminal_patterns:
             if pattern.search(content):
                 question = self._extract_question(content)
@@ -280,7 +308,11 @@ class ClaudePromptDetector:
         return None
 
     def _detect_login_redirect(self, content: str) -> PromptInfo | None:
-        """Detect login/authentication prompts."""
+        """Detect login/authentication prompts.
+
+        Returns:
+        object: Description of return value.
+        """
         for pattern in self.login_patterns:
             if pattern.search(content):
                 question = self._extract_question(content)
@@ -297,7 +329,11 @@ class ClaudePromptDetector:
         return None
 
     def _detect_confirmation(self, content: str) -> PromptInfo | None:
-        """Detect general confirmation prompts."""
+        """Detect general confirmation prompts.
+
+        Returns:
+        object: Description of return value.
+        """
         question = self._extract_question(content)
 
         if question and ("?" in question):
@@ -327,7 +363,11 @@ class ClaudePromptDetector:
         return None
 
     def _extract_question(self, content: str) -> str:
-        """Extract the main question from content."""
+        """Extract the main question from content.
+
+        Returns:
+        str: Description of return value.
+        """
         lines = content.split("\n")
 
         # Look for lines ending with '?'

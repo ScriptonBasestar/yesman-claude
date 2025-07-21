@@ -1,19 +1,20 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import os
+import subprocess
+import sys
+import click
+import libtmux
+from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
+from libs.ui.session_selector import show_session_selector
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Enter (attach to) a tmux session command."""
 
-import os
-import subprocess
-import sys
-from typing import object
 
-import click
-import libtmux
 
-from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
-from libs.ui.session_selector import show_session_selector
 
 
 class EnterCommand(BaseCommand, SessionCommandMixin):
@@ -33,8 +34,11 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             msg = "Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts"
             raise CommandError(msg)
 
-    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
-        """Execute the enter command."""
+    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs: dict[str, object]) -> dict:  # noqa: FBT001, ARG002
+        """Execute the enter command.
+
+    Returns:
+        Dict containing."""
         if list_sessions:
             # Show available sessions
             self.tmux_manager.list_running_sessions()
@@ -61,7 +65,10 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         return {"action": "attached", "session": actual_session_name, "success": True}
 
     def _select_session(self) -> str | None:
-        """Select a session from running sessions."""
+        """Select a session from running sessions.
+
+    Returns:
+        Str | None object."""
         # Get all running sessions
         running_sessions = []
         projects = self.tmux_manager.load_projects().get("sessions", {})
@@ -102,7 +109,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             try:
                 choice = click.prompt("Select session number", type=int)
                 if 1 <= choice <= len(running_sessions):
-                    session_data: dict[str, object] = running_sessions[choice - 1]
+                    session_data: dict[str] = running_sessions[choice - 1]
                     return str(session_data["session"])
                 self.print_error("Invalid selection")
                 return None
@@ -111,7 +118,10 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
                 return None
 
     def _resolve_session_name(self, session_name: str) -> str | None:
-        """Resolve session name from project name if needed."""
+        """Resolve session name from project name if needed.
+
+    Returns:
+        Str | None object."""
         # Check if the session exists directly
         if self.server.find_where({"session_name": session_name}):
             return session_name
@@ -130,7 +140,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         return None
 
     @staticmethod
-    def _attach_to_session( session_name: str) -> None:
+    def _attach_to_session(session_name: str) -> None:
         """Attach to the specified tmux session."""
         # Check if we're already in a tmux session
         if "TMUX" in os.environ:

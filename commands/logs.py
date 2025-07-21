@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Log management and analysis commands."""
+# Copyright notice.
 
 import gzip
 import json
@@ -10,14 +6,20 @@ import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
-
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
 from libs.core.base_command import BaseCommand, CommandError
 from libs.logging import AsyncLogger, AsyncLoggerConfig, LogLevel
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Log management and analysis commands."""
+
+
+
 
 
 class LogsConfigureCommand(BaseCommand):
@@ -33,9 +35,15 @@ class LogsConfigureCommand(BaseCommand):
         format: str = "json",
         compression: bool = False,  # noqa: FBT001
         buffer_size: int = 1000,
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the configure command."""
+        """Execute the configure command.
+        
+            Returns:
+                Dict containing.
+        
+                
+        """
         try:
             # Expand home directory
             output_path = Path(output_dir).expanduser()
@@ -94,9 +102,15 @@ class LogsAnalyzeCommand(BaseCommand):
         log_dir: str = "~/.scripton/yesman/logs",
         last_hours: int = 24,
         level: str | None = None,
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the analyze command."""
+        """Execute the analyze command.
+        
+            Returns:
+                Dict containing.
+        
+                
+        """
         try:
             log_path = Path(log_dir).expanduser()
 
@@ -123,9 +137,13 @@ class LogsAnalyzeCommand(BaseCommand):
             msg = f"Error analyzing logs: {e}"
             raise CommandError(msg) from e
 
-    def _analyze_log_files(self, log_files: list[Path], last_hours: int, level_filter: str | None = None) -> dict[str, Any]:
-        """Analyze log files and return statistics."""
-        stats: dict[str, Any] = {
+    def _analyze_log_files(self, log_files: list[Path], last_hours: int, level_filter: str | None = None) -> dict[str, object]:
+        """Analyze log files and return statistics.
+
+        Returns:
+        object: Description of return value.
+        """
+        stats: dict[str, object] = {
             "total_entries": 0,
             "level_counts": defaultdict(int),
             "hourly_counts": defaultdict(int),
@@ -169,7 +187,7 @@ class LogsAnalyzeCommand(BaseCommand):
                             stats["hourly_counts"][hour] += 1
 
                             # Collect errors
-                            if level in ["ERROR", "CRITICAL"] and len(stats["error_messages"]) < 10:
+                            if level in {"ERROR", "CRITICAL"} and len(stats["error_messages"]) < 10:
                                 stats["error_messages"].append(entry.get("message", ""))
 
                         except json.JSONDecodeError:
@@ -182,8 +200,10 @@ class LogsAnalyzeCommand(BaseCommand):
 
         return stats
 
-    def _display_log_statistics(self, stats: dict[str, Any]) -> None:
-        """Display log analysis statistics."""
+    def _display_log_statistics(self, stats: dict[str, object]) -> None:
+        """Display log analysis statistics.
+
+        """
         # Overview
         overview = Panel(
             f"Total Entries: {stats['total_entries']:,}\nTime Range: Last 24 hours\nError Count: {stats['level_counts']['ERROR'] + stats['level_counts']['CRITICAL']}",
@@ -214,7 +234,10 @@ class LogsAnalyzeCommand(BaseCommand):
 
 
 class LogsTailCommand(BaseCommand):
-    """Tail log files (like tail -f)."""
+    """Execute the tail command.
+
+    Returns:
+        Dict containing."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -226,9 +249,11 @@ class LogsTailCommand(BaseCommand):
         level: str = "INFO",
         follow: bool = False,  # noqa: FBT001
         last_lines: int = 50,
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the tail command."""
+        """Execute the tail command.
+
+        """
         try:
             log_path = Path(log_dir).expanduser()
 
@@ -260,12 +285,14 @@ class LogsTailCommand(BaseCommand):
             raise CommandError(msg) from e
 
     def _follow_log_file(self, log_file: Path, level_filter: str | None = None) -> None:
-        """Follow a log file like tail -f."""
+        """Follow a log file like tail -f.
+
+        """
         self.console.print(f"📋 Following {log_file.name} (Press Ctrl+C to stop)")
         self.console.print("=" * 60)
 
         # Start from end of file
-        with open(log_file) as f:
+        with open(log_file, encoding="utf-8") as f:
             f.seek(0, 2)  # Seek to end
 
             while True:
@@ -307,12 +334,14 @@ class LogsTailCommand(BaseCommand):
                     time.sleep(0.1)
 
     def _show_recent_logs(self, log_file: Path, lines: int, level_filter: str | None = None) -> None:
-        """Show recent log entries."""
+        """Show recent log entries.
+
+        """
         self.console.print(f"📋 Last {lines} entries from {log_file.name}")
         self.console.print("=" * 60)
 
         try:
-            with open(log_file) as f:
+            with open(log_file, encoding="utf-8") as f:
                 all_lines = f.readlines()
                 recent_lines = all_lines[-lines:]
 
@@ -360,8 +389,12 @@ class LogsCleanupCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the cleanup command."""
+    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the cleanup command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             log_path = Path(log_dir).expanduser()
 
@@ -407,7 +440,9 @@ class LogsCleanupCommand(BaseCommand):
 
 @click.group()
 def logs() -> None:
-    """Log management and analysis."""
+    """Log management and analysis.
+
+    """
 
 
 @logs.command()
@@ -422,7 +457,9 @@ def logs() -> None:
 @click.option("--compression", "-c", is_flag=True, help="Enable gzip compression")
 @click.option("--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching")
 def configure(output_dir: str, format: str, compression: bool, buffer_size: int) -> None:  # noqa: FBT001
-    """Configure async logging system."""
+    """Configure async logging system.
+
+    """
     command = LogsConfigureCommand()
     command.run(
         output_dir=output_dir,
@@ -442,7 +479,9 @@ def configure(output_dir: str, format: str, compression: bool, buffer_size: int)
 @click.option("--last-hours", "-h", default=24, type=int, help="Analyze last N hours")
 @click.option("--level", "-l", help="Filter by log level")
 def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
-    """Analyze log files and show statistics."""
+    """Analyze log files and show statistics.
+
+    """
     command = LogsAnalyzeCommand()
     command.run(log_dir=log_dir, last_hours=last_hours, level=level)
 
@@ -453,7 +492,9 @@ def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
 @click.option("--follow", "-f", is_flag=True, help="Follow log output")
 @click.option("--last-lines", "-n", default=50, type=int, help="Show last N lines")
 def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:  # noqa: FBT001
-    """Tail log files (like tail -f)."""
+    """Tail log files (like tail -f).
+
+    """
     command = LogsTailCommand()
     command.run(log_dir=log_dir, level=level, follow=follow, last_lines=last_lines)
 
@@ -462,7 +503,9 @@ def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:  # no
 @click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
 @click.option("--days", default=7, type=int, help="Days of logs to keep")
 def cleanup(log_dir: str, days: int) -> None:
-    """Clean up old log files."""
+    """Clean up old log files.
+
+    """
     command = LogsCleanupCommand()
     command.run(log_dir=log_dir, days=days)
 

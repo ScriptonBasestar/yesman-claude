@@ -1,26 +1,31 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+from typing import Any
+import click
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from libs.core.base_command import BaseCommand
+from libs.core.mixins import LayoutManagerMixin, StatusManagerMixin
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Status command - Refactored version using base command and mixins."""
 
-from typing import Any
 
-import click
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
 
-from libs.core.base_command import BaseCommand
-from libs.core.mixins import LayoutManagerMixin, StatusManagerMixin
 
 
 class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     """Show status of all or specific tmux sessions."""
 
     def __init__(self) -> None:
-        """Initialize status command."""
+        """Initialize status command.
+
+        """
         super().__init__()
         self.console = Console()
         self._current_status = "idle"
@@ -30,7 +35,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             "show_details": True,
         }
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: dict[str, object]) -> dict[str, object]:
         """Execute the status command.
 
         Args:
@@ -59,25 +64,39 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             raise
 
     def update_status(self, status: str) -> None:
-        """Update the current status - implements StatusManagerMixin interface."""
+        """Update the current status - implements StatusManagerMixin interface.
+
+        """
         self._current_status = status
         self.logger.debug(f"Status updated to: {status}")  # noqa: G004
 
     def update_activity(self, activity: str) -> None:
-        """Update the current activity - implements StatusManagerMixin interface."""
+        """Update the current activity - implements StatusManagerMixin interface.
+
+        """
         self.logger.debug(f"Activity: {activity}")  # noqa: G004
 
-    def create_layout(self) -> dict[str, Any]:
-        """Create and return layout configuration - implements LayoutManagerMixin interface."""
+    def create_layout(self) -> dict[str, object]:
+        """Create and return layout configuration - implements LayoutManagerMixin interface.
+
+        Returns:
+        object: Description of return value.
+        """
         return self._layout_config.copy()
 
-    def update_layout(self, layout_config: dict[str, Any]) -> None:
-        """Update layout configuration - implements LayoutManagerMixin interface."""
+    def update_layout(self, layout_config: dict[str, object]) -> None:
+        """Update layout configuration - implements LayoutManagerMixin interface.
+
+        """
         self._layout_config.update(layout_config)
         self.logger.debug(f"Layout updated: {layout_config}")  # noqa: G004
 
-    def _check_single_session(self, session_name: str) -> dict[str, Any]:
-        """Check status of a single session."""
+    def _check_single_session(self, session_name: str) -> dict[str, object]:
+        """Check status of a single session.
+
+        Returns:
+        object: Description of return value.
+        """
         self.update_status("checking_session")
 
         # Load projects configuration
@@ -96,8 +115,12 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         return {"sessions": [session_info]}
 
-    def _check_all_sessions(self) -> dict[str, Any]:
-        """Check status of all sessions."""
+    def _check_all_sessions(self) -> dict[str, object]:
+        """Check status of all sessions.
+
+        Returns:
+        object: Description of return value.
+        """
         self.update_status("checking_all")
 
         # Load projects configuration
@@ -118,8 +141,12 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         return {"sessions": session_infos}
 
-    def _get_session_info(self, session_name: str, session_config: dict[str, Any]) -> dict[str, Any]:
-        """Get detailed information about a session."""
+    def _get_session_info(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
+        """Get detailed information about a session.
+
+        Returns:
+        object: Description of return value.
+        """
         info = {
             "name": session_name,
             "project": session_config.get("project_name", session_name),
@@ -155,8 +182,10 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         return info
 
-    def _display_session_status(self, sessions: list[dict[str, Any]]) -> None:
-        """Display session status based on current layout configuration."""
+    def _display_session_status(self, sessions: list[dict[str, object]]) -> None:
+        """Display session status based on current layout configuration.
+
+        """
         layout_format = self._layout_config.get("format", "table")
 
         if layout_format == "table":
@@ -166,8 +195,10 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         else:  # list
             self._display_as_list(sessions)
 
-    def _display_as_table(self, sessions: list[dict[str, Any]]) -> None:
-        """Display sessions in table format."""
+    def _display_as_table(self, sessions: list[dict[str, object]]) -> None:
+        """Display sessions in table format.
+
+        """
         table = Table(
             title="Tmux Session Status",
             show_header=True,
@@ -226,8 +257,10 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         total = len(sessions)
         self.console.print(f"\n[dim]Total: {total} sessions, {running} running[/dim]")
 
-    def _display_as_grid(self, sessions: list[dict[str, Any]]) -> None:
-        """Display sessions in grid format."""
+    def _display_as_grid(self, sessions: list[dict[str, object]]) -> None:
+        """Display sessions in grid format.
+
+        """
         for i, session in enumerate(sessions):
             # Create panel for each session
             content = []
@@ -253,8 +286,10 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             if i < len(sessions) - 1:
                 self.console.print()
 
-    def _display_as_list(self, sessions: list[dict[str, Any]]) -> None:
-        """Display sessions in simple list format."""
+    def _display_as_list(self, sessions: list[dict[str, object]]) -> None:
+        """Display sessions in simple list format.
+
+        """
         for session in sessions:
             status_icon = "●" if session["status"] == "running" else "○"
             status_color = "green" if session["status"] == "running" else "red"
@@ -289,7 +324,9 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     help="Show detailed information",
 )
 def status(session_name: str | None, format: str, details: bool) -> None:  # noqa: FBT001
-    """Show status of all or specific tmux sessions."""
+    """Show status of all or specific tmux sessions.
+
+    """
     command = StatusCommand()
 
     # Update layout configuration

@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import logging
+from pathlib import Path
+import yaml
+from .core.config_loader import (
+from .core.config_schema import YesmanConfigSchema
+from .utils import ensure_log_directory
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Yesman configuration management using centralized config loader."""
 
-import logging
-from pathlib import Path
-from typing import object
 
-import yaml
 
-from .core.config_loader import (
     ConfigLoader,
     DictSource,
     create_cached_config_loader,
     create_default_loader,
 )
-from .core.config_schema import YesmanConfigSchema
-from .utils import ensure_log_directory
 
 
 class YesmanConfig:
@@ -90,11 +92,11 @@ class YesmanConfig:
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
 
-    def get(self, key: str, default: object = None) -> Any:
+    def get(self, key: str, default: object = None) -> object:
         """Get configuration value by key (backward compatibility).
 
         Supports dot notation for nested values (e.g., 'tmux.default_shell')
-        
+
         Returns:
             Description of return value
         """
@@ -110,10 +112,10 @@ class YesmanConfig:
 
         return value
 
-    def save(self, new_config_data: dict[str, object]) -> None:
+    def save(self, new_config_data: dict[str]) -> None:
         """Save configuration updates to local file."""
         # Load current local config
-        current_local_cfg: dict[str, object] = {}
+        current_local_cfg: dict[str] = {}
         if self.local_path.exists():
             with open(self.local_path, encoding="utf-8") as f:
                 current_local_cfg = yaml.safe_load(f) or {}
@@ -166,7 +168,7 @@ class YesmanConfig:
         """Get typed configuration schema."""
         return self._config_schema
 
-    def get_cache_stats(self) -> dict[str, object] | None:
+    def get_cache_stats(self) -> dict[str] | None:
         """Get cache statistics if using cached loader."""
         if hasattr(self._loader, "get_cache_stats"):
             return self._loader.get_cache_stats()  # type: ignore[no-any-return]

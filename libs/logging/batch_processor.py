@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Batch log processor for optimized I/O operations."""
+# Copyright notice.
 
 import asyncio
 import gzip
@@ -14,18 +10,28 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Batch log processor for optimized I/O operations."""
+
+
 
 @dataclass
 class LogBatch:
     """A batch of log entries to be processed together."""
 
-    entries: list[dict[str, Any]]
+    entries: list[dict[str, object]]
     timestamp: float
     batch_id: str
     size_bytes: int = 0
 
-    def __post_init__(self):
-        """Calculate size after initialization."""
+    def __post_init__(self) -> object:
+        """Calculate size after initialization.
+
+        Returns:
+        object: Description of return value.
+        """
         if not self.size_bytes:
             self.size_bytes = sum(len(str(entry)) for entry in self.entries)
 
@@ -51,7 +57,7 @@ class BatchProcessor:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Batch management
-        self.pending_entries: deque[dict[str, Any]] = deque()
+        self.pending_entries: deque[dict[str, object]] = deque()
         self.last_flush_time = time.time()
         self.batch_counter = 0
         self.current_file_size = 0
@@ -101,8 +107,10 @@ class BatchProcessor:
 
         self.logger.info("Batch processor stopped")
 
-    def add_entry(self, entry: dict[str, Any]) -> None:
-        """Add a log entry to the processing queue."""
+    def add_entry(self, entry: dict[str, object]) -> None:
+        """Add a log entry to the processing queue.
+
+        """
         # Add timestamp if not present
         if "timestamp" not in entry:
             entry["timestamp"] = time.time()
@@ -134,7 +142,7 @@ class BatchProcessor:
             return
 
         # Create batch
-        entries: list[dict[str, Any]] = []
+        entries: list[dict[str, object]] = []
         while self.pending_entries and len(entries) < self.max_batch_size:
             entries.append(self.pending_entries.popleft())
 
@@ -212,8 +220,12 @@ class BatchProcessor:
 
         self.logger.info("Rotated to new log file: %s", self.current_log_file)
 
-    def get_statistics(self) -> dict[str, Any]:
-        """Get processing statistics."""
+    def get_statistics(self) -> dict[str, object]:
+        """Get processing statistics.
+
+        Returns:
+        object: Description of return value.
+        """
         uptime = time.time() - (self.last_flush_time if self.stats["batches_processed"] > 0 else time.time())
 
         return {
@@ -276,7 +288,11 @@ class BatchProcessor:
 
         return batches
 
-    def get_recent_entries(self, limit: int = 100) -> list[dict[str, Any]]:
-        """Get recent log entries from memory (pending entries)."""
+    def get_recent_entries(self, limit: int = 100) -> list[dict[str, object]]:
+        """Get recent log entries from memory (pending entries).
+
+        Returns:
+        object: Description of return value.
+        """
         recent = list(self.pending_entries)
         return recent[-limit:] if len(recent) > limit else recent

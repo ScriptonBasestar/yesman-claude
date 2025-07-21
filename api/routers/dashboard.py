@@ -1,23 +1,28 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Web dashboard router for FastAPI."""
+# Copyright notice.
 
 import logging
 import secrets
 from datetime import UTC, datetime
 from typing import Annotated, TypedDict
-
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.templating import Jinja2Templates
-
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.project_health import ProjectHealth
 from libs.yesman_config import YesmanConfig
-
 from ..shared import claude_manager
+import subprocess
+from collections import defaultdict
+from datetime import timedelta
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Web dashboard router for FastAPI."""
+
+
+
+
 
 
 class ActivityData(TypedDict):
@@ -182,9 +187,6 @@ async def get_activity_data():
     """Get activity heatmap data."""
     try:
         # Try to get real git activity data
-        import subprocess
-        from collections import defaultdict
-        from datetime import timedelta
 
         activities: list[ActivityData]
         try:
@@ -231,7 +233,6 @@ async def get_activity_data():
             }
         except (subprocess.CalledProcessError, ImportError, AttributeError):
             # Fallback with mock data for last 90 days
-            from datetime import timedelta
 
             end_date = datetime.now(UTC).date()
             start_date = end_date - timedelta(days=89)

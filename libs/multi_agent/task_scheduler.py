@@ -1,16 +1,18 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Intelligent task scheduling and distribution algorithms for multi-agent system."""
+# Copyright notice.
 
 import heapq
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
-
 from .types import Agent, Task
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Intelligent task scheduling and distribution algorithms for multi-agent system."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +32,11 @@ class AgentCapability:
     current_load: float = 0.0  # Current workload (0.0-1.0)
 
     def get_efficiency_score(self, task: Task) -> float:
-        """Calculate efficiency score for this agent handling a specific task."""
+        """Calculate efficiency score for this agent handling a specific task.
+
+        Returns:
+        float: Description of return value.
+        """
         # Base efficiency from processing power and success rate
         base_efficiency = self.processing_power * self.success_rate
 
@@ -71,7 +77,9 @@ class TaskScheduler:
     """Intelligent task scheduler with priority and complexity-based distribution."""
 
     def __init__(self) -> None:
-        """Initialize the task scheduler."""
+        """Initialize the task scheduler.
+
+        """
         self.agent_capabilities: dict[str, AgentCapability] = {}
         self.priority_queue: list[PriorityTask] = []
         self.task_history: dict[str, list[Task]] = {}  # agent_id -> task history
@@ -97,7 +105,11 @@ class TaskScheduler:
         agent: Agent,
         capabilities: AgentCapability | None = None,
     ) -> None:
-        """Register an agent with the scheduler."""
+        """Register an agent with the scheduler.
+
+        Returns:
+        None: Description of return value.
+        """
         if capabilities is None:
             capabilities = AgentCapability(agent_id=agent.agent_id)
 
@@ -107,7 +119,9 @@ class TaskScheduler:
         logger.info("Registered agent %s with scheduler", agent.agent_id)
 
     def add_task(self, task: Task) -> None:
-        """Add a task to the priority queue."""
+        """Add a task to the priority queue.
+
+        """
         priority_score = self._calculate_priority_score(task)
         priority_task = PriorityTask(priority_score=priority_score, task=task)
 
@@ -119,7 +133,13 @@ class TaskScheduler:
         )
 
     def get_next_task_for_agent(self, agent: Agent) -> Task | None:
-        """Get the best next task for a specific agent."""
+        """Get the best next task for a specific agent.
+        
+            Returns:
+                Task | None object the requested data.
+        
+                
+        """
         if not self.priority_queue:
             return None
 
@@ -146,7 +166,11 @@ class TaskScheduler:
         self,
         available_agents: list[Agent],
     ) -> list[tuple[Agent, Task]]:
-        """Get optimal task assignments for multiple agents."""
+        """Get optimal task assignments for multiple agents.
+
+        Returns:
+        object: Description of return value.
+        """
         assignments = []
 
         # Create a copy of the priority queue for manipulation
@@ -156,7 +180,7 @@ class TaskScheduler:
         # Sort agents by current capability and load
         sorted_agents = sorted(
             available_agents,
-            key=lambda a: self._get_agent_total_score(a),
+            key=self._get_agent_total_score,
             reverse=True,
         )
 
@@ -211,7 +235,11 @@ class TaskScheduler:
         success: bool,  # noqa: FBT001
         execution_time: float,
     ) -> None:
-        """Update agent performance metrics based on task completion."""
+        """Update agent performance metrics based on task completion.
+
+        Returns:
+        None: Description of return value.
+        """
         capability = self.agent_capabilities.get(agent_id)
         if not capability:
             return
@@ -249,7 +277,11 @@ class TaskScheduler:
         )
 
     def _calculate_priority_score(self, task: Task) -> float:
-        """Calculate priority score for a task."""
+        """Calculate priority score for a task.
+
+        Returns:
+        float: Description of return value.
+        """
         # Base priority from task priority field (1-10)
         priority_score = task.priority / 10.0 * self.priority_weight
 
@@ -274,7 +306,11 @@ class TaskScheduler:
         self,
         agent_capability: AgentCapability,
     ) -> int | None:
-        """Find the best task index for a specific agent."""
+        """Find the best task index for a specific agent.
+
+        Returns:
+        object: Description of return value.
+        """
         if not self.priority_queue:
             return None
 
@@ -301,7 +337,11 @@ class TaskScheduler:
         return best_index
 
     def _get_agent_total_score(self, agent: Agent) -> float:
-        """Get total capability score for an agent."""
+        """Get total capability score for an agent.
+
+        Returns:
+        float: Description of return value.
+        """
         capability = self.agent_capabilities.get(agent.agent_id)
         if not capability:
             return 0.5
@@ -309,8 +349,12 @@ class TaskScheduler:
         return capability.processing_power * 0.4 + capability.success_rate * 0.4 + (1.0 - capability.current_load) * 0.2
 
     @staticmethod
-    def _are_dependencies_met( task: Task) -> bool:
-        """Check if task dependencies are satisfied."""
+    def _are_dependencies_met(task: Task) -> bool:
+        """Check if task dependencies are satisfied.
+
+        Returns:
+        bool: Description of return value.
+        """
         if not task.dependencies:
             return True
 
@@ -323,7 +367,11 @@ class TaskScheduler:
         task: Task,
         agent_capability: AgentCapability,
     ) -> float:
-        """Estimate how long a task will take for a specific agent."""
+        """Estimate how long a task will take for a specific agent.
+
+        Returns:
+        float: Description of return value.
+        """
         base_time = self._estimate_base_task_time(task)
 
         # Adjust for agent's processing power and specializations
@@ -338,30 +386,40 @@ class TaskScheduler:
 
     @staticmethod
     def _estimate_base_task_time(task: Task) -> float:
-        """Estimate base time for a task."""
+        """Estimate base time for a task.
+
+        Returns:
+        float: Description of return value.
+        """
         # Simple heuristic based on complexity and command type
         base_time = task.complexity * 60.0  # Base: complexity * 60 seconds
 
         # Adjust based on command type
         if task.command:
             command = task.command[0].lower()
-            if command in ["test", "pytest", "npm test"]:
+            if command in {"test", "pytest", "npm test"}:
                 base_time *= 2.0  # Tests take longer
-            elif command in ["build", "compile", "make"]:
+            elif command in {"build", "compile", "make"}:
                 base_time *= 1.5  # Builds take longer
-            elif command in ["lint", "format", "check"]:
+            elif command in {"lint", "format", "check"}:
                 base_time *= 0.5  # Quick tasks
 
         return base_time
 
     def update_agent_load(self, agent_id: str, load: float) -> None:
-        """Update current load for an agent."""
+        """Update current load for an agent.
+
+        """
         capability = self.agent_capabilities.get(agent_id)
         if capability:
             capability.current_load = max(0.0, min(1.0, load))
 
-    def get_scheduling_metrics(self) -> dict[str, Any]:
-        """Get current scheduling performance metrics."""
+    def get_scheduling_metrics(self) -> dict[str, object]:
+        """Get current scheduling performance metrics.
+
+        Returns:
+        object: Description of return value.
+        """
         if not self.agent_capabilities:
             return self.scheduling_metrics
 
@@ -392,7 +450,11 @@ class TaskScheduler:
         return self.scheduling_metrics.copy()
 
     def rebalance_tasks(self) -> list[tuple[str, str]]:
-        """Rebalance workload between agents by adjusting task assignment preferences."""
+        """Rebalance workload between agents by adjusting task assignment preferences.
+
+        Returns:
+        object: Description of return value.
+        """
         rebalancing_actions = []
 
         # Find overloaded and underloaded agents
@@ -450,7 +512,9 @@ class TaskScheduler:
         return rebalancing_actions
 
     def _adjust_assignment_preferences(self, overloaded_agent_id: str, underloaded_agent_id: str) -> None:
-        """Adjust task assignment preferences to favor underloaded agents."""
+        """Adjust task assignment preferences to favor underloaded agents.
+
+        """
         overloaded_cap = self.agent_capabilities.get(overloaded_agent_id)
         underloaded_cap = self.agent_capabilities.get(underloaded_agent_id)
 
@@ -464,7 +528,9 @@ class TaskScheduler:
         logger.debug("Adjusted assignment preferences: %s penalty, %s boost", overloaded_agent_id, underloaded_agent_id)
 
     def reset_assignment_preferences(self, agent_id: str) -> None:
-        """Reset assignment preferences for an agent to baseline values."""
+        """Reset assignment preferences for an agent to baseline values.
+
+        """
         capability = self.agent_capabilities.get(agent_id)
         if not capability:
             return
@@ -480,7 +546,11 @@ class TaskScheduler:
         logger.debug("Reset assignment preferences for agent %s", agent_id)
 
     def _estimate_task_load(self, task: Task, agent_capability: AgentCapability) -> float:
-        """Estimate the load a task represents for an agent."""
+        """Estimate the load a task represents for an agent.
+
+        Returns:
+        float: Description of return value.
+        """
         estimated_time = self._estimate_task_time(task, agent_capability)
         # Convert to load factor (assuming 8-hour workday)
         return estimated_time / (8 * 3600.0)

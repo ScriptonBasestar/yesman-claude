@@ -1,32 +1,29 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Global error handler middleware for FastAPI."""
+# Copyright notice.
 
 import traceback
 import uuid
 from collections.abc import Awaitable, Callable
-
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
-
 from libs.core.error_handling import (
     ConfigurationError,
     ErrorSeverity,
     NetworkError,
+    PermissionError as YesmanPermissionError,
     SessionError,
+    TimeoutError as YesmanTimeoutError,
     ValidationError,
     YesmanError,
 )
-from libs.core.error_handling import PermissionError as YesmanPermissionError
-from libs.core.error_handling import TimeoutError as YesmanTimeoutError
 
 
 def error_to_status_code(error: YesmanError) -> int:
-    """Map YesmanError to HTTP status code."""
+    """Map YesmanError to HTTP status code.
+
+    Returns:
+        Dict containing status information."""
     # Map by error type
     if isinstance(error, ValidationError):
         return status.HTTP_400_BAD_REQUEST
@@ -152,7 +149,10 @@ def create_error_response(
     context: dict[str, object] | None = None,
     request_id: str | None = None,
 ) -> JSONResponse:
-    """Helper function to create standardized error responses."""
+    """Helper function to create standardized error responses.
+
+    Returns:
+        JSON response object the created item."""
     error_data: dict[str, object] = {
         "code": code,
         "message": message,

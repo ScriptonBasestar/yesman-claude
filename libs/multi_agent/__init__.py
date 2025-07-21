@@ -1,25 +1,39 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from .agent_pool import AgentPool
+from .auto_resolver import (
+from .branch_info_protocol import (
+from .branch_manager import BranchManager
+from .code_review_engine import (
+from .collaboration_engine import (
+from .conflict_prediction import (
+from .conflict_prevention import (
+from .conflict_resolution import (
+from .dependency_propagation import (
+from .graph import DirectedGraph
+from .semantic_analyzer import (
+from .semantic_merger import (
+from .task_analyzer import CodeDependency, TaskAnalyzer, TaskDefinition
+from .task_scheduler import AgentCapability, TaskScheduler
+from .types import Agent, AgentState, Task, TaskStatus
+from .work_environment import WorkEnvironment, WorkEnvironmentManager
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Multi-agent system for parallel branch-based development automation."""
 
-from .agent_pool import AgentPool
-from .auto_resolver import (
     AutoResolutionMode,
     AutoResolutionResult,
     AutoResolver,
     ResolutionOutcome,
 )
-from .branch_info_protocol import (
     BranchInfo,
     BranchInfoProtocol,
     BranchInfoType,
     BranchSyncEvent,
     SyncStrategy,
 )
-from .branch_manager import BranchManager
-from .code_review_engine import (
     CodeReview,
     CodeReviewEngine,
     QualityMetric,
@@ -30,7 +44,6 @@ from .code_review_engine import (
     ReviewSummary,
     ReviewType,
 )
-from .collaboration_engine import (
     CollaborationEngine,
     CollaborationMessage,
     CollaborationMode,
@@ -39,21 +52,18 @@ from .collaboration_engine import (
     MessageType,
     SharedKnowledge,
 )
-from .conflict_prediction import (
     ConflictPattern,
     ConflictPredictor,
     ConflictVector,
     PredictionConfidence,
     PredictionResult,
 )
-from .conflict_prevention import (
     ConflictPreventionSystem,
     PreventionAction,
     PreventionMeasure,
     PreventionResult,
     PreventionStrategy,
 )
-from .conflict_resolution import (
     ConflictInfo,
     ConflictResolutionEngine,
     ConflictSeverity,
@@ -61,7 +71,6 @@ from .conflict_resolution import (
     ResolutionResult,
     ResolutionStrategy,
 )
-from .dependency_propagation import (
     ChangeImpact,
     DependencyChange,
     DependencyNode,
@@ -70,8 +79,6 @@ from .dependency_propagation import (
     PropagationResult,
     PropagationStrategy,
 )
-from .graph import DirectedGraph
-from .semantic_analyzer import (
     ClassDefinition,
     FunctionSignature,
     SemanticAnalyzer,
@@ -80,17 +87,12 @@ from .semantic_analyzer import (
     SemanticContext,
     SymbolVisibility,
 )
-from .semantic_merger import (
     ConflictResolutionRule,
     MergeResolution,
     MergeResult,
     MergeStrategy,
     SemanticMerger,
 )
-from .task_analyzer import CodeDependency, TaskAnalyzer, TaskDefinition
-from .task_scheduler import AgentCapability, TaskScheduler
-from .types import Agent, AgentState, Task, TaskStatus
-from .work_environment import WorkEnvironment, WorkEnvironmentManager
 
 __all__ = [
     "Agent",

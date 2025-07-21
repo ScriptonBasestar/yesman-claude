@@ -1,4 +1,11 @@
-"""Copyright notice."""
+from typing import Any
+from templates using Jinja2 template rendering.
+from pathlib import Path
+import tmuxp
+import yaml
+from jinja2 import Template
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -7,15 +14,10 @@
 This module provides utilities for generating tmux session configurations
 """
 
-from templates using Jinja2 template rendering.
-from pathlib import Path
-import tmuxp
-import yaml
-from jinja2 import Template
 
 
 
-def generate(session_name: str, start_directory: str):
+def generate(session_name: str, start_directory: str) -> object:
     """Generate a tmux session configuration from a template.
 
     Args:

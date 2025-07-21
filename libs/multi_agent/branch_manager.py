@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Branch management system for multi-agent parallel development."""
+# Copyright notice.
 
 import json
 import logging
@@ -12,6 +8,12 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Branch management system for multi-agent parallel development."""
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,20 +27,20 @@ class BranchInfo:
     created_at: datetime
     last_commit: str | None = None
     status: str = "active"  # active, merged, abandoned
-    metadata: dict[str, Any] = None
+    metadata: dict[str, object] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.metadata is None:
             self.metadata = {}
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         data = asdict(self)
         data["created_at"] = self.created_at.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "BranchInfo":
+    def from_dict(cls, data: dict[str, object]) -> "BranchInfo":
         """Create from dictionary."""
         data["created_at"] = datetime.fromisoformat(data["created_at"])
         return cls(**data)
@@ -65,7 +67,7 @@ class BranchManager:
         check: bool = True,  # noqa: FBT001
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result."""
-        cmd = ["git", *args]
+        cmd = ["git", *args: object]
         logger.debug("Running git command: %s", " ".join(cmd))
 
         try:
@@ -104,7 +106,7 @@ class BranchManager:
 
         if metadata_file.exists():
             try:
-                with open(metadata_file) as f:
+                with open(metadata_file, encoding="utf-8") as f:
                     data = json.load(f)
                     self.branches = {name: BranchInfo.from_dict(info) for name, info in data.items()}
                 logger.info("Loaded %d branch metadata entries", len(self.branches))
@@ -122,7 +124,7 @@ class BranchManager:
         try:
             data = {name: info.to_dict() for name, info in self.branches.items()}
 
-            with open(metadata_file, "w") as f:
+            with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
             logger.debug("Saved branch metadata for %d branches", len(self.branches))
@@ -211,7 +213,7 @@ class BranchManager:
 
         return active_branches
 
-    def get_branch_status(self, branch_name: str) -> dict[str, Any]:
+    def get_branch_status(self, branch_name: str) -> dict[str, object]:
         """Get detailed status of a branch."""
         if not self._branch_exists(branch_name):
             msg = f"Branch '{branch_name}' does not exist"
@@ -290,7 +292,7 @@ class BranchManager:
     def update_branch_metadata(
         self,
         branch_name: str,
-        metadata: dict[str, Any],
+        metadata: dict[str, object],
     ) -> None:
         """Update metadata for a branch."""
         if branch_name not in self.branches:
@@ -347,7 +349,7 @@ class BranchManager:
         self,
         branch_name: str,
         target_branch: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Check for potential conflicts with target branch."""
         if not self._branch_exists(branch_name):
             msg = f"Branch '{branch_name}' does not exist"

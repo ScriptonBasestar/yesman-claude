@@ -1,12 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Performance Optimizer.
-
-Comprehensive performance monitoring and optimization system for dashboard interfaces
-with automatic tuning, metrics collection, and intelligent resource management.
-"""
+# Copyright notice.
 
 import asyncio
 import gc
@@ -21,9 +13,19 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from functools import wraps
-from typing import object, Optional
-
+from typing import Optional, object, Any
 import psutil
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Performance Optimizer.
+
+Comprehensive performance monitoring and optimization system for dashboard interfaces
+with automatic tuning, metrics collection, and intelligent resource management.
+"""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +152,7 @@ class PerformanceProfiler:
         self.lock = threading.Lock()
 
     @contextmanager
-    def measure(self, operation_name: str):
+    def measure(self, operation_name: str) -> object:
         """Context manager for measuring operation time."""
         start_time = time.perf_counter()
         try:
@@ -169,9 +171,9 @@ class PerformanceProfiler:
             name = operation_name or f"{func.__module__}.{func.__name__}"
 
             @wraps(func)
-            def wrapper(*args: object, **kwargs: object) -> Any:
+            def wrapper(*args: object, **kwargs: object) -> object:
                 with self.measure(name):
-                    return func(*args, **kwargs)
+                    return func(*args: object, **kwargs)
 
             return wrapper
 
@@ -521,7 +523,7 @@ class PerformanceOptimizer:
         logger.debug("Update frequency optimized: %ss interval", new_interval)
 
     @staticmethod
-    def _optimize_caching(strategy: OptimizationStrategy) -> None:  # noqa: ARG002
+    def _optimize_caching(strategy: OptimizationStrategy) -> None:  # noqa: ARG002  # noqa: ARG004
         """Optimize caching behavior."""
         # This would integrate with actual cache systems
         logger.debug("Caching optimization applied")
@@ -533,7 +535,7 @@ class PerformanceOptimizer:
         logger.debug("Widget count limited to: %d", strategy.max_widget_count)
 
     @staticmethod
-    def _optimize_animations(strategy: OptimizationStrategy) -> None:  # noqa: ARG002
+    def _optimize_animations(strategy: OptimizationStrategy) -> None:  # noqa: ARG002  # noqa: ARG004
         """Optimize animations."""
         # This would integrate with animation system
         logger.debug("Animations disabled for performance")
@@ -659,7 +661,7 @@ class AsyncPerformanceOptimizer:
         Args:
             monitoring_interval: Interval between measurements
             max_concurrent_tasks: Maximum concurrent optimization tasks
-        
+
         Returns:
             Description of return value
         """

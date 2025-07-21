@@ -1,15 +1,16 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import logging
 import re
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import object
-
 from libs.yesman_config import YesmanConfig
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,15 @@ class ActivityHeatmapGenerator:
         self.config = config
 
     def collect_session_activity(self, session_name: str, days: int = 7) -> dict[str, int]:
-        """Tmux 세션의 활동 로그 수집 및 분석."""
+        """Tmux 세션의 활동 로그 수집 및 분석.
+
+        Returns:
+        object: Description of return value.
+        """
         start_time_collect = datetime.now(UTC)
         try:
             log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
-            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in ("-", "_")).rstrip()
+            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
             log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 
             if not log_file.exists():
@@ -55,8 +60,12 @@ class ActivityHeatmapGenerator:
             logger.exception("Error collecting session activity for {session_name}")  # noqa: G004
             return {}
 
-    def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str, object]:
-        """24x7 그리드 형태의 히트맵 데이터 생성."""
+    def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str]:
+        """24x7 그리드 형태의 히트맵 데이터 생성.
+
+        Returns:
+        object: Description of return value.
+        """
         start_time_generate = datetime.now(UTC)
         heatmap_data: defaultdict[int, defaultdict[int, int]] = defaultdict(lambda: defaultdict(int))
 

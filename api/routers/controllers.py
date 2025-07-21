@@ -1,14 +1,15 @@
-"""Copyright notice."""
+from typing import Any
+import subprocess
+from fastapi import APIRouter, HTTPException
+from libs.core.session_manager import SessionManager
+from ..shared import claude_manager
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Controller management API endpoints."""
 
-import subprocess
 
-from fastapi import APIRouter, HTTPException
 
-from ..shared import claude_manager
 
 router = APIRouter()
 # Using shared ClaudeManager instance to ensure consistency across all API endpoints
@@ -17,7 +18,10 @@ cm = claude_manager
 
 @router.get("/sessions/{session_name}/controller/status", response_model=str)
 def get_controller_status(session_name: str) -> str | None:
-    """지정된 세션의 컨트롤러 상태를 조회합니다 ('running' 또는 'stopped')."""
+    """지정된 세션의 컨트롤러 상태를 조회합니다 ('running' 또는 'stopped').
+
+    Returns:
+        Dict containing status information."""
     try:
         controller = cm.get_controller(session_name)
         return "running" if controller.is_running else "stopped"
@@ -35,7 +39,6 @@ def start_controller(session_name: str) -> None:
         controller = cm.get_controller(session_name)
 
         # First check if session exists
-        from libs.core.session_manager import SessionManager
 
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
@@ -297,10 +300,12 @@ def restart_claude_pane(session_name: str) -> None:
 
 
 @router.post("/controllers/start-all", status_code=200)
-def start_all_controllers():
-    """모든 활성 세션의 컨트롤러를 시작합니다."""
+def start_all_controllers() -> object:
+    """모든 활성 세션의 컨트롤러를 시작합니다.
+
+    Returns:
+        Object object."""
     try:
-        from libs.core.session_manager import SessionManager
 
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
@@ -354,10 +359,12 @@ def start_all_controllers():
 
 
 @router.post("/controllers/stop-all", status_code=200)
-def stop_all_controllers():
-    """모든 활성 세션의 컨트롤러를 중지합니다."""
+def stop_all_controllers() -> object:
+    """모든 활성 세션의 컨트롤러를 중지합니다.
+
+    Returns:
+        Object object."""
     try:
-        from libs.core.session_manager import SessionManager
 
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()

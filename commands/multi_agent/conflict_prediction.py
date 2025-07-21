@@ -1,17 +1,20 @@
-"""Copyright notice."""
+from typing import Any
+import asyncio
+import logging
+from datetime import timedelta
+from libs.core.base_command import BaseCommand, CommandError
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_prediction import ConflictPredictor
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Conflict prediction and analysis commands."""
 
-import asyncio
-import logging
-from datetime import timedelta
 
-from libs.core.base_command import BaseCommand, CommandError
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_prediction import ConflictPredictor
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +29,13 @@ class PredictConflictsCommand(BaseCommand):
         time_horizon: int = 7,
         min_confidence: float = 0.3,
         limit: int = 10,
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the predict conflicts command."""
+        """Execute the predict conflicts command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             # Validate required parameters
             if not branches:
@@ -115,8 +122,12 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show prediction summary and statistics."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the prediction summary command."""
+    def execute(self, repo_path: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the prediction summary command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             self.print_info("🔮 Conflict Prediction Summary")
             self.print_info("=" * 40)
@@ -153,8 +164,12 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns and trends."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the analyze conflict patterns command."""
+    def execute(self, repo_path: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the analyze conflict patterns command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             self.print_info("📈 Analyzing conflict patterns...")
 

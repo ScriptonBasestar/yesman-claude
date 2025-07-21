@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Rollback mechanism and error recovery system for multi-agent operations."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -17,9 +13,16 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Union
-
 from .types import Agent, AgentState, Task, TaskStatus
+                    from .branch_manager import BranchInfo
+import re
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Rollback mechanism and error recovery system for multi-agent operations."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -443,7 +446,7 @@ class RecoveryEngine:
             return False
 
     @staticmethod
-    async def _restore_agent_states( agent_pool: object | None, agent_states: dict[str, dict[str, str | int | bool | list[str]]]) -> None:
+    async def _restore_agent_states(agent_pool: object | None, agent_states: dict[str, dict[str, str | int | bool | list[str]]]) -> None:
         """Restore agent states from snapshot."""
         for agent_id, agent_data in agent_states.items():
             try:
@@ -483,7 +486,7 @@ class RecoveryEngine:
                 task = Task.from_dict(task_data)
 
                 # Reset execution state
-                if task.status in [TaskStatus.RUNNING, TaskStatus.ASSIGNED]:
+                if task.status in {TaskStatus.RUNNING, TaskStatus.ASSIGNED}:
                     task.status = TaskStatus.PENDING
                     task.assigned_agent = None
                     task.start_time = None
@@ -508,7 +511,6 @@ class RecoveryEngine:
             branches_data = branch_state.get("branches", {})
             for branch_name, branch_data in branches_data.items():
                 try:
-                    from .branch_manager import BranchInfo
 
                     branch_info = BranchInfo.from_dict(branch_data)
                     branch_manager.branches[branch_name] = branch_info
@@ -667,7 +669,6 @@ class RecoveryEngine:
 
     def _find_recovery_strategy(self, error_message: str) -> RecoveryStrategy | None:
         """Find the best matching recovery strategy for an error."""
-        import re
 
         # Try to find a specific match first
         for name, strategy in self.recovery_strategies.items():

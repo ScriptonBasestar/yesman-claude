@@ -1,4 +1,15 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from commands.multi_agent.agent_pool import (
+from commands.multi_agent.batch_operations import (
+from commands.multi_agent.cli import multi_agent
+from commands.multi_agent.code_review import (
+from commands.multi_agent.collaboration import (
+from commands.multi_agent.conflict_prediction import (
+from commands.multi_agent.conflict_resolution import (
+from commands.multi_agent.dependency_tracking import (
+from commands.multi_agent.semantic_analysis import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -31,7 +42,6 @@ Benefits of this refactoring:
 
 # Import the main CLI group from the modular structure
 # Import all command classes for backward compatibility
-from commands.multi_agent.agent_pool import (
     AddTaskCommand,
     ListTasksCommand,
     MonitorAgentsCommand,
@@ -39,13 +49,10 @@ from commands.multi_agent.agent_pool import (
     StatusCommand,
     StopAgentsCommand,
 )
-from commands.multi_agent.batch_operations import (
     AutoResolveCommand,
     BatchMergeCommand,
     PreventConflictsCommand,
 )
-from commands.multi_agent.cli import multi_agent
-from commands.multi_agent.code_review import (
     QualityCheckCommand,
     ReviewApproveCommand,
     ReviewInitiateCommand,
@@ -53,29 +60,24 @@ from commands.multi_agent.code_review import (
     ReviewStatusCommand,
     ReviewSummaryCommand,
 )
-from commands.multi_agent.collaboration import (
     BranchInfoCommand,
     CollaborateCommand,
     SendMessageCommand,
     ShareKnowledgeCommand,
 )
-from commands.multi_agent.conflict_prediction import (
     AnalyzeConflictPatternsCommand,
     PredictConflictsCommand,
     PredictionSummaryCommand,
 )
-from commands.multi_agent.conflict_resolution import (
     ConflictSummaryCommand,
     DetectConflictsCommand,
     ResolveConflictCommand,
 )
-from commands.multi_agent.dependency_tracking import (
     DependencyImpactCommand,
     DependencyPropagateCommand,
     DependencyStatusCommand,
     DependencyTrackCommand,
 )
-from commands.multi_agent.semantic_analysis import (
     AnalyzeSemanticConflictsCommand,
     FunctionDiffCommand,
     SemanticMergeCommand,

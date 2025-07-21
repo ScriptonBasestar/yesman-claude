@@ -1,17 +1,19 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Session progress overview widget."""
+# Copyright notice.
 
 from datetime import UTC, datetime
-from typing import object
-
 from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Session progress overview widget."""
+
+
+
 
 
 class SessionProgressWidget:
@@ -20,8 +22,11 @@ class SessionProgressWidget:
     def __init__(self, console: Console | None = None) -> None:
         self.console = console or Console()
 
-    def render_progress_overview(self, progress_data: dict[str, object]) -> Panel:
-        """Render the main progress overview panel."""
+    def render_progress_overview(self, progress_data: dict[str]) -> Panel:
+        """Render the main progress overview panel.
+
+    Returns:
+        Panel object."""
         if not progress_data:
             return Panel(
                 Text("No progress data available", style="dim"),
@@ -44,8 +49,11 @@ class SessionProgressWidget:
         return Panel(layout, title="📊 Progress Overview", border_style="cyan")
 
     @staticmethod
-    def _render_summary( data: dict[str, object]) -> Panel:
-        """Render summary statistics."""
+    def _render_summary(data: dict[str]) -> Panel:
+        """Render summary statistics.
+
+    Returns:
+        Panel object."""
         content = Text()
 
         # Overall progress bar
@@ -70,8 +78,11 @@ class SessionProgressWidget:
 
         return Panel(content, title="Summary", border_style="dim")
 
-    def _render_sessions_table(self, sessions: list[dict[str, object]]) -> Panel:
-        """Render individual sessions progress table."""
+    def _render_sessions_table(self, sessions: list[dict[str]]) -> Panel:
+        """Render individual sessions progress table.
+
+    Returns:
+        Panel object."""
         if not sessions:
             return Panel(Text("No active sessions", style="dim"), title="Sessions")
 
@@ -104,7 +115,10 @@ class SessionProgressWidget:
 
     @staticmethod
     def _get_phase_emoji(phase: str) -> str:
-        """Get emoji for task phase."""
+        """Get emoji for task phase.
+
+    Returns:
+        String containing the requested data."""
         phase_emojis = {
             "starting": "🚀",
             "analyzing": "🔍",
@@ -117,8 +131,11 @@ class SessionProgressWidget:
         return phase_emojis.get(phase, "❓")
 
     @staticmethod
-    def render_compact_progress(progress_data: dict[str, object]) -> Text:
-        """Render compact progress for status bars."""
+    def render_compact_progress(progress_data: dict[str]) -> Text:
+        """Render compact progress for status bars.
+
+    Returns:
+        Text object."""
         if not progress_data:
             return Text("Progress: No data", style="dim")
 
@@ -134,8 +151,11 @@ class SessionProgressWidget:
         return text
 
     @staticmethod
-    def render_session_detail(session_name: str, session_info: object, progress: object) -> Panel:  # noqa: ARG002
-        """Render detailed progress for a specific session."""
+    def render_session_detail(session_info: progress, object) -> Panel:  # noqa: ARG002  # noqa: ARG004
+        """Render detailed progress for a specific session.
+
+    Returns:
+        Panel object."""
         if not progress:
             return Panel(
                 Text("No progress data for this session", style="dim"),

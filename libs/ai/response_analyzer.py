@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Response pattern analysis and learning engine."""
+# Copyright notice.
 
 import json
 import logging
@@ -12,6 +8,12 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Response pattern analysis and learning engine."""
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,16 +60,18 @@ class ResponseAnalyzer:
         self._load_data()
 
     def _load_data(self) -> None:
-        """Load existing response history and patterns."""
+        """Load existing response history and patterns.
+
+        """
         try:
             if self.responses_file.exists():
-                with open(self.responses_file) as f:
+                with open(self.responses_file, encoding="utf-8") as f:
                     data = json.load(f)
                     self.response_history = [ResponseRecord(**record) for record in data]
                 logger.info("Loaded %d response records", len(self.response_history))
 
             if self.patterns_file.exists():
-                with open(self.patterns_file) as f:
+                with open(self.patterns_file, encoding="utf-8") as f:
                     data = json.load(f)
                     self.learned_patterns = {pid: PromptPattern(**pattern) for pid, pattern in data.items()}
                 logger.info("Loaded %d learned patterns", len(self.learned_patterns))
@@ -76,14 +80,16 @@ class ResponseAnalyzer:
             logger.exception("Error loading AI data")
 
     def _save_data(self) -> None:
-        """Save response history and patterns to disk."""
+        """Save response history and patterns to disk.
+
+        """
         try:
             # Save response history
-            with open(self.responses_file, "w") as f:
+            with open(self.responses_file, "w", encoding="utf-8") as f:
                 json.dump([asdict(record) for record in self.response_history], f, indent=2)
 
             # Save patterns
-            with open(self.patterns_file, "w") as f:
+            with open(self.patterns_file, "w", encoding="utf-8") as f:
                 json.dump(
                     {pid: asdict(pattern) for pid, pattern in self.learned_patterns.items()},
                     f,
@@ -100,7 +106,11 @@ class ResponseAnalyzer:
         context: str = "",
         project_name: str | None = None,
     ) -> None:
-        """Record a user response for learning."""
+        """Record a user response for learning.
+
+        Returns:
+        None: Description of return value.
+        """
         prompt_type = self._classify_prompt_type(prompt_text)
 
         record = ResponseRecord(
@@ -124,8 +134,12 @@ class ResponseAnalyzer:
         logger.debug("Recorded response: %s -> %s", prompt_type, user_response)
 
     @staticmethod
-    def _classify_prompt_type( prompt_text: str) -> str:
-        """Classify the type of prompt based on its content."""
+    def _classify_prompt_type(prompt_text: str) -> str:
+        """Classify the type of prompt based on its content.
+
+        Returns:
+        str: Description of return value.
+        """
         text = prompt_text.lower().strip()
 
         # Common prompt patterns
@@ -144,7 +158,9 @@ class ResponseAnalyzer:
         return "unknown"
 
     def _update_patterns(self, record: ResponseRecord) -> None:
-        """Update learned patterns based on new response record."""
+        """Update learned patterns based on new response record.
+
+        """
         pattern_id = f"{record.prompt_type}_{record.project_name or 'global'}"
 
         if pattern_id not in self.learned_patterns:
@@ -178,7 +194,11 @@ class ResponseAnalyzer:
 
     @staticmethod
     def _generate_regex_pattern(prompt_text: str) -> str:
-        """Generate a regex pattern to match similar prompts."""
+        """Generate a regex pattern to match similar prompts.
+
+        Returns:
+        str: Description of return value.
+        """
         # Simplified pattern generation - replace specific words with wildcards
         pattern = re.escape(prompt_text.lower())
 
@@ -190,7 +210,11 @@ class ResponseAnalyzer:
 
     @staticmethod
     def _extract_context_key(context: str) -> str:
-        """Extract a key from context for pattern matching."""
+        """Extract a key from context for pattern matching.
+
+        Returns:
+        str: Description of return value.
+        """
         # Simplified context extraction
         context = context.lower()
 
@@ -205,7 +229,11 @@ class ResponseAnalyzer:
         return "general_context"
 
     def predict_response(self, prompt_text: str, context: str = "", project_name: str | None = None) -> tuple[str, float]:
-        """Predict the best response for a given prompt."""
+        """Predict the best response for a given prompt.
+
+        Returns:
+        object: Description of return value.
+        """
         prompt_type = self._classify_prompt_type(prompt_text)
         pattern_id = f"{prompt_type}_{project_name or 'global'}"
 
@@ -234,7 +262,11 @@ class ResponseAnalyzer:
         return self._get_default_response(prompt_type)
 
     def _calculate_confidence(self, pattern: PromptPattern, prompt_text: str, context: str) -> float:
-        """Calculate confidence score for a prediction."""
+        """Calculate confidence score for a prediction.
+
+        Returns:
+        float: Description of return value.
+        """
         base_confidence = 0.5
 
         # Pattern matching confidence
@@ -259,7 +291,11 @@ class ResponseAnalyzer:
 
     @staticmethod
     def _get_default_response(prompt_type: str) -> tuple[str, float]:
-        """Get default response for a prompt type."""
+        """Get default response for a prompt type.
+
+        Returns:
+        object: Description of return value.
+        """
         defaults = {
             "yes_no": ("yes", 0.3),
             "numbered_selection": ("1", 0.3),
@@ -272,8 +308,12 @@ class ResponseAnalyzer:
 
         return defaults.get(prompt_type, ("", 0.1))
 
-    def get_statistics(self) -> dict[str, Any]:
-        """Get statistics about learned patterns and responses."""
+    def get_statistics(self) -> dict[str, object]:
+        """Get statistics about learned patterns and responses.
+
+        Returns:
+        object: Description of return value.
+        """
         total_responses = len(self.response_history)
 
         # Response type distribution
@@ -295,8 +335,12 @@ class ResponseAnalyzer:
             "data_directory": str(self.data_dir),
         }
 
-    def cleanup_old_data(self, days_to_keep: int = 30):
-        """Remove old response records to keep data fresh."""
+    def cleanup_old_data(self, days_to_keep: int = 30) -> object:
+        """Remove old response records to keep data fresh.
+
+        Returns:
+        object: Description of return value.
+        """
         cutoff_time = time.time() - (days_to_keep * 24 * 3600)
 
         old_count = len(self.response_history)

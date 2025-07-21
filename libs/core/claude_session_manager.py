@@ -1,15 +1,17 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import logging
+from typing import Any
+import libtmux
+from libs.utils import ensure_log_directory, get_default_log_path
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Claude session and pane management."""
 
-import logging
-from typing import Any
 
-import libtmux
 
-from libs.utils import ensure_log_directory, get_default_log_path
 
 
 class ClaudeSessionManager:
@@ -20,11 +22,15 @@ class ClaudeSessionManager:
         self.pane_id = pane_id
         self.server = libtmux.Server()
         self.session: libtmux.Session | None = None
-        self.claude_pane: Any = None
+        self.claude_pane: Optional[object] = None
         self.logger = self._setup_logger()
 
     def _setup_logger(self) -> logging.Logger:
-        """Setup logger for session manager."""
+        """Setup logger for session manager.
+
+        Returns:
+        object: Description of return value.
+        """
         logger = logging.getLogger(f"yesman.claude_session.{self.session_name}")
         logger.setLevel(logging.INFO)
         logger.propagate = False
@@ -42,7 +48,11 @@ class ClaudeSessionManager:
         return logger
 
     def initialize_session(self) -> bool:
-        """Initialize tmux session and find Claude pane."""
+        """Initialize tmux session and find Claude pane.
+
+        Returns:
+        bool: Description of return value.
+        """
         try:
             self.session = self.server.find_where({"session_name": self.session_name})
             if not self.session:
@@ -62,8 +72,14 @@ class ClaudeSessionManager:
             self.logger.exception("Could not initialize session")
             return False
 
-    def _find_claude_pane(self):
-        """Find pane running Claude."""
+    def _find_claude_pane(self) -> object:
+        """Find pane running Claude.
+        
+            Returns:
+                Object object.
+        
+                
+        """
         if not self.session:
             return None
 
@@ -98,16 +114,28 @@ class ClaudeSessionManager:
         self.logger.warning("No Claude pane found in any window")
         return None
 
-    def get_claude_pane(self):
-        """Get the Claude pane."""
+    def get_claude_pane(self) -> object:
+        """Get the Claude pane.
+
+        Returns:
+        object: Description of return value.
+        """
         return self.claude_pane
 
     def is_session_available(self) -> bool:
-        """Check if session and Claude pane are available."""
+        """Check if session and Claude pane are available.
+
+        Returns:
+        bool: Description of return value.
+        """
         return self.session is not None and self.claude_pane is not None
 
     def capture_pane_content(self, lines: int = 50) -> str:
-        """Capture content from Claude pane."""
+        """Capture content from Claude pane.
+
+        Returns:
+        str: Description of return value.
+        """
         if not self.claude_pane:
             return ""
 
@@ -120,12 +148,18 @@ class ClaudeSessionManager:
             return ""
 
     def send_keys(self, keys: str) -> None:
-        """Send keys to Claude pane."""
+        """Send keys to Claude pane.
+
+        """
         if self.claude_pane:
             self.claude_pane.send_keys(keys)
 
     def get_current_command(self) -> str:
-        """Get current command running in Claude pane."""
+        """Get current command running in Claude pane.
+
+        Returns:
+        str: Description of return value.
+        """
         if not self.claude_pane:
             return ""
 

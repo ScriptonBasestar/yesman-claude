@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""WebSocket message batch processor for optimized real-time updates - Refactored version."""
+# Copyright notice.
 
 import json
 import logging
@@ -12,21 +8,28 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
-
 from libs.core.base_batch_processor import BaseBatchProcessor
+import asyncio
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""WebSocket message batch processor for optimized real-time updates - Refactored version."""
+
+
 
 
 @dataclass
 class MessageBatch:
     """A batch of WebSocket messages to be sent together."""
 
-    messages: list[dict[str, Any]]
+    messages: list[dict[str, object]]
     timestamp: float
     batch_id: str
     channel: str
     size_bytes: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         """Calculate batch size after initialization."""
         if not self.size_bytes:
             self.size_bytes = sum(len(json.dumps(msg)) for msg in self.messages)
@@ -42,7 +45,7 @@ class BatchConfig:
     compression_threshold: int = 5  # Start batching after 5 messages
 
 
-class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
+class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch]):
     """Batch processor for a single channel."""
 
     def __init__(
@@ -50,7 +53,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         channel: str,
         handler: Callable,
         config: BatchConfig,
-        parent_stats: dict[str, Any],
+        parent_stats: dict[str, object],
     ) -> None:
         """Initialize channel-specific batch processor."""
         super().__init__(
@@ -63,8 +66,11 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         self.parent_stats = parent_stats  # Reference to parent statistics
         self.batch_counter = 0
 
-    def create_batch(self, items: list[dict[str, Any]]) -> MessageBatch:
-        """Create a MessageBatch from messages."""
+    def create_batch(self, items: list[dict[str, object]]) -> MessageBatch:
+        """Create a MessageBatch from messages.
+
+    Returns:
+        Messagebatch object the created item."""
         # Add metadata to messages
         for msg in items:
             if "queued_at" not in msg:
@@ -109,8 +115,11 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
 
         self.logger.debug("Sent batch %s: %d messages", batch.batch_id, len(batch.messages))
 
-    def _optimize_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Optimize a batch of messages by combining similar ones."""
+    def _optimize_messages(self, messages: list[dict[str, object]]) -> list[dict[str, object]]:
+        """Optimize a batch of messages by combining similar ones.
+
+    Returns:
+        Dict containing."""
         optimized = []
 
         # Group messages by type for potential combination
@@ -120,7 +129,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
             message_groups[msg_type].append(msg)
 
         for msg_type, group in message_groups.items():
-            if msg_type in ["session_update", "health_update", "activity_update"]:
+            if msg_type in {"session_update", "health_update", "activity_update"}:
                 # For update messages, combine data and keep only the latest
                 if len(group) > 1:
                     combined_message = self._combine_update_messages(group)
@@ -141,8 +150,11 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         return optimized
 
     @staticmethod
-    def _combine_update_messages( messages: list[dict[str, Any]]) -> dict[str, Any]:
-        """Combine multiple update messages into a single message."""
+    def _combine_update_messages(messages: list[dict[str, object]]) -> dict[str, object]:
+        """Combine multiple update messages into a single message.
+
+    Returns:
+        Dict containing the updated item."""
         if not messages:
             return {}
 
@@ -167,8 +179,11 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         }
 
     @staticmethod
-    def _combine_log_messages(messages: list[dict[str, Any]]) -> dict[str, Any]:
-        """Combine multiple log messages into a batched log message."""
+    def _combine_log_messages(messages: list[dict[str, object]]) -> dict[str, object]:
+        """Combine multiple log messages into a batched log message.
+
+    Returns:
+        Dict containing."""
         if not messages:
             return {}
 
@@ -247,7 +262,7 @@ class WebSocketBatchProcessor:
 
         self.logger.info("WebSocket batch processor stopped")
 
-    def queue_message(self, channel: str, message: dict[str, Any]) -> None:
+    def queue_message(self, channel: str, message: dict[str, object]) -> None:
         """Queue a message for batch processing."""
         # Create channel processor if it doesn't exist
         if channel not in self._channel_processors:
@@ -266,14 +281,13 @@ class WebSocketBatchProcessor:
 
             # Start processor if we're running
             if self._running:
-                import asyncio
 
                 asyncio.create_task(processor.start())
 
         # Add message to channel processor
         self._channel_processors[channel].add(message)
 
-    async def send_immediate(self, channel: str, message: dict[str, Any]) -> None:
+    async def send_immediate(self, channel: str, message: dict[str, object]) -> None:
         """Send a message immediately without batching (for urgent messages)."""
         handler = self._message_handlers.get(channel)
         if handler:
@@ -285,8 +299,11 @@ class WebSocketBatchProcessor:
         else:
             self.logger.warning("No handler registered for channel: %s", channel)
 
-    def get_statistics(self) -> dict[str, Any]:
-        """Get processing statistics."""
+    def get_statistics(self) -> dict[str, object]:
+        """Get processing statistics.
+
+    Returns:
+        Dict containing the requested data."""
         # Collect statistics from all channel processors
         channel_stats = {}
         total_pending = 0
@@ -315,7 +332,7 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def update_config(self, **kwargs) -> None:
+    def update_config(self, **kwargs: dict[str, object]) -> None:
         """Update batch processing configuration."""
         for key, value in kwargs.items():
             if hasattr(self.config, key):

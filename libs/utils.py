@@ -1,12 +1,14 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import logging
+import os
+from pathlib import Path
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Utility functions for yesman."""
 
-import logging
-import os
-from pathlib import Path
 
 
 def ensure_log_directory(log_path: Path) -> Path:
@@ -32,5 +34,9 @@ def ensure_log_directory(log_path: Path) -> Path:
 
 
 def get_default_log_path() -> Path:
-    """Get the default log path for yesman."""
+    """Get the default log path for yesman.
+
+    Returns:
+        Path: Description of return value.
+    """
     return Path("~/.scripton/yesman/logs/")

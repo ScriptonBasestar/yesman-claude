@@ -1,13 +1,15 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Data models for dashboard."""
+# Copyright notice.
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Data models for dashboard."""
+
 
 
 class TaskPhase(Enum):
@@ -52,14 +54,18 @@ class TaskProgress:
     todos_completed: int = 0
 
     def update_phase(self, new_phase: TaskPhase) -> None:
-        """Update to a new phase."""
+        """Update to a new phase.
+
+        """
         self.phase = new_phase
         self.phase_start_time = datetime.now(UTC)
         self.phase_progress = 0.0
         self._recalculate_overall_progress()
 
     def _recalculate_overall_progress(self) -> None:
-        """Recalculate overall progress based on phase."""
+        """Recalculate overall progress based on phase.
+
+        """
         phase_weights = {
             TaskPhase.STARTING: 0.1,
             TaskPhase.ANALYZING: 0.2,
@@ -84,8 +90,12 @@ class TaskProgress:
 
         self.overall_progress = round(min(100.0, base_progress * 100), 1)
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "phase": self.phase.value,
             "phase_progress": self.phase_progress,
@@ -121,13 +131,23 @@ class SessionProgress:
     last_update_time: datetime | None = None
 
     def get_current_task(self) -> TaskProgress | None:
-        """Get the current task progress."""
+        """Get the current task progress.
+        
+            Returns:
+                Taskprogress | None object the requested data.
+        
+                
+        """
         if 0 <= self.current_task_index < len(self.tasks):
             return self.tasks[self.current_task_index]
         return None
 
     def add_task(self) -> TaskProgress:
-        """Add a new task and make it current."""
+        """Add a new task and make it current.
+
+        Returns:
+        TaskProgress: Description of return value.
+        """
         task = TaskProgress()
         task.start_time = datetime.now(UTC)
         self.tasks.append(task)
@@ -137,7 +157,11 @@ class SessionProgress:
         return task
 
     def calculate_overall_progress(self) -> float:
-        """Calculate overall session progress."""
+        """Calculate overall session progress.
+
+        Returns:
+        float: Description of return value.
+        """
         if not self.tasks:
             return 0.0
 
@@ -145,14 +169,20 @@ class SessionProgress:
         return total_progress / len(self.tasks)
 
     def update_aggregates(self) -> None:
-        """Update aggregate metrics from all tasks."""
+        """Update aggregate metrics from all tasks.
+
+        """
         self.total_files_changed = sum(task.files_created + task.files_modified for task in self.tasks)
         self.total_commands = sum(task.commands_executed for task in self.tasks)
         self.total_todos_completed = sum(task.todos_completed for task in self.tasks)
         self.last_update_time = datetime.now(UTC)
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "session_name": self.session_name,
             "current_task_index": self.current_task_index,
@@ -190,12 +220,14 @@ class PaneInfo:
     last_output: str | None = None
     output_lines: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.last_activity is None:
             self.last_activity = datetime.now(UTC)
 
     def update_activity(self, new_output: str | None = None) -> None:
-        """Update activity tracking."""
+        """Update activity tracking.
+
+        """
         self.last_activity = datetime.now(UTC)
         self.idle_time = 0.0
         if new_output:
@@ -203,7 +235,11 @@ class PaneInfo:
             self.output_lines += 1
 
     def calculate_idle_time(self) -> float:
-        """Calculate current idle time in seconds."""
+        """Calculate current idle time in seconds.
+
+        Returns:
+        float: Description of return value.
+        """
         if self.last_activity:
             self.idle_time = (datetime.now(UTC) - self.last_activity).total_seconds()
         return self.idle_time
@@ -231,8 +267,12 @@ class SessionInfo:
     controller_status: str  # 'running', 'not running', 'unknown'
     progress: SessionProgress | None = None
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for compatibility."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary for compatibility.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "project_name": self.project_name,
             "session_name": self.session_name,
@@ -281,7 +321,11 @@ class DashboardStats:
 
     @classmethod
     def from_sessions(cls, sessions: list[SessionInfo]) -> "DashboardStats":
-        """Create stats from session list."""
+        """Create stats from session list.
+
+        Returns:
+        DashboardStats: Description of return value.
+        """
         total = len(sessions)
         running = sum(1 for s in sessions if s.status == "running")
         controllers = sum(1 for s in sessions if s.controller_status == "running")

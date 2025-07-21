@@ -1,20 +1,24 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Interactive session browser with tree view and keyboard navigation."""
+# Copyright notice.
 
 import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
+from rich.columns import Columns
+from rich.padding import Padding
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Interactive session browser with tree view and keyboard navigation."""
+
+
 
 
 class ViewMode(Enum):
@@ -31,7 +35,7 @@ class SessionNode:
 
     session_name: str
     status: str
-    windows: list[dict[str, Any]]
+    windows: list[dict[str, object]]
     last_activity: float
     is_active: bool = False
     claude_status: str | None = None
@@ -55,7 +59,7 @@ class SessionBrowser:
         self.activity_levels: dict[str, float] = {}
         self.last_update = time.time()
 
-    def update_sessions(self, sessions_data: list[dict[str, Any]]) -> None:
+    def update_sessions(self, sessions_data: list[dict[str, object]]) -> None:
         """Update session data and refresh display."""
         self.sessions = []
         current_time = time.time()
@@ -77,15 +81,18 @@ class SessionBrowser:
         self.last_update = current_time
 
     @staticmethod
-    def _calculate_activity_level( session_data: dict[str, Any]) -> float:
-        """Calculate activity level (0.0 - 1.0) based on session state."""
+    def _calculate_activity_level(session_data: dict[str, object]) -> float:
+        """Calculate activity level (0.0 - 1.0) based on session state.
+
+    Returns:
+        Float representing."""
         activity = 0.0
 
         # Check for active processes
         for window in session_data.get("windows", []):
             for pane in window.get("panes", []):
                 command = pane.get("pane_current_command", "")
-                if command and command not in ["zsh", "bash", "sh"]:
+                if command and command not in {"zsh", "bash", "sh"}:
                     activity += 0.3
 
                 # Claude sessions get higher activity
@@ -95,8 +102,11 @@ class SessionBrowser:
         return min(activity, 1.0)
 
     @staticmethod
-    def _get_session_status(session_data: dict[str, Any]) -> str:
-        """Determine session status with emoji indicators."""
+    def _get_session_status(session_data: dict[str, object]) -> str:
+        """Determine session status with emoji indicators.
+
+    Returns:
+        Dict containing status information."""
         if not session_data.get("exists", True):
             return "❌ Not Found"
 
@@ -109,7 +119,7 @@ class SessionBrowser:
         for window in session_data.get("windows", []):
             for pane in window.get("panes", []):
                 command = pane.get("pane_current_command", "")
-                if command and command not in ["zsh", "bash", "sh"]:
+                if command and command not in {"zsh", "bash", "sh"}:
                     active_processes += 1
 
         if active_processes > 0:
@@ -117,8 +127,11 @@ class SessionBrowser:
         return "🟡 Idle"
 
     @staticmethod
-    def _detect_claude_status(session_data: dict[str, Any]) -> str | None:
-        """Detect Claude status in session."""
+    def _detect_claude_status(session_data: dict[str, object]) -> str | None:
+        """Detect Claude status in session.
+
+    Returns:
+        Dict containing status information."""
         for window in session_data.get("windows", []):
             for pane in window.get("panes", []):
                 command = pane.get("pane_current_command", "")
@@ -132,7 +145,10 @@ class SessionBrowser:
         return None
 
     def render_tree_view(self) -> Panel:
-        """Render sessions as a tree structure."""
+        """Render sessions as a tree structure.
+
+    Returns:
+        Panel object."""
         tree = Tree("📁 Yesman Sessions", guide_style="bright_blue")
 
         for i, session in enumerate(self.sessions):
@@ -166,7 +182,7 @@ class SessionBrowser:
 
                     if "claude" in command.lower():
                         pane_text.append("🤖 Claude", style="cyan")
-                    elif command and command not in ["zsh", "bash", "sh"]:
+                    elif command and command not in {"zsh", "bash", "sh"}:
                         pane_text.append(f"💻 {command}", style="green")
                     else:
                         pane_text.append("📺 Terminal", style="dim")
@@ -179,7 +195,10 @@ class SessionBrowser:
         return Panel(tree, title="Session Browser", border_style="blue")
 
     def render_list_view(self) -> Panel:
-        """Render sessions as a detailed list."""
+        """Render sessions as a detailed list.
+
+    Returns:
+        List of items."""
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Session", style="cyan", width=20)
         table.add_column("Status", width=25)
@@ -207,9 +226,10 @@ class SessionBrowser:
         return Panel(table, title="Session List", border_style="blue")
 
     def render_grid_view(self) -> Panel:
-        """Render sessions as a grid of cards."""
-        from rich.columns import Columns
-        from rich.padding import Padding
+        """Render sessions as a grid of cards.
+
+    Returns:
+        Panel object."""
 
         cards = []
         for i, session in enumerate(self.sessions):
@@ -242,7 +262,10 @@ class SessionBrowser:
         )
 
     def render_status_bar(self) -> Text:
-        """Render status bar with navigation help."""
+        """Render status bar with navigation help.
+
+    Returns:
+        Dict containing status information."""
         status = Text()
         status.append("📋 Navigation: ", style="bold")
         status.append("↑↓ Select  ", style="cyan")
@@ -254,7 +277,10 @@ class SessionBrowser:
         return status
 
     def render(self) -> tuple[Panel, Text]:
-        """Render current view based on view mode."""
+        """Render current view based on view mode.
+
+    Returns:
+        Tuple[Panel, Text] object."""
         if self.view_mode == ViewMode.TREE:
             content = self.render_tree_view()
         elif self.view_mode == ViewMode.LIST:
@@ -266,7 +292,10 @@ class SessionBrowser:
         return content, status_bar
 
     def handle_key(self, key: str) -> str | None:
-        """Handle keyboard input and return action if any."""
+        """Handle keyboard input and return action if any.
+
+    Returns:
+        Str | None object."""
         if not self.sessions:
             return None
 
@@ -290,7 +319,10 @@ class SessionBrowser:
         return None
 
     def get_selected_session(self) -> str | None:
-        """Get currently selected session name."""
+        """Get currently selected session name.
+
+    Returns:
+        Str | None object the requested data."""
         if self.sessions and 0 <= self.selected_index < len(self.sessions):
             return self.sessions[self.selected_index].session_name
         return None

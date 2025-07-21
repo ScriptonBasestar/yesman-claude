@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Multi-agent system commands for parallel development automation."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -15,13 +11,9 @@ from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Never
-
-import click
 from unittest.mock import Mock
-
 import click
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
-
 from libs.core.base_command import BaseCommand, CommandError
 from libs.dashboard.widgets.agent_monitor import AgentMetrics, AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
@@ -29,32 +21,81 @@ from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_info_protocol import BranchInfoType
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.code_review_engine import (
+from libs.multi_agent.collaboration_engine import (
+from libs.multi_agent.conflict_prediction import ConflictPattern, ConflictPredictor
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ResolutionStrategy
+from libs.multi_agent.dependency_propagation import (
+from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
+from libs.multi_agent.semantic_merger import (
+from libs.multi_agent.types import TaskStatus
+                    # ResolutionStrategy import moved to top-level
+                # timedelta import moved to top-level
+                            # ConflictPattern import moved to top-level
+                    # json import moved to top-level
+                    # json import moved to top-level
+                    # json import moved to top-level
+                # Counter import moved to top-level
+                # json import moved to top-level
+                # json import moved to top-level
+                # UTC, datetime imports moved to top-level
+        # ConflictPredictor import moved to top-level
+                # json import moved to top-level
+        # ConflictPredictor import moved to top-level
+                # json import moved to top-level
+                # UTC, datetime imports moved to top-level
+        # CollaborationMode import moved to top-level
+        # AgentPool import moved to top-level
+        # CollaborationEngine import moved to top-level
+            # MessagePriority, MessageType imports moved to top-level
+        # json import moved to top-level
+        # MessagePriority, MessageType imports moved to top-level
+        # json import moved to top-level
+        # json import moved to top-level
+        # BranchInfoType import moved to top-level
+        # json import moved to top-level
+            # Mock import moved to top-level
+            # json import moved to top-level
+            # Mock import moved to top-level
+                # json import moved to top-level
+            # Mock import moved to top-level
+                # json import moved to top-level
+        # MessagePriority import moved to top-level
+                # Mock import moved to top-level
+                # Mock import moved to top-level
+                # Mock import moved to top-level
+                # Mock import moved to top-level
+                            # Counter import moved to top-level
+                # Mock import moved to top-level
+                    # json import moved to top-level
+                # Mock import moved to top-level
+                    # json import moved to top-level
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Multi-agent system commands for parallel development automation."""
+
+
+
     CodeReviewEngine,
     QualityMetric,
     ReviewSeverity,
     ReviewType,
 )
-from libs.multi_agent.collaboration_engine import (
     CollaborationEngine,
     CollaborationMode,
     MessagePriority,
     MessageType,
 )
-from libs.multi_agent.conflict_prediction import ConflictPattern, ConflictPredictor
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ResolutionStrategy
-from libs.multi_agent.dependency_propagation import (
     ChangeImpact,
     DependencyPropagationSystem,
     DependencyType,
     PropagationStrategy,
 )
-from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.semantic_merger import (
     MergeResolution,
     MergeStrategy,
     SemanticMerger,
 )
-from libs.multi_agent.types import TaskStatus
 
 logger = logging.getLogger(__name__)
 
@@ -523,7 +564,6 @@ class ResolveConflictCommand(BaseCommand):
             resolution_strategy = None
             if strategy:
                 try:
-                    # ResolutionStrategy import moved to top-level
 
                     resolution_strategy = ResolutionStrategy(strategy)
                 except ValueError as e:
@@ -670,7 +710,6 @@ class PredictConflictsCommand(BaseCommand):
             predictor.max_predictions_per_run = limit * 2  # Get more, filter later
 
             async def run_prediction():
-                # timedelta import moved to top-level
 
                 horizon = timedelta(days=time_horizon)
                 predictions = await predictor.predict_conflicts(branches, horizon)
@@ -890,7 +929,6 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 
                         # Pattern-specific analysis
                         if pattern:
-                            # ConflictPattern import moved to top-level
 
                             try:
                                 target_pattern = ConflictPattern(pattern)
@@ -909,7 +947,6 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 
                 # Export results if requested
                 if export:
-                    # json import moved to top-level
 
                     export_path = Path(export)
                     with export_path.open("w") as f:
@@ -999,7 +1036,6 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 
                 # Export if requested
                 if export:
-                    # json import moved to top-level
 
                     export_path = Path(export)
                     with export_path.open("w") as f:
@@ -1137,7 +1173,6 @@ class FunctionDiffCommand(BaseCommand):
 
                 # Export if requested
                 if export:
-                    # json import moved to top-level
 
                     export_path = Path(export)
                     with export_path.open("w") as f:
@@ -1544,7 +1579,6 @@ def analyze_semantic_conflicts(
                 click.echo(f"Total conflicts: {len(all_conflicts)}")
 
                 # Group by type
-                # Counter import moved to top-level
 
                 type_counts = Counter(c.conflict_type.value for c in all_conflicts)
                 severity_counts = Counter(c.severity.value for c in all_conflicts)
@@ -1574,7 +1608,6 @@ def analyze_semantic_conflicts(
 
             # Export results
             if export:
-                # json import moved to top-level
 
                 export_data = {
                     "branches": list(branches),
@@ -1591,7 +1624,7 @@ def analyze_semantic_conflicts(
 
         asyncio.run(run_semantic_analysis())
 
-    except (OSError, IOError, json.JSONEncodeError, RuntimeError, ValueError) as e:
+    except (OSError, json.JSONEncodeError, RuntimeError, ValueError) as e:
         click.echo(f"❌ Error analyzing semantic conflicts: {e}", err=True)
 
 
@@ -1754,7 +1787,7 @@ def batch_merge(
             )
 
             # Analyze results
-            successful = [r for r in merge_results if r.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION]]
+            successful = [r for r in merge_results if r.resolution in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION}]
             failed = [r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED]
             manual_required = [r for r in merge_results if r.resolution == MergeResolution.MANUAL_REQUIRED]
 
@@ -1806,8 +1839,6 @@ def batch_merge(
 
             # Export summary if requested
             if export_summary:
-                # json import moved to top-level
-                # UTC, datetime imports moved to top-level
 
                 summary_data = {
                     "batch_merge_summary": {
@@ -1909,7 +1940,6 @@ def auto_resolve(
         )
 
         # Create conflict predictor for advanced resolution
-        # ConflictPredictor import moved to top-level
 
         conflict_predictor = ConflictPredictor(
             conflict_engine,
@@ -1984,10 +2014,10 @@ def auto_resolve(
                     r
                     for r in result.merge_results
                     if r.resolution
-                    in [
+                    in {
                         MergeResolution.AUTO_RESOLVED,
                         MergeResolution.PARTIAL_RESOLUTION,
-                    ]
+                    }
                 ]
 
                 for merge_result in successful_merges[:10]:
@@ -2016,7 +2046,7 @@ def auto_resolve(
                     )
 
             # Apply results if requested and not in preview mode
-            if apply and not preview and result.outcome in ["fully_resolved", "partially_resolved"]:
+            if apply and not preview and result.outcome in {"fully_resolved", "partially_resolved"}:
                 click.echo("\n🚀 Applying resolution results...")
                 applied_count = len(
                     [r for r in result.merge_results if r.semantic_integrity],
@@ -2030,7 +2060,6 @@ def auto_resolve(
 
             # Export report if requested
             if export:
-                # json import moved to top-level
 
                 report_data = {
                     "auto_resolution_report": {
@@ -2145,7 +2174,6 @@ def prevent_conflicts(
             repo_path,
         )
 
-        # ConflictPredictor import moved to top-level
 
         conflict_predictor = ConflictPredictor(
             conflict_engine,
@@ -2245,8 +2273,6 @@ def prevent_conflicts(
 
             # Export results if requested
             if export:
-                # json import moved to top-level
-                # UTC, datetime imports moved to top-level
 
                 export_data = {
                     "conflict_prevention_report": {
@@ -2304,7 +2330,6 @@ def collaborate(
 ) -> None:
     """Start a collaboration session between multiple agents."""
     try:
-        # CollaborationMode import moved to top-level
 
         click.echo("🤝 Starting collaboration session")
         click.echo(f"   Agents: {', '.join(agents)}")
@@ -2317,12 +2342,10 @@ def collaborate(
         semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
 
         # Create mock agent pool for demo
-        # AgentPool import moved to top-level
 
         agent_pool = AgentPool(max_agents=len(agents))
 
         # Create collaboration engine
-        # CollaborationEngine import moved to top-level
 
         collab_engine = CollaborationEngine(
             agent_pool=agent_pool,
@@ -2337,7 +2360,6 @@ def collaborate(
             collab_engine.sync_interval = 30  # More frequent for demo
 
         async def run_collaboration() -> None:
-            # MessagePriority, MessageType imports moved to top-level
 
             # Start collaboration engine
             await collab_engine.start()
@@ -2476,9 +2498,7 @@ def send_message(
 ) -> None:
     """Send a message between agents in the collaboration system."""
     try:
-        # json import moved to top-level
 
-        # MessagePriority, MessageType imports moved to top-level
 
         # Parse content as JSON
         try:
@@ -2553,7 +2573,6 @@ def share_knowledge(
 ) -> None:
     """Share knowledge in the collaboration system."""
     try:
-        # json import moved to top-level
 
         # Parse content
         try:
@@ -2631,9 +2650,7 @@ def branch_info(
 ) -> None:
     """Manage branch information sharing protocol."""
     try:
-        # json import moved to top-level
 
-        # BranchInfoType import moved to top-level
 
         click.echo(f"🌿 Branch Info Protocol - {action}")
 
@@ -2786,7 +2803,6 @@ def dependency_track(
 ) -> None:
     """Track a dependency change for propagation."""
     try:
-        # json import moved to top-level
 
         click.echo("📊 Tracking dependency change")
         click.echo(f"   File: {file}")
@@ -2809,7 +2825,6 @@ def dependency_track(
 
         # This is a demo - in real usage would connect to running dependency system
         async def track_change() -> None:
-            # Mock import moved to top-level
 
             # Create mock components
             branch_manager = BranchManager(repo_path=repo_path)
@@ -2846,7 +2861,7 @@ def dependency_track(
 
         try:
             asyncio.run(track_change())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             mock_change_id = f"dep_change_{agent}_{file.replace('/', '_')}"
             click.echo("\n✅ Change tracked successfully")
@@ -2891,7 +2906,6 @@ def dependency_status(repo_path: str | None, detailed: bool, export: str | None)
             click.echo("   No pending propagations")
 
         if export:
-            # json import moved to top-level
 
             export_data = {
                 "dependency_system_status": {
@@ -2931,7 +2945,6 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
 
         # This is a demo - would perform real analysis
         async def analyze_impact() -> None:
-            # Mock import moved to top-level
 
             # Create mock components
             branch_manager = BranchManager(repo_path=repo_path)
@@ -2984,7 +2997,6 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
                     click.echo(f"   ... and {len(report['dependents']) - 5} more")
 
             if export:
-                # json import moved to top-level
 
                 export_path = Path(export)
                 with export_path.open("w") as f:
@@ -2993,7 +3005,7 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
 
         try:
             asyncio.run(analyze_impact())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {file_path}")
@@ -3034,7 +3046,6 @@ def dependency_propagate(
 
         # This is a demo - would perform real propagation
         async def propagate_changes() -> None:
-            # Mock import moved to top-level
 
             # Create mock components
             branch_manager = BranchManager(repo_path=repo_path)
@@ -3081,7 +3092,6 @@ def dependency_propagate(
                         click.echo(f"     • {rec}")
 
             if export:
-                # json import moved to top-level
 
                 export_data = {
                     "propagation_results": [
@@ -3106,7 +3116,7 @@ def dependency_propagate(
 
         try:
             asyncio.run(propagate_changes())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("\n📊 Propagation Results:")
             for change_id in change_ids:
@@ -3149,7 +3159,6 @@ def review_initiate(
 ) -> None:
     """Initiate a code review for changes in a branch."""
     try:
-        # MessagePriority import moved to top-level
 
         click.echo("📋 Initiating code review")
         click.echo(f"   Branch: {branch_name}")
@@ -3195,7 +3204,6 @@ def review_initiate(
 
         async def run_review() -> None:
             try:
-                # Mock import moved to top-level
 
                 # Create mock components
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -3247,7 +3255,7 @@ def review_initiate(
 
         try:
             asyncio.run(run_review())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             mock_review_id = f"review_{branch_name}_{agent}"
             click.echo("\n✅ Review initiated successfully")
@@ -3277,7 +3285,6 @@ def review_approve(
 
         async def run_approval() -> None:
             try:
-                # Mock import moved to top-level
 
                 # Create mock components
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -3315,7 +3322,7 @@ def review_approve(
 
         try:
             asyncio.run(run_approval())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             click.echo("\n✅ Review approved successfully")
             if comments:
@@ -3355,7 +3362,6 @@ def review_reject(
 
         async def run_rejection() -> None:
             try:
-                # Mock import moved to top-level
 
                 # Create mock components
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -3400,7 +3406,7 @@ def review_reject(
 
         try:
             asyncio.run(run_rejection())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             click.echo("\n❌ Review rejected")
             click.echo("   Reasons:")
@@ -3426,7 +3432,6 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
 
         async def get_status() -> None:
             try:
-                # Mock import moved to top-level
 
                 # Create mock components
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -3466,7 +3471,6 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
                         click.echo(f"   Findings: {len(review.findings)}")
                         if detailed and review.findings:
                             # Group findings by severity
-                            # Counter import moved to top-level
 
                             severity_counts = Counter(f.severity.value for f in review.findings)
                             for severity, count in severity_counts.items():
@@ -3524,7 +3528,7 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
 
         try:
             asyncio.run(get_status())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             if review_id:
                 click.echo("\n📋 Review Details:")
@@ -3581,7 +3585,6 @@ def quality_check(
 
         async def run_quality_check() -> None:
             try:
-                # Mock import moved to top-level
 
                 # Create mock components
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -3634,7 +3637,6 @@ def quality_check(
 
                 # Export if requested
                 if export:
-                    # json import moved to top-level
 
                     export_data = {
                         "quality_check_report": {
@@ -3664,7 +3666,7 @@ def quality_check(
 
         try:
             asyncio.run(run_quality_check())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("\n📊 Quality Check Results:")
             for i, file in enumerate(files, 1):
@@ -3688,7 +3690,6 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
         async def get_summary() -> None:
             try:
-                # Mock import moved to top-level
 
                 # Create mock components
                 branch_manager = BranchManager(repo_path=repo_path)
@@ -3764,7 +3765,6 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
                 # Export if requested
                 if export:
-                    # json import moved to top-level
 
                     export_path = Path(export)
                     with export_path.open("w") as f:
@@ -3778,7 +3778,7 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
         try:
             asyncio.run(get_summary())
-        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("Engine Status: Running")
             click.echo("Active reviews: 0")

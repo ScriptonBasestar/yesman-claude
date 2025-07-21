@@ -1,18 +1,11 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Interactive session browser command."""
+# Copyright notice.
 
 import threading
 import time
-from typing import object
-
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
-
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.progress_indicators import with_startup_progress
 from libs.core.session_manager import SessionManager
@@ -20,11 +13,16 @@ from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Interactive session browser command."""
+
 
 class InteractiveBrowser:
     """Interactive session browser with live updates."""
 
-    def __init__(self, tmux_manager: object, config: object, update_interval: float = 2.0) -> None:
+    def __init__(self, tmux_manager, config, update_interval: float = 2.0) -> None:
         self.console = Console()
         self.config = config
         self.tmux_manager = tmux_manager
@@ -40,8 +38,8 @@ class InteractiveBrowser:
         self.update_interval = update_interval
         self.running = False
         self.update_thread: threading.Thread | None = None
-        self.progress_data: dict[str, object] | None = None
-        self.session_data: list[dict[str, object]] = []
+        self.progress_data: dict[str] | None = None
+        self.session_data: list[dict[str]] = []
 
     def update_data(self) -> None:
         """Update session data and activity metrics."""
@@ -71,8 +69,11 @@ class InteractiveBrowser:
             self.console.print(f"[red]Error updating session data: {e}[/]")
 
     @staticmethod
-    def _calculate_session_activity( session_info: dict) -> float:
-        """Calculate activity level for a session."""
+    def _calculate_session_activity(session_info: dict) -> float:
+        """Calculate activity level for a session.
+
+    Returns:
+        Float representing."""
         if not session_info.get("exists", True):
             return 0.0
 
@@ -84,7 +85,7 @@ class InteractiveBrowser:
                 command = pane.get("pane_current_command", "")
 
                 # Active processes contribute to activity
-                if command and command not in ["zsh", "bash", "sh"]:
+                if command and command not in {"zsh", "bash", "sh"}:
                     activity += 0.2
 
                 # Claude sessions get higher weight
@@ -99,7 +100,10 @@ class InteractiveBrowser:
 
     @staticmethod
     def create_layout() -> Layout:
-        """Create the main dashboard layout."""
+        """Create the main dashboard layout.
+
+    Returns:
+        Layout object the created item."""
         layout = Layout()
 
         layout.split_column(
@@ -191,8 +195,11 @@ class InteractiveBrowser:
             self.update_thread.join(timeout=1.0)
 
     @staticmethod
-    def _render_heatmap_display(heatmap_data: dict[str, object]) -> str:
-        """Render heatmap data as a simple text display."""
+    def _render_heatmap_display(heatmap_data: dict[str]) -> str:
+        """Render heatmap data as a simple text display.
+
+    Returns:
+        String containing."""
         if not heatmap_data or "heatmap" not in heatmap_data:
             return "[dim]No activity data available[/dim]"
 
@@ -219,8 +226,11 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    def execute(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the browse command."""
+    def execute(self, update_interval: float = 2.0, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the browse command.
+
+    Returns:
+        Dict containing."""
         try:
             with with_startup_progress("🔧 Initializing session browser...") as update:
                 update("📊 Loading session data...")

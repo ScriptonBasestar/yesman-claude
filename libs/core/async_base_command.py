@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+from abc import ABC, abstractmethod
+from collections.abc import Callable, Coroutine
+from .base_command import BaseCommand, CommandError
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Async-capable base command class for long-running operations."""
 
-import asyncio
-from abc import ABC, abstractmethod
-from collections.abc import Callable, Coroutine
-from typing import object
 
-from .base_command import BaseCommand, CommandError
 
 
 class AsyncBaseCommand(BaseCommand, ABC):
     """Async-capable base class for commands with long-running operations."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args: object, **kwargs) -> None:
+        super().__init__(*args: object, **kwargs)
         self._running = False
         self._loop = None
 
     @abstractmethod
     @staticmethod
-    async def execute_async(**kwargs) -> dict:
+    async def execute_async(**kwargs: dict[str, object]) -> dict:
         """Async version of execute method - must be implemented by subclasses."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs: dict[str, object]) -> dict:
         """Sync wrapper that runs the async execute method."""
         try:
             # Use existing event loop if available, otherwise create new one
@@ -34,12 +36,12 @@ class AsyncBaseCommand(BaseCommand, ABC):
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     # We're already in an async context, use run_coroutine_threadsafe directly
-                    coro = self.execute_async(**kwargs)
+                    coro = self.execute_async(**kwargs: dict[str, object])
                     return asyncio.run_coroutine_threadsafe(coro, loop).result()
-                return loop.run_until_complete(self.execute_async(**kwargs))
+                return loop.run_until_complete(self.execute_async(**kwargs: dict[str, object]))
             except RuntimeError:
                 # No event loop exists, create a new one
-                return asyncio.run(self.execute_async(**kwargs))
+                return asyncio.run(self.execute_async(**kwargs: dict[str, object]))
         except Exception as e:
             if isinstance(e, CommandError):
                 raise
@@ -47,11 +49,11 @@ class AsyncBaseCommand(BaseCommand, ABC):
             raise CommandError(msg) from e
 
     @staticmethod
-    async def sleep( duration: float) -> None:
+    async def sleep(duration: float) -> None:
         """Async sleep wrapper for better concurrency."""
         await asyncio.sleep(duration)
 
-    async def run_with_interval(self, async_func: Callable[[], Coroutine[object, object, None]], interval: float, max_iterations: int | None = None) -> None:
+    async def run_with_interval(self, async_func: Callable[[], Coroutine[None]], interval: float, max_iterations: int | None = None) -> None:
         """Run an async function repeatedly with specified interval."""
         self._running = True
         iterations = 0
@@ -88,8 +90,8 @@ class AsyncBaseCommand(BaseCommand, ABC):
 class AsyncMonitoringMixin:
     """Mixin for commands that need monitoring capabilities."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args: object, **kwargs) -> None:
+        super().__init__(*args: object, **kwargs)
         self.update_interval = 1.0  # Default 1 second
         self._monitor_data = {}
 
@@ -101,7 +103,7 @@ class AsyncMonitoringMixin:
     stop: Callable[[], None]
     run_with_interval: Callable
 
-    async def start_monitoring(self, update_func: Callable[[], Coroutine[object, object, None]] | None = None) -> None:
+    async def start_monitoring(self, update_func: Callable[[], Coroutine[None]] | None = None) -> None:
         """Start monitoring with regular updates."""
         if not isinstance(self, AsyncBaseCommand):
             msg = "AsyncMonitoringMixin requires AsyncBaseCommand"
@@ -130,8 +132,8 @@ class AsyncMonitoringMixin:
 class AsyncProgressMixin:
     """Mixin for commands that need progress reporting."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args: object, **kwargs) -> None:
+        super().__init__(*args: object, **kwargs)
         self._progress_total = 0
         self._progress_current = 0
 
@@ -140,7 +142,7 @@ class AsyncProgressMixin:
     print_success: Callable[[str], None]
     print_error: Callable[[str], None]
 
-    async def with_progress(self, async_func: Callable[[], Coroutine[object, object, object]], total_steps: int, description: str = "Processing") -> Any:
+    async def with_progress(self, async_func: Callable[[], Coroutine[object]], total_steps: int, description: str = "Processing") -> object:
         """Execute async function with progress tracking."""
         self._progress_total = total_steps
         self._progress_current = 0
@@ -175,8 +177,8 @@ class AsyncProgressMixin:
 class AsyncRetryMixin:
     """Mixin for commands that need retry capabilities."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args: object, **kwargs) -> None:
+        super().__init__(*args: object, **kwargs)
         self.max_retries = 3
         self.retry_delay = 1.0
         self.backoff_multiplier = 2.0
@@ -187,11 +189,11 @@ class AsyncRetryMixin:
 
     async def with_retry(
         self,
-        async_func: Callable[[], Coroutine[object, object, object]],
+        async_func: Callable[[], Coroutine[object]],
         max_retries: int | None = None,
         retry_delay: float | None = None,
         backoff_multiplier: float | None = None,
-    ) -> Any:
+    ) -> object:
         """Execute async function with exponential backoff retry."""
         max_retries = max_retries or self.max_retries
         retry_delay = retry_delay or self.retry_delay

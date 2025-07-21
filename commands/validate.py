@@ -1,9 +1,5 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
+from typing import Any
 import os
-
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -11,15 +7,27 @@ from rich.progress import track
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
-
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
+    # Try to keep the important parts (end of path)
+
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+
+
 
 
 class ValidateCommand(BaseCommand, SessionCommandMixin):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
 
-    def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:  # noqa: ARG002
-        """Execute the validate command."""
+    def execute(self, session_name: str | None = None, format: str = "table", **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the validate command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             console = Console()
             sessions = self.tmux_manager.load_projects().get("sessions", {})
@@ -133,13 +141,17 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
     help="Output format",
 )
 def validate(session_name: str | None, format: str) -> None:
-    """Check if all directories in projects.yaml exist (or only for a specific session)."""
+    """Check if all directories in projects.yaml exist (or only for a specific session).
+
+    """
     command = ValidateCommand()
     command.run(session_name=session_name, format=format)
 
 
 def _display_success(console: Console, valid_count: int, total_count: int) -> None:
-    """Display success message when all directories exist."""
+    """Display success message when all directories exist.
+
+    """
     success_panel = Panel(
         Text("✅ All directories exist!", style="bold green"),
         title="[green]Validation Complete[/green]",
@@ -151,7 +163,9 @@ def _display_success(console: Console, valid_count: int, total_count: int) -> No
 
 
 def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
-    """Display results in table format."""
+    """Display results in table format.
+
+    """
     table = Table(
         title="[red]Directory Validation Results[/red]",
         caption=f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]",
@@ -191,7 +205,9 @@ def _display_table_format(console: Console, missing: list, valid_count: int, tot
 
 
 def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
-    """Display results in tree format."""
+    """Display results in tree format.
+
+    """
     console.print("\n[red bold]❌ Directory Validation Issues[/red bold]")
     console.print(f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n")
 
@@ -227,7 +243,9 @@ def _display_tree_format(console: Console, missing: list, valid_count: int, tota
 
 
 def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
-    """Display results in simple format."""
+    """Display results in simple format.
+
+    """
     console.print("[red bold]❌ Missing Directories Found[/red bold]\n")
 
     for session_name, session_missing in missing:
@@ -250,11 +268,14 @@ def _display_simple_format(console: Console, missing: list, valid_count: int, to
 
 
 def _shorten_path(path: str, max_length: int = 60) -> str:
-    """Shorten path for better display."""
+    """Shorten path for better display.
+
+    Returns:
+        str: Description of return value.
+    """
     if len(path) <= max_length:
         return path
 
-    # Try to keep the important parts (end of path)
     parts = path.split("/")
     if len(parts) > 3:
         return f".../{'/'.join(parts[-3:])}"

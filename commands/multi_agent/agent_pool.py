@@ -1,19 +1,24 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import asyncio
+import logging
+from pathlib import Path
+from typing import object, Never
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from libs.core.base_command import BaseCommand, CommandError
+from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
+from libs.multi_agent.agent_pool import AgentPool
+from libs.dashboard.widgets.agent_monitor import AgentMetrics
+import signal
+from libs.multi_agent.types import TaskStatus
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Agent pool management commands."""
 
-import asyncio
-import logging
-from pathlib import Path
-from typing import Never
 
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
-from libs.core.base_command import BaseCommand, CommandError
-from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
-from libs.multi_agent.agent_pool import AgentPool
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +31,12 @@ class StartAgentsCommand(BaseCommand):
         max_agents: int = 3,
         work_dir: str | None = None,
         monitor: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the start agents command."""
+        """Execute the start agents command.
+
+    Returns:
+        Dict containing."""
         try:
             # Create progress indicator for agent startup
             with Progress(
@@ -83,9 +91,12 @@ class MonitorAgentsCommand(BaseCommand):
         work_dir: str | None = None,
         duration: float | None = None,
         refresh: float = 1.0,
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the monitor agents command."""
+        """Execute the monitor agents command.
+
+    Returns:
+        Dict containing."""
         try:
             self.print_info("📊 Starting agent monitoring dashboard...")
 
@@ -105,7 +116,6 @@ class MonitorAgentsCommand(BaseCommand):
                 if not pool:
                     self.print_warning("⚠️  No active agent pool found. Showing demo mode.")
                     # Add some demo data for visualization
-                    from libs.dashboard.widgets.agent_monitor import AgentMetrics
 
                     monitor.agent_metrics = {
                         "agent-1": AgentMetrics(
@@ -119,7 +129,6 @@ class MonitorAgentsCommand(BaseCommand):
 
                 if duration:
                     self.print_info(f"⏱️  Monitoring for {duration} seconds...")
-                    import signal
 
                     def timeout_handler(signum: int, frame: Any) -> Never:
                         raise KeyboardInterrupt
@@ -143,8 +152,11 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the status command."""
+    def execute(self, work_dir: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the status command.
+
+    Returns:
+        Dict containing."""
         try:
             # Initialize agent pool
             pool = AgentPool(work_dir=work_dir)
@@ -196,8 +208,11 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the stop agents command."""
+    def execute(self, work_dir: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the stop agents command.
+
+    Returns:
+        Dict containing."""
         try:
             self.print_info("🛑 Stopping multi-agent pool...")
 
@@ -233,9 +248,12 @@ class AddTaskCommand(BaseCommand):
         complexity: int = 5,
         timeout: int = 300,
         description: str | None = None,
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the add task command."""
+        """Execute the add task command.
+
+    Returns:
+        Dict containing."""
         try:
             # Validate required parameters
             if not title:
@@ -279,12 +297,14 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the list tasks command."""
+    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the list tasks command.
+
+    Returns:
+        Dict containing."""
         try:
             pool = AgentPool(work_dir=work_dir)
 
-            from libs.multi_agent.types import TaskStatus
 
             filter_status = None
             if status:

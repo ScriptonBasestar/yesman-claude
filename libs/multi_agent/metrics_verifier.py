@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Success metrics verification system for multi-agent operations."""
+# Copyright notice.
 
 import asyncio
 import json
@@ -12,9 +8,16 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import object
-
 from .agent_pool import AgentPool
+                    from .types import Task
+                from .types import Task
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Success metrics verification system for multi-agent operations."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +49,9 @@ class PerformanceMetrics:
     # Additional performance data
     task_completion_times: list[float] = field(default_factory=list)
     agent_utilization_rates: dict[str, float] = field(default_factory=dict)
-    resource_usage: dict[str, object] = field(default_factory=dict)
+    resource_usage: dict[str] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str]:
         """Convert to dictionary for serialization."""
         return {
             "single_agent_time": self.single_agent_time,
@@ -127,7 +130,7 @@ class MetricsVerifier:
         """Load existing metrics from disk."""
         if self.metrics_file.exists():
             try:
-                with open(self.metrics_file) as f:
+                with open(self.metrics_file, encoding="utf-8") as f:
                     data = json.load(f)
 
                 # Load performance metrics
@@ -153,7 +156,7 @@ class MetricsVerifier:
                 "last_updated": datetime.now(UTC).isoformat(),
             }
 
-            with open(self.metrics_file, "w") as f:
+            with open(self.metrics_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
         except Exception:
@@ -162,7 +165,7 @@ class MetricsVerifier:
     async def measure_single_agent_performance(
         self,
         agent_pool: AgentPool,
-        benchmark_tasks: list[dict[str, object]],
+        benchmark_tasks: list[dict[str]],
         iterations: int = 3,
     ) -> float:
         """Measure single-agent performance baseline.
@@ -191,7 +194,6 @@ class MetricsVerifier:
 
                 # Create and submit benchmark tasks
                 for task_data in benchmark_tasks:
-                    from .types import Task
 
                     task = Task(
                         task_id=f"benchmark-single-{iteration}-{task_data['id']}",
@@ -236,7 +238,7 @@ class MetricsVerifier:
     async def measure_multi_agent_performance(
         self,
         agent_pool: AgentPool,
-        benchmark_tasks: list[dict[str, object]],
+        benchmark_tasks: list[dict[str]],
         iterations: int = 3,
     ) -> float:
         """Measure multi-agent performance.
@@ -260,7 +262,6 @@ class MetricsVerifier:
 
             # Create and submit benchmark tasks
             for task_data in benchmark_tasks:
-                from .types import Task
 
                 task = Task(
                     task_id=f"benchmark-multi-{iteration}-{task_data['id']}",
@@ -361,7 +362,7 @@ class MetricsVerifier:
         )
         self._save_metrics()
 
-    def verify_success_criteria(self) -> dict[str, object]:
+    def verify_success_criteria(self) -> dict[str]:
         """Verify if system meets all success criteria."""
         compliance = self.success_criteria.check_compliance(self.current_metrics)
 
@@ -381,7 +382,7 @@ class MetricsVerifier:
 
         # Save verification results
         verification_file = self.work_dir / "verification_results.json"
-        with open(verification_file, "w") as f:
+        with open(verification_file, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2)
 
         return results
@@ -441,7 +442,7 @@ class MetricsVerifier:
         return "\n".join(report_lines)
 
     @staticmethod
-    def get_benchmark_tasks() -> list[dict[str, object]]:
+    def get_benchmark_tasks() -> list[dict[str]]:
         """Get standard benchmark tasks for performance testing."""
         return [
             {
@@ -505,7 +506,7 @@ class MetricsVerifier:
 async def run_comprehensive_verification(
     agent_pool: AgentPool,
     work_dir: str = ".scripton/yesman",
-) -> dict[str, object]:
+) -> dict[str]:
     """Run comprehensive metrics verification.
 
     Args:

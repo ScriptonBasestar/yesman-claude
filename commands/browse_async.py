@@ -1,30 +1,35 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Async Interactive session browser command with enhanced performance."""
-
+from typing import Any
 import asyncio
 import contextlib
 import time
-
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
-
 from libs.core.async_base_command import AsyncMonitoringCommand, CommandError
 from libs.core.base_command import SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
+from rich.text import Text
+from commands.browse import BrowseCommand as SyncBrowseCommand
+
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Async Interactive session browser command with enhanced performance."""
+
+
+
 
 
 class AsyncInteractiveBrowser:
     """Async interactive session browser with live updates."""
 
-    def __init__(self, tmux_manager: Any, config: Any, update_interval: float = 2.0) -> None:
+    def __init__(self, tmux_manager: object, config: object, update_interval: float = 2.0) -> None:
         self.console = Console()
         self.config = config
         self.tmux_manager = tmux_manager
@@ -84,8 +89,11 @@ class AsyncInteractiveBrowser:
         return await loop.run_in_executor(None, self.session_manager.get_progress_overview)
 
     @staticmethod
-    def _calculate_session_activity( session_info: dict) -> float:
-        """Calculate activity level for a session."""
+    def _calculate_session_activity(session_info: dict) -> float:
+        """Calculate activity level for a session.
+
+    Returns:
+        Float representing."""
         if not session_info.get("exists", True):
             return 0.0
 
@@ -97,7 +105,7 @@ class AsyncInteractiveBrowser:
                 command = pane.get("pane_current_command", "")
 
                 # Active processes contribute to activity
-                if command and command not in ["zsh", "bash", "sh"]:
+                if command and command not in {"zsh", "bash", "sh"}:
                     activity += 0.2
 
                 # Claude sessions get higher weight
@@ -112,7 +120,10 @@ class AsyncInteractiveBrowser:
 
     @staticmethod
     def create_layout() -> Layout:
-        """Create the main dashboard layout."""
+        """Create the main dashboard layout.
+
+    Returns:
+        Layout object the created item."""
         layout = Layout()
 
         layout.split_column(
@@ -209,8 +220,10 @@ class AsyncInteractiveBrowser:
 
     @staticmethod
     def _render_heatmap(heatmap_data: dict) -> str:
-        """Render activity heatmap visualization."""
-        from rich.text import Text
+        """Render activity heatmap visualization.
+
+    Returns:
+        String containing."""
 
         # Simple text representation of heatmap
         output = Text()
@@ -248,7 +261,7 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
+    async def execute_async(self, update_interval: float = 2.0, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
         """Execute the async browse command."""
         try:
             browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)
@@ -299,7 +312,6 @@ def browse(update_interval: float, async_mode: bool) -> None:  # noqa: FBT001
         command.print_info("🔥 Running in async mode for optimal performance")
     else:
         # Fallback to original implementation if needed
-        from commands.browse import BrowseCommand as SyncBrowseCommand
 
         command: AsyncBrowseCommand = SyncBrowseCommand()  # type: ignore
         command.print_warning("⚠️  Running in sync mode (consider using --async-mode)")

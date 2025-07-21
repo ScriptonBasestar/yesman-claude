@@ -1,4 +1,12 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import glob
+import re
+import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
+import argparse
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -12,11 +20,6 @@ This module provides automated processing of TODO files:
 5. Moves completed files to /tasks/done/
 """
 
-import glob
-import re
-import subprocess
-from datetime import UTC, datetime
-from pathlib import Path
 
 
 class TodoTask:
@@ -60,14 +63,20 @@ class TodoFile:
                 self.tasks.append(task)
 
     @staticmethod
-    def _is_task_line( line: str) -> bool:
-        """Check if line contains a task marker."""
+    def _is_task_line(line: str) -> bool:
+        """Check if line contains a task marker.
+
+    Returns:
+        Boolean indicating."""
         line = line.strip()
         return bool(re.match(r"^-\s*\[([ x>])\]\s*\]?", line))
 
     @staticmethod
     def _parse_task_line(line: str, line_num: int) -> TodoTask:
-        """Parse a task line into TodoTask object."""
+        """Parse a task line into TodoTask object.
+
+    Returns:
+        Todotask object."""
         line = line.strip()
         match = re.match(r"^-\s*\[([x >])\]\s*\]?\s*(.+)", line)
         if match:
@@ -78,7 +87,10 @@ class TodoFile:
         return TodoTask(line, False, False, line_num)
 
     def get_next_incomplete_task(self) -> TodoTask | None:
-        """Get the next uncompleted task."""
+        """Get the next uncompleted task.
+
+    Returns:
+        Todotask | None object the requested data."""
         for task in self.tasks:
             if not task.completed and not task.skipped:
                 return task
@@ -134,7 +146,10 @@ class TodoFile:
             f.writelines(updated_lines)
 
     def is_all_completed(self) -> bool:
-        """Check if all tasks are completed or skipped."""
+        """Check if all tasks are completed or skipped.
+
+    Returns:
+        Boolean indicating."""
         return all(task.completed or task.skipped for task in self.tasks)
 
 
@@ -152,7 +167,10 @@ class TaskRunner:
         self.alert_dir.mkdir(parents=True, exist_ok=True)
 
     def find_todo_files(self, specific_dir: str | None = None) -> list[Path]:
-        """Find all todo .md files in directory order."""
+        """Find all todo .md files in directory order.
+
+    Returns:
+        List of."""
         if specific_dir:
             # Handle both absolute and relative paths
             search_dir = Path(specific_dir) if specific_dir.startswith("/") else self.todo_dir / specific_dir
@@ -166,13 +184,16 @@ class TaskRunner:
         todo_files = []
         for file_path in sorted(all_files):
             file_name = Path(file_path).name.lower()
-            if file_name not in ["readme.md", "summary.md"]:
+            if file_name not in {"readme.md", "summary.md"}:
                 todo_files.append(Path(file_path))
 
         return todo_files
 
     def get_next_task(self, specific_dir: str | None = None) -> tuple[TodoFile, TodoTask] | None:
-        """Get the next incomplete task from todo files."""
+        """Get the next incomplete task from todo files.
+
+    Returns:
+        Tuple[Todofile, Todotask] | None object the requested data."""
         todo_files = self.find_todo_files(specific_dir)
 
         for file_path in todo_files:
@@ -184,7 +205,10 @@ class TaskRunner:
         return None
 
     def move_completed_file(self, todo_file: TodoFile) -> bool:
-        """Move completed file to done directory."""
+        """Move completed file to done directory.
+
+    Returns:
+        Boolean indicating."""
         if not todo_file.is_all_completed():
             return False
 
@@ -200,7 +224,10 @@ class TaskRunner:
         return True
 
     def move_failed_file(self, todo_file: TodoFile, reason: str) -> bool:
-        """Move failed file to alert directory."""
+        """Move failed file to alert directory.
+
+    Returns:
+        Boolean indicating."""
         today = datetime.now(UTC).strftime("%Y%m%d")
         original_name = todo_file.file_path.stem
         new_name = f"{original_name}__ALERT_{today}.md"
@@ -219,7 +246,10 @@ class TaskRunner:
 
     @staticmethod
     def analyze_task_dependencies(task: TodoTask) -> list[str]:
-        """Analyze task and break down into subtasks if needed."""
+        """Analyze task and break down into subtasks if needed.
+
+    Returns:
+        List of."""
         content = task.content.lower()
 
         # Complex tasks that should be broken down
@@ -249,7 +279,10 @@ class TaskRunner:
         return []
 
     def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:  # noqa: ARG002
-        """Commit changes with appropriate message."""
+        """Commit changes with appropriate message.
+
+    Returns:
+        Bool | None object."""
         try:
             # Stage changes
             subprocess.run(["git", "add", "."], check=True, cwd=self.todo_dir.parent)
@@ -274,7 +307,10 @@ class TaskRunner:
             return False
 
     def run_tests(self) -> bool:
-        """Run relevant tests for the changes."""
+        """Run relevant tests for the changes.
+
+    Returns:
+        Boolean indicating."""
         try:
             # Check if pytest is available and run tests
             result = subprocess.run(
@@ -291,7 +327,10 @@ class TaskRunner:
             return True  # Don't fail if tests can't run
 
     def process_next_task(self, specific_dir: str | None = None) -> bool:
-        """Process the next available task."""
+        """Process the next available task.
+
+    Returns:
+        Boolean indicating."""
         result = self.get_next_task(specific_dir)
         if not result:
             return False
@@ -332,7 +371,6 @@ class TaskRunner:
 
 def main() -> None:
     """CLI entry point for task runner."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Automated TODO task processor")
     parser.add_argument("--dir", "-d", help="Specific directory to process (e.g. /tasks/todo/phase3)")

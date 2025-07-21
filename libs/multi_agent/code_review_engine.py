@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Automated code review and quality checking engine for multi-agent collaboration."""
+# Copyright notice.
 
 import ast
 import asyncio
@@ -14,12 +10,17 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
 from .semantic_analyzer import SemanticAnalyzer
 from .types import AgentState
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Automated code review and quality checking engine for multi-agent collaboration."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class ReviewFinding:
     suggestion: str | None = None
     rule_id: str | None = None
     tool_name: str | None = None
-    context: dict[str, object] = field(default_factory=dict)
+    context: dict[str] = field(default_factory=dict)
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -99,7 +100,7 @@ class QualityMetrics:
     thresholds: dict[QualityMetric, float] = field(default_factory=dict)
     violations: list[QualityMetric] = field(default_factory=list)
     calculated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
 
 
 @dataclass
@@ -121,7 +122,7 @@ class CodeReview:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     started_at: datetime | None = None
     completed_at: datetime | None = None
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
 
 
 @dataclass
@@ -159,7 +160,7 @@ class CodeReviewEngine:
             branch_manager: Manager for branch operations
             repo_path: Path to git repository
             enable_auto_review: Whether to automatically trigger reviews
-        
+
         Returns:
             Description of return value
         """
@@ -175,7 +176,7 @@ class CodeReviewEngine:
         self.quality_profiles: dict[str, dict] = {}  # file -> quality profile
 
         # Review configuration
-        self.review_config: dict[str, object] = {
+        self.review_config: dict[str] = {
             "require_approval_for_critical": True,
             "auto_approve_threshold": 8.5,  # Out of 10
             "max_concurrent_reviews": 10,
@@ -1098,8 +1099,12 @@ class CodeReviewEngine:
         return metrics
 
     @staticmethod
-    def _estimate_cyclomatic_complexity( content: str) -> float:
-        """Estimate cyclomatic complexity by counting decision points."""
+    def _estimate_cyclomatic_complexity(content: str) -> float:
+        """Estimate cyclomatic complexity by counting decision points.
+
+        Returns:
+        float: Description of return value.
+        """
         try:
             tree = ast.parse(content)
             complexity = 1  # Base complexity
@@ -1119,7 +1124,11 @@ class CodeReviewEngine:
 
     @staticmethod
     def _calculate_maintainability_index(content: str, loc: int) -> float:
-        """Calculate a simplified maintainability index."""
+        """Calculate a simplified maintainability index.
+
+        Returns:
+        float: Description of return value.
+        """
         try:
             # Simplified calculation based on lines of code and comments
             comment_ratio = content.count("#") / max(loc, 1)
@@ -1142,7 +1151,11 @@ class CodeReviewEngine:
         findings: list[ReviewFinding],
         metrics: list[QualityMetrics],
     ) -> float:
-        """Calculate overall review score from findings and metrics."""
+        """Calculate overall review score from findings and metrics.
+
+        Returns:
+        float: Description of return value.
+        """
         base_score = 10.0
 
         # Deduct points for findings based on severity
@@ -1165,7 +1178,11 @@ class CodeReviewEngine:
         return max(0.0, min(10.0, base_score))
 
     def _can_auto_approve(self, review: CodeReview) -> bool:
-        """Determine if a review can be automatically approved."""
+        """Determine if a review can be automatically approved.
+
+        Returns:
+        bool: Description of return value.
+        """
         # Check overall score threshold
         threshold = self.review_config["auto_approve_threshold"]
         assert isinstance(threshold, int | float)
@@ -1175,15 +1192,19 @@ class CodeReviewEngine:
         # Check for critical or high severity findings
         if self.review_config["require_approval_for_critical"]:
             for finding in review.findings:
-                if finding.severity in [ReviewSeverity.CRITICAL, ReviewSeverity.HIGH]:
+                if finding.severity in {ReviewSeverity.CRITICAL, ReviewSeverity.HIGH}:
                     return False
 
         # Check for quality metric violations
         return all(not metrics.violations for metrics in review.quality_metrics)
 
     @staticmethod
-    def _summarize_findings(findings: list[ReviewFinding]) -> dict[str, object]:
-        """Create a summary of review findings."""
+    def _summarize_findings(findings: list[ReviewFinding]) -> dict[str]:
+        """Create a summary of review findings.
+
+        Returns:
+        object: Description of return value.
+        """
         severity_counts = Counter(f.severity.value for f in findings)
         type_counts = Counter(f.review_type.value for f in findings)
 
@@ -1207,10 +1228,10 @@ class CodeReviewEngine:
         # Get all available agents
         available_agents = []
         for agent in self.collaboration_engine.agent_pool.agents.values():
-            if agent.agent_id != requester_id and agent.state in [
+            if agent.agent_id != requester_id and agent.state in {
                 AgentState.IDLE,
                 AgentState.WORKING,
-            ]:
+            }:
                 available_agents.append(agent.agent_id)
 
         # For now, just return the first available agents
@@ -1265,7 +1286,11 @@ class CodeReviewEngine:
                 await asyncio.sleep(3600)
 
     def get_review_summary(self) -> ReviewSummary:
-        """Get summary of all reviews."""
+        """Get summary of all reviews.
+
+        Returns:
+        ReviewSummary: Description of return value.
+        """
         all_reviews = list(self.active_reviews.values()) + self.review_history
 
         if not all_reviews:
@@ -1280,7 +1305,7 @@ class CodeReviewEngine:
             [r for r in all_reviews if r.status == ReviewStatus.REJECTED],
         )
         pending_reviews = len(
-            [r for r in all_reviews if r.status in [ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS]],
+            [r for r in all_reviews if r.status in {ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS}],
         )
 
         # Calculate average score
@@ -1329,8 +1354,12 @@ class CodeReviewEngine:
             review_time_stats=review_time_stats,
         )
 
-    def get_engine_summary(self) -> dict[str, object]:
-        """Get comprehensive summary of the review engine."""
+    def get_engine_summary(self) -> dict[str]:
+        """Get comprehensive summary of the review engine.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "statistics": self.review_stats.copy(),
             "active_reviews": len(self.active_reviews),

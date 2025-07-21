@@ -1,30 +1,37 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Async comprehensive project status dashboard command with performance optimizations."""
-
+from typing import Any
 import asyncio
 import time
 from pathlib import Path
-
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
-
 from libs.core.async_base_command import AsyncMonitoringCommand, CommandError
 from libs.core.base_command import SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets import (
+from libs.dashboard.widgets.session_progress import SessionProgressWidget
+from rich.table import Table
+from rich.text import Text
+from rich.table import Table
+from commands.status import StatusCommand as SyncStatusCommand
+
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Async comprehensive project status dashboard command with performance optimizations."""
+
+
+
     ActivityHeatmapGenerator,
     GitActivityWidget,
     ProgressTracker,
     ProjectHealth,
     SessionBrowser,
 )
-from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 
 class AsyncStatusDashboard:
@@ -162,7 +169,7 @@ class AsyncStatusDashboard:
         self._data_cache["progress_data"] = progress_data
 
     @staticmethod
-    def _calculate_session_activity( session_info: dict) -> float:
+    def _calculate_session_activity(session_info: dict) -> float:
         """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
@@ -174,7 +181,7 @@ class AsyncStatusDashboard:
             for pane in window.get("panes", []):
                 command = pane.get("pane_current_command", "")
 
-                if command and command not in ["zsh", "bash", "sh"]:
+                if command and command not in {"zsh", "bash", "sh"}:
                     activity += 0.2
 
                 if "claude" in command.lower():
@@ -306,7 +313,6 @@ class AsyncStatusDashboard:
 
     def _render_health_summary(self, health_data: dict) -> str:
         """Render health summary from health data."""
-        from rich.table import Table
 
         table = Table(show_header=False, expand=True)
         table.add_column("Metric")
@@ -338,7 +344,6 @@ class AsyncStatusDashboard:
     @staticmethod
     def _render_heatmap(heatmap_data: dict) -> str:
         """Render activity heatmap visualization."""
-        from rich.text import Text
 
         # Simple text representation of heatmap
         output = Text()
@@ -390,7 +395,6 @@ class AsyncStatusDashboard:
 
     def _render_progress_summary(self, stats: dict) -> str:
         """Render progress summary visualization."""
-        from rich.table import Table
 
         table = Table(show_header=False, expand=True)
         table.add_column("Metric")
@@ -420,7 +424,7 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         project_path: str = ".",
         update_interval: float = 5.0,
         interactive: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
         """Execute the async status command."""
         try:
@@ -492,7 +496,6 @@ def status(project_path: str, update_interval: float, interactive: bool, async_m
             command.print_info("⚡ Running async interactive dashboard")
     else:
         # Fallback to original implementation if needed
-        from commands.status import StatusCommand as SyncStatusCommand
 
         command: AsyncStatusCommand = SyncStatusCommand()  # type: ignore
         command.print_warning("⚠️  Running in sync mode (consider using --async-mode)")

@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""WebSocket message batch processor for optimized real-time updates."""
+# Copyright notice.
 
 import asyncio
 import json
@@ -14,19 +10,29 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""WebSocket message batch processor for optimized real-time updates."""
+
+
 
 @dataclass
 class MessageBatch:
     """A batch of WebSocket messages to be sent together."""
 
-    messages: list[dict[str, Any]]
+    messages: list[dict[str, object]]
     timestamp: float
     batch_id: str
     channel: str
     size_bytes: int = 0
 
-    def __post_init__(self):
-        """Calculate batch size after initialization."""
+    def __post_init__(self) -> object:
+        """Calculate batch size after initialization.
+
+        Returns:
+        object: Description of return value.
+        """
         if not self.size_bytes:
             self.size_bytes = sum(len(json.dumps(msg)) for msg in self.messages)
 
@@ -65,12 +71,14 @@ class WebSocketBatchProcessor:
         # Processing control
         self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
-        self._message_handlers: dict[str, Callable[[list[dict[str, Any]]], Awaitable[None]]] = {}
+        self._message_handlers: dict[str, Callable[[list[dict[str, object]]], Awaitable[None]]] = {}
 
         self.logger = logging.getLogger("yesman.websocket_batch")
 
-    def register_message_handler(self, channel: str, handler: Callable[[list[dict[str, Any]]], Awaitable[None]]) -> None:
-        """Register a message handler for a specific channel."""
+    def register_message_handler(self, channel: str, handler: Callable[[list[dict[str, object]]], Awaitable[None]]) -> None:
+        """Register a message handler for a specific channel.
+
+        """
         self._message_handlers[channel] = handler
         self.logger.info("Registered message handler for channel: %s", channel)
 
@@ -102,8 +110,10 @@ class WebSocketBatchProcessor:
 
         self.logger.info("WebSocket batch processor stopped")
 
-    def queue_message(self, channel: str, message: dict[str, Any]) -> None:
-        """Queue a message for batch processing."""
+    def queue_message(self, channel: str, message: dict[str, object]) -> None:
+        """Queue a message for batch processing.
+
+        """
         # Initialize channel if not exists
         if channel not in self.pending_messages:
             self.pending_messages[channel] = deque()
@@ -124,7 +134,7 @@ class WebSocketBatchProcessor:
             # Schedule immediate flush for this channel
             asyncio.create_task(self._flush_channel(channel))
 
-    async def send_immediate(self, channel: str, message: dict[str, Any]) -> None:
+    async def send_immediate(self, channel: str, message: dict[str, object]) -> None:
         """Send a message immediately without batching (for urgent messages)."""
         handler = self._message_handlers.get(channel)
         if handler:
@@ -248,12 +258,16 @@ class WebSocketBatchProcessor:
             self.logger.exception("Handler error for channel %s", batch.channel)
             raise
 
-    def _optimize_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Optimize a batch of messages by combining similar ones."""
+    def _optimize_messages(self, messages: list[dict[str, object]]) -> list[dict[str, object]]:
+        """Optimize a batch of messages by combining similar ones.
+
+        Returns:
+        object: Description of return value.
+        """
         optimized = []
 
         # Group messages by type for potential combination
-        message_groups: dict[str, list[dict[str, Any]]] = {}
+        message_groups: dict[str, list[dict[str, object]]] = {}
         for msg in messages:
             msg_type = msg.get("type", "unknown")
             if msg_type not in message_groups:
@@ -261,7 +275,7 @@ class WebSocketBatchProcessor:
             message_groups[msg_type].append(msg)
 
         for msg_type, group in message_groups.items():
-            if msg_type in ["session_update", "health_update", "activity_update"]:
+            if msg_type in {"session_update", "health_update", "activity_update"}:
                 # For update messages, combine data and keep only the latest
                 if len(group) > 1:
                     combined_message = self._combine_update_messages(group)
@@ -282,8 +296,12 @@ class WebSocketBatchProcessor:
         return optimized
 
     @staticmethod
-    def _combine_update_messages( messages: list[dict[str, Any]]) -> dict[str, Any]:
-        """Combine multiple update messages into a single message."""
+    def _combine_update_messages(messages: list[dict[str, object]]) -> dict[str, object]:
+        """Combine multiple update messages into a single message.
+
+        Returns:
+        object: Description of return value.
+        """
         if not messages:
             return {}
 
@@ -308,8 +326,12 @@ class WebSocketBatchProcessor:
         }
 
     @staticmethod
-    def _combine_log_messages(messages: list[dict[str, Any]]) -> dict[str, Any]:
-        """Combine multiple log messages into a batched log message."""
+    def _combine_log_messages(messages: list[dict[str, object]]) -> dict[str, object]:
+        """Combine multiple log messages into a batched log message.
+
+        Returns:
+        object: Description of return value.
+        """
         if not messages:
             return {}
 
@@ -333,7 +355,11 @@ class WebSocketBatchProcessor:
 
     @staticmethod
     def _get_queue_memory_size(queue: deque) -> int:
-        """Estimate memory usage of a message queue."""
+        """Estimate memory usage of a message queue.
+
+        Returns:
+        int: Description of return value.
+        """
         return sum(len(json.dumps(msg)) for msg in queue)
 
     async def _flush_all_channels(self) -> None:
@@ -341,8 +367,12 @@ class WebSocketBatchProcessor:
         for channel in list(self.pending_messages.keys()):
             await self._flush_channel(channel)
 
-    def get_statistics(self) -> dict[str, Any]:
-        """Get processing statistics."""
+    def get_statistics(self) -> dict[str, object]:
+        """Get processing statistics.
+
+        Returns:
+        object: Description of return value.
+        """
         active_channels = len([ch for ch, queue in self.pending_messages.items() if queue])
         total_pending = sum(len(queue) for queue in self.pending_messages.values())
 
@@ -358,8 +388,10 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def update_config(self, **kwargs) -> None:
-        """Update batch processing configuration."""
+    def update_config(self, **kwargs: dict[str, object]) -> None:
+        """Update batch processing configuration.
+
+        """
         for key, value in kwargs.items():
             if hasattr(self.config, key):
                 setattr(self.config, key, value)
@@ -368,7 +400,9 @@ class WebSocketBatchProcessor:
                 self.logger.warning("Unknown config key: %s", key)
 
     def clear_channel(self, channel: str) -> None:
-        """Clear all pending messages for a specific channel."""
+        """Clear all pending messages for a specific channel.
+
+        """
         if channel in self.pending_messages:
             cleared_count = len(self.pending_messages[channel])
             self.pending_messages[channel].clear()

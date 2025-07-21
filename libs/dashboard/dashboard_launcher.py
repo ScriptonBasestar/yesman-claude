@@ -1,11 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Dashboard Launcher.
-
-Detects optimal dashboard interface and manages system requirements.
-"""
+# Copyright notice.
 
 import os
 import platform
@@ -15,6 +8,18 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+import rich
+import fastapi
+import uvicorn
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Dashboard Launcher.
+
+Detects optimal dashboard interface and manages system requirements.
+"""
+
 
 
 @dataclass
@@ -132,13 +137,13 @@ class DashboardLauncher:
         self._update_interface_availability()
         return self._interface_configs[interface]
 
-    def check_system_requirements(self) -> dict[str, dict[str, Any]]:
+    def check_system_requirements(self) -> dict[str, dict[str, object]]:
         """Check system requirements for all interfaces.
 
         Returns:
             Dictionary with requirement status for each interface
         """
-        results: dict[str, dict[str, Any]] = {}
+        results: dict[str, dict[str, object]] = {}
 
         for interface, config in self._interface_configs.items():
             results[interface] = {
@@ -206,7 +211,10 @@ class DashboardLauncher:
 
     @staticmethod
     def _is_gui_available() -> bool:
-        """Check if GUI environment is available."""
+        """Check if GUI environment is available.
+
+    Returns:
+        Boolean indicating."""
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
         # Linux/Unix
@@ -214,16 +222,25 @@ class DashboardLauncher:
 
     @staticmethod
     def _is_ssh_session() -> bool:
-        """Check if running in SSH session."""
+        """Check if running in SSH session.
+
+    Returns:
+        Boolean indicating."""
         return bool(os.environ.get("SSH_CLIENT") or os.environ.get("SSH_TTY"))
 
     @staticmethod
     def _is_terminal_capable() -> bool:
-        """Check if terminal supports rich output."""
+        """Check if terminal supports rich output.
+
+    Returns:
+        Boolean indicating."""
         return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
 
     def _is_tauri_available(self) -> bool:
-        """Check if Tauri desktop app is available."""
+        """Check if Tauri desktop app is available.
+
+    Returns:
+        Boolean indicating."""
         # Check if tauri directory exists
         if not self.tauri_path.exists():
             return False
@@ -237,12 +254,18 @@ class DashboardLauncher:
 
     @staticmethod
     def _is_node_available() -> bool:
-        """Check if Node.js and npm are available."""
+        """Check if Node.js and npm are available.
+
+    Returns:
+        Boolean indicating."""
         return shutil.which("node") is not None and shutil.which("npm") is not None
 
     @staticmethod
     def _is_python_package_available(package: str) -> bool:
-        """Check if a Python package is available."""
+        """Check if a Python package is available.
+
+    Returns:
+        Boolean indicating."""
         try:
             __import__(package)
             return True
@@ -300,7 +323,6 @@ class DashboardLauncher:
 
         if requirement == "rich":
             try:
-                import rich
 
                 # Rich might not have __version__ in older versions
                 version = getattr(rich, "__version__", "unknown")
@@ -310,7 +332,6 @@ class DashboardLauncher:
 
         elif requirement == "fastapi":
             try:
-                import fastapi
 
                 return True, f"FastAPI {fastapi.__version__}"
             except ImportError:
@@ -318,7 +339,6 @@ class DashboardLauncher:
 
         elif requirement == "uvicorn":
             try:
-                import uvicorn
 
                 return True, f"Uvicorn {uvicorn.__version__}"
             except ImportError:

@@ -1,20 +1,23 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Centralized configuration loader with multiple source support and caching."""
+# Copyright notice.
 
 import hashlib
 import json
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import object
-
 import yaml
 from pydantic import ValidationError
-
 from .config_schema import YesmanConfigSchema
+    # Import here to avoid circular imports
+    from .config_cache import CachedConfigLoader
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Centralized configuration loader with multiple source support and caching."""
+
+
+
 
 
 class ConfigSource(ABC):
@@ -22,7 +25,7 @@ class ConfigSource(ABC):
 
     @abstractmethod
     @staticmethod
-    def load() -> dict[str, object]:
+    def load() -> dict[str]:
         """Load configuration from this source."""
 
     @abstractmethod
@@ -38,7 +41,7 @@ class YamlFileSource(ConfigSource):
         self.path = Path(path).expanduser()
         self.file_path = self.path  # For cache compatibility
 
-    def load(self) -> dict[str, object]:
+    def load(self) -> dict[str]:
         """Load configuration from YAML file."""
         if not self.exists():
             return {}
@@ -65,9 +68,9 @@ class EnvironmentSource(ConfigSource):
     def __init__(self, prefix: str = "YESMAN_") -> None:
         self.prefix = prefix
 
-    def load(self) -> dict[str, object]:
+    def load(self) -> dict[str]:
         """Load configuration from environment variables."""
-        config: dict[str, object] = {}
+        config: dict[str] = {}
 
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
@@ -98,10 +101,10 @@ class EnvironmentSource(ConfigSource):
         return True
 
     @staticmethod
-    def _convert_value(value: str) -> Any:
+    def _convert_value(value: str) -> object:
         """Convert string value to appropriate type."""
         # Try boolean
-        if value.lower() in ("true", "false"):
+        if value.lower() in {"true", "false"}:
             return value.lower() == "true"
 
         # Try integer
@@ -131,10 +134,10 @@ class EnvironmentSource(ConfigSource):
 class DictSource(ConfigSource):
     """Dictionary configuration source (for programmatic config)."""
 
-    def __init__(self, config: dict[str, object]) -> None:
+    def __init__(self, config: dict[str]) -> None:
         self.config = config
 
-    def load(self) -> dict[str, object]:
+    def load(self) -> dict[str]:
         """Return the dictionary."""
         return self.config.copy()
 
@@ -173,7 +176,7 @@ class ConfigLoader:
         if self._cached_config is not None:
             return self._cached_config
 
-        merged_config: dict[str, object] = {}
+        merged_config: dict[str] = {}
 
         # Load from each source in order (later sources override earlier ones)
         for source in self._sources:
@@ -191,7 +194,7 @@ class ConfigLoader:
         return self._cached_config
 
     @staticmethod
-    def validate(config: dict[str, object]) -> YesmanConfigSchema:
+    def validate(config: dict[str]) -> YesmanConfigSchema:
         """Validate configuration against schema."""
         try:
             return YesmanConfigSchema.model_validate(config)
@@ -210,7 +213,7 @@ class ConfigLoader:
         self._cached_config = None
         return self.load()
 
-    def _deep_merge(self, dict1: dict[str, object], dict2: dict[str, object]) -> dict[str, object]:
+    def _deep_merge(self, dict1: dict[str], dict2: dict[str]) -> dict[str]:
         """Deep merge two dictionaries."""
         result = dict1.copy()
 
@@ -222,7 +225,7 @@ class ConfigLoader:
 
         return result
 
-    def get_config_sources_info(self) -> list[dict[str, object]]:
+    def get_config_sources_info(self) -> list[dict[str]]:
         """Get information about configured sources."""
         info = []
         for i, source in enumerate(self._sources):
@@ -273,7 +276,7 @@ def create_default_loader() -> ConfigLoader:
     return loader
 
 
-def create_cached_config_loader(cache_ttl: float = 300.0):
+def create_cached_config_loader(cache_ttl: float = 300.0) -> object:
     """Create a cached configuration loader with default sources.
 
     Args:
@@ -282,8 +285,6 @@ def create_cached_config_loader(cache_ttl: float = 300.0):
     Returns:
         CachedConfigLoader instance with all standard sources
     """
-    # Import here to avoid circular imports
-    from .config_cache import CachedConfigLoader
 
     base_loader = create_default_loader()
     return CachedConfigLoader(base_loader, cache_ttl=cache_ttl)

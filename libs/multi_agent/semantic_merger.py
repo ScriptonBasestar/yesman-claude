@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Automatic conflict resolution and semantic merge implementation for multi-agent development."""
+# Copyright notice.
 
 import ast
 import asyncio
@@ -13,11 +9,18 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictResolutionEngine
 from .semantic_analyzer import (
+            # Start with imports and module-level code from first version
+                # Merge imports by union
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Automatic conflict resolution and semantic merge implementation for multi-agent development."""
+
+
     SemanticAnalyzer,
     SemanticConflict,
     SemanticConflictType,
@@ -63,7 +66,7 @@ class MergeResult:
     merge_confidence: float = 0.0
     semantic_integrity: bool = True
     diff_stats: dict[str, int] = field(default_factory=dict)
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
     merge_time: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -97,7 +100,7 @@ class SemanticMerger:
             conflict_engine: ConflictResolutionEngine for conflict context
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
-        
+
         Returns:
             Description of return value
         """
@@ -121,7 +124,7 @@ class SemanticMerger:
         self.enable_ast_validation = True
 
         # Machine learning components for merge decisions
-        self.merge_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
+        self.merge_patterns: defaultdict[str, list[dict[str]]] = defaultdict(list)
         self.success_rate_by_strategy: defaultdict[str, list[float]] = defaultdict(list)
 
         # Performance tracking
@@ -550,7 +553,6 @@ class SemanticMerger:
             functions1 = self._extract_functions_with_content(content1)
             functions2 = self._extract_functions_with_content(content2)
 
-            # Start with imports and module-level code from first version
             base_content = self._extract_non_function_content(content1)
             merged_functions = {}
             resolved_conflicts = []
@@ -668,11 +670,11 @@ class SemanticMerger:
             # Assess conflicts resolution
             resolved_conflicts = []
             for conflict in conflicts:
-                if conflict.conflict_type in [
+                if conflict.conflict_type in {
                     SemanticConflictType.IMPORT_SEMANTIC_CONFLICT,
                     SemanticConflictType.FUNCTION_SIGNATURE_CHANGE,
                     SemanticConflictType.CLASS_INTERFACE_CHANGE,
-                ]:
+                }:
                     resolved_conflicts.append(conflict.conflict_id)
 
             unresolved_conflicts = [c.conflict_id for c in conflicts if c.conflict_id not in resolved_conflicts]
@@ -857,7 +859,7 @@ class SemanticMerger:
         content2: str,  # noqa: ARG002
         context1: SemanticContext,
         context2: SemanticContext,
-    ) -> dict[str, object]:
+    ) -> dict[str]:
         """Resolve an individual semantic conflict."""
         resolution_result = {
             "resolved": False,
@@ -868,7 +870,6 @@ class SemanticMerger:
 
         try:
             if conflict.conflict_type == SemanticConflictType.IMPORT_SEMANTIC_CONFLICT:
-                # Merge imports by union
                 self._merge_imports(context1.imports, context2.imports)
                 # Apply to content (simplified)
                 resolution_result.update(
@@ -913,7 +914,7 @@ class SemanticMerger:
         merge_result: MergeResult,
     ) -> bool:
         """Check if a conflict was resolved by the merge operation."""
-        return merge_result.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION] and merge_result.semantic_integrity
+        return merge_result.resolution in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION} and merge_result.semantic_integrity
 
     def _update_merge_stats(self, merge_result: MergeResult) -> None:
         """Update merge statistics."""
@@ -1004,7 +1005,7 @@ class SemanticMerger:
         func1: str,  # noqa: ARG002
         func2: str,
         conflict: SemanticConflict,  # noqa: ARG002
-    ) -> dict[str, object]:
+    ) -> dict[str]:
         """Merge two function definitions."""
         # Simplified implementation
         return {
@@ -1055,7 +1056,7 @@ class SemanticMerger:
         # Simplified implementation - would need proper code generation
         return content2  # Fallback to second version
 
-    def get_merge_summary(self) -> dict[str, object]:
+    def get_merge_summary(self) -> dict[str]:
         """Get comprehensive summary of merge operations."""
         return {
             "total_merges": self.merge_stats["total_merges"],

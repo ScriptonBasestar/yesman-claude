@@ -1,17 +1,18 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Abstract base classes and interfaces for the yesman-claude system."""
+# Copyright notice.
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import object
-
 from .models import SessionInfo
 from .prompt_detector import PromptInfo
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Abstract base classes and interfaces for the yesman-claude system."""
+
+
 
 
 class ControllerState(Enum):
@@ -64,7 +65,7 @@ class ISessionManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_cache_stats() -> dict[str, object]:
+    def get_cache_stats() -> dict[str]:
         """Get cache statistics."""
 
 
@@ -133,7 +134,7 @@ class IController(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_collection_stats() -> dict[str, object]:
+    def get_collection_stats() -> dict[str]:
         """Get collection statistics."""
 
 
@@ -147,7 +148,7 @@ class IControllerManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def create_controller(session_name: str, **kwargs) -> IController:
+    def create_controller(session_name: str, **kwargs: dict[str, object]) -> IController:
         """Create a new controller."""
 
     @abstractmethod
@@ -171,7 +172,7 @@ class ICache(ABC):
 
     @abstractmethod
     @staticmethod
-    def put(key: str, value: object, ttl: float | None = None) -> bool:
+    def put(value: ttl, float | None = None) -> bool:
         """Store value in cache."""
 
     @abstractmethod
@@ -186,7 +187,7 @@ class ICache(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_stats() -> dict[str, object]:
+    def get_stats() -> dict[str]:
         """Get cache statistics."""
 
 
@@ -195,12 +196,12 @@ class ICacheAnalytics(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_cache_health_report() -> dict[str, object]:
+    def get_cache_health_report() -> dict[str]:
         """Generate comprehensive cache health report."""
 
     @abstractmethod
     @staticmethod
-    def get_visual_status_summary() -> dict[str, object]:
+    def get_visual_status_summary() -> dict[str]:
         """Get cache status summary for visualization."""
 
     @abstractmethod
@@ -214,7 +215,7 @@ class IPromptDetector(ABC):
 
     @abstractmethod
     @staticmethod
-    def detect_prompts(content: str, context: dict[str, object] | None = None) -> list[PromptInfo]:
+    def detect_prompts(content: str, context: dict[str] | None = None) -> list[PromptInfo]:
         """Detect prompts in content."""
 
     @abstractmethod
@@ -233,7 +234,7 @@ class IPatternLoader(ABC):
 
     @abstractmethod
     @staticmethod
-    def load_pattern(pattern_type: str) -> dict[str, object]:
+    def load_pattern(pattern_type: str) -> dict[str]:
         """Load a specific pattern."""
 
     @abstractmethod
@@ -257,7 +258,7 @@ class IPlugin(ABC):
 
     @abstractmethod
     @staticmethod
-    def initialize(config: dict[str, object]) -> bool:
+    def initialize(config: dict[str]) -> bool:
         """Initialize the plugin."""
 
     @abstractmethod
@@ -372,7 +373,7 @@ class IEventBus(ABC):
 
     @abstractmethod
     @staticmethod
-    def subscribe(event_type: str, handler: Callable[[dict[str, object]], None]) -> str:
+    def subscribe(event_type: str, handler: Callable[[dict[str]], None]) -> str:
         """Subscribe to events, returns subscription ID."""
 
     @abstractmethod
@@ -382,7 +383,7 @@ class IEventBus(ABC):
 
     @abstractmethod
     @staticmethod
-    def publish(event_type: str, data: dict[str, object]) -> None:
+    def publish(event_type: str, data: dict[str]) -> None:
         """Publish an event."""
 
     @abstractmethod
@@ -396,7 +397,7 @@ class IConfigManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_config(key: str, default: object = None) -> Any:
+    def get_config(key: str, default: object = None) -> object:
         """Get configuration value."""
 
     @abstractmethod
@@ -411,7 +412,7 @@ class IConfigManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_all_config() -> dict[str, object]:
+    def get_all_config() -> dict[str]:
         """Get all configuration."""
 
     @abstractmethod

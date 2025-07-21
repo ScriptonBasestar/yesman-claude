@@ -1,4 +1,12 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import asyncio
+import logging
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import object, Optional
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -8,12 +16,6 @@ Universal keyboard navigation manager for all dashboard interfaces
 with context-aware bindings, focus management, and accessibility support.
 """
 
-import asyncio
-import logging
-from collections.abc import Callable
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ class KeyBinding:
     enabled: bool = True
     priority: int = 0  # Higher priority takes precedence
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         """Validate and normalize key binding."""
         if not self.key:
             msg = "Key cannot be empty"
@@ -94,7 +96,7 @@ class KeyBinding:
         """Check if this binding matches the given key combination."""
         return self.key.lower() == key.lower() and set(self.modifiers) == set(modifiers) and self.enabled
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         return {
             "key": self.key,
@@ -107,7 +109,7 @@ class KeyBinding:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "KeyBinding":
+    def from_dict(cls, data: dict[str, object]) -> "KeyBinding":
         """Create KeyBinding from dictionary."""
         return cls(
             key=data["key"],
@@ -130,7 +132,7 @@ class FocusableElement:
     enabled: bool = True
     context: NavigationContext | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary."""
         return {
             "element_id": self.element_id,
@@ -375,11 +377,11 @@ class KeyboardNavigationManager:
             context = self.current_context
 
         # Special handling for Vim mode
-        if self.vim_mode_enabled and context in [
+        if self.vim_mode_enabled and context in {
             NavigationContext.VIM_NORMAL,
             NavigationContext.VIM_INSERT,
             NavigationContext.VIM_VISUAL,
-        ]:
+        }:
             context = self.vim_mode
 
         key_combo = "+".join([mod.value for mod in modifiers] + [key.lower()])
@@ -396,7 +398,7 @@ class KeyboardNavigationManager:
                 continue
 
             # Check context match
-            if (binding.context is None or binding.context in (context, NavigationContext.GLOBAL)) and (best_binding is None or binding.priority > best_binding.priority):
+            if (binding.context is None or binding.context in {context, NavigationContext.GLOBAL}) and (best_binding is None or binding.priority > best_binding.priority):
                 best_binding = binding
 
         if best_binding is None:
@@ -406,7 +408,7 @@ class KeyboardNavigationManager:
         # Execute action
         return self.execute_action(best_binding.action)
 
-    def execute_action(self, action_name: str, *args, **kwargs) -> bool:
+    def execute_action(self, action_name: str, *args: object, **kwargs) -> bool:
         """Execute a registered action.
 
         Args:
@@ -425,9 +427,9 @@ class KeyboardNavigationManager:
 
             # Handle async actions
             if asyncio.iscoroutinefunction(handler):
-                asyncio.create_task(handler(*args, **kwargs))
+                asyncio.create_task(handler(*args: object, **kwargs))
             else:
-                handler(*args, **kwargs)
+                handler(*args: object, **kwargs)
 
             logger.debug("Executed action: %s", action_name)
             return True
@@ -559,7 +561,7 @@ class KeyboardNavigationManager:
         return False
 
     @staticmethod
-    def _focus_element( element: FocusableElement) -> None:
+    def _focus_element(element: FocusableElement) -> None:
         """Internal method to focus an element."""
         logger.debug("Focusing element: %s", element.element_id)
         # This would be implemented by subclasses or interface-specific handlers
@@ -636,14 +638,14 @@ class KeyboardNavigationManager:
 
     # Serialization methods
 
-    def export_bindings(self) -> dict[str, Any]:
+    def export_bindings(self) -> dict[str, object]:
         """Export all key bindings to dictionary."""
         exported = {}
         for key_combo, bindings in self.bindings.items():
             exported[key_combo] = [binding.to_dict() for binding in bindings]
         return exported
 
-    def import_bindings(self, bindings_data: dict[str, Any]) -> None:
+    def import_bindings(self, bindings_data: dict[str, object]) -> None:
         """Import key bindings from dictionary."""
         self.bindings.clear()
 

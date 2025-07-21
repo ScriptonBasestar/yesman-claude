@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Background task system for real-time updates."""
+# Copyright notice.
 
 import asyncio
 import hashlib
@@ -14,19 +10,25 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-
-# Note: Removed typing.Any usage to fix ANN401 errors
 from api.routers.websocket_router import manager
 from libs.core.session_manager import SessionManager
 from libs.dashboard.health_calculator import HealthCalculator
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Background task system for real-time updates."""
+
+
+# Note: Removed typing.Any usage to fix ANN401 errors
+
 logger = logging.getLogger(__name__)
 
 # Constants for status scoring
 SCORE_EXCELLENT_THRESHOLD = 90
-SCORE_GOOD_THRESHOLD = 80  
+SCORE_GOOD_THRESHOLD = 80
 SCORE_WARNING_THRESHOLD = 60
 
 
@@ -45,7 +47,9 @@ class BackgroundTaskRunner:
     """Manages background tasks for real-time monitoring."""
 
     def __init__(self) -> None:
-        """Initialize the background task runner."""
+        """Initialize the background task runner.
+
+        """
         self.tasks: list[asyncio.Task] = []
         self.is_running = False
         self.task_states: dict[str, TaskState] = {}
@@ -101,8 +105,12 @@ class BackgroundTaskRunner:
         logger.info("Background tasks stopped")
 
     @staticmethod
-    def _calculate_data_hash( data: object) -> str:
-        """Calculate hash of data for change detection."""
+    def _calculate_data_hash(data: object) -> str:
+        """Calculate hash of data for change detection.
+
+        Returns:
+        str: Description of return value.
+        """
         json_str = json.dumps(data, sort_keys=True, default=str)
         return hashlib.md5(json_str.encode(), usedforsecurity=False).hexdigest()
 
@@ -412,7 +420,11 @@ class BackgroundTaskRunner:
 
     @staticmethod
     def _get_status(score: float) -> str:
-        """Get status string based on score."""
+        """Get status string based on score.
+
+        Returns:
+        str: Description of return value.
+        """
         if score >= SCORE_EXCELLENT_THRESHOLD:
             return "excellent"
         if score >= SCORE_GOOD_THRESHOLD:
@@ -422,7 +434,11 @@ class BackgroundTaskRunner:
         return "poor"
 
     def get_task_states(self) -> dict[str, dict]:
-        """Get current state of all tasks."""
+        """Get current state of all tasks.
+
+        Returns:
+        object: Description of return value.
+        """
         states = {}
         for name, state in self.task_states.items():
             states[name] = {

@@ -1,21 +1,25 @@
-"""Copyright notice."""
+from typing import Any
+import asyncio
+import logging
+import threading
+import time
+from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
+from libs.automation.automation_manager import AutomationManager
+from libs.dashboard.health_calculator import HealthCalculator
+from libs.logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
+from .content_collector import ClaudeContentCollector
+from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
+from pathlib import Path
+from libs.automation.context_detector import ContextType
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Claude monitoring and auto-response system."""
 
-import asyncio
-import logging
-import threading
-import time
 
-from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
-from libs.automation.automation_manager import AutomationManager
-from libs.dashboard.health_calculator import HealthCalculator
-from libs.logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
 
-from .content_collector import ClaudeContentCollector
-from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 
 
 class ClaudeMonitor:
@@ -461,7 +465,6 @@ class ClaudeMonitor:
 
     def export_adaptive_data(self, output_path: str) -> bool:
         """Export adaptive learning data for analysis."""
-        from pathlib import Path
 
         return self.adaptive_response.export_learning_data(Path(output_path))
 
@@ -493,7 +496,6 @@ class ClaudeMonitor:
 
     async def test_automation(self, context_type_name: str) -> dict:
         """Test automation with simulated context."""
-        from libs.automation.context_detector import ContextType
 
         try:
             context_type = ContextType(context_type_name)
@@ -563,10 +565,10 @@ class ClaudeMonitor:
             self.async_logger = None
             self.logger.info("Async logging system stopped")
 
-    def _async_log(self, level: LogLevel, message: str, **kwargs) -> None:
+    def _async_log(self, level: LogLevel, message: str, **kwargs: dict[str, object]) -> None:
         """Log message to async logger (safe for sync contexts)."""
         if self.async_logger:
-            self.async_logger.log(level, message, **kwargs)
+            self.async_logger.log(level, message, **kwargs: dict[str, object])
         else:
             # Fallback to standard logger
             self.logger.log(level.level_value, message)
@@ -609,7 +611,7 @@ class ClaudeMonitor:
             await self.async_logger.flush()
 
     @staticmethod
-    def _detect_trust_prompt( content: str) -> bool:
+    def _detect_trust_prompt(content: str) -> bool:
         """Detect trust prompt in content (legacy compatibility method)."""
         # Check if content contains trust-related prompts
         trust_keywords = ["trust", "certificate", "security", "authenticate", "verify"]

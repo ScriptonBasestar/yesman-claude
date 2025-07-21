@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Real-time multi-agent monitoring dashboard widget."""
+# Copyright notice.
 
 import asyncio
 import logging
@@ -11,7 +7,6 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, object
-
 from rich.align import Align
 from rich.console import Console
 from rich.layout import Layout
@@ -19,13 +14,21 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+from rich.progress import Progress, TaskID
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Real-time multi-agent monitoring dashboard widget."""
+
+
 
 if TYPE_CHECKING:
-    from rich.progress import Progress, TaskID
 
 try:
-    from libs.multi_agent.agent_pool import AgentPool
-    from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
+    pass
 except ImportError:
     # For development/testing when multi_agent is not available
     class AgentState(Enum):  # type: ignore[no-redef]
@@ -214,7 +217,7 @@ class AgentMonitor:
             self.logger.exception("Error updating metrics")  # noqa: G004
 
     @staticmethod
-    def _calculate_task_progress( task_data: dict[str, object]) -> float:
+    def _calculate_task_progress(task_data: dict[str, object]) -> float:
         """Calculate task progress percentage."""
         status = task_data["status"]
         start_time = task_data.get("start_time")

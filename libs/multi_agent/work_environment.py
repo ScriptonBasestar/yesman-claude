@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Isolated work environment management for multi-agent development."""
+# Copyright notice.
 
 import json
 import logging
@@ -15,6 +11,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Isolated work environment management for multi-agent development."""
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,20 +27,28 @@ class WorkEnvironment:
     branch_name: str
     worktree_path: Path
     venv_path: Path
-    config: dict[str, Any]
+    config: dict[str, object]
     agent_id: str | None = None
     status: str = "initialized"  # initialized, active, suspended, terminated
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+        Returns:
+        object: Description of return value.
+        """
         data = asdict(self)
         data["worktree_path"] = str(self.worktree_path)
         data["venv_path"] = str(self.venv_path)
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "WorkEnvironment":
-        """Create from dictionary."""
+    def from_dict(cls, data: dict[str, object]) -> "WorkEnvironment":
+        """Create from dictionary.
+
+        Returns:
+        WorkEnvironment: Description of return value.
+        """
         data["worktree_path"] = Path(data["worktree_path"])
         data["venv_path"] = Path(data["venv_path"])
         return cls(**data)
@@ -53,6 +63,7 @@ class WorkEnvironmentManager:
         Args:
             repo_path: Path to main repository
             work_dir: Directory for worktrees and environments
+
         """
         self.repo_path = Path(repo_path).resolve()
         self.work_dir = Path(work_dir) if work_dir else self.repo_path.parent / ".yesman-work"
@@ -67,7 +78,13 @@ class WorkEnvironmentManager:
         cwd: Path | None = None,
         env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
-        """Run a command with optional working directory and environment."""
+        """Run a command with optional working directory and environment.
+        
+            Returns:
+                Subprocess.Completedprocess object.
+        
+                
+        """
         logger.debug("Running command: {' '.join(cmd)} in {cwd or 'current dir'}")
 
         try:
@@ -91,16 +108,22 @@ class WorkEnvironmentManager:
             raise
 
     def _get_environments_file(self) -> Path:
-        """Get path to environments metadata file."""
+        """Get path to environments metadata file.
+
+        Returns:
+        Path: Description of return value.
+        """
         return self.work_dir / "environments.json"
 
     def _load_environments(self) -> None:
-        """Load environments metadata."""
+        """Load environments metadata.
+
+        """
         metadata_file = self._get_environments_file()
 
         if metadata_file.exists():
             try:
-                with open(metadata_file) as f:
+                with open(metadata_file, encoding="utf-8") as f:
                     data = json.load(f)
                     self.environments = {name: WorkEnvironment.from_dict(info) for name, info in data.items()}
                 logger.info("Loaded {len(self.environments)} work environments")
@@ -109,13 +132,15 @@ class WorkEnvironmentManager:
                 self.environments = {}
 
     def _save_environments(self) -> None:
-        """Save environments metadata."""
+        """Save environments metadata.
+
+        """
         metadata_file = self._get_environments_file()
 
         try:
             data = {name: env.to_dict() for name, env in self.environments.items()}
 
-            with open(metadata_file, "w") as f:
+            with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
             logger.debug("Saved {len(self.environments)} work environments")
@@ -125,16 +150,16 @@ class WorkEnvironmentManager:
     def create_work_environment(
         self,
         branch_name: str,
-        config: dict[str, Any] | None = None,
+        config: dict[str, object] | None = None,
     ) -> WorkEnvironment:
         """Create an isolated work environment for a branch.
-
+        
         Args:
             branch_name: Name of the branch
             config: Configuration for the environment
-
-        Returns:
-            WorkEnvironment object
+        
+            Returns:
+                Workenvironment object the created item.
         """
         if branch_name in self.environments:
             logger.warning("Environment for branch {branch_name} already exists")
@@ -176,7 +201,11 @@ class WorkEnvironmentManager:
         return env
 
     def _create_worktree(self, branch_name: str) -> Path:
-        """Create a git worktree for the branch."""
+        """Create a git worktree for the branch.
+
+        Returns:
+        Path: Description of return value.
+        """
         # Sanitize branch name for directory
         safe_name = branch_name.replace("/", "_")
         worktree_path = self.work_dir / "worktrees" / safe_name
@@ -203,9 +232,13 @@ class WorkEnvironmentManager:
         self,
         branch_name: str,
         worktree_path: Path,
-        config: dict[str, Any],
+        config: dict[str, object],
     ) -> Path:
-        """Create a virtual environment for the branch."""
+        """Create a virtual environment for the branch.
+
+        Returns:
+        Path: Description of return value.
+        """
         safe_name = branch_name.replace("/", "_")
         venv_path = self.work_dir / "venvs" / safe_name
 
@@ -226,7 +259,9 @@ class WorkEnvironmentManager:
         return venv_path
 
     def _install_dependencies(self, venv_path: Path, worktree_path: Path) -> None:
-        """Install dependencies in the virtual environment."""
+        """Install dependencies in the virtual environment.
+
+        """
         pip_path = venv_path / "bin" / "pip"
         if not pip_path.exists():
             pip_path = venv_path / "Scripts" / "pip.exe"  # Windows
@@ -260,7 +295,9 @@ class WorkEnvironmentManager:
             self._run_command([str(pip_path), "install", "-e", str(worktree_path)])
 
     def _setup_environment(self, env: WorkEnvironment) -> None:
-        """Set up the work environment."""
+        """Set up the work environment.
+
+        """
         # Copy configuration files if requested
         if env.config.get("copy_config", True):
             self._copy_config_files(env)
@@ -272,7 +309,9 @@ class WorkEnvironmentManager:
         self._run_project_setup(env)
 
     def _copy_config_files(self, env: WorkEnvironment) -> None:
-        """Copy configuration files to the work environment."""
+        """Copy configuration files to the work environment.
+
+        """
         config_files = [
             ".env",
             ".env.local",
@@ -291,15 +330,17 @@ class WorkEnvironmentManager:
                     logger.debug("Copied {config_file} to work environment")
 
     @staticmethod
-    def _create_activation_script( env: WorkEnvironment) -> None:
-        """Create custom activation script with environment variables."""
+    def _create_activation_script(env: WorkEnvironment) -> None:
+        """Create custom activation script with environment variables.
+
+        """
         activate_dir = env.venv_path / "bin"
         if not activate_dir.exists():
             activate_dir = env.venv_path / "Scripts"  # Windows
 
         custom_activate = activate_dir / "activate_custom"
 
-        with open(custom_activate, "w") as f:
+        with open(custom_activate, "w", encoding="utf-8") as f:
             f.write("#!/bin/bash\n")
             f.write(f"# Custom activation script for {env.branch_name}\n\n")
 
@@ -320,7 +361,9 @@ class WorkEnvironmentManager:
         os.chmod(custom_activate, 0o700)
 
     def _run_project_setup(self, env: WorkEnvironment) -> None:
-        """Run any project-specific setup commands."""
+        """Run any project-specific setup commands.
+
+        """
         setup_commands = env.config.get("setup_commands", [])
 
         for cmd in setup_commands:
@@ -331,7 +374,11 @@ class WorkEnvironmentManager:
                 logger.error("Setup command failed: {cmd}")
 
     def get_environment(self, branch_name: str) -> WorkEnvironment | None:
-        """Get work environment for a branch."""
+        """Get work environment for a branch.
+
+        Returns:
+        object: Description of return value.
+        """
         return self.environments.get(branch_name)
 
     def activate_environment(self, branch_name: str) -> tuple[Path, dict[str, str]]:
@@ -390,7 +437,9 @@ class WorkEnvironmentManager:
             os.environ.update(original_env)
 
     def suspend_environment(self, branch_name: str) -> None:
-        """Suspend a work environment."""
+        """Suspend a work environment.
+
+        """
         env = self.get_environment(branch_name)
         if env:
             env.status = "suspended"
@@ -402,7 +451,9 @@ class WorkEnvironmentManager:
         branch_name: str,
         remove_files: bool = False,  # noqa: FBT001
     ) -> None:
-        """Terminate a work environment."""
+        """Terminate a work environment.
+
+        """
         env = self.get_environment(branch_name)
         if not env:
             logger.warning("No environment found for branch {branch_name}")
@@ -435,7 +486,11 @@ class WorkEnvironmentManager:
         logger.info("Terminated environment for branch: {branch_name}")
 
     def cleanup_terminated(self) -> list[str]:
-        """Clean up all terminated environments."""
+        """Clean up all terminated environments.
+
+        Returns:
+        object: Description of return value.
+        """
         cleaned = []
 
         for branch_name, env in list(self.environments.items()):
@@ -446,5 +501,9 @@ class WorkEnvironmentManager:
         return cleaned
 
     def list_environments(self) -> list[WorkEnvironment]:
-        """List all work environments."""
+        """List all work environments.
+
+        Returns:
+        object: Description of return value.
+        """
         return list(self.environments.values())

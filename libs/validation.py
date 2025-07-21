@@ -1,5 +1,11 @@
+from typing import Any
+import os
+import re
+from pathlib import Path
+from libs.core.settings import ContentLimits, ValidationPatterns
+
 #!/usr/bin/env python3
-"""Copyright notice."""
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,11 +15,7 @@ This module provides common validation functions used throughout the project
 for validating session names, project names, paths, and other inputs.
 """
 
-import os
-import re
-from pathlib import Path
 
-from libs.core.settings import ContentLimits, ValidationPatterns
 
 
 class ValidationError(Exception):
@@ -300,7 +302,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
 
 
 # Validation decorators for common use cases
-def validate_input(validation_func: Any, field_name: str):
+def validate_input(validation_func: object, field_name: str) -> object:
     """Decorator to validate function inputs.
 
     Args:
@@ -309,15 +311,15 @@ def validate_input(validation_func: Any, field_name: str):
 
     Example:
         @validate_input(validate_session_name, "session_name")
-        def create_session(session_name: str):
+        def create_session(session_name: str) -> object:
             pass
-    
+
     Returns:
         Description of return value
     """
 
-    def decorator(func: Any):
-        def wrapper(*args, **kwargs):
+    def decorator(func: Any) -> object:
+        def wrapper(*args, **kwargs) -> object:
             # Get the value to validate
             if field_name in kwargs:
                 value = kwargs[field_name]
@@ -333,7 +335,7 @@ def validate_input(validation_func: Any, field_name: str):
             if not valid:
                 raise ValidationError(field_name, str(value), error)
 
-            return func(*args, **kwargs)
+            return func(*args: object, **kwargs)
 
         return wrapper
 

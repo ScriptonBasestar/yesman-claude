@@ -1,4 +1,10 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import re
+from abc import ABC, abstractmethod
+from datetime import datetime
+from enum import Enum
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -6,11 +12,6 @@
 Abstract base class for all dashboard renderers.
 """
 
-import re
-from abc import ABC, abstractmethod
-from datetime import datetime
-from enum import Enum
-from typing import object
 
 
 class RenderFormat(Enum):
@@ -63,16 +64,17 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(self, format_type: RenderFormat, theme: dict[str, object] | None = None) -> None:
+    def __init__(self, format_type: RenderFormat, theme: dict[str] | None = None) -> None:
         """Initialize base renderer.
 
         Args:
             format_type: The rendering format this renderer supports
             theme: Optional theme configuration
+
         """
         self.format_type = format_type
         self.theme = theme or self._get_default_theme()
-        self._cache: dict[str, object] = {}
+        self._cache: dict[str] = {}
 
     @abstractmethod
     @staticmethod
@@ -80,7 +82,7 @@ class BaseRenderer(ABC):
         self,
         widget_type: WidgetType,
         data: object,
-        options: dict[str, object] | None = None,
+        options: dict[str] | None = None,
     ) -> str:
         """Render a single widget.
 
@@ -89,16 +91,14 @@ class BaseRenderer(ABC):
             data: Data to display in the widget
             options: Optional rendering options
 
-        Returns:
-            Rendered widget as string
         """
 
     @abstractmethod
     @staticmethod
     def render_layout(
         self,
-        widgets: list[dict[str, object]],
-        layout_config: dict[str, object] | None = None,
+        widgets: list[dict[str]],
+        layout_config: dict[str] | None = None,
     ) -> str:
         """Render a layout containing multiple widgets.
 
@@ -112,7 +112,7 @@ class BaseRenderer(ABC):
 
     @abstractmethod
     @staticmethod
-    def render_container(content: str, container_config: dict[str, object] | None = None) -> str:
+    def render_container(content: str, container_config: dict[str] | None = None) -> str:
         """Render a container wrapping content.
 
         Args:
@@ -126,7 +126,7 @@ class BaseRenderer(ABC):
     # Common utility methods
 
     @staticmethod
-    def format_number( value: float, precision: int = 2, suffix: str = "") -> str:
+    def format_number(value: float, precision: int = 2, suffix: str = "") -> str:
         """Format a number with optional precision and suffix.
 
         Args:
@@ -304,13 +304,13 @@ class BaseRenderer(ABC):
         """
         status_lower = status.lower()
 
-        if status_lower in ["active", "running", "healthy", "online", "connected"]:
+        if status_lower in {"active", "running", "healthy", "online", "connected"}:
             return ThemeColor.SUCCESS
-        if status_lower in ["warning", "degraded", "slow"]:
+        if status_lower in {"warning", "degraded", "slow"}:
             return ThemeColor.WARNING
-        if status_lower in ["error", "failed", "stopped", "offline", "disconnected"]:
+        if status_lower in {"error", "failed", "stopped", "offline", "disconnected"}:
             return ThemeColor.ERROR
-        if status_lower in ["loading", "pending", "connecting"]:
+        if status_lower in {"loading", "pending", "connecting"}:
             return ThemeColor.INFO
         return ThemeColor.NEUTRAL
 
@@ -344,7 +344,7 @@ class BaseRenderer(ABC):
             weight = weights.get(metric, 0.1)
 
             # Convert to health score (higher is better)
-            if metric in ["cpu_usage", "memory_usage", "disk_usage", "error_rate"]:
+            if metric in {"cpu_usage", "memory_usage", "disk_usage", "error_rate"}:
                 # For usage metrics, lower is better
                 score = max(0, 100 - value)
             else:
@@ -357,7 +357,7 @@ class BaseRenderer(ABC):
         return total_score / total_weight if total_weight > 0 else 0.0
 
     @staticmethod
-    def _get_default_theme() -> dict[str, object]:
+    def _get_default_theme() -> dict[str]:
         """Get default theme configuration.
 
         Returns:
@@ -414,14 +414,17 @@ class BaseRenderer(ABC):
         }
 
     def clear_cache(self) -> None:
-        """Clear the internal cache."""
+        """Clear the internal cache.
+
+        """
         self._cache.clear()
 
-    def set_theme(self, theme: dict[str, object]) -> None:
+    def set_theme(self, theme: dict[str]) -> None:
         """Set new theme configuration.
 
         Args:
             theme: New theme configuration
+
         """
         self.theme = theme
         self.clear_cache()

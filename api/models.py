@@ -1,8 +1,10 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from pydantic import BaseModel
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-from pydantic import BaseModel
 
 
 class PaneInfo(BaseModel):

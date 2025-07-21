@@ -1,11 +1,13 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from collections.abc import Callable
+from typing import object, TypeVar, cast
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Dependency Injection Container for managing service instances and dependencies."""
 
-from collections.abc import Callable
-from typing import Any, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -21,9 +23,9 @@ class DIContainer:
     """
 
     def __init__(self) -> None:
-        self._services: dict[type, Any] = {}
+        self._services: dict[type, object] = {}
         self._factories: dict[type, Callable] = {}
-        self._singletons: dict[type, Any] = {}
+        self._singletons: dict[type, object] = {}
         self._resolving: set = set()  # Track circular dependencies
 
     def register_singleton(self, service_type: type[T], instance: T) -> None:
@@ -32,6 +34,7 @@ class DIContainer:
         Args:
             service_type: The type/interface to register
             instance: The singleton instance to register
+
         """
         self._singletons[service_type] = instance
         # Remove from factories if it was registered there
@@ -44,6 +47,7 @@ class DIContainer:
         Args:
             service_type: The type/interface to register
             factory: Factory function that creates instances
+
         """
         self._factories[service_type] = factory
         # Remove from singletons if it was registered there
@@ -56,6 +60,7 @@ class DIContainer:
         Args:
             service_type: The type/interface to register
             factory: Factory function that creates instances
+
         """
         self._services[service_type] = factory
         # Remove from other registrations
@@ -117,7 +122,9 @@ class DIContainer:
         return service_type in self._singletons or service_type in self._factories or service_type in self._services
 
     def clear(self) -> None:
-        """Clear all registrations and reset the container."""
+        """Clear all registrations and reset the container.
+
+        """
         self._services.clear()
         self._factories.clear()
         self._singletons.clear()

@@ -1,18 +1,20 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import logging
+import time
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Claude process control and lifecycle management."""
 
-import logging
-import time
-from typing import object
+
 
 
 class ClaudeProcessController:
     """Controls Claude process lifecycle (start, stop, restart)."""
 
-    def __init__(self, session_manager: object, status_manager: object) -> None:
+    def __init__(session_manager: status_manager, object) -> None:
         self.session_manager = session_manager
         self.status_manager = status_manager
         self.selected_model = "default"
@@ -24,7 +26,10 @@ class ClaudeProcessController:
         self.status_manager.update_status(f"[cyan]Model set to: {model}[/]")
 
     def restart_claude_pane(self) -> bool:
-        """Restart Claude pane."""
+        """Restart Claude pane.
+
+    Returns:
+        Boolean indicating."""
         if not self.session_manager.get_claude_pane():
             self.status_manager.update_status("[red]Cannot restart: No Claude pane in session[/]")
             return False
@@ -89,7 +94,10 @@ class ClaudeProcessController:
             self.logger.warning(f"Error during claude process termination: {e}")  # noqa: G004
 
     def _get_claude_command(self) -> str:
-        """Get claude command based on selected model."""
+        """Get claude command based on selected model.
+
+    Returns:
+        String containing the requested data."""
         if self.selected_model == "opus":
             return "claude --model claude-3-5-opus-20241022"
         if self.selected_model == "sonnet":
@@ -97,7 +105,10 @@ class ClaudeProcessController:
         return "claude"
 
     def is_claude_running(self) -> bool:
-        """Check if Claude is currently running."""
+        """Check if Claude is currently running.
+
+    Returns:
+        Boolean indicating."""
         try:
             cmd = self.session_manager.get_current_command()
             return "claude" in cmd.lower()

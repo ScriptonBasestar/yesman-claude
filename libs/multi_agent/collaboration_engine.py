@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Collaboration engine for multi-agent branch development coordination."""
+# Copyright notice.
 
 import asyncio
 import hashlib
@@ -13,12 +9,18 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
-
 from .agent_pool import AgentPool
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictInfo, ConflictResolutionEngine
 from .semantic_analyzer import SemanticAnalyzer
 from .types import AgentState
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Collaboration engine for multi-agent branch development coordination."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,15 +69,19 @@ class CollaborationMessage:
     message_type: MessageType
     priority: MessagePriority
     subject: str
-    content: dict[str, Any]
-    metadata: dict[str, Any] = field(default_factory=dict)
+    content: dict[str, object]
+    metadata: dict[str, object] = field(default_factory=dict)
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     expires_at: datetime | None = None
     requires_ack: bool = False
     acknowledged: bool = False
 
     def is_expired(self) -> bool:
-        """Check if message has expired."""
+        """Check if message has expired.
+
+        Returns:
+        bool: Description of return value.
+        """
         if self.expires_at:
             return datetime.now(UTC) > self.expires_at
         return False
@@ -88,7 +94,7 @@ class SharedKnowledge:
     knowledge_id: str
     contributor_id: str
     knowledge_type: str  # e.g., "function_signature", "api_change", "pattern"
-    content: dict[str, Any]
+    content: dict[str, object]
     relevance_score: float = 1.0
     access_count: int = 0
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
@@ -106,8 +112,8 @@ class CollaborationSession:
     purpose: str
     started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     ended_at: datetime | None = None
-    shared_context: dict[str, Any] = field(default_factory=dict)
-    decisions: list[dict[str, Any]] = field(default_factory=list)
+    shared_context: dict[str, object] = field(default_factory=dict)
+    decisions: list[dict[str, object]] = field(default_factory=list)
     outcomes: list[str] = field(default_factory=list)
 
 
@@ -130,6 +136,9 @@ class CollaborationEngine:
             conflict_engine: Engine for conflict resolution
             semantic_analyzer: Optional semantic analyzer for code understanding
             repo_path: Path to git repository
+
+        Returns:
+        None: Description of return value.
         """
         self.agent_pool = agent_pool
         self.branch_manager = branch_manager
@@ -178,7 +187,7 @@ class CollaborationEngine:
 
         # Background tasks
         self._running = False
-        self._tasks: list[asyncio.Task[Any]] = []
+        self._tasks: list[asyncio.Task[object]] = []
 
     async def start(self) -> None:
         """Start the collaboration engine."""
@@ -215,7 +224,7 @@ class CollaborationEngine:
         recipient_id: str | None,
         message_type: MessageType,
         subject: str,
-        content: dict[str, Any],
+        content: dict[str, object],
         priority: MessagePriority = MessagePriority.NORMAL,
         expires_in: timedelta | None = None,
         requires_ack: bool = False,  # noqa: FBT001
@@ -274,7 +283,7 @@ class CollaborationEngine:
             "Message %s sent from %s to %s",
             message_id,
             sender_id,
-            recipient_id or 'all',
+            recipient_id or "all",
         )
         return message_id
 
@@ -322,7 +331,7 @@ class CollaborationEngine:
         self,
         contributor_id: str,
         knowledge_type: str,
-        content: dict[str, Any],
+        content: dict[str, object],
         tags: list[str] | None = None,
         relevance_score: float = 1.0,
     ) -> str:
@@ -335,8 +344,6 @@ class CollaborationEngine:
             tags: Tags for categorization
             relevance_score: Initial relevance score
 
-        Returns:
-            Knowledge ID
         """
         knowledge_id = f"know_{contributor_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(content).encode()).hexdigest()[:8]}"
 
@@ -449,7 +456,7 @@ class CollaborationEngine:
         participant_ids: list[str],
         mode: CollaborationMode,
         purpose: str,
-        initial_context: dict[str, Any] | None = None,
+        initial_context: dict[str, object] | None = None,
     ) -> str:
         """Create a collaboration session between agents.
 
@@ -509,7 +516,7 @@ class CollaborationEngine:
         self,
         session_id: str,
         agent_id: str,
-        context_update: dict[str, Any],
+        context_update: dict[str, object],
     ) -> None:
         """Update shared context in a collaboration session."""
         if session_id not in self.active_sessions:
@@ -544,7 +551,7 @@ class CollaborationEngine:
         self,
         session_id: str,
         agent_id: str,
-        decision: dict[str, Any],
+        decision: dict[str, object],
     ) -> None:
         """Add a decision to a collaboration session."""
         if session_id not in self.active_sessions:
@@ -595,7 +602,7 @@ class CollaborationEngine:
         file_path: str,
         changed_by: str,
         change_type: str,
-        change_details: dict[str, Any],
+        change_details: dict[str, object],
         affected_files: list[str] | None = None,
     ) -> None:
         """Track a dependency change that needs to be propagated.
@@ -651,7 +658,7 @@ class CollaborationEngine:
         requester_id: str,
         problem_type: str,
         problem_description: str,
-        context: dict[str, Any] | None = None,
+        context: dict[str, object] | None = None,
         expertise_needed: list[str] | None = None,
     ) -> str | None:
         """Request help from other agents.
@@ -743,7 +750,7 @@ class CollaborationEngine:
                 continue
 
             # Check if agent is available for review
-            if agent.state in [AgentState.IDLE, AgentState.WORKING]:
+            if agent.state in {AgentState.IDLE, AgentState.WORKING}:
                 reviewers.append(agent.agent_id)
 
                 if len(reviewers) >= 2:  # Maximum 2 reviewers
@@ -904,7 +911,7 @@ class CollaborationEngine:
                         # Could trigger additional analysis or notifications
                         logger.info(
                             "Processing dependency change in %s",
-                            change_info['file_path'],
+                            change_info["file_path"],
                         )
 
                     processed += 1
@@ -1018,8 +1025,12 @@ class CollaborationEngine:
                 logger.exception("Error in auto sync loop")
                 await asyncio.sleep(self.sync_interval)
 
-    def get_collaboration_summary(self) -> dict[str, Any]:
-        """Get comprehensive summary of collaboration activities."""
+    def get_collaboration_summary(self) -> dict[str, object]:
+        """Get comprehensive summary of collaboration activities.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "statistics": self.collaboration_stats.copy(),
             "active_sessions": len(self.active_sessions),
@@ -1042,7 +1053,11 @@ class CollaborationEngine:
         }
 
     def _count_knowledge_by_type(self) -> dict[str, int]:
-        """Count knowledge items by type."""
+        """Count knowledge items by type.
+
+        Returns:
+        object: Description of return value.
+        """
         counts: dict[str, int] = defaultdict(int)
         for knowledge in self.shared_knowledge.values():
             counts[knowledge.knowledge_type] += 1

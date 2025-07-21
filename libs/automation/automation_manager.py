@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Automation manager that integrates context detection and workflow execution."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -11,9 +7,15 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
-
 from .context_detector import ContextDetector, ContextInfo, ContextType
 from .workflow_engine import WorkflowChain, WorkflowEngine
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Automation manager that integrates context detection and workflow execution."""
+
+
 
 
 class AutomationManager:
@@ -45,12 +47,16 @@ class AutomationManager:
         }
 
     def add_callback(self, event_type: str, callback: Callable) -> None:
-        """Add callback for automation events."""
+        """Add callback for automation events.
+
+        """
         if event_type in self._callbacks:
             self._callbacks[event_type].append(callback)
 
     def remove_callback(self, event_type: str, callback: Callable) -> None:
-        """Remove callback for automation events."""
+        """Remove callback for automation events.
+
+        """
         if event_type in self._callbacks and callback in self._callbacks[event_type]:
             self._callbacks[event_type].remove(callback)
 
@@ -166,19 +172,33 @@ class AutomationManager:
                     self.logger.exception("Workflow trigger callback error")
 
     def analyze_content_for_context(self, content: str, session_name: str | None = None) -> list[ContextInfo]:
-        """Analyze content (e.g., tmux pane output) for context clues."""
+        """Analyze content (e.g., tmux pane output) for context clues.
+
+        Returns:
+        object: Description of return value.
+        """
         return self.context_detector.detect_context_from_content(content, session_name)
 
     def analyze_claude_idle(self, last_activity_time: float, idle_threshold: int = 30) -> ContextInfo | None:
-        """Analyze Claude idle state for potential automation."""
+        """Analyze Claude idle state for potential automation.
+
+        Returns:
+        object: Description of return value.
+        """
         return self.context_detector.detect_claude_idle_context(last_activity_time, idle_threshold)
 
     def register_custom_workflow(self, workflow: WorkflowChain) -> None:
-        """Register a custom workflow chain."""
+        """Register a custom workflow chain.
+
+        """
         self.workflow_engine.register_workflow(workflow)
 
-    def get_automation_status(self) -> dict[str, Any]:
-        """Get comprehensive automation status."""
+    def get_automation_status(self) -> dict[str, object]:
+        """Get comprehensive automation status.
+
+        Returns:
+        object: Description of return value.
+        """
         workflow_status = self.workflow_engine.get_workflow_status()
         context_summary = self.context_detector.get_current_context_summary()
 
@@ -209,7 +229,9 @@ class AutomationManager:
         return None
 
     def save_automation_config(self, config_path: Path | None = None) -> None:
-        """Save automation configuration to file."""
+        """Save automation configuration to file.
+
+        """
         if not config_path:
             config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
@@ -219,7 +241,9 @@ class AutomationManager:
         self.logger.info("Saved automation config to: %s", config_path)
 
     def load_automation_config(self, config_path: Path | None = None) -> None:
-        """Load automation configuration from file."""
+        """Load automation configuration from file.
+
+        """
         if not config_path:
             config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
@@ -229,12 +253,16 @@ class AutomationManager:
         else:
             self.logger.debug("No automation config found at: %s", config_path)
 
-    def get_execution_history(self, limit: int = 20) -> list[dict[str, Any]]:
-        """Get recent workflow execution history."""
+    def get_execution_history(self, limit: int = 20) -> list[dict[str, object]]:
+        """Get recent workflow execution history.
+
+        Returns:
+        object: Description of return value.
+        """
         history = self.workflow_engine.execution_history[-limit:]
         return [execution.to_dict() for execution in history]
 
-    async def test_automation_chain(self, context_type: ContextType, test_details: dict[str, Any] | None = None) -> dict[str, Any]:
+    async def test_automation_chain(self, context_type: ContextType, test_details: dict[str, object] | None = None) -> dict[str, object]:
         """Test automation chain with simulated context."""
         test_context = ContextInfo(
             context_type=context_type,
@@ -267,8 +295,12 @@ class AutomationManager:
         return result
 
     @staticmethod
-    def get_workflow_recommendations( context_info: ContextInfo) -> list[str]:
-        """Get recommendations for workflows based on context."""
+    def get_workflow_recommendations(context_info: ContextInfo) -> list[str]:
+        """Get recommendations for workflows based on context.
+
+        Returns:
+        object: Description of return value.
+        """
         recommendations = []
 
         # Analyze context and suggest appropriate workflows

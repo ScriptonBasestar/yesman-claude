@@ -1,21 +1,25 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Improved sessions router with dependency injection and proper error handling."""
-
+from typing import Any
 import logging
-
-# Note: Removed typing.Any usage to fix ANN401 errors
 from fastapi import APIRouter, HTTPException, status
-
 from api import models
 from libs.core.error_handling import ErrorCategory, YesmanError
 from libs.core.services import get_session_manager, get_tmux_manager
 from libs.core.session_manager import SessionManager
 from libs.core.types import SessionAPIData
 from libs.tmux_manager import TmuxManager
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Improved sessions router with dependency injection and proper error handling."""
+
+
+# Note: Removed typing.Any usage to fix ANN401 errors
+
 
 # Set up logger
 logger = logging.getLogger("yesman.api.sessions")
@@ -30,7 +34,10 @@ class SessionService:
         self.logger = logging.getLogger("yesman.api.sessions.service")
 
     def get_all_sessions(self) -> list[SessionAPIData]:
-        """Get all sessions with error handling."""
+        """Get all sessions with error handling.
+
+    Returns:
+        List of the requested data."""
         try:
             sessions_data = self.session_manager.get_all_sessions()
             return [self._convert_session_to_api_data(session) for session in sessions_data]
@@ -44,7 +51,10 @@ class SessionService:
             )
 
     def get_session_by_name(self, session_name: str) -> SessionAPIData | None:
-        """Get specific session by name."""
+        """Get specific session by name.
+
+    Returns:
+        Sessionapidata | None object the requested data."""
         try:
             # Load projects configuration to get project_conf
             projects = self.tmux_manager.load_projects().get("sessions", {})
@@ -77,7 +87,10 @@ class SessionService:
             )
 
     def setup_session(self, session_name: str) -> dict[str, object]:
-        """Set up a specific session."""
+        """Set up a specific session.
+
+    Returns:
+        Dict containing."""
         try:
             # Check if session already exists
             if self._session_exists(session_name):
@@ -117,7 +130,10 @@ class SessionService:
             )
 
     def teardown_session(self, session_name: str) -> dict[str, object]:
-        """Teardown a specific session."""
+        """Teardown a specific session.
+
+    Returns:
+        Dict containing."""
         try:
             if not self._session_exists(session_name):
                 msg = f"Session '{session_name}' not found"
@@ -146,7 +162,10 @@ class SessionService:
             )
 
     def get_session_status(self, session_name: str) -> dict[str, object]:
-        """Get session status information."""
+        """Get session status information.
+
+    Returns:
+        Dict containing status information."""
         try:
             # Load projects configuration to get project_conf
             projects = self.tmux_manager.load_projects().get("sessions", {})
@@ -195,7 +214,10 @@ class SessionService:
             )
 
     def setup_all_sessions(self) -> dict[str, object]:
-        """Setup all sessions defined in projects.yaml."""
+        """Setup all sessions defined in projects.yaml.
+
+    Returns:
+        Dict containing."""
         try:
             projects = self.tmux_manager.load_projects().get("sessions", {})
             successful = []
@@ -229,7 +251,10 @@ class SessionService:
             )
 
     def teardown_all_sessions(self) -> dict[str, object]:
-        """Teardown all managed sessions."""
+        """Teardown all managed sessions.
+
+    Returns:
+        Dict containing."""
         try:
             sessions = self.session_manager.get_all_sessions()
             successful = []
@@ -261,7 +286,10 @@ class SessionService:
             )
 
     def start_session(self, session_name: str) -> dict[str, object]:
-        """Start an existing session."""
+        """Start an existing session.
+
+    Returns:
+        Dict containing."""
         try:
             if self._session_exists(session_name):
                 msg = f"Session '{session_name}' is already running"
@@ -271,7 +299,6 @@ class SessionService:
                 )
 
             # Attach to the session
-            import subprocess
 
             subprocess.run(["tmux", "attach-session", "-t", session_name], check=False)
 
@@ -292,7 +319,10 @@ class SessionService:
             )
 
     def stop_session(self, session_name: str) -> dict[str, object]:
-        """Stop a running session."""
+        """Stop a running session.
+
+    Returns:
+        Dict containing."""
         try:
             if not self._session_exists(session_name):
                 msg = f"Session '{session_name}' not found"
@@ -321,7 +351,10 @@ class SessionService:
             )
 
     def _convert_session_to_api_data(self, session_data: object) -> SessionAPIData:
-        """Convert internal session data to API format."""
+        """Convert internal session data to API format.
+
+    Returns:
+        Sessionapidata object."""
         try:
             return {
                 "session_name": session_data.session_name,
@@ -354,7 +387,10 @@ class SessionService:
             )
 
     def _session_exists(self, session_name: str) -> bool:
-        """Check if session exists."""
+        """Check if session exists.
+
+    Returns:
+        Boolean indicating."""
         try:
             sessions = self.session_manager.get_all_sessions()
             return any(session.session_name == session_name for session in sessions)
@@ -362,8 +398,11 @@ class SessionService:
             return False
 
     @staticmethod
-    def _setup_session_internal( session_name: str, session_config: dict[str, object]) -> dict[str, object]:  # noqa: ARG002
-        """Internal session setup logic."""
+    def _setup_session_internal(session_name: str, session_config: dict[str, object]) -> dict[str, object]:  # noqa: ARG002  # noqa: ARG004
+        """Internal session setup logic.
+
+    Returns:
+        Dict containing."""
         # This would integrate with the improved SessionSetupService
         # For now, return a placeholder
         return {"message": "Session setup completed"}
@@ -371,7 +410,6 @@ class SessionService:
     @staticmethod
     def _teardown_session_internal(session_name: str) -> None:
         """Internal session teardown logic."""
-        import subprocess
 
         try:
             subprocess.run(
@@ -394,8 +432,11 @@ router = APIRouter(tags=["sessions"])
     summary="Get all sessions",
     description="Retrieve information about all active tmux sessions",
 )
-def get_all_sessions():
-    """Get all tmux sessions with detailed information."""
+def get_all_sessions() -> object:
+    """Get all tmux sessions with detailed information.
+
+    Returns:
+        Object object the requested data."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -448,8 +489,11 @@ def get_all_sessions():
     summary="Get specific session",
     description="Retrieve information about a specific session",
 )
-def get_session(session_name: str):
-    """Get specific session by name."""
+def get_session(session_name: str) -> object:
+    """Get specific session by name.
+
+    Returns:
+        Object object the requested data."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -506,8 +550,11 @@ def get_session(session_name: str):
     summary="Setup session",
     description="Create and setup a tmux session",
 )
-def setup_session(session_name: str):
-    """Setup a specific session."""
+def setup_session(session_name: str) -> object:
+    """Setup a specific session.
+
+    Returns:
+        Object object."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -531,8 +578,11 @@ def setup_session(session_name: str):
     summary="Teardown session",
     description="Remove a tmux session",
 )
-def teardown_session(session_name: str):
-    """Teardown a specific session."""
+def teardown_session(session_name: str) -> object:
+    """Teardown a specific session.
+
+    Returns:
+        Object object."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -556,8 +606,11 @@ def teardown_session(session_name: str):
     summary="Get session status",
     description="Get current status of a session",
 )
-def get_session_status(session_name: str):
-    """Get session status."""
+def get_session_status(session_name: str) -> object:
+    """Get session status.
+
+    Returns:
+        Dict containing status information."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -583,8 +636,11 @@ def get_session_status(session_name: str):
     summary="Setup all sessions",
     description="Create and setup all tmux sessions defined in projects.yaml",
 )
-def setup_all_sessions():
-    """Setup all sessions from projects configuration."""
+def setup_all_sessions() -> object:
+    """Setup all sessions from projects configuration.
+
+    Returns:
+        Object object."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -610,8 +666,11 @@ def setup_all_sessions():
     summary="Teardown all sessions",
     description="Remove all managed tmux sessions",
 )
-def teardown_all_sessions():
-    """Teardown all managed sessions."""
+def teardown_all_sessions() -> object:
+    """Teardown all managed sessions.
+
+    Returns:
+        Object object."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -637,8 +696,11 @@ def teardown_all_sessions():
     summary="Start session",
     description="Start an existing tmux session",
 )
-def start_session(session_name: str):
-    """Start a specific session."""
+def start_session(session_name: str) -> object:
+    """Start a specific session.
+
+    Returns:
+        Object object."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()
@@ -662,8 +724,11 @@ def start_session(session_name: str):
     summary="Stop session",
     description="Stop a running tmux session",
 )
-def stop_session(session_name: str):
-    """Stop a specific session."""
+def stop_session(session_name: str) -> object:
+    """Stop a specific session.
+
+    Returns:
+        Object object."""
     try:
         session_manager = get_session_manager()
         tmux_manager = get_tmux_manager()

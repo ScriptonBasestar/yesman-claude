@@ -1,12 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Theme System.
-
-Unified theme management system for all dashboard interfaces
-providing consistent colors, typography, spacing, and visual design.
-"""
+# Copyright notice.
 
 import json
 import logging
@@ -16,7 +8,18 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import object, Optional
+import winreg
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Theme System.
+
+Unified theme management system for all dashboard interfaces
+providing consistent colors, typography, spacing, and visual design.
+"""
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,17 +70,26 @@ class ColorPalette:
     highlight: str = "#fbbf24"  # Amber
 
     def to_dict(self) -> dict[str, str]:
-        """Convert to dictionary."""
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "ColorPalette":
-        """Create from dictionary."""
+        """Create from dictionary.
+
+    Returns:
+        'Colorpalette' object."""
         return cls(**data)
 
     @staticmethod
-    def adjust_opacity( color: str, opacity: float) -> str:
-        """Add opacity to a color (simplified - would need color parsing in production)."""
+    def adjust_opacity(color: str, opacity: float) -> str:
+        """Add opacity to a color (simplified - would need color parsing in production).
+
+    Returns:
+        String containing."""
         if color.startswith("#") and len(color) == 7:
             # Convert hex to RGB and add alpha
             r = int(color[1:3], 16)
@@ -118,12 +130,18 @@ class Typography:
     line_height_relaxed: str = "1.75"
 
     def to_dict(self) -> dict[str, str]:
-        """Convert to dictionary."""
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "Typography":
-        """Create from dictionary."""
+        """Create from dictionary.
+
+    Returns:
+        'Typography' object."""
         return cls(**data)
 
 
@@ -161,12 +179,18 @@ class Spacing:
     radius_full: str = "9999px"
 
     def to_dict(self) -> dict[str, str]:
-        """Convert to dictionary."""
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "Spacing":
-        """Create from dictionary."""
+        """Create from dictionary.
+
+    Returns:
+        'Spacing' object."""
         return cls(**data)
 
 
@@ -184,8 +208,11 @@ class Theme:
     author: str = ""
     version: str = "1.0.0"
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
         return {
             "name": self.name,
             "mode": self.mode.value,
@@ -199,8 +226,11 @@ class Theme:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Theme":
-        """Create from dictionary."""
+    def from_dict(cls, data: dict[str, object]) -> "Theme":
+        """Create from dictionary.
+
+    Returns:
+        'Theme' object."""
         return cls(
             name=data["name"],
             mode=ThemeMode(data["mode"]),
@@ -219,7 +249,10 @@ class SystemThemeDetector:
 
     @staticmethod
     def get_system_theme() -> ThemeMode:
-        """Get system theme preference."""
+        """Get system theme preference.
+
+    Returns:
+        Thememode object the requested data."""
         try:
             system = platform.system()
 
@@ -239,7 +272,10 @@ class SystemThemeDetector:
 
     @staticmethod
     def _get_macos_theme() -> ThemeMode:
-        """Get macOS theme preference."""
+        """Get macOS theme preference.
+
+    Returns:
+        Thememode object the requested data."""
         try:
             result = subprocess.run(
                 ["defaults", "read", "-g", "AppleInterfaceStyle"],
@@ -262,9 +298,11 @@ class SystemThemeDetector:
 
     @staticmethod
     def _get_windows_theme() -> ThemeMode:
-        """Get Windows theme preference."""
+        """Get Windows theme preference.
+
+    Returns:
+        Thememode object the requested data."""
         try:
-            import winreg
 
             # Check Windows registry for theme preference
             key = winreg.OpenKey(  # type: ignore[attr-defined]
@@ -286,7 +324,10 @@ class SystemThemeDetector:
 
     @staticmethod
     def _get_linux_theme() -> ThemeMode:
-        """Get Linux theme preference."""
+        """Get Linux theme preference.
+
+    Returns:
+        Thememode object the requested data."""
         try:
             # Check various Linux desktop environment settings
 
@@ -308,7 +349,7 @@ class SystemThemeDetector:
                 # Check KDE color scheme
                 kde_config = Path.home() / ".config" / "kdeglobals"
                 if kde_config.exists():
-                    with open(kde_config) as f:
+                    with open(kde_config, encoding="utf-8") as f:
                         content = f.read()
                         if "ColorScheme=Breeze Dark" in content:
                             return ThemeMode.DARK
@@ -317,7 +358,7 @@ class SystemThemeDetector:
             if os.environ.get("GTK_THEME", "").lower().find("dark") != -1:
                 return ThemeMode.DARK
 
-        except (OSError, subprocess.TimeoutExpired, subprocess.CalledProcessError, IOError) as e:
+        except (OSError, subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
             logger.warning("Linux theme detection failed: %s", e)
             return ThemeMode.LIGHT
         else:
@@ -331,7 +372,10 @@ class ThemeManager:
 
     @classmethod
     def get_instance(cls, config_dir: Path | None = None) -> "ThemeManager":
-        """Get the singleton instance of the theme manager."""
+        """Get the singleton instance of the theme manager.
+
+    Returns:
+        'Thememanager' object the requested data."""
         if cls._instance is None:
             cls._instance = cls(config_dir=config_dir)
         return cls._instance
@@ -372,7 +416,10 @@ class ThemeManager:
 
     @staticmethod
     def _create_builtin_themes() -> dict[str, Theme]:
-        """Create built-in themes."""
+        """Create built-in themes.
+
+    Returns:
+        Dict containing the created item."""
         themes = {}
 
         # Default Light Theme
@@ -444,13 +491,19 @@ class ThemeManager:
         return themes
 
     def get_all_themes(self) -> dict[str, Theme]:
-        """Get all available themes (built-in + user)."""
+        """Get all available themes (built-in + user).
+
+    Returns:
+        Dict containing the requested data."""
         all_themes = self.built_in_themes.copy()
         all_themes.update(self.user_themes)
         return all_themes
 
     def get_theme(self, name: str) -> Theme | None:
-        """Get theme by name."""
+        """Get theme by name.
+
+    Returns:
+        Theme | None object the requested data."""
         all_themes = self.get_all_themes()
         return all_themes.get(name)
 
@@ -503,7 +556,10 @@ class ThemeManager:
         return False
 
     def update_from_system(self) -> bool:
-        """Update theme from system preference."""
+        """Update theme from system preference.
+
+    Returns:
+        Boolean indicating the updated item."""
         if not self.auto_theme_enabled:
             return False
 
@@ -532,7 +588,7 @@ class ThemeManager:
             self.user_themes[name] = theme
             logger.info("Theme saved: %s", name)
 
-        except (OSError, IOError, json.JSONEncodeError, PermissionError) as e:
+        except (OSError, json.JSONEncodeError, PermissionError) as e:
             logger.exception("Error saving theme %s")
             return False
         else:
@@ -540,12 +596,12 @@ class ThemeManager:
 
     def load_theme(self, name: str) -> Theme | None:
         """Load user theme from disk.
-
+        
         Args:
             name: Theme name to load
-
-        Returns:
-            Loaded theme or None if failed
+        
+            Returns:
+                Theme | None object.
         """
         try:
             theme_file = self.config_dir / f"{name}.json"
@@ -560,7 +616,7 @@ class ThemeManager:
             self.user_themes[name] = theme
             logger.info("Theme loaded: %s", name)
 
-        except (OSError, IOError, json.JSONDecodeError, ValueError, KeyError) as e:
+        except (OSError, json.JSONDecodeError, ValueError, KeyError) as e:
             logger.exception("Error loading theme %s")
             return None
         else:
@@ -696,7 +752,10 @@ class ThemeManager:
         }
 
     def export_textual_css(self, theme: Theme | None = None) -> str:
-        """Export theme as CSS for Textual TUI framework."""
+        """Export theme as CSS for Textual TUI framework.
+
+    Returns:
+        String containing."""
         theme = theme or self.current_theme
         if not theme:
             return ""
@@ -720,7 +779,10 @@ class ThemeManager:
 
 
 def get_theme_manager() -> ThemeManager:
-    """Get the global theme manager instance."""
+    """Get the global theme manager instance.
+
+    Returns:
+        Thememanager object the requested data."""
     return ThemeManager.get_instance()
 
 

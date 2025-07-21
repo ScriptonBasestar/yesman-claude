@@ -1,4 +1,17 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.containers import Container, Horizontal, Vertical
+from textual.message import Message
+from textual.reactive import reactive
+from textual.widgets import (
+from .renderers import TUIRenderer, WidgetType
+from .renderers.widget_models import (
+from textual.timer import Timer
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -8,15 +21,7 @@ Textual-based terminal user interface dashboard for Yesman-Claude
 Provides comprehensive project monitoring with multiple views and real-time updates.
 """
 
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
-from textual.app import App, ComposeResult
-from textual.binding import Binding
-from textual.containers import Container, Horizontal, Vertical
-from textual.message import Message
-from textual.reactive import reactive
-from textual.widgets import (
     Footer,
     Header,
     Label,
@@ -28,8 +33,6 @@ from textual.widgets import (
     TabPane,
 )
 
-from .renderers import TUIRenderer, WidgetType
-from .renderers.widget_models import (
     ActivityData,
     HealthCategoryData,
     HealthData,
@@ -39,7 +42,6 @@ from .renderers.widget_models import (
 )
 
 if TYPE_CHECKING:
-    from textual.timer import Timer
 
 
 class DashboardWidget(Static):
@@ -63,13 +65,13 @@ class DashboardWidget(Static):
             title: Widget title for display
             update_interval: Auto-update interval in seconds
         """
-        super().__init__(**kwargs)
+        super().__init__(**kwargs: dict[str, object])
         self.widget_type = widget_type
         self.title = title
         self.update_interval = update_interval
         self.renderer = TUIRenderer()
         self._timer: Timer | None = None
-        self._last_data: Any | None = None
+        self._last_data: dict[str, object] | None = None
 
     def compose(self) -> ComposeResult:
         """Compose the widget structure."""
@@ -135,7 +137,7 @@ class SessionsView(DashboardWidget):
             widget_type=WidgetType.SESSION_BROWSER,
             title="Active Sessions",
             update_interval=3.0,
-            **kwargs,
+            **kwargs: object,
         )
 
     async def auto_update(self) -> None:
@@ -170,7 +172,7 @@ class HealthView(DashboardWidget):
             widget_type=WidgetType.PROJECT_HEALTH,
             title="Project Health",
             update_interval=5.0,
-            **kwargs,
+            **kwargs: object,
         )
 
     async def auto_update(self) -> None:
@@ -203,7 +205,7 @@ class ActivityView(DashboardWidget):
             widget_type=WidgetType.ACTIVITY_HEATMAP,
             title="Activity Heatmap",
             update_interval=10.0,
-            **kwargs,
+            **kwargs: object,
         )
 
     async def auto_update(self) -> None:
@@ -225,7 +227,7 @@ class LogsView(Static):
     """Logs monitoring view."""
 
     def __init__(self, **kwargs: object) -> None:
-        super().__init__(**kwargs)
+        super().__init__(**kwargs: dict[str, object])
         self.log_buffer: list[str] = []
         self.max_logs = 100
 
@@ -270,8 +272,8 @@ class SettingsView(Static):
     """Settings and configuration view."""
 
     def __init__(self, **kwargs: object) -> None:
-        super().__init__(**kwargs)
-        self.settings: dict[str, Any] = {
+        super().__init__(**kwargs: dict[str, object])
+        self.settings: dict[str, object] = {
             "auto_refresh": True,
             "refresh_interval": 3.0,
             "dark_mode": True,
@@ -349,7 +351,7 @@ class TUIDashboard(App):
 
     def __init__(self, **kwargs: object) -> None:
         """Initialize TUI Dashboard."""
-        super().__init__(**kwargs)
+        super().__init__(**kwargs: dict[str, object])
         self.title = "Yesman-Claude TUI Dashboard"
         self.sub_title = "Real-time Project Monitoring"
 

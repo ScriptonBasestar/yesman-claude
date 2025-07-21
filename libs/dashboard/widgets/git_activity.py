@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Git activity visualization and metrics widget."""
+# Copyright notice.
 
 import re
 import subprocess
@@ -10,11 +6,17 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Git activity visualization and metrics widget."""
+
+
 
 
 @dataclass
@@ -39,7 +41,7 @@ class GitStats:
     recent_commits: list[CommitInfo]
     daily_activity: dict[str, int]
     file_changes: dict[str, int]
-    branch_info: dict[str, Any]
+    branch_info: dict[str, object]
 
 
 class GitActivityWidget:
@@ -50,7 +52,11 @@ class GitActivityWidget:
         self.repo_path = repo_path
 
     def update_git_stats(self) -> GitStats:
-        """Update git statistics from repository."""
+        """Update git statistics from repository.
+
+        Returns:
+        GitStats: Description of return value.
+        """
         try:
             # Get basic repo info
             total_commits = self._get_total_commits()
@@ -81,7 +87,11 @@ class GitActivityWidget:
             )
 
     def _run_git_command(self, command: list[str]) -> str:
-        """Run a git command and return output."""
+        """Run a git command and return output.
+
+        Returns:
+        str: Description of return value.
+        """
         try:
             result = subprocess.run(
                 ["git", *command],
@@ -96,12 +106,20 @@ class GitActivityWidget:
             return ""
 
     def _get_total_commits(self) -> int:
-        """Get total number of commits."""
+        """Get total number of commits.
+
+        Returns:
+        int: Description of return value.
+        """
         output = self._run_git_command(["rev-list", "--count", "HEAD"])
         return int(output) if output.isdigit() else 0
 
     def _get_recent_commits(self, limit: int = 20) -> list[CommitInfo]:
-        """Get recent commit information."""
+        """Get recent commit information.
+
+        Returns:
+        object: Description of return value.
+        """
         commits: list[CommitInfo] = []
 
         # Get commit information
@@ -160,8 +178,12 @@ class GitActivityWidget:
         return commits
 
     @staticmethod
-    def _parse_diff_stats( stats_output: str) -> tuple[int, int, int]:
-        """Parse git diff stats output."""
+    def _parse_diff_stats(stats_output: str) -> tuple[int, int, int]:
+        """Parse git diff stats output.
+
+        Returns:
+        object: Description of return value.
+        """
         files_changed = 0
         insertions = 0
         deletions = 0
@@ -178,7 +200,11 @@ class GitActivityWidget:
         return files_changed, insertions, deletions
 
     def _get_active_contributors(self, days: int = 30) -> dict[str, int]:
-        """Get active contributors in the last N days."""
+        """Get active contributors in the last N days.
+
+        Returns:
+        object: Description of return value.
+        """
         since_date = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
 
         output = self._run_git_command(
@@ -198,7 +224,11 @@ class GitActivityWidget:
         return contributors
 
     def _get_daily_activity(self, days: int = 30) -> dict[str, int]:
-        """Get daily commit activity for the last N days."""
+        """Get daily commit activity for the last N days.
+
+        Returns:
+        object: Description of return value.
+        """
         since_date = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
 
         output = self._run_git_command(
@@ -218,7 +248,11 @@ class GitActivityWidget:
         return dict(activity)
 
     def _get_file_change_stats(self, limit: int = 10) -> dict[str, int]:
-        """Get most frequently changed files."""
+        """Get most frequently changed files.
+
+        Returns:
+        object: Description of return value.
+        """
         output = self._run_git_command(
             [
                 "log",
@@ -238,8 +272,12 @@ class GitActivityWidget:
         sorted_files = sorted(file_changes.items(), key=lambda x: x[1], reverse=True)
         return dict(sorted_files[:limit])
 
-    def _get_branch_info(self) -> dict[str, Any]:
-        """Get branch information."""
+    def _get_branch_info(self) -> dict[str, object]:
+        """Get branch information.
+
+        Returns:
+        object: Description of return value.
+        """
         info = {}
 
         # Current branch
@@ -265,7 +303,11 @@ class GitActivityWidget:
         return info
 
     def render_activity_overview(self) -> Panel:
-        """Render git activity overview."""
+        """Render git activity overview.
+
+        Returns:
+        Panel: Description of return value.
+        """
         stats = self.update_git_stats()
 
         content = Text()
@@ -296,7 +338,11 @@ class GitActivityWidget:
         return Panel(content, title="🔀 Git Activity", border_style="blue")
 
     def render_recent_commits(self, limit: int = 5) -> Panel:
-        """Render recent commits table."""
+        """Render recent commits table.
+
+        Returns:
+        Panel: Description of return value.
+        """
         stats = self.update_git_stats()
 
         table = Table(show_header=True, header_style="bold magenta")
@@ -327,7 +373,11 @@ class GitActivityWidget:
         return Panel(table, title="📝 Recent Commits", border_style="green")
 
     def render_file_activity(self) -> Panel:
-        """Render file change activity."""
+        """Render file change activity.
+
+        Returns:
+        Panel: Description of return value.
+        """
         stats = self.update_git_stats()
 
         if not stats.file_changes:
@@ -353,7 +403,11 @@ class GitActivityWidget:
         return Panel(content, title="📁 File Activity", border_style="yellow")
 
     def render_contributors(self) -> Panel:
-        """Render contributor activity."""
+        """Render contributor activity.
+
+        Returns:
+        Panel: Description of return value.
+        """
         contributors = self._get_active_contributors(days=30)
 
         if not contributors:
@@ -376,7 +430,11 @@ class GitActivityWidget:
         return Panel(table, title="👥 Contributors (30 days)", border_style="cyan")
 
     def render_compact_status(self) -> Text:
-        """Render compact git status for status bars."""
+        """Render compact git status for status bars.
+
+        Returns:
+        Text: Description of return value.
+        """
         stats = self.update_git_stats()
 
         text = Text()
@@ -396,8 +454,12 @@ class GitActivityWidget:
 
         return text
 
-    def get_activity_metrics(self) -> dict[str, Any]:
-        """Get git activity metrics as data."""
+    def get_activity_metrics(self) -> dict[str, object]:
+        """Get git activity metrics as data.
+
+        Returns:
+        object: Description of return value.
+        """
         stats = self.update_git_stats()
 
         # Calculate trends

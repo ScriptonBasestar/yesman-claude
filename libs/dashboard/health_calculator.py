@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Project health score calculation system."""
+# Copyright notice.
 
 import json
 import logging
@@ -12,6 +8,13 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
+import toml
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Project health score calculation system."""
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,10 @@ class HealthLevel(Enum):
 
     @classmethod
     def from_score(cls, score: int) -> "HealthLevel":
-        """Get health level from numeric score."""
+        """Get health level from numeric score.
+
+    Returns:
+        'Healthlevel' object."""
         if score < 0:
             return cls.UNKNOWN
         for level in [cls.EXCELLENT, cls.GOOD, cls.WARNING, cls.CRITICAL]:
@@ -64,22 +70,31 @@ class HealthMetric:
     score: int
     max_score: int = 100
     description: str = ""
-    details: dict[str, Any] = field(default_factory=dict)
+    details: dict[str, object] = field(default_factory=dict)
     last_updated: float = field(default_factory=time.time)
 
     @property
     def health_level(self) -> HealthLevel:
-        """Get health level for this metric."""
+        """Get health level for this metric.
+
+    Returns:
+        Dict containing health status information."""
         percentage = (self.score / self.max_score) * 100 if self.max_score > 0 else 0
         return HealthLevel.from_score(int(percentage))
 
     @property
     def percentage(self) -> float:
-        """Get percentage score."""
+        """Get percentage score.
+
+    Returns:
+        Float representing."""
         return (self.score / self.max_score) * 100 if self.max_score > 0 else 0
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
         return {
             "category": self.category.value,
             "name": self.name,
@@ -105,12 +120,18 @@ class ProjectHealth:
 
     @property
     def overall_health_level(self) -> HealthLevel:
-        """Get overall health level."""
+        """Get overall health level.
+
+    Returns:
+        Dict containing health status information."""
         return HealthLevel.from_score(self.overall_score)
 
     @property
     def category_scores(self) -> dict[str, float]:
-        """Get average scores by category."""
+        """Get average scores by category.
+
+    Returns:
+        Dict containing."""
         category_metrics: dict[str, list[float]] = {}
         for metric in self.metrics:
             category = metric.category.value
@@ -120,8 +141,11 @@ class ProjectHealth:
 
         return {category: sum(scores) / len(scores) if scores else 0 for category, scores in category_metrics.items()}
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
         return {
             "project_path": self.project_path,
             "overall_score": self.overall_score,
@@ -142,7 +166,7 @@ class HealthCalculator:
         self.logger = logging.getLogger("yesman.health_calculator")
 
         # Cache for expensive operations
-        self._cache: dict[str, Any] = {}
+        self._cache: dict[str, object] = {}
         self._cache_ttl = 300  # 5 minutes
 
     async def calculate_health(self, force_refresh: bool = False) -> ProjectHealth:  # noqa: FBT001
@@ -646,8 +670,11 @@ class HealthCalculator:
         return metrics
 
     @staticmethod
-    def _calculate_overall_score( metrics: list[HealthMetric]) -> int:
-        """Calculate overall project health score."""
+    def _calculate_overall_score(metrics: list[HealthMetric]) -> int:
+        """Calculate overall project health score.
+
+    Returns:
+        Integer representing."""
         if not metrics:
             return 0
 
@@ -730,7 +757,7 @@ class HealthCalculator:
     async def _check_npm_dependencies(package_json_path: Path) -> tuple[int, int]:
         """Check npm dependencies for outdated packages."""
         try:
-            with open(package_json_path) as f:
+            with open(package_json_path, encoding="utf-8") as f:
                 package_data = json.load(f)
 
             deps = package_data.get("dependencies", {})
@@ -765,7 +792,6 @@ class HealthCalculator:
     async def _check_rust_dependencies(cargo_toml_path: Path) -> tuple[int, int]:
         """Check Rust/Cargo dependencies."""
         try:
-            import toml
 
             content = toml.load(cargo_toml_path)
             deps = content.get("dependencies", {})
@@ -779,7 +805,10 @@ class HealthCalculator:
 
     @staticmethod
     def _get_dependencies_from_toml(content: str) -> tuple[list[str], list[str]]:
-        """Extract dependencies from Cargo.toml content."""
+        """Extract dependencies from Cargo.toml content.
+
+    Returns:
+        List of the requested data."""
         dependencies = []
         dev_dependencies = []
         in_deps_section = False
@@ -859,8 +888,11 @@ class HealthCalculator:
             return 50  # Default on error
 
     @staticmethod
-    def get_health_summary(health: ProjectHealth) -> dict[str, Any]:
-        """Get a summary of project health."""
+    def get_health_summary(health: ProjectHealth) -> dict[str, object]:
+        """Get a summary of project health.
+
+    Returns:
+        Dict containing health status information."""
         return {
             "overall": {
                 "score": health.overall_score,

@@ -1,13 +1,6 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
 
-"""Generic base batch processor for handling items in batches.
-
-This module provides a thread-safe, async-compatible base class for
-batch processing various types of items with configurable size and time limits.
-"""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -18,9 +11,19 @@ from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, Generic, TypeVar
-
+from typing import object, Generic, TypeVar
 from libs.core.mixins import StatisticsProviderMixin
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Generic base batch processor for handling items in batches.
+
+This module provides a thread-safe, async-compatible base class for
+batch processing various types of items with configurable size and time limits.
+"""
+
+
 
 # Type variable for generic batch items
 T = TypeVar("T")
@@ -70,6 +73,9 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
             batch_size: Maximum number of items per batch
             flush_interval: Maximum time (seconds) before forcing a flush
             max_pending_batches: Maximum number of pending batches before blocking
+
+        Returns:
+        None: Description of return value.
         """
         self.batch_size = batch_size
         self.flush_interval = flush_interval
@@ -122,6 +128,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
 
         Args:
             item: Item to add to the batch
+
         """
         with self._lock:
             self._pending_items.append(item)
@@ -135,6 +142,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         """Flush pending items to a batch.
 
         Must be called while holding the lock.
+
         """
         if not self._pending_items:
             return
@@ -229,7 +237,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
                 self.logger.error(f"Error in processing loop: {e}", exc_info=True)  # noqa: G004
                 await asyncio.sleep(1.0)  # Back off on error
 
-    def get_statistics(self) -> dict[str, Any]:
+    def get_statistics(self) -> dict[str, object]:
         """Get current batch processor statistics.
 
         Returns:
@@ -278,5 +286,9 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         return False
 
     def __repr__(self) -> str:
-        """String representation of the batch processor."""
+        """String representation of the batch processor.
+
+        Returns:
+        str: Description of return value.
+        """
         return f"{self.__class__.__name__}(batch_size={self.batch_size}, flush_interval={self.flush_interval}, running={self._running})"

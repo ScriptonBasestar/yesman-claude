@@ -1,15 +1,17 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""WebSocket connection test script."""
+# Copyright notice.
 
 import asyncio
 import contextlib
 import json
 from datetime import UTC, datetime
-
 import websockets
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""WebSocket connection test script."""
+
+
 
 
 async def test_websocket_connection(uri: str, channel: str) -> None:

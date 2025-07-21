@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Asynchronous logger with queue-based processing for high performance - Refactored version."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -16,11 +12,16 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from libs.core.mixins import StatisticsProviderMixin
-
 from .batch_processor import BatchProcessor
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Asynchronous logger with queue-based processing for high performance - Refactored version."""
+
+
+
 
 
 class LogLevel(Enum):
@@ -50,12 +51,12 @@ class LogEntry:
     module: str = ""
     function: str = ""
     line_number: int = 0
-    thread_id: int = field(default_factory=lambda: threading.get_ident())
-    process_id: int = field(default_factory=lambda: os.getpid())
-    extra_data: dict[str, object] = field(default_factory=dict)
+    thread_id: int = field(default_factory=threading.get_ident)
+    process_id: int = field(default_factory=os.getpid)
+    extra_data: dict[str] = field(default_factory=dict)
     exception_info: str | None = None
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str]:
         """Convert log entry to dictionary for serialization."""
         return {
             "level": self.level.level_name,
@@ -141,7 +142,7 @@ class AsyncLogger(StatisticsProviderMixin):
         # Lock for thread-safe operations
         self._stats_lock = threading.Lock()
 
-    def get_statistics(self) -> dict[str, object]:
+    def get_statistics(self) -> dict[str]:
         """Get logger statistics - implements StatisticsProviderMixin interface."""
         batch_stats = {}
         if self.batch_processor:
@@ -332,27 +333,27 @@ class AsyncLogger(StatisticsProviderMixin):
     # Convenience methods for different log levels
     async def trace(self, message: str, **kwargs: object) -> None:
         """Log a trace message."""
-        await self._log(LogLevel.TRACE, message, **kwargs)
+        await self._log(LogLevel.TRACE, message, **kwargs: dict[str, object])
 
     async def debug(self, message: str, **kwargs: object) -> None:
         """Log a debug message."""
-        await self._log(LogLevel.DEBUG, message, **kwargs)
+        await self._log(LogLevel.DEBUG, message, **kwargs: dict[str, object])
 
     async def info(self, message: str, **kwargs: object) -> None:
         """Log an info message."""
-        await self._log(LogLevel.INFO, message, **kwargs)
+        await self._log(LogLevel.INFO, message, **kwargs: dict[str, object])
 
     async def warning(self, message: str, **kwargs: object) -> None:
         """Log a warning message."""
-        await self._log(LogLevel.WARNING, message, **kwargs)
+        await self._log(LogLevel.WARNING, message, **kwargs: dict[str, object])
 
     async def error(self, message: str, exc_info: Exception | None = None, **kwargs: object) -> None:
         """Log an error message."""
-        await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
+        await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs: dict[str, object])
 
     async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: object) -> None:
         """Log a critical message."""
-        await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
+        await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs: dict[str, object])
 
     def set_min_level(self, level: LogLevel) -> None:
         """Set minimum log level."""

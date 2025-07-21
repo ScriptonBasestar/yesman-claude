@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
 
-"""Type definitions and type hints for Yesman-Claude."""
+# Copyright notice.
 
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Literal
-
+from typing import object, Literal
 from typing_extensions import TypedDict
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Type definitions and type hints for Yesman-Claude."""
+
+
 
 # Session-related types
 SessionName = str
@@ -78,7 +81,7 @@ class SessionInfo:
     created_at: float | None = None
     last_activity: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.created_at is None:
             self.created_at = time.time()
         if self.last_activity is None:
@@ -94,7 +97,7 @@ class WindowInfo:
     active: bool = False
     panes: list["PaneInfo"] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.panes is None:
             self.panes = []
 
@@ -122,7 +125,7 @@ class ControllerState:
     response_count: int = 0
     error_count: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.last_activity is None:
             self.last_activity = time.time()
 
@@ -148,7 +151,7 @@ class AutoResponse:
     timestamp: float
     success: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if hasattr(self, "timestamp") and self.timestamp is None:
             self.timestamp = time.time()
 
@@ -174,10 +177,10 @@ class HealthScore:
     category: HealthCategory
     score: float  # 0-100
     status: HealthStatusType
-    details: dict[str, Any]
+    details: dict[str, object]
     last_checked: float
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if hasattr(self, "last_checked") and self.last_checked is None:
             self.last_checked = time.time()
 
@@ -192,7 +195,7 @@ class ProjectHealth:
     last_updated: float
     trends: list["HealthTrend"]
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if hasattr(self, "last_updated") and self.last_updated is None:
             self.last_updated = time.time()
         if not hasattr(self, "trends") or self.trends is None:
@@ -225,16 +228,22 @@ class CacheEntry:
     access_count: int = 0
     last_accessed: float | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.last_accessed is None:
             self.last_accessed = self.created_at
 
     def is_expired(self) -> bool:
-        """Check if cache entry is expired."""
+        """Check if cache entry is expired.
+
+        Returns:
+        bool: Description of return value.
+        """
         return time.time() > (self.created_at + self.ttl)
 
     def touch(self) -> None:
-        """Update access information."""
+        """Update access information.
+
+        """
         self.access_count += 1
         self.last_accessed = time.time()
 
@@ -244,7 +253,7 @@ class APIResponse(TypedDict):
     """Standard API response structure."""
 
     success: bool
-    data: Any | None
+    data: dict[str, object] | None
     error: str | None
     timestamp: float
 
@@ -254,7 +263,7 @@ class SessionAPIData(TypedDict):
 
     session_name: str
     status: SessionStatusType
-    windows: list[dict[str, Any]]
+    windows: list[dict[str, object]]
     created_at: float | None
     last_activity: float | None
 
@@ -271,14 +280,14 @@ class ControllerAPIData(TypedDict):
 
 
 # Callback and handler types
-EventCallback = Callable[[str, dict[str, Any]], None]
+EventCallback = Callable[[str, dict[str, object]], None]
 ErrorHandler = Callable[[Exception], None]
-ValidationFunction = Callable[[Any], bool]
-TransformFunction = Callable[[Any], Any]
+ValidationFunction = Callable[[object], bool]
+TransformFunction = Callable[[object], object]
 
 # Logging types
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-LogEntry = dict[str, Any]
+LogEntry = dict[str, object]
 
 # File system types
 FilePath = str
@@ -322,7 +331,11 @@ class PerformanceMetrics:
 
     @property
     def duration(self) -> float:
-        """Get operation duration in seconds."""
+        """Get operation duration in seconds.
+
+        Returns:
+        float: Description of return value.
+        """
         return self.end_time - self.start_time
 
 
@@ -337,7 +350,7 @@ class UsageStatistics:
     uptime_seconds: float = 0
     last_reset: float = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         if self.last_reset == 0:
             self.last_reset = time.time()
 

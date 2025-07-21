@@ -1,21 +1,25 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test background tasks and WebSocket updates."""
+# Copyright notice.
 
 import asyncio
 import contextlib
 import json
 import time
 from datetime import UTC, datetime
-
 import requests
 import websockets
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Test background tasks and WebSocket updates."""
+
+
+
 
 def check_task_status() -> None:
-    """Check the status of background tasks via API."""
+    """Check the status of background tasks via API.
+
+    """
     response = requests.get("http://localhost:8000/api/tasks/status", timeout=5)
     if response.status_code == 200:
         data = response.json()
@@ -61,11 +65,11 @@ async def monitor_updates(duration: int = 60) -> None:
                             )
                         )
 
-                    elif msg_type in [
+                    elif msg_type in {
                         "session_update",
                         "health_update",
                         "activity_update",
-                    ]:
+                    }:
                         if msg_type == "session_update":
                             sessions = data.get("data", [])
                             for session in sessions[:3]:  # Show first 3

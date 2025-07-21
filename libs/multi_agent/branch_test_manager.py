@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Branch-specific test execution and result integration system."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -15,9 +11,15 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .branch_manager import BranchManager
+import re
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Branch-specific test execution and result integration system."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +63,9 @@ class TestResult:
     exit_code: int | None = None
     coverage: float | None = None
     failed_tests: list[str] = field(default_factory=list)
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str]:
         """Convert to dictionary for serialization."""
         return {
             "test_id": self.test_id,
@@ -82,7 +84,7 @@ class TestResult:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, object]) -> "TestResult":
+    def from_dict(cls, data: dict[str]) -> "TestResult":
         """Create from dictionary."""
         data["test_type"] = TestType(data["test_type"])
         data["status"] = TestStatus(data["status"])
@@ -406,7 +408,7 @@ class BranchTestManager:
                 try:
                     process.terminate()
                     await asyncio.wait_for(process.wait(), timeout=5)
-                except (ProcessLookupError, OSError, asyncio.TimeoutError):
+                except (TimeoutError, ProcessLookupError, OSError):
                     with contextlib.suppress(Exception):
                         process.kill()
 
@@ -503,7 +505,7 @@ class BranchTestManager:
         return results
 
     @staticmethod
-    async def _parse_test_output( result: TestResult, suite: TestSuite) -> None:
+    async def _parse_test_output(result: TestResult, suite: TestSuite) -> None:
         """Parse test output to extract additional information."""
         try:
             output = result.output
@@ -512,7 +514,6 @@ class BranchTestManager:
             if "pytest" in suite.command:
                 # Extract coverage information
                 if "coverage" in output.lower():
-                    import re
 
                     coverage_match = re.search(r"TOTAL.*?(\d+)%", output)
                     if coverage_match:
@@ -561,7 +562,7 @@ class BranchTestManager:
             logger.exception("Build failed for %s", branch_name)
             return False
 
-    def get_branch_test_summary(self, branch_name: str) -> dict[str, object]:
+    def get_branch_test_summary(self, branch_name: str) -> dict[str]:
         """Get test summary for a branch."""
         if branch_name not in self.branch_results:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
@@ -571,7 +572,7 @@ class BranchTestManager:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
 
         # Get latest results for each test type
-        latest_results: dict[str, object] = {}
+        latest_results: dict[str] = {}
         for result in results:
             key = f"{result.test_type.value}"
             if key not in latest_results or result.start_time > latest_results[key].start_time:
@@ -604,7 +605,7 @@ class BranchTestManager:
             "last_run": max(r.start_time for r in latest_results.values()).isoformat(),
         }
 
-    def get_all_branch_summaries(self) -> dict[str, dict[str, object]]:
+    def get_all_branch_summaries(self) -> dict[str, dict[str]]:
         """Get test summaries for all active branches."""
         summaries = {}
 
@@ -632,14 +633,14 @@ class BranchTestManager:
         name: str,
         test_type: TestType,
         command: list[str],
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         """Configure or update a test suite."""
         self.test_suites[name] = TestSuite(
             name=name,
             test_type=test_type,
             command=command,
-            **kwargs,
+            **kwargs: object,
         )
         self._save_test_configuration()
         logger.info("Configured test suite: %s", name)

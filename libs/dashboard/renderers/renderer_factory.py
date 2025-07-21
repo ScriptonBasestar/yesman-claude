@@ -1,4 +1,13 @@
-"""Copyright notice."""
+from typing import Any
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from .base_renderer import BaseRenderer, RenderFormat, WidgetType
+from .registry import RendererRegistry
+from .tauri_renderer import TauriRenderer
+from .tui_renderer import TUIRenderer
+from .web_renderer import WebRenderer
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -6,15 +15,7 @@
 Factory pattern for creating and managing dashboard renderers.
 """
 
-import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Union
 
-from .base_renderer import BaseRenderer, RenderFormat, WidgetType
-from .registry import RendererRegistry
-from .tauri_renderer import TauriRenderer
-from .tui_renderer import TUIRenderer
-from .web_renderer import WebRenderer
 
 
 class RendererFactoryError(Exception):
@@ -100,7 +101,7 @@ class RendererFactory:
                     ) from e
 
     @classmethod
-    def create(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
+    def create(cls, render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
         """Create a renderer instance for the specified format.
 
         Args:
@@ -125,7 +126,7 @@ class RendererFactory:
 
         try:
             renderer_class = cls._renderer_classes[render_format]
-            return renderer_class(**kwargs)
+            return renderer_class(**kwargs: dict[str, object])
         except Exception as e:
             msg = f"Failed to create {render_format.value} renderer: {e}"
             raise RendererInitializationError(
@@ -133,7 +134,7 @@ class RendererFactory:
             ) from e
 
     @classmethod
-    def get_singleton(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
+    def get_singleton(cls, render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
         """Get or create a singleton renderer instance.
 
         Args:
@@ -145,7 +146,7 @@ class RendererFactory:
         """
         with cls._lock:
             if render_format not in cls._instances:
-                cls._instances[render_format] = cls.create(render_format, **kwargs)
+                cls._instances[render_format] = cls.create(render_format, **kwargs: dict[str, object])
             return cls._instances[render_format]
 
     @classmethod
@@ -345,7 +346,7 @@ def render_formats(
     return results
 
 
-def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
+def create_renderer(render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
     """Create a new renderer instance.
 
     Args:
@@ -355,10 +356,10 @@ def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
     Returns:
         New renderer instance
     """
-    return RendererFactory.create(render_format, **kwargs)
+    return RendererFactory.create(render_format, **kwargs: dict[str, object])
 
 
-def get_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
+def get_renderer(render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
     """Get singleton renderer instance.
 
     Args:
@@ -368,4 +369,4 @@ def get_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
     Returns:
         Singleton renderer instance
     """
-    return RendererFactory.get_singleton(render_format, **kwargs)
+    return RendererFactory.get_singleton(render_format, **kwargs: dict[str, object])

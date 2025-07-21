@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import click
+from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Improved ls command using base command class."""
 
-from typing import object
 
-import click
 
-from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
 
 
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict[str]:
+        """Execute the command.
+
+    Returns:
+        Dict containing."""
         # Extract parameters from kwargs
 
         output_format = kwargs.get("output_format", "table")
@@ -45,15 +50,21 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         return result
 
     def _get_templates(self) -> list[str]:
-        """Get available session templates."""
+        """Get available session templates.
+
+    Returns:
+        List of the requested data."""
         try:
             return self.tmux_manager.get_templates()
         except Exception as e:
             self.logger.exception("Failed to get templates")  # noqa: G004
             return []
 
-    def _get_projects(self) -> list[dict[str, object]]:
-        """Get configured projects with details."""
+    def _get_projects(self) -> list[dict[str]]:
+        """Get configured projects with details.
+
+    Returns:
+        Dict containing the requested data."""
         try:
             projects_config = self.load_projects_config()
             sessions = projects_config.get("sessions", {})
@@ -81,7 +92,10 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
             return []
 
     def _get_project_status(self, session_name: str) -> str:
-        """Get the current status of a project session."""
+        """Get the current status of a project session.
+
+    Returns:
+        Dict containing status information."""
         try:
             if self.session_exists(session_name):
                 return "running"
@@ -89,7 +103,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         except Exception:
             return "unknown"
 
-    def _display_output(self, data: dict[str, object], output_format: str) -> None:
+    def _display_output(self, data: dict[str], output_format: str) -> None:
         """Display output in specified format."""
         if output_format == "json":
             click.echo(self.format_json(data))
@@ -101,7 +115,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         # Default table format
         self._display_table_format(data)
 
-    def _display_table_format(self, data: dict[str, object]) -> None:
+    def _display_table_format(self, data: dict[str]) -> None:
         """Display output in table format."""
         templates = data["templates"]
         projects = data["projects"]

@@ -1,24 +1,25 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Context-aware automation and workflow management commands."""
+# Copyright notice.
 
 import asyncio
 import json
 import time
 from pathlib import Path
-from typing import object
-
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
-
 from libs.automation.automation_manager import AutomationManager
 from libs.automation.context_detector import ContextType
 from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
+from libs.automation.context_detector import ContextInfo, ContextType
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Context-aware automation and workflow management commands."""
+
+
 
 
 class AutomateStatusCommand(BaseCommand):
@@ -28,8 +29,11 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, object]:  # noqa: ARG002
-        """Execute the status command."""
+    def execute(self, project_path: str = ".", **kwargs: dict[str, object]) -> dict[str]:  # noqa: ARG002
+        """Execute the status command.
+
+    Returns:
+        Dict containing."""
         try:
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
@@ -120,8 +124,11 @@ class AutomateStatusCommand(BaseCommand):
             raise CommandError(msg) from e
 
     @staticmethod
-    def _format_duration( seconds: float) -> str:
-        """Format duration in human readable format."""
+    def _format_duration(seconds: float) -> str:
+        """Format duration in human readable format.
+
+    Returns:
+        String containing."""
         if seconds < 60:
             return f"{int(seconds)}s"
         if seconds < 3600:
@@ -138,8 +145,11 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, object]:  # noqa: ARG002
-        """Execute the monitor command."""
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: dict[str, object]) -> dict[str]:  # noqa: ARG002
+        """Execute the monitor command.
+
+    Returns:
+        Dict containing."""
         try:
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
@@ -195,9 +205,12 @@ class AutomateTriggerCommand(BaseCommand):
         project_path: str = ".",
         context_type: str | None = None,
         description: str = "Manual trigger",
-        **kwargs,  # noqa: ARG002
-    ) -> dict[str, object]:
-        """Execute the trigger command."""
+        **kwargs: object,  # noqa: ARG002
+    ) -> dict[str]:
+        """Execute the trigger command.
+
+    Returns:
+        Dict containing."""
         if not context_type:
             msg = "Context type is required"
             raise CommandError(msg)
@@ -214,9 +227,7 @@ class AutomateTriggerCommand(BaseCommand):
 
             # Simulate context detection
             async def trigger_automation():
-                import time
 
-                from libs.automation.context_detector import ContextInfo
 
                 # Create a context info object
                 context_info = ContextInfo(context_type=context_enum, confidence=1.0, details={"description": description, "manual": True}, timestamp=time.time())
@@ -250,8 +261,11 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs) -> dict[str, object]:
-        """Execute the workflow command."""
+    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: dict[str, object]) -> dict[str]:
+        """Execute the workflow command.
+
+    Returns:
+        Dict containing."""
         # Handle workflow_name from kwargs if not provided as positional argument
         if workflow_name is None:
             workflow_name = kwargs.get("workflow_name")
@@ -267,9 +281,7 @@ class AutomateExecuteCommand(BaseCommand):
             self.console.print(f"⚡ Executing workflow: {workflow_name}")
 
             async def run_workflow():
-                import time
 
-                from libs.automation.context_detector import ContextInfo, ContextType
 
                 # Create a dummy context for manual execution
                 context_info = ContextInfo(context_type=ContextType.UNKNOWN, confidence=1.0, details={"manual_execution": True, "workflow_name": workflow_name}, timestamp=time.time())
@@ -307,8 +319,11 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, object]:  # noqa: ARG002
-        """Execute the detect command."""
+    def execute(self, project_path: str = ".", **kwargs: dict[str, object]) -> dict[str]:  # noqa: ARG002
+        """Execute the detect command.
+
+    Returns:
+        Dict containing."""
         try:
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
@@ -381,8 +396,11 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict[str, object]:  # noqa: ARG002
-        """Execute the config command."""
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: dict[str, object]) -> dict[str]:  # noqa: ARG002
+        """Execute the config command.
+
+    Returns:
+        Dict containing."""
         try:
             # Generate sample workflow configuration
             sample_config = {

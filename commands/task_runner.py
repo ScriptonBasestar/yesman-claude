@@ -1,5 +1,18 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import sys
+from pathlib import Path
+import click
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
+# Add libs to path for imports
+from libs.core.base_command import BaseCommand, CommandError
+from libs.task_runner import TaskRunner
+from libs.task_runner import TodoFile
+from libs.task_runner import TodoFile
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -13,25 +26,20 @@ Implements the TASK_RUNNER.todo prompt workflow:
 4. Commit changes and move completed files
 """
 
-import os
-import sys
-from pathlib import Path
 
-import click
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
 
-# Add libs to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from libs.core.base_command import BaseCommand, CommandError
-from libs.task_runner import TaskRunner
 
 
 class TaskRunnerNextCommand(BaseCommand):
     """Process the next available task."""
 
-    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
-        """Execute the next command."""
+    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs: dict[str, object]) -> dict:  # noqa: FBT001, ARG002
+        """Execute the next command.
+
+    Returns:
+        Dict containing."""
         try:
             runner = TaskRunner()
             success = runner.process_next_task(directory)
@@ -55,9 +63,12 @@ class TaskRunnerRunCommand(BaseCommand):
         directory: str | None = None,
         max_iterations: int = 100,
         dry_run: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the run command."""
+        """Execute the run command.
+
+    Returns:
+        Dict containing."""
         try:
             runner = TaskRunner()
 
@@ -75,7 +86,6 @@ class TaskRunnerRunCommand(BaseCommand):
                     description="📁 Analyzing todo files...",
                     style="bold cyan",
                 ):
-                    from libs.task_runner import TodoFile
 
                     todo_file = TodoFile(str(file_path))
                     incomplete_tasks = [t for t in todo_file.tasks if not t.completed and not t.skipped]
@@ -114,8 +124,11 @@ class TaskRunnerRunCommand(BaseCommand):
 class TaskRunnerStatusCommand(BaseCommand):
     """Show current task status."""
 
-    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
-        """Execute the status command."""
+    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs: dict[str, object]) -> dict:  # noqa: FBT001, ARG002
+        """Execute the status command.
+
+    Returns:
+        Dict containing."""
         try:
             runner = TaskRunner()
             todo_files = runner.find_todo_files(directory)
@@ -134,7 +147,6 @@ class TaskRunnerStatusCommand(BaseCommand):
             self.print_info("=" * 50)
 
             for file_path in todo_files:
-                from libs.task_runner import TodoFile
 
                 todo_file = TodoFile(str(file_path))
 
@@ -198,8 +210,11 @@ class TaskRunnerStatusCommand(BaseCommand):
 class TaskRunnerAddCommand(BaseCommand):
     """Add a new task to a todo file."""
 
-    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the add command."""
+    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the add command.
+
+    Returns:
+        Dict containing."""
         if not task or not file_path:
             msg = "Both --task and --file options are required"
             raise CommandError(msg)

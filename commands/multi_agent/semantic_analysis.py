@@ -1,18 +1,19 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Semantic analysis and merging commands."""
+# Copyright notice.
 
 import asyncio
 import logging
-from typing import object
-
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 from libs.multi_agent.semantic_merger import MergeStrategy, SemanticMerger
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Semantic analysis and merging commands."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +30,12 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         language: str = "python",
         repo_path: str | None = None,
         **kwargs: object,
-    ) -> dict[str, object]:
-        """Execute the analyze semantic conflicts command."""
+    ) -> dict[str]:
+        """Execute the analyze semantic conflicts command.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             # Handle files parameter from kwargs if not provided as positional argument
             if files is None:
@@ -101,8 +106,12 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: object) -> dict[str, object]:  # noqa: ARG002
-        """Execute the semantic summary command."""
+    def execute(self, repo_path: str | None = None, **kwargs: object) -> dict[str]:  # noqa: ARG002
+        """Execute the semantic summary command.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             self.print_info("🧠 Semantic Analysis Summary")
             self.print_info("=" * 40)
@@ -126,8 +135,12 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: object) -> dict[str, object]:  # noqa: ARG002
-        """Execute the function diff command."""
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: object) -> dict[str]:  # noqa: ARG002
+        """Execute the function diff command.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             # Handle file parameters from kwargs if not provided as positional arguments
             if file1 is None:
@@ -180,8 +193,12 @@ class SemanticMergeCommand(BaseCommand):
         language: str = "python",  # noqa: ARG002
         strategy: str = "auto",
         **kwargs: object,
-    ) -> dict[str, object]:
-        """Execute the semantic merge command."""
+    ) -> dict[str]:
+        """Execute the semantic merge command.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             # Handle file parameters from kwargs if not provided as positional arguments
             if source_file is None:
@@ -210,7 +227,7 @@ class SemanticMergeCommand(BaseCommand):
             async def run_merge():
                 result = await merger.perform_semantic_merge(file_path=target_file, branch1="current", branch2="other", strategy=merge_strategy)
 
-                success = result.resolution.value in ["auto_resolved", "partial_resolution"]
+                success = result.resolution.value in {"auto_resolved", "partial_resolution"}
                 if success:
                     self.print_success("✅ Semantic merge completed successfully!")
                     self.print_info(f"   Resolution: {result.resolution.value}")

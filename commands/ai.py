@@ -1,23 +1,25 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""AI learning system management commands."""
+# Copyright notice.
 
 import asyncio
 import time
 from pathlib import Path
 from typing import Any
-
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-
 from libs.ai.adaptive_response import AdaptiveResponse
 from libs.ai.response_analyzer import ResponseAnalyzer
 from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""AI learning system management commands."""
+
+
+
 
 
 class AIStatusCommand(BaseCommand):
@@ -29,7 +31,9 @@ class AIStatusCommand(BaseCommand):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions."""
+        """Validate command preconditions.
+
+        """
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -37,11 +41,15 @@ class AIStatusCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:  # noqa: ARG002
-        """Execute the status command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+        """Execute the status command.
+
+        Returns:
+        dict: Description of return value.
+        """
         try:
             # Get statistics
-            stats: dict[str, Any] = self.adaptive.get_learning_statistics()
+            stats: dict[str, object] = self.adaptive.get_learning_statistics()
 
             # Create status table
             table = Table(title="🤖 AI Learning System Status", show_header=True)
@@ -115,7 +123,9 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions."""
+        """Validate command preconditions.
+
+        """
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -123,8 +133,12 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+        Returns:
+        dict: Description of return value.
+        """
         # Extract parameters from kwargs
 
         threshold = kwargs.get("threshold")
@@ -172,7 +186,9 @@ class AIHistoryCommand(BaseCommand):
         self.analyzer: ResponseAnalyzer | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions."""
+        """Validate command preconditions.
+
+        """
         super().validate_preconditions()
         try:
             self.analyzer = ResponseAnalyzer()
@@ -180,8 +196,12 @@ class AIHistoryCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+        Returns:
+        dict: Description of return value.
+        """
         # Extract parameters from kwargs
 
         limit = kwargs.get("limit", 10)
@@ -238,7 +258,9 @@ class AIExportCommand(BaseCommand):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions."""
+        """Validate command preconditions.
+
+        """
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -246,8 +268,12 @@ class AIExportCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+        Returns:
+        dict: Description of return value.
+        """
         # Extract parameters from kwargs
 
         output = kwargs.get("output")
@@ -274,7 +300,9 @@ class AICleanupCommand(BaseCommand):
         self.analyzer: ResponseAnalyzer | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions."""
+        """Validate command preconditions.
+
+        """
         super().validate_preconditions()
         try:
             self.analyzer = ResponseAnalyzer()
@@ -282,8 +310,12 @@ class AICleanupCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+        Returns:
+        dict: Description of return value.
+        """
         # Extract parameters from kwargs
 
         days = kwargs.get("days", 30)
@@ -308,7 +340,9 @@ class AIPredictCommand(BaseCommand):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions."""
+        """Validate command preconditions.
+
+        """
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -316,8 +350,12 @@ class AIPredictCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+        Returns:
+        dict: Description of return value.
+        """
         # Extract parameters from kwargs
 
         prompt_text = kwargs["prompt_text"]
@@ -368,12 +406,16 @@ class AIPredictCommand(BaseCommand):
 
 @click.group()
 def ai() -> None:
-    """AI learning system management."""
+    """AI learning system management.
+
+    """
 
 
 @ai.command()
 def status() -> None:
-    """Show AI learning system status."""
+    """Show AI learning system status.
+
+    """
     command = AIStatusCommand()
     command.run()
 
@@ -387,7 +429,9 @@ def status() -> None:
 )
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
 def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:  # noqa: FBT001
-    """Configure AI learning system settings."""
+    """Configure AI learning system settings.
+
+    """
     command = AIConfigCommand()
     command.run(threshold=threshold, auto_response=auto_response, learning=learning)
 
@@ -397,7 +441,9 @@ def config(threshold: float | None, auto_response: bool | None, learning: bool |
 @click.option("--type", "-t", help="Filter by prompt type")
 @click.option("--project", "-p", help="Filter by project name")
 def history(limit: int, type: str | None, project: str | None) -> None:
-    """Show AI response history."""
+    """Show AI response history.
+
+    """
     command = AIHistoryCommand()
     command.run(limit=limit, type=type, project=project)
 
@@ -405,7 +451,9 @@ def history(limit: int, type: str | None, project: str | None) -> None:
 @ai.command()
 @click.option("--output", "-o", help="Output file path for exported data")
 def export(output: str | None) -> None:
-    """Export AI learning data."""
+    """Export AI learning data.
+
+    """
     command = AIExportCommand()
     command.run(output=output)
 
@@ -413,7 +461,9 @@ def export(output: str | None) -> None:
 @ai.command()
 @click.option("--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)")
 def cleanup(days: int) -> None:
-    """Clean up old AI learning data."""
+    """Clean up old AI learning data.
+
+    """
     command = AICleanupCommand()
     command.run(days=days)
 
@@ -423,7 +473,9 @@ def cleanup(days: int) -> None:
 @click.option("--context", "-c", default="", help="Context for the prompt")
 @click.option("--project", "-p", help="Project name")
 def predict(prompt_text: str, context: str, project: str | None) -> None:
-    """Predict response for a given prompt."""
+    """Predict response for a given prompt.
+
+    """
     command = AIPredictCommand()
     command.run(prompt_text=prompt_text, context=context, project=project)
 

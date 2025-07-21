@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+from abc import ABC, abstractmethod
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -11,8 +15,6 @@ These mixins provide standardized interfaces for common patterns:
 - Layout creation and updates
 """
 
-from abc import ABC, abstractmethod
-from typing import object
 
 
 class StatisticsProviderMixin(ABC):
@@ -20,11 +22,11 @@ class StatisticsProviderMixin(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_statistics() -> dict[str, object]:
+    def get_statistics() -> dict[str]:
         """Get statistics information from the implementing class.
 
         Returns:
-            dict[str, object]: Dictionary containing statistics data.
+            dict[str]: Dictionary containing statistics data.
                            The structure depends on the implementing class.
 
         Example:
@@ -54,6 +56,7 @@ class StatusManagerMixin(ABC):
 
         Raises:
             ValueError: If the status value is invalid
+
         """
         msg = "Subclasses must implement update_status()"
         raise NotImplementedError(msg)
@@ -70,6 +73,7 @@ class StatusManagerMixin(ABC):
         Example:
             update_activity("Processing batch 5 of 10")
             update_activity("Waiting for user input")
+
         """
         msg = "Subclasses must implement update_activity()"
         raise NotImplementedError(msg)
@@ -80,7 +84,7 @@ class LayoutManagerMixin(ABC):
 
     @abstractmethod
     @staticmethod
-    def create_layout() -> Any:
+    def create_layout() -> object:
         """Create and return a layout object.
 
         Returns:
@@ -103,6 +107,7 @@ class LayoutManagerMixin(ABC):
         Raises:
             TypeError: If the layout type doesn't match expected type
             ValueError: If the layout configuration is invalid
+
         """
         msg = "Subclasses must implement update_layout()"
         raise NotImplementedError(msg)
@@ -119,8 +124,12 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
             "failed_operations": 0,
         }
 
-    def get_statistics(self) -> dict[str, object]:
-        """Get current statistics with calculated success rate."""
+    def get_statistics(self) -> dict[str]:
+        """Get current statistics with calculated success rate.
+
+        Returns:
+        object: Description of return value.
+        """
         stats = self._statistics.copy()
         total = stats["total_operations"]
         if total > 0:
@@ -130,7 +139,9 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
         return stats
 
     def _increment_stat(self, stat_name: str, value: int = 1) -> None:
-        """Helper method to increment statistics counters."""
+        """Helper method to increment statistics counters.
+
+        """
         if stat_name in self._statistics:
             self._statistics[stat_name] += value
 
@@ -145,14 +156,18 @@ class DefaultStatusManagerMixin(StatusManagerMixin):
         self._activity = "No activity"
 
     def update_status(self, status: str) -> None:
-        """Update status with validation."""
+        """Update status with validation.
+
+        """
         if status not in self.VALID_STATUSES:
             msg = f"Invalid status: {status}. Must be one of {self.VALID_STATUSES}"
             raise ValueError(msg)
         self._status = status
 
     def update_activity(self, activity: str) -> None:
-        """Update current activity description."""
+        """Update current activity description.
+
+        """
         if not activity or not isinstance(activity, str):
             msg = "Activity must be a non-empty string"
             raise ValueError(msg)
@@ -160,10 +175,18 @@ class DefaultStatusManagerMixin(StatusManagerMixin):
 
     @property
     def current_status(self) -> str:
-        """Get current status."""
+        """Get current status.
+
+        Returns:
+        str: Description of return value.
+        """
         return self._status
 
     @property
     def current_activity(self) -> str:
-        """Get current activity."""
+        """Get current activity.
+
+        Returns:
+        str: Description of return value.
+        """
         return self._activity

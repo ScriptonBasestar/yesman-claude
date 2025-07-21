@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Batch log processor for optimized I/O operations - Refactored version."""
+# Copyright notice.
 
 import gzip
 import json
@@ -11,26 +7,36 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 from libs.core.base_batch_processor import BaseBatchProcessor
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Batch log processor for optimized I/O operations - Refactored version."""
+
+
 
 
 @dataclass
 class LogBatch:
     """A batch of log entries to be processed together."""
 
-    entries: list[dict[str, Any]]
+    entries: list[dict[str, object]]
     timestamp: float
     batch_id: str
     size_bytes: int = 0
 
-    def __post_init__(self):
-        """Calculate size after initialization."""
+    def __post_init__(self) -> object:
+        """Calculate size after initialization.
+
+        Returns:
+        object: Description of return value.
+        """
         if not self.size_bytes:
             self.size_bytes = sum(len(str(entry)) for entry in self.entries)
 
 
-class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
+class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
     """Processes log entries in batches for optimized I/O."""
 
     def __init__(
@@ -49,6 +55,9 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
             max_file_size: Maximum size of a single log file
             compression_enabled: Whether to enable gzip compression
             output_dir: Directory to write log files
+
+        Returns:
+        None: Description of return value.
         """
         # Initialize base class
         super().__init__(
@@ -78,8 +87,12 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
 
         self.logger = logging.getLogger("yesman.batch_processor")
 
-    def create_batch(self, items: list[dict[str, Any]]) -> LogBatch:
-        """Create a LogBatch from log entries."""
+    def create_batch(self, items: list[dict[str, object]]) -> LogBatch:
+        """Create a LogBatch from log entries.
+
+        Returns:
+        LogBatch: Description of return value.
+        """
         # Add timestamp if not present
         for entry in items:
             if "timestamp" not in entry:
@@ -161,12 +174,18 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
 
         self.logger.info(f"Rotated to new log file: {self.current_log_file}")  # noqa: G004
 
-    def add_entry(self, entry: dict[str, Any]) -> None:
-        """Add a log entry to the processing queue."""
+    def add_entry(self, entry: dict[str, object]) -> None:
+        """Add a log entry to the processing queue.
+
+        """
         self.add(entry)
 
-    def get_statistics(self) -> dict[str, Any]:
-        """Get processing statistics."""
+    def get_statistics(self) -> dict[str, object]:
+        """Get processing statistics.
+
+        Returns:
+        object: Description of return value.
+        """
         # Get base statistics
         base_stats = super().get_statistics()
 
@@ -229,8 +248,12 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
 
         return batches
 
-    def get_recent_entries(self, limit: int = 100) -> list[dict[str, Any]]:
-        """Get recent log entries from memory (pending entries)."""
+    def get_recent_entries(self, limit: int = 100) -> list[dict[str, object]]:
+        """Get recent log entries from memory (pending entries).
+
+        Returns:
+        object: Description of return value.
+        """
         with self._lock:
             recent = list(self._pending_items)
             return recent[-limit:] if len(recent) > limit else recent

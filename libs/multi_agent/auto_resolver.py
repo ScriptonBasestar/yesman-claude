@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Automated conflict resolution system integrating semantic analysis and intelligent merging."""
+# Copyright notice.
 
 import ast
 import logging
@@ -11,17 +7,23 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
 from .conflict_resolution import (
+from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType
+from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
+                # ast is imported at module level
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Automated conflict resolution system integrating semantic analysis and intelligent merging."""
+
+
     ConflictResolutionEngine,
     ConflictSeverity,
     ResolutionStrategy,
 )
-from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType
-from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +85,7 @@ class AutoResolutionResult:
     manual_intervention_required: list[str] = field(default_factory=list)
 
     # Metadata
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
     resolved_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -135,8 +137,8 @@ class AutoResolver:
 
         # Resolution history and learning
         self.resolution_history: list[AutoResolutionResult] = []
-        self.success_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
-        self.failure_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
+        self.success_patterns: defaultdict[str, list[dict[str]]] = defaultdict(list)
+        self.failure_patterns: defaultdict[str, list[dict[str]]] = defaultdict(list)
 
         # Performance tracking
         self.resolution_stats = {
@@ -282,7 +284,7 @@ class AutoResolver:
         self,
         branches: list[str],
         prevention_mode: AutoResolutionMode = AutoResolutionMode.PREDICTIVE,
-    ) -> dict[str, object]:
+    ) -> dict[str]:
         """Use prediction to prevent conflicts before they occur.
 
         Args:
@@ -357,14 +359,14 @@ class AutoResolver:
 
             # Conservative mode: only resolve very low-risk conflicts
             if mode == AutoResolutionMode.CONSERVATIVE:
-                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity in [ConflictSeverity.LOW]:
+                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity in {ConflictSeverity.LOW}:
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
 
             # Balanced mode: resolve low-medium risk with good suggestions
             elif mode == AutoResolutionMode.BALANCED:
-                if risk_score <= BALANCED_RISK_THRESHOLD and conflict.severity in [ConflictSeverity.LOW, ConflictSeverity.MEDIUM] and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED:
+                if risk_score <= BALANCED_RISK_THRESHOLD and conflict.severity in {ConflictSeverity.LOW, ConflictSeverity.MEDIUM} and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED:
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
@@ -427,7 +429,7 @@ class AutoResolver:
         threshold = self.confidence_thresholds[mode]
 
         for result in merge_results:
-            if result.merge_confidence >= threshold and result.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION] and result.semantic_integrity:
+            if result.merge_confidence >= threshold and result.resolution in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION} and result.semantic_integrity:
                 filtered_results.append(result)
             else:
                 logger.info("Filtering out merge result for %s due to low confidence or integrity issues", result.file_path)
@@ -451,7 +453,7 @@ class AutoResolver:
         return validated
 
     @staticmethod
-    async def _validate_single_merge_result( result: MergeResult) -> bool:
+    async def _validate_single_merge_result(result: MergeResult) -> bool:
         """Validate a single merge result."""
         # Check semantic integrity
         if not result.semantic_integrity:
@@ -464,7 +466,6 @@ class AutoResolver:
         # Validate AST if it's Python code
         if result.file_path.endswith(".py"):
             try:
-                # ast is imported at module level
 
                 ast.parse(result.merged_content)
             except SyntaxError:
@@ -557,12 +558,12 @@ class AutoResolver:
     def _generate_prevention_strategies(
         self,
         predictions: list[PredictionResult],
-    ) -> list[dict[str, object]]:
+    ) -> list[dict[str]]:
         """Generate strategies to prevent predicted conflicts."""
         strategies = []
 
         for prediction in predictions:
-            strategy: dict[str, object] = {
+            strategy: dict[str] = {
                 "prediction_id": prediction.prediction_id,
                 "pattern": prediction.pattern.value,
                 "prevention_suggestions": prediction.prevention_suggestions[:],  # Copy the list
@@ -586,8 +587,8 @@ class AutoResolver:
     async def _apply_preventive_measures(
         self,
         predictions: list[PredictionResult],  # noqa: ARG002
-        strategies: list[dict[str, object]],
-    ) -> list[dict[str, object]]:
+        strategies: list[dict[str]],
+    ) -> list[dict[str]]:
         """Apply automated preventive measures."""
         applied_measures = []
 
@@ -618,21 +619,21 @@ class AutoResolver:
     async def _apply_preventive_measure(
         self,
         measure: str,
-        strategy: dict[str, object],  # noqa: ARG002
+        strategy: dict[str],  # noqa: ARG002
     ) -> bool:
         """Apply a specific preventive measure."""
         # This would implement actual preventive measures
         # For now, just simulate success for certain measures
-        return measure in ["standardize_import_order", "add_import_sorting_hooks"]
+        return measure in {"standardize_import_order", "add_import_sorting_hooks"}
 
     def _update_resolution_stats(self, result: AutoResolutionResult) -> None:
         """Update resolution statistics."""
         self.resolution_stats["total_sessions"] += 1
 
-        if result.outcome in [
+        if result.outcome in {
             ResolutionOutcome.FULLY_RESOLVED,
             ResolutionOutcome.PARTIALLY_RESOLVED,
-        ]:
+        }:
             self.resolution_stats["successful_resolutions"] += 1
 
         if result.outcome == ResolutionOutcome.FULLY_RESOLVED:
@@ -660,10 +661,10 @@ class AutoResolver:
     ) -> None:
         """Learn from resolution results to improve future performance."""
         # Record successful patterns
-        if result.outcome in [
+        if result.outcome in {
             ResolutionOutcome.FULLY_RESOLVED,
             ResolutionOutcome.PARTIALLY_RESOLVED,
-        ]:
+        }:
             for conflict in conflicts:
                 if conflict.conflict_id not in result.escalated_conflicts:
                     pattern_key = f"{conflict.conflict_type.value}_{conflict.severity.value}"
@@ -687,7 +688,7 @@ class AutoResolver:
                     },
                 )
 
-    def get_resolution_summary(self) -> dict[str, object]:
+    def get_resolution_summary(self) -> dict[str]:
         """Get comprehensive summary of auto-resolution performance."""
         return {
             "performance_stats": self.resolution_stats.copy(),
@@ -709,7 +710,7 @@ class AutoResolver:
             "recommendations": self._generate_performance_recommendations(),
         }
 
-    def _analyze_mode_performance(self) -> dict[str, object]:
+    def _analyze_mode_performance(self) -> dict[str]:
         """Analyze performance by resolution mode."""
         mode_stats: defaultdict[str, dict[str, float]] = defaultdict(
             lambda: {
@@ -724,10 +725,10 @@ class AutoResolver:
             mode = result.mode.value
             mode_stats[mode]["sessions"] += 1
 
-            if result.outcome in [
+            if result.outcome in {
                 ResolutionOutcome.FULLY_RESOLVED,
                 ResolutionOutcome.PARTIALLY_RESOLVED,
-            ]:
+            }:
                 mode_stats[mode]["success_rate"] += 1
 
             mode_stats[mode]["average_confidence"] += result.confidence_score

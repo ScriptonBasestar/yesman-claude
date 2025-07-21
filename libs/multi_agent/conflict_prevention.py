@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Predictive conflict prevention system for proactive multi-agent development."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -12,12 +8,17 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
 from .conflict_prediction import (
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Predictive conflict prevention system for proactive multi-agent development."""
+
+
     ConflictPattern,
     ConflictPredictor,
     PredictionConfidence,
@@ -76,7 +77,7 @@ class PreventionMeasure:
     effectiveness: float | None = None  # measured post-application
 
     # Metadata
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -103,7 +104,7 @@ class PreventionResult:
     analysis_overhead: float = 0.0
 
     # Metadata
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
     executed_at: datetime = field(default_factory=datetime.now)
 
 
@@ -126,7 +127,7 @@ class ConflictPreventionSystem:
             collaboration_engine: For coordinating agent actions
             branch_manager: For branch operations
             repo_path: Path to git repository
-        
+
         Returns:
             Description of return value
         """
@@ -562,7 +563,7 @@ class ConflictPreventionSystem:
                     branch2=measure.target_branches[1],
                     mode=AutoResolutionMode.PREDICTIVE,
                 )
-                return result.outcome in ["fully_resolved", "partially_resolved"]
+                return result.outcome in {"fully_resolved", "partially_resolved"}
         except Exception:
             logger.exception("Early merge failed")
         return False
@@ -663,7 +664,7 @@ class ConflictPreventionSystem:
             logger.exception("Error getting active branches")
             return []
 
-    def get_prevention_summary(self) -> dict[str, object]:
+    def get_prevention_summary(self) -> dict[str]:
         """Get summary of prevention system status and performance."""
         active_measures_count = len(self.active_measures)
         recent_results = self.prevention_history[-10:] if self.prevention_history else []

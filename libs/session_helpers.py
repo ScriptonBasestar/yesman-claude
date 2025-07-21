@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import logging
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+import libtmux
+from libtmux.exc import LibTmuxException
+from libs.core.error_handling import ErrorCategory, ErrorContext, YesmanError
+from libs.validation import validate_session_name
+import copy
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,17 +22,8 @@ This module provides common functions for working with tmux sessions,
 windows, and panes across the Yesman-Claude project.
 """
 
-import logging
-import os
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any
 
-import libtmux
-from libtmux.exc import LibTmuxException
 
-from libs.core.error_handling import ErrorCategory, ErrorContext, YesmanError
-from libs.validation import validate_session_name
 
 logger = logging.getLogger(__name__)
 
@@ -208,7 +212,7 @@ def get_session_info(session_name: str, server: libtmux.Server | None = None) ->
 
 def create_session_windows(
     session_name: str,
-    windows_config: list[dict[str, Any]],
+    windows_config: list[dict[str, object]],
     start_directory: str | None = None,
     server: libtmux.Server | None = None,
 ) -> libtmux.Session:
@@ -453,7 +457,7 @@ def list_session_windows(session_name: str, server: libtmux.Server | None = None
     return session_info.windows
 
 
-def merge_template_override(template_config: dict[str, Any], override_config: dict[str, Any]) -> dict[str, Any]:
+def merge_template_override(template_config: dict[str, object], override_config: dict[str, object]) -> dict[str, object]:
     """Merge template configuration with override configuration.
 
     Override values take precedence over template values.
@@ -465,7 +469,6 @@ def merge_template_override(template_config: dict[str, Any], override_config: di
     Returns:
         Merged configuration dictionary
     """
-    import copy
 
     # Deep copy template to avoid modifying original
     merged = copy.deepcopy(template_config)
@@ -533,7 +536,7 @@ def expand_and_validate_directory(directory: str, create_if_missing: bool = Fals
 
 def get_session_by_project(
     project_name: str,
-    projects_config: dict[str, Any],
+    projects_config: dict[str, object],
     server: libtmux.Server | None = None,
 ) -> SessionInfo | None:
     """Get session information by project name.

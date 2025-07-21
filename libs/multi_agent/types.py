@@ -1,14 +1,18 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Shared types for multi-agent system."""
+# Copyright notice.
 
 import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any
+from dataclasses import asdict
+from dataclasses import asdict
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Shared types for multi-agent system."""
+
 
 
 class AgentState(Enum):
@@ -46,7 +50,7 @@ class Task:
     priority: int = 5  # 1-10, higher is more priority
     complexity: int = 5  # 1-10, estimate of task complexity
     dependencies: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
     # Execution tracking
     status: TaskStatus = TaskStatus.PENDING
@@ -57,9 +61,11 @@ class Task:
     error: str = ""
     exit_code: int | None = None
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        from dataclasses import asdict
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary.
+
+    Returns:
+        Dict containing."""
 
         data = asdict(self)
         # Convert enums to strings
@@ -72,8 +78,11 @@ class Task:
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Task":
-        """Create from dictionary."""
+    def from_dict(cls, data: dict[str, object]) -> "Task":
+        """Create from dictionary.
+
+    Returns:
+        'Task' object."""
         # Convert status back to enum
         if "status" in data:
             data["status"] = TaskStatus(data["status"])
@@ -100,11 +109,13 @@ class Agent:
     completed_tasks: int = 0
     failed_tasks: int = 0
     total_execution_time: float = 0.0
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary (excluding process)."""
-        from dataclasses import asdict
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary (excluding process).
+
+    Returns:
+        Dict containing."""
 
         data = asdict(self)
         # Remove non-serializable fields
@@ -116,8 +127,11 @@ class Agent:
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Agent":
-        """Create from dictionary."""
+    def from_dict(cls, data: dict[str, object]) -> "Agent":
+        """Create from dictionary.
+
+    Returns:
+        'Agent' object."""
         # Convert state back to enum
         if "state" in data:
             data["state"] = AgentState(data["state"])

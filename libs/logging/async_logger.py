@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Asynchronous logger with queue-based processing for high performance."""
+# Copyright notice.
 
 import asyncio
 import inspect
@@ -16,9 +12,15 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional
-
+from typing import Optional, Any
 from .batch_processor import BatchProcessor
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Asynchronous logger with queue-based processing for high performance."""
+
+
 
 
 class LogLevel(Enum):
@@ -48,12 +50,12 @@ class LogEntry:
     module: str = ""
     function: str = ""
     line_number: int = 0
-    thread_id: int = field(default_factory=lambda: threading.get_ident())
-    process_id: int = field(default_factory=lambda: os.getpid())
-    extra_data: dict[str, Any] = field(default_factory=dict)
+    thread_id: int = field(default_factory=threading.get_ident)
+    process_id: int = field(default_factory=os.getpid)
+    extra_data: dict[str, object] = field(default_factory=dict)
     exception_info: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         return {
             "timestamp": self.timestamp,
@@ -173,7 +175,7 @@ class AsyncLogger:
         self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="async_logger")
 
         # Thread-safe logging from sync code
-        self._sync_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
+        self._sync_queue: asyncio.Queue[dict[str, object]] = asyncio.Queue()
 
     async def start(self) -> None:
         """Start the async logger."""
@@ -322,7 +324,7 @@ class AsyncLogger:
         )
 
         # Add exception info if logging an exception
-        if level in [LogLevel.ERROR, LogLevel.CRITICAL]:
+        if level in {LogLevel.ERROR, LogLevel.CRITICAL}:
             try:
                 if sys.exc_info()[0] is not None:
                     entry.exception_info = traceback.format_exc()
@@ -336,27 +338,27 @@ class AsyncLogger:
     # Convenience methods for different log levels
     def trace(self, message: str, **kwargs: object) -> None:
         """Log a trace message."""
-        self.log(LogLevel.TRACE, message, **kwargs)
+        self.log(LogLevel.TRACE, message, **kwargs: dict[str, object])
 
     def debug(self, message: str, **kwargs: object) -> None:
         """Log a debug message."""
-        self.log(LogLevel.DEBUG, message, **kwargs)
+        self.log(LogLevel.DEBUG, message, **kwargs: dict[str, object])
 
     def info(self, message: str, **kwargs: object) -> None:
         """Log an info message."""
-        self.log(LogLevel.INFO, message, **kwargs)
+        self.log(LogLevel.INFO, message, **kwargs: dict[str, object])
 
     def warning(self, message: str, **kwargs: object) -> None:
         """Log a warning message."""
-        self.log(LogLevel.WARNING, message, **kwargs)
+        self.log(LogLevel.WARNING, message, **kwargs: dict[str, object])
 
     def error(self, message: str, **kwargs: object) -> None:
         """Log an error message."""
-        self.log(LogLevel.ERROR, message, **kwargs)
+        self.log(LogLevel.ERROR, message, **kwargs: dict[str, object])
 
     def critical(self, message: str, **kwargs: object) -> None:
         """Log a critical message."""
-        self.log(LogLevel.CRITICAL, message, **kwargs)
+        self.log(LogLevel.CRITICAL, message, **kwargs: dict[str, object])
 
     # Context manager support
     async def __aenter__(self):
@@ -368,7 +370,7 @@ class AsyncLogger:
         """Async context manager exit."""
         await self.stop()
 
-    def get_statistics(self) -> dict[str, Any]:
+    def get_statistics(self) -> dict[str, object]:
         """Get logger statistics."""
         batch_stats = {}
         if self.batch_processor:

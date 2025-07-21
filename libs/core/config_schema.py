@@ -1,13 +1,14 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from pathlib import Path
+from pydantic import BaseModel, Field, field_validator
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Configuration schemas using Pydantic for type safety and validation."""
 
-from pathlib import Path
-from typing import object
 
-from pydantic import BaseModel, Field, field_validator
 
 
 class TmuxConfig(BaseModel):
@@ -34,7 +35,11 @@ class LoggingConfig(BaseModel):
     @field_validator("level")
     @classmethod
     def uppercase_level(cls, v: str) -> str:
-        """Ensure log level is uppercase."""
+        """Ensure log level is uppercase.
+
+        Returns:
+        str: Description of return value.
+        """
         return v.upper()
 
 
@@ -88,16 +93,22 @@ class YesmanConfigSchema(BaseModel):
     enable_telemetry: bool = False
 
     # Custom settings (allows flexibility)
-    custom: dict[str, object] = Field(default_factory=dict)
+    custom: dict[str] = Field(default_factory=dict)
 
     @field_validator("root_dir")
     @classmethod
     def expand_path(cls, v: str) -> str:
-        """Expand user home directory in paths."""
+        """Expand user home directory in paths.
+
+        Returns:
+        str: Description of return value.
+        """
         return str(Path(v).expanduser())
 
     def model_post_init(self, __context: object) -> None:
-        """Post-initialization validation and setup."""
+        """Post-initialization validation and setup.
+
+        """
         # Expand paths in nested configs
         if self.logging.log_path:
             self.logging.log_path = str(Path(self.logging.log_path).expanduser())

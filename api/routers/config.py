@@ -1,11 +1,14 @@
-"""Copyright notice."""
+from typing import Any
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from libs.core.services import get_config, get_tmux_manager
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
-from libs.core.services import get_config, get_tmux_manager
 
 
 # API 응답을 위한 Pydantic 모델
@@ -20,8 +23,12 @@ router = APIRouter()
 
 
 @router.get("/config", response_model=AppConfig)
-def get_app_config():
-    """애플리케이션의 현재 설정을 조회합니다."""
+def get_app_config() -> object:
+    """애플리케이션의 현재 설정을 조회합니다.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         # DI 컨테이너에서 YesmanConfig 인스턴스를 가져옵니다.
         config_manager = get_config()
@@ -35,7 +42,9 @@ def get_app_config():
 #       YesmanConfig에 save 메서드를 추가해야 합니다.
 @router.post("/config", status_code=204)
 def save_app_config(config: AppConfig) -> None:
-    """애플리케이션 설정을 저장합니다."""
+    """애플리케이션 설정을 저장합니다.
+
+    """
     try:
         config_manager = get_config()
         config_data = config.dict(exclude_unset=True)
@@ -46,8 +55,12 @@ def save_app_config(config: AppConfig) -> None:
 
 
 @router.get("/config/projects", response_model=list[str])
-def get_available_projects():
-    """세션 설정에 정의된 모든 프로젝트 목록을 반환합니다."""
+def get_available_projects() -> object:
+    """세션 설정에 정의된 모든 프로젝트 목록을 반환합니다.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         tm = get_tmux_manager()
         projects = tm.load_projects().get("sessions", {})
@@ -57,8 +70,12 @@ def get_available_projects():
 
 
 @router.get("/config/session-files", response_model=list[str])
-def list_session_files():
-    """사용 가능한 세션 설정 파일 목록을 반환합니다."""
+def list_session_files() -> object:
+    """사용 가능한 세션 설정 파일 목록을 반환합니다.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         tm = get_tmux_manager()
         return tm.list_session_configs()
@@ -67,8 +84,12 @@ def list_session_files():
 
 
 @router.get("/config/paths", response_model=dict[str, str])
-def get_config_paths():
-    """설정 파일 경로 정보를 반환합니다."""
+def get_config_paths() -> object:
+    """설정 파일 경로 정보를 반환합니다.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         config_manager = get_config()
         tm = get_tmux_manager()

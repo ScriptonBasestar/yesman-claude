@@ -1,17 +1,19 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""TUI Session Selector using Rich."""
+# Copyright notice.
 
 from typing import Any
-
 import libtmux
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""TUI Session Selector using Rich."""
+
+
 
 
 class SessionSelector:
@@ -22,8 +24,12 @@ class SessionSelector:
         self.console = Console()
 
     @staticmethod
-    def _get_session_details( session_name: str) -> dict[str, Any]:
-        """Get session details from tmux."""
+    def _get_session_details(session_name: str) -> dict[str, object]:
+        """Get session details from tmux.
+
+        Returns:
+        object: Description of return value.
+        """
         try:
             server = libtmux.Server()
             session = server.find_where({"session_name": session_name})
@@ -48,7 +54,11 @@ class SessionSelector:
         }
 
     def _create_display(self, search_term: str = "") -> tuple[Table, list[dict[str, str]]]:
-        """Create the display table."""
+        """Create the display table.
+
+        Returns:
+        object: Description of return value.
+        """
         table = Table(
             title="🖥️  Select a tmux session",
             show_header=True,
@@ -94,7 +104,13 @@ class SessionSelector:
         return table, filtered_sessions
 
     def select_session(self) -> str | None:
-        """Show interactive session selector and return selected session."""
+        """Show interactive session selector and return selected session.
+        
+            Returns:
+                Str | None object.
+        
+                
+        """
         if not self.sessions:
             return None
 

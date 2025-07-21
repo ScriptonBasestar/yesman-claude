@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
 
-"""Central settings and configuration management."""
+# Copyright notice.
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Central settings and configuration management."""
+
 
 
 @dataclass
@@ -108,7 +111,9 @@ class AppSettings:
         self._expand_paths()
 
     def _load_from_env(self) -> None:
-        """Load settings from environment variables."""
+        """Load settings from environment variables.
+
+        """
         # Cache settings
         self.cache.ttl = float(os.getenv("YESMAN_CACHE_TTL", self.cache.ttl))
         self.cache.max_entries = int(os.getenv("YESMAN_CACHE_MAX_ENTRIES", self.cache.max_entries))
@@ -130,7 +135,9 @@ class AppSettings:
         self.api.debug = os.getenv("YESMAN_API_DEBUG", "false").lower() == "true"
 
     def _expand_paths(self) -> None:
-        """Expand user paths (~) to absolute paths."""
+        """Expand user paths (~) to absolute paths.
+
+        """
         self.paths.home_dir = os.path.expanduser(self.paths.home_dir)
         self.paths.templates_dir = os.path.expanduser(self.paths.templates_dir)
         self.paths.logs_dir = os.path.expanduser(self.paths.logs_dir)
@@ -140,7 +147,9 @@ class AppSettings:
         self.logging.default_path = os.path.expanduser(self.logging.default_path)
 
     def ensure_directories(self) -> None:
-        """Create necessary directories if they don't exist."""
+        """Create necessary directories if they don't exist.
+
+        """
         directories = [
             self.paths.home_dir,
             self.paths.templates_dir,
@@ -152,8 +161,12 @@ class AppSettings:
         for directory in directories:
             Path(directory).mkdir(parents=True, exist_ok=True)
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert settings to dictionary for serialization."""
+    def to_dict(self) -> dict[str, object]:
+        """Convert settings to dictionary for serialization.
+
+        Returns:
+        object: Description of return value.
+        """
         return {
             "cache": {
                 "ttl": self.cache.ttl,

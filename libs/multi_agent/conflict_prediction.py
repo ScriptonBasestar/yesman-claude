@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Advanced conflict prediction system for multi-agent branch development."""
+# Copyright notice.
 
 import ast
 import difflib
@@ -13,16 +9,25 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import object, NamedTuple
-
+from typing import NamedTuple, object
 from .branch_manager import BranchManager
 from .conflict_resolution import (
+from .semantic_analyzer import SemanticAnalyzer
+                # Check for conflicting import patterns
+        # Check for overlapping imports with different patterns
+        # Check for similar but slightly different imports
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Advanced conflict prediction system for multi-agent branch development."""
+
+
     ConflictInfo,
     ConflictResolutionEngine,
     ConflictSeverity,
     ConflictType,
 )
-from .semantic_analyzer import SemanticAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +112,7 @@ class ConflictPredictor:
             conflict_engine: ConflictResolutionEngine for resolution context
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
-        
+
         Returns:
             Description of return value
         """
@@ -281,7 +286,6 @@ class ConflictPredictor:
                 imports1 = files1[file_path]
                 imports2 = files2[file_path]
 
-                # Check for conflicting import patterns
                 if self._imports_likely_to_conflict(imports1, imports2):
                     affected_files.append(file_path)
                     conflict_likelihood += 0.2
@@ -666,19 +670,19 @@ class ConflictPredictor:
             return 0.0
 
     @staticmethod
-    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG002
+    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG002  # noqa: ARG004
         """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG002
+    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG002  # noqa: ARG004
         """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG002
+    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG002  # noqa: ARG004
         """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5
@@ -738,7 +742,6 @@ class ConflictPredictor:
         set1 = set(imports1)
         set2 = set(imports2)
 
-        # Check for overlapping imports with different patterns
         overlap = set1 & set2
         different = (set1 - set2) | (set2 - set1)
 
@@ -746,7 +749,6 @@ class ConflictPredictor:
         if len(overlap) > HIGH_OVERLAP_THRESHOLD and len(different) > SIGNIFICANT_DIFFERENCES_THRESHOLD:
             return True
 
-        # Check for similar but slightly different imports
         for imp1 in imports1:
             for imp2 in imports2:
                 if imp1 != imp2 and difflib.SequenceMatcher(None, imp1, imp2).ratio() > SIMILARITY_THRESHOLD_MEDIUM:

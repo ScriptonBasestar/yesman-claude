@@ -1,29 +1,30 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Comprehensive project status dashboard command."""
+# Copyright notice.
 
 import time
 from pathlib import Path
-from typing import object
-
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
-
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets import (
+from libs.dashboard.widgets.session_progress import SessionProgressWidget
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Comprehensive project status dashboard command."""
+
+
+
     ActivityHeatmapGenerator,
     GitActivityWidget,
     ProgressTracker,
     ProjectHealth,
     SessionBrowser,
 )
-from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 
 class StatusDashboard:
@@ -58,7 +59,7 @@ class StatusDashboard:
 
         # Load initial data
         self._load_todo_data()
-        self.progress_data: dict[str, object] | None = None
+        self.progress_data: dict[str] | None = None
 
     def _load_todo_data(self) -> None:
         """Load TODO data from various sources."""
@@ -105,7 +106,7 @@ class StatusDashboard:
             self.console.print(f"[red]Error updating data: {e}[/]")
 
     @staticmethod
-    def _calculate_session_activity( session_info: dict) -> float:
+    def _calculate_session_activity(session_info: dict) -> float:
         """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
@@ -117,7 +118,7 @@ class StatusDashboard:
             for pane in window.get("panes", []):
                 command = pane.get("pane_current_command", "")
 
-                if command and command not in ["zsh", "bash", "sh"]:
+                if command and command not in {"zsh", "bash", "sh"}:
                     activity += 0.2
 
                 if "claude" in command.lower():
@@ -277,7 +278,7 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
         interactive: bool = False,  # noqa: FBT001
         update_interval: float = 5.0,
         detailed: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
         """Execute the status command."""
         try:

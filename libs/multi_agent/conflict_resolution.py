@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Conflict resolution engine for multi-agent branch-based development."""
+# Copyright notice.
 
 import asyncio
 import logging
@@ -13,8 +9,19 @@ from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
-
 from .branch_manager import BranchManager
+            # Example: Handle import conflicts
+        # Simple approach: merge unique imports
+        # Extract imports from conflict markers
+            # Extract import statements
+            # Merge unique imports
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Conflict resolution engine for multi-agent branch-based development."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +68,7 @@ class ConflictInfo:
     files: list[str]
     description: str
     suggested_strategy: ResolutionStrategy
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     detected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     resolved_at: datetime | None = None
     resolution_result: str | None = None
@@ -78,7 +85,7 @@ class ResolutionResult:
     message: str
     resolved_files: list[str] = field(default_factory=list)
     remaining_conflicts: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 class ConflictResolutionEngine:
@@ -122,7 +129,7 @@ class ConflictResolutionEngine:
         }
 
     @staticmethod
-    def _load_conflict_patterns() -> dict[str, dict[str, Any]]:
+    def _load_conflict_patterns() -> dict[str, dict[str, object]]:
         """Load known conflict patterns and their resolutions."""
         return {
             "import_conflicts": {
@@ -656,7 +663,6 @@ class ConflictResolutionEngine:
             # Check for known patterns and apply custom logic
             content = conflict.metadata.get("conflict_content", "")
 
-            # Example: Handle import conflicts
             if "import" in content.lower():
                 resolved_content = self._resolve_import_conflicts(content)
                 if resolved_content:
@@ -741,19 +747,15 @@ class ConflictResolutionEngine:
     @staticmethod
     def _resolve_import_conflicts(content: str) -> str | None:
         """Resolve import statement conflicts."""
-        # Simple approach: merge unique imports
 
-        # Extract imports from conflict markers
         parts = content.split("=======")
         if len(parts) == 2:
             head_part = parts[0].replace("<<<<<<< HEAD", "").strip()
             other_part = parts[1].split(">>>>>>> ")[0].strip()
 
-            # Extract import statements
             head_imports = [line.strip() for line in head_part.split("\n") if line.strip().startswith("import")]
             other_imports = [line.strip() for line in other_part.split("\n") if line.strip().startswith("import")]
 
-            # Merge unique imports
             all_imports = list(set(head_imports + other_imports))
             all_imports.sort()  # Sort alphabetically
 
@@ -766,16 +768,16 @@ class ConflictResolutionEngine:
         results = []
 
         for conflict_id, conflict in self.detected_conflicts.items():
-            if conflict.resolved_at is None and conflict.severity in [
+            if conflict.resolved_at is None and conflict.severity in {
                 ConflictSeverity.LOW,
                 ConflictSeverity.MEDIUM,
-            ]:
+            }:
                 result = await self.resolve_conflict(conflict_id)
                 results.append(result)
 
         return results
 
-    def get_conflict_summary(self) -> dict[str, Any]:
+    def get_conflict_summary(self) -> dict[str, object]:
         """Get a summary of all conflicts and resolution statistics."""
         total_conflicts = len(self.detected_conflicts)
         resolved_conflicts = len(
@@ -807,7 +809,7 @@ class ConflictResolutionEngine:
     # Git helper methods
     async def _run_git_command(self, args: list[str]) -> subprocess.CompletedProcess:
         """Run a git command and return the result."""
-        cmd = ["git", *args]
+        cmd = ["git", *args: object]
         result = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=self.repo_path,
@@ -885,6 +887,6 @@ class ConflictResolutionEngine:
         try:
             # This would be implemented with actual git merge commands
             # For now, return a simulation result
-            return strategy in ["recursive", "ours"] and len(branches) == 2
+            return strategy in {"recursive", "ours"} and len(branches) == 2
         except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
             return False

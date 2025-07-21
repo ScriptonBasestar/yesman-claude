@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Branch information sharing protocol for multi-agent collaboration."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -12,10 +8,15 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import object
-
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Branch information sharing protocol for multi-agent collaboration."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +62,9 @@ class BranchInfo:
     merge_ready: bool = False
     conflicts_detected: list[str] = field(default_factory=list)
     dependencies: dict[str, list[str]] = field(default_factory=dict)
-    api_signatures: dict[str, object] = field(default_factory=dict)
+    api_signatures: dict[str] = field(default_factory=dict)
     work_items: list[str] = field(default_factory=list)
-    metadata: dict[str, object] = field(default_factory=dict)
+    metadata: dict[str] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,7 +75,7 @@ class BranchSyncEvent:
     branch_name: str
     agent_id: str
     event_type: BranchInfoType
-    event_data: dict[str, object]
+    event_data: dict[str]
     timestamp: datetime = field(default_factory=datetime.now)
     priority: MessagePriority = MessagePriority.NORMAL
     requires_action: bool = False
@@ -98,7 +99,7 @@ class BranchInfoProtocol:
             collaboration_engine: Engine for agent collaboration
             repo_path: Path to git repository
             sync_strategy: Strategy for information synchronization
-        
+
         Returns:
             Description of return value
         """
@@ -142,7 +143,7 @@ class BranchInfoProtocol:
         logger.info("Starting branch info protocol")
 
         # Start sync task based on strategy
-        if self.sync_strategy in [SyncStrategy.PERIODIC, SyncStrategy.SMART]:
+        if self.sync_strategy in {SyncStrategy.PERIODIC, SyncStrategy.SMART}:
             self._sync_task = asyncio.create_task(self._periodic_sync_loop())
 
     async def stop(self) -> None:
@@ -170,8 +171,6 @@ class BranchInfoProtocol:
             base_branch: Base branch name
             work_items: List of work items/tasks for this branch
 
-        Returns:
-            BranchInfo object
         """
         branch_info = BranchInfo(
             branch_name=branch_name,
@@ -202,7 +201,7 @@ class BranchInfoProtocol:
         self,
         branch_name: str,
         info_type: BranchInfoType,
-        update_data: dict[str, object],
+        update_data: dict[str],
         requires_immediate_sync: bool = False,  # noqa: FBT001
     ) -> None:
         """Update branch information and potentially trigger sync.
@@ -351,7 +350,7 @@ class BranchInfoProtocol:
 
         return conflicts
 
-    async def prepare_merge_report(self, branch_name: str) -> dict[str, object]:
+    async def prepare_merge_report(self, branch_name: str) -> dict[str]:
         """Prepare a comprehensive merge readiness report.
 
         Args:
@@ -421,7 +420,7 @@ class BranchInfoProtocol:
         self,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: dict[str, object],
+        event_data: dict[str],
     ) -> None:
         """Share branch information with subscribed agents."""
         # Create sync event
@@ -433,10 +432,10 @@ class BranchInfoProtocol:
             event_data=event_data,
             priority=self._determine_priority(info_type),
             requires_action=info_type
-            in [
+            in {
                 BranchInfoType.CONFLICT_INFO,
                 BranchInfoType.API_CHANGES,
-            ],
+            },
         )
 
         self.sync_history.append(event)
@@ -480,7 +479,7 @@ class BranchInfoProtocol:
         agent_id: str,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: dict[str, object],
+        event_data: dict[str],
     ) -> None:
         """Send branch update to specific agent."""
         message_type = MessageType.STATUS_UPDATE
@@ -506,15 +505,19 @@ class BranchInfoProtocol:
             },
             priority=self._determine_priority(info_type),
             requires_ack=info_type
-            in [
+            in {
                 BranchInfoType.CONFLICT_INFO,
                 BranchInfoType.API_CHANGES,
-            ],
+            },
         )
 
     @staticmethod
-    def _determine_priority( info_type: BranchInfoType) -> MessagePriority:
-        """Determine message priority based on info type."""
+    def _determine_priority(info_type: BranchInfoType) -> MessagePriority:
+        """Determine message priority based on info type.
+
+        Returns:
+        MessagePriority: Description of return value.
+        """
         priority_map = {
             BranchInfoType.CONFLICT_INFO: MessagePriority.HIGH,
             BranchInfoType.API_CHANGES: MessagePriority.HIGH,
@@ -528,7 +531,11 @@ class BranchInfoProtocol:
 
     @staticmethod
     def _calculate_relevance(info_type: BranchInfoType) -> float:
-        """Calculate relevance score for knowledge sharing."""
+        """Calculate relevance score for knowledge sharing.
+
+        Returns:
+        float: Description of return value.
+        """
         relevance_map = {
             BranchInfoType.CONFLICT_INFO: 1.0,
             BranchInfoType.API_CHANGES: 0.9,
@@ -577,8 +584,12 @@ class BranchInfoProtocol:
             except Exception:
                 logger.exception("Error in periodic sync")
 
-    def get_protocol_summary(self) -> dict[str, object]:
-        """Get comprehensive summary of protocol activity."""
+    def get_protocol_summary(self) -> dict[str]:
+        """Get comprehensive summary of protocol activity.
+
+        Returns:
+        object: Description of return value.
+        """
         active_branches = [
             {
                 "branch_name": info.branch_name,

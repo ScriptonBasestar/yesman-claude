@@ -1,19 +1,22 @@
-"""Copyright notice."""
+from typing import Any
+import os
+import shutil
+from pathlib import Path
+import click
+from rich.console import Console
+from rich.progress import track
+from rich.table import Table
+from libs.core.base_command import BaseCommand, ConfigCommandMixin
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Cache cleanup command for removing excessive cache files."""
 
-import os
-import shutil
-from pathlib import Path
 
-import click
-from rich.console import Console
-from rich.progress import track
-from rich.table import Table
 
-from libs.core.base_command import BaseCommand, ConfigCommandMixin
 
 
 class CleanupCommand(BaseCommand, ConfigCommandMixin):
@@ -28,9 +31,15 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         dry_run: bool = False,  # noqa: FBT001
         force: bool = False,  # noqa: FBT001
         cleanup_all: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the cleanup command."""
+        """Execute the cleanup command.
+        
+            Returns:
+                Dict containing.
+        
+                
+        """
         # Find cache files to clean
         cache_paths = self._find_cache_files(cleanup_all)
         total_size = sum(size for _, _, size in cache_paths)
@@ -69,7 +78,11 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         }
 
     def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:  # noqa: FBT001
-        """Find cache files to clean."""
+        """Find cache files to clean.
+
+        Returns:
+        object: Description of return value.
+        """
         cache_paths = []
 
         # Python cache files (__pycache__, *.pyc)
@@ -115,7 +128,9 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         return cache_paths
 
     def _display_summary(self, cache_paths: list[tuple[str, Path, int]], total_size: int) -> None:
-        """Display cache cleanup summary."""
+        """Display cache cleanup summary.
+
+        """
         table = Table(title="Cache Cleanup Summary")
         table.add_column("Type", style="cyan")
         table.add_column("Path", style="yellow")
@@ -129,7 +144,11 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         self.console.print(f"\n[bold]Total cache size:[/bold] {self._human_readable_size(total_size)}")
 
     def _perform_cleanup(self, cache_paths: list[tuple[str, Path, int]]) -> tuple[int, int, list[str]]:
-        """Perform the actual cleanup."""
+        """Perform the actual cleanup.
+
+        Returns:
+        object: Description of return value.
+        """
         self.console.print("\n[blue]🧹 Cleaning up cache files...[/blue]")
 
         cleaned_count = 0
@@ -150,7 +169,9 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         return cleaned_count, cleaned_size, errors
 
     def _display_results(self, cleaned_count: int, cleaned_size: int, errors: list[str]) -> None:
-        """Display cleanup results."""
+        """Display cleanup results.
+
+        """
         if cleaned_count > 0:
             self.print_success(f"Cleaned {cleaned_count} items ({self._human_readable_size(cleaned_size)})")
 
@@ -162,8 +183,12 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
                 self.console.print(f"   ... and {len(errors) - 5} more")
 
     @staticmethod
-    def _human_readable_size( size_bytes: int) -> str:
-        """Convert bytes to human readable format."""
+    def _human_readable_size(size_bytes: int) -> str:
+        """Convert bytes to human readable format.
+
+        Returns:
+        str: Description of return value.
+        """
         if size_bytes == 0:
             return "0 B"
 
@@ -171,7 +196,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         for unit in ["B", "KB", "MB", "GB"]:
             if size < 1024:
                 return f"{size:.1f} {unit}"
-            size = size / 1024
+            size /= 1024
         return f"{size:.1f} TB"
 
 
@@ -185,7 +210,9 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
 def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:  # noqa: FBT001
-    """Clean up excessive cache files and temporary data."""
+    """Clean up excessive cache files and temporary data.
+
+    """
     command = CleanupCommand()
     command.run(dry_run=dry_run, force=force, cleanup_all=cleanup_all)
 

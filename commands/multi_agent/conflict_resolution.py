@@ -1,17 +1,21 @@
-"""Copyright notice."""
+from typing import Any
+import asyncio
+import logging
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from libs.core.base_command import BaseCommand, CommandError
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
+from libs.multi_agent.conflict_resolution import ResolutionStrategy
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Conflict detection and resolution commands."""
 
-import asyncio
-import logging
 
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
-from libs.core.base_command import BaseCommand, CommandError
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +23,11 @@ logger = logging.getLogger(__name__)
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+    Returns:
+        Dict containing."""
         # Extract parameters from kwargs
 
         branches = kwargs["branches"]
@@ -117,8 +124,11 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+    Returns:
+        Dict containing."""
         # Extract parameters from kwargs
 
         conflict_id = kwargs["conflict_id"]
@@ -138,7 +148,6 @@ class ResolveConflictCommand(BaseCommand):
             resolution_strategy = None
             if strategy:
                 try:
-                    from libs.multi_agent.conflict_resolution import ResolutionStrategy
 
                     resolution_strategy = ResolutionStrategy(strategy)
                 except ValueError as e:
@@ -187,8 +196,11 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs) -> dict:
-        """Execute the command."""
+    def execute(self, **kwargs: dict[str, object]) -> dict:
+        """Execute the command.
+
+    Returns:
+        Dict containing."""
         # Extract parameters from kwargs
 
         repo_path = kwargs.get("repo_path")

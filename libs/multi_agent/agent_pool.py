@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Agent pool management for multi-agent development system."""
+# Copyright notice.
 
 import asyncio
 import contextlib
@@ -14,16 +10,26 @@ import uuid
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from pathlib import Path
-
 # Import scheduler types after main types to avoid circular imports
-from typing import TYPE_CHECKING, object
-
+from typing import TYPE_CHECKING, object, Any
 from .types import Agent, AgentState, Task, TaskStatus
+    from .task_scheduler import AgentCapability, TaskScheduler
+    from .task_scheduler import TaskScheduler
+            from .branch_test_manager import BranchTestManager
+            from .recovery_engine import RecoveryEngine
+            from .recovery_engine import OperationType
+            from .task_scheduler import TaskScheduler
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Agent pool management for multi-agent development system."""
+
+
+
 
 if TYPE_CHECKING:
-    from .task_scheduler import AgentCapability, TaskScheduler
 else:
-    from .task_scheduler import TaskScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -200,7 +206,7 @@ class AgentPool:
         command: list[str],
         working_directory: str,
         description: str = "",
-        **kwargs,
+        **kwargs: object,
     ) -> Task:
         """Create and add a task."""
         task = Task(
@@ -209,7 +215,7 @@ class AgentPool:
             description=description,
             command=command,
             working_directory=working_directory,
-            **kwargs,
+            **kwargs: object,
         )
 
         self.add_task(task)
@@ -698,7 +704,6 @@ class AgentPool:
     def enable_branch_testing(self, repo_path: str | None = None, results_dir: str | None = None) -> None:
         """Enable automatic branch testing integration."""
         try:
-            from .branch_test_manager import BranchTestManager
 
             repo_path = repo_path or "."
             results_dir = results_dir or ".scripton/yesman/test_results"
@@ -855,7 +860,6 @@ class AgentPool:
     def enable_recovery_system(self, work_dir: str | None = None, max_snapshots: int = 50) -> None:
         """Enable automatic rollback and error recovery system."""
         try:
-            from .recovery_engine import RecoveryEngine
 
             work_dir = work_dir or ".scripton/yesman"
 
@@ -944,7 +948,6 @@ class AgentPool:
             return None
 
         try:
-            from .recovery_engine import OperationType
 
             # Map string to enum
             op_type_map = {
@@ -1149,7 +1152,7 @@ class AgentPool:
         if not self.tasks:
             return True
 
-        incomplete_tasks = [task for task in self.tasks.values() if task.status not in [TaskStatus.COMPLETED, TaskStatus.FAILED]]
+        incomplete_tasks = [task for task in self.tasks.values() if task.status not in {TaskStatus.COMPLETED, TaskStatus.FAILED}]
         return len(incomplete_tasks) == 0
 
     def reset(self) -> None:
@@ -1170,7 +1173,6 @@ class AgentPool:
             self.scheduler.reset()
         else:
             # Recreate scheduler if reset method doesn't exist
-            from .task_scheduler import TaskScheduler
 
             self.scheduler = TaskScheduler()
 

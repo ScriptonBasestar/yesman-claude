@@ -1,35 +1,37 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Base command class with common functionality."""
-
+from typing import Any
 import json
 import logging
 import re
 import shutil
 import sys
-import yaml
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
-
 import click
-
+import yaml
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
-
 from .claude_manager import ClaudeManager
 from .error_handling import (
+from .services import get_config, get_tmux_manager, initialize_services
+from .settings import ValidationPatterns, settings
+
+#!/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Base command class with common functionality."""
+
+
+
+
     ConfigurationError,
     ErrorContext,
     ErrorSeverity,
     YesmanError,
     error_handler,
 )
-from .services import get_config, get_tmux_manager, initialize_services
-from .settings import ValidationPatterns, settings
 
 
 class CommandError(YesmanError):
@@ -47,7 +49,7 @@ class CommandError(YesmanError):
             severity=ErrorSeverity.MEDIUM,
             exit_code=exit_code,
             recovery_hint=recovery_hint,
-            **kwargs,
+            **kwargs: object,
         )
 
 
@@ -226,10 +228,10 @@ class BaseCommand(ABC):
         command_name = self.__class__.__name__.replace("Command", "").lower()
 
         try:
-            self.log_command_start(command_name, **kwargs)
+            self.log_command_start(command_name, **kwargs: dict[str, object])
             self.validate_preconditions()
 
-            result = self.execute(**kwargs)
+            result = self.execute(**kwargs: dict[str, object])
 
             self.log_command_end(command_name, success=True)
             self.handle_success(result)
@@ -315,10 +317,10 @@ class ConfigCommandMixin:
     # Expected attributes from BaseCommand
     logger: logging.Logger
 
-    def load_projects_config(self) -> dict[str, Any]:
+    def load_projects_config(self) -> dict[str, object]:
         """Load projects configuration with error handling."""
         try:
-            with open(settings.paths.projects_file) as f:
+            with open(settings.paths.projects_file, encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         except FileNotFoundError:
             self.logger.warning("Projects file not found: %s", settings.paths.projects_file)
@@ -328,10 +330,10 @@ class ConfigCommandMixin:
             raise CommandError(msg) from e
 
     @staticmethod
-    def save_projects_config(config: dict[str, Any]) -> None:
+    def save_projects_config(config: dict[str, object]) -> None:
         """Save projects configuration with error handling."""
         try:
-            with open(settings.paths.projects_file, "w") as f:
+            with open(settings.paths.projects_file, "w", encoding="utf-8") as f:
                 yaml.dump(config, f, default_flow_style=False)
         except Exception as e:
             msg = f"Failed to save projects configuration: {e}"
@@ -353,7 +355,7 @@ class OutputFormatterMixin:
     """Mixin for commands that need output formatting."""
 
     @staticmethod
-    def format_table(data: list[dict[str, Any]], headers: list[str]) -> str:
+    def format_table(data: list[dict[str, object]], headers: list[str]) -> str:
         """Format data as table."""
         if not data:
             return "No data to display"

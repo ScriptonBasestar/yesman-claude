@@ -1,15 +1,18 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import asyncio
+from unittest.mock import AsyncMock
+import pytest
+from api.utils import BatchConfig, WebSocketBatchProcessor
+from collections import deque
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for WebSocket batch processor functionality."""
 
-import asyncio
-from unittest.mock import AsyncMock
 
-import pytest
 
-from api.utils import BatchConfig, WebSocketBatchProcessor
 
 
 class TestBatchConfig:
@@ -45,14 +48,20 @@ class TestWebSocketBatchProcessor:
     @pytest.fixture
     @staticmethod
     def processor() -> WebSocketBatchProcessor:
-        """Create a batch processor for testing."""
+        """Create a batch processor for testing.
+
+    Returns:
+        Websocketbatchprocessor object."""
         config = BatchConfig(max_batch_size=3, max_batch_time=0.05)
         return WebSocketBatchProcessor(config)
 
     @pytest.fixture
     @staticmethod
     def mock_handler() -> AsyncMock:
-        """Create a mock message handler."""
+        """Create a mock message handler.
+
+    Returns:
+        Asyncmock object."""
         return AsyncMock()
 
     @staticmethod
@@ -272,7 +281,6 @@ class TestWebSocketBatchProcessor:
     @staticmethod
     def test_memory_size_calculation(processor: WebSocketBatchProcessor) -> None:
         """Test memory size calculation for queues."""
-        from collections import deque
 
         test_queue = deque(
             [

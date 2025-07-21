@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Task analysis and dependency graph generation for multi-agent development."""
+# Copyright notice.
 
 import ast
 import json
@@ -10,8 +6,19 @@ import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
-
 from .graph import DirectedGraph
+            # Find imports
+                # Find local files that import this module
+                    # Check if this file imports our module
+                # Find files that current file imports
+        # Relative import match
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Task analysis and dependency graph generation for multi-agent development."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +33,7 @@ class CodeDependency:
     line_number: int
     symbols: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary."""
         return asdict(self)
 
@@ -42,14 +49,14 @@ class TaskDefinition:
     dependencies: list[str] = field(default_factory=list)  # Other task IDs
     estimated_hours: float = 1.0
     complexity: str = "medium"  # low, medium, high
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TaskDefinition":
+    def from_dict(cls, data: dict[str, object]) -> "TaskDefinition":
         """Create from dictionary."""
         return cls(**data)
 
@@ -91,7 +98,6 @@ class TaskAnalyzer:
             # Parse AST
             tree = ast.parse(content, filename=str(full_path))
 
-            # Find imports
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     for alias in node.names:
@@ -143,7 +149,6 @@ class TaskAnalyzer:
                 # Get dependencies of current file
                 deps = self.analyze_file_dependencies(current_file)
 
-                # Find local files that import this module
                 module_name = self._file_to_module(current_file)
 
                 for py_file in self._get_python_files():
@@ -152,13 +157,11 @@ class TaskAnalyzer:
 
                     file_deps = self.analyze_file_dependencies(str(py_file))
 
-                    # Check if this file imports our module
                     for dep in file_deps:
                         if self._matches_module(dep.imported_module, module_name):
                             new_files.add(str(py_file))
                             break
 
-                # Find files that current file imports
                 for dep in deps:
                     imported_file = self._module_to_file(dep.imported_module)
                     if imported_file and imported_file not in related:
@@ -200,7 +203,7 @@ class TaskAnalyzer:
         return self._python_files_cache
 
     @staticmethod
-    def _file_to_module( file_path: str) -> str:
+    def _file_to_module(file_path: str) -> str:
         """Convert file path to module name."""
         # Remove .py extension and convert path to module
         path = Path(file_path)
@@ -239,7 +242,6 @@ class TaskAnalyzer:
         if module.startswith(imported + "."):
             return True
 
-        # Relative import match
         return bool("." in imported and imported.split(".")[-1] == module.split(".")[-1])
 
     def create_task_from_files(
@@ -248,7 +250,7 @@ class TaskAnalyzer:
         title: str,
         file_paths: list[str],
         description: str = "",
-        **kwargs,
+        **kwargs: object,
     ) -> TaskDefinition:
         """Create a task definition from file paths.
 
@@ -273,7 +275,7 @@ class TaskAnalyzer:
             title=title,
             description=description,
             file_paths=sorted(all_files),
-            **kwargs,
+            **kwargs: object,
         )
 
         # Add to graph
@@ -424,7 +426,7 @@ class TaskAnalyzer:
 
     def export_dependency_graph(self, output_path: str) -> None:
         """Export dependency graph to JSON format."""
-        data: dict[str, Any] = {"tasks": {}, "dependencies": []}
+        data: dict[str, object] = {"tasks": {}, "dependencies": []}
 
         # Export tasks
         for node_id in self.task_graph.nodes_iter():
@@ -445,7 +447,7 @@ class TaskAnalyzer:
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_file, "w") as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
         logger.info("Exported dependency graph to %s", output_path)

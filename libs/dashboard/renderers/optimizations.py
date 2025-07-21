@@ -1,11 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Rendering Optimizations and Caching
-Performance optimization system for dashboard renderers.
-"""
-
+from typing import Any
 import hashlib
 import json
 import threading
@@ -15,9 +8,17 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from functools import wraps
-from typing import Union
-
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Rendering Optimizations and Caching
+Performance optimization system for dashboard renderers.
+"""
+
+
 
 
 @dataclass
@@ -209,12 +210,12 @@ _widget_cache = RenderCache(max_size=500, ttl=300)  # 5 minute TTL
 _layout_cache = RenderCache(max_size=100, ttl=600)  # 10 minute TTL
 
 
-def cached_render(cache: RenderCache | None = None):
+def cached_render(cache: RenderCache | None = None) -> object:
     """Decorator for caching render method results.
 
     Args:
         cache: Cache instance to use (default: global widget cache)
-    
+
     Returns:
         Description of return value
     """
@@ -248,7 +249,7 @@ def cached_render(cache: RenderCache | None = None):
     return decorator
 
 
-def cached_layout(cache: RenderCache | None = None):
+def cached_layout(cache: RenderCache | None = None) -> object:
     """Decorator for caching layout method results.
 
     Args:
@@ -462,12 +463,12 @@ class PerformanceProfiler:
         self.metrics: dict[str, list[float]] = {}
         self._lock = threading.Lock()
 
-    def time_operation(self, operation_name: str):
+    def time_operation(self, operation_name: str) -> object:
         """Context manager for timing operations.
 
         Args:
             operation_name: Name of operation being timed
-        
+
         Returns:
             Description of return value
         """
@@ -524,7 +525,7 @@ class TimingContext:
         self.operation_name = operation_name
         self.start_time: float | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> object:
         self.start_time = time.time()
         return self
 
@@ -538,7 +539,7 @@ class TimingContext:
 global_profiler = PerformanceProfiler()
 
 
-def profile_render(operation_name: str | None = None):
+def profile_render(operation_name: str | None = None) -> object:
     """Decorator for profiling render operations.
 
     Args:
@@ -547,10 +548,10 @@ def profile_render(operation_name: str | None = None):
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> object:
             name = operation_name or f"{func.__module__}.{func.__name__}"
             with global_profiler.time_operation(name):
-                return func(*args, **kwargs)
+                return func(*args: object, **kwargs)
 
         return wrapper
 

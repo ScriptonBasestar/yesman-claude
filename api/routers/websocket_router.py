@@ -1,18 +1,21 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""WebSocket router for real-time updates."""
+# Copyright notice.
 
 import asyncio
 import logging
 from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Any
-
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-
 from api.utils import BatchConfig, WebSocketBatchProcessor
+from api.routers.logs import get_logs
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""WebSocket router for real-time updates."""
+
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -145,10 +148,9 @@ class ConnectionManager:
         logger.info("WebSocket disconnected")
 
     @staticmethod
-    async def send_initial_data( websocket: WebSocket, channel: str) -> None:
+    async def send_initial_data(websocket: WebSocket, channel: str) -> None:
         """Send initial data when a client connects."""
         try:
-            # Import here to avoid circular imports
             from api.routers.dashboard import (
                 get_activity_data,
                 get_dashboard_stats,
@@ -158,15 +160,15 @@ class ConnectionManager:
 
             initial_data = {}
 
-            if channel in ["dashboard", "sessions"]:
+            if channel in {"dashboard", "sessions"}:
                 sessions = await get_sessions()
                 initial_data["sessions"] = sessions
 
-            if channel in ["dashboard", "health"]:
+            if channel in {"dashboard", "health"}:
                 health = await get_project_health()
                 initial_data["health"] = health
 
-            if channel in ["dashboard", "activity"]:
+            if channel in {"dashboard", "activity"}:
                 activity = await get_activity_data()
                 initial_data["activity"] = activity
 
@@ -289,9 +291,12 @@ class ConnectionManager:
             for conn in disconnected:
                 self.disconnect(conn)
 
-    def get_connection_stats(self):
-        """Get statistics about active connections."""
-        stats: dict[str, Any] = {
+    def get_connection_stats(self) -> object:
+        """Get statistics about active connections.
+
+    Returns:
+        Object object the requested data."""
+        stats: dict[str, object] = {
             "total_connections": len(self.active_connections),
             "channels": {},
         }
@@ -321,8 +326,11 @@ class ConnectionManager:
 
         logger.info("WebSocket connection manager shutdown complete")
 
-    def get_batch_statistics(self):
-        """Get batch processing statistics."""
+    def get_batch_statistics(self) -> object:
+        """Get batch processing statistics.
+
+    Returns:
+        Object object the requested data."""
         return self.batch_processor.get_statistics()
 
 
@@ -466,7 +474,6 @@ async def websocket_logs(websocket: WebSocket) -> None:
             elif data.get("type") == "refresh":
                 # Client requests fresh log data
                 try:
-                    from api.routers.logs import get_logs
 
                     logs = get_logs(limit=100)
                     initial_data = {

@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Adaptive response system that integrates learning with auto-response."""
+# Copyright notice.
 
 import asyncio
 import logging
@@ -10,8 +6,15 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 from .response_analyzer import ResponseAnalyzer
+import json
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Adaptive response system that integrates learning with auto-response."""
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +39,7 @@ class AdaptiveResponse:
         self.analyzer = ResponseAnalyzer(data_dir)
 
         self._response_queue: list[tuple[str, str, str, str]] = []
-        self._learning_cache: dict[str, Any] = {}
+        self._learning_cache: dict[str, object] = {}
         self._last_pattern_update = time.time()
 
         logger.info("Adaptive response system initialized")
@@ -165,8 +168,11 @@ class AdaptiveResponse:
         except Exception:
             logger.exception("Failed to update patterns: {e}")
 
-    def get_learning_statistics(self) -> dict[str, Any]:
-        """Get comprehensive learning statistics."""
+    def get_learning_statistics(self) -> dict[str, object]:
+        """Get comprehensive learning statistics.
+
+    Returns:
+        Dict containing the requested data."""
         try:
             base_stats = self.analyzer.get_statistics()
 
@@ -192,7 +198,10 @@ class AdaptiveResponse:
             return {}
 
     def get_prompt_suggestions(self, partial_prompt: str, limit: int = 5) -> list[str]:
-        """Get suggestions for similar prompts based on learning history."""
+        """Get suggestions for similar prompts based on learning history.
+
+    Returns:
+        List of the requested data."""
         try:
             # Simple implementation - find prompts that contain similar keywords
             suggestions = []
@@ -215,9 +224,11 @@ class AdaptiveResponse:
             return []
 
     def export_learning_data(self, output_path: Path) -> bool:
-        """Export learning data for analysis or backup."""
+        """Export learning data for analysis or backup.
+
+    Returns:
+        Boolean indicating."""
         try:
-            import json
 
             export_data = {
                 "config": {
@@ -229,7 +240,7 @@ class AdaptiveResponse:
                 "export_timestamp": time.time(),
             }
 
-            with open(output_path, "w") as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2)
 
             logger.info("Learning data exported to: {output_path}")

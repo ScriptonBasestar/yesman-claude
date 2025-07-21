@@ -1,16 +1,20 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Claude status and callback management."""
+# Copyright notice.
 
 import datetime
 import logging
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
-
 from libs.utils import ensure_log_directory, get_default_log_path
+            # Import here to avoid circular import
+from libs.yesman_config import YesmanConfig
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Claude status and callback management."""
+
+
 
 
 class ClaudeStatusManager:
@@ -20,7 +24,7 @@ class ClaudeStatusManager:
         self.session_name = session_name
         self.status_callback: Callable | None = None
         self.activity_callback: Callable | None = None
-        self.response_history: list[dict[str, Any]] = []
+        self.response_history: list[dict[str, object]] = []
         self.logger = logging.getLogger(f"yesman.claude_status.{session_name}")
 
     def set_status_callback(self, callback: Callable) -> None:
@@ -57,15 +61,19 @@ class ClaudeStatusManager:
         if len(self.response_history) > 100:
             self.response_history = self.response_history[-100:]
 
-    def get_response_history(self) -> list[dict[str, Any]]:
-        """Get the response history."""
+    def get_response_history(self) -> list[dict[str, object]]:
+        """Get the response history.
+
+    Returns:
+        Dict containing the requested data."""
         return self.response_history
 
     def save_capture_to_file(self, content: str, pane_id: str | None = None) -> str:
-        """Save captured content to file and return file path."""
+        """Save captured content to file and return file path.
+
+    Returns:
+        String containing."""
         try:
-            # Import here to avoid circular import
-            from libs.yesman_config import YesmanConfig
 
             config = YesmanConfig()
             log_base = config.get("log_path", str(get_default_log_path()))
