@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import inspect
 import logging
 import os
 import threading
@@ -278,15 +279,13 @@ class AsyncLogger(StatisticsProviderMixin):
         level: LogLevel,
         message: str,
         exc_info: Exception | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Internal method to queue a log entry."""
         if level.level_value < self.min_level.level_value:
             return
 
         # Get caller info
-        import inspect
-
         frame = inspect.currentframe()
         if frame and frame.f_back and frame.f_back.f_back:
             caller_frame = frame.f_back.f_back
@@ -327,27 +326,27 @@ class AsyncLogger(StatisticsProviderMixin):
             self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")
 
     # Convenience methods for different log levels
-    async def trace(self, message: str, **kwargs) -> None:
+    async def trace(self, message: str, **kwargs: Any) -> None:
         """Log a trace message."""
         await self._log(LogLevel.TRACE, message, **kwargs)
 
-    async def debug(self, message: str, **kwargs) -> None:
+    async def debug(self, message: str, **kwargs: Any) -> None:
         """Log a debug message."""
         await self._log(LogLevel.DEBUG, message, **kwargs)
 
-    async def info(self, message: str, **kwargs) -> None:
+    async def info(self, message: str, **kwargs: Any) -> None:
         """Log an info message."""
         await self._log(LogLevel.INFO, message, **kwargs)
 
-    async def warning(self, message: str, **kwargs) -> None:
+    async def warning(self, message: str, **kwargs: Any) -> None:
         """Log a warning message."""
         await self._log(LogLevel.WARNING, message, **kwargs)
 
-    async def error(self, message: str, exc_info: Exception | None = None, **kwargs) -> None:
+    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
         """Log an error message."""
         await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
 
-    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs) -> None:
+    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
         """Log a critical message."""
         await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 

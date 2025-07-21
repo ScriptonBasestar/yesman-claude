@@ -23,6 +23,18 @@ import psutil
 
 logger = logging.getLogger(__name__)
 
+# Constants for performance thresholds
+CPU_CRITICAL_THRESHOLD = 70
+MEMORY_CRITICAL_THRESHOLD = 80
+CPU_WARNING_THRESHOLD = 50
+MEMORY_WARNING_THRESHOLD = 60
+CPU_GOOD_THRESHOLD = 30
+MEMORY_GOOD_THRESHOLD = 40
+RENDER_TIME_THRESHOLD = 0.1
+CACHE_HIT_RATE_THRESHOLD = 0.8
+HISTORY_LENGTH_THRESHOLD = 10
+OPTIMIZATION_RATE_LIMIT_SECONDS = 30.0
+
 
 class OptimizationLevel(Enum):
     """Performance optimization levels."""
@@ -90,11 +102,11 @@ class PerformanceMetrics:
 
     def get_threshold_level(self) -> PerformanceThreshold:
         """Get performance threshold level based on metrics."""
-        if self.cpu_usage >= 70 or self.memory_usage >= 80:
+        if self.cpu_usage >= CPU_CRITICAL_THRESHOLD or self.memory_usage >= MEMORY_CRITICAL_THRESHOLD:
             return PerformanceThreshold.CRITICAL
-        if self.cpu_usage >= 50 or self.memory_usage >= 60:
+        if self.cpu_usage >= CPU_WARNING_THRESHOLD or self.memory_usage >= MEMORY_WARNING_THRESHOLD:
             return PerformanceThreshold.WARNING
-        if self.cpu_usage >= 30 or self.memory_usage >= 40:
+        if self.cpu_usage >= CPU_GOOD_THRESHOLD or self.memory_usage >= MEMORY_GOOD_THRESHOLD:
             return PerformanceThreshold.GOOD
         return PerformanceThreshold.EXCELLENT
 
@@ -153,7 +165,7 @@ class PerformanceProfiler:
             name = operation_name or f"{func.__module__}.{func.__name__}"
 
             @wraps(func)
-            def wrapper(*args, **kwargs):
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
                 with self.measure(name):
                     return func(*args, **kwargs)
 
@@ -576,23 +588,23 @@ class PerformanceOptimizer:
         recommendations = []
 
         # CPU recommendations
-        if current.cpu_usage > 70:
+        if current.cpu_usage > CPU_CRITICAL_THRESHOLD:
             recommendations.append("High CPU usage detected. Consider reducing update frequency or widget count.")
 
         # Memory recommendations
-        if current.memory_usage > 80:
+        if current.memory_usage > MEMORY_CRITICAL_THRESHOLD:
             recommendations.append("High memory usage detected. Consider enabling aggressive caching or garbage collection.")
 
         # Render time recommendations
-        if current.render_time > 0.1:
+        if current.render_time > RENDER_TIME_THRESHOLD:
             recommendations.append("Slow rendering detected. Consider optimizing widget complexity or enabling caching.")
 
         # Cache recommendations
-        if current.cache_hit_rate < 0.8:
+        if current.cache_hit_rate < CACHE_HIT_RATE_THRESHOLD:
             recommendations.append("Low cache hit rate. Consider adjusting cache size or retention policies.")
 
         # Historical trends
-        if len(history) > 10:
+        if len(history) > HISTORY_LENGTH_THRESHOLD:
             recent_cpu = statistics.mean([m.cpu_usage for m in history[-10:]])
             older_cpu = statistics.mean([m.cpu_usage for m in history[:10]])
 
@@ -715,7 +727,7 @@ class AsyncPerformanceOptimizer:
         current_time = time.time()
         last_optimization = self.rate_limiter.get("optimization", 0)
 
-        if current_time - last_optimization < 30.0:  # Max 1 optimization per 30 seconds
+        if current_time - last_optimization < OPTIMIZATION_RATE_LIMIT_SECONDS:  # Max 1 optimization per 30 seconds
             return
 
         if threshold_level == PerformanceThreshold.CRITICAL:

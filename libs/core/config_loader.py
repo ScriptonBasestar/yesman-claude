@@ -1,5 +1,7 @@
 """Centralized configuration loader with multiple source support and caching."""
 
+import hashlib
+import json
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -111,9 +113,6 @@ class EnvironmentSource(ConfigSource):
 
     def get_cache_key(self) -> str:
         """Generate cache key based on relevant environment variables."""
-        import hashlib
-        import json
-
         env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)
@@ -137,9 +136,6 @@ class DictSource(ConfigSource):
 
     def get_cache_key(self) -> str:
         """Generate cache key based on dictionary content."""
-        import hashlib
-        import json
-
         content_json = json.dumps(self.config, sort_keys=True)
         content_hash = hashlib.sha256(content_json.encode()).hexdigest()[:16]
         return f"dict:{content_hash}"

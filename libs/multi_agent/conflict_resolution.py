@@ -169,7 +169,7 @@ class ConflictResolutionEngine:
             self.resolution_stats["total_conflicts"] += len(conflicts)
             logger.info("Detected %d potential conflicts", len(conflicts))
 
-        except Exception:
+        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
             logger.exception("Error detecting conflicts")
 
         return conflicts
@@ -207,10 +207,8 @@ class ConflictResolutionEngine:
             semantic_conflicts = await self._detect_semantic_conflicts(branch1, branch2)
             conflicts.extend(semantic_conflicts)
 
-        except Exception:
-            logger.exception(
-                "Error detecting conflicts between %s and %s", branch1, branch2
-            )
+        except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError) as e:
+            logger.exception("Error detecting conflicts between %s and %s", branch1, branch2)
 
         return conflicts
 
@@ -363,7 +361,7 @@ class ConflictResolutionEngine:
                     ),
                 )
 
-        except Exception:
+        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
             logger.exception("Error detecting file conflicts")
 
         return conflicts
@@ -392,7 +390,7 @@ class ConflictResolutionEngine:
                 )
                 conflicts.extend(semantic_conflicts)
 
-        except Exception:
+        except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError) as e:
             logger.exception("Error detecting semantic conflicts")
 
         return conflicts
@@ -443,7 +441,7 @@ class ConflictResolutionEngine:
                         ),
                     )
 
-        except Exception:
+        except (subprocess.CalledProcessError, OSError, RuntimeError, ValueError, TypeError) as e:
             logger.exception("Error analyzing semantic changes in %s", file_path)
 
         return conflicts
@@ -528,9 +526,7 @@ class ConflictResolutionEngine:
             times = [r.resolution_time for r in self.resolution_history if r.resolution_time > 0]
             self.resolution_stats["average_resolution_time"] = sum(times) / len(times) if times else 0.0
 
-            logger.info(
-                "Conflict resolution result: %s using %s", result.success, strategy.value
-            )
+            logger.info("Conflict resolution result: %s using %s", result.success, strategy.value)
 
         except Exception as e:
             logger.exception("Error resolving conflict %s", conflict_id)
@@ -850,7 +846,7 @@ class ConflictResolutionEngine:
         try:
             result = await self._run_git_command(["show", f"{branch}:{file_path}"])
             return str(result.stdout) if result.returncode == 0 else None
-        except Exception:
+        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
             return None
 
     async def _get_latest_branch(self, branches: list[str]) -> str | None:
@@ -880,5 +876,5 @@ class ConflictResolutionEngine:
             # This would be implemented with actual git merge commands
             # For now, return a simulation result
             return strategy in ["recursive", "ours"] and len(branches) == 2
-        except Exception:
+        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
             return False

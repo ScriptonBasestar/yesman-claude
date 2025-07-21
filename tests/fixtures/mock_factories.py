@@ -2,6 +2,7 @@
 Provides standardized mock objects to reduce duplication across test files.
 """
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
@@ -11,7 +12,7 @@ class ManagerMockFactory:
     """Factory for commonly mocked manager classes."""
 
     @staticmethod
-    def create_session_manager_mock(**kwargs) -> MagicMock:
+    def create_session_manager_mock(**kwargs: Any) -> MagicMock:
         """Create a standardized SessionManager mock.
 
         Args:
@@ -19,7 +20,7 @@ class ManagerMockFactory:
             create_session_result: Return value for create_session (default: True)
             get_session_info_result: Return value for get_session_info (default: MOCK_SESSION_DATA)
             validate_session_name_side_effect: Side effect for validation (default: None)
-            **kwargs: Additional attributes to set on the mock
+            **kwargs: Any: Additional attributes to set on the mock
 
         Returns:
             MagicMock configured with standard SessionManager behavior
@@ -63,14 +64,14 @@ class ManagerMockFactory:
         return mock_manager
 
     @staticmethod
-    def create_claude_manager_mock(**kwargs) -> MagicMock:
+    def create_claude_manager_mock(**kwargs: Any) -> MagicMock:
         """Create a standardized ClaudeManager mock.
 
         Args:
             controller_count: Number of active controllers (default: 1)
             get_controller_result: Mock controller object (default: auto-generated)
             controllers_status: Status dict for all controllers (default: {"test-session": "running"})
-            **kwargs: Additional attributes to set on the mock
+            **kwargs: Any: Additional attributes to set on the mock
 
         Returns:
             MagicMock configured with standard ClaudeManager behavior
@@ -115,14 +116,14 @@ class ManagerMockFactory:
         return mock_manager
 
     @staticmethod
-    def create_tmux_manager_mock(**kwargs) -> MagicMock:
+    def create_tmux_manager_mock(**kwargs: Any) -> MagicMock:
         """Create a standardized TmuxManager mock.
 
         Args:
             sessions: List of session names (default: ["test-session"])
             list_sessions_result: Return value for list_sessions (default: sessions)
             session_exists_result: Return value for session_exists (default: True)
-            **kwargs: Additional attributes to set on the mock
+            **kwargs: Any: Additional attributes to set on the mock
 
         Returns:
             MagicMock configured with standard TmuxManager behavior
@@ -159,7 +160,7 @@ class ComponentMockFactory:
     """Factory for commonly mocked component objects."""
 
     @staticmethod
-    def create_tmux_session_mock(name: str = "test-session", **kwargs) -> MagicMock:
+    def create_tmux_session_mock(name: str = "test-session", **kwargs: Any) -> MagicMock:
         """Create a standardized tmux session mock."""
         mock_session = MagicMock()
         mock_session.name = name
@@ -205,31 +206,31 @@ class PatchContextFactory:
     """Factory for common patch contexts."""
 
     @staticmethod
-    def patch_session_manager(**kwargs):
+    def patch_session_manager(**kwargs: Any):
         """Create a patch context for SessionManager with standard mock."""
         mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs)
         return patch("libs.core.session_manager.SessionManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_claude_manager(**kwargs):
+    def patch_claude_manager(**kwargs: Any):
         """Create a patch context for ClaudeManager with standard mock."""
         mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs)
         return patch("libs.core.claude_manager.ClaudeManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_tmux_manager(**kwargs):
+    def patch_tmux_manager(**kwargs: Any):
         """Create a patch context for TmuxManager with standard mock."""
         mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
         return patch("libs.tmux_manager.TmuxManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_setup_tmux_manager(**kwargs):
+    def patch_setup_tmux_manager(**kwargs: Any):
         """Create a patch context for TmuxManager in setup commands."""
         mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
         return patch("commands.setup.TmuxManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_subprocess_run(**kwargs):
+    def patch_subprocess_run(**kwargs: Any):
         """Create a patch context for subprocess.run with standard mock."""
         mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs)
         return patch("subprocess.run", return_value=mock_result)

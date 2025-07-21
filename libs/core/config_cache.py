@@ -4,8 +4,10 @@
 import hashlib
 import json
 import logging
+import os
 import threading
 import time
+import yaml
 from pathlib import Path
 from typing import Any
 
@@ -255,8 +257,6 @@ class CachedConfigLoader:
 
     def _generate_current_cache_key(self) -> str:
         """Generate cache key for current loader state."""
-        import os
-
         # Get environment variables that affect configuration
         env_vars = {key: value for key, value in os.environ.items() if key.startswith("YESMAN_")}
 
@@ -314,8 +314,6 @@ class CacheableYamlFileSource:
         return self.file_path.exists()
 
     def load(self) -> dict:
-        import yaml
-
         with open(self.file_path) as f:
             return yaml.safe_load(f) or {}
 
@@ -338,8 +336,6 @@ class CacheableEnvironmentSource:
         return True
 
     def load(self) -> dict:
-        import os
-
         config: dict[str, Any] = {}
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
@@ -369,9 +365,6 @@ class CacheableEnvironmentSource:
 
     def get_cache_key(self) -> str:
         """Generate cache key based on relevant environment variables."""
-        import hashlib
-        import os
-
         env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)

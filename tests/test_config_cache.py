@@ -8,6 +8,7 @@ import pytest
 
 from libs.core.config_cache import CachedConfigLoader, ConfigCache, FileWatcher
 from libs.core.config_loader import ConfigLoader, EnvironmentSource, YamlFileSource
+from libs.core.config_schema import YesmanConfigSchema
 from libs.yesman_config import create_cached_yesman_config
 
 
@@ -22,8 +23,6 @@ class TestConfigCache:
         assert cache.get("test_key") is None
 
         # Test cache put and hit
-        from libs.core.config_schema import YesmanConfigSchema
-
         config = YesmanConfigSchema()
         cache.put("test_key", config)
 
@@ -34,8 +33,6 @@ class TestConfigCache:
     def test_cache_ttl_expiry(self) -> None:
         """Test cache TTL expiry."""
         cache = ConfigCache(cache_ttl=0.1, max_cache_size=5)
-
-        from libs.core.config_schema import YesmanConfigSchema
 
         config = YesmanConfigSchema()
         cache.put("test_key", config)
@@ -52,8 +49,6 @@ class TestConfigCache:
     def test_cache_size_limit(self) -> None:
         """Test cache size limit and eviction."""
         cache = ConfigCache(cache_ttl=10.0, max_cache_size=2)
-
-        from libs.core.config_schema import YesmanConfigSchema
 
         # Add two entries
         config1 = YesmanConfigSchema()
@@ -82,8 +77,6 @@ class TestConfigCache:
         stats = cache.get_stats()
         assert stats["total_entries"] == 0
         assert stats["valid_entries"] == 0
-
-        from libs.core.config_schema import YesmanConfigSchema
 
         config = YesmanConfigSchema()
         cache.put("test_key", config)
@@ -256,8 +249,6 @@ class TestPerformanceImprovements:
 
     def test_performance_improvement(self) -> None:
         """Test that cached loading is faster than uncached."""
-        import time
-
         # Create configs
         base_loader = ConfigLoader()
         base_loader.add_source(EnvironmentSource())

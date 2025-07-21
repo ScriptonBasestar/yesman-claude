@@ -291,7 +291,6 @@ class TaskRunner:
 
         todo_file, task = result
 
-
         # Check if task needs to be broken down
         subtasks = self.analyze_task_dependencies(task)
         if subtasks:
@@ -322,7 +321,6 @@ class TaskRunner:
 
             if iterations >= max_iterations:
                 break
-
 
 
 def main() -> None:

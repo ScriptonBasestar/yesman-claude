@@ -1,5 +1,6 @@
 """Automated conflict resolution system integrating semantic analysis and intelligent merging."""
 
+import ast
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -19,6 +20,17 @@ from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConfl
 from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
 
 logger = logging.getLogger(__name__)
+
+# Constants for risk thresholds and statistical analysis
+CONSERVATIVE_RISK_THRESHOLD = 0.3
+BALANCED_RISK_THRESHOLD = 0.6
+PREDICTIVE_RISK_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.5
+SUCCESS_RATE_THRESHOLD = 0.7
+CONFIDENCE_RATE_THRESHOLD = 0.6
+SEMANTIC_INTEGRITY_THRESHOLD = 0.95
+MIN_SESSIONS_FOR_ANALYSIS = 10
+MIN_FAILURE_COUNT = 2
 
 
 class AutoResolutionMode(Enum):
@@ -157,9 +169,7 @@ class AutoResolver:
         target_branch = target_branch or branch1
         start_time = datetime.now(UTC)
 
-        logger.info(
-            "Starting auto-resolution session %s in %s mode", session_id, mode.value
-        )
+        logger.info("Starting auto-resolution session %s in %s mode", session_id, mode.value)
 
         try:
             # Step 1: Detect semantic conflicts
@@ -190,9 +200,7 @@ class AutoResolver:
             # Step 2: Assess resolvability
             resolvable_conflicts, escalated_conflicts = self._assess_conflict_resolvability(conflicts, mode)
 
-            logger.info(
-                "Resolvable: %d, Escalated: %d", len(resolvable_conflicts), len(escalated_conflicts)
-            )
+            logger.info("Resolvable: %d, Escalated: %d", len(resolvable_conflicts), len(escalated_conflicts))
 
             # Step 3: Perform automatic resolution
             merge_results = []
@@ -280,9 +288,7 @@ class AutoResolver:
         Returns:
             Dictionary with prevention results and recommendations
         """
-        logger.info(
-            "Starting predictive conflict prevention for %d branches", len(branches)
-        )
+        logger.info("Starting predictive conflict prevention for %d branches", len(branches))
 
         try:
             # Get conflict predictions
@@ -347,14 +353,14 @@ class AutoResolver:
 
             # Conservative mode: only resolve very low-risk conflicts
             if mode == AutoResolutionMode.CONSERVATIVE:
-                if risk_score <= 0.3 and conflict.severity in [ConflictSeverity.LOW]:
+                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity in [ConflictSeverity.LOW]:
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
 
             # Balanced mode: resolve low-medium risk with good suggestions
             elif mode == AutoResolutionMode.BALANCED:
-                if risk_score <= 0.6 and conflict.severity in [ConflictSeverity.LOW, ConflictSeverity.MEDIUM] and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED:
+                if risk_score <= BALANCED_RISK_THRESHOLD and conflict.severity in [ConflictSeverity.LOW, ConflictSeverity.MEDIUM] and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED:
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
@@ -367,7 +373,7 @@ class AutoResolver:
                     escalated.append(conflict)
 
             # Predictive mode: use prediction confidence
-            elif risk_score <= 0.5 and conflict.severity != ConflictSeverity.CRITICAL:
+            elif risk_score <= PREDICTIVE_RISK_THRESHOLD and conflict.severity != ConflictSeverity.CRITICAL:
                 resolvable.append(conflict)
             else:
                 escalated.append(conflict)
@@ -420,10 +426,7 @@ class AutoResolver:
             if result.merge_confidence >= threshold and result.resolution in [MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION] and result.semantic_integrity:
                 filtered_results.append(result)
             else:
-                logger.info(
-                    "Filtering out merge result for %s due to low confidence or integrity issues",
-                    result.file_path
-                )
+                logger.info("Filtering out merge result for %s due to low confidence or integrity issues", result.file_path)
 
         return filtered_results
 
@@ -456,14 +459,14 @@ class AutoResolver:
         # Validate AST if it's Python code
         if result.file_path.endswith(".py"):
             try:
-                import ast
+                # ast is imported at module level
 
                 ast.parse(result.merged_content)
             except SyntaxError:
                 return False
 
         # Check confidence threshold
-        return not result.merge_confidence < 0.5
+        return not result.merge_confidence < CONFIDENCE_THRESHOLD
 
     async def _apply_merge_results(
         self,
@@ -735,20 +738,20 @@ class AutoResolver:
         recommendations = []
 
         # Analyze success rates
-        if self.resolution_stats["total_sessions"] > 10:
+        if self.resolution_stats["total_sessions"] > MIN_SESSIONS_FOR_ANALYSIS:
             success_rate = self.resolution_stats["successful_resolutions"] / self.resolution_stats["total_sessions"]
 
-            if success_rate < 0.7:
+            if success_rate < SUCCESS_RATE_THRESHOLD:
                 recommendations.append(
                     "Consider using more conservative resolution mode to improve success rate",
                 )
 
-            if self.resolution_stats["average_confidence"] < 0.6:
+            if self.resolution_stats["average_confidence"] < CONFIDENCE_RATE_THRESHOLD:
                 recommendations.append(
                     "Review conflict assessment criteria to improve confidence scores",
                 )
 
-            if self.resolution_stats["semantic_integrity_rate"] < 0.95:
+            if self.resolution_stats["semantic_integrity_rate"] < SEMANTIC_INTEGRITY_THRESHOLD:
                 recommendations.append(
                     "Enhance AST validation and semantic integrity checks",
                 )
@@ -761,9 +764,7 @@ class AutoResolver:
         )[:3]
 
         for pattern, failures in common_failures:
-            if len(failures) > 2:
-                recommendations.append(
-                    "Improve resolution strategy for %s conflicts (failed %d times)" % (pattern, len(failures))
-                )
+            if len(failures) > MIN_FAILURE_COUNT:
+                recommendations.append("Improve resolution strategy for %s conflicts (failed %d times)" % (pattern, len(failures)))
 
         return recommendations

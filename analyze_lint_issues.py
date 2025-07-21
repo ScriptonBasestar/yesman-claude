@@ -6,6 +6,10 @@ import re
 from pathlib import Path
 from typing import Any
 
+# Constants for lint analysis
+MAX_LINE_LENGTH = 88  # ruff default
+MAX_ISSUES_TO_DISPLAY = 5
+
 
 class LintAnalyzer:
     def __init__(self, project_path: str):
@@ -87,7 +91,7 @@ class LintAnalyzer:
 
         # 3. Check line length
         for line_num, line in enumerate(lines, 1):
-            if len(line) > 88:  # ruff default
+            if len(line) > MAX_LINE_LENGTH:  # ruff default
                 issues.append(
                     {
                         "file": str(file_path),
@@ -237,7 +241,7 @@ def main():
             relative_path = issue["file"].replace(project_path + "/", "")
             print(f"  {relative_path}:{issue['line']} - {issue['message']}")
 
-        if len(issues) > 5:
+        if len(issues) > MAX_ISSUES_TO_DISPLAY:
             print(f"  ... and {len(issues) - 5} more")
         print()
 

@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """Base command class with common functionality."""
 
+import json
 import logging
+import re
+import shutil
 import sys
+import yaml
 from abc import ABC, abstractmethod
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +26,7 @@ from .error_handling import (
     error_handler,
 )
 from .services import get_config, get_tmux_manager, initialize_services
-from .settings import settings
+from .settings import ValidationPatterns, settings
 
 
 class CommandError(YesmanError):
@@ -32,7 +37,7 @@ class CommandError(YesmanError):
         message: str,
         exit_code: int = 1,
         recovery_hint: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             message=message,
@@ -155,8 +160,6 @@ class BaseCommand(ABC):
 
     def _is_tmux_available(self) -> bool:
         """Check if tmux is available."""
-        import shutil
-
         return shutil.which("tmux") is not None
 
     def handle_error(self, error: Exception, context_str: str = "") -> None:
@@ -171,7 +174,7 @@ class BaseCommand(ABC):
         else:
             error_handler.handle_error(error, exit_on_critical=True)
 
-    def log_command_start(self, command_name: str, **kwargs) -> None:
+    def log_command_start(self, command_name: str, **kwargs: Any) -> None:
         """Log command start with parameters."""
         params = ", ".join(f"{k}={v}" for k, v in kwargs.items() if v is not None)
         self.logger.info(f"Starting command: {command_name}" + (f" with {params}" if params else ""))
@@ -206,10 +209,10 @@ class BaseCommand(ABC):
         click.echo(click.style(f"ℹ️  {message}", fg="blue"))
 
     @abstractmethod
-    def execute(self, **kwargs) -> Any:
+    def execute(self, **kwargs: Any) -> Any:
         """Execute the command (must be implemented by subclasses)."""
 
-    def run(self, **kwargs) -> Any:
+    def run(self, **kwargs: Any) -> Any:
         """Main execution wrapper with error handling."""
         command_name = self.__class__.__name__.replace("Command", "").lower()
 
@@ -284,10 +287,6 @@ class SessionCommandMixin:
             msg = f"Session name too long (max {settings.sessions.session_name_max_length} characters)"
             raise CommandError(msg)
 
-        import re
-
-        from .settings import ValidationPatterns
-
         if not re.match(ValidationPatterns.SESSION_NAME, session_name):
             msg = "Session name can only contain letters, numbers, underscores, and hyphens"
             raise CommandError(msg)
@@ -309,8 +308,6 @@ class ConfigCommandMixin:
     def load_projects_config(self) -> dict[str, Any]:
         """Load projects configuration with error handling."""
         try:
-            import yaml
-
             with open(settings.paths.projects_file) as f:
                 return yaml.safe_load(f) or {}
         except FileNotFoundError:
@@ -323,8 +320,6 @@ class ConfigCommandMixin:
     def save_projects_config(self, config: dict[str, Any]) -> None:
         """Save projects configuration with error handling."""
         try:
-            import yaml
-
             with open(settings.paths.projects_file, "w") as f:
                 yaml.dump(config, f, default_flow_style=False)
         except Exception as e:
@@ -333,9 +328,6 @@ class ConfigCommandMixin:
 
     def backup_config(self, config_path: str) -> str:
         """Create backup of configuration file."""
-        import shutil
-        from datetime import UTC, datetime
-
         backup_path = f"{config_path}.backup.{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         try:
             shutil.copy2(config_path, backup_path)
@@ -379,12 +371,8 @@ class OutputFormatterMixin:
 
     def format_json(self, data: Any, indent: int = 2) -> str:
         """Format data as JSON."""
-        import json
-
         return json.dumps(data, indent=indent, default=str)
 
     def format_yaml(self, data: Any) -> str:
         """Format data as YAML."""
-        import yaml
-
         return yaml.dump(data, default_flow_style=False)

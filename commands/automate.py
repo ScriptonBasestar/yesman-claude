@@ -24,7 +24,7 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:
+    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:  # noqa: ARG002
         """Execute the status command."""
         try:
             project_path_obj = Path(project_path).resolve()
@@ -95,7 +95,7 @@ class AutomateStatusCommand(BaseCommand):
                 ),
             }
 
-            for (name, desc, triggers) in context_info.values():
+            for name, desc, triggers in context_info.values():
                 context_table.add_row(name, desc, triggers)
 
             self.console.print(context_table)
@@ -133,7 +133,7 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, Any]:
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, Any]:  # noqa: ARG002
         """Execute the monitor command."""
         try:
             project_path_obj = Path(project_path).resolve()

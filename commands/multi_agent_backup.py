@@ -5,6 +5,7 @@ import contextlib
 import json
 import logging
 import signal
+import subprocess
 import types
 from collections import Counter
 from datetime import UTC, datetime, timedelta
@@ -51,11 +52,19 @@ from libs.multi_agent.types import TaskStatus
 
 logger = logging.getLogger(__name__)
 
+# Constants for magic number replacements
+MIN_BRANCHES_FOR_COMPARISON = 2
+DEFAULT_DISPLAY_LIMIT_SMALL = 3
+DEFAULT_DISPLAY_LIMIT_MEDIUM = 5
+DEFAULT_DISPLAY_LIMIT_LARGE = 10
+RISK_THRESHOLD_HIGH = 0.7
+RISK_THRESHOLD_MEDIUM = 0.4
+
 
 class StartAgentsCommand(BaseCommand):
     """Start the multi-agent pool."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -119,7 +128,7 @@ class StartAgentsCommand(BaseCommand):
 class MonitorAgentsCommand(BaseCommand):
     """Start real-time agent monitoring dashboard."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -183,7 +192,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -240,7 +249,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -271,7 +280,7 @@ class StopAgentsCommand(BaseCommand):
 class AddTaskCommand(BaseCommand):
     """Add a task to the agent pool queue."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the add task command."""
         # Extract parameters from kwargs
         title = kwargs.get("title", "")
@@ -318,7 +327,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -328,7 +337,6 @@ class ListTasksCommand(BaseCommand):
         """Execute the list tasks command."""
         try:
             pool = AgentPool(work_dir=work_dir)
-
 
             filter_status = None
             if status:
@@ -383,7 +391,7 @@ class ListTasksCommand(BaseCommand):
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -488,7 +496,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -558,7 +566,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -627,7 +635,7 @@ class ConflictSummaryCommand(BaseCommand):
 class PredictConflictsCommand(BaseCommand):
     """Predict potential conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -708,7 +716,7 @@ class PredictConflictsCommand(BaseCommand):
 
                     if prediction.affected_files:
                         files_str = ", ".join(prediction.affected_files[:3])
-                        if len(prediction.affected_files) > 3:
+                        if len(prediction.affected_files) > DEFAULT_DISPLAY_LIMIT_SMALL:
                             files_str += f" (and {len(prediction.affected_files) - 3} more)"
                         self.print_info(f"   Files: {files_str}")
 
@@ -748,7 +756,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show conflict prediction summary and statistics."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -823,7 +831,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns between branches."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -871,7 +879,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 
                         # Overall risk score
                         risk_score = sum(vector) / len(vector)
-                        risk_level = "🔴 HIGH" if risk_score > 0.7 else "🟡 MEDIUM" if risk_score > 0.4 else "🟢 LOW"
+                        risk_level = "🔴 HIGH" if risk_score > RISK_THRESHOLD_HIGH else "🟡 MEDIUM" if risk_score > RISK_THRESHOLD_MEDIUM else "🟢 LOW"
                         self.print_info(f"   Overall Risk: {risk_level} ({risk_score:.2f})")
 
                         # Pattern-specific analysis
@@ -921,7 +929,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 class AnalyzeSemanticConflictsCommand(BaseCommand):
     """Analyze AST-based semantic conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -950,7 +958,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 
             async def run_semantic_analysis():
                 all_conflicts = []
-                if len(branches) >= 2:
+                if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze conflicts between the first two branches
                     results = await semantic_analyzer.analyze_semantic_conflicts(
                         branches[0],
@@ -1013,7 +1021,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic structure summary of code."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1080,7 +1088,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Compare function signatures between branches."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1104,7 +1112,7 @@ class FunctionDiffCommand(BaseCommand):
 
             async def run_diff():
                 diff_results = []
-                if len(branches) >= 2:
+                if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze differences between first two branches
                     conflicts = await analyzer.analyze_semantic_conflicts(branches[0], branches[1], file_paths=file_list)
 
@@ -1149,7 +1157,7 @@ class FunctionDiffCommand(BaseCommand):
 class SemanticMergeCommand(BaseCommand):
     """Perform intelligent semantic merge."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1419,7 +1427,7 @@ def analyze_semantic_conflicts(
     try:
         click.echo(f"🧠 Analyzing semantic conflicts between: {', '.join(branches)}")
 
-        if len(branches) < 2:
+        if len(branches) < MIN_BRANCHES_FOR_COMPARISON:
             click.echo("❌ Need at least 2 branches for comparison")
             return
 
@@ -1519,7 +1527,7 @@ def analyze_semantic_conflicts(
                             },
                         )
 
-                    if len(conflicts) > 10:
+                    if len(conflicts) > DEFAULT_DISPLAY_LIMIT_LARGE:
                         click.echo(f"   ... and {len(conflicts) - 10} more conflicts")
 
                     all_conflicts.extend(conflicts)
@@ -1710,7 +1718,7 @@ def batch_merge(
                         branch1,
                         branch2,
                     )
-                except Exception:
+                except (OSError, subprocess.CalledProcessError, RuntimeError, AttributeError) as e:
                     click.echo(
                         "❌ Could not determine changed files. Please specify --files",
                     )
@@ -1723,7 +1731,7 @@ def batch_merge(
             click.echo(f"📁 Files to merge: {len(file_list)}")
             for f in file_list[:10]:
                 click.echo(f"   • {f}")
-            if len(file_list) > 10:
+            if len(file_list) > DEFAULT_DISPLAY_LIMIT_LARGE:
                 click.echo(f"   ... and {len(file_list) - 10} more")
 
             click.echo(
@@ -1765,7 +1773,7 @@ def batch_merge(
                 for result in failed[:5]:
                     error = result.metadata.get("error", "Unknown error")
                     click.echo(f"   • {result.file_path}: {error}")
-                if len(failed) > 5:
+                if len(failed) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
                     click.echo(f"   ... and {len(failed) - 5} more")
 
             if manual_required:
@@ -1774,7 +1782,7 @@ def batch_merge(
                     click.echo(
                         f"   • {result.file_path}: {len(result.unresolved_conflicts)} unresolved conflicts",
                     )
-                if len(manual_required) > 5:
+                if len(manual_required) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
                     click.echo(f"   ... and {len(manual_required) - 5} more")
 
             # Apply successful merges if requested
@@ -1960,7 +1968,7 @@ def auto_resolve(
                 )
                 for conflict_id in result.escalated_conflicts[:5]:
                     click.echo(f"   • {conflict_id}")
-                if len(result.escalated_conflicts) > 5:
+                if len(result.escalated_conflicts) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
                     click.echo(f"   ... and {len(result.escalated_conflicts) - 5} more")
 
             # Merge results details
@@ -1986,7 +1994,7 @@ def auto_resolve(
                             f"      Resolved: {len(merge_result.conflicts_resolved)} conflicts",
                         )
 
-                if len(successful_merges) > 10:
+                if len(successful_merges) > DEFAULT_DISPLAY_LIMIT_LARGE:
                     click.echo(
                         f"   ... and {len(successful_merges) - 10} more successful merges",
                     )
@@ -1996,7 +2004,7 @@ def auto_resolve(
                 click.echo("\n👥 Manual Intervention Required:")
                 for item in result.manual_intervention_required[:5]:
                     click.echo(f"   • {item}")
-                if len(result.manual_intervention_required) > 5:
+                if len(result.manual_intervention_required) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
                     click.echo(
                         f"   ... and {len(result.manual_intervention_required) - 5} more",
                     )
@@ -2116,7 +2124,7 @@ def prevent_conflicts(
         click.echo(f"   Branches: {', '.join(branches)}")
         click.echo(f"   Mode: {mode_enum.value}")
 
-        if len(branches) < 2:
+        if len(branches) < MIN_BRANCHES_FOR_COMPARISON:
             click.echo("❌ Need at least 2 branches for conflict prediction")
             return
 
@@ -2832,7 +2840,7 @@ def dependency_track(
 
         try:
             asyncio.run(track_change())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             mock_change_id = f"dep_change_{agent}_{file.replace('/', '_')}"
             click.echo("\n✅ Change tracked successfully")
@@ -2959,14 +2967,14 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
                 click.echo(f"\n📦 Dependencies ({len(report['dependencies'])}):")
                 for dep in report["dependencies"][:5]:
                     click.echo(f"   • {dep}")
-                if len(report["dependencies"]) > 5:
+                if len(report["dependencies"]) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
                     click.echo(f"   ... and {len(report['dependencies']) - 5} more")
 
             if report["dependents"]:
                 click.echo(f"\n🔗 Dependents ({len(report['dependents'])}):")
                 for dep in report["dependents"][:5]:
                     click.echo(f"   • {dep}")
-                if len(report["dependents"]) > 5:
+                if len(report["dependents"]) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
                     click.echo(f"   ... and {len(report['dependents']) - 5} more")
 
             if export:
@@ -2979,7 +2987,7 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
 
         try:
             asyncio.run(analyze_impact())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {file_path}")
@@ -3092,7 +3100,7 @@ def dependency_propagate(
 
         try:
             asyncio.run(propagate_changes())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("\n📊 Propagation Results:")
             for change_id in change_ids:
@@ -3233,7 +3241,7 @@ def review_initiate(
 
         try:
             asyncio.run(run_review())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             mock_review_id = f"review_{branch_name}_{agent}"
             click.echo("\n✅ Review initiated successfully")
@@ -3301,7 +3309,7 @@ def review_approve(
 
         try:
             asyncio.run(run_approval())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             click.echo("\n✅ Review approved successfully")
             if comments:
@@ -3386,7 +3394,7 @@ def review_reject(
 
         try:
             asyncio.run(run_rejection())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             click.echo("\n❌ Review rejected")
             click.echo("   Reasons:")
@@ -3510,7 +3518,7 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
 
         try:
             asyncio.run(get_status())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError) as e:
             # Fallback to demo output
             if review_id:
                 click.echo("\n📋 Review Details:")
@@ -3650,7 +3658,7 @@ def quality_check(
 
         try:
             asyncio.run(run_quality_check())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("\n📊 Quality Check Results:")
             for i, file in enumerate(files, 1):
@@ -3764,7 +3772,7 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
         try:
             asyncio.run(get_summary())
-        except Exception:
+        except (asyncio.TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
             # Fallback to demo output
             click.echo("Engine Status: Running")
             click.echo("Active reviews: 0")

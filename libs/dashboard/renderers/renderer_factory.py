@@ -4,7 +4,7 @@ Factory pattern for creating and managing dashboard renderers.
 
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any
+from typing import Union
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .registry import RendererRegistry
@@ -17,15 +17,12 @@ class RendererFactoryError(Exception):
     """Base exception for renderer factory errors."""
 
 
-
 class UnsupportedFormatError(RendererFactoryError):
     """Raised when unsupported format is requested."""
 
 
-
 class RendererInitializationError(RendererFactoryError):
     """Raised when renderer initialization fails."""
-
 
 
 class RendererFactory:
@@ -151,10 +148,10 @@ class RendererFactory:
     def render_universal(
         cls,
         widget_type: WidgetType,
-        data: Any,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
         render_format: RenderFormat | None = None,
-        options: dict[str, Any] | None = None,
-    ) -> Any | dict[RenderFormat, Any]:
+        options: dict[str, str | int | float | bool] | None = None,
+    ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool] | dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Universal rendering method with format selection.
 
         Args:
@@ -203,11 +200,11 @@ class RendererFactory:
     def render_parallel(
         cls,
         widget_type: WidgetType,
-        data: Any,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
         formats: list[RenderFormat] | None = None,
-        options: dict[str, Any] | None = None,
+        options: dict[str, str | int | float | bool] | None = None,
         max_workers: int = 3,
-    ) -> dict[RenderFormat, Any]:
+    ) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render widget with multiple formats in parallel.
 
         Args:
@@ -228,7 +225,7 @@ class RendererFactory:
         results = {}
         errors = []
 
-        def render_format(fmt: RenderFormat) -> tuple:
+        def render_format(fmt: RenderFormat) -> tuple[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool] | None, str | None]:
             try:
                 renderer = cls.get_singleton(fmt)
                 result = renderer.render_widget(widget_type, data, options)
@@ -281,10 +278,10 @@ class RendererFactory:
 
 def render_widget(
     widget_type: WidgetType,
-    data: Any,
+    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
     render_format: RenderFormat,
-    options: dict[str, Any] | None = None,
-) -> Any:
+    options: dict[str, str | int | float | bool] | None = None,
+) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool]:
     """Render a single widget with specified format.
 
     Args:
@@ -301,9 +298,9 @@ def render_widget(
 
 def render_all_formats(
     widget_type: WidgetType,
-    data: Any,
-    options: dict[str, Any] | None = None,
-) -> dict[RenderFormat, Any]:
+    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+    options: dict[str, str | int | float | bool] | None = None,
+) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
     """Render a widget with all available formats.
 
     Args:
@@ -319,11 +316,11 @@ def render_all_formats(
 
 def render_formats(
     widget_type: WidgetType,
-    data: Any,
+    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
     formats: list[RenderFormat],
-    options: dict[str, Any] | None = None,
+    options: dict[str, str | int | float | bool] | None = None,
     parallel: bool = False,
-) -> dict[RenderFormat, Any]:
+) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
     """Render a widget with specific formats.
 
     Args:

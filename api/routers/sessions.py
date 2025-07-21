@@ -357,7 +357,7 @@ class SessionService:
         except Exception:
             return False
 
-    def _setup_session_internal(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
+    def _setup_session_internal(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:  # noqa: ARG002
         """Internal session setup logic."""
         # This would integrate with the improved SessionSetupService
         # For now, return a placeholder

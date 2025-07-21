@@ -285,7 +285,6 @@ class SessionManager:
                 output_lines=output_lines,
             )
 
-
         except Exception:
             self.logger.exception("Error getting detailed pane info")
             # Return basic pane info as fallback

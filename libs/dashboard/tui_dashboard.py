@@ -27,6 +27,7 @@ from textual.widgets import (
 from .renderers import TUIRenderer, WidgetType
 from .renderers.widget_models import (
     ActivityData,
+    HealthCategoryData,
     HealthData,
     HealthLevel,
     SessionData,
@@ -49,7 +50,7 @@ class DashboardWidget(Static):
         widget_type: WidgetType,
         title: str = "",
         update_interval: float = 2.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Initialize dashboard widget.
 
@@ -102,8 +103,6 @@ class DashboardWidget(Static):
             else:
                 # Fallback for containers without update method
                 content_container.remove_children()
-                from textual.widgets import Static
-
                 content_text = rendered_content.get("content", "") if isinstance(rendered_content, dict) else str(rendered_content)
                 content_container.mount(Static(content_text))
 
@@ -116,8 +115,6 @@ class DashboardWidget(Static):
             else:
                 # Fallback for containers without update method
                 content_container.remove_children()
-                from textual.widgets import Static
-
                 content_container.mount(Static(f"[red]{error_msg}[/red]"))
 
     async def auto_update(self) -> None:
@@ -129,7 +126,7 @@ class DashboardWidget(Static):
 class SessionsView(DashboardWidget):
     """Sessions monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             widget_type=WidgetType.SESSION_BROWSER,
             title="Active Sessions",
@@ -164,7 +161,7 @@ class SessionsView(DashboardWidget):
 class HealthView(DashboardWidget):
     """Project health monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             widget_type=WidgetType.PROJECT_HEALTH,
             title="Project Health",
@@ -175,8 +172,6 @@ class HealthView(DashboardWidget):
     async def auto_update(self) -> None:
         """Fetch and update health data."""
         # Mock health data
-        from .renderers.widget_models import HealthCategoryData
-
         mock_categories = [
             HealthCategoryData(category="build", score=90, level=HealthLevel.EXCELLENT),
             HealthCategoryData(category="tests", score=85, level=HealthLevel.GOOD),
@@ -199,7 +194,7 @@ class HealthView(DashboardWidget):
 class ActivityView(DashboardWidget):
     """Activity monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             widget_type=WidgetType.ACTIVITY_HEATMAP,
             title="Activity Heatmap",
@@ -225,7 +220,7 @@ class ActivityView(DashboardWidget):
 class LogsView(Static):
     """Logs monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.log_buffer: list[str] = []
         self.max_logs = 100
@@ -269,7 +264,7 @@ class LogsView(Static):
 class SettingsView(Static):
     """Settings and configuration view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.settings: dict[str, Any] = {
             "auto_refresh": True,
@@ -347,7 +342,7 @@ class TUIDashboard(App):
     auto_refresh_enabled = reactive(True)
     refresh_interval = reactive(3.0)
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize TUI Dashboard."""
         super().__init__(**kwargs)
         self.title = "Yesman-Claude TUI Dashboard"

@@ -1,8 +1,10 @@
 """Asynchronous logger with queue-based processing for high performance."""
 
 import asyncio
+import inspect
 import logging
 import os
+import sys
 import threading
 import time
 import traceback
@@ -288,13 +290,11 @@ class AsyncLogger:
             # Fallback to standard logging
             self.standard_logger.exception(f"Failed to queue log entry: {e}")
 
-    def log(self, level: LogLevel, message: str, **kwargs) -> None:
+    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
         """Log a message at specified level."""
         # Extract caller information
         frame = None
         try:
-            import inspect
-
             frame = inspect.currentframe().f_back
             module = frame.f_globals.get("__name__", "")
             function = frame.f_code.co_name
@@ -320,8 +320,6 @@ class AsyncLogger:
         # Add exception info if logging an exception
         if level in [LogLevel.ERROR, LogLevel.CRITICAL]:
             try:
-                import sys
-
                 if sys.exc_info()[0] is not None:
                     entry.exception_info = traceback.format_exc()
             except Exception as e:
@@ -332,27 +330,27 @@ class AsyncLogger:
         self._queue_entry(entry)
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs) -> None:
+    def trace(self, message: str, **kwargs: Any) -> None:
         """Log a trace message."""
         self.log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs) -> None:
+    def debug(self, message: str, **kwargs: Any) -> None:
         """Log a debug message."""
         self.log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs) -> None:
+    def info(self, message: str, **kwargs: Any) -> None:
         """Log an info message."""
         self.log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs) -> None:
+    def warning(self, message: str, **kwargs: Any) -> None:
         """Log a warning message."""
         self.log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs) -> None:
+    def error(self, message: str, **kwargs: Any) -> None:
         """Log an error message."""
         self.log(LogLevel.ERROR, message, **kwargs)
 
-    def critical(self, message: str, **kwargs) -> None:
+    def critical(self, message: str, **kwargs: Any) -> None:
         """Log a critical message."""
         self.log(LogLevel.CRITICAL, message, **kwargs)
 

@@ -3,10 +3,21 @@
 """
 
 import sys
+import tempfile
+import yaml
 from pathlib import Path
-from typing import Any, Generator
+from typing import Generator, Union
+from pathlib import Path as PathType
 
 import pytest
+
+# Dashboard imports
+from libs.dashboard import (
+    DashboardLauncher,
+    KeyboardNavigationManager,
+    PerformanceOptimizer,
+    ThemeManager,
+)
 
 # 프로젝트 루트를 Python path에 추가
 project_root = Path(__file__).parent.parent
@@ -99,8 +110,6 @@ def test_config_file(temp_dir: str) -> Path:
         },
     }
     config_path = Path(temp_dir) / "test_config.yaml"
-    import yaml
-
     with open(config_path, "w") as f:
         yaml.dump(config, f)
     return config_path
@@ -109,9 +118,6 @@ def test_config_file(temp_dir: str) -> Path:
 @pytest.fixture
 def temp_project_root():
     """Create temporary project directory."""
-    import tempfile
-    from pathlib import Path
-
     with tempfile.TemporaryDirectory() as temp_dir:
         project_root = Path(temp_dir)
 
@@ -124,21 +130,14 @@ def temp_project_root():
 
 
 @pytest.fixture
-def launcher(temp_project_root: Path) -> Any:
+def launcher(temp_project_root: Path) -> object:
     """Create DashboardLauncher with temp project root."""
-    from libs.dashboard import DashboardLauncher
-
     return DashboardLauncher(project_root=temp_project_root)
 
 
 @pytest.fixture
 def theme_manager():
     """Create ThemeManager instance."""
-    import tempfile
-    from pathlib import Path
-
-    from libs.dashboard import ThemeManager
-
     with tempfile.TemporaryDirectory() as temp_dir:
         yield ThemeManager(config_dir=Path(temp_dir))
 
@@ -146,8 +145,6 @@ def theme_manager():
 @pytest.fixture
 def keyboard_manager():
     """Create KeyboardNavigationManager instance."""
-    from libs.dashboard import KeyboardNavigationManager
-
     manager = KeyboardNavigationManager()
     yield manager
     # Cleanup
@@ -158,8 +155,6 @@ def keyboard_manager():
 @pytest.fixture
 def performance_optimizer():
     """Create PerformanceOptimizer instance."""
-    from libs.dashboard import PerformanceOptimizer
-
     optimizer = PerformanceOptimizer()
     yield optimizer
     # Cleanup
@@ -168,7 +163,7 @@ def performance_optimizer():
 
 
 # pytest 설정
-def pytest_configure(config: Any) -> None:
+def pytest_configure(config: object) -> None:
     """Pytest 설정 커스터마이징."""
     config.addinivalue_line(
         "markers",
@@ -185,16 +180,16 @@ def pytest_configure(config: Any) -> None:
 
 
 # 테스트 세션 시작/종료 훅
-def pytest_sessionstart(session: Any) -> None:
+def pytest_sessionstart(session: object) -> None:
     """테스트 세션 시작 시 실행."""
 
 
-def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
+def pytest_sessionfinish(session: object, exitstatus: int) -> None:
     """테스트 세션 종료 시 실행."""
 
 
 # 테스트 결과 리포팅 커스터마이징
-def pytest_report_teststatus(report: Any, config: Any) -> Any:
+def pytest_report_teststatus(report: object, config: object) -> tuple[str, str, str] | None:
     """테스트 상태 리포팅 커스터마이징."""
     if report.when == "call":
         if report.passed:

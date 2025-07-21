@@ -1,5 +1,7 @@
 """Controller management API endpoints."""
 
+import subprocess
+
 from fastapi import APIRouter, HTTPException
 
 from ..shared import claude_manager
@@ -15,7 +17,7 @@ def get_controller_status(session_name: str) -> str | None:
     try:
         controller = cm.get_controller(session_name)
         return "running" if controller.is_running else "stopped"
-    except Exception as e:
+    except (AttributeError, KeyError, RuntimeError) as e:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get controller status: {e!s}",
@@ -73,13 +75,13 @@ def start_controller(session_name: str) -> None:
                                 pane_info.append(
                                     f"Window '{window.name}' Pane {pane.index}: {cmd}",
                                 )
-                            except Exception as e:
+                            except (OSError, subprocess.CalledProcessError, RuntimeError) as e:
                                 pane_info.append(
                                     f"Window '{window.name}' Pane {pane.index}: <command unknown> (error: {e!s})",
                                 )
                 else:
                     pane_info.append("❌ Could not access session information")
-            except Exception as e:
+            except (AttributeError, RuntimeError, OSError) as e:
                 pane_info.append(f"❌ Error accessing session: {e!s}")
 
             detail_msg = (
@@ -117,7 +119,7 @@ def start_controller(session_name: str) -> None:
                     try:
                         monitor_status = controller.monitor.is_running
                         error_details.append(f"📊 Monitor running: {monitor_status}")
-                    except Exception as e:
+                    except (AttributeError, RuntimeError) as e:
                         error_details.append(f"❌ Monitor error: {e!s}")
 
                 detail_msg = f"❌ Controller failed to start for session '{session_name}'. The system encountered an internal error.\n\n🔍 Diagnostic Information:\n"
@@ -138,7 +140,7 @@ def start_controller(session_name: str) -> None:
 
                 raise HTTPException(status_code=500, detail=detail_msg)
 
-        except Exception as start_error:
+        except (RuntimeError, OSError, subprocess.CalledProcessError, AttributeError) as start_error:
             # Detailed error information for start failures
             detail_msg = (
                 f"❌ Controller start failed for session '{session_name}': "
@@ -159,7 +161,7 @@ def start_controller(session_name: str) -> None:
 
     except HTTPException:
         raise
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError, AttributeError, ValueError, TypeError) as e:
         # Catch-all for unexpected errors
         detail_msg = (
             f"❌ Unexpected error starting controller for session '{session_name}': "
@@ -213,7 +215,7 @@ def stop_controller(session_name: str) -> None:
         return
     except HTTPException:
         raise
-    except Exception as e:
+    except (RuntimeError, OSError, AttributeError, KeyError) as e:
         detail_msg = (
             f"❌ Failed to stop controller for session '{session_name}': {e!s}\n\n"
             f"🔍 Error Type: {type(e).__name__}\n\n"
@@ -272,7 +274,7 @@ def restart_claude_pane(session_name: str) -> None:
         return
     except HTTPException:
         raise
-    except Exception as e:
+    except (RuntimeError, OSError, subprocess.CalledProcessError, AttributeError) as e:
         detail_msg = (
             f"❌ Failed to restart Claude pane for session '{session_name}': "
             f"{e!s}\n\n"
@@ -324,7 +326,7 @@ def start_all_controllers():
                 else:
                     # 이미 실행 중인 경우도 성공으로 카운트
                     started_count += 1
-            except Exception as e:
+            except (RuntimeError, OSError, AttributeError) as e:
                 errors.append(f"Error starting controller for session '{session.session_name}': {e!s}")
 
         if errors and started_count == 0:
@@ -343,7 +345,7 @@ def start_all_controllers():
 
     except HTTPException:
         raise
-    except Exception as e:
+    except (ImportError, AttributeError, RuntimeError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to start all controllers: {e!s}")
 
 
@@ -384,7 +386,7 @@ def stop_all_controllers():
                 else:
                     # 이미 중지된 경우도 성공으로 카운트
                     stopped_count += 1
-            except Exception as e:
+            except (RuntimeError, OSError, AttributeError) as e:
                 errors.append(f"Error stopping controller for session '{session.session_name}': {e!s}")
 
         if errors and stopped_count == 0:
@@ -403,5 +405,5 @@ def stop_all_controllers():
 
     except HTTPException:
         raise
-    except Exception as e:
+    except (ImportError, AttributeError, RuntimeError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to stop all controllers: {e!s}")

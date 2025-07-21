@@ -25,7 +25,6 @@ async def monitor_updates(duration: int = 60) -> None:
     """Monitor WebSocket updates for a specified duration."""
     uri = "ws://localhost:8000/ws/dashboard"
 
-
     update_counts = {
         "session_update": 0,
         "health_update": 0,
@@ -38,7 +37,6 @@ async def monitor_updates(duration: int = 60) -> None:
 
     try:
         async with websockets.connect(uri) as websocket:
-
             while time.time() - start_time < duration:
                 try:
                     # Set timeout to avoid blocking forever
@@ -64,7 +62,6 @@ async def monitor_updates(duration: int = 60) -> None:
                         "health_update",
                         "activity_update",
                     ]:
-
                         if msg_type == "session_update":
                             sessions = data.get("data", [])
                             for session in sessions[:3]:  # Show first 3
@@ -105,8 +102,6 @@ async def main() -> None:
     check_task_status()
 
 
-
 if __name__ == "__main__":
-
     with contextlib.suppress(KeyboardInterrupt):
         asyncio.run(main())

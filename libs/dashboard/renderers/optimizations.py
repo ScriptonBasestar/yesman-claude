@@ -11,7 +11,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any
+from typing import Union
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 
@@ -50,15 +50,15 @@ class RenderCache:
         """
         self.max_size = max_size
         self.ttl = ttl
-        self._cache: OrderedDict[str, dict[str, Any]] = OrderedDict()
+        self._cache: OrderedDict[str, dict[str, str | float]] = OrderedDict()
         self._lock = threading.RLock()
         self.stats = CacheStats()
 
     def _generate_cache_key(
         self,
         widget_type: WidgetType,
-        data: Any,
-        options: dict[str, Any] | None = None,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+        options: dict[str, str | int | float | bool] | None = None,
         renderer_format: RenderFormat | None = None,
     ) -> str:
         """Generate consistent cache key from render parameters.
@@ -106,7 +106,7 @@ class RenderCache:
             # Ultimate fallback
             return hashlib.sha256(str(key_components).encode()).hexdigest()
 
-    def get(self, cache_key: str) -> Any | None:
+    def get(self, cache_key: str) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool] | None:
         """Get cached result.
 
         Args:
@@ -140,7 +140,7 @@ class RenderCache:
             self.stats.update_hit_rate()
             return cache_entry["result"]
 
-    def set(self, cache_key: str, result: Any) -> None:
+    def set(self, cache_key: str, result: str | dict[str, str | int | float | bool] | list[str | int | float | bool]) -> None:
         """Store result in cache.
 
         Args:
@@ -216,10 +216,10 @@ def cached_render(cache: RenderCache | None = None):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(
-            self: Any,
+            self: object | None,
             widget_type: WidgetType,
-            data: Any,
-            options: dict[str, Any] | None = None,
+            data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+            options: dict[str, str | int | float | bool] | None = None,
         ):
             # Generate cache key
             renderer_format = getattr(self, "format_type", None)
@@ -252,9 +252,9 @@ def cached_layout(cache: RenderCache | None = None):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(
-            self: Any,
-            widgets: list[dict[str, Any]],
-            layout_config: dict[str, Any] | None = None,
+            self: object | None,
+            widgets: list[dict[str, str | int | float | bool | object]],
+            layout_config: dict[str, str | int | float | bool] | None = None,
         ):
             # Generate cache key from widgets and layout config
             cache_key_data = {
@@ -303,8 +303,8 @@ class LazyRenderer:
         self,
         renderer: BaseRenderer,
         widget_type: WidgetType,
-        data: Any,
-        options: dict[str, Any] | None = None,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+        options: dict[str, str | int | float | bool] | None = None,
     ) -> None:
         """Initialize lazy renderer.
 
@@ -318,11 +318,11 @@ class LazyRenderer:
         self.widget_type = widget_type
         self.data = data
         self.options = options or {}
-        self._result: Any = None
+        self._result: str | dict[str, str | int | float | bool] | list[str | int | float | bool] | None = None
         self._rendered = False
         self._lock = threading.Lock()
 
-    def render(self) -> Any:
+    def render(self) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool]:
         """Perform actual rendering (called automatically when needed).
 
         Returns:
@@ -374,9 +374,9 @@ class BatchRenderer:
 
     def render_batch(
         self,
-        render_requests: list[tuple[WidgetType, Any, dict[str, Any] | None]],
+        render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]],
         parallel: bool = True,
-    ) -> list[Any]:
+    ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render multiple widgets in batch.
 
         Args:
@@ -393,7 +393,7 @@ class BatchRenderer:
             return self._render_parallel(render_requests)
         return self._render_sequential(render_requests)
 
-    def _render_sequential(self, render_requests: list[tuple]) -> list[Any]:
+    def _render_sequential(self, render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]]) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render requests sequentially."""
         results = []
         for widget_type, data, options in render_requests:
@@ -401,16 +401,16 @@ class BatchRenderer:
             results.append(result)
         return results
 
-    def _render_parallel(self, render_requests: list[tuple]) -> list[Any]:
+    def _render_parallel(self, render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]]) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render requests in parallel."""
         results = [None] * len(render_requests)
 
         def render_single(
             index: int,
             widget_type: WidgetType,
-            data: Any,
-            options: dict[str, Any] | None,
-        ) -> tuple[int, Any]:
+            data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+            options: dict[str, str | int | float | bool] | None,
+        ) -> tuple[int, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
             try:
                 result = self.renderer.render_widget(widget_type, data, options or {})
                 return index, result
@@ -430,7 +430,7 @@ class BatchRenderer:
 
     def render_lazy_batch(
         self,
-        render_requests: list[tuple[WidgetType, Any, dict[str, Any] | None]],
+        render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]],
     ) -> list[LazyRenderer]:
         """Create lazy renderers for batch processing.
 
@@ -517,7 +517,7 @@ class TimingContext:
         self.start_time = time.time()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, exc_type: type | None, exc_val: Exception | None, exc_tb: object | None) -> None:
         if self.start_time is not None:
             duration = time.time() - self.start_time
             self.profiler.record_time(self.operation_name, duration)

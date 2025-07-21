@@ -208,7 +208,6 @@ class TaskAnalyzer:
         # Handle __init__.py files
         return module.removesuffix(".__init__")  # Remove .__init__
 
-
     def _module_to_file(self, module_name: str) -> str | None:
         """Convert module name to file path."""
         # Try different possibilities

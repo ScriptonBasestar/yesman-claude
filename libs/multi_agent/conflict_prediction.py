@@ -22,6 +22,18 @@ from .semantic_analyzer import SemanticAnalyzer
 
 logger = logging.getLogger(__name__)
 
+# Constants for magic number replacements
+SIMILARITY_THRESHOLD_HIGH = 0.8
+SIMILARITY_THRESHOLD_MEDIUM = 0.8
+CONFIDENCE_CRITICAL_THRESHOLD = 0.9
+CONFIDENCE_HIGH_THRESHOLD = 0.7
+CONFIDENCE_MEDIUM_THRESHOLD = 0.4
+MIN_PARTS_FOR_PARSING = 2
+HIGH_OVERLAP_THRESHOLD = 5
+SIGNIFICANT_DIFFERENCES_THRESHOLD = 3
+HIGH_SCORE_THRESHOLD = 5
+MEDIUM_SCORE_THRESHOLD = 2
+
 
 class PredictionConfidence(Enum):
     """Confidence levels for conflict predictions."""
@@ -329,7 +341,7 @@ class ConflictPredictor:
                 if sig1 != sig2:
                     # Calculate signature similarity
                     similarity = difflib.SequenceMatcher(None, sig1, sig2).ratio()
-                    if similarity < 0.8:  # Significant difference
+                    if similarity < SIMILARITY_THRESHOLD_HIGH:  # Significant difference
                         affected_functions.append(func_name)
                         drift_score += 1.0 - similarity
 
@@ -341,7 +353,7 @@ class ConflictPredictor:
             drift_score = min(drift_score, 1.0)
 
             confidence = self._likelihood_to_confidence(drift_score)
-            severity = ConflictSeverity.HIGH if len(affected_functions) > 5 else ConflictSeverity.MEDIUM
+            severity = ConflictSeverity.HIGH if len(affected_functions) > HIGH_OVERLAP_THRESHOLD else ConflictSeverity.MEDIUM
 
             return PredictionResult(
                 prediction_id=f"signature_drift_{branch1}_{branch2}_{len(affected_functions)}",
@@ -429,7 +441,7 @@ class ConflictPredictor:
         self,
         branch1: str,
         branch2: str,
-        vector: ConflictVector,
+        vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential class hierarchy conflicts."""
         try:
@@ -487,7 +499,7 @@ class ConflictPredictor:
         self,
         branch1: str,
         branch2: str,
-        vector: ConflictVector,
+        vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential dependency version conflicts."""
         try:
@@ -543,9 +555,9 @@ class ConflictPredictor:
 
     async def _detect_api_changes(
         self,
-        branch1: str,
-        branch2: str,
-        vector: ConflictVector,
+        branch1: str,  # noqa: ARG002
+        branch2: str,  # noqa: ARG002
+        vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential API breaking changes."""
         # Implementation would analyze public API changes
@@ -554,9 +566,9 @@ class ConflictPredictor:
 
     async def _detect_resource_conflicts(
         self,
-        branch1: str,
-        branch2: str,
-        vector: ConflictVector,
+        branch1: str,  # noqa: ARG002
+        branch2: str,  # noqa: ARG002
+        vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential resource contention conflicts."""
         # Implementation would analyze file locks, database access, etc.
@@ -564,9 +576,9 @@ class ConflictPredictor:
 
     async def _detect_context_loss(
         self,
-        branch1: str,
-        branch2: str,
-        vector: ConflictVector,
+        branch1: str,  # noqa: ARG002
+        branch2: str,  # noqa: ARG002
+        vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential merge context loss scenarios."""
         # Implementation would analyze merge complexity
@@ -596,11 +608,11 @@ class ConflictPredictor:
 
     def _likelihood_to_confidence(self, likelihood: float) -> PredictionConfidence:
         """Convert likelihood score to confidence enum."""
-        if likelihood >= 0.9:
+        if likelihood >= CONFIDENCE_CRITICAL_THRESHOLD:
             return PredictionConfidence.CRITICAL
-        if likelihood >= 0.7:
+        if likelihood >= CONFIDENCE_HIGH_THRESHOLD:
             return PredictionConfidence.HIGH
-        if likelihood >= 0.4:
+        if likelihood >= CONFIDENCE_MEDIUM_THRESHOLD:
             return PredictionConfidence.MEDIUM
         return PredictionConfidence.LOW
 
@@ -630,7 +642,7 @@ class ConflictPredictor:
                 if "+" in line and "-" in line:
                     # Parse insertion/deletion counts
                     parts = line.strip().split()
-                    if len(parts) >= 2:
+                    if len(parts) >= MIN_PARTS_FOR_PARSING:
                         try:
                             additions = int(parts[-2])
                             deletions = int(parts[-1])
@@ -642,17 +654,17 @@ class ConflictPredictor:
         except Exception:
             return 0.0
 
-    async def _calculate_dependency_coupling(self, branch1: str, branch2: str) -> float:
+    async def _calculate_dependency_coupling(self, branch1: str, branch2: str) -> float:  # noqa: ARG002
         """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
-    async def _calculate_semantic_distance(self, branch1: str, branch2: str) -> float:
+    async def _calculate_semantic_distance(self, branch1: str, branch2: str) -> float:  # noqa: ARG002
         """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
-    async def _calculate_temporal_proximity(self, branch1: str, branch2: str) -> float:
+    async def _calculate_temporal_proximity(self, branch1: str, branch2: str) -> float:  # noqa: ARG002
         """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5
@@ -715,13 +727,13 @@ class ConflictPredictor:
         different = (set1 - set2) | (set2 - set1)
 
         # Heuristic: high overlap + significant differences = likely conflict
-        if len(overlap) > 5 and len(different) > 3:
+        if len(overlap) > HIGH_OVERLAP_THRESHOLD and len(different) > SIGNIFICANT_DIFFERENCES_THRESHOLD:
             return True
 
         # Check for similar but slightly different imports
         for imp1 in imports1:
             for imp2 in imports2:
-                if imp1 != imp2 and difflib.SequenceMatcher(None, imp1, imp2).ratio() > 0.8:
+                if imp1 != imp2 and difflib.SequenceMatcher(None, imp1, imp2).ratio() > SIMILARITY_THRESHOLD_MEDIUM:
                     return True
 
         return False
@@ -833,7 +845,7 @@ class ConflictPredictor:
                     elif in_dependencies and "=" in line and '"' in line:
                         # Parse "package>=version" format
                         parts = line.split("=", 1)
-                        if len(parts) == 2:
+                        if len(parts) == MIN_PARTS_FOR_PARSING:
                             pkg = parts[0].strip().strip("\"'")
                             ver = parts[1].strip().strip("\"'")
                             versions[pkg] = ver
@@ -934,7 +946,7 @@ class ConflictPredictor:
         hotspots = [
             {
                 "location": branch,
-                "severity": "high" if score > 5 else "medium" if score > 2 else "low",
+                "severity": "high" if score > HIGH_SCORE_THRESHOLD else "medium" if score > MEDIUM_SCORE_THRESHOLD else "low",
                 "score": score,
             }
             for branch, score in branch_conflicts.most_common(5)

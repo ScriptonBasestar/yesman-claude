@@ -33,6 +33,8 @@ exclude = [
 ]
 
 [lint]
+# Enable preview for additional rules
+preview = true
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
 select = [
     # Pyflakes

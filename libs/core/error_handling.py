@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Centralized error handling and exception management."""
 
+import hashlib
 import logging
 import sys
 from collections.abc import Callable
@@ -71,8 +72,6 @@ class YesmanError(Exception):
     def _generate_error_code(self) -> str:
         """Generate error code from category and message."""
         # Create a simple error code from category and hash of message
-        import hashlib
-
         msg_hash = hashlib.sha256(self.message.encode()).hexdigest()[:8].upper()
         return f"{self.category.value.upper()}_{msg_hash}"
 
@@ -112,7 +111,7 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, config_file: str | None = None, **kwargs) -> None:
+    def __init__(self, message: str, config_file: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -134,7 +133,7 @@ class ConfigurationError(YesmanError):
 class ValidationError(YesmanError):
     """Validation-related errors."""
 
-    def __init__(self, message: str, field_name: str | None = None, **kwargs) -> None:
+    def __init__(self, message: str, field_name: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -159,7 +158,7 @@ class ValidationError(YesmanError):
 class SessionError(YesmanError):
     """Session management related errors."""
 
-    def __init__(self, message: str, session_name: str | None = None, **kwargs) -> None:
+    def __init__(self, message: str, session_name: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -184,7 +183,7 @@ class SessionError(YesmanError):
 class NetworkError(YesmanError):
     """Network-related errors."""
 
-    def __init__(self, message: str, endpoint: str | None = None, **kwargs) -> None:
+    def __init__(self, message: str, endpoint: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -201,7 +200,7 @@ class NetworkError(YesmanError):
 class PermissionError(YesmanError):
     """Permission-related errors."""
 
-    def __init__(self, message: str, resource_path: str | None = None, **kwargs) -> None:
+    def __init__(self, message: str, resource_path: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -218,7 +217,7 @@ class PermissionError(YesmanError):
 class TimeoutError(YesmanError):
     """Timeout-related errors."""
 
-    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs) -> None:
+    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
@@ -360,7 +359,7 @@ error_handler = ErrorHandler()
 def handle_exceptions(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator for automatic exception handling."""
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
         except YesmanError as e:
@@ -380,9 +379,9 @@ def safe_execute(
     operation: str,
     component: str,
     func: Any,  # Should be Callable but using Any to avoid complex type annotation
-    *args,
+    *args: Any,
     error_category: ErrorCategory = ErrorCategory.UNKNOWN,
-    **kwargs,
+    **kwargs: Any,
 ) -> Any:
     """Safely execute a function with error handling.
 

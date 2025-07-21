@@ -5,10 +5,15 @@ import logging
 from typing import Any
 
 from libs.core.base_command import BaseCommand, CommandError
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.semantic_merger import SemanticMerger
+from libs.multi_agent.semantic_merger import MergeStrategy, SemanticMerger
 
 logger = logging.getLogger(__name__)
+
+# Constants for magic number replacements
+MIN_BRANCHES_FOR_ANALYSIS = 2
 
 
 class AnalyzeSemanticConflictsCommand(BaseCommand):
@@ -19,7 +24,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         files: list[str] | None = None,
         language: str = "python",
         repo_path: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Execute the analyze semantic conflicts command."""
         try:
@@ -34,19 +39,17 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             self.print_info(f"🧠 Analyzing semantic conflicts in {len(files)} files...")
             self.print_info(f"   Language: {language}")
 
-            from libs.multi_agent.branch_manager import BranchManager
-
             branch_manager = BranchManager(repo_path or ".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
 
             async def run_analysis():
                 # For semantic conflict analysis, we need branches
-                if len(files) < 2:
+                if len(files) < MIN_BRANCHES_FOR_ANALYSIS:
                     msg = "At least 2 branches are required for conflict analysis"
                     raise CommandError(msg)
 
                 branch1, branch2 = files[0], files[1]
-                file_paths = files[2:] if len(files) > 2 else None
+                file_paths = files[MIN_BRANCHES_FOR_ANALYSIS:] if len(files) > MIN_BRANCHES_FOR_ANALYSIS else None
 
                 conflicts = await analyzer.analyze_semantic_conflicts(branch1, branch2, file_paths)
 
@@ -94,13 +97,11 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict[str, Any]:
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict[str, Any]:
         """Execute the semantic summary command."""
         try:
             self.print_info("🧠 Semantic Analysis Summary")
             self.print_info("=" * 40)
-
-            from libs.multi_agent.branch_manager import BranchManager
 
             branch_manager = BranchManager(repo_path or ".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
@@ -121,7 +122,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs) -> dict[str, Any]:
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: Any) -> dict[str, Any]:
         """Execute the function diff command."""
         try:
             # Handle file parameters from kwargs if not provided as positional arguments
@@ -135,8 +136,6 @@ class FunctionDiffCommand(BaseCommand):
                 raise CommandError(msg)
 
             self.print_info(f"🔍 Function-level diff: {file1} vs {file2}")
-
-            from libs.multi_agent.branch_manager import BranchManager
 
             branch_manager = BranchManager(".")
             SemanticAnalyzer(branch_manager=branch_manager)
@@ -176,7 +175,7 @@ class SemanticMergeCommand(BaseCommand):
         target_file: str | None = None,
         language: str = "python",
         strategy: str = "auto",
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Execute the semantic merge command."""
         try:
@@ -192,10 +191,6 @@ class SemanticMergeCommand(BaseCommand):
 
             self.print_info(f"🔀 Semantic merge: {source_file} → {target_file}")
             self.print_info(f"   Strategy: {strategy}")
-
-            from libs.multi_agent.branch_manager import BranchManager
-            from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-            from libs.multi_agent.semantic_merger import MergeStrategy
 
             branch_manager = BranchManager(".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager)

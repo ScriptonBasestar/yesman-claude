@@ -24,7 +24,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         dry_run: bool = False,
         force: bool = False,
         cleanup_all: bool = False,
-        **kwargs,
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the cleanup command."""
         # Find cache files to clean

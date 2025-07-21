@@ -8,7 +8,10 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Union
+
+# Type aliases for complex types
+WorkflowStatusType = dict[str, int | dict[str, str | int | bool | list[str]]]
 
 from .context_detector import ContextInfo, ContextType
 
@@ -45,14 +48,14 @@ class WorkflowAction:
 
     action_type: ActionType
     command: str
-    parameters: dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, str | int | float | bool | list[str] | dict[str, str]] = field(default_factory=dict)
     timeout: int = 60
     retry_count: int = 0
     retry_delay: int = 5
     continue_on_failure: bool = False
     condition: str | None = None  # Python expression to evaluate
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, str | int | bool | dict[str, str | int | float | bool | list[str] | dict[str, str]]]:
         """Convert to dictionary for serialization."""
         return {
             "action_type": self.action_type.value,
@@ -77,7 +80,7 @@ class WorkflowChain:
     enabled: bool = True
     description: str = ""
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, str | int | bool | list[str] | list[dict[str, str | int | bool | dict[str, str | int | float | bool | list[str] | dict[str, str]]]]]:
         """Convert to dictionary for serialization."""
         return {
             "name": self.name,
@@ -99,10 +102,10 @@ class WorkflowExecution:
     start_time: float
     end_time: float | None = None
     current_action: int = 0
-    results: list[dict[str, Any]] = field(default_factory=list)
+    results: list[dict[str, str | int | float | bool]] = field(default_factory=list)
     error_message: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, str | float | int | list[dict[str, str | int | float | bool]] | dict[str, str | float | int | list[str]]]:
         """Convert to dictionary for serialization."""
         return {
             "workflow_name": self.workflow_name,
@@ -179,7 +182,7 @@ class ConditionEvaluator:
 
         return self.operators[operator](var_value, expected_value)
 
-    def _parse_value(self, value_str: str) -> Any:
+    def _parse_value(self, value_str: str) -> str | int | float | bool | None:
         """Parse a value string into appropriate Python type."""
         value_str = value_str.strip()
 
@@ -208,50 +211,50 @@ class ConditionEvaluator:
         # Default to string
         return value_str
 
-    def _equals(self, left: Any, right: Any) -> bool:
+    def _equals(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Equality comparison."""
         return bool(left == right)
 
-    def _not_equals(self, left: Any, right: Any) -> bool:
+    def _not_equals(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Inequality comparison."""
         return bool(left != right)
 
-    def _greater_than(self, left: Any, right: Any) -> bool:
+    def _greater_than(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Greater than comparison."""
         try:
             return bool(left > right)
         except TypeError:
             return False
 
-    def _less_than(self, left: Any, right: Any) -> bool:
+    def _less_than(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Less than comparison."""
         try:
             return bool(left < right)
         except TypeError:
             return False
 
-    def _greater_equal(self, left: Any, right: Any) -> bool:
+    def _greater_equal(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Greater than or equal comparison."""
         try:
             return bool(left >= right)
         except TypeError:
             return False
 
-    def _less_equal(self, left: Any, right: Any) -> bool:
+    def _less_equal(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Less than or equal comparison."""
         try:
             return bool(left <= right)
         except TypeError:
             return False
 
-    def _contains(self, left: Any, right: Any) -> bool:
+    def _contains(self, left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
         """Containment check."""
         try:
             return right in left
         except TypeError:
             return False
 
-    def _not_contains(self, left: Any, right: Any) -> bool:
+    def _not_contains(self, left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
         """Not containment check."""
         try:
             return right not in left
@@ -384,7 +387,7 @@ class WorkflowEngine:
 
         return False
 
-    async def _execute_single_action(self, action: WorkflowAction, execution: WorkflowExecution) -> Any:
+    async def _execute_single_action(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str | int | bool | list[str | Exception]]:
         """Execute a single action."""
         self.logger.debug("Executing action: %s - %s", action.action_type.value, action.command)
 
@@ -415,7 +418,7 @@ class WorkflowEngine:
         msg = f"Unsupported action type: {action.action_type}"
         raise ValueError(msg)
 
-    async def _execute_shell_command(self, action: WorkflowAction) -> dict[str, Any]:
+    async def _execute_shell_command(self, action: WorkflowAction) -> dict[str, int | str]:
         """Execute shell command."""
         process = await asyncio.create_subprocess_shell(
             action.command,
@@ -441,7 +444,7 @@ class WorkflowEngine:
             msg = f"Command timed out after {action.timeout}s: {action.command}"
             raise TimeoutError(msg) from e
 
-    async def _execute_tmux_command(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
+    async def _execute_tmux_command(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, int | str]:
         """Execute tmux command."""
         session_name = execution.context_info.session_name or action.parameters.get("session_name")
 
@@ -465,7 +468,7 @@ class WorkflowEngine:
             "command_sent": action.command,
         }
 
-    async def _execute_claude_input(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
+    async def _execute_claude_input(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str]:
         """Send input to Claude through the dashboard controller."""
         # This would integrate with the ClaudeManager
         # For now, simulate the action
@@ -476,7 +479,7 @@ class WorkflowEngine:
             "session_name": execution.context_info.session_name,
         }
 
-    async def _execute_file_operation(self, action: WorkflowAction) -> dict[str, Any]:
+    async def _execute_file_operation(self, action: WorkflowAction) -> dict[str, str | int]:
         """Execute file operation."""
         operation = action.parameters.get("operation", "read")
         file_path = Path(self.project_path) / action.command
@@ -497,7 +500,7 @@ class WorkflowEngine:
         msg = f"Unsupported file operation: {operation}"
         raise ValueError(msg)
 
-    async def _execute_notification(self, action: WorkflowAction) -> dict[str, Any]:
+    async def _execute_notification(self, action: WorkflowAction) -> dict[str, str]:
         """Send notification."""
         # Platform-specific notification
         title = action.parameters.get("title", "Yesman Automation")
@@ -514,18 +517,18 @@ class WorkflowEngine:
 
         return {"notification_sent": action.command}
 
-    async def _execute_delay(self, action: WorkflowAction) -> dict[str, Any]:
+    async def _execute_delay(self, action: WorkflowAction) -> dict[str, int]:
         """Execute delay."""
         delay_seconds = int(action.command)
         await asyncio.sleep(delay_seconds)
         return {"delay_seconds": delay_seconds}
 
-    async def _execute_condition_check(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
+    async def _execute_condition_check(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str | bool]:
         """Execute condition check."""
         result = self._evaluate_condition(action.command, execution.context_info)
         return {"condition": action.command, "result": result}
 
-    async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, Any]:
+    async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, list[dict[str, str | int | bool | list[str | Exception]] | Exception] | int]:
         """Execute multiple actions in parallel."""
         parallel_actions = action.parameters.get("actions", [])
 
@@ -626,7 +629,7 @@ class WorkflowEngine:
         self.register_workflow(test_failure_workflow)
         self.register_workflow(claude_idle_workflow)
 
-    def get_workflow_status(self) -> dict[str, Any]:
+    def get_workflow_status(self) -> WorkflowStatusType:
         """Get current workflow engine status."""
         return {
             "registered_workflows": len(self.workflows),

@@ -161,7 +161,6 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
             },
         }
 
-
     def _combine_log_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple log messages into a batched log message."""
         if not messages:
@@ -182,7 +181,6 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
                 "time_span": messages[-1].get("queued_at", 0) - messages[0].get("queued_at", 0),
             },
         }
-
 
 
 class WebSocketBatchProcessor:

@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Union
 
 from .types import Agent, AgentState, Task, TaskStatus
 
@@ -52,16 +52,16 @@ class OperationSnapshot:
     description: str
 
     # System state snapshots
-    agent_states: dict[str, dict[str, Any]] = field(default_factory=dict)
-    task_states: dict[str, dict[str, Any]] = field(default_factory=dict)
+    agent_states: dict[str, dict[str, str | int | bool | list[str]]] = field(default_factory=dict)
+    task_states: dict[str, dict[str, str | int | bool | float | list[str]]] = field(default_factory=dict)
     file_states: dict[str, str] = field(default_factory=dict)  # file_path -> backup_path
-    branch_state: dict[str, Any] | None = None
+    branch_state: dict[str, str | dict[str, str | int | bool | list[str]]] | None = None
 
     # Operation context
-    operation_context: dict[str, Any] = field(default_factory=dict)
-    rollback_instructions: list[dict[str, Any]] = field(default_factory=list)
+    operation_context: dict[str, str | int | bool | float | list[str]] = field(default_factory=dict)
+    rollback_instructions: list[dict[str, str | int | bool | list[str]]] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, str | int | bool | float | list[str] | dict[str, str | int | bool | float | list[str]] | dict[str, str | int | bool | list[str]]]:
         """Convert to dictionary for serialization."""
         return {
             "snapshot_id": self.snapshot_id,
@@ -77,7 +77,7 @@ class OperationSnapshot:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "OperationSnapshot":
+    def from_dict(cls, data: dict[str, str | int | bool | float | list[str] | dict[str, str | int | bool | float | list[str]]]) -> "OperationSnapshot":
         """Create from dictionary."""
         data["operation_type"] = OperationType(data["operation_type"])
         data["timestamp"] = datetime.fromisoformat(data["timestamp"])
@@ -93,7 +93,7 @@ class RecoveryStrategy:
     retry_delay: float = 1.0  # Seconds
     recovery_actions: list[RecoveryAction] = field(default_factory=list)
     escalation_threshold: int = 5  # Number of failures before escalation
-    custom_handler: Callable[[Exception, dict[str, Any]], Awaitable[bool]] | None = None
+    custom_handler: Callable[[Exception, dict[str, str | int | bool | float | list[str]]], Awaitable[bool]] | None = None
 
 
 class RecoveryEngine:
@@ -128,7 +128,7 @@ class RecoveryEngine:
         # State management
         self.snapshots: dict[str, OperationSnapshot] = {}
         self.recovery_strategies: dict[str, RecoveryStrategy] = {}
-        self.operation_history: list[dict[str, Any]] = []
+        self.operation_history: list[dict[str, str | bool | dict[str, str | int | bool | float | list[str]]]] = []
         self.failure_counts: dict[str, int] = {}
 
         # Monitoring
@@ -286,10 +286,10 @@ class RecoveryEngine:
         self,
         operation_type: OperationType,
         description: str,
-        agent_pool: Any = None,
-        branch_manager: Any = None,
+        agent_pool: object | None = None,
+        branch_manager: object | None = None,
         files_to_backup: list[str] | None = None,
-        operation_context: dict[str, Any] | None = None,
+        operation_context: dict[str, str | int | bool | float | list[str]] | None = None,
     ) -> str:
         """Create a snapshot before a critical operation.
 
@@ -385,8 +385,8 @@ class RecoveryEngine:
     async def rollback_operation(
         self,
         snapshot_id: str,
-        agent_pool: Any = None,
-        branch_manager: Any = None,
+        agent_pool: object | None = None,
+        branch_manager: object | None = None,
         restore_files: bool = True,
     ) -> bool:
         """Rollback to a previous snapshot.
@@ -438,7 +438,7 @@ class RecoveryEngine:
             logger.exception(f"Failed to rollback to snapshot {snapshot_id}: {e}")
             return False
 
-    async def _restore_agent_states(self, agent_pool: Any, agent_states: dict[str, dict[str, Any]]) -> None:
+    async def _restore_agent_states(self, agent_pool: object | None, agent_states: dict[str, dict[str, str | int | bool | list[str]]]) -> None:
         """Restore agent states from snapshot."""
         for agent_id, agent_data in agent_states.items():
             try:
@@ -467,7 +467,7 @@ class RecoveryEngine:
             except (KeyError, AttributeError, TypeError, ValueError) as e:
                 logger.warning(f"Failed to restore agent {agent_id}: {e}")
 
-    async def _restore_task_states(self, agent_pool: Any, task_states: dict[str, dict[str, Any]]) -> None:
+    async def _restore_task_states(self, agent_pool: object | None, task_states: dict[str, dict[str, str | int | bool | float | list[str]]]) -> None:
         """Restore task states from snapshot."""
         # Clear current tasks and restore from snapshot
         agent_pool.tasks.clear()
@@ -488,7 +488,7 @@ class RecoveryEngine:
             except (KeyError, AttributeError, TypeError, ValueError) as e:
                 logger.warning(f"Failed to restore task {task_id}: {e}")
 
-    async def _restore_branch_state(self, branch_manager: Any, branch_state: dict[str, Any]) -> None:
+    async def _restore_branch_state(self, branch_manager: object | None, branch_state: dict[str, str | dict[str, str | int | bool | list[str]]]) -> None:
         """Restore branch state from snapshot."""
         try:
             current_branch = branch_state.get("current_branch")
@@ -526,7 +526,7 @@ class RecoveryEngine:
             except (OSError, PermissionError, shutil.Error) as e:
                 logger.warning(f"Failed to restore file {original_path}: {e}")
 
-    async def _execute_rollback_instruction(self, instruction: dict[str, Any]) -> None:
+    async def _execute_rollback_instruction(self, instruction: dict[str, str | int | bool | list[str]]) -> None:
         """Execute a custom rollback instruction."""
         try:
             instruction_type = instruction.get("type")
@@ -562,9 +562,9 @@ class RecoveryEngine:
         self,
         operation_id: str,
         exception: Exception,
-        context: dict[str, Any] | None = None,
-        agent_pool: Any = None,
-        branch_manager: Any = None,
+        context: dict[str, str | int | bool | float | list[str]] | None = None,
+        agent_pool: object | None = None,
+        branch_manager: object | None = None,
     ) -> bool:
         """Handle an operation failure with automatic recovery.
 
@@ -673,9 +673,9 @@ class RecoveryEngine:
         action: RecoveryAction,
         snapshot_id: str | None,
         exception: Exception,
-        context: dict[str, Any],
-        agent_pool: Any = None,
-        branch_manager: Any = None,
+        context: dict[str, str | int | bool | float | list[str]],
+        agent_pool: object | None = None,
+        branch_manager: object | None = None,
     ) -> bool:
         """Execute a specific recovery action."""
         try:
@@ -746,7 +746,7 @@ class RecoveryEngine:
         self,
         operation_id: str,
         exception: Exception,
-        context: dict[str, Any],
+        context: dict[str, str | int | bool | float | list[str]],
     ) -> None:
         """Escalate a failure to higher level handling."""
         escalation_data = {
@@ -841,7 +841,7 @@ class RecoveryEngine:
         if operation_id in self.active_operations:
             del self.active_operations[operation_id]
 
-    def get_recovery_metrics(self) -> dict[str, Any]:
+    def get_recovery_metrics(self) -> dict[str, int | float | dict[str, int]]:
         """Get recovery and rollback metrics."""
         return {
             **self.recovery_metrics,
@@ -862,11 +862,11 @@ class RecoveryEngine:
         except (OSError, PermissionError):
             return 0.0
 
-    def get_recent_operations(self, limit: int = 20) -> list[dict[str, Any]]:
+    def get_recent_operations(self, limit: int = 20) -> list[dict[str, str | bool | dict[str, str | int | bool | float | list[str]]]]:
         """Get recent operation history."""
         return self.operation_history[-limit:]
 
-    def get_snapshot_info(self, snapshot_id: str) -> dict[str, Any] | None:
+    def get_snapshot_info(self, snapshot_id: str) -> dict[str, str | int | bool | float | list[str] | dict[str, str | int | bool | float | list[str]] | dict[str, str | int | bool | list[str]]] | None:
         """Get information about a specific snapshot."""
         if snapshot_id in self.snapshots:
             return self.snapshots[snapshot_id].to_dict()
@@ -875,8 +875,8 @@ class RecoveryEngine:
     async def manual_rollback(
         self,
         snapshot_id: str,
-        agent_pool: Any = None,
-        branch_manager: Any = None,
+        agent_pool: object | None = None,
+        branch_manager: object | None = None,
     ) -> bool:
         """Manually trigger a rollback to a specific snapshot."""
         logger.info("Manual rollback requested to snapshot {snapshot_id}")

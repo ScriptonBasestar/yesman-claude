@@ -104,7 +104,8 @@ class AgentPool:
 
                 logger.info(
                     "Loaded %d agents and %d tasks",
-                    len(self.agents), len(self.tasks),
+                    len(self.agents),
+                    len(self.tasks),
                 )
 
             except Exception:
@@ -379,14 +380,16 @@ class AgentPool:
 
                     logger.error(
                         "Task %s failed with exit code %d",
-                        task.task_id, process.returncode,
+                        task.task_id,
+                        process.returncode,
                     )
 
             except TimeoutError:
                 # Task timed out
                 logger.exception(
                     "Task %s timed out after %d seconds",
-                    task.task_id, task.timeout,
+                    task.task_id,
+                    task.timeout,
                 )
 
                 # Terminate process
@@ -644,7 +647,10 @@ class AgentPool:
 
                     logger.info(
                         "Rebalanced load: %s (%.2f) -> %s (%.2f)",
-                        from_agent_id, from_cap.current_load, to_agent_id, to_cap.current_load,
+                        from_agent_id,
+                        from_cap.current_load,
+                        to_agent_id,
+                        to_cap.current_load,
                     )
 
         except Exception:
@@ -770,7 +776,6 @@ class AgentPool:
                 "auto_generated": True,
             },
         )
-
 
     async def auto_test_branch(self, branch_name: str) -> list[str]:
         """Automatically create and schedule test tasks for a branch.
@@ -957,7 +962,6 @@ class AgentPool:
                 files_to_backup=files_to_backup,
                 operation_context=context,
             )
-
 
         except Exception:
             logger.exception("Failed to create operation snapshot:")

@@ -33,7 +33,7 @@ class AIStatusCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:  # noqa: ARG002
         """Execute the status command."""
         try:
             # Get statistics

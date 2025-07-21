@@ -402,7 +402,7 @@ class BranchTestManager:
                 try:
                     process.terminate()
                     await asyncio.wait_for(process.wait(), timeout=5)
-                except:
+                except (ProcessLookupError, OSError, asyncio.TimeoutError):
                     with contextlib.suppress(Exception):
                         process.kill()
 
@@ -431,7 +431,10 @@ class BranchTestManager:
 
         logger.info(
             "Test %s on %s completed: %s (duration: %.2fs)",
-            suite_name, branch_name, result.status.value, result.duration,
+            suite_name,
+            branch_name,
+            result.status.value,
+            result.duration,
         )
 
         return result

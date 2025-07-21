@@ -218,9 +218,7 @@ class ConflictPreventionSystem:
         # Filter predictions by confidence threshold
         significant_predictions = [p for p in predictions if p.likelihood_score >= self.prevention_config["prediction_threshold"]]
 
-        logger.info(
-            "Found %d significant conflict predictions", len(significant_predictions)
-        )
+        logger.info("Found %d significant conflict predictions", len(significant_predictions))
 
         # Generate prevention measures
         prevention_measures = []
@@ -243,9 +241,7 @@ class ConflictPreventionSystem:
                 else:
                     failed_measures.append(measure)
             except Exception as e:
-                logger.exception(
-                    "Failed to apply prevention measure %s: %s", measure.measure_id, e
-                )
+                logger.exception("Failed to apply prevention measure %s: %s", measure.measure_id, e)
                 measure.status = "failed"
                 measure.metadata["error"] = str(e)
                 failed_measures.append(measure)
@@ -287,10 +283,7 @@ class ConflictPreventionSystem:
         )
 
         self.prevention_history.append(result)
-        logger.info(
-            "Prevention session %s completed: %d conflicts prevented",
-            session_id, conflicts_prevented
-        )
+        logger.info("Prevention session %s completed: %d conflicts prevented", session_id, conflicts_prevented)
 
         return result
 
@@ -317,7 +310,6 @@ class ConflictPreventionSystem:
 
         # Filter by effort threshold
         return [m for m in measures if m.estimated_effort <= self.prevention_config["effort_threshold"]]
-
 
     async def _generate_dependency_measures(
         self,
@@ -637,9 +629,7 @@ class ConflictPreventionSystem:
                     result = await self.analyze_and_prevent_conflicts(active_branches)
 
                     if result.measures_applied > 0:
-                        logger.info(
-                            "Prevention monitor applied %d measures", result.measures_applied
-                        )
+                        logger.info("Prevention monitor applied %d measures", result.measures_applied)
 
                 await asyncio.sleep(interval)
 

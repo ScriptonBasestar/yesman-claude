@@ -285,9 +285,7 @@ class SemanticAnalyzer:
             return context
 
         except Exception as e:
-            logger.exception(
-                "Error getting semantic context for %s in %s: %s", file_path, branch, e
-            )
+            logger.exception("Error getting semantic context for %s in %s: %s", file_path, branch, e)
             return None
 
     def _extract_semantic_context(

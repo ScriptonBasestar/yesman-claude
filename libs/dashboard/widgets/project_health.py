@@ -49,7 +49,7 @@ class ProjectHealth:
 
             return scores
 
-        except Exception as e:
+        except (OSError, PermissionError, ValueError, TypeError) as e:
             logger.exception(f"Error calculating project health: {e}")
             return {
                 "overall_score": 50,
@@ -74,7 +74,7 @@ class ProjectHealth:
             if has_build_config:
                 return 85
             return 60
-        except Exception:
+        except (OSError, FileNotFoundError) as e:
             return 50
 
     def _check_test_health(self) -> int:
@@ -87,7 +87,7 @@ class ProjectHealth:
             if has_tests:
                 return 75
             return 40
-        except Exception:
+        except (OSError, FileNotFoundError) as e:
             return 50
 
     def _check_dependencies_health(self) -> int:
@@ -100,7 +100,7 @@ class ProjectHealth:
             if has_deps:
                 return 90
             return 30
-        except Exception:
+        except (OSError, FileNotFoundError) as e:
             return 50
 
     def _check_security_health(self) -> int:
@@ -117,7 +117,7 @@ class ProjectHealth:
                 score += 20
 
             return min(score, 100)
-        except Exception:
+        except (OSError, FileNotFoundError, IOError) as e:
             return 80
 
     def _check_performance_health(self) -> int:
@@ -140,7 +140,7 @@ class ProjectHealth:
             if has_quality_config:
                 return 85
             return 60
-        except Exception:
+        except (OSError, FileNotFoundError) as e:
             return 50
 
     def _check_git_health(self) -> int:
@@ -158,12 +158,12 @@ class ProjectHealth:
                     )
                     if result.returncode == 0 and result.stdout.strip():
                         return 95
-                except Exception as e:
+                except (subprocess.CalledProcessError, OSError, FileNotFoundError) as e:
                     # Log subprocess execution errors if needed
                     logger.warning(f"Failed to check git log: {e}")
                 return 80
             return 30
-        except Exception:
+        except (OSError, subprocess.CalledProcessError) as e:
             return 50
 
     def _check_documentation_health(self) -> int:
@@ -176,7 +176,7 @@ class ProjectHealth:
             if has_docs:
                 return 70
             return 30
-        except Exception:
+        except (OSError, FileNotFoundError) as e:
             return 50
 
     def _generate_suggestions(self, scores: dict[str, Any]) -> list[str]:

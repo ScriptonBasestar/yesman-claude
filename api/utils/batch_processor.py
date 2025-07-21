@@ -302,7 +302,6 @@ class WebSocketBatchProcessor:
             },
         }
 
-
     def _combine_log_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple log messages into a batched log message."""
         if not messages:
@@ -325,7 +324,6 @@ class WebSocketBatchProcessor:
                 "time_span": messages[-1].get("queued_at", 0) - messages[0].get("queued_at", 0),
             },
         }
-
 
     def _get_queue_memory_size(self, queue: deque) -> int:
         """Estimate memory usage of a message queue."""

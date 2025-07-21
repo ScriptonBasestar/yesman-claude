@@ -210,7 +210,7 @@ class TestRendererSystemIntegration:
                         assert "widget_type" in result
                         assert "data" in result
 
-                except Exception as e:
+                except (ValueError, TypeError, AttributeError, KeyError) as e:
                     pytest.fail(f"Failed to render {widget_type.value} with {render_format.value}: {e}")
 
     def test_cross_format_consistency(self) -> None:
@@ -272,7 +272,7 @@ class TestRendererSystemIntegration:
                 result = render_widget(WidgetType.METRIC_CARD, None, render_format)
                 # Should either handle gracefully or provide error info
                 assert result is not None
-            except Exception:
+            except (ValueError, TypeError, AttributeError, KeyError):
                 # Exceptions are acceptable for invalid data
                 pass
 
@@ -283,7 +283,7 @@ class TestRendererSystemIntegration:
                 if render_format == RenderFormat.TAURI:
                     assert "error" in result.get("data", {})
                 # Other formats should handle gracefully
-            except Exception:
+            except (ValueError, TypeError, AttributeError, KeyError):
                 # Exceptions are acceptable for invalid data
                 pass
 
@@ -364,7 +364,7 @@ class TestRendererSystemIntegration:
                     result = render_widget(WidgetType.METRIC_CARD, metric, render_format)
                     results.append((worker_id, render_format, result))
 
-            except Exception as e:
+            except (ValueError, TypeError, AttributeError, KeyError, RuntimeError) as e:
                 errors.append((worker_id, str(e)))
 
         # Run 10 workers concurrently
@@ -657,7 +657,7 @@ class TestRendererCompatibility:
             result2 = render_widget(WidgetType.METRIC_CARD, metric_dict, RenderFormat.TAURI)
             # If supported, should work
             assert result2 is not None
-        except Exception:
+        except (ValueError, TypeError, AttributeError, KeyError):
             # If not supported, that's acceptable
             pass
 
@@ -770,7 +770,7 @@ class TestRendererCompatibility:
                         assert isinstance(result, str)
                         assert len(result) > 0
 
-                except Exception as e:
+                except (ValueError, TypeError, AttributeError, KeyError) as e:
                     # Some empty data might be invalid, that's acceptable
                     assert "invalid" in str(e).lower() or "error" in str(e).lower()
 

@@ -212,7 +212,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    def execute(self, update_interval: float = 2.0, **kwargs) -> dict:
+    def execute(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
         """Execute the browse command."""
         try:
             with with_startup_progress("🔧 Initializing session browser...") as update:

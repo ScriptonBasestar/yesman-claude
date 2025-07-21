@@ -12,7 +12,6 @@ async def test_websocket_connection(uri: str, channel: str) -> None:
     """Test WebSocket connection to a specific channel."""
     try:
         async with websockets.connect(uri) as websocket:
-
             # Create a task to receive messages
             async def receive_messages() -> None:
                 while True:
@@ -84,7 +83,6 @@ async def test_websocket_connection(uri: str, channel: str) -> None:
             # Cancel receive task
             receive_task.cancel()
 
-
     except websockets.exceptions.WebSocketException:
         pass
     except Exception:
@@ -123,7 +121,6 @@ async def stress_test_connections(num_connections: int = 10) -> None:
             ws = await websockets.connect(uri)
             connections.append(ws)
 
-
         # Keep connections alive for a bit
         await asyncio.sleep(5)
 
@@ -152,8 +149,6 @@ async def main() -> None:
     await stress_test_connections(20)
 
 
-
 if __name__ == "__main__":
-
     with contextlib.suppress(KeyboardInterrupt):
         asyncio.run(main())

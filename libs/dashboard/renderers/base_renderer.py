@@ -278,7 +278,6 @@ class BaseRenderer(ABC):
         # Remove control characters except newline and tab
         return re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]", "", text)
 
-
     def get_status_color(self, status: str) -> ThemeColor:
         """Get appropriate color for status.
 

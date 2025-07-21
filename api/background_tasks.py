@@ -20,6 +20,11 @@ from libs.yesman_config import YesmanConfig
 
 logger = logging.getLogger(__name__)
 
+# Constants for status scoring
+SCORE_EXCELLENT_THRESHOLD = 90
+SCORE_GOOD_THRESHOLD = 80  
+SCORE_WARNING_THRESHOLD = 60
+
 
 @dataclass
 class TaskState:
@@ -389,7 +394,9 @@ class BackgroundTaskRunner:
                         age = (datetime.now(UTC) - state.last_run).total_seconds()
                         logger.debug(
                             "Task %s: last run %.1fs ago, errors: %d",
-                            name, age, state.error_count,
+                            name,
+                            age,
+                            state.error_count,
                         )
 
             except Exception:
@@ -400,11 +407,11 @@ class BackgroundTaskRunner:
 
     def _get_status(self, score: float) -> str:
         """Get status string based on score."""
-        if score >= 90:
+        if score >= SCORE_EXCELLENT_THRESHOLD:
             return "excellent"
-        if score >= 80:
+        if score >= SCORE_GOOD_THRESHOLD:
             return "good"
-        if score >= 60:
+        if score >= SCORE_WARNING_THRESHOLD:
             return "warning"
         return "poor"
 

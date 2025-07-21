@@ -110,7 +110,8 @@ class TaskScheduler:
         heapq.heappush(self.priority_queue, priority_task)
         logger.debug(
             "Added task %s with priority score %.3f",
-            task.task_id, priority_score,
+            task.task_id,
+            priority_score,
         )
 
     def get_next_task_for_agent(self, agent: Agent) -> Task | None:
@@ -238,7 +239,9 @@ class TaskScheduler:
 
         logger.debug(
             "Updated performance for agent %s: success_rate=%.3f, processing_power=%.3f",
-            agent_id, capability.success_rate, capability.processing_power,
+            agent_id,
+            capability.success_rate,
+            capability.processing_power,
         )
 
     def _calculate_priority_score(self, task: Task) -> float:
@@ -400,7 +403,8 @@ class TaskScheduler:
         if overloaded and underloaded:
             logger.info(
                 "Rebalancing workload: %d overloaded, %d underloaded agents",
-                len(overloaded), len(underloaded),
+                len(overloaded),
+                len(underloaded),
             )
 
             # Sort by load difference to prioritize most urgent rebalancing
@@ -427,8 +431,11 @@ class TaskScheduler:
                         rebalancing_actions.append((overloaded_agent_id, underloaded_agent_id))
                         logger.info(
                             "Redistributed %.2f load from %s (%.2f) to %s (%.2f)",
-                            load_transfer, overloaded_agent_id, overloaded_cap.current_load,
-                            underloaded_agent_id, underloaded_cap.current_load,
+                            load_transfer,
+                            overloaded_agent_id,
+                            overloaded_cap.current_load,
+                            underloaded_agent_id,
+                            underloaded_cap.current_load,
                         )
 
                         # Apply scheduling preference adjustment

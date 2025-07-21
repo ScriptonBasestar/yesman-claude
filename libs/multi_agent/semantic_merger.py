@@ -147,9 +147,7 @@ class SemanticMerger:
         Returns:
             MergeResult with merge outcome and details
         """
-        logger.info(
-            "Performing semantic merge for %s between %s and %s", file_path, branch1, branch2
-        )
+        logger.info("Performing semantic merge for %s between %s and %s", file_path, branch1, branch2)
 
         merge_id = f"merge_{branch1}_{branch2}_{hashlib.sha256(file_path.encode()).hexdigest()[:8]}"
         strategy = strategy or self.default_strategy
@@ -842,7 +840,7 @@ class SemanticMerger:
         self,
         conflict: SemanticConflict,
         content1: str,
-        content2: str,
+        content2: str,  # noqa: ARG002
         context1: SemanticContext,
         context2: SemanticContext,
     ) -> dict[str, Any]:
@@ -896,7 +894,7 @@ class SemanticMerger:
 
     def _conflict_resolved_by_merge(
         self,
-        conflict: SemanticConflict,
+        conflict: SemanticConflict,  # noqa: ARG002
         merge_result: MergeResult,
     ) -> bool:
         """Check if a conflict was resolved by the merge operation."""
@@ -926,8 +924,8 @@ class SemanticMerger:
     def _merge_ast_trees(
         self,
         tree1: ast.AST,
-        tree2: ast.AST,
-        conflicts: list[SemanticConflict],
+        tree2: ast.AST,  # noqa: ARG002
+        conflicts: list[SemanticConflict],  # noqa: ARG002
     ) -> ast.AST:
         """Merge two AST trees intelligently."""
         # Simplified implementation - would need complex AST merging logic
@@ -983,9 +981,9 @@ class SemanticMerger:
 
     def _merge_function_definitions(
         self,
-        func1: str,
+        func1: str,  # noqa: ARG002
         func2: str,
-        conflict: SemanticConflict,
+        conflict: SemanticConflict,  # noqa: ARG002
     ) -> dict[str, Any]:
         """Merge two function definitions."""
         # Simplified implementation
@@ -1023,10 +1021,10 @@ class SemanticMerger:
 
     def _reconstruct_from_semantic_elements(
         self,
-        imports: list,
-        functions: dict,
-        classes: dict,
-        content1: str,
+        imports: list,  # noqa: ARG002
+        functions: dict,  # noqa: ARG002
+        classes: dict,  # noqa: ARG002
+        content1: str,  # noqa: ARG002
         content2: str,
     ) -> str:
         """Reconstruct source code from semantic elements."""

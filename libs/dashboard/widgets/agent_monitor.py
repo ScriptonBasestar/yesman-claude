@@ -54,7 +54,6 @@ except ImportError:
         """Fallback AgentPool class for when multi_agent is not available."""
 
 
-
 class MonitorDisplayMode(Enum):
     """Agent monitor display modes."""
 

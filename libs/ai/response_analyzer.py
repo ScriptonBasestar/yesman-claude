@@ -182,7 +182,6 @@ class ResponseAnalyzer:
         # Replace file names/paths with wildcards
         return re.sub(r"[a-zA-Z0-9_\-\.]+\.(py|js|ts|md|txt)", r"[\\w\-\.]+", pattern)
 
-
     def _extract_context_key(self, context: str) -> str:
         """Extract a key from context for pattern matching."""
         # Simplified context extraction

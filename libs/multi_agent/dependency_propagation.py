@@ -240,9 +240,7 @@ class DependencyPropagationSystem:
         self.change_history.append(dependency_change)
         self.propagation_stats["changes_tracked"] += 1
 
-        logger.info(
-            "Tracked dependency change %s in %s by %s", change_id, file_path, changed_by
-        )
+        logger.info("Tracked dependency change %s in %s by %s", change_id, file_path, changed_by)
 
         # Immediate propagation for critical changes
         if propagation_strategy == PropagationStrategy.IMMEDIATE and impact_level in [ChangeImpact.BREAKING, ChangeImpact.SECURITY] and self.auto_propagate:
@@ -736,9 +734,7 @@ class DependencyPropagationSystem:
         for branch_name in branches:
             try:
                 # Simulate propagation (in real implementation, would apply changes)
-                logger.info(
-                    "Propagating change %s to branch %s", change.change_id, branch_name
-                )
+                logger.info("Propagating change %s to branch %s", change.change_id, branch_name)
                 propagated_to.append(branch_name)
 
             except Exception:
