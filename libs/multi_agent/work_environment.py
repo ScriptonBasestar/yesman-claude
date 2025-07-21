@@ -79,11 +79,11 @@ class WorkEnvironmentManager:
         env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
         """Run a command with optional working directory and environment.
-        
+
             Returns:
                 Subprocess.Completedprocess object.
-        
-                
+
+
         """
         logger.debug("Running command: {' '.join(cmd)} in {cwd or 'current dir'}")
 
@@ -149,11 +149,11 @@ class WorkEnvironmentManager:
         config: dict[str, object] | None = None,
     ) -> WorkEnvironment:
         """Create an isolated work environment for a branch.
-        
+
         Args:
             branch_name: Name of the branch
             config: Configuration for the environment
-        
+
             Returns:
                 Workenvironment object the created item.
         """

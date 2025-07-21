@@ -103,11 +103,11 @@ class SessionSelector:
 
     def select_session(self) -> str | None:
         """Show interactive session selector and return selected session.
-        
+
             Returns:
                 Str | None object.
-        
-                
+
+
         """
         if not self.sessions:
             return None

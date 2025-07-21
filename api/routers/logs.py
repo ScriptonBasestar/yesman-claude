@@ -62,11 +62,11 @@ def get_session_logs(session_name: str, limit: int = 100) -> object:
 
 def parse_log_line(line: str) -> LogEntry | None:
     """Parse a log line into a structured LogEntry.
-    
+
         Returns:
             Logentry | None object.
-    
-        
+
+
     """
     line = line.strip()
     if not line:

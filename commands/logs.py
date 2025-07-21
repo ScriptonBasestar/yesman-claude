@@ -35,11 +35,11 @@ class LogsConfigureCommand(BaseCommand):
         **kwargs: object,  # noqa: ARG002
     ) -> dict:
         """Execute the configure command.
-        
+
             Returns:
                 Dict containing.
-        
-                
+
+
         """
         try:
             # Expand home directory
@@ -102,11 +102,11 @@ class LogsAnalyzeCommand(BaseCommand):
         **kwargs: object,  # noqa: ARG002
     ) -> dict:
         """Execute the analyze command.
-        
+
             Returns:
                 Dict containing.
-        
-                
+
+
         """
         try:
             log_path = Path(log_dir).expanduser()

@@ -108,10 +108,10 @@ class ClaudePromptDetector:
 
     def detect_prompt(self, content: str) -> PromptInfo | None:
         """Detect prompt type and extract information.
-        
+
         Args:
             content: The terminal content to analyze
-        
+
             Returns:
                 Promptinfo | None object.
         """

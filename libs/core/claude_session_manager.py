@@ -71,11 +71,11 @@ class ClaudeSessionManager:
 
     def _find_claude_pane(self) -> object:
         """Find pane running Claude.
-        
+
             Returns:
                 Object object.
-        
-                
+
+
         """
         if not self.session:
             return None

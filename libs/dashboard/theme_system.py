@@ -596,10 +596,10 @@ class ThemeManager:
 
     def load_theme(self, name: str) -> Theme | None:
         """Load user theme from disk.
-        
+
         Args:
             name: Theme name to load
-        
+
             Returns:
                 Theme | None object.
         """

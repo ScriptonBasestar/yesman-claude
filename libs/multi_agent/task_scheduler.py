@@ -129,11 +129,11 @@ class TaskScheduler:
 
     def get_next_task_for_agent(self, agent: Agent) -> Task | None:
         """Get the best next task for a specific agent.
-        
+
             Returns:
                 Task | None object the requested data.
-        
-                
+
+
         """
         if not self.priority_queue:
             return None

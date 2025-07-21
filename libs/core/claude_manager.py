@@ -369,11 +369,11 @@ class ClaudeManager:
         pane_id: str | None = None,
     ) -> DashboardController:
         """Get or create controller for session.
-        
+
             Returns:
                 Dashboardcontroller object the requested data.
-        
-                
+
+
         """
         if session_name not in self.controllers:
             self.controllers[session_name] = DashboardController(session_name, pane_id)

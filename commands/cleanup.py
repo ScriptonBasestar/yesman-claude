@@ -31,11 +31,11 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         **kwargs: object,  # noqa: ARG002
     ) -> dict:
         """Execute the cleanup command.
-        
+
             Returns:
                 Dict containing.
-        
-                
+
+
         """
         # Find cache files to clean
         cache_paths = self._find_cache_files(cleanup_all)

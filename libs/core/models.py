@@ -127,11 +127,11 @@ class SessionProgress:
 
     def get_current_task(self) -> TaskProgress | None:
         """Get the current task progress.
-        
+
             Returns:
                 Taskprogress | None object the requested data.
-        
-                
+
+
         """
         if 0 <= self.current_task_index < len(self.tasks):
             return self.tasks[self.current_task_index]

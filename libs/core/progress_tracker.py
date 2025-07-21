@@ -64,11 +64,11 @@ class ProgressAnalyzer:
 
     def analyze_pane_output(self, session_name: str, pane_output: list[str]) -> SessionProgress | None:
         """Analyze pane output to determine progress.
-        
+
             Returns:
                 Sessionprogress | None object.
-        
-                
+
+
         """
         if not pane_output:
             return None

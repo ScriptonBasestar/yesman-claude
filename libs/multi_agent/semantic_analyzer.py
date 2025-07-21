@@ -974,11 +974,11 @@ class SemanticVisitor(ast.NodeVisitor):
         node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> FunctionSignature:
         """Extract detailed function signature.
-        
+
             Returns:
                 Functionsignature object.
-        
-                
+
+
         """
         args = []
         defaults = []
