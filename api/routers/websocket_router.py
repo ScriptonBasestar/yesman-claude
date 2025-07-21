@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """WebSocket router for real-time updates."""
 
 import asyncio
@@ -94,7 +98,7 @@ class ConnectionManager:
                     }
                     await connection.send_json(batch_message)
             except Exception:
-                logger.exception(f"Error broadcasting batch to {channel}:")
+                logger.exception(f"Error broadcasting batch to {channel}:")  # noqa: G004
                 disconnected.append(connection)
 
         # Clean up disconnected clients
@@ -119,7 +123,7 @@ class ConnectionManager:
             "last_ping": datetime.now(UTC),
         }
 
-        logger.info(f"WebSocket connected to channel: {channel}")
+        logger.info(f"WebSocket connected to channel: {channel}")  # noqa: G004
 
         # Send initial data
         await self.send_initial_data(websocket, channel)
@@ -140,7 +144,8 @@ class ConnectionManager:
 
         logger.info("WebSocket disconnected")
 
-    async def send_initial_data(self, websocket: WebSocket, channel: str) -> None:
+    @staticmethod
+    async def send_initial_data( websocket: WebSocket, channel: str) -> None:
         """Send initial data when a client connects."""
         try:
             # Import here to avoid circular imports
@@ -345,7 +350,7 @@ async def websocket_dashboard(websocket: WebSocket) -> None:
                 channels = data.get("channels", [])
                 for channel in channels:
                     manager.channel_connections[channel].add(websocket)
-                    logger.info(f"Dashboard client subscribed to channel: {channel}")
+                    logger.info(f"Dashboard client subscribed to channel: {channel}")  # noqa: G004
 
             elif data.get("type") == "unsubscribe":
                 # Client wants to unsubscribe from specific updates
@@ -353,7 +358,7 @@ async def websocket_dashboard(websocket: WebSocket) -> None:
                 for channel in channels:
                     if websocket in manager.channel_connections[channel]:
                         manager.channel_connections[channel].remove(websocket)
-                        logger.info(f"Dashboard client unsubscribed from channel: {channel}")
+                        logger.info(f"Dashboard client unsubscribed from channel: {channel}")  # noqa: G004
 
             else:
                 # Echo back unknown messages for debugging

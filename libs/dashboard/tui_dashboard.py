@@ -1,11 +1,15 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """TUI Dashboard.
 
 Textual-based terminal user interface dashboard for Yesman-Claude
 Provides comprehensive project monitoring with multiple views and real-time updates.
 """
 
-from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -50,7 +54,7 @@ class DashboardWidget(Static):
         widget_type: WidgetType,
         title: str = "",
         update_interval: float = 2.0,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         """Initialize dashboard widget.
 
@@ -83,7 +87,7 @@ class DashboardWidget(Static):
         if self._timer:
             self._timer.stop()
 
-    async def update_data(self, data: Any) -> None:
+    async def update_data(self, data: object) -> None:
         """Update widget with new data.
 
         Args:
@@ -126,7 +130,7 @@ class DashboardWidget(Static):
 class SessionsView(DashboardWidget):
     """Sessions monitoring view."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(
             widget_type=WidgetType.SESSION_BROWSER,
             title="Active Sessions",
@@ -142,17 +146,17 @@ class SessionsView(DashboardWidget):
                 name="yesman-dev",
                 id="yesman-dev-1",
                 status=SessionStatus.ACTIVE,
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC),
                 windows=[],  # Empty list of WindowData
-                last_activity=datetime.now(),
+                last_activity=datetime.now(UTC),
             ),
             SessionData(
                 name="claude-test",
                 id="claude-test-1",
                 status=SessionStatus.IDLE,
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC),
                 windows=[],  # Empty list of WindowData
-                last_activity=datetime.now(),
+                last_activity=datetime.now(UTC),
             ),
         ]
         await self.update_data(mock_sessions)
@@ -161,7 +165,7 @@ class SessionsView(DashboardWidget):
 class HealthView(DashboardWidget):
     """Project health monitoring view."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(
             widget_type=WidgetType.PROJECT_HEALTH,
             title="Project Health",
@@ -186,7 +190,7 @@ class HealthView(DashboardWidget):
             overall_score=85,
             overall_level=HealthLevel.GOOD,
             categories=mock_categories,
-            last_updated=datetime.now(),
+            last_updated=datetime.now(UTC),
         )
         await self.update_data(mock_health)
 
@@ -194,7 +198,7 @@ class HealthView(DashboardWidget):
 class ActivityView(DashboardWidget):
     """Activity monitoring view."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(
             widget_type=WidgetType.ACTIVITY_HEATMAP,
             title="Activity Heatmap",
@@ -220,12 +224,13 @@ class ActivityView(DashboardWidget):
 class LogsView(Static):
     """Logs monitoring view."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.log_buffer: list[str] = []
         self.max_logs = 100
 
-    def compose(self) -> ComposeResult:
+    @staticmethod
+    def compose() -> ComposeResult:
         """Compose logs view."""
         yield Label("System Logs", classes="widget-title")
         yield RichLog(id="logs-content", highlight=True, markup=True)
@@ -238,7 +243,7 @@ class LogsView(Static):
 
     def add_log(self, level: str, message: str) -> None:
         """Add a log entry."""
-        timestamp = datetime.now().strftime("%H:%M:%S")
+        timestamp = datetime.now(UTC).strftime("%H:%M:%S")
 
         # Color-code log levels
         color_map = {
@@ -264,7 +269,7 @@ class LogsView(Static):
 class SettingsView(Static):
     """Settings and configuration view."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.settings: dict[str, Any] = {
             "auto_refresh": True,
@@ -310,7 +315,7 @@ class SettingsView(Static):
     class SettingChanged(Message):
         """Setting changed message."""
 
-        def __init__(self, setting: str, value: Any) -> None:
+        def __init__(self, setting: str, value: object) -> None:
             self.setting = setting
             self.value = value
             super().__init__()
@@ -342,7 +347,7 @@ class TUIDashboard(App):
     auto_refresh_enabled = reactive(True)
     refresh_interval = reactive(3.0)
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         """Initialize TUI Dashboard."""
         super().__init__(**kwargs)
         self.title = "Yesman-Claude TUI Dashboard"
@@ -358,7 +363,8 @@ class TUIDashboard(App):
         # Refresh timer
         self._refresh_timer: Timer | None = None
 
-    def compose(self) -> ComposeResult:
+    @staticmethod
+    def compose() -> ComposeResult:
         """Compose the main dashboard layout."""
         yield Header(show_clock=True)
 

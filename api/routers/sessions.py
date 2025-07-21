@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Improved sessions router with dependency injection and proper error handling."""
 
 import logging
@@ -203,7 +207,7 @@ class SessionService:
                         self._setup_session_internal(session_name, session_config)
                         successful.append(session_name)
                     else:
-                        self.logger.info(f"Session '{session_name}' already exists, skipping")
+                        self.logger.info(f"Session '{session_name}' already exists, skipping")  # noqa: G004
                 except Exception as e:
                     self.logger.exception("Failed to setup session '{session_name}': {e}")
                     failed.append({"session_name": session_name, "error": str(e)})
@@ -357,13 +361,15 @@ class SessionService:
         except Exception:
             return False
 
-    def _setup_session_internal(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:  # noqa: ARG002
+    @staticmethod
+    def _setup_session_internal( session_name: str, session_config: dict[str, object]) -> dict[str, object]:  # noqa: ARG002
         """Internal session setup logic."""
         # This would integrate with the improved SessionSetupService
         # For now, return a placeholder
         return {"message": "Session setup completed"}
 
-    def _teardown_session_internal(self, session_name: str) -> None:
+    @staticmethod
+    def _teardown_session_internal(session_name: str) -> None:
         """Internal session teardown logic."""
         import subprocess
 

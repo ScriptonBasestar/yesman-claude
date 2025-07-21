@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for TaskScheduler class."""
 
 import pytest
@@ -9,7 +13,8 @@ from libs.multi_agent.types import Agent, Task
 class TestAgentCapability:
     """Test cases for AgentCapability."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test AgentCapability initialization."""
         capability = AgentCapability(agent_id="test-agent")
 
@@ -21,7 +26,8 @@ class TestAgentCapability:
         assert capability.specializations == []
         assert capability.current_load == 0.0
 
-    def test_get_efficiency_score_basic(self) -> None:
+    @staticmethod
+    def test_get_efficiency_score_basic() -> None:
         """Test basic efficiency score calculation."""
         capability = AgentCapability(
             agent_id="test-agent",
@@ -41,7 +47,8 @@ class TestAgentCapability:
         assert score > 0.0
         assert score <= 2.0  # Max theoretical score
 
-    def test_get_efficiency_score_with_specialization(self) -> None:
+    @staticmethod
+    def test_get_efficiency_score_with_specialization() -> None:
         """Test efficiency score with specialization bonus."""
         capability = AgentCapability(
             agent_id="test-agent",
@@ -71,7 +78,8 @@ class TestAgentCapability:
 
         assert score > score_no_spec  # Should get specialization bonus
 
-    def test_get_efficiency_score_with_load_penalty(self) -> None:
+    @staticmethod
+    def test_get_efficiency_score_with_load_penalty() -> None:
         """Test efficiency score with load penalty."""
         capability = AgentCapability(
             agent_id="test-agent",
@@ -97,7 +105,8 @@ class TestAgentCapability:
 class TestPriorityTask:
     """Test cases for PriorityTask."""
 
-    def test_priority_comparison(self) -> None:
+    @staticmethod
+    def test_priority_comparison() -> None:
         """Test priority task comparison for heap."""
         task1 = Task(
             task_id="task-1",
@@ -124,17 +133,20 @@ class TestTaskScheduler:
     """Test cases for TaskScheduler."""
 
     @pytest.fixture
-    def scheduler(self) -> TaskScheduler:
+    @staticmethod
+    def scheduler() -> TaskScheduler:
         """Create TaskScheduler instance."""
         return TaskScheduler()
 
     @pytest.fixture
-    def sample_agent(self) -> Agent:
+    @staticmethod
+    def sample_agent() -> Agent:
         """Create sample agent."""
         return Agent(agent_id="test-agent")
 
     @pytest.fixture
-    def sample_task(self) -> Task:
+    @staticmethod
+    def sample_task() -> Task:
         """Create sample task."""
         return Task(
             task_id="test-task",
@@ -146,7 +158,8 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-    def test_init(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_init(scheduler: TaskScheduler) -> None:
         """Test TaskScheduler initialization."""
         assert scheduler.agent_capabilities == {}
         assert scheduler.priority_queue == []
@@ -155,7 +168,8 @@ class TestTaskScheduler:
         assert scheduler.priority_weight == 0.4
         assert scheduler.learning_rate == 0.1
 
-    def test_register_agent(self, scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    @staticmethod
+    def test_register_agent(scheduler: TaskScheduler, sample_agent: Agent) -> None:
         """Test agent registration."""
         scheduler.register_agent(sample_agent)
 
@@ -166,7 +180,8 @@ class TestTaskScheduler:
         capability = scheduler.agent_capabilities[sample_agent.agent_id]
         assert capability.agent_id == sample_agent.agent_id
 
-    def test_register_agent_with_capability(self, scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    @staticmethod
+    def test_register_agent_with_capability(scheduler: TaskScheduler, sample_agent: Agent) -> None:
         """Test agent registration with custom capability."""
         custom_capability = AgentCapability(
             agent_id=sample_agent.agent_id,
@@ -180,7 +195,8 @@ class TestTaskScheduler:
         assert capability.processing_power == 2.0
         assert capability.specializations == ["python"]
 
-    def test_add_task(self, scheduler: TaskScheduler, sample_task: Task) -> None:
+    @staticmethod
+    def test_add_task(scheduler: TaskScheduler, sample_task: Task) -> None:
         """Test adding task to priority queue."""
         scheduler.add_task(sample_task)
 
@@ -189,7 +205,8 @@ class TestTaskScheduler:
         assert priority_task.task == sample_task
         assert priority_task.priority_score > 0
 
-    def test_calculate_priority_score(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_calculate_priority_score(scheduler: TaskScheduler) -> None:
         """Test priority score calculation."""
         task = Task(
             task_id="test",
@@ -201,11 +218,12 @@ class TestTaskScheduler:
             metadata={"blocks_tasks": 3},  # Blocks other tasks
         )
 
-        score = scheduler._calculate_priority_score(task)
+        score = scheduler._calculate_priority_score(task)  # noqa: SLF001
         assert score > 0.0
         assert score <= 1.0  # Should be normalized
 
-    def test_get_next_task_for_agent(self, scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task) -> None:
+    @staticmethod
+    def test_get_next_task_for_agent(scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task) -> None:
         """Test getting next task for agent."""
         scheduler.register_agent(sample_agent)
         scheduler.add_task(sample_task)
@@ -216,6 +234,7 @@ class TestTaskScheduler:
         assert len(scheduler.priority_queue) == 0  # Task should be removed
         assert scheduler.scheduling_metrics["total_scheduled"] == 1
 
+    @staticmethod
     def test_get_next_task_for_unregistered_agent(
         self,
         scheduler: TaskScheduler,
@@ -230,14 +249,16 @@ class TestTaskScheduler:
         assert task == sample_task
         assert sample_agent.agent_id in scheduler.agent_capabilities  # Should auto-register
 
-    def test_get_next_task_empty_queue(self, scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    @staticmethod
+    def test_get_next_task_empty_queue(scheduler: TaskScheduler, sample_agent: Agent) -> None:
         """Test getting task from empty queue."""
         scheduler.register_agent(sample_agent)
 
         task = scheduler.get_next_task_for_agent(sample_agent)
         assert task is None
 
-    def test_get_optimal_task_assignment(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_get_optimal_task_assignment(scheduler: TaskScheduler) -> None:
         """Test optimal task assignment for multiple agents."""
         # Create agents
         agent1 = Agent(agent_id="agent-1")
@@ -292,7 +313,8 @@ class TestTaskScheduler:
         assert "task-1" in [task.task_id for agent, task in assignments]
         assert "task-2" in [task.task_id for agent, task in assignments]
 
-    def test_update_agent_performance(self, scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task) -> None:
+    @staticmethod
+    def test_update_agent_performance(scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task) -> None:
         """Test updating agent performance metrics."""
         scheduler.register_agent(sample_agent)
 
@@ -309,6 +331,7 @@ class TestTaskScheduler:
         assert capability.average_execution_time == 120.0
         assert len(scheduler.task_history[sample_agent.agent_id]) == 1
 
+    @staticmethod
     def test_update_agent_performance_failure(
         self,
         scheduler: TaskScheduler,
@@ -329,7 +352,8 @@ class TestTaskScheduler:
         capability = scheduler.agent_capabilities[sample_agent.agent_id]
         assert capability.success_rate < 1.0  # Should decrease
 
-    def test_estimate_task_time(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_estimate_task_time(scheduler: TaskScheduler) -> None:
         """Test task time estimation."""
         capability = AgentCapability(
             agent_id="test-agent",
@@ -346,14 +370,15 @@ class TestTaskScheduler:
             metadata={"tags": ["python"]},
         )
 
-        estimated_time = scheduler._estimate_task_time(task, capability)
+        estimated_time = scheduler._estimate_task_time(task, capability)  # noqa: SLF001
         assert estimated_time > 0
 
         # Should be faster due to high processing power and specialization
-        base_time = scheduler._estimate_base_task_time(task)
+        base_time = scheduler._estimate_base_task_time(task)  # noqa: SLF001
         assert estimated_time < base_time
 
-    def test_estimate_base_task_time(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_estimate_base_task_time(scheduler: TaskScheduler) -> None:
         """Test base task time estimation."""
         # Test task
         test_task = Task(
@@ -364,7 +389,7 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-        test_time = scheduler._estimate_base_task_time(test_task)
+        test_time = scheduler._estimate_base_task_time(test_task)  # noqa: SLF001
 
         # Build task
         build_task = Task(
@@ -375,7 +400,7 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-        build_time = scheduler._estimate_base_task_time(build_task)
+        build_time = scheduler._estimate_base_task_time(build_task)  # noqa: SLF001
 
         # Lint task
         lint_task = Task(
@@ -386,13 +411,14 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-        lint_time = scheduler._estimate_base_task_time(lint_task)
+        lint_time = scheduler._estimate_base_task_time(lint_task)  # noqa: SLF001
 
         # Test tasks should take longer than lint tasks
         assert test_time > lint_time
         assert build_time > lint_time
 
-    def test_update_agent_load(self, scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    @staticmethod
+    def test_update_agent_load(scheduler: TaskScheduler, sample_agent: Agent) -> None:
         """Test updating agent load."""
         scheduler.register_agent(sample_agent)
 
@@ -408,7 +434,8 @@ class TestTaskScheduler:
         scheduler.update_agent_load(sample_agent.agent_id, -0.5)  # Under limit
         assert capability.current_load == 0.0  # Should be floored
 
-    def test_get_scheduling_metrics(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_get_scheduling_metrics(scheduler: TaskScheduler) -> None:
         """Test getting scheduling metrics."""
         metrics = scheduler.get_scheduling_metrics()
 
@@ -432,7 +459,8 @@ class TestTaskScheduler:
         assert 0.0 <= metrics["load_balancing_score"] <= 1.0
         assert 0.0 <= metrics["efficiency_score"] <= 2.0
 
-    def test_rebalance_tasks(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_rebalance_tasks(scheduler: TaskScheduler) -> None:
         """Test task rebalancing."""
         # Create agents with different loads
         agent1 = Agent(agent_id="agent-1")
@@ -454,7 +482,8 @@ class TestTaskScheduler:
         assert any("agent-1" in action for action in rebalancing_actions)
         assert any("agent-2" in action for action in rebalancing_actions)
 
-    def test_task_dependency_check(self, scheduler: TaskScheduler) -> None:
+    @staticmethod
+    def test_task_dependency_check(scheduler: TaskScheduler) -> None:
         """Test task dependency checking."""
         # Task with no dependencies
         task_no_deps = Task(
@@ -464,7 +493,7 @@ class TestTaskScheduler:
             working_directory="/tmp",
         )
 
-        assert scheduler._are_dependencies_met(task_no_deps) is True
+        assert scheduler._are_dependencies_met(task_no_deps) is True  # noqa: SLF001
 
         # Task with dependencies (should fail for now)
         task_with_deps = Task(
@@ -475,9 +504,10 @@ class TestTaskScheduler:
             dependencies=["other-task"],
         )
 
-        assert scheduler._are_dependencies_met(task_with_deps) is False
+        assert scheduler._are_dependencies_met(task_with_deps) is False  # noqa: SLF001
 
-    def test_task_history_limit(self, scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    @staticmethod
+    def test_task_history_limit(scheduler: TaskScheduler, sample_agent: Agent) -> None:
         """Test task history size limiting."""
         scheduler.register_agent(sample_agent)
 

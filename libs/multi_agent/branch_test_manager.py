@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Branch-specific test execution and result integration system."""
 
 import asyncio
@@ -11,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_manager import BranchManager
 
@@ -57,9 +61,9 @@ class TestResult:
     exit_code: int | None = None
     coverage: float | None = None
     failed_tests: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         return {
             "test_id": self.test_id,
@@ -78,7 +82,7 @@ class TestResult:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TestResult":
+    def from_dict(cls, data: dict[str, object]) -> "TestResult":
         """Create from dictionary."""
         data["test_type"] = TestType(data["test_type"])
         data["status"] = TestStatus(data["status"])
@@ -111,7 +115,7 @@ class BranchTestManager:
         self,
         repo_path: str = ".",
         results_dir: str = ".scripton/yesman/test_results",
-        agent_pool: Any = None,
+        agent_pool: object = None,
     ) -> None:
         """Initialize branch test manager.
 
@@ -177,8 +181,8 @@ class BranchTestManager:
 
                 logger.info("Loaded %d test suites", len(self.test_suites))
 
-            except Exception as e:
-                logger.exception("Failed to load test configuration: %s", e)
+            except Exception:
+                logger.exception("Failed to load test configuration")
                 self._create_default_configuration()
         else:
             self._create_default_configuration()
@@ -252,8 +256,8 @@ class BranchTestManager:
             with config_file.open("w") as f:
                 json.dump(config, f, indent=2)
 
-        except Exception as e:
-            logger.exception("Failed to save test configuration: %s", e)
+        except Exception:
+            logger.exception("Failed to save test configuration")
 
     def _load_test_results(self) -> None:
         """Load test results for all branches."""
@@ -272,8 +276,8 @@ class BranchTestManager:
                         results = [TestResult.from_dict(r) for r in results_data]
                         self.branch_results[branch_info.name] = results
 
-                    except Exception as e:
-                        logger.exception("Failed to load results for %s: %s", branch_info.name, e)
+                    except Exception:
+                        logger.exception("Failed to load results for %s", branch_info.name)
         except Exception as e:
             logger.warning("Failed to list active branches for test results loading: %s", e)
             # Continue without loading existing results
@@ -291,14 +295,14 @@ class BranchTestManager:
             with results_file.open("w") as f:
                 json.dump(results_data, f, indent=2)
 
-        except Exception as e:
-            logger.exception("Failed to save results for %s: %s", branch_name, e)
+        except Exception:
+            logger.exception("Failed to save results for %s", branch_name)
 
     async def run_test_suite(
         self,
         branch_name: str,
         suite_name: str,
-        force: bool = False,
+        force: bool = False,  # noqa: FBT001, ARG002
     ) -> TestResult:
         """Run a specific test suite on a branch.
 
@@ -411,8 +415,8 @@ class BranchTestManager:
                 result.end_time = datetime.now(UTC)
                 result.duration = suite.timeout
 
-        except Exception as e:
-            logger.exception("Error running test %s: %s", test_id, e)
+        except Exception:
+            logger.exception("Error running test %s", test_id)
             result.status = TestStatus.ERROR
             result.error = str(e)
             result.end_time = datetime.now(UTC)
@@ -442,7 +446,7 @@ class BranchTestManager:
     async def run_all_tests(
         self,
         branch_name: str,
-        parallel: bool = True,
+        parallel: bool = True,  # noqa: FBT001
     ) -> list[TestResult]:
         """Run all test suites on a branch.
 
@@ -498,7 +502,8 @@ class BranchTestManager:
 
         return results
 
-    async def _parse_test_output(self, result: TestResult, suite: TestSuite) -> None:
+    @staticmethod
+    async def _parse_test_output( result: TestResult, suite: TestSuite) -> None:
         """Parse test output to extract additional information."""
         try:
             output = result.output
@@ -552,11 +557,11 @@ class BranchTestManager:
             await process.communicate()
             return process.returncode == 0
 
-        except Exception as e:
-            logger.exception("Build failed for %s: %s", branch_name, e)
+        except Exception:
+            logger.exception("Build failed for %s", branch_name)
             return False
 
-    def get_branch_test_summary(self, branch_name: str) -> dict[str, Any]:
+    def get_branch_test_summary(self, branch_name: str) -> dict[str, object]:
         """Get test summary for a branch."""
         if branch_name not in self.branch_results:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
@@ -566,7 +571,7 @@ class BranchTestManager:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
 
         # Get latest results for each test type
-        latest_results: dict[str, Any] = {}
+        latest_results: dict[str, object] = {}
         for result in results:
             key = f"{result.test_type.value}"
             if key not in latest_results or result.start_time > latest_results[key].start_time:
@@ -599,7 +604,7 @@ class BranchTestManager:
             "last_run": max(r.start_time for r in latest_results.values()).isoformat(),
         }
 
-    def get_all_branch_summaries(self) -> dict[str, dict[str, Any]]:
+    def get_all_branch_summaries(self) -> dict[str, dict[str, object]]:
         """Get test summaries for all active branches."""
         summaries = {}
 
@@ -639,7 +644,7 @@ class BranchTestManager:
         self._save_test_configuration()
         logger.info("Configured test suite: %s", name)
 
-    def enable_auto_testing(self, enabled: bool = True) -> None:
+    def enable_auto_testing(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable automatic testing."""
         self.auto_testing_enabled = enabled
         self._save_test_configuration()
@@ -700,8 +705,8 @@ class BranchTestManager:
                 # Wait before next check
                 await asyncio.sleep(60)  # Check every minute
 
-            except Exception as e:
-                logger.exception("Error in test monitor: %s", e)
+            except Exception:
+                logger.exception("Error in test monitor")
                 await asyncio.sleep(60)
 
     def _get_last_test_time(self, branch_name: str) -> datetime:

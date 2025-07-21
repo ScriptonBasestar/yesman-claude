@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Cross-Module Integration Tests.
 
 Tests integration across all major system modules including CLI, automation,
@@ -8,7 +12,7 @@ AI learning, session management, and dashboard coordination.
 from commands.automate import AutomateDetectCommand, AutomateMonitorCommand
 from commands.browse import BrowseCommand
 from commands.setup import SetupCommand
-from typing import Any
+from typing import object
 from commands.status import StatusCommand
 from libs.ai.learning_engine import LearningEngine
 
@@ -164,7 +168,8 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
 
         assert total_workflow_time < 45.0, f"Complete workflow took {total_workflow_time:.2f}s, should be < 45s"
 
-    def _create_comprehensive_project(self, project_dir: Any) -> None:
+    @staticmethod
+    def _create_comprehensive_project( project_dir: object) -> None:
         """Create a comprehensive project with multiple contexts."""
         # Python web application
         (project_dir / "app.py").write_text("""

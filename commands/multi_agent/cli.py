@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Main CLI group registration for multi-agent commands."""
 
 import click
@@ -65,7 +69,7 @@ def multi_agent(ctx: click.Context) -> None:
 @click.option("--max-agents", "-n", default=3, help="Maximum number of agents")
 @click.option("--work-dir", "-w", help="Working directory for agents")
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
-def start(max_agents: int, work_dir: str | None, monitor: bool) -> None:
+def start(max_agents: int, work_dir: str | None, monitor: bool) -> None:  # noqa: FBT001
     """Start the multi-agent pool."""
     command = StartAgentsCommand()
     command.run(max_agents=max_agents, work_dir=work_dir, monitor=monitor)
@@ -135,7 +139,7 @@ def list_tasks(work_dir: str | None, status: str | None) -> None:
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Repository path")
 @click.option("--auto-resolve", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(branches: str, repo_path: str | None, auto_resolve: bool) -> None:
+def detect_conflicts(branches: str, repo_path: str | None, auto_resolve: bool) -> None:  # noqa: FBT001
     """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)

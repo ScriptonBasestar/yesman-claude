@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Claude monitoring and auto-response system."""
 
 import asyncio
@@ -17,7 +21,7 @@ from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 class ClaudeMonitor:
     """Handles Claude monitoring and auto-response logic."""
 
-    def __init__(self, session_manager: Any, process_controller: Any, status_manager: Any) -> None:
+    def __init__(self, session_manager: object, process_controller: object, status_manager: object) -> None:
         self.session_manager = session_manager
         self.process_controller = process_controller
         self.status_manager = status_manager
@@ -68,7 +72,7 @@ class ClaudeMonitor:
 
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
 
-    def set_auto_next(self, enabled: bool) -> None:
+    def set_auto_next(self, enabled: bool) -> None:  # noqa: FBT001
         """Enable or disable auto-next responses."""
         self.is_auto_next_enabled = enabled
         status = "enabled" if enabled else "disabled"
@@ -447,11 +451,11 @@ class ClaudeMonitor:
         """Adjust the confidence threshold for adaptive responses."""
         self.adaptive_response.adjust_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True) -> None:
+    def enable_adaptive_response(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable adaptive response functionality."""
         self.adaptive_response.enable_auto_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True) -> None:
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable adaptive learning functionality."""
         self.adaptive_response.enable_learning(enabled)
 
@@ -483,7 +487,7 @@ class ClaudeMonitor:
         """Get automation system status."""
         return self.automation_manager.get_automation_status()
 
-    def register_automation_workflow(self, workflow: Any) -> None:
+    def register_automation_workflow(self, workflow: object) -> None:
         """Register a custom automation workflow."""
         self.automation_manager.register_custom_workflow(workflow)
 
@@ -510,7 +514,7 @@ class ClaudeMonitor:
         self.automation_manager.load_automation_config()
 
     # Project health monitoring methods
-    async def calculate_project_health(self, force_refresh: bool = False) -> dict:
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:  # noqa: FBT001
         """Calculate comprehensive project health."""
         health = await self.health_calculator.calculate_health(force_refresh)
         return health.to_dict()
@@ -604,14 +608,16 @@ class ClaudeMonitor:
         if self.async_logger:
             await self.async_logger.flush()
 
-    def _detect_trust_prompt(self, content: str) -> bool:
+    @staticmethod
+    def _detect_trust_prompt( content: str) -> bool:
         """Detect trust prompt in content (legacy compatibility method)."""
         # Check if content contains trust-related prompts
         trust_keywords = ["trust", "certificate", "security", "authenticate", "verify"]
         content_lower = content.lower()
         return any(keyword in content_lower for keyword in trust_keywords)
 
-    def _auto_trust_if_needed(self) -> bool:
+    @staticmethod
+    def _auto_trust_if_needed() -> bool:
         """Auto-respond to trust prompts if detected (legacy compatibility method)."""
         # For safety, this method returns False by default
         # Individual implementations should override based on security requirements

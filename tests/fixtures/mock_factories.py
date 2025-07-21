@@ -1,8 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Centralized Mock Factory System
 Provides standardized mock objects to reduce duplication across test files.
 """
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
@@ -12,7 +15,7 @@ class ManagerMockFactory:
     """Factory for commonly mocked manager classes."""
 
     @staticmethod
-    def create_session_manager_mock(**kwargs: Any) -> MagicMock:
+    def create_session_manager_mock(**kwargs: object) -> MagicMock:
         """Create a standardized SessionManager mock.
 
         Args:
@@ -64,7 +67,7 @@ class ManagerMockFactory:
         return mock_manager
 
     @staticmethod
-    def create_claude_manager_mock(**kwargs: Any) -> MagicMock:
+    def create_claude_manager_mock(**kwargs: object) -> MagicMock:
         """Create a standardized ClaudeManager mock.
 
         Args:
@@ -116,7 +119,7 @@ class ManagerMockFactory:
         return mock_manager
 
     @staticmethod
-    def create_tmux_manager_mock(**kwargs: Any) -> MagicMock:
+    def create_tmux_manager_mock(**kwargs: object) -> MagicMock:
         """Create a standardized TmuxManager mock.
 
         Args:
@@ -160,7 +163,7 @@ class ComponentMockFactory:
     """Factory for commonly mocked component objects."""
 
     @staticmethod
-    def create_tmux_session_mock(name: str = "test-session", **kwargs: Any) -> MagicMock:
+    def create_tmux_session_mock(name: str = "test-session", **kwargs: object) -> MagicMock:
         """Create a standardized tmux session mock."""
         mock_session = MagicMock()
         mock_session.name = name
@@ -206,31 +209,31 @@ class PatchContextFactory:
     """Factory for common patch contexts."""
 
     @staticmethod
-    def patch_session_manager(**kwargs: Any):
+    def patch_session_manager(**kwargs: object):
         """Create a patch context for SessionManager with standard mock."""
         mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs)
         return patch("libs.core.session_manager.SessionManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_claude_manager(**kwargs: Any):
+    def patch_claude_manager(**kwargs: object):
         """Create a patch context for ClaudeManager with standard mock."""
         mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs)
         return patch("libs.core.claude_manager.ClaudeManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_tmux_manager(**kwargs: Any):
+    def patch_tmux_manager(**kwargs: object):
         """Create a patch context for TmuxManager with standard mock."""
         mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
         return patch("libs.tmux_manager.TmuxManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_setup_tmux_manager(**kwargs: Any):
+    def patch_setup_tmux_manager(**kwargs: object):
         """Create a patch context for TmuxManager in setup commands."""
         mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
         return patch("commands.setup.TmuxManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_subprocess_run(**kwargs: Any):
+    def patch_subprocess_run(**kwargs: object):
         """Create a patch context for subprocess.run with standard mock."""
         mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs)
         return patch("subprocess.run", return_value=mock_result)

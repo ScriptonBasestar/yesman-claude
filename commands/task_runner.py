@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Task Runner CLI command for automated TODO processing.
 
 Provides automation for processing TODO files in /tasks/todo/ directory.
@@ -26,7 +30,7 @@ from libs.task_runner import TaskRunner
 class TaskRunnerNextCommand(BaseCommand):
     """Process the next available task."""
 
-    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:
+    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the next command."""
         try:
             runner = TaskRunner()
@@ -50,8 +54,8 @@ class TaskRunnerRunCommand(BaseCommand):
         self,
         directory: str | None = None,
         max_iterations: int = 100,
-        dry_run: bool = False,
-        **kwargs,
+        dry_run: bool = False,  # noqa: FBT001
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the run command."""
         try:
@@ -110,7 +114,7 @@ class TaskRunnerRunCommand(BaseCommand):
 class TaskRunnerStatusCommand(BaseCommand):
     """Show current task status."""
 
-    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:
+    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the status command."""
         try:
             runner = TaskRunner()
@@ -194,7 +198,7 @@ class TaskRunnerStatusCommand(BaseCommand):
 class TaskRunnerAddCommand(BaseCommand):
     """Add a new task to a todo file."""
 
-    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:
+    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the add command."""
         if not task or not file_path:
             msg = "Both --task and --file options are required"
@@ -242,7 +246,7 @@ def task_runner() -> None:
     help="Specific directory to process (e.g. /tasks/todo/phase3)",
 )
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
-def next(directory: str | None, verbose: bool) -> None:
+def next(directory: str | None, verbose: bool) -> None:  # noqa: FBT001
     """Process the next available task.
 
     Finds and processes the next uncompleted task in todo files.
@@ -276,7 +280,7 @@ def next(directory: str | None, verbose: bool) -> None:
     is_flag=True,
     help="Show what would be processed without making changes",
 )
-def run(directory: str | None, max_iterations: int, dry_run: bool) -> None:
+def run(directory: str | None, max_iterations: int, dry_run: bool) -> None:  # noqa: FBT001
     """Run task processor continuously.
 
     Processes all available tasks until none remain or max iterations reached.
@@ -295,7 +299,7 @@ def run(directory: str | None, max_iterations: int, dry_run: bool) -> None:
 @task_runner.command()
 @click.option("--dir", "-d", "directory", help="Specific directory to show status for")
 @click.option("--detailed", is_flag=True, help="Show detailed task breakdown")
-def status(directory: str | None, detailed: bool) -> None:
+def status(directory: str | None, detailed: bool) -> None:  # noqa: FBT001
     """Show current task status.
 
     Displays overview of todo files and task completion status.

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Batch operations and auto-resolution commands."""
 
 import logging
@@ -10,7 +14,8 @@ logger = logging.getLogger(__name__)
 class BatchMergeCommand(BaseCommand):
     """Perform batch merge operations."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute( **kwargs) -> dict:  # noqa: ARG002
         """Execute the batch merge command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Performing batch merge operations...")
@@ -21,7 +26,8 @@ class BatchMergeCommand(BaseCommand):
 class AutoResolveCommand(BaseCommand):
     """Auto-resolve conflicts with various strategies."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the auto-resolve command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Auto-resolving conflicts with various strategies...")
@@ -32,7 +38,8 @@ class AutoResolveCommand(BaseCommand):
 class PreventConflictsCommand(BaseCommand):
     """Proactive conflict prevention."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the prevent conflicts command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Performing proactive conflict prevention...")

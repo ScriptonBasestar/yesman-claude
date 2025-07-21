@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Custom Renderer Example.
 
 This example demonstrates how to create custom renderers
@@ -6,8 +10,8 @@ for the Yesman-Claude dashboard system.
 """
 
 import json
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
+from typing import object
 
 from libs.dashboard.renderers import BaseRenderer, RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import ActivityData, HealthData, HealthLevel, SessionData, SessionStatus
@@ -16,7 +20,7 @@ from libs.dashboard.renderers.widget_models import ActivityData, HealthData, Hea
 class ASCIIRenderer(BaseRenderer):
     """Custom renderer that outputs ASCII art representations."""
 
-    def __init__(self, theme: dict[str, Any] | None = None):
+    def __init__(self, theme: dict[str, object] | None = None):
         """Initialize ASCII renderer.
 
         Args:
@@ -28,7 +32,7 @@ class ASCIIRenderer(BaseRenderer):
         self.theme = theme or {}
         self.width = 80  # ASCII art width
 
-    def render_widget(self, widget_type: WidgetType, data: Any) -> dict[str, Any]:
+    def render_widget(self, widget_type: WidgetType, data: object) -> dict[str, object]:
         """Render widget as ASCII art."""
         if widget_type == WidgetType.SESSION_BROWSER:
             return self._render_session_browser(data)
@@ -39,7 +43,7 @@ class ASCIIRenderer(BaseRenderer):
         else:
             return {"content": f"Unsupported widget: {widget_type}", "data": data}
 
-    def _render_session_browser(self, sessions: list[SessionData]) -> dict[str, Any]:
+    def _render_session_browser(self, sessions: list[SessionData]) -> dict[str, object]:
         """Render sessions as ASCII table."""
         lines = []
         lines.append("=" * self.width)
@@ -73,7 +77,7 @@ class ASCIIRenderer(BaseRenderer):
             "session_count": len(sessions),
         }
 
-    def _render_health_chart(self, health: HealthData) -> dict[str, Any]:
+    def _render_health_chart(self, health: HealthData) -> dict[str, object]:
         """Render health as ASCII bar chart."""
         lines = []
         lines.append("=" * self.width)
@@ -107,7 +111,7 @@ class ASCIIRenderer(BaseRenderer):
             "health_score": health.overall_score,
         }
 
-    def _render_activity_graph(self, activities: list[ActivityData]) -> dict[str, Any]:
+    def _render_activity_graph(self, activities: list[ActivityData]) -> dict[str, object]:
         """Render activity as ASCII graph."""
         lines = []
         lines.append("=" * self.width)
@@ -154,13 +158,15 @@ class ASCIIRenderer(BaseRenderer):
             "activity_count": len(activities),
         }
 
-    def _create_progress_bar(self, percentage: int, width: int) -> str:
+    @staticmethod
+    def _create_progress_bar( percentage: int, width: int) -> str:
         """Create ASCII progress bar."""
         filled = int(percentage * width / 100)
         bar = "█" * filled + "░" * (width - filled)
         return f"[{bar}]"
 
-    def _get_health_indicator(self, level: HealthLevel) -> str:
+    @staticmethod
+    def _get_health_indicator(level: HealthLevel) -> str:
         """Get ASCII health indicator."""
         indicators = {
             HealthLevel.EXCELLENT: "🟢 EXCELLENT",
@@ -170,7 +176,8 @@ class ASCIIRenderer(BaseRenderer):
         }
         return indicators.get(level, "❓ UNKNOWN")
 
-    def _get_activity_symbol(self, activity_type: str) -> str:
+    @staticmethod
+    def _get_activity_symbol(activity_type: str) -> str:
         """Get symbol for activity type."""
         symbols = {
             "command": "●",
@@ -182,7 +189,8 @@ class ASCIIRenderer(BaseRenderer):
         }
         return symbols.get(activity_type, "○")
 
-    def _format_uptime(self, seconds: int | None) -> str:
+    @staticmethod
+    def _format_uptime(seconds: int | None) -> str:
         """Format uptime as human-readable string."""
         if not seconds:
             return "N/A"
@@ -195,11 +203,12 @@ class ASCIIRenderer(BaseRenderer):
         else:
             return f"{minutes}m"
 
-    def apply_theme(self, theme: dict[str, Any]) -> None:
+    def apply_theme(self, theme: dict[str, object]) -> None:
         """Apply theme to renderer."""
         self.theme.update(theme)
 
-    def get_capabilities(self) -> list[str]:
+    @staticmethod
+    def get_capabilities() -> list[str]:
         """Get renderer capabilities."""
         return [
             "ascii_art",
@@ -212,7 +221,7 @@ class ASCIIRenderer(BaseRenderer):
 class JSONRenderer(BaseRenderer):
     """Custom renderer that outputs structured JSON."""
 
-    def __init__(self, theme: dict[str, Any] | None = None):
+    def __init__(self, theme: dict[str, object] | None = None):
         """Initialize JSON renderer.
 
         Args:
@@ -224,11 +233,11 @@ class JSONRenderer(BaseRenderer):
         self.theme = theme or {}
         self.indent = 2
 
-    def render_widget(self, widget_type: WidgetType, data: Any) -> dict[str, Any]:
+    def render_widget(self, widget_type: WidgetType, data: object) -> dict[str, object]:
         """Render widget as structured JSON."""
         result = {
             "widget_type": widget_type.value,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "data": self._serialize_data(data),
             "metadata": {
                 "renderer": "JSONRenderer",
@@ -251,7 +260,7 @@ class JSONRenderer(BaseRenderer):
             "format": "json",
         }
 
-    def _serialize_data(self, data: Any) -> Any:
+    def _serialize_data(self, data: object) -> Any:
         """Serialize data to JSON-compatible format."""
         if isinstance(data, list):
             return [self._serialize_data(item) for item in data]
@@ -274,7 +283,8 @@ class JSONRenderer(BaseRenderer):
         else:
             return data
 
-    def _summarize_sessions(self, sessions: list[SessionData]) -> dict[str, Any]:
+    @staticmethod
+    def _summarize_sessions(sessions: list[SessionData]) -> dict[str, object]:
         """Create session summary."""
         if not sessions:
             return {"total": 0, "active": 0, "inactive": 0}
@@ -291,7 +301,8 @@ class JSONRenderer(BaseRenderer):
             "average_cpu": round(avg_cpu, 2),
         }
 
-    def _summarize_health(self, health: HealthData) -> dict[str, Any]:
+    @staticmethod
+    def _summarize_health(health: HealthData) -> dict[str, object]:
         """Create health summary."""
         category_avg = 0
         if health.categories:
@@ -304,7 +315,8 @@ class JSONRenderer(BaseRenderer):
             "category_count": len(health.categories or {}),
         }
 
-    def _summarize_activity(self, activities: list[ActivityData]) -> dict[str, Any]:
+    @staticmethod
+    def _summarize_activity(activities: list[ActivityData]) -> dict[str, object]:
         """Create activity summary."""
         if not activities:
             return {"total": 0, "sessions": 0, "latest": None}
@@ -322,7 +334,7 @@ class JSONRenderer(BaseRenderer):
             },
         }
 
-    def apply_theme(self, theme: dict[str, Any]) -> None:
+    def apply_theme(self, theme: dict[str, object]) -> None:
         """Apply theme to renderer."""
         self.theme.update(theme)
         # Adjust indentation based on theme
@@ -331,7 +343,8 @@ class JSONRenderer(BaseRenderer):
         else:
             self.indent = 2
 
-    def get_capabilities(self) -> list[str]:
+    @staticmethod
+    def get_capabilities() -> list[str]:
         """Get renderer capabilities."""
         return [
             "structured_output",
@@ -434,7 +447,8 @@ def save_renderer_examples():
 class MyASCIIRenderer(BaseRenderer):
     """Custom ASCII art renderer"""
 
-    def render_widget(self, widget_type, data):
+    @staticmethod
+    def render_widget(widget_type, data):
         # Your ASCII rendering logic here
         return {"content": "ASCII output", "format": "ascii"}
 '''
@@ -449,7 +463,8 @@ class MyASCIIRenderer(BaseRenderer):
 class MyJSONRenderer(BaseRenderer):
     """Custom JSON data renderer"""
 
-    def render_widget(self, widget_type, data):
+    @staticmethod
+    def render_widget(widget_type, data):
         # Your JSON rendering logic here
         result = {"widget_type": widget_type.value, "data": data}
         return {"content": json.dumps(result), "format": "json"}

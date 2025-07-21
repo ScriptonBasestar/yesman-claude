@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Keyboard Navigation System.
 
 Universal keyboard navigation manager for all dashboard interfaces
@@ -429,7 +433,7 @@ class KeyboardNavigationManager:
             return True
 
         except Exception as e:
-            logger.exception("Error executing action %s: %s", action_name, e)
+            logger.exception("Error executing action %s")
             return False
 
     def set_context(self, context: NavigationContext) -> None:
@@ -554,7 +558,8 @@ class KeyboardNavigationManager:
 
         return False
 
-    def _focus_element(self, element: FocusableElement) -> None:
+    @staticmethod
+    def _focus_element( element: FocusableElement) -> None:
         """Internal method to focus an element."""
         logger.debug("Focusing element: %s", element.element_id)
         # This would be implemented by subclasses or interface-specific handlers
@@ -573,19 +578,23 @@ class KeyboardNavigationManager:
         if element:
             logger.debug("Activating element: %s", element.element_id)
 
-    def cancel_action(self) -> None:
+    @staticmethod
+    def cancel_action() -> None:
         """Handle cancel/escape action."""
         logger.debug("Cancel action triggered")
 
-    def refresh_action(self) -> None:
+    @staticmethod
+    def refresh_action() -> None:
         """Handle refresh action."""
         logger.debug("Refresh action triggered")
 
-    def find_action(self) -> None:
+    @staticmethod
+    def find_action() -> None:
         """Handle find action."""
         logger.debug("Find action triggered")
 
-    def navigate_direction(self, direction: str) -> None:
+    @staticmethod
+    def navigate_direction(direction: str) -> None:
         """Handle directional navigation."""
         logger.debug("Navigate %s", direction)
 

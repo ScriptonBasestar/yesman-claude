@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import gc
 
 from libs.dashboard.renderers import RendererFactory, RenderFormat
@@ -7,7 +11,8 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 class TestMemoryStability:
     """Tests for memory stability during intensive operations."""
 
-    def test_memory_stability(self) -> None:
+    @staticmethod
+    def test_memory_stability() -> None:
         """Test 14: Memory stability during intensive operations."""
         factory = RendererFactory()
         initial_objects = len(gc.get_objects())

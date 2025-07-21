@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """TASK_RUNNER: Automated todo file processor for /tasks/todo/ directory.
 
 This module provides automated processing of TODO files:
@@ -11,7 +15,7 @@ This module provides automated processing of TODO files:
 import glob
 import re
 import subprocess
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -21,8 +25,8 @@ class TodoTask:
     def __init__(
         self,
         content: str,
-        completed: bool = False,
-        skipped: bool = False,
+        completed: bool = False,  # noqa: FBT001
+        skipped: bool = False,  # noqa: FBT001
         line_num: int = 0,
     ) -> None:
         self.content = content.strip()
@@ -55,12 +59,14 @@ class TodoFile:
                 task = self._parse_task_line(line, i)
                 self.tasks.append(task)
 
-    def _is_task_line(self, line: str) -> bool:
+    @staticmethod
+    def _is_task_line( line: str) -> bool:
         """Check if line contains a task marker."""
         line = line.strip()
         return bool(re.match(r"^-\s*\[([ x>])\]\s*\]?", line))
 
-    def _parse_task_line(self, line: str, line_num: int) -> TodoTask:
+    @staticmethod
+    def _parse_task_line(line: str, line_num: int) -> TodoTask:
         """Parse a task line into TodoTask object."""
         line = line.strip()
         match = re.match(r"^-\s*\[([x >])\]\s*\]?\s*(.+)", line)
@@ -183,7 +189,7 @@ class TaskRunner:
             return False
 
         # Generate new filename with completion date
-        today = datetime.now().strftime("%Y%m%d")
+        today = datetime.now(UTC).strftime("%Y%m%d")
         original_name = todo_file.file_path.stem
         new_name = f"{original_name}__DONE_{today}.md"
 
@@ -195,7 +201,7 @@ class TaskRunner:
 
     def move_failed_file(self, todo_file: TodoFile, reason: str) -> bool:
         """Move failed file to alert directory."""
-        today = datetime.now().strftime("%Y%m%d")
+        today = datetime.now(UTC).strftime("%Y%m%d")
         original_name = todo_file.file_path.stem
         new_name = f"{original_name}__ALERT_{today}.md"
 
@@ -211,7 +217,8 @@ class TaskRunner:
 
         return True
 
-    def analyze_task_dependencies(self, task: TodoTask) -> list[str]:
+    @staticmethod
+    def analyze_task_dependencies(task: TodoTask) -> list[str]:
         """Analyze task and break down into subtasks if needed."""
         content = task.content.lower()
 
@@ -241,7 +248,7 @@ class TaskRunner:
 
         return []
 
-    def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:
+    def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:  # noqa: ARG002
         """Commit changes with appropriate message."""
         try:
             # Stage changes

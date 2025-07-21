@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """AI learning system management commands."""
 
 import asyncio
@@ -382,7 +386,7 @@ def status() -> None:
     help="Enable/disable auto-response",
 )
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
-def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:
+def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:  # noqa: FBT001
     """Configure AI learning system settings."""
     command = AIConfigCommand()
     command.run(threshold=threshold, auto_response=auto_response, learning=learning)

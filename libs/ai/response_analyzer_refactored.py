@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Response pattern analysis and learning engine - Refactored version."""
 
 import json
@@ -107,8 +111,8 @@ class ResponseAnalyzer(StatisticsProviderMixin):
             with open(self.responses_file, encoding="utf-8") as f:
                 data = json.load(f)
                 return [ResponseRecord(**item) for item in data]
-        except Exception as e:
-            logger.exception(f"Failed to load response history: {e}")
+        except Exception:
+            logger.exception("Failed to load response history")  # noqa: G004
             return []
 
     def _load_patterns(self) -> dict[str, PromptPattern]:
@@ -120,8 +124,8 @@ class ResponseAnalyzer(StatisticsProviderMixin):
             with open(self.patterns_file, encoding="utf-8") as f:
                 data = json.load(f)
                 return {k: PromptPattern(**v) for k, v in data.items()}
-        except Exception as e:
-            logger.exception(f"Failed to load patterns: {e}")
+        except Exception:
+            logger.exception("Failed to load patterns")  # noqa: G004
             return {}
 
     def save_data(self) -> None:
@@ -139,8 +143,8 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                     indent=2,
                 )
 
-        except Exception as e:
-            logger.exception(f"Failed to save data: {e}")
+        except Exception:
+            logger.exception("Failed to save data")  # noqa: G004
 
     def record_response(
         self,
@@ -193,7 +197,8 @@ class ResponseAnalyzer(StatisticsProviderMixin):
             self.learned_patterns[pattern_id] = pattern
             self._stats["patterns_learned"] += 1
 
-    def _generate_regex_pattern(self, prompt_text: str) -> str:
+    @staticmethod
+    def _generate_regex_pattern( prompt_text: str) -> str:
         """Generate a regex pattern from prompt text."""
         # Escape special regex characters
         escaped = re.escape(prompt_text)
@@ -216,7 +221,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         self,
         prompt_text: str,
         prompt_type: str,
-        context: str = "",
+        context: str = "",  # noqa: ARG002
         project_name: str | None = None,
     ) -> tuple[str | None, float]:
         """Predict the likely user response based on learned patterns."""
@@ -267,7 +272,8 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         return best_match, best_confidence
 
-    def get_default_response(self, prompt_type: str) -> tuple[str, float]:
+    @staticmethod
+    def get_default_response(prompt_type: str) -> tuple[str, float]:
         """Get default response for a prompt type when no pattern matches."""
         defaults = {
             "yes_no": ("y", 0.8),
@@ -311,7 +317,8 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         return insights
 
-    def _calculate_entropy(self, counter: Counter) -> float:
+    @staticmethod
+    def _calculate_entropy(counter: Counter) -> float:
         """Calculate Shannon entropy for response distribution."""
         import math
 
@@ -336,7 +343,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         removed = original_count - len(self.response_history)
         if removed > 0:
-            logger.info(f"Cleaned up {removed} old response records")
+            logger.info(f"Cleaned up {removed} old response records")  # noqa: G004
             self.save_data()
 
         return removed

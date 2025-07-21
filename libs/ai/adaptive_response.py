@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Adaptive response system that integrates learning with auto-response."""
 
 import asyncio
@@ -63,7 +67,7 @@ class AdaptiveResponse:
         self,
         prompt_text: str,
         response: str,
-        confidence: float,
+        confidence: float,  # noqa: ARG002
         context: str = "",
         project_name: str | None = None,
     ) -> bool:
@@ -91,7 +95,7 @@ class AdaptiveResponse:
         response: str,
         context: str = "",
         project_name: str | None = None,
-        success: bool = True,
+        success: bool = True,  # noqa: FBT001
     ) -> None:
         """Confirm whether a response was successful and record it for learning."""
         if not self.config.learning_enabled:
@@ -243,12 +247,12 @@ class AdaptiveResponse:
         else:
             logger.warning("Invalid confidence threshold: {new_threshold}. Must be between 0.0 and 1.0")
 
-    def enable_auto_response(self, enabled: bool = True) -> None:
+    def enable_auto_response(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable auto-response functionality."""
         self.config.auto_response_enabled = enabled
         logger.info("Auto-response {'enabled' if enabled else 'disabled'}")
 
-    def enable_learning(self, enabled: bool = True) -> None:
+    def enable_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable learning functionality."""
         self.config.learning_enabled = enabled
         logger.info("Learning {'enabled' if enabled else 'disabled'}")

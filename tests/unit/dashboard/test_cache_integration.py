@@ -1,10 +1,15 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 from libs.dashboard.renderers.optimizations import RenderCache
 
 
 class TestCacheIntegration:
     """Tests for cache integration across components."""
 
-    def test_cache_integration(self) -> None:
+    @staticmethod
+    def test_cache_integration() -> None:
         """Test 12: Cache integration across components."""
         cache = RenderCache(max_size=100, ttl=60.0)
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """AI Learning System Integration Tests.
 
 Tests the AI learning system's integration with session interactions,

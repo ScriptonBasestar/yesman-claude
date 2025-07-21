@@ -1,9 +1,13 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Test rollback mechanism and error recovery system."""
 
 import asyncio
 import tempfile
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -23,17 +27,20 @@ class TestRecoveryEngine:
     """Test recovery engine functionality."""
 
     @pytest.fixture
-    def temp_work_dir(self) -> Iterator[str]:
+    @staticmethod
+    def temp_work_dir() -> Iterator[str]:
         """Create temporary work directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
             yield tmpdir
 
     @pytest.fixture
-    def recovery_engine(self, temp_work_dir: str) -> RecoveryEngine:
+    @staticmethod
+    def recovery_engine(temp_work_dir: str) -> RecoveryEngine:
         """Create recovery engine for testing."""
         return RecoveryEngine(work_dir=temp_work_dir, max_snapshots=10)
 
-    def test_recovery_engine_initialization(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    def test_recovery_engine_initialization(recovery_engine: RecoveryEngine) -> None:
         """Test recovery engine initialization."""
         assert recovery_engine.work_dir.exists()
         assert recovery_engine.snapshots_dir.exists()
@@ -42,12 +49,13 @@ class TestRecoveryEngine:
         assert "task_timeout" in recovery_engine.recovery_strategies
         assert "agent_error" in recovery_engine.recovery_strategies
 
-    def test_operation_snapshot_serialization(self) -> None:
+    @staticmethod
+    def test_operation_snapshot_serialization() -> None:
         """Test snapshot serialization/deserialization."""
         snapshot = OperationSnapshot(
             snapshot_id="test-snapshot",
             operation_type=OperationType.TASK_EXECUTION,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             description="Test snapshot",
             agent_states={"agent-1": {"state": "idle"}},
             task_states={"task-1": {"status": "pending"}},
@@ -65,7 +73,8 @@ class TestRecoveryEngine:
         assert restored.operation_type == snapshot.operation_type
         assert restored.agent_states == snapshot.agent_states
 
-    def test_recovery_strategy_registration(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    def test_recovery_strategy_registration(recovery_engine: RecoveryEngine) -> None:
         """Test registering custom recovery strategies."""
         recovery_engine.register_recovery_strategy(
             name="custom_test",
@@ -82,7 +91,8 @@ class TestRecoveryEngine:
         assert RecoveryAction.RETRY in strategy.recovery_actions
 
     @pytest.mark.asyncio
-    async def test_snapshot_creation(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    async def test_snapshot_creation(recovery_engine: RecoveryEngine) -> None:
         """Test creating operation snapshots."""
         # Create mock agent pool
         agent_pool = Mock()
@@ -110,7 +120,8 @@ class TestRecoveryEngine:
         assert len(snapshot.task_states) == 1
 
     @pytest.mark.asyncio
-    async def test_file_backup_and_restore(self, recovery_engine: RecoveryEngine, temp_work_dir: str) -> None:
+    @staticmethod
+    async def test_file_backup_and_restore(recovery_engine: RecoveryEngine, temp_work_dir: str) -> None:
         """Test file backup and restore functionality."""
         # Create test file
         test_file = Path(temp_work_dir) / "test.txt"
@@ -135,7 +146,8 @@ class TestRecoveryEngine:
         assert test_file.read_text() == "original content"
 
     @pytest.mark.asyncio
-    async def test_agent_state_rollback(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    async def test_agent_state_rollback(recovery_engine: RecoveryEngine) -> None:
         """Test rolling back agent states."""
         # Create mock agent pool
         agent_pool = Mock()
@@ -178,7 +190,8 @@ class TestRecoveryEngine:
         assert agent.current_task is None
 
     @pytest.mark.asyncio
-    async def test_error_strategy_matching(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    async def test_error_strategy_matching(recovery_engine: RecoveryEngine) -> None:
         """Test finding appropriate recovery strategies for different errors."""
         # Test timeout error
         strategy = recovery_engine._find_recovery_strategy("Task timed out after 300 seconds")  # noqa: SLF001
@@ -200,7 +213,8 @@ class TestRecoveryEngine:
         assert strategy is not None
 
     @pytest.mark.asyncio
-    async def test_operation_failure_handling(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    async def test_operation_failure_handling(recovery_engine: RecoveryEngine) -> None:
         """Test handling operation failures with recovery."""
         # Mock agent pool
         agent_pool = Mock()
@@ -239,7 +253,8 @@ class TestRecoveryEngine:
         assert recovery_engine.recovery_metrics["successful_recoveries"] > 0
 
     @pytest.mark.asyncio
-    async def test_recovery_action_execution(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    async def test_recovery_action_execution(recovery_engine: RecoveryEngine) -> None:
         """Test execution of different recovery actions."""
         # Test SKIP action
         success = await recovery_engine._execute_recovery_action(  # noqa: SLF001
@@ -269,14 +284,15 @@ class TestRecoveryEngine:
         assert agent.state == AgentState.IDLE
         assert agent.current_task is None
 
-    def test_snapshot_cleanup(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    def test_snapshot_cleanup(recovery_engine: RecoveryEngine) -> None:
         """Test automatic cleanup of old snapshots."""
         # Create multiple snapshots
         for i in range(15):  # More than max_snapshots (10)
             snapshot = OperationSnapshot(
                 snapshot_id=f"snapshot-{i}",
                 operation_type=OperationType.TASK_EXECUTION,
-                timestamp=datetime.now(),
+                timestamp=datetime.now(UTC),
                 description=f"Test snapshot {i}",
             )
             recovery_engine.snapshots[snapshot.snapshot_id] = snapshot
@@ -288,7 +304,8 @@ class TestRecoveryEngine:
         asyncio.run(recovery_engine._cleanup_old_snapshots())  # noqa: SLF001
         assert len(recovery_engine.snapshots) <= recovery_engine.max_snapshots
 
-    def test_metrics_tracking(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    def test_metrics_tracking(recovery_engine: RecoveryEngine) -> None:
         """Test recovery metrics tracking."""
         initial_metrics = recovery_engine.get_recovery_metrics()
 
@@ -305,7 +322,8 @@ class TestRecoveryEngine:
         assert updated_metrics["successful_recoveries"] == initial_metrics["successful_recoveries"] + 1
         assert updated_metrics["rollbacks_performed"] == initial_metrics["rollbacks_performed"] + 1
 
-    def test_state_persistence(self, recovery_engine: RecoveryEngine) -> None:
+    @staticmethod
+    def test_state_persistence(recovery_engine: RecoveryEngine) -> None:
         """Test persistence of recovery state."""
         # Add some data
         recovery_engine.failure_counts["test_operation"] = 3
@@ -331,13 +349,15 @@ class TestAgentPoolRecoveryIntegration:
     """Test integration of recovery system with AgentPool."""
 
     @pytest.fixture
-    def agent_pool(self) -> Iterator[AgentPool]:
+    @staticmethod
+    def agent_pool() -> Iterator[AgentPool]:
         """Create agent pool for testing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pool = AgentPool(max_agents=2, work_dir=tmpdir)
             yield pool
 
-    def test_recovery_system_enablement(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    def test_recovery_system_enablement(agent_pool: AgentPool) -> None:
         """Test enabling recovery system in agent pool."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)
@@ -346,7 +366,8 @@ class TestAgentPoolRecoveryIntegration:
             assert agent_pool.recovery_engine is not None
 
     @pytest.mark.asyncio
-    async def test_snapshot_creation_via_agent_pool(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    async def test_snapshot_creation_via_agent_pool(agent_pool: AgentPool) -> None:
         """Test creating snapshots through agent pool."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)
@@ -361,7 +382,8 @@ class TestAgentPoolRecoveryIntegration:
             assert snapshot_id in agent_pool.recovery_engine.snapshots
 
     @pytest.mark.asyncio
-    async def test_manual_rollback_via_agent_pool(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    async def test_manual_rollback_via_agent_pool(agent_pool: AgentPool) -> None:
         """Test manual rollback through agent pool."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)
@@ -376,7 +398,8 @@ class TestAgentPoolRecoveryIntegration:
             success = await agent_pool.rollback_to_snapshot(snapshot_id)
             assert success
 
-    def test_recovery_status_retrieval(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    def test_recovery_status_retrieval(agent_pool: AgentPool) -> None:
         """Test retrieving recovery status."""
         # Without recovery enabled
         status = agent_pool.get_recovery_status()
@@ -391,7 +414,8 @@ class TestAgentPoolRecoveryIntegration:
             assert "metrics" in status
             assert "recent_operations" in status
 
-    def test_snapshot_listing(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    def test_snapshot_listing(agent_pool: AgentPool) -> None:
         """Test listing recovery snapshots."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)
@@ -404,7 +428,7 @@ class TestAgentPoolRecoveryIntegration:
             snapshot = OperationSnapshot(
                 snapshot_id="test-snapshot",
                 operation_type=OperationType.TASK_EXECUTION,
-                timestamp=datetime.now(),
+                timestamp=datetime.now(UTC),
                 description="Test snapshot",
             )
             agent_pool.recovery_engine.snapshots["test-snapshot"] = snapshot
@@ -415,7 +439,8 @@ class TestAgentPoolRecoveryIntegration:
             assert snapshots[0]["snapshot_id"] == "test-snapshot"
 
     @pytest.mark.asyncio
-    async def test_execute_with_recovery(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    async def test_execute_with_recovery(agent_pool: AgentPool) -> None:
         """Test executing operations with automatic recovery."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)
@@ -455,7 +480,8 @@ class TestAgentPoolRecoveryIntegration:
             assert result == "success after retries"
             assert call_count == 3
 
-    def test_error_handling_when_recovery_disabled(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    def test_error_handling_when_recovery_disabled(agent_pool: AgentPool) -> None:
         """Test error handling when recovery system is not enabled."""
         # Don't enable recovery system
 
@@ -466,7 +492,8 @@ class TestAgentPoolRecoveryIntegration:
         assert len(snapshots) == 0
 
     @pytest.mark.asyncio
-    async def test_task_failure_callback_integration(self, agent_pool: AgentPool) -> None:
+    @staticmethod
+    async def test_task_failure_callback_integration(agent_pool: AgentPool) -> None:
         """Test that task failures trigger recovery callbacks."""
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)

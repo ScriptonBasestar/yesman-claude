@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Base command class with common functionality."""
 
 import json
@@ -10,7 +14,6 @@ import yaml
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 import click
 
@@ -37,7 +40,7 @@ class CommandError(YesmanError):
         message: str,
         exit_code: int = 1,
         recovery_hint: str | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         super().__init__(
             message=message,
@@ -158,7 +161,8 @@ class BaseCommand(ABC):
                 self.logger.warning("Creating missing directory: %s", path)
                 Path(path).mkdir(parents=True, exist_ok=True)
 
-    def _is_tmux_available(self) -> bool:
+    @staticmethod
+    def _is_tmux_available() -> bool:
         """Check if tmux is available."""
         return shutil.which("tmux") is not None
 
@@ -174,17 +178,17 @@ class BaseCommand(ABC):
         else:
             error_handler.handle_error(error, exit_on_critical=True)
 
-    def log_command_start(self, command_name: str, **kwargs: Any) -> None:
+    def log_command_start(self, command_name: str, **kwargs: object) -> None:
         """Log command start with parameters."""
         params = ", ".join(f"{k}={v}" for k, v in kwargs.items() if v is not None)
         self.logger.info(f"Starting command: {command_name}" + (f" with {params}" if params else ""))
 
-    def log_command_end(self, command_name: str, success: bool = True) -> None:
+    def log_command_end(self, command_name: str, success: bool = True) -> None:  # noqa: FBT001
         """Log command completion."""
         status = "completed successfully" if success else "failed"
         self.logger.info("Command %s %s", command_name, status)
 
-    def confirm_action(self, message: str, default: bool = False) -> bool:
+    def confirm_action(self, message: str, default: bool = False) -> bool:  # noqa: FBT001
         """Ask for user confirmation."""
         try:
             return click.confirm(message, default=default)
@@ -192,27 +196,32 @@ class BaseCommand(ABC):
             self.logger.info("Operation cancelled by user")
             sys.exit(0)
 
-    def print_success(self, message: str) -> None:
+    @staticmethod
+    def print_success(message: str) -> None:
         """Print success message with formatting."""
         click.echo(click.style(f"✅ {message}", fg="green"))
 
-    def print_warning(self, message: str) -> None:
+    @staticmethod
+    def print_warning(message: str) -> None:
         """Print warning message with formatting."""
         click.echo(click.style(f"⚠️  {message}", fg="yellow"))
 
-    def print_error(self, message: str) -> None:
+    @staticmethod
+    def print_error(message: str) -> None:
         """Print error message with formatting."""
         click.echo(click.style(f"❌ {message}", fg="red"))
 
-    def print_info(self, message: str) -> None:
+    @staticmethod
+    def print_info(message: str) -> None:
         """Print info message with formatting."""
         click.echo(click.style(f"ℹ️  {message}", fg="blue"))
 
     @abstractmethod
-    def execute(self, **kwargs: Any) -> Any:
+    @staticmethod
+    def execute(**kwargs: object) -> object:
         """Execute the command (must be implemented by subclasses)."""
 
-    def run(self, **kwargs: Any) -> Any:
+    def run(self, **kwargs: object) -> object:
         """Main execution wrapper with error handling."""
         command_name = self.__class__.__name__.replace("Command", "").lower()
 
@@ -233,7 +242,7 @@ class BaseCommand(ABC):
             self.log_command_end(command_name, success=False)
             self.handle_unexpected_error(e)
 
-    def handle_success(self, result: Any) -> None:
+    def handle_success(self, result: object) -> None:
         """Handle successful command execution."""
         # Default implementation - can be overridden
         if result and isinstance(result, dict) and result.get("message"):
@@ -277,7 +286,8 @@ class SessionCommandMixin:
             self.logger.exception("Failed to get session list")
             return []
 
-    def validate_session_name(self, session_name: str) -> None:
+    @staticmethod
+    def validate_session_name(session_name: str) -> None:
         """Validate session name format."""
         if not session_name:
             msg = "Session name cannot be empty"
@@ -317,7 +327,8 @@ class ConfigCommandMixin:
             msg = f"Failed to load projects configuration: {e}"
             raise CommandError(msg) from e
 
-    def save_projects_config(self, config: dict[str, Any]) -> None:
+    @staticmethod
+    def save_projects_config(config: dict[str, Any]) -> None:
         """Save projects configuration with error handling."""
         try:
             with open(settings.paths.projects_file, "w") as f:
@@ -341,7 +352,8 @@ class ConfigCommandMixin:
 class OutputFormatterMixin:
     """Mixin for commands that need output formatting."""
 
-    def format_table(self, data: list[dict[str, Any]], headers: list[str]) -> str:
+    @staticmethod
+    def format_table(data: list[dict[str, Any]], headers: list[str]) -> str:
         """Format data as table."""
         if not data:
             return "No data to display"
@@ -369,10 +381,12 @@ class OutputFormatterMixin:
 
         return "\n".join(lines)
 
-    def format_json(self, data: Any, indent: int = 2) -> str:
+    @staticmethod
+    def format_json(data: object, indent: int = 2) -> str:
         """Format data as JSON."""
         return json.dumps(data, indent=indent, default=str)
 
-    def format_yaml(self, data: Any) -> str:
+    @staticmethod
+    def format_yaml(data: object) -> str:
         """Format data as YAML."""
         return yaml.dump(data, default_flow_style=False)

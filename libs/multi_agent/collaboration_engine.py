@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Collaboration engine for multi-agent branch development coordination."""
 
 import asyncio
@@ -214,7 +218,7 @@ class CollaborationEngine:
         content: dict[str, Any],
         priority: MessagePriority = MessagePriority.NORMAL,
         expires_in: timedelta | None = None,
-        requires_ack: bool = False,
+        requires_ack: bool = False,  # noqa: FBT001
     ) -> str:
         """Send a message between agents.
 
@@ -267,7 +271,10 @@ class CollaborationEngine:
         self.collaboration_stats["messages_sent"] += 1
 
         logger.info(
-            f"Message {message_id} sent from {sender_id} to {recipient_id or 'all'}",
+            "Message %s sent from %s to %s",
+            message_id,
+            sender_id,
+            recipient_id or 'all',
         )
         return message_id
 
@@ -371,7 +378,7 @@ class CollaborationEngine:
 
     async def access_knowledge(
         self,
-        agent_id: str,
+        agent_id: str,  # noqa: ARG002
         knowledge_id: str | None = None,
         tags: list[str] | None = None,
         knowledge_type: str | None = None,
@@ -492,7 +499,9 @@ class CollaborationEngine:
                 )
 
         logger.info(
-            f"Collaboration session {session_id} created with {len(participant_ids)} participants",
+            "Collaboration session %s created with %d participants",
+            session_id,
+            len(participant_ids),
         )
         return session_id
 
@@ -759,7 +768,9 @@ class CollaborationEngine:
             )
 
         logger.info(
-            f"Code review initiated by {author_id} with {len(reviewers)} reviewers",
+            "Code review initiated by %s with %d reviewers",
+            author_id,
+            len(reviewers),
         )
         return reviewers
 
@@ -868,13 +879,15 @@ class CollaborationEngine:
                         for _ in range(removed):
                             queue.popleft()
                         logger.warning(
-                            f"Trimmed {removed} messages from {agent_id} queue",
+                            "Trimmed %d messages from %s queue",
+                            removed,
+                            agent_id,
                         )
 
                 await asyncio.sleep(5)
 
-            except Exception as e:
-                logger.exception("Error in message processor: %s", e)
+            except Exception:
+                logger.exception("Error in message processor")
                 await asyncio.sleep(10)
 
     async def _dependency_monitor(self) -> None:
@@ -890,15 +903,16 @@ class CollaborationEngine:
                     if change_info.get("affected_files"):
                         # Could trigger additional analysis or notifications
                         logger.info(
-                            f"Processing dependency change in {change_info['file_path']}",
+                            "Processing dependency change in %s",
+                            change_info['file_path'],
                         )
 
                     processed += 1
 
                 await asyncio.sleep(10)
 
-            except Exception as e:
-                logger.exception("Error in dependency monitor: %s", e)
+            except Exception:
+                logger.exception("Error in dependency monitor")
                 await asyncio.sleep(30)
 
     async def _knowledge_cleanup(self) -> None:
@@ -930,8 +944,8 @@ class CollaborationEngine:
 
                 await asyncio.sleep(3600)  # Run hourly
 
-            except Exception as e:
-                logger.exception("Error in knowledge cleanup: %s", e)
+            except Exception:
+                logger.exception("Error in knowledge cleanup")
                 await asyncio.sleep(3600)
 
     async def _session_monitor(self) -> None:
@@ -956,8 +970,8 @@ class CollaborationEngine:
 
                 await asyncio.sleep(60)
 
-            except Exception as e:
-                logger.exception("Error in session monitor: %s", e)
+            except Exception:
+                logger.exception("Error in session monitor")
                 await asyncio.sleep(60)
 
     async def _auto_sync_loop(self) -> None:
@@ -1000,8 +1014,8 @@ class CollaborationEngine:
 
                 await asyncio.sleep(self.sync_interval)
 
-            except Exception as e:
-                logger.exception("Error in auto sync loop: %s", e)
+            except Exception:
+                logger.exception("Error in auto sync loop")
                 await asyncio.sleep(self.sync_interval)
 
     def get_collaboration_summary(self) -> dict[str, Any]:

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Background task system for real-time updates."""
 
 import asyncio
@@ -96,7 +100,8 @@ class BackgroundTaskRunner:
         self.tasks = []
         logger.info("Background tasks stopped")
 
-    def _calculate_data_hash(self, data: object) -> str:
+    @staticmethod
+    def _calculate_data_hash( data: object) -> str:
         """Calculate hash of data for change detection."""
         json_str = json.dumps(data, sort_keys=True, default=str)
         return hashlib.md5(json_str.encode(), usedforsecurity=False).hexdigest()
@@ -405,7 +410,8 @@ class BackgroundTaskRunner:
 
         await self._run_task_safely("cleanup", cleanup, self.intervals["cleanup"])
 
-    def _get_status(self, score: float) -> str:
+    @staticmethod
+    def _get_status(score: float) -> str:
         """Get status string based on score."""
         if score >= SCORE_EXCELLENT_THRESHOLD:
             return "excellent"

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Predictive conflict prevention system for proactive multi-agent development."""
 
 import asyncio
@@ -5,10 +9,10 @@ import contextlib
 import hashlib
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
@@ -72,7 +76,7 @@ class PreventionMeasure:
     effectiveness: float | None = None  # measured post-application
 
     # Metadata
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -99,7 +103,7 @@ class PreventionResult:
     analysis_overhead: float = 0.0
 
     # Metadata
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     executed_at: datetime = field(default_factory=datetime.now)
 
 
@@ -122,6 +126,9 @@ class ConflictPreventionSystem:
             collaboration_engine: For coordinating agent actions
             branch_manager: For branch operations
             repo_path: Path to git repository
+        
+        Returns:
+            Description of return value
         """
         self.conflict_predictor = conflict_predictor
         self.auto_resolver = auto_resolver
@@ -165,7 +172,7 @@ class ConflictPreventionSystem:
 
         # Background monitoring
         self._running = False
-        self._prevention_monitor_task: asyncio.Task[Any] | None = None
+        self._prevention_monitor_task: asyncio.Task[object] | None = None
 
     async def start_prevention_monitoring(self, monitoring_interval: float = 300.0) -> None:
         """Start continuous conflict prevention monitoring."""
@@ -200,7 +207,7 @@ class ConflictPreventionSystem:
         Returns:
             Result of prevention analysis and measures applied
         """
-        start_time = datetime.now()
+        start_time = datetime.now(UTC)
         session_id = f"prevention_{start_time.strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(''.join(branches).encode()).hexdigest()[:8]}"
 
         logger.info("Starting conflict prevention analysis for session %s", session_id)
@@ -240,14 +247,14 @@ class ConflictPreventionSystem:
                     conflicts_prevented += 1
                 else:
                     failed_measures.append(measure)
-            except Exception as e:
-                logger.exception("Failed to apply prevention measure %s: %s", measure.measure_id, e)
+            except Exception:
+                logger.exception("Failed to apply prevention measure %s")
                 measure.status = "failed"
                 measure.metadata["error"] = str(e)
                 failed_measures.append(measure)
 
         # Calculate prevention effectiveness
-        prevention_time = (datetime.now() - start_time).total_seconds()
+        prevention_time = (datetime.now(UTC) - start_time).total_seconds()
         success_rate = len(applied_measures) / len(prevention_measures) if prevention_measures else 0.0
 
         # Estimate time saved (rough heuristic)
@@ -290,7 +297,7 @@ class ConflictPreventionSystem:
     async def _generate_prevention_measures(
         self,
         prediction: PredictionResult,
-        agents: list[str] | None = None,
+        agents: list[str] | None = None,  # noqa: ARG002
     ) -> list[PreventionMeasure]:
         """Generate appropriate prevention measures for a conflict prediction."""
         measures = []
@@ -311,6 +318,7 @@ class ConflictPreventionSystem:
         # Filter by effort threshold
         return [m for m in measures if m.estimated_effort <= self.prevention_config["effort_threshold"]]
 
+    @staticmethod
     async def _generate_dependency_measures(
         self,
         prediction: PredictionResult,
@@ -341,6 +349,7 @@ class ConflictPreventionSystem:
 
         return measures
 
+    @staticmethod
     async def _generate_coordination_measures(
         self,
         prediction: PredictionResult,
@@ -371,6 +380,7 @@ class ConflictPreventionSystem:
 
         return measures
 
+    @staticmethod
     async def _generate_interface_measures(
         self,
         prediction: PredictionResult,
@@ -401,6 +411,7 @@ class ConflictPreventionSystem:
 
         return measures
 
+    @staticmethod
     async def _generate_temporal_measures(
         self,
         prediction: PredictionResult,
@@ -478,7 +489,7 @@ class ConflictPreventionSystem:
 
             if success:
                 measure.status = "applied"
-                measure.applied_at = datetime.now()
+                measure.applied_at = datetime.now(UTC)
                 self.active_measures[measure.measure_id] = measure
                 logger.info("Successfully applied measure: %s", measure.measure_id)
             else:
@@ -487,15 +498,16 @@ class ConflictPreventionSystem:
 
             return success
 
-        except Exception as e:
-            logger.exception("Error applying measure %s: %s", measure.measure_id, e)
+        except Exception:
+            logger.exception("Error applying measure %s")
             measure.status = "failed"
             measure.metadata["error"] = str(e)
             return False
 
     # Strategy implementation methods
 
-    async def _apply_branch_isolation(self, measure: PreventionMeasure) -> bool:
+    @staticmethod
+    async def _apply_branch_isolation(measure: PreventionMeasure) -> bool:
         """Apply branch isolation strategy."""
         # This is a placeholder - in a real implementation, this would
         # create separate working directories or use git worktrees
@@ -551,8 +563,8 @@ class ConflictPreventionSystem:
                     mode=AutoResolutionMode.PREDICTIVE,
                 )
                 return result.outcome in ["fully_resolved", "partially_resolved"]
-        except Exception as e:
-            logger.exception("Early merge failed: %s", e)
+        except Exception:
+            logger.exception("Early merge failed")
         return False
 
     async def _apply_agent_coordination(self, measure: PreventionMeasure) -> bool:
@@ -633,11 +645,12 @@ class ConflictPreventionSystem:
 
                 await asyncio.sleep(interval)
 
-            except Exception as e:
-                logger.exception("Error in prevention monitor loop: %s", e)
+            except Exception:
+                logger.exception("Error in prevention monitor loop")
                 await asyncio.sleep(interval)
 
-    async def _get_active_branches(self) -> list[str]:
+    @staticmethod
+    async def _get_active_branches() -> list[str]:
         """Get list of currently active branches with ongoing work."""
         # This would integrate with the branch manager and agent pool
         # For now, return a placeholder
@@ -646,11 +659,11 @@ class ConflictPreventionSystem:
             branches: list[str] = []
             # This would be implemented based on git activity, agent assignments, etc.
             return branches
-        except Exception as e:
-            logger.exception("Error getting active branches: %s", e)
+        except Exception:
+            logger.exception("Error getting active branches")
             return []
 
-    def get_prevention_summary(self) -> dict[str, Any]:
+    def get_prevention_summary(self) -> dict[str, object]:
         """Get summary of prevention system status and performance."""
         active_measures_count = len(self.active_measures)
         recent_results = self.prevention_history[-10:] if self.prevention_history else []

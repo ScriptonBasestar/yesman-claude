@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Multi-agent system commands - Modular Architecture.
 
 This file has been refactored from a monolithic 3,434-line file into a modular

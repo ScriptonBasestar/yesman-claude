@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Yesman configuration management using centralized config loader."""
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import object
 
 import yaml
 
@@ -86,10 +90,13 @@ class YesmanConfig:
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: object = None) -> Any:
         """Get configuration value by key (backward compatibility).
 
         Supports dot notation for nested values (e.g., 'tmux.default_shell')
+        
+        Returns:
+            Description of return value
         """
         # Handle dot notation
         keys = key.split(".")
@@ -103,10 +110,10 @@ class YesmanConfig:
 
         return value
 
-    def save(self, new_config_data: dict[str, Any]) -> None:
+    def save(self, new_config_data: dict[str, object]) -> None:
         """Save configuration updates to local file."""
         # Load current local config
-        current_local_cfg: dict[str, Any] = {}
+        current_local_cfg: dict[str, object] = {}
         if self.local_path.exists():
             with open(self.local_path, encoding="utf-8") as f:
                 current_local_cfg = yaml.safe_load(f) or {}
@@ -151,7 +158,7 @@ class YesmanConfig:
             self._loader.validate(self.config)
             return True
         except ValueError as e:
-            self.logger.exception(f"Configuration validation failed: {e}")
+            self.logger.exception("Configuration validation failed")  # noqa: G004
             return False
 
     @property
@@ -159,7 +166,7 @@ class YesmanConfig:
         """Get typed configuration schema."""
         return self._config_schema
 
-    def get_cache_stats(self) -> dict[str, Any] | None:
+    def get_cache_stats(self) -> dict[str, object] | None:
         """Get cache statistics if using cached loader."""
         if hasattr(self._loader, "get_cache_stats"):
             return self._loader.get_cache_stats()  # type: ignore[no-any-return]

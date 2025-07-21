@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Branch information sharing protocol for multi-agent collaboration."""
 
 import asyncio
@@ -5,10 +9,10 @@ import contextlib
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
@@ -57,9 +61,9 @@ class BranchInfo:
     merge_ready: bool = False
     conflicts_detected: list[str] = field(default_factory=list)
     dependencies: dict[str, list[str]] = field(default_factory=dict)
-    api_signatures: dict[str, Any] = field(default_factory=dict)
+    api_signatures: dict[str, object] = field(default_factory=dict)
     work_items: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass
@@ -70,7 +74,7 @@ class BranchSyncEvent:
     branch_name: str
     agent_id: str
     event_type: BranchInfoType
-    event_data: dict[str, Any]
+    event_data: dict[str, object]
     timestamp: datetime = field(default_factory=datetime.now)
     priority: MessagePriority = MessagePriority.NORMAL
     requires_action: bool = False
@@ -94,6 +98,9 @@ class BranchInfoProtocol:
             collaboration_engine: Engine for agent collaboration
             repo_path: Path to git repository
             sync_strategy: Strategy for information synchronization
+        
+        Returns:
+            Description of return value
         """
         self.branch_manager = branch_manager
         self.collaboration_engine = collaboration_engine
@@ -127,7 +134,7 @@ class BranchInfoProtocol:
 
         # Background tasks
         self._running = False
-        self._sync_task: asyncio.Task[Any] | None = None
+        self._sync_task: asyncio.Task[object] | None = None
 
     async def start(self) -> None:
         """Start the branch info protocol."""
@@ -170,8 +177,8 @@ class BranchInfoProtocol:
             branch_name=branch_name,
             agent_id=agent_id,
             base_branch=base_branch,
-            created_at=datetime.now(),
-            last_updated=datetime.now(),
+            created_at=datetime.now(UTC),
+            last_updated=datetime.now(UTC),
             work_items=work_items or [],
         )
 
@@ -195,8 +202,8 @@ class BranchInfoProtocol:
         self,
         branch_name: str,
         info_type: BranchInfoType,
-        update_data: dict[str, Any],
-        requires_immediate_sync: bool = False,
+        update_data: dict[str, object],
+        requires_immediate_sync: bool = False,  # noqa: FBT001
     ) -> None:
         """Update branch information and potentially trigger sync.
 
@@ -211,7 +218,7 @@ class BranchInfoProtocol:
             return
 
         branch_info = self.branch_info[branch_name]
-        branch_info.last_updated = datetime.now()
+        branch_info.last_updated = datetime.now(UTC)
 
         # Apply updates based on type
         if info_type == BranchInfoType.FILE_CHANGES:
@@ -344,7 +351,7 @@ class BranchInfoProtocol:
 
         return conflicts
 
-    async def prepare_merge_report(self, branch_name: str) -> dict[str, Any]:
+    async def prepare_merge_report(self, branch_name: str) -> dict[str, object]:
         """Prepare a comprehensive merge readiness report.
 
         Args:
@@ -414,12 +421,12 @@ class BranchInfoProtocol:
         self,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: dict[str, Any],
+        event_data: dict[str, object],
     ) -> None:
         """Share branch information with subscribed agents."""
         # Create sync event
         event = BranchSyncEvent(
-            event_id=f"sync_{branch_info.branch_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            event_id=f"sync_{branch_info.branch_name}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
             branch_name=branch_info.branch_name,
             agent_id=branch_info.agent_id,
             event_type=info_type,
@@ -473,7 +480,7 @@ class BranchInfoProtocol:
         agent_id: str,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: dict[str, Any],
+        event_data: dict[str, object],
     ) -> None:
         """Send branch update to specific agent."""
         message_type = MessageType.STATUS_UPDATE
@@ -505,7 +512,8 @@ class BranchInfoProtocol:
             ],
         )
 
-    def _determine_priority(self, info_type: BranchInfoType) -> MessagePriority:
+    @staticmethod
+    def _determine_priority( info_type: BranchInfoType) -> MessagePriority:
         """Determine message priority based on info type."""
         priority_map = {
             BranchInfoType.CONFLICT_INFO: MessagePriority.HIGH,
@@ -518,7 +526,8 @@ class BranchInfoProtocol:
         }
         return priority_map.get(info_type, MessagePriority.NORMAL)
 
-    def _calculate_relevance(self, info_type: BranchInfoType) -> float:
+    @staticmethod
+    def _calculate_relevance(info_type: BranchInfoType) -> float:
         """Calculate relevance score for knowledge sharing."""
         relevance_map = {
             BranchInfoType.CONFLICT_INFO: 1.0,
@@ -543,7 +552,7 @@ class BranchInfoProtocol:
                 # Sync all active branches
                 for branch_info in self.branch_info.values():
                     # Check if branch needs sync
-                    time_since_update = datetime.now() - branch_info.last_updated
+                    time_since_update = datetime.now(UTC) - branch_info.last_updated
 
                     if self.sync_strategy == SyncStrategy.SMART:
                         # Smart sync based on activity
@@ -565,10 +574,10 @@ class BranchInfoProtocol:
                             {"sync_type": "periodic"},
                         )
 
-            except Exception as e:
-                logger.exception("Error in periodic sync: %s", e)
+            except Exception:
+                logger.exception("Error in periodic sync")
 
-    def get_protocol_summary(self) -> dict[str, Any]:
+    def get_protocol_summary(self) -> dict[str, object]:
         """Get comprehensive summary of protocol activity."""
         active_branches = [
             {

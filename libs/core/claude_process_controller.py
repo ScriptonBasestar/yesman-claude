@@ -1,14 +1,18 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Claude process control and lifecycle management."""
 
 import logging
 import time
-from typing import Any
+from typing import object
 
 
 class ClaudeProcessController:
     """Controls Claude process lifecycle (start, stop, restart)."""
 
-    def __init__(self, session_manager: Any, status_manager: Any) -> None:
+    def __init__(self, session_manager: object, status_manager: object) -> None:
         self.session_manager = session_manager
         self.status_manager = status_manager
         self.selected_model = "default"
@@ -40,7 +44,7 @@ class ClaudeProcessController:
 
         except Exception as e:
             self.status_manager.update_status(f"[red]Failed to restart Claude pane: {e}[/]")
-            self.logger.exception(f"Failed to restart Claude pane: {e}")
+            self.logger.exception("Failed to restart Claude pane")  # noqa: G004
             return False
 
     def _terminate_claude_process(self) -> None:
@@ -67,7 +71,7 @@ class ClaudeProcessController:
                     # Check if claude is still running by checking the command
                     cmd = self.session_manager.get_current_command()
                     if "claude" not in cmd.lower():
-                        self.logger.info(f"Claude process terminated after {attempt + 1} attempts")
+                        self.logger.info(f"Claude process terminated after {attempt + 1} attempts")  # noqa: G004
                         break
                 except Exception:
                     # If we can't get the command, assume it's terminated
@@ -82,7 +86,7 @@ class ClaudeProcessController:
             time.sleep(0.2)
 
         except Exception as e:
-            self.logger.warning(f"Error during claude process termination: {e}")
+            self.logger.warning(f"Error during claude process termination: {e}")  # noqa: G004
 
     def _get_claude_command(self) -> str:
         """Get claude command based on selected model."""

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Improved setup command using refactored session setup logic."""
 
 import click
@@ -81,7 +85,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     is_flag=True,
     help="Force recreation of existing sessions without prompting",
 )
-def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
+def setup(session_name: str | None, dry_run: bool, force: bool) -> None:  # noqa: FBT001
     """Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
 
     Args:

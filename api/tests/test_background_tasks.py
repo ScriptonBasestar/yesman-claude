@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Test background tasks and WebSocket updates."""
 
 import asyncio
 import contextlib
 import json
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 
 import requests
 import websockets
@@ -52,7 +56,7 @@ async def monitor_updates(duration: int = 60) -> None:
                             json.dumps(
                                 {
                                     "type": "pong",
-                                    "timestamp": datetime.now().isoformat(),
+                                    "timestamp": datetime.now(UTC).isoformat(),
                                 }
                             )
                         )

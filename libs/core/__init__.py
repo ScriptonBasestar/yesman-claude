@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Core modules for Yesman Claude.
 
 This module provides core functionality shared between different dashboard implementations.

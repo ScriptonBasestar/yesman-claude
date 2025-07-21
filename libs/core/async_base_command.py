@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Async-capable base command class for long-running operations."""
 
 import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Coroutine
-from typing import Any
+from typing import object
 
 from .base_command import BaseCommand, CommandError
 
@@ -18,7 +22,8 @@ class AsyncBaseCommand(BaseCommand, ABC):
         self._loop = None
 
     @abstractmethod
-    async def execute_async(self, **kwargs) -> dict:
+    @staticmethod
+    async def execute_async(**kwargs) -> dict:
         """Async version of execute method - must be implemented by subclasses."""
 
     def execute(self, **kwargs) -> dict:
@@ -41,11 +46,12 @@ class AsyncBaseCommand(BaseCommand, ABC):
             msg = f"Async command execution failed: {e}"
             raise CommandError(msg) from e
 
-    async def sleep(self, duration: float) -> None:
+    @staticmethod
+    async def sleep( duration: float) -> None:
         """Async sleep wrapper for better concurrency."""
         await asyncio.sleep(duration)
 
-    async def run_with_interval(self, async_func: Callable[[], Coroutine[Any, Any, None]], interval: float, max_iterations: int | None = None) -> None:
+    async def run_with_interval(self, async_func: Callable[[], Coroutine[object, object, None]], interval: float, max_iterations: int | None = None) -> None:
         """Run an async function repeatedly with specified interval."""
         self._running = True
         iterations = 0
@@ -64,7 +70,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
             self._running = False
             raise
         except Exception as e:
-            self.logger.exception(f"Error in async loop: {e}")
+            self.logger.exception("Error in async loop")  # noqa: G004
             self._running = False
             msg = f"Async operation failed: {e}"
             raise CommandError(msg) from e
@@ -95,7 +101,7 @@ class AsyncMonitoringMixin:
     stop: Callable[[], None]
     run_with_interval: Callable
 
-    async def start_monitoring(self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None) -> None:
+    async def start_monitoring(self, update_func: Callable[[], Coroutine[object, object, None]] | None = None) -> None:
         """Start monitoring with regular updates."""
         if not isinstance(self, AsyncBaseCommand):
             msg = "AsyncMonitoringMixin requires AsyncBaseCommand"
@@ -109,7 +115,8 @@ class AsyncMonitoringMixin:
             self.print_info("\n📊 Monitoring stopped by user")
             self.stop()
 
-    async def update_monitoring_data(self) -> None:
+    @staticmethod
+    async def update_monitoring_data() -> None:
         """Override this method to implement specific monitoring logic."""
 
     def set_update_interval(self, interval: float) -> None:
@@ -133,7 +140,7 @@ class AsyncProgressMixin:
     print_success: Callable[[str], None]
     print_error: Callable[[str], None]
 
-    async def with_progress(self, async_func: Callable[[], Coroutine[Any, Any, Any]], total_steps: int, description: str = "Processing") -> Any:
+    async def with_progress(self, async_func: Callable[[], Coroutine[object, object, object]], total_steps: int, description: str = "Processing") -> Any:
         """Execute async function with progress tracking."""
         self._progress_total = total_steps
         self._progress_current = 0
@@ -180,7 +187,7 @@ class AsyncRetryMixin:
 
     async def with_retry(
         self,
-        async_func: Callable[[], Coroutine[Any, Any, Any]],
+        async_func: Callable[[], Coroutine[object, object, object]],
         max_retries: int | None = None,
         retry_delay: float | None = None,
         backoff_multiplier: float | None = None,

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import pytest
 
 from libs.dashboard import KeyboardNavigationManager, NavigationContext
@@ -8,7 +12,8 @@ class TestKeyboardNavigation:
     """Tests for keyboard navigation system."""
 
     @pytest.fixture
-    def keyboard_manager(self) -> KeyboardNavigationManager:
+    @staticmethod
+    def keyboard_manager() -> KeyboardNavigationManager:
         """Create KeyboardNavigationManager instance."""
         manager = KeyboardNavigationManager()
         yield manager
@@ -16,7 +21,8 @@ class TestKeyboardNavigation:
         manager.actions.clear()
         manager.bindings.clear()
 
-    def test_keyboard_navigation(self, keyboard_manager: KeyboardNavigationManager) -> None:
+    @staticmethod
+    def test_keyboard_navigation(keyboard_manager: KeyboardNavigationManager) -> None:
         """Test 4: Keyboard navigation system."""
         # Test action registration
         test_called = False

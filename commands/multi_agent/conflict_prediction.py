@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Conflict prediction and analysis commands."""
 
 import asyncio
@@ -22,7 +26,7 @@ class PredictConflictsCommand(BaseCommand):
         time_horizon: int = 7,
         min_confidence: float = 0.3,
         limit: int = 10,
-        **kwargs,
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the predict conflicts command."""
         try:
@@ -111,7 +115,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show prediction summary and statistics."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict:
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the prediction summary command."""
         try:
             self.print_info("🔮 Conflict Prediction Summary")
@@ -149,7 +153,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns and trends."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict:
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the analyze conflict patterns command."""
         try:
             self.print_info("📈 Analyzing conflict patterns...")

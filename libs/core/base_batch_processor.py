@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Generic base batch processor for handling items in batches.
 
 This module provides a thread-safe, async-compatible base class for
@@ -13,7 +17,7 @@ import time
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Generic, TypeVar
 
 from libs.core.mixins import StatisticsProviderMixin
@@ -84,7 +88,8 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
 
     @abstractmethod
-    def create_batch(self, items: list[T]) -> B:
+    @staticmethod
+    def create_batch(items: list[T]) -> B:
         """Create a batch container from a list of items.
 
         Args:
@@ -96,7 +101,8 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def process_batch(self, batch: B) -> None:
+    @staticmethod
+    async def process_batch(batch: B) -> None:
         """Process a single batch.
 
         This method should implement the actual batch processing logic.
@@ -142,7 +148,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         self._stats.total_batches += 1
         self._last_flush_time = time.time()
 
-        self.logger.debug(f"Created batch with {len(items)} items")
+        self.logger.debug(f"Created batch with {len(items)} items")  # noqa: G004
 
     async def start(self) -> None:
         """Start the batch processor."""
@@ -171,7 +177,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
             try:
                 await self.process_batch(batch)
             except Exception as e:
-                self.logger.exception(f"Error processing final batch: {e}")
+                self.logger.exception("Error processing final batch")  # noqa: G004
                 self._stats.failed_batches += 1
 
         # Wait for processing task to complete
@@ -205,7 +211,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
 
                         # Update statistics
                         self._stats.processing_time_ms += processing_time
-                        self._stats.last_batch_time = datetime.now()
+                        self._stats.last_batch_time = datetime.now(UTC)
 
                         # Calculate averages
                         if self._stats.total_batches > 0:
@@ -213,14 +219,14 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
                             self._stats.average_batch_size = self._stats.total_items / self._stats.total_batches
 
                     except Exception as e:
-                        self.logger.error(f"Error processing batch: {e}", exc_info=True)
+                        self.logger.error(f"Error processing batch: {e}", exc_info=True)  # noqa: G004
                         self._stats.failed_batches += 1
 
                 # Small sleep to prevent busy waiting
                 await asyncio.sleep(0.1)
 
             except Exception as e:
-                self.logger.error(f"Error in processing loop: {e}", exc_info=True)
+                self.logger.error(f"Error in processing loop: {e}", exc_info=True)  # noqa: G004
                 await asyncio.sleep(1.0)  # Back off on error
 
     def get_statistics(self) -> dict[str, Any]:

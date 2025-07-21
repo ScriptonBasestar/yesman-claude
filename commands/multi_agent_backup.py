@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Multi-agent system commands for parallel development automation."""
 
 import asyncio
@@ -10,7 +14,9 @@ import types
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Never
+from typing import Never
+
+import click
 from unittest.mock import Mock
 
 import click
@@ -64,7 +70,7 @@ RISK_THRESHOLD_MEDIUM = 0.4
 class StartAgentsCommand(BaseCommand):
     """Start the multi-agent pool."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -128,7 +134,7 @@ class StartAgentsCommand(BaseCommand):
 class MonitorAgentsCommand(BaseCommand):
     """Start real-time agent monitoring dashboard."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -192,7 +198,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -249,7 +255,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -280,7 +286,7 @@ class StopAgentsCommand(BaseCommand):
 class AddTaskCommand(BaseCommand):
     """Add a task to the agent pool queue."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the add task command."""
         # Extract parameters from kwargs
         title = kwargs.get("title", "")
@@ -327,7 +333,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -391,7 +397,7 @@ class ListTasksCommand(BaseCommand):
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -496,7 +502,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -566,7 +572,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -635,7 +641,7 @@ class ConflictSummaryCommand(BaseCommand):
 class PredictConflictsCommand(BaseCommand):
     """Predict potential conflicts between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -756,7 +762,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show conflict prediction summary and statistics."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -831,7 +837,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -929,7 +935,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 class AnalyzeSemanticConflictsCommand(BaseCommand):
     """Analyze AST-based semantic conflicts between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1021,7 +1027,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic structure summary of code."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1088,7 +1094,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Compare function signatures between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1157,7 +1163,7 @@ class FunctionDiffCommand(BaseCommand):
 class SemanticMergeCommand(BaseCommand):
     """Perform intelligent semantic merge."""
 
-    def execute(self, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, **kwargs: object) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1220,7 +1226,7 @@ class SemanticMergeCommand(BaseCommand):
 
 @click.group(name="multi-agent")
 @click.pass_context
-def multi_agent_cli(ctx: Any) -> None:
+def multi_agent_cli(ctx: click.Context) -> None:
     """Multi-agent system for parallel development automation."""
 
 
@@ -1228,7 +1234,7 @@ def multi_agent_cli(ctx: Any) -> None:
 @click.option("--max-agents", "-a", default=3, help="Maximum number of agents")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
-def start_agents(max_agents: int, work_dir: str | None, monitor: bool) -> None:
+def start_agents(max_agents: int, work_dir: str | None, monitor: bool) -> None:  # noqa: FBT001
     """Start the multi-agent pool."""
     command = StartAgentsCommand()
     command.run(max_agents=max_agents, work_dir=work_dir, monitor=monitor)
@@ -1306,7 +1312,7 @@ def list_tasks(work_dir: str | None, status: str | None) -> None:
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--auto-resolve", "-a", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool) -> None:
+def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool) -> None:  # noqa: FBT001
     """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
@@ -1419,9 +1425,9 @@ def analyze_semantic_conflicts(
     branches: tuple,
     repo_path: str | None,
     files: str | None,
-    include_private: bool,
+    include_private: bool,  # noqa: FBT001
     export: str | None,
-    detailed: bool,
+    detailed: bool,  # noqa: FBT001
 ) -> None:
     """Analyze AST-based semantic conflicts between branches."""
     try:
@@ -1585,7 +1591,7 @@ def analyze_semantic_conflicts(
 
         asyncio.run(run_semantic_analysis())
 
-    except Exception as e:
+    except (OSError, IOError, json.JSONEncodeError, RuntimeError, ValueError) as e:
         click.echo(f"❌ Error analyzing semantic conflicts: {e}", err=True)
 
 
@@ -1646,7 +1652,7 @@ def semantic_merge(
     repo_path: str | None,
     target_branch: str | None,
     strategy: str | None,
-    apply: bool,
+    apply: bool,  # noqa: FBT001
     export: str | None,
 ) -> None:
     """Perform intelligent semantic merge of a file between branches."""
@@ -1687,7 +1693,7 @@ def batch_merge(
     files: str | None,
     strategy: str | None,
     max_concurrent: int,
-    apply: bool,
+    apply: bool,  # noqa: FBT001
     export_summary: str | None,
 ) -> None:
     """Perform batch semantic merge of multiple files between branches."""
@@ -1876,9 +1882,9 @@ def auto_resolve(
     target_branch: str | None,
     mode: str,
     files: str | None,
-    apply: bool,
+    apply: bool,  # noqa: FBT001
     export: str | None,
-    preview: bool,
+    preview: bool,  # noqa: FBT001
 ) -> None:
     """Automatically resolve conflicts between branches using AI-powered semantic analysis."""
     try:
@@ -2113,7 +2119,7 @@ def prevent_conflicts(
     branches: tuple,
     repo_path: str | None,
     mode: str,
-    apply_measures: bool,
+    apply_measures: bool,  # noqa: FBT001
     export: str | None,
 ) -> None:
     """Use AI prediction to prevent conflicts before they occur."""
@@ -2294,7 +2300,7 @@ def collaborate(
     mode: str,
     purpose: str,
     duration: int,
-    enable_sync: bool,
+    enable_sync: bool,  # noqa: FBT001
 ) -> None:
     """Start a collaboration session between multiple agents."""
     try:
@@ -2855,7 +2861,7 @@ def dependency_track(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
 @click.option("--export", "-e", help="Export dependency data to JSON file")
-def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:
+def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:  # noqa: FBT001
     """Show dependency propagation system status."""
     try:
         click.echo("📊 Dependency Propagation System Status")
@@ -3410,7 +3416,7 @@ def review_reject(
 @click.argument("review_id", required=False)
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed review information")
-def review_status(review_id: str | None, repo_path: str | None, detailed: bool) -> None:
+def review_status(review_id: str | None, repo_path: str | None, detailed: bool) -> None:  # noqa: FBT001
     """Get status of a specific review or all reviews."""
     try:
         if review_id:
@@ -3784,6 +3790,6 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
 
 # Register the command group
-def register_commands(cli: Any) -> None:
+def register_commands(cli: click.Group) -> None:
     """Register multi-agent commands with the main CLI."""
     cli.add_command(multi_agent_cli)

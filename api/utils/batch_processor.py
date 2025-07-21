@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """WebSocket message batch processor for optimized real-time updates."""
 
 import asyncio
@@ -277,7 +281,8 @@ class WebSocketBatchProcessor:
 
         return optimized
 
-    def _combine_update_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
+    @staticmethod
+    def _combine_update_messages( messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple update messages into a single message."""
         if not messages:
             return {}
@@ -302,7 +307,8 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def _combine_log_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
+    @staticmethod
+    def _combine_log_messages(messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple log messages into a batched log message."""
         if not messages:
             return {}
@@ -325,7 +331,8 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def _get_queue_memory_size(self, queue: deque) -> int:
+    @staticmethod
+    def _get_queue_memory_size(queue: deque) -> int:
         """Estimate memory usage of a message queue."""
         return sum(len(json.dumps(msg)) for msg in queue)
 

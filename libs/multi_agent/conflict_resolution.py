@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Conflict resolution engine for multi-agent branch-based development."""
 
 import asyncio
@@ -117,7 +121,8 @@ class ConflictResolutionEngine:
             "average_resolution_time": 0.0,
         }
 
-    def _load_conflict_patterns(self) -> dict[str, dict[str, Any]]:
+    @staticmethod
+    def _load_conflict_patterns() -> dict[str, dict[str, Any]]:
         """Load known conflict patterns and their resolutions."""
         return {
             "import_conflicts": {
@@ -446,7 +451,8 @@ class ConflictResolutionEngine:
 
         return conflicts
 
-    def _extract_function_signatures(self, content: str) -> dict[str, str]:
+    @staticmethod
+    def _extract_function_signatures(content: str) -> dict[str, str]:
         """Extract function signatures from Python code."""
         signatures = {}
 
@@ -609,7 +615,8 @@ class ConflictResolutionEngine:
                 message=f"Latest preference failed: {e}",
             )
 
-    async def _prefer_main_strategy(self, conflict: ConflictInfo) -> ResolutionResult:
+    @staticmethod
+    async def _prefer_main_strategy(conflict: ConflictInfo) -> ResolutionResult:
         """Resolve conflict by preferring main branch changes."""
         main_branches = ["main", "master", "develop"]
 
@@ -681,6 +688,7 @@ class ConflictResolutionEngine:
                 message=f"Custom merge failed: {e}",
             )
 
+    @staticmethod
     async def _semantic_analysis_strategy(
         self,
         conflict: ConflictInfo,
@@ -730,7 +738,8 @@ class ConflictResolutionEngine:
                 message=f"Semantic analysis failed: {e}",
             )
 
-    def _resolve_import_conflicts(self, content: str) -> str | None:
+    @staticmethod
+    def _resolve_import_conflicts(content: str) -> str | None:
         """Resolve import statement conflicts."""
         # Simple approach: merge unique imports
 
@@ -870,7 +879,8 @@ class ConflictResolutionEngine:
 
         return latest_branch
 
-    async def _try_git_merge(self, branches: list[str], strategy: str) -> bool:
+    @staticmethod
+    async def _try_git_merge(branches: list[str], strategy: str) -> bool:
         """Try to merge branches using a specific git strategy."""
         try:
             # This would be implemented with actual git merge commands

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Claude status and callback management."""
 
 import datetime
@@ -41,13 +45,13 @@ class ClaudeStatusManager:
     def record_response(self, prompt_type: str, response: str, content: str) -> None:
         """Record auto-response in history."""
         record = {
-            "timestamp": datetime.datetime.now().isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             "prompt_type": prompt_type,
             "response": response,
             "content_snippet": content[-200:],  # Last 200 chars for context
         }
         self.response_history.append(record)
-        self.logger.info(f"Auto-response recorded: {prompt_type} -> {response}")
+        self.logger.info(f"Auto-response recorded: {prompt_type} -> {response}")  # noqa: G004
 
         # Keep only last 100 responses
         if len(self.response_history) > 100:
@@ -68,7 +72,7 @@ class ClaudeStatusManager:
             log_path = ensure_log_directory(Path(log_base))
             capture_dir = ensure_log_directory(log_path / "captures")
 
-            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            ts = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S")
             pane_id = pane_id or "unknown"
             filename = f"capture_{self.session_name}_{pane_id}_{ts}.txt"
             file_path = capture_dir / filename
@@ -76,9 +80,9 @@ class ClaudeStatusManager:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-            self.logger.info(f"Saved pane capture to {file_path}")
+            self.logger.info(f"Saved pane capture to {file_path}")  # noqa: G004
             return str(file_path)
 
         except Exception as e:
-            self.logger.exception(f"Error saving capture to file: {e}")
+            self.logger.exception("Error saving capture to file")  # noqa: G004
             return ""

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Agent pool management commands."""
 
 import asyncio
@@ -21,8 +25,8 @@ class StartAgentsCommand(BaseCommand):
         self,
         max_agents: int = 3,
         work_dir: str | None = None,
-        monitor: bool = False,
-        **kwargs,
+        monitor: bool = False,  # noqa: FBT001
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the start agents command."""
         try:
@@ -79,7 +83,7 @@ class MonitorAgentsCommand(BaseCommand):
         work_dir: str | None = None,
         duration: float | None = None,
         refresh: float = 1.0,
-        **kwargs,
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the monitor agents command."""
         try:
@@ -139,7 +143,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, work_dir: str | None = None, **kwargs) -> dict:
+    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the status command."""
         try:
             # Initialize agent pool
@@ -192,7 +196,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, work_dir: str | None = None, **kwargs) -> dict:
+    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the stop agents command."""
         try:
             self.print_info("🛑 Stopping multi-agent pool...")
@@ -229,7 +233,7 @@ class AddTaskCommand(BaseCommand):
         complexity: int = 5,
         timeout: int = 300,
         description: str | None = None,
-        **kwargs,
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the add task command."""
         try:
@@ -275,7 +279,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:
+    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the list tasks command."""
         try:
             pool = AgentPool(work_dir=work_dir)

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dashboard Integration Tests.
 
 Tests the real-time dashboard integration with CLI, API, and automation systems.
@@ -7,7 +11,7 @@ Validates that dashboard updates reflect system state accurately across componen
 
 import asyncio
 import time
-from typing import Any, Never
+from typing import object, Never
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -175,7 +179,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         # Track update events
         update_events = []
 
-        async def mock_update_handler(event_type: str, data: Any) -> None:
+        async def mock_update_handler(event_type: str, data: object) -> None:
             update_events.append({"type": event_type, "data": data, "timestamp": time.time()})
 
         # Register update handler
@@ -254,7 +258,8 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
-    async def _start_mock_dashboard(self):
+    @staticmethod
+    async def _start_mock_dashboard():
         """Start mock dashboard for testing."""
         # Create mock dashboard that simulates real behavior
         dashboard = Mock()
@@ -275,13 +280,13 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         }
 
         # Add helper methods for testing
-        async def add_session(session_data: dict[str, Any]) -> None:
+        async def add_session(session_data: dict[str, object]) -> None:
             dashboard._state["sessions"].append(session_data)  # noqa: SLF001
 
-        async def add_automation_project(project_data: dict[str, Any]) -> None:
+        async def add_automation_project(project_data: dict[str, object]) -> None:
             dashboard._state["automation"]["monitored_projects"].append(project_data)  # noqa: SLF001
 
-        async def add_performance_metric(metric_name: str, metric_data: Any) -> None:
+        async def add_performance_metric(metric_name: str, metric_data: object) -> None:
             dashboard._state["performance_metrics"][metric_name] = metric_data  # noqa: SLF001
 
         dashboard.add_session = add_session
@@ -296,13 +301,15 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
         return dashboard
 
-    async def _stop_mock_dashboard(self, dashboard: Any) -> None:
+    @staticmethod
+    async def _stop_mock_dashboard(dashboard: object) -> None:
         """Stop mock dashboard."""
         # Cleanup mock dashboard
         if hasattr(dashboard, "cleanup"):
             await dashboard.cleanup()
 
-    async def _create_mock_websocket_client(self, dashboard: Any, client_id: str) -> Mock:
+    @staticmethod
+    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:  # noqa: ARG002
         """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id
@@ -392,7 +399,8 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
 
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
-    async def _start_mock_dashboard(self):
+    @staticmethod
+    async def _start_mock_dashboard():
         """Start mock dashboard - reuse from previous class."""
         dashboard = Mock()
         dashboard._state = {  # noqa: SLF001
@@ -407,7 +415,8 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         dashboard.get_current_state = get_state
         return dashboard
 
-    async def _stop_mock_dashboard(self, dashboard: Any) -> None:
+    @staticmethod
+    async def _stop_mock_dashboard(dashboard: object) -> None:
         """Stop mock dashboard - reuse from previous class."""
 
 
@@ -475,7 +484,8 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
 
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
-    async def _start_mock_dashboard(self):
+    @staticmethod
+    async def _start_mock_dashboard():
         """Start mock dashboard - reuse pattern."""
         dashboard = Mock()
         dashboard._state = {  # noqa: SLF001
@@ -490,5 +500,6 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         dashboard.get_current_state = get_state
         return dashboard
 
-    async def _stop_mock_dashboard(self, dashboard: Any) -> None:
+    @staticmethod
+    async def _stop_mock_dashboard(dashboard: object) -> None:
         """Stop mock dashboard."""

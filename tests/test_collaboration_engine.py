@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for CollaborationEngine multi-agent coordination system."""
 
 from collections import deque
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import Mock
 
 import pytest
@@ -25,7 +29,8 @@ from libs.multi_agent.types import AgentState
 class TestCollaborationMessage:
     """Test cases for CollaborationMessage."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test CollaborationMessage initialization."""
         message = CollaborationMessage(
             message_id="test-msg-1",
@@ -49,7 +54,8 @@ class TestCollaborationMessage:
         assert message.acknowledged is False
         assert isinstance(message.created_at, datetime)
 
-    def test_is_expired(self) -> None:
+    @staticmethod
+    def test_is_expired() -> None:
         """Test message expiration check."""
         # Non-expiring message
         message1 = CollaborationMessage(
@@ -72,7 +78,7 @@ class TestCollaborationMessage:
             priority=MessagePriority.NORMAL,
             subject="Test",
             content={},
-            expires_at=datetime.now() - timedelta(seconds=1),
+            expires_at=datetime.now(UTC) - timedelta(seconds=1),
         )
         assert message2.is_expired() is True
 
@@ -85,7 +91,7 @@ class TestCollaborationMessage:
             priority=MessagePriority.NORMAL,
             subject="Test",
             content={},
-            expires_at=datetime.now() + timedelta(hours=1),
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
         )
         assert message3.is_expired() is False
 
@@ -93,7 +99,8 @@ class TestCollaborationMessage:
 class TestSharedKnowledge:
     """Test cases for SharedKnowledge."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test SharedKnowledge initialization."""
         knowledge = SharedKnowledge(
             knowledge_id="know-1",
@@ -118,7 +125,8 @@ class TestSharedKnowledge:
 class TestCollaborationSession:
     """Test cases for CollaborationSession."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test CollaborationSession initialization."""
         session = CollaborationSession(
             session_id="session-1",
@@ -143,7 +151,8 @@ class TestCollaborationEngine:
     """Test cases for CollaborationEngine."""
 
     @pytest.fixture
-    def mock_agent_pool(self) -> Mock:
+    @staticmethod
+    def mock_agent_pool() -> Mock:
         """Create mock agent pool."""
         pool = Mock(spec=AgentPool)
         pool.agents = {
@@ -154,21 +163,25 @@ class TestCollaborationEngine:
         return pool
 
     @pytest.fixture
-    def mock_branch_manager(self) -> Mock:
+    @staticmethod
+    def mock_branch_manager() -> Mock:
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
-    def mock_conflict_engine(self) -> Mock:
+    @staticmethod
+    def mock_conflict_engine() -> Mock:
         """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
-    def mock_semantic_analyzer(self) -> Mock:
+    @staticmethod
+    def mock_semantic_analyzer() -> Mock:
         """Create mock semantic analyzer."""
         return Mock(spec=SemanticAnalyzer)
 
     @pytest.fixture
+    @staticmethod
     def engine(
         self,
         mock_agent_pool: Mock,
@@ -184,6 +197,7 @@ class TestCollaborationEngine:
             semantic_analyzer=mock_semantic_analyzer,
         )
 
+    @staticmethod
     def test_init(
         self,
         engine: CollaborationEngine,
@@ -212,7 +226,8 @@ class TestCollaborationEngine:
         assert engine._tasks == []  # noqa: SLF001
 
     @pytest.mark.asyncio
-    async def test_start_stop(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_start_stop(engine: CollaborationEngine) -> None:
         """Test starting and stopping the engine."""
         # Start engine
         await engine.start()
@@ -225,7 +240,8 @@ class TestCollaborationEngine:
         assert len(engine._tasks) == 0  # noqa: SLF001
 
     @pytest.mark.asyncio
-    async def test_send_message_unicast(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_send_message_unicast(engine: CollaborationEngine) -> None:
         """Test sending a unicast message."""
         message_id = await engine.send_message(
             sender_id="agent-1",
@@ -253,7 +269,8 @@ class TestCollaborationEngine:
         assert queued_message.requires_ack is True
 
     @pytest.mark.asyncio
-    async def test_send_message_broadcast(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_send_message_broadcast(engine: CollaborationEngine) -> None:
         """Test sending a broadcast message."""
         await engine.send_message(
             sender_id="agent-1",
@@ -270,7 +287,8 @@ class TestCollaborationEngine:
         assert "agent-1" not in engine.message_queues or len(engine.message_queues["agent-1"]) == 0
 
     @pytest.mark.asyncio
-    async def test_receive_messages(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_receive_messages(engine: CollaborationEngine) -> None:
         """Test receiving messages for an agent."""
         # Queue some messages
         await engine.send_message(
@@ -319,7 +337,8 @@ class TestCollaborationEngine:
         assert len(engine.message_queues["agent-2"]) == 1  # One message left
 
     @pytest.mark.asyncio
-    async def test_acknowledge_message(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_acknowledge_message(engine: CollaborationEngine) -> None:
         """Test message acknowledgment."""
         message_id = await engine.send_message(
             sender_id="agent-1",
@@ -341,7 +360,8 @@ class TestCollaborationEngine:
         assert message.acknowledged is True
 
     @pytest.mark.asyncio
-    async def test_share_knowledge(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_share_knowledge(engine: CollaborationEngine) -> None:
         """Test knowledge sharing."""
         knowledge_id = await engine.share_knowledge(
             contributor_id="agent-1",
@@ -377,7 +397,8 @@ class TestCollaborationEngine:
         assert len(engine.message_queues["agent-3"]) == 1
 
     @pytest.mark.asyncio
-    async def test_access_knowledge_by_id(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_access_knowledge_by_id(engine: CollaborationEngine) -> None:
         """Test accessing specific knowledge by ID."""
         # Share some knowledge
         knowledge_id = await engine.share_knowledge(
@@ -395,7 +416,8 @@ class TestCollaborationEngine:
         assert engine.collaboration_stats["knowledge_accessed"] == 1
 
     @pytest.mark.asyncio
-    async def test_access_knowledge_by_tags(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_access_knowledge_by_tags(engine: CollaborationEngine) -> None:
         """Test accessing knowledge by tags."""
         # Share multiple knowledge items
         await engine.share_knowledge(
@@ -435,7 +457,8 @@ class TestCollaborationEngine:
         assert len(results) == 2
 
     @pytest.mark.asyncio
-    async def test_access_knowledge_by_type(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_access_knowledge_by_type(engine: CollaborationEngine) -> None:
         """Test accessing knowledge by type."""
         # Share different types of knowledge
         await engine.share_knowledge(
@@ -464,7 +487,8 @@ class TestCollaborationEngine:
         assert all(k.knowledge_type == "function_signature" for k in results)
 
     @pytest.mark.asyncio
-    async def test_create_collaboration_session(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_create_collaboration_session(engine: CollaborationEngine) -> None:
         """Test creating a collaboration session."""
         session_id = await engine.create_collaboration_session(
             initiator_id="agent-1",
@@ -494,7 +518,8 @@ class TestCollaborationEngine:
         assert messages[0].requires_ack is True
 
     @pytest.mark.asyncio
-    async def test_update_session_context(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_update_session_context(engine: CollaborationEngine) -> None:
         """Test updating collaboration session context."""
         # Create session
         session_id = await engine.create_collaboration_session(
@@ -520,7 +545,8 @@ class TestCollaborationEngine:
         assert len(engine.message_queues["agent-3"]) == 2
 
     @pytest.mark.asyncio
-    async def test_add_session_decision(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_add_session_decision(engine: CollaborationEngine) -> None:
         """Test adding decisions to a session."""
         # Create session
         session_id = await engine.create_collaboration_session(
@@ -545,7 +571,8 @@ class TestCollaborationEngine:
         assert "timestamp" in session.decisions[0]
 
     @pytest.mark.asyncio
-    async def test_end_collaboration_session(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_end_collaboration_session(engine: CollaborationEngine) -> None:
         """Test ending a collaboration session."""
         # Create session
         session_id = await engine.create_collaboration_session(
@@ -570,7 +597,8 @@ class TestCollaborationEngine:
         assert historical_session.ended_at is not None
 
     @pytest.mark.asyncio
-    async def test_track_dependency_change(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_track_dependency_change(engine: CollaborationEngine) -> None:
         """Test tracking dependency changes."""
         await engine.track_dependency_change(
             file_path="module/api.py",
@@ -597,7 +625,8 @@ class TestCollaborationEngine:
         assert change_info["change_type"] == "function_signature"
 
     @pytest.mark.asyncio
-    async def test_request_help(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_request_help(engine: CollaborationEngine) -> None:
         """Test help request functionality."""
         # Setup agent with expertise
         engine.agent_pool.agents["agent-3"].expertise = ["algorithms", "optimization"]
@@ -620,7 +649,8 @@ class TestCollaborationEngine:
         assert messages[0].requires_ack is True
 
     @pytest.mark.asyncio
-    async def test_initiate_code_review(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_initiate_code_review(engine: CollaborationEngine) -> None:
         """Test code review initiation."""
         reviewers = await engine.initiate_code_review(
             author_id="agent-1",
@@ -639,7 +669,8 @@ class TestCollaborationEngine:
             assert any(msg.message_type == MessageType.REVIEW_REQUEST for msg in messages)
 
     @pytest.mark.asyncio
-    async def test_prevent_conflict_collaboratively(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_prevent_conflict_collaboratively(engine: CollaborationEngine) -> None:
         """Test collaborative conflict prevention."""
         # Setup agents with branches
         engine.agent_pool.agents["agent-1"].current_branch = "feature-a"
@@ -669,7 +700,8 @@ class TestCollaborationEngine:
         assert engine.collaboration_stats["conflicts_prevented"] == 1
         assert len(engine.shared_knowledge) > 0  # Knowledge was shared
 
-    def test_get_collaboration_summary(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    def test_get_collaboration_summary(engine: CollaborationEngine) -> None:
         """Test getting collaboration summary."""
         # Add some test data
         engine.collaboration_stats["messages_sent"] = 50
@@ -698,7 +730,8 @@ class TestCollaborationEngine:
         assert summary["knowledge_by_type"]["api_change"] == 1
 
     @pytest.mark.asyncio
-    async def test_message_expiration_handling(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_message_expiration_handling(engine: CollaborationEngine) -> None:
         """Test that expired messages are not delivered."""
         # Send an already expired message
         await engine.send_message(
@@ -715,7 +748,8 @@ class TestCollaborationEngine:
         assert len(messages) == 0  # Expired message should not be delivered
 
     @pytest.mark.asyncio
-    async def test_background_tasks_message_processor(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    async def test_background_tasks_message_processor(engine: CollaborationEngine) -> None:
         """Test message processor background task."""
         # Add expired acknowledgment
         expired_msg = CollaborationMessage(
@@ -726,7 +760,7 @@ class TestCollaborationEngine:
             priority=MessagePriority.HIGH,
             subject="Test",
             content={},
-            expires_at=datetime.now() - timedelta(seconds=1),
+            expires_at=datetime.now(UTC) - timedelta(seconds=1),
             requires_ack=True,
         )
         engine.pending_acknowledgments["expired-1"] = expired_msg
@@ -740,7 +774,8 @@ class TestCollaborationEngine:
         # Check that expired acknowledgment was removed
         assert "expired-1" not in engine.pending_acknowledgments
 
-    def test_count_knowledge_by_type(self, engine: CollaborationEngine) -> None:
+    @staticmethod
+    def test_count_knowledge_by_type(engine: CollaborationEngine) -> None:
         """Test knowledge counting by type."""
         engine.shared_knowledge = {
             "k1": Mock(knowledge_type="pattern"),

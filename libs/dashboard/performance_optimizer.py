@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Performance Optimizer.
 
 Comprehensive performance monitoring and optimization system for dashboard interfaces
@@ -17,7 +21,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from functools import wraps
-from typing import Any, Optional
+from typing import object, Optional
 
 import psutil
 
@@ -81,7 +85,7 @@ class PerformanceMetrics:
     # Timestamps
     timestamp: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary."""
         return {
             "cpu_usage": self.cpu_usage,
@@ -165,7 +169,7 @@ class PerformanceProfiler:
             name = operation_name or f"{func.__module__}.{func.__name__}"
 
             @wraps(func)
-            def wrapper(*args: Any, **kwargs: Any) -> Any:
+            def wrapper(*args: object, **kwargs: object) -> Any:
                 with self.measure(name):
                     return func(*args, **kwargs)
 
@@ -260,6 +264,7 @@ class PerformanceOptimizer:
         # System monitoring
         self.process = psutil.Process()
 
+    @staticmethod
     def _create_optimization_strategies(
         self,
     ) -> dict[OptimizationLevel, OptimizationStrategy]:
@@ -424,7 +429,8 @@ class PerformanceOptimizer:
             logger.exception("Error collecting metrics")
             return PerformanceMetrics()
 
-    def _get_cache_stats(self) -> dict[str, Any]:
+    @staticmethod
+    def _get_cache_stats() -> dict[str, object]:
         """Get cache statistics (placeholder for actual cache integration)."""
         # This would integrate with actual cache systems
         return {
@@ -433,12 +439,14 @@ class PerformanceOptimizer:
             "entries": 100,
         }
 
-    def _get_widget_count(self) -> int:
+    @staticmethod
+    def _get_widget_count() -> int:
         """Get current widget count (placeholder for actual integration)."""
         # This would integrate with dashboard widget system
         return 25  # Mock data
 
-    def _get_active_connections(self) -> int:
+    @staticmethod
+    def _get_active_connections() -> int:
         """Get active connection count (placeholder for actual integration)."""
         # This would integrate with web server or connection manager
         return 3  # Mock data
@@ -512,22 +520,26 @@ class PerformanceOptimizer:
         self.monitoring_interval = new_interval
         logger.debug("Update frequency optimized: %ss interval", new_interval)
 
-    def _optimize_caching(self, strategy: OptimizationStrategy) -> None:
+    @staticmethod
+    def _optimize_caching(strategy: OptimizationStrategy) -> None:  # noqa: ARG002
         """Optimize caching behavior."""
         # This would integrate with actual cache systems
         logger.debug("Caching optimization applied")
 
-    def _optimize_widget_count(self, strategy: OptimizationStrategy) -> None:
+    @staticmethod
+    def _optimize_widget_count(strategy: OptimizationStrategy) -> None:
         """Optimize widget count."""
         # This would integrate with widget management system
         logger.debug("Widget count limited to: %d", strategy.max_widget_count)
 
-    def _optimize_animations(self, strategy: OptimizationStrategy) -> None:
+    @staticmethod
+    def _optimize_animations(strategy: OptimizationStrategy) -> None:  # noqa: ARG002
         """Optimize animations."""
         # This would integrate with animation system
         logger.debug("Animations disabled for performance")
 
-    def _force_garbage_collection(self) -> None:
+    @staticmethod
+    def _force_garbage_collection() -> None:
         """Force garbage collection."""
         collected = gc.collect()
         logger.debug("Garbage collection forced: %d objects collected", collected)
@@ -548,7 +560,7 @@ class PerformanceOptimizer:
         with self.lock:
             return [metrics for metrics in self.metrics_history if metrics.timestamp >= cutoff_time]
 
-    def get_performance_report(self) -> dict[str, Any]:
+    def get_performance_report(self) -> dict[str, object]:
         """Generate comprehensive performance report."""
         current = self.get_current_metrics()
         history = self.get_metrics_history(5)
@@ -583,7 +595,8 @@ class PerformanceOptimizer:
             "history_count": len(history),
         }
 
-    def _generate_recommendations(self, current: PerformanceMetrics, history: list[PerformanceMetrics]) -> list[str]:
+    @staticmethod
+    def _generate_recommendations(current: PerformanceMetrics, history: list[PerformanceMetrics]) -> list[str]:
         """Generate performance recommendations."""
         recommendations = []
 
@@ -646,6 +659,9 @@ class AsyncPerformanceOptimizer:
         Args:
             monitoring_interval: Interval between measurements
             max_concurrent_tasks: Maximum concurrent optimization tasks
+        
+        Returns:
+            Description of return value
         """
         self.monitoring_interval = monitoring_interval
         self.semaphore = asyncio.Semaphore(max_concurrent_tasks)
@@ -743,7 +759,7 @@ class AsyncPerformanceOptimizer:
             level,
         )
 
-    async def get_performance_report(self) -> dict[str, Any]:
+    async def get_performance_report(self) -> dict[str, object]:
         """Get async performance report."""
         # For simplicity, delegate to sync implementation for now
         return self.optimizer.get_performance_report()

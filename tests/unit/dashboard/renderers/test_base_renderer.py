@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for BaseRenderer and related components."""
 
 from datetime import datetime
-from typing import Any
+from typing import object
 
 import pytest
 
@@ -17,10 +21,11 @@ from libs.dashboard.renderers.registry import RendererRegistry
 class TestRenderer(BaseRenderer):
     """Test implementation of BaseRenderer for testing."""
 
-    def render_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any] | None = None) -> str:
+    @staticmethod
+    def render_widget( widget_type: WidgetType, data: object, options: dict[str, object] | None = None) -> str:  # noqa: ARG002
         return f"<widget type='{widget_type.value}' data='{data}' />"
 
-    def render_layout(self, widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None) -> str:
+    def render_layout(self, widgets: list[dict[str, object]], layout_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
         rendered_widgets = []
         for widget in widgets:
             widget_html = self.render_widget(
@@ -31,7 +36,8 @@ class TestRenderer(BaseRenderer):
             rendered_widgets.append(widget_html)
         return f"<layout>{' '.join(rendered_widgets)}</layout>"
 
-    def render_container(self, content: Any, container_config: dict[str, Any] | None = None) -> str:
+    @staticmethod
+    def render_container(content: object, container_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
         return f"<container>{content}</container>"
 
 
@@ -49,7 +55,8 @@ class TestBaseRenderer:
         assert isinstance(self.renderer.theme, dict)
         assert "colors" in self.renderer.theme
 
-    def test_initialization_with_custom_theme(self) -> None:
+    @staticmethod
+    def test_initialization_with_custom_theme() -> None:
         """Test renderer initialization with custom theme."""
         custom_theme = {
             "colors": {"primary": "#FF0000"},
@@ -331,7 +338,8 @@ class TestRendererRegistry:
 class TestEnums:
     """Test cases for enum definitions."""
 
-    def test_render_format_enum(self) -> None:
+    @staticmethod
+    def test_render_format_enum() -> None:
         """Test RenderFormat enum."""
         assert RenderFormat.TUI.value == "tui"
         assert RenderFormat.WEB.value == "web"
@@ -339,7 +347,8 @@ class TestEnums:
         assert RenderFormat.JSON.value == "json"
         assert RenderFormat.MARKDOWN.value == "markdown"
 
-    def test_widget_type_enum(self) -> None:
+    @staticmethod
+    def test_widget_type_enum() -> None:
         """Test WidgetType enum."""
         assert WidgetType.SESSION_BROWSER.value == "session_browser"
         assert WidgetType.HEALTH_METER.value == "health_meter"
@@ -367,7 +376,8 @@ class TestEnums:
         for widget in expected_widgets:
             assert hasattr(WidgetType, widget)
 
-    def test_theme_color_enum(self) -> None:
+    @staticmethod
+    def test_theme_color_enum() -> None:
         """Test ThemeColor enum."""
         assert ThemeColor.PRIMARY.value == "primary"
         assert ThemeColor.SUCCESS.value == "success"

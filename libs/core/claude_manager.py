@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Claude manager for dashboard integration - Refactored.""" ""
 
 import logging
@@ -71,12 +75,13 @@ class DashboardController:
         """Start the controller."""
         # Re-initialize in case session was created after initialization
         if not self.claude_pane and not self.session_manager.initialize_session():
-            self.logger.error(f"Failed to initialize session '{self.session_name}'")
+            self.logger.error(f"Failed to initialize session '{self.session_name}'")  # noqa: G004
             return False
 
         if not self.claude_pane:
             self.logger.error(
-                f"No Claude pane found in session '{self.session_name}'. Make sure the session is running and Claude Code is started.",
+                "No Claude pane found in session '%s'. Make sure the session is running and Claude Code is started.",
+                self.session_name,
             )
             return False
 
@@ -94,7 +99,7 @@ class DashboardController:
         """Set the selected model."""
         self.process_controller.set_model(model)
 
-    def set_auto_next(self, enabled: bool) -> None:
+    def set_auto_next(self, enabled: bool) -> None:  # noqa: FBT001
         """Enable or disable auto-next responses."""
         self.monitor.set_auto_next(enabled)
 
@@ -151,11 +156,11 @@ class DashboardController:
         """Adjust the confidence threshold for adaptive responses."""
         self.monitor.set_adaptive_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True) -> None:
+    def enable_adaptive_response(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable adaptive response functionality."""
         self.monitor.enable_adaptive_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True) -> None:
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable adaptive learning functionality."""
         self.monitor.enable_adaptive_learning(enabled)
 
@@ -185,7 +190,7 @@ class DashboardController:
         """Get automation system status."""
         return self.monitor.get_automation_status()
 
-    def register_automation_workflow(self, workflow: Any) -> None:
+    def register_automation_workflow(self, workflow: object) -> None:
         """Register a custom automation workflow."""
         self.monitor.register_automation_workflow(workflow)
 
@@ -206,7 +211,7 @@ class DashboardController:
         self.monitor.load_automation_config()
 
     # Project health monitoring methods
-    async def calculate_project_health(self, force_refresh: bool = False) -> dict:
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:  # noqa: FBT001
         """Calculate comprehensive project health."""
         return await self.monitor.calculate_project_health(force_refresh)
 

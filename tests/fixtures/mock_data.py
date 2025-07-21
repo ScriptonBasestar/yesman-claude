@@ -1,22 +1,26 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """공통 Mock 데이터 정의
 테스트에서 재사용 가능한 mock 객체들을 중앙화.
 
 Updated: Enhanced with factory system integration for better mock management
 """
 
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
+from typing import object
 
 
 # Tmux 관련 Mock
 class MockTmuxSession:
     """Tmux 세션 Mock 객체."""
 
-    def __init__(self, name: str = "test-session", windows: list[Any] | None = None) -> None:
+    def __init__(self, name: str = "test-session", windows: list[object] | None = None) -> None:
         self.name = name
         self.windows = windows or []
         self.id = f"${name}:0"
-        self.created_time = datetime.now()
+        self.created_time = datetime.now(UTC)
 
     def list_windows(self):
         return self.windows
@@ -56,7 +60,7 @@ class MockClaudeProcess:
     def __init__(self, pid: int = 12345, status: str = "running") -> None:
         self.pid = pid
         self.status = status
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(UTC)
 
     def terminate(self) -> None:
         self.status = "terminated"
@@ -156,7 +160,7 @@ class EnhancedMockTmuxSession(MockTmuxSession):
 
 
 # Convenience functions for common mock patterns
-def create_mock_session_with_controller(**kwargs) -> dict[str, Any]:
+def create_mock_session_with_controller(**kwargs) -> dict[str, object]:
     """Create a complete mock session with controller for integration tests."""
     session_mock = get_factory_mock("session_manager", **kwargs)
     claude_mock = get_factory_mock("claude_manager", **kwargs)
@@ -168,7 +172,7 @@ def create_mock_session_with_controller(**kwargs) -> dict[str, Any]:
     }
 
 
-def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
+def create_api_test_mocks(success: bool = True) -> dict[str, object]:  # noqa: FBT001
     """Create standard API test mocks."""
     if success:
         return {

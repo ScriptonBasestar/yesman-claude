@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Abstract base classes and interfaces for the yesman-claude system."""
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import object
 
 from .models import SessionInfo
 from .prompt_detector import PromptInfo
@@ -44,19 +48,23 @@ class ISessionManager(ABC):
     """Interface for session management."""
 
     @abstractmethod
-    def get_all_sessions(self) -> list[SessionInfo]:
+    @staticmethod
+    def get_all_sessions() -> list[SessionInfo]:
         """Get all available sessions."""
 
     @abstractmethod
-    def get_session(self, session_name: str) -> SessionInfo | None:
+    @staticmethod
+    def get_session(session_name: str) -> SessionInfo | None:
         """Get a specific session by name."""
 
     @abstractmethod
-    def invalidate_cache(self, session_name: str | None = None) -> None:
+    @staticmethod
+    def invalidate_cache(session_name: str | None = None) -> None:
         """Invalidate session cache."""
 
     @abstractmethod
-    def get_cache_stats(self) -> dict[str, Any]:
+    @staticmethod
+    def get_cache_stats() -> dict[str, object]:
         """Get cache statistics."""
 
 
@@ -79,43 +87,53 @@ class IController(ABC):
         """Check if auto next is enabled."""
 
     @abstractmethod
-    def start(self) -> bool:
+    @staticmethod
+    def start() -> bool:
         """Start the controller."""
 
     @abstractmethod
-    def stop(self) -> bool:
+    @staticmethod
+    def stop() -> bool:
         """Stop the controller."""
 
     @abstractmethod
-    def restart_claude_pane(self) -> bool:
+    @staticmethod
+    def restart_claude_pane() -> bool:
         """Restart Claude pane."""
 
     @abstractmethod
-    def set_model(self, model: str) -> bool:
+    @staticmethod
+    def set_model(model: str) -> bool:
         """Set the model."""
 
     @abstractmethod
-    def set_auto_next(self, enabled: bool) -> bool:
+    @staticmethod
+    def set_auto_next(enabled: bool) -> bool:  # noqa: FBT001
         """Set auto next setting."""
 
     @abstractmethod
-    def is_waiting_for_input(self) -> bool:
+    @staticmethod
+    def is_waiting_for_input() -> bool:
         """Check if waiting for input."""
 
     @abstractmethod
-    def get_current_prompt(self) -> PromptInfo | None:
+    @staticmethod
+    def get_current_prompt() -> PromptInfo | None:
         """Get current prompt information."""
 
     @abstractmethod
-    def send_input(self, response: str) -> bool:
+    @staticmethod
+    def send_input(response: str) -> bool:
         """Send input response."""
 
     @abstractmethod
-    def clear_prompt_state(self) -> None:
+    @staticmethod
+    def clear_prompt_state() -> None:
         """Clear prompt state."""
 
     @abstractmethod
-    def get_collection_stats(self) -> dict[str, Any]:
+    @staticmethod
+    def get_collection_stats() -> dict[str, object]:
         """Get collection statistics."""
 
 
@@ -123,19 +141,23 @@ class IControllerManager(ABC):
     """Interface for controller management."""
 
     @abstractmethod
-    def get_controller(self, session_name: str) -> IController | None:
+    @staticmethod
+    def get_controller(session_name: str) -> IController | None:
         """Get controller for session."""
 
     @abstractmethod
-    def create_controller(self, session_name: str, **kwargs) -> IController:
+    @staticmethod
+    def create_controller(session_name: str, **kwargs) -> IController:
         """Create a new controller."""
 
     @abstractmethod
-    def remove_controller(self, session_name: str) -> bool:
+    @staticmethod
+    def remove_controller(session_name: str) -> bool:
         """Remove a controller."""
 
     @abstractmethod
-    def list_controllers(self) -> list[str]:
+    @staticmethod
+    def list_controllers() -> list[str]:
         """List all controller names."""
 
 
@@ -143,23 +165,28 @@ class ICache(ABC):
     """Interface for caching systems."""
 
     @abstractmethod
-    def get(self, key: str, ttl: float | None = None) -> Any | None:
+    @staticmethod
+    def get(key: str, ttl: float | None = None) -> object | None:
         """Get cached value."""
 
     @abstractmethod
-    def put(self, key: str, value: Any, ttl: float | None = None) -> bool:
+    @staticmethod
+    def put(key: str, value: object, ttl: float | None = None) -> bool:
         """Store value in cache."""
 
     @abstractmethod
-    def invalidate(self, key: str) -> bool:
+    @staticmethod
+    def invalidate(key: str) -> bool:
         """Invalidate specific cache entry."""
 
     @abstractmethod
-    def clear(self) -> int:
+    @staticmethod
+    def clear() -> int:
         """Clear all cache entries."""
 
     @abstractmethod
-    def get_stats(self) -> dict[str, Any]:
+    @staticmethod
+    def get_stats() -> dict[str, object]:
         """Get cache statistics."""
 
 
@@ -167,15 +194,18 @@ class ICacheAnalytics(ABC):
     """Interface for cache analytics."""
 
     @abstractmethod
-    def get_cache_health_report(self) -> dict[str, Any]:
+    @staticmethod
+    def get_cache_health_report() -> dict[str, object]:
         """Generate comprehensive cache health report."""
 
     @abstractmethod
-    def get_visual_status_summary(self) -> dict[str, Any]:
+    @staticmethod
+    def get_visual_status_summary() -> dict[str, object]:
         """Get cache status summary for visualization."""
 
     @abstractmethod
-    def export_stats_json(self) -> str:
+    @staticmethod
+    def export_stats_json() -> str:
         """Export cache statistics as JSON."""
 
 
@@ -183,15 +213,18 @@ class IPromptDetector(ABC):
     """Interface for prompt detection."""
 
     @abstractmethod
-    def detect_prompts(self, content: str, context: dict[str, Any] | None = None) -> list[PromptInfo]:
+    @staticmethod
+    def detect_prompts(content: str, context: dict[str, object] | None = None) -> list[PromptInfo]:
         """Detect prompts in content."""
 
     @abstractmethod
-    def load_patterns(self, pattern_dir: str) -> bool:
+    @staticmethod
+    def load_patterns(pattern_dir: str) -> bool:
         """Load detection patterns."""
 
     @abstractmethod
-    def get_supported_types(self) -> list[str]:
+    @staticmethod
+    def get_supported_types() -> list[str]:
         """Get supported prompt types."""
 
 
@@ -199,15 +232,18 @@ class IPatternLoader(ABC):
     """Interface for pattern loading."""
 
     @abstractmethod
-    def load_pattern(self, pattern_type: str) -> dict[str, Any]:
+    @staticmethod
+    def load_pattern(pattern_type: str) -> dict[str, object]:
         """Load a specific pattern."""
 
     @abstractmethod
-    def get_available_patterns(self) -> list[str]:
+    @staticmethod
+    def get_available_patterns() -> list[str]:
         """Get list of available patterns."""
 
     @abstractmethod
-    def reload_patterns(self) -> bool:
+    @staticmethod
+    def reload_patterns() -> bool:
         """Reload all patterns."""
 
 
@@ -220,15 +256,18 @@ class IPlugin(ABC):
         """Get plugin metadata."""
 
     @abstractmethod
-    def initialize(self, config: dict[str, Any]) -> bool:
+    @staticmethod
+    def initialize(config: dict[str, object]) -> bool:
         """Initialize the plugin."""
 
     @abstractmethod
-    def cleanup(self) -> bool:
+    @staticmethod
+    def cleanup() -> bool:
         """Cleanup plugin resources."""
 
     @abstractmethod
-    def is_enabled(self) -> bool:
+    @staticmethod
+    def is_enabled() -> bool:
         """Check if plugin is enabled."""
 
 
@@ -236,15 +275,18 @@ class IControllerPlugin(IPlugin):
     """Interface for controller plugins."""
 
     @abstractmethod
-    def on_controller_start(self, session_name: str, controller: IController) -> None:
+    @staticmethod
+    def on_controller_start(session_name: str, controller: IController) -> None:
         """Called when controller starts."""
 
     @abstractmethod
-    def on_controller_stop(self, session_name: str, controller: IController) -> None:
+    @staticmethod
+    def on_controller_stop(session_name: str, controller: IController) -> None:
         """Called when controller stops."""
 
     @abstractmethod
-    def on_prompt_detected(self, session_name: str, prompt: PromptInfo) -> str | None:
+    @staticmethod
+    def on_prompt_detected(session_name: str, prompt: PromptInfo) -> str | None:
         """Called when prompt is detected, return response or None."""
 
 
@@ -252,15 +294,18 @@ class ISessionPlugin(IPlugin):
     """Interface for session plugins."""
 
     @abstractmethod
-    def on_session_created(self, session: SessionInfo) -> None:
+    @staticmethod
+    def on_session_created(session: SessionInfo) -> None:
         """Called when session is created."""
 
     @abstractmethod
-    def on_session_destroyed(self, session_name: str) -> None:
+    @staticmethod
+    def on_session_destroyed(session_name: str) -> None:
         """Called when session is destroyed."""
 
     @abstractmethod
-    def on_session_status_changed(self, session: SessionInfo, old_status: str) -> None:
+    @staticmethod
+    def on_session_status_changed(session: SessionInfo, old_status: str) -> None:
         """Called when session status changes."""
 
 
@@ -268,15 +313,18 @@ class ICachePlugin(IPlugin):
     """Interface for cache plugins."""
 
     @abstractmethod
-    def on_cache_hit(self, key: str, value: Any) -> None:
+    @staticmethod
+    def on_cache_hit(key: str, value: object) -> None:
         """Called on cache hit."""
 
     @abstractmethod
-    def on_cache_miss(self, key: str) -> None:
+    @staticmethod
+    def on_cache_miss(key: str) -> None:
         """Called on cache miss."""
 
     @abstractmethod
-    def on_cache_eviction(self, key: str, reason: str) -> None:
+    @staticmethod
+    def on_cache_eviction(key: str, reason: str) -> None:
         """Called on cache eviction."""
 
 
@@ -284,31 +332,38 @@ class IPluginManager(ABC):
     """Interface for plugin management."""
 
     @abstractmethod
-    def load_plugin(self, plugin_path: str) -> bool:
+    @staticmethod
+    def load_plugin(plugin_path: str) -> bool:
         """Load a plugin from path."""
 
     @abstractmethod
-    def unload_plugin(self, plugin_name: str) -> bool:
+    @staticmethod
+    def unload_plugin(plugin_name: str) -> bool:
         """Unload a plugin."""
 
     @abstractmethod
-    def get_plugin(self, plugin_name: str) -> IPlugin | None:
+    @staticmethod
+    def get_plugin(plugin_name: str) -> IPlugin | None:
         """Get a loaded plugin."""
 
     @abstractmethod
-    def list_plugins(self) -> list[PluginMetadata]:
+    @staticmethod
+    def list_plugins() -> list[PluginMetadata]:
         """List all loaded plugins."""
 
     @abstractmethod
-    def enable_plugin(self, plugin_name: str) -> bool:
+    @staticmethod
+    def enable_plugin(plugin_name: str) -> bool:
         """Enable a plugin."""
 
     @abstractmethod
-    def disable_plugin(self, plugin_name: str) -> bool:
+    @staticmethod
+    def disable_plugin(plugin_name: str) -> bool:
         """Disable a plugin."""
 
     @abstractmethod
-    def get_plugins_by_type(self, plugin_type: type) -> list[IPlugin]:
+    @staticmethod
+    def get_plugins_by_type(plugin_type: type) -> list[IPlugin]:
         """Get plugins of specific type."""
 
 
@@ -316,19 +371,23 @@ class IEventBus(ABC):
     """Interface for event bus system."""
 
     @abstractmethod
-    def subscribe(self, event_type: str, handler: Callable[[dict[str, Any]], None]) -> str:
+    @staticmethod
+    def subscribe(event_type: str, handler: Callable[[dict[str, object]], None]) -> str:
         """Subscribe to events, returns subscription ID."""
 
     @abstractmethod
-    def unsubscribe(self, subscription_id: str) -> bool:
+    @staticmethod
+    def unsubscribe(subscription_id: str) -> bool:
         """Unsubscribe from events."""
 
     @abstractmethod
-    def publish(self, event_type: str, data: dict[str, Any]) -> None:
+    @staticmethod
+    def publish(event_type: str, data: dict[str, object]) -> None:
         """Publish an event."""
 
     @abstractmethod
-    def get_event_types(self) -> list[str]:
+    @staticmethod
+    def get_event_types() -> list[str]:
         """Get available event types."""
 
 
@@ -336,23 +395,28 @@ class IConfigManager(ABC):
     """Interface for configuration management."""
 
     @abstractmethod
-    def get_config(self, key: str, default: Any = None) -> Any:
+    @staticmethod
+    def get_config(key: str, default: object = None) -> Any:
         """Get configuration value."""
 
     @abstractmethod
-    def set_config(self, key: str, value: Any) -> bool:
+    @staticmethod
+    def set_config(key: str, value: object) -> bool:
         """Set configuration value."""
 
     @abstractmethod
-    def reload_config(self) -> bool:
+    @staticmethod
+    def reload_config() -> bool:
         """Reload configuration."""
 
     @abstractmethod
-    def get_all_config(self) -> dict[str, Any]:
+    @staticmethod
+    def get_all_config() -> dict[str, object]:
         """Get all configuration."""
 
     @abstractmethod
-    def validate_config(self) -> list[str]:
+    @staticmethod
+    def validate_config() -> list[str]:
         """Validate configuration, return list of errors."""
 
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import logging
 from pathlib import Path
 from typing import Any
@@ -42,12 +46,11 @@ class TmuxManager:
             builder.build()
             self.logger.info("Session {session_name_from_config} created successfully.")
 
-            return True
-        except Exception:
-            # print e
-            raise
-            self.logger.exception("Failed to create session from {session_name}:")
+        except (OSError, RuntimeError, ValueError, AttributeError) as e:
+            self.logger.exception("Failed to create session from %s")
             return False
+        else:
+            return True
 
     def get_templates(self) -> list[str]:
         """Get all available session templates."""
@@ -91,10 +94,12 @@ class TmuxManager:
             with session_file.open("w", encoding="utf-8") as f:
                 yaml.dump(session_config, f, default_flow_style=False, allow_unicode=True)
             self.logger.info("Saved session config: {session_name}")
-            return True
-        except Exception:
-            self.logger.exception("Failed to save session config {session_name}:")
+
+        except (OSError, IOError, PermissionError, yaml.YAMLError) as e:
+            self.logger.exception("Failed to save session config %s")
             return False
+        else:
+            return True
 
     def delete_session_config(self, session_name: str) -> bool:
         """Delete a session configuration file."""
@@ -113,9 +118,11 @@ class TmuxManager:
                 return True
 
             self.logger.warning("Session config file not found: {session_name}")
+
+        except (OSError, PermissionError) as e:
+            self.logger.exception("Failed to delete session config %s")
             return False
-        except Exception:
-            self.logger.exception("Failed to delete session config {session_name}:")
+        else:
             return False
 
     def get_session_config_file(self, session_name: str) -> Path | None:
@@ -191,7 +198,8 @@ class TmuxManager:
 
         return result
 
-    def list_running_sessions(self) -> None:
+    @staticmethod
+    def list_running_sessions() -> None:
         """List currently running tmux sessions."""
         server = libtmux.Server()
         sessions = server.list_sessions()
@@ -279,9 +287,11 @@ class TmuxManager:
                 self.logger.info("Session {session_name} terminated.")
                 return True
             self.logger.warning("Session {session_name} not found.")
+
+        except (OSError, RuntimeError, AttributeError) as e:
+            self.logger.exception("Failed to teardown session %s")
             return False
-        except Exception:
-            self.logger.exception("Failed to teardown session {session_name}:")
+        else:
             return False
 
     def teardown_all_sessions(self) -> None:
@@ -320,12 +330,12 @@ class TmuxManager:
 
             import re
             from collections import defaultdict
-            from datetime import datetime, timedelta
+            from datetime import UTC, datetime, timedelta
 
             # Activity per hour for the last 7 days
             activity_counts: dict[str, int] = defaultdict(int)
 
-            now = datetime.now()
+            now = datetime.now(UTC)
             seven_days_ago = now - timedelta(days=7)
 
             with log_file.open(encoding="utf-8") as f:
@@ -347,10 +357,11 @@ class TmuxManager:
             # Format data for heatmap
             activity_data = [{"timestamp": ts, "activity": count} for ts, count in activity_counts.items()]
 
+        except (OSError, IOError, PermissionError, ValueError) as e:
+            self.logger.exception("Failed to get session activity for %s")
+            return {"session_name": session_name, "activity_data": []}
+        else:
             return {
                 "session_name": session_name,
                 "activity_data": activity_data,
             }
-        except Exception:
-            self.logger.exception("Failed to get session activity for {session_name}:")
-            return {"session_name": session_name, "activity_data": []}

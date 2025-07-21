@@ -1,6 +1,10 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import logging
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -89,7 +93,7 @@ def parse_log_line(line: str) -> LogEntry | None:
     # Fallback: treat as unstructured log
     return LogEntry(
         level="info",
-        timestamp=datetime.now().isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         source="unknown",
         message=line,
         raw=line,
@@ -175,7 +179,7 @@ def get_log_sources():
                             if log_entry:
                                 sources.add(log_entry.source)
                 except Exception as e:
-                    logger.warning(f"Failed to parse log file {log_file}: {e}")
+                    logger.warning(f"Failed to parse log file {log_file}: {e}")  # noqa: G004
                     continue
 
         return {"sources": sorted(sources)}
@@ -192,10 +196,10 @@ def add_test_log(level: str = "info", source: str = "test", message: str = "Test
 
     test_log_entry = LogEntry(
         level=level.lower(),
-        timestamp=datetime.now().isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         source=source,
         message=message,
-        raw=f"[{datetime.now().isoformat()}] [{level.upper()}] [{source}] {message}",
+        raw=f"[{datetime.now(UTC).isoformat()}] [{level.upper()}] [{source}] {message}",
     )
 
     return {"status": "success", "log_entry": test_log_entry}

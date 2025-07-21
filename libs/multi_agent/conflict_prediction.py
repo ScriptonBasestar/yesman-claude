@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Advanced conflict prediction system for multi-agent branch development."""
 
 import ast
@@ -9,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import object, NamedTuple
 
 from .branch_manager import BranchManager
 from .conflict_resolution import (
@@ -73,7 +77,7 @@ class PredictionResult:
     prevention_suggestions: list[str] = field(default_factory=list)
     timeline_prediction: datetime | None = None
     affected_agents: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     predicted_at: datetime = field(default_factory=datetime.now)
 
 
@@ -103,6 +107,9 @@ class ConflictPredictor:
             conflict_engine: ConflictResolutionEngine for resolution context
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
+        
+        Returns:
+            Description of return value
         """
         self.conflict_engine = conflict_engine
         self.branch_manager = branch_manager
@@ -128,7 +135,7 @@ class ConflictPredictor:
         }
 
         # Machine learning components (simplified heuristics for now)
-        self.historical_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.historical_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
         self.conflict_vectors: dict[str, ConflictVector] = {}
 
         # Configuration
@@ -553,6 +560,7 @@ class ConflictPredictor:
             logger.exception("Error detecting version conflicts:")
             return None
 
+    @staticmethod
     async def _detect_api_changes(
         self,
         branch1: str,  # noqa: ARG002
@@ -564,6 +572,7 @@ class ConflictPredictor:
         # This is a simplified version
         return None
 
+    @staticmethod
     async def _detect_resource_conflicts(
         self,
         branch1: str,  # noqa: ARG002
@@ -574,6 +583,7 @@ class ConflictPredictor:
         # Implementation would analyze file locks, database access, etc.
         return None
 
+    @staticmethod
     async def _detect_context_loss(
         self,
         branch1: str,  # noqa: ARG002
@@ -606,7 +616,8 @@ class ConflictPredictor:
 
         return predictions
 
-    def _likelihood_to_confidence(self, likelihood: float) -> PredictionConfidence:
+    @staticmethod
+    def _likelihood_to_confidence(likelihood: float) -> PredictionConfidence:
         """Convert likelihood score to confidence enum."""
         if likelihood >= CONFIDENCE_CRITICAL_THRESHOLD:
             return PredictionConfidence.CRITICAL
@@ -654,17 +665,20 @@ class ConflictPredictor:
         except Exception:
             return 0.0
 
-    async def _calculate_dependency_coupling(self, branch1: str, branch2: str) -> float:  # noqa: ARG002
+    @staticmethod
+    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG002
         """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
-    async def _calculate_semantic_distance(self, branch1: str, branch2: str) -> float:  # noqa: ARG002
+    @staticmethod
+    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG002
         """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
-    async def _calculate_temporal_proximity(self, branch1: str, branch2: str) -> float:  # noqa: ARG002
+    @staticmethod
+    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG002
         """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5
@@ -686,7 +700,8 @@ class ConflictPredictor:
             logger.exception("Error getting Python files with imports:")
         return files
 
-    def _extract_imports(self, content: str) -> list[str]:
+    @staticmethod
+    def _extract_imports(content: str) -> list[str]:
         """Extract import statements from Python code."""
         imports = []
         try:
@@ -713,6 +728,7 @@ class ConflictPredictor:
                         break
         return imports
 
+    @staticmethod
     def _imports_likely_to_conflict(
         self,
         imports1: list[str],
@@ -854,7 +870,8 @@ class ConflictPredictor:
             logger.exception("Error getting dependency versions:")
         return versions
 
-    def _calculate_version_distance(self, ver1: str, ver2: str) -> float:
+    @staticmethod
+    def _calculate_version_distance(ver1: str, ver2: str) -> float:
         """Calculate semantic distance between version strings."""
         try:
             # Simple version comparison
@@ -878,7 +895,7 @@ class ConflictPredictor:
         except Exception:
             return 0.5  # Default moderate distance
 
-    def get_prediction_summary(self) -> dict[str, Any]:
+    def get_prediction_summary(self) -> dict[str, object]:
         """Get summary of all predictions and statistics."""
         if not self.predictions:
             return {
@@ -914,12 +931,13 @@ class ConflictPredictor:
             ],
         }
 
-    def validate_prediction_accuracy(self, actual_conflicts: list[ConflictInfo]) -> None:
+    @staticmethod
+    def validate_prediction_accuracy(actual_conflicts: list[ConflictInfo]) -> None:
         """Validate prediction accuracy against actual conflicts."""
         # Implementation would compare predictions with actual conflicts
         # and update accuracy metrics
 
-    def analyze_conflict_patterns(self) -> dict[str, Any]:
+    def analyze_conflict_patterns(self) -> dict[str, object]:
         """Analyze detailed conflict patterns and trends."""
         if not self.predictions:
             return {

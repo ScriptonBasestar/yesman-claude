@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Lint configuration validation script.
 Ensures make lint, pre-commit, and pre-push hooks are consistent.
 """
@@ -8,7 +12,7 @@ import sys
 from pathlib import Path
 
 
-def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:  # noqa: FBT001
     """Run a shell command and return the result."""
     print(f"🔍 Running: {cmd}")
     # nosec B602 - shell=True is intentional for this validation script

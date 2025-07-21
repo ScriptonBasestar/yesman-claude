@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for WorkEnvironmentManager."""
 
 import os
@@ -13,7 +17,8 @@ class TestWorkEnvironmentManager:
     """Test cases for WorkEnvironmentManager."""
 
     @pytest.fixture
-    def temp_repo(self, tmp_path: Path) -> Path:
+    @staticmethod
+    def temp_repo( tmp_path: Path) -> Path:
         """Create a temporary git repository."""
         repo_path = tmp_path / "test_repo"
         repo_path.mkdir()
@@ -43,25 +48,29 @@ class TestWorkEnvironmentManager:
         return repo_path
 
     @pytest.fixture
-    def work_dir(self, tmp_path: Path) -> Path:
+    @staticmethod
+    def work_dir(tmp_path: Path) -> Path:
         """Create a temporary work directory."""
         work_path = tmp_path / "work"
         work_path.mkdir()
         return work_path
 
     @pytest.fixture
-    def manager(self, temp_repo: Path, work_dir: Path) -> WorkEnvironmentManager:
+    @staticmethod
+    def manager(temp_repo: Path, work_dir: Path) -> WorkEnvironmentManager:
         """Create WorkEnvironmentManager instance."""
         return WorkEnvironmentManager(repo_path=str(temp_repo), work_dir=str(work_dir))
 
-    def test_init(self, manager: WorkEnvironmentManager, temp_repo: Path, work_dir: Path) -> None:
+    @staticmethod
+    def test_init(manager: WorkEnvironmentManager, temp_repo: Path, work_dir: Path) -> None:
         """Test WorkEnvironmentManager initialization."""
         assert manager.repo_path == temp_repo
         assert manager.work_dir == work_dir
         assert manager.environments == {}
         assert manager.work_dir.exists()
 
-    def test_create_work_environment(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_create_work_environment(manager: WorkEnvironmentManager) -> None:
         """Test creating a work environment."""
         with patch.object(manager, "_create_worktree") as mock_worktree:
             with patch.object(manager, "_create_venv") as mock_venv:
@@ -87,7 +96,8 @@ class TestWorkEnvironmentManager:
                     # Verify saved
                     assert "test-branch" in manager.environments
 
-    def test_create_work_environment_custom_config(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_create_work_environment_custom_config(manager: WorkEnvironmentManager) -> None:
         """Test creating environment with custom configuration."""
         config = {
             "python_version": "3.12",
@@ -108,7 +118,8 @@ class TestWorkEnvironmentManager:
                     assert env.config["install_deps"] is False
                     assert env.config["env_vars"]["FOO"] == "bar"
 
-    def test_create_worktree(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_create_worktree(manager: WorkEnvironmentManager) -> None:
         """Test creating a git worktree."""
         with patch.object(manager, "_run_command") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
@@ -126,7 +137,8 @@ class TestWorkEnvironmentManager:
             assert str(expected_path) in cmd
             assert "feature/test" in cmd
 
-    def test_create_venv(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_create_venv(manager: WorkEnvironmentManager) -> None:
         """Test creating a virtual environment."""
         worktree_path = manager.work_dir / "worktrees" / "test"
         worktree_path.mkdir(parents=True)
@@ -148,7 +160,8 @@ class TestWorkEnvironmentManager:
                 # Verify dependencies installation
                 mock_install.assert_called_once_with(expected_path, worktree_path)
 
-    def test_install_dependencies(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_install_dependencies(manager: WorkEnvironmentManager) -> None:
         """Test installing dependencies."""
         venv_path = manager.work_dir / "venvs" / "test"
         venv_path.mkdir(parents=True)
@@ -178,7 +191,8 @@ class TestWorkEnvironmentManager:
             assert "install" in pip_upgrade_call
             assert "--upgrade" in pip_upgrade_call
 
-    def test_setup_environment(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_setup_environment(manager: WorkEnvironmentManager) -> None:
         """Test setting up environment."""
         env = WorkEnvironment(
             branch_name="test",
@@ -196,7 +210,8 @@ class TestWorkEnvironmentManager:
                     mock_script.assert_called_once_with(env)
                     mock_setup.assert_called_once_with(env)
 
-    def test_activate_environment(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_activate_environment(manager: WorkEnvironmentManager) -> None:
         """Test activating an environment."""
         env = WorkEnvironment(
             branch_name="test",
@@ -218,7 +233,8 @@ class TestWorkEnvironmentManager:
         assert env_vars["CUSTOM_VAR"] == "value"
         assert env.status == "active"
 
-    def test_work_in_environment_context(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_work_in_environment_context(manager: WorkEnvironmentManager) -> None:
         """Test work_in_environment context manager."""
         env = WorkEnvironment(
             branch_name="test",
@@ -245,7 +261,8 @@ class TestWorkEnvironmentManager:
         assert os.getcwd() == original_cwd
         assert os.environ.get("YESMAN_BRANCH") != "test"
 
-    def test_terminate_environment(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_terminate_environment(manager: WorkEnvironmentManager) -> None:
         """Test terminating an environment."""
         env = WorkEnvironment(
             branch_name="test",
@@ -279,7 +296,8 @@ class TestWorkEnvironmentManager:
             # Verify removed from environments
             assert "test" not in manager.environments
 
-    def test_list_environments(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_list_environments(manager: WorkEnvironmentManager) -> None:
         """Test listing environments."""
         env1 = WorkEnvironment(
             branch_name="branch1",
@@ -301,7 +319,8 @@ class TestWorkEnvironmentManager:
         assert env1 in envs
         assert env2 in envs
 
-    def test_environment_persistence(self, manager: WorkEnvironmentManager) -> None:
+    @staticmethod
+    def test_environment_persistence(manager: WorkEnvironmentManager) -> None:
         """Test saving and loading environments."""
         env = WorkEnvironment(
             branch_name="test",

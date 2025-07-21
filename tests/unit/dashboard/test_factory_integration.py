@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
 
@@ -5,7 +9,8 @@ from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
 class TestFactoryIntegration:
     """Tests for renderer factory with all formats."""
 
-    def test_factory_integration(self) -> None:
+    @staticmethod
+    def test_factory_integration() -> None:
         """Test 11: Renderer factory with all formats."""
         factory = RendererFactory()
 

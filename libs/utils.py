@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Utility functions for yesman."""
 
 import logging
@@ -22,7 +26,7 @@ def ensure_log_directory(log_path: Path) -> Path:
     try:
         os.chmod(log_path, 0o700)
     except OSError as e:
-        logging.warning(f"Could not set permissions on {log_path}: {e}")
+        logging.warning("Could not set permissions on %s: %s", log_path, e)
 
     return log_path
 

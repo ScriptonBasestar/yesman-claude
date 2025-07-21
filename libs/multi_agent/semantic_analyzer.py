@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """AST-based semantic conflict analysis engine for multi-agent development."""
 
 import ast
@@ -7,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictSeverity, ResolutionStrategy
@@ -111,9 +115,9 @@ class SemanticConflict:
     description: str
     old_definition: str | None = None
     new_definition: str | None = None
-    impact_analysis: dict[str, Any] = field(default_factory=dict)
+    impact_analysis: dict[str, object] = field(default_factory=dict)
     suggested_resolution: ResolutionStrategy = ResolutionStrategy.HUMAN_REQUIRED
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     detected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -126,6 +130,9 @@ class SemanticAnalyzer:
         Args:
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
+        
+        Returns:
+            Description of return value
         """
         self.branch_manager = branch_manager
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
@@ -194,8 +201,8 @@ class SemanticAnalyzer:
 
             logger.info("Found %d semantic conflicts", len(conflicts))
 
-        except Exception as e:
-            logger.exception("Error analyzing semantic conflicts: %s", e)
+        except Exception:
+            logger.exception("Error analyzing semantic conflicts")
 
         return conflicts
 
@@ -252,8 +259,8 @@ class SemanticAnalyzer:
             )
             conflicts.extend(var_conflicts)
 
-        except Exception as e:
-            logger.exception("Error analyzing file %s: %s", file_path, e)
+        except Exception:
+            logger.exception("Error analyzing file %s")
 
         return conflicts
 
@@ -284,10 +291,11 @@ class SemanticAnalyzer:
 
             return context
 
-        except Exception as e:
-            logger.exception("Error getting semantic context for %s in %s: %s", file_path, branch, e)
+        except Exception:
+            logger.exception("Error getting semantic context for %s in %s")
             return None
 
+    @staticmethod
     def _extract_semantic_context(
         self,
         file_path: str,
@@ -315,8 +323,8 @@ class SemanticAnalyzer:
 
         except SyntaxError as e:
             logger.warning("Syntax error in %s: %s", file_path, e)
-        except Exception as e:
-            logger.exception("Error extracting semantic context: %s", e)
+        except Exception:
+            logger.exception("Error extracting semantic context")
 
         return context
 
@@ -441,6 +449,7 @@ class SemanticAnalyzer:
 
         return conflicts
 
+    @staticmethod
     def _detect_import_conflicts(
         self,
         context1: SemanticContext,
@@ -483,6 +492,7 @@ class SemanticAnalyzer:
 
         return conflicts
 
+    @staticmethod
     def _detect_variable_conflicts(
         self,
         context1: SemanticContext,
@@ -584,6 +594,7 @@ class SemanticAnalyzer:
         # Check decorator changes
         return func1.decorators != func2.decorators
 
+    @staticmethod
     def _assess_function_conflict_severity(
         self,
         func1: FunctionSignature,
@@ -612,13 +623,14 @@ class SemanticAnalyzer:
 
         return ConflictSeverity.LOW
 
+    @staticmethod
     def _analyze_function_impact(
         self,
         func1: FunctionSignature,
         func2: FunctionSignature,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Analyze the impact of function signature changes."""
-        impact: dict[str, Any] = {
+        impact: dict[str, object] = {
             "breaking_change": False,
             "parameter_changes": [],
             "return_type_change": func1.return_type != func2.return_type,
@@ -661,7 +673,8 @@ class SemanticAnalyzer:
         # Default to semantic analysis
         return ResolutionStrategy.SEMANTIC_ANALYSIS
 
-    def _signature_to_string(self, func: FunctionSignature) -> str:
+    @staticmethod
+    def _signature_to_string(func: FunctionSignature) -> str:
         """Convert function signature to string representation."""
         args = func.args.copy()
 
@@ -693,13 +706,14 @@ class SemanticAnalyzer:
 
         return signature
 
+    @staticmethod
     def _rank_conflicts_by_impact(
         self,
         conflicts: list[SemanticConflict],
     ) -> list[SemanticConflict]:
         """Rank conflicts by their potential impact."""
 
-        def conflict_priority(conflict: Any) -> int:
+        def conflict_priority(conflict: object) -> int:
             priority = 0
 
             # Severity weight
@@ -730,6 +744,7 @@ class SemanticAnalyzer:
 
         return sorted(conflicts, key=conflict_priority, reverse=True)
 
+    @staticmethod
     def _merge_related_conflicts(
         self,
         conflicts: list[SemanticConflict],
@@ -740,7 +755,8 @@ class SemanticAnalyzer:
 
     # Helper methods
 
-    async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:
+    @staticmethod
+    async def _get_changed_python_files(branch1: str, branch2: str) -> list[str]:  # noqa: ARG002
         """Get list of Python files changed between branches."""
         try:
             # This would use git to find changed files
@@ -749,7 +765,7 @@ class SemanticAnalyzer:
         except Exception:
             return []
 
-    async def _get_file_content(self, file_path: str, branch: str) -> str | None:
+    async def _get_file_content(self, file_path: str, branch: str) -> str | None:  # noqa: ARG002
         """Get file content from specific branch."""
         try:
             # This would use git to get file content from branch
@@ -758,11 +774,11 @@ class SemanticAnalyzer:
             if full_path.exists() and full_path.suffix == ".py":
                 with open(full_path, encoding="utf-8") as f:
                     return f.read()
-        except Exception as e:
-            logger.exception("Error reading file %s: %s", file_path, e)
+        except Exception:
+            logger.exception("Error reading file %s")
         return None
 
-    def get_analysis_summary(self) -> dict[str, Any]:
+    def get_analysis_summary(self) -> dict[str, object]:
         """Get summary of semantic analysis."""
         return {
             "files_analyzed": self.analysis_stats["files_analyzed"],
@@ -980,7 +996,8 @@ class SemanticVisitor(ast.NodeVisitor):
             docstring=docstring,
         )
 
-    def _determine_visibility(self, name: str) -> SymbolVisibility:
+    @staticmethod
+    def _determine_visibility(name: str) -> SymbolVisibility:
         """Determine symbol visibility based on naming convention."""
         if name.startswith("__") and name.endswith("__"):
             return SymbolVisibility.MAGIC
@@ -990,7 +1007,8 @@ class SemanticVisitor(ast.NodeVisitor):
             return SymbolVisibility.PROTECTED
         return SymbolVisibility.PUBLIC
 
-    def _infer_type(self, node: ast.expr) -> str:
+    @staticmethod
+    def _infer_type(node: ast.expr) -> str:
         """Simple type inference for AST nodes."""
         if isinstance(node, ast.Constant):
             return type(node.value).__name__

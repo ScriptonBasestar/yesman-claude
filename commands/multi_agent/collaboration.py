@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Agent collaboration commands."""
 
 import logging
@@ -10,7 +14,8 @@ logger = logging.getLogger(__name__)
 class CollaborateCommand(BaseCommand):
     """Start agent collaboration session."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute( **kwargs) -> dict:  # noqa: ARG002
         """Execute the collaborate command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Starting agent collaboration session...")
@@ -21,7 +26,8 @@ class CollaborateCommand(BaseCommand):
 class SendMessageCommand(BaseCommand):
     """Send message between agents."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the send message command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Sending message between agents...")
@@ -32,7 +38,8 @@ class SendMessageCommand(BaseCommand):
 class ShareKnowledgeCommand(BaseCommand):
     """Share knowledge between agents."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the share knowledge command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Sharing knowledge between agents...")
@@ -43,7 +50,8 @@ class ShareKnowledgeCommand(BaseCommand):
 class BranchInfoCommand(BaseCommand):
     """Get branch information for collaboration."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the branch info command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Getting branch information for collaboration...")

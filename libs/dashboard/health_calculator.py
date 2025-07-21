@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Project health score calculation system."""
 
 import json
@@ -141,7 +145,7 @@ class HealthCalculator:
         self._cache: dict[str, Any] = {}
         self._cache_ttl = 300  # 5 minutes
 
-    async def calculate_health(self, force_refresh: bool = False) -> ProjectHealth:
+    async def calculate_health(self, force_refresh: bool = False) -> ProjectHealth:  # noqa: FBT001
         """Calculate comprehensive project health."""
         cache_key = f"health_{self.project_path}"
 
@@ -641,7 +645,8 @@ class HealthCalculator:
 
         return metrics
 
-    def _calculate_overall_score(self, metrics: list[HealthMetric]) -> int:
+    @staticmethod
+    def _calculate_overall_score( metrics: list[HealthMetric]) -> int:
         """Calculate overall project health score."""
         if not metrics:
             return 0
@@ -721,7 +726,8 @@ class HealthCalculator:
 
         return 40  # Default score if no test command works
 
-    async def _check_npm_dependencies(self, package_json_path: Path) -> tuple[int, int]:
+    @staticmethod
+    async def _check_npm_dependencies(package_json_path: Path) -> tuple[int, int]:
         """Check npm dependencies for outdated packages."""
         try:
             with open(package_json_path) as f:
@@ -739,7 +745,8 @@ class HealthCalculator:
         except (OSError, json.JSONDecodeError, KeyError):
             return 0, 0
 
-    async def _check_python_dependencies(self, requirements_path: Path) -> tuple[int, int]:
+    @staticmethod
+    async def _check_python_dependencies(requirements_path: Path) -> tuple[int, int]:
         """Check Python dependencies."""
         try:
             content = requirements_path.read_text()
@@ -754,7 +761,8 @@ class HealthCalculator:
         except (OSError, UnicodeDecodeError):
             return 0, 0
 
-    async def _check_rust_dependencies(self, cargo_toml_path: Path) -> tuple[int, int]:
+    @staticmethod
+    async def _check_rust_dependencies(cargo_toml_path: Path) -> tuple[int, int]:
         """Check Rust/Cargo dependencies."""
         try:
             import toml
@@ -769,7 +777,8 @@ class HealthCalculator:
         except (ImportError, OSError, ValueError, KeyError):
             return 0, 0
 
-    def _get_dependencies_from_toml(self, content: str) -> tuple[list[str], list[str]]:
+    @staticmethod
+    def _get_dependencies_from_toml(content: str) -> tuple[list[str], list[str]]:
         """Extract dependencies from Cargo.toml content."""
         dependencies = []
         dev_dependencies = []
@@ -798,7 +807,8 @@ class HealthCalculator:
 
         return dependencies, dev_dependencies
 
-    async def _check_go_dependencies(self, go_mod_path: Path) -> tuple[int, int]:
+    @staticmethod
+    async def _check_go_dependencies(go_mod_path: Path) -> tuple[int, int]:
         """Check Go dependencies."""
         try:
             content = go_mod_path.read_text()
@@ -848,7 +858,8 @@ class HealthCalculator:
         except (OSError, ValueError):
             return 50  # Default on error
 
-    def get_health_summary(self, health: ProjectHealth) -> dict[str, Any]:
+    @staticmethod
+    def get_health_summary(health: ProjectHealth) -> dict[str, Any]:
         """Get a summary of project health."""
         return {
             "overall": {

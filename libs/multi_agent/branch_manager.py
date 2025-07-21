@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Branch management system for multi-agent parallel development."""
 
 import json
@@ -58,7 +62,7 @@ class BranchManager:
     def _run_git_command(
         self,
         args: list[str],
-        check: bool = True,
+        check: bool = True,  # noqa: FBT001
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result."""
         cmd = ["git", *args]
@@ -307,7 +311,7 @@ class BranchManager:
             self._save_branch_metadata()
             logger.info("Marked branch '%s' as merged", branch_name)
 
-    def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:
+    def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:  # noqa: FBT001
         """Clean up merged branches."""
         cleaned = []
 

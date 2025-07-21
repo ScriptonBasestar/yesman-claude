@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Project health calculator widget."""
 
 import logging
@@ -47,10 +51,8 @@ class ProjectHealth:
             suggestions = self._generate_suggestions(scores)
             scores["suggestions"] = suggestions
 
-            return scores
-
         except (OSError, PermissionError, ValueError, TypeError) as e:
-            logger.exception(f"Error calculating project health: {e}")
+            logger.exception("Error calculating project health")  # noqa: G004
             return {
                 "overall_score": 50,
                 "build_score": 50,
@@ -63,47 +65,56 @@ class ProjectHealth:
                 "docs_score": 50,
                 "suggestions": ["Unable to calculate health metrics"],
             }
+        else:
+            return scores
 
-    def _check_build_health(self) -> int:
+    @staticmethod
+    def _check_build_health() -> int:
         """Check if project builds successfully."""
         try:
             # Check for common build files
             build_files = ["Makefile", "build.py", "setup.py", "pyproject.toml"]
             has_build_config = any(os.path.exists(f) for f in build_files)
 
+        except (OSError, FileNotFoundError) as e:
+            return 50
+        else:
             if has_build_config:
                 return 85
             return 60
-        except (OSError, FileNotFoundError) as e:
-            return 50
 
-    def _check_test_health(self) -> int:
+    @staticmethod
+    def _check_test_health() -> int:
         """Check test coverage and presence."""
         try:
             # Check for test directories/files
             test_indicators = ["tests/", "test_", "pytest", "unittest"]
             has_tests = any(os.path.exists(indicator) or any(indicator in f for f in os.listdir(".") if os.path.isfile(f)) for indicator in test_indicators)
 
+        except (OSError, FileNotFoundError) as e:
+            return 50
+        else:
             if has_tests:
                 return 75
             return 40
-        except (OSError, FileNotFoundError) as e:
-            return 50
 
-    def _check_dependencies_health(self) -> int:
+    @staticmethod
+    def _check_dependencies_health() -> int:
         """Check dependency management."""
         try:
             # Check for dependency files
             dep_files = ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"]
             has_deps = any(os.path.exists(f) for f in dep_files)
 
+        except (OSError, FileNotFoundError) as e:
+            return 50
+        else:
             if has_deps:
                 return 90
             return 30
-        except (OSError, FileNotFoundError) as e:
-            return 50
 
-    def _check_security_health(self) -> int:
+    @staticmethod
+    def _check_security_health() -> int:
         """Check security aspects."""
         try:
             # Basic security checks
@@ -120,12 +131,14 @@ class ProjectHealth:
         except (OSError, FileNotFoundError, IOError) as e:
             return 80
 
-    def _check_performance_health(self) -> int:
+    @staticmethod
+    def _check_performance_health() -> int:
         """Check performance indicators."""
         # Basic performance score
         return 65
 
-    def _check_code_quality_health(self) -> int:
+    @staticmethod
+    def _check_code_quality_health() -> int:
         """Check code quality."""
         try:
             # Check for linting/formatting config
@@ -137,11 +150,12 @@ class ProjectHealth:
             ]
             has_quality_config = any(os.path.exists(f) for f in quality_files)
 
+        except (OSError, FileNotFoundError) as e:
+            return 50
+        else:
             if has_quality_config:
                 return 85
             return 60
-        except (OSError, FileNotFoundError) as e:
-            return 50
 
     def _check_git_health(self) -> int:
         """Check git repository health."""
@@ -160,26 +174,31 @@ class ProjectHealth:
                         return 95
                 except (subprocess.CalledProcessError, OSError, FileNotFoundError) as e:
                     # Log subprocess execution errors if needed
-                    logger.warning(f"Failed to check git log: {e}")
+                    logger.warning(f"Failed to check git log: {e}")  # noqa: G004
                 return 80
-            return 30
+
         except (OSError, subprocess.CalledProcessError) as e:
             return 50
+        else:
+            return 30
 
-    def _check_documentation_health(self) -> int:
+    @staticmethod
+    def _check_documentation_health() -> int:
         """Check documentation coverage."""
         try:
             # Check for documentation files
             doc_files = ["README.md", "README.rst", "docs/", "CHANGELOG.md"]
             has_docs = any(os.path.exists(f) for f in doc_files)
 
+        except (OSError, FileNotFoundError) as e:
+            return 50
+        else:
             if has_docs:
                 return 70
             return 30
-        except (OSError, FileNotFoundError) as e:
-            return 50
 
-    def _generate_suggestions(self, scores: dict[str, Any]) -> list[str]:
+    @staticmethod
+    def _generate_suggestions(scores: dict[str, Any]) -> list[str]:
         """Generate improvement suggestions based on scores."""
         suggestions = []
 

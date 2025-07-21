@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Automation manager that integrates context detection and workflow execution."""
 
 import asyncio
@@ -143,7 +147,7 @@ class AutomationManager:
                 else:
                     callback(context)
             except Exception as e:
-                self.logger.exception("Callback error: %s", e)
+                self.logger.exception("Callback error")
 
         # Trigger workflows
         triggered_executions = self.workflow_engine.trigger_workflows(context)
@@ -159,7 +163,7 @@ class AutomationManager:
                     else:
                         callback(context, triggered_executions)
                 except Exception as e:
-                    self.logger.exception("Workflow trigger callback error: %s", e)
+                    self.logger.exception("Workflow trigger callback error")
 
     def analyze_content_for_context(self, content: str, session_name: str | None = None) -> list[ContextInfo]:
         """Analyze content (e.g., tmux pane output) for context clues."""
@@ -262,7 +266,8 @@ class AutomationManager:
 
         return result
 
-    def get_workflow_recommendations(self, context_info: ContextInfo) -> list[str]:
+    @staticmethod
+    def get_workflow_recommendations( context_info: ContextInfo) -> list[str]:
         """Get recommendations for workflows based on context."""
         recommendations = []
 

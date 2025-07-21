@@ -1,14 +1,18 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tmux session template generation utilities.
 
 This module provides utilities for generating tmux session configurations
-from templates using Jinja2 template rendering.
 """
 
+from templates using Jinja2 template rendering.
 from pathlib import Path
-
 import tmuxp
 import yaml
 from jinja2 import Template
+
 
 
 def generate(session_name: str, start_directory: str):

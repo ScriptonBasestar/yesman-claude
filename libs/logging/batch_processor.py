@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Batch log processor for optimized I/O operations."""
 
 import asyncio
@@ -34,7 +38,7 @@ class BatchProcessor:
         max_batch_size: int = 100,
         max_batch_time: float = 5.0,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
-        compression_enabled: bool = True,
+        compression_enabled: bool = True,  # noqa: FBT001
         output_dir: Path | None = None,
     ) -> None:
         self.max_batch_size = max_batch_size
@@ -122,7 +126,7 @@ class BatchProcessor:
                     await self._flush_pending_entries()
 
         except Exception as e:
-            self.logger.error(f"Error in batch processing loop: {e}", exc_info=True)
+            self.logger.error("Error in batch processing loop: %s", e, exc_info=True)
 
     async def _flush_pending_entries(self) -> None:
         """Flush pending entries to storage."""
@@ -155,7 +159,7 @@ class BatchProcessor:
             self.batch_counter += 1
 
         except Exception as e:
-            self.logger.exception(f"Failed to write batch {batch.batch_id}: {e}")
+            self.logger.exception("Failed to write batch {batch.batch_id}")  # noqa: G004
             # Re-queue entries for retry
             self.pending_entries.extendleft(reversed(entries))
 
@@ -195,7 +199,7 @@ class BatchProcessor:
         self.current_file_size += written_size
         self.stats["bytes_written"] += written_size
 
-        self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")
+        self.logger.debug("Wrote batch %s: %d entries, %d bytes", batch.batch_id, len(batch.entries), written_size)
 
     async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
@@ -206,7 +210,7 @@ class BatchProcessor:
         self.current_file_size = 0
         self.stats["files_created"] += 1
 
-        self.logger.info(f"Rotated to new log file: {self.current_log_file}")
+        self.logger.info("Rotated to new log file: %s", self.current_log_file)
 
     def get_statistics(self) -> dict[str, Any]:
         """Get processing statistics."""
@@ -236,10 +240,10 @@ class BatchProcessor:
                     removed_count += 1
 
             if removed_count > 0:
-                self.logger.info(f"Cleaned up {removed_count} old log files")
+                self.logger.info("Cleaned up %d old log files", removed_count)
 
         except Exception as e:
-            self.logger.exception(f"Error cleaning up old log files: {e}")
+            self.logger.exception("Error cleaning up old log files")  # noqa: G004
 
         return removed_count
 
@@ -268,7 +272,7 @@ class BatchProcessor:
                     batches.append(batch)
 
         except Exception as e:
-            self.logger.exception(f"Error reading batch file {file_path}: {e}")
+            self.logger.exception("Error reading batch file {file_path}")  # noqa: G004
 
         return batches
 

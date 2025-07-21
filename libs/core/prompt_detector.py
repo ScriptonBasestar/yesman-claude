@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Advanced prompt detection system for Claude Code interactions."""
 
 import logging
@@ -131,14 +135,15 @@ class ClaudePromptDetector:
             try:
                 prompt_info = detector(cleaned_content)
                 if prompt_info:
-                    self.logger.debug(f"Detected prompt: {prompt_info.type.value}")
+                    self.logger.debug(f"Detected prompt: {prompt_info.type.value}")  # noqa: G004
                     return prompt_info
             except Exception as e:
-                self.logger.exception(f"Error in detector {detector.__name__}: {e}")
+                self.logger.exception("Error in detector {detector.__name__}")  # noqa: G004
 
         return None
 
-    def _clean_content(self, content: str) -> str:
+    @staticmethod
+    def _clean_content( content: str) -> str:
         """Clean and normalize content for analysis."""
         # Remove ANSI escape sequences
         ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")

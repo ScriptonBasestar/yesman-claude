@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Centralized configuration loader with multiple source support and caching."""
 
 import hashlib
@@ -5,7 +9,7 @@ import json
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any
+from typing import object
 
 import yaml
 from pydantic import ValidationError
@@ -17,11 +21,13 @@ class ConfigSource(ABC):
     """Abstract base class for configuration sources."""
 
     @abstractmethod
-    def load(self) -> dict[str, Any]:
+    @staticmethod
+    def load() -> dict[str, object]:
         """Load configuration from this source."""
 
     @abstractmethod
-    def exists(self) -> bool:
+    @staticmethod
+    def exists() -> bool:
         """Check if this source exists/is available."""
 
 
@@ -32,7 +38,7 @@ class YamlFileSource(ConfigSource):
         self.path = Path(path).expanduser()
         self.file_path = self.path  # For cache compatibility
 
-    def load(self) -> dict[str, Any]:
+    def load(self) -> dict[str, object]:
         """Load configuration from YAML file."""
         if not self.exists():
             return {}
@@ -59,9 +65,9 @@ class EnvironmentSource(ConfigSource):
     def __init__(self, prefix: str = "YESMAN_") -> None:
         self.prefix = prefix
 
-    def load(self) -> dict[str, Any]:
+    def load(self) -> dict[str, object]:
         """Load configuration from environment variables."""
-        config: dict[str, Any] = {}
+        config: dict[str, object] = {}
 
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
@@ -86,11 +92,13 @@ class EnvironmentSource(ConfigSource):
 
         return config
 
-    def exists(self) -> bool:
+    @staticmethod
+    def exists() -> bool:
         """Environment source always exists."""
         return True
 
-    def _convert_value(self, value: str) -> Any:
+    @staticmethod
+    def _convert_value(value: str) -> Any:
         """Convert string value to appropriate type."""
         # Try boolean
         if value.lower() in ("true", "false"):
@@ -123,14 +131,15 @@ class EnvironmentSource(ConfigSource):
 class DictSource(ConfigSource):
     """Dictionary configuration source (for programmatic config)."""
 
-    def __init__(self, config: dict[str, Any]) -> None:
+    def __init__(self, config: dict[str, object]) -> None:
         self.config = config
 
-    def load(self) -> dict[str, Any]:
+    def load(self) -> dict[str, object]:
         """Return the dictionary."""
         return self.config.copy()
 
-    def exists(self) -> bool:
+    @staticmethod
+    def exists() -> bool:
         """Dict source always exists."""
         return True
 
@@ -159,12 +168,12 @@ class ConfigLoader:
         # Invalidate cache when source is added
         self._cached_config = None
 
-    def load(self, validate: bool = True) -> YesmanConfigSchema:
+    def load(self, validate: bool = True) -> YesmanConfigSchema:  # noqa: FBT001
         """Load and merge configurations from all sources."""
         if self._cached_config is not None:
             return self._cached_config
 
-        merged_config: dict[str, Any] = {}
+        merged_config: dict[str, object] = {}
 
         # Load from each source in order (later sources override earlier ones)
         for source in self._sources:
@@ -181,7 +190,8 @@ class ConfigLoader:
         self._cached_config = YesmanConfigSchema.model_validate(merged_config)
         return self._cached_config
 
-    def validate(self, config: dict[str, Any]) -> YesmanConfigSchema:
+    @staticmethod
+    def validate(config: dict[str, object]) -> YesmanConfigSchema:
         """Validate configuration against schema."""
         try:
             return YesmanConfigSchema.model_validate(config)
@@ -200,7 +210,7 @@ class ConfigLoader:
         self._cached_config = None
         return self.load()
 
-    def _deep_merge(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> dict[str, Any]:
+    def _deep_merge(self, dict1: dict[str, object], dict2: dict[str, object]) -> dict[str, object]:
         """Deep merge two dictionaries."""
         result = dict1.copy()
 
@@ -212,7 +222,7 @@ class ConfigLoader:
 
         return result
 
-    def get_config_sources_info(self) -> list[dict[str, Any]]:
+    def get_config_sources_info(self) -> list[dict[str, object]]:
         """Get information about configured sources."""
         info = []
         for i, source in enumerate(self._sources):

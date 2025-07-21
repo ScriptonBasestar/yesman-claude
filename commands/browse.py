@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Interactive session browser command."""
 
 import threading
 import time
-from typing import Any
+from typing import object
 
 import click
 from rich.console import Console
@@ -20,7 +24,7 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 class InteractiveBrowser:
     """Interactive session browser with live updates."""
 
-    def __init__(self, tmux_manager: Any, config: Any, update_interval: float = 2.0) -> None:
+    def __init__(self, tmux_manager: object, config: object, update_interval: float = 2.0) -> None:
         self.console = Console()
         self.config = config
         self.tmux_manager = tmux_manager
@@ -36,8 +40,8 @@ class InteractiveBrowser:
         self.update_interval = update_interval
         self.running = False
         self.update_thread: threading.Thread | None = None
-        self.progress_data: dict[str, Any] | None = None
-        self.session_data: list[dict[str, Any]] = []
+        self.progress_data: dict[str, object] | None = None
+        self.session_data: list[dict[str, object]] = []
 
     def update_data(self) -> None:
         """Update session data and activity metrics."""
@@ -66,7 +70,8 @@ class InteractiveBrowser:
         except Exception as e:
             self.console.print(f"[red]Error updating session data: {e}[/]")
 
-    def _calculate_session_activity(self, session_info: dict) -> float:
+    @staticmethod
+    def _calculate_session_activity( session_info: dict) -> float:
         """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
@@ -92,7 +97,8 @@ class InteractiveBrowser:
 
         return min(activity, 1.0)
 
-    def create_layout(self) -> Layout:
+    @staticmethod
+    def create_layout() -> Layout:
         """Create the main dashboard layout."""
         layout = Layout()
 
@@ -184,7 +190,8 @@ class InteractiveBrowser:
         if self.update_thread:
             self.update_thread.join(timeout=1.0)
 
-    def _render_heatmap_display(self, heatmap_data: dict[str, Any]) -> str:
+    @staticmethod
+    def _render_heatmap_display(heatmap_data: dict[str, object]) -> str:
         """Render heatmap data as a simple text display."""
         if not heatmap_data or "heatmap" not in heatmap_data:
             return "[dim]No activity data available[/dim]"

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Analyze common lint issues by examining the codebase."""
 
 import ast
@@ -16,7 +20,8 @@ class LintAnalyzer:
         self.project_path = Path(project_path)
         self.issues = []
 
-    def analyze_file(self, file_path: Path) -> list[dict[str, Any]]:
+    @staticmethod
+    def analyze_file( file_path: Path) -> list[dict[str, Any]]:
         """Analyze a single Python file for common lint issues."""
         issues = []
 

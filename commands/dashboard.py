@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dashboard interface management commands."""
 
 import http.server
@@ -90,9 +94,9 @@ class DashboardRunCommand(BaseCommand):
         host: str = "localhost",
         port: int = 8080,
         theme: str | None = None,
-        dev: bool = False,
-        detach: bool = False,
-        **kwargs,
+        dev: bool = False,  # noqa: FBT001
+        detach: bool = False,  # noqa: FBT001
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the dashboard run command."""
         # Auto-detect interface if needed
@@ -144,7 +148,7 @@ class DashboardRunCommand(BaseCommand):
             msg = f"Dashboard error: {e}"
             raise CommandError(msg) from e
 
-    def _launch_tui_dashboard(self, theme: str | None = None, dev: bool = False) -> None:
+    def _launch_tui_dashboard(self, theme: str | None = None, dev: bool = False) -> None:  # noqa: FBT001, ARG002
         """Launch TUI-based dashboard interface."""
         self.print_info("🖥️  Starting TUI Dashboard...")
 
@@ -200,8 +204,8 @@ class DashboardRunCommand(BaseCommand):
         host: str = "localhost",
         port: int = 8080,
         theme: str | None = None,
-        dev: bool = False,
-        detach: bool = False,
+        dev: bool = False,  # noqa: FBT001
+        detach: bool = False,  # noqa: FBT001
     ) -> None:
         """Launch web-based dashboard interface."""
         self.print_info(f"🌐 Starting Web Dashboard on http://{host}:{port}...")
@@ -361,9 +365,9 @@ class DashboardRunCommand(BaseCommand):
 
     def _launch_tauri_dashboard(
         self,
-        theme: str | None = None,
-        dev: bool = False,
-        detach: bool = False,
+        theme: str | None = None,  # noqa: ARG002
+        dev: bool = False,  # noqa: FBT001
+        detach: bool = False,  # noqa: FBT001
     ) -> None:
         """Launch Tauri-based desktop dashboard interface."""
         self.print_info("🖥️  Starting Tauri Desktop Dashboard...")
@@ -448,7 +452,7 @@ class DashboardListCommand(BaseCommand):
         super().__init__()
         self.env = DashboardEnvironment()
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:  # noqa: ARG002
         """Execute the list command."""
         self.print_info("📋 Available Dashboard Interfaces:\n")
 
@@ -491,7 +495,7 @@ class DashboardListCommand(BaseCommand):
 class DashboardBuildCommand(BaseCommand):
     """Build dashboard for production deployment."""
 
-    def execute(self, interface: str = "tauri", **kwargs) -> dict:
+    def execute(self, interface: str = "tauri", **kwargs) -> dict:  # noqa: ARG002
         """Execute the build command."""
         self.print_info(f"🔨 Building {interface} dashboard for production...")
 
@@ -557,7 +561,7 @@ def dashboard_group() -> None:
 @click.option("--theme", "-t", help="Dashboard theme")
 @click.option("--dev", is_flag=True, default=False, help="Run in development mode")
 @click.option("--detach", "-d", is_flag=True, default=False, help="Run in background")
-def run(interface: str, host: str, port: int, theme: str | None, dev: bool, detach: bool) -> None:
+def run(interface: str, host: str, port: int, theme: str | None, dev: bool, detach: bool) -> None:  # noqa: FBT001
     """Run the dashboard with specified interface."""
     command = DashboardRunCommand()
     command.run(interface=interface, host=host, port=port, theme=theme, dev=dev, detach=detach)
@@ -596,7 +600,7 @@ def build(interface: str) -> None:
 @click.command()
 @click.option("--port", "-p", default=1420, type=int, help="Port for Tauri dev server")
 @click.option("--dev", is_flag=True, default=False, help="Run in development mode")
-def dashboard(port: int, dev: bool) -> None:
+def dashboard(port: int, dev: bool) -> None:  # noqa: FBT001
     """Legacy dashboard command (launches Tauri interface)."""
     click.echo("⚠️  Using legacy dashboard command. Consider using 'yesman dashboard run' for more options.")
     command = DashboardRunCommand()

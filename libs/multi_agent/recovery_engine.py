@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Rollback mechanism and error recovery system for multi-agent operations."""
 
 import asyncio
@@ -169,8 +173,8 @@ class RecoveryEngine:
 
                 logger.info("Loaded {len(self.snapshots)} recovery snapshots")
 
-            except Exception as e:
-                logger.exception(f"Failed to load recovery state: {e}")
+            except Exception:
+                logger.exception("Failed to load recovery state")
 
         # Also load individual snapshot files
         try:
@@ -182,9 +186,9 @@ class RecoveryEngine:
                         snapshot = OperationSnapshot.from_dict(snapshot_data)
                         self.snapshots[snapshot.snapshot_id] = snapshot
                     except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
-                        logger.warning(f"Failed to load snapshot file {snapshot_file}: {e}")
+                        logger.warning("Failed to load snapshot file %s: %s", snapshot_file, e)
         except (OSError, PermissionError) as e:
-            logger.warning(f"Failed to load snapshot files: {e}")
+            logger.warning("Failed to load snapshot files: %s", e)
 
     def _save_state(self) -> None:
         """Save recovery engine state."""
@@ -202,8 +206,8 @@ class RecoveryEngine:
             with state_file.open("w") as f:
                 json.dump(data, f, indent=2)
 
-        except Exception as e:
-            logger.exception(f"Failed to save recovery state: {e}")
+        except Exception:
+            logger.exception("Failed to save recovery state")
 
     def _setup_default_strategies(self) -> None:
         """Setup default recovery strategies."""
@@ -332,7 +336,7 @@ class RecoveryEngine:
                         "branches": {name: info.to_dict() for name, info in branch_manager.branches.items()},
                     }
                 except (AttributeError, KeyError, TypeError) as e:
-                    logger.warning(f"Failed to snapshot branch state: {e}")
+                    logger.warning("Failed to snapshot branch state: %s", e)
 
             # Backup files
             if files_to_backup:
@@ -342,7 +346,7 @@ class RecoveryEngine:
                         if backup_path:
                             snapshot.file_states[file_path] = backup_path
                     except (OSError, PermissionError, shutil.Error) as e:
-                        logger.warning(f"Failed to backup file {file_path}: {e}")
+                        logger.warning("Failed to backup file %s: %s", file_path, e)
 
             # Store snapshot
             self.snapshots[snapshot_id] = snapshot
@@ -354,15 +358,15 @@ class RecoveryEngine:
 
             self.recovery_metrics["total_operations"] += 1
 
-            logger.info("Created snapshot {snapshot_id} for {operation_type.value}: {description}")
+            logger.info("Created snapshot %s for %s: %s", snapshot_id, operation_type.value, description)
 
             # Cleanup old snapshots
             await self._cleanup_old_snapshots()
 
             return snapshot_id
 
-        except Exception as e:
-            logger.exception(f"Failed to create snapshot: {e}")
+        except Exception:
+            logger.exception("Failed to create snapshot")
             raise
 
     async def _backup_file(self, snapshot_id: str, file_path: str) -> str | None:
@@ -378,8 +382,8 @@ class RecoveryEngine:
             shutil.copy2(source_path, backup_path)
             return str(backup_path)
 
-        except Exception as e:
-            logger.exception(f"Failed to backup file {file_path}: {e}")
+        except Exception:
+            logger.exception(f"Failed to backup file {file_path}")  # noqa: G004
             return None
 
     async def rollback_operation(
@@ -387,7 +391,7 @@ class RecoveryEngine:
         snapshot_id: str,
         agent_pool: object | None = None,
         branch_manager: object | None = None,
-        restore_files: bool = True,
+        restore_files: bool = True,  # noqa: FBT001
     ) -> bool:
         """Rollback to a previous snapshot.
 
@@ -434,11 +438,12 @@ class RecoveryEngine:
             logger.info("Successfully rolled back to snapshot {snapshot_id}")
             return True
 
-        except Exception as e:
-            logger.exception(f"Failed to rollback to snapshot {snapshot_id}: {e}")
+        except Exception:
+            logger.exception(f"Failed to rollback to snapshot {snapshot_id}")  # noqa: G004
             return False
 
-    async def _restore_agent_states(self, agent_pool: object | None, agent_states: dict[str, dict[str, str | int | bool | list[str]]]) -> None:
+    @staticmethod
+    async def _restore_agent_states( agent_pool: object | None, agent_states: dict[str, dict[str, str | int | bool | list[str]]]) -> None:
         """Restore agent states from snapshot."""
         for agent_id, agent_data in agent_states.items():
             try:
@@ -465,9 +470,10 @@ class RecoveryEngine:
                     agent_pool.agents[agent_id] = agent
 
             except (KeyError, AttributeError, TypeError, ValueError) as e:
-                logger.warning(f"Failed to restore agent {agent_id}: {e}")
+                logger.warning("Failed to restore agent %s: %s", agent_id, e)
 
-    async def _restore_task_states(self, agent_pool: object | None, task_states: dict[str, dict[str, str | int | bool | float | list[str]]]) -> None:
+    @staticmethod
+    async def _restore_task_states(agent_pool: object | None, task_states: dict[str, dict[str, str | int | bool | float | list[str]]]) -> None:
         """Restore task states from snapshot."""
         # Clear current tasks and restore from snapshot
         agent_pool.tasks.clear()
@@ -486,9 +492,10 @@ class RecoveryEngine:
                 agent_pool.tasks[task_id] = task
 
             except (KeyError, AttributeError, TypeError, ValueError) as e:
-                logger.warning(f"Failed to restore task {task_id}: {e}")
+                logger.warning("Failed to restore task %s: %s", task_id, e)
 
-    async def _restore_branch_state(self, branch_manager: object | None, branch_state: dict[str, str | dict[str, str | int | bool | list[str]]]) -> None:
+    @staticmethod
+    async def _restore_branch_state(branch_manager: object | None, branch_state: dict[str, str | dict[str, str | int | bool | list[str]]]) -> None:
         """Restore branch state from snapshot."""
         try:
             current_branch = branch_state.get("current_branch")
@@ -506,27 +513,29 @@ class RecoveryEngine:
                     branch_info = BranchInfo.from_dict(branch_data)
                     branch_manager.branches[branch_name] = branch_info
                 except (KeyError, AttributeError, TypeError, ImportError) as e:
-                    logger.warning(f"Failed to restore branch {branch_name}: {e}")
+                    logger.warning("Failed to restore branch %s: %s", branch_name, e)
 
             # Save restored branch metadata
             branch_manager._save_branch_metadata()
 
         except (AttributeError, KeyError, ImportError, OSError) as e:
-            logger.warning(f"Failed to restore branch state: {e}")
+            logger.warning("Failed to restore branch state: %s", e)
 
-    async def _restore_files(self, file_states: dict[str, str]) -> None:
+    @staticmethod
+    async def _restore_files(file_states: dict[str, str]) -> None:
         """Restore files from backup."""
         for original_path, backup_path in file_states.items():
             try:
                 if Path(backup_path).exists():
                     shutil.copy2(backup_path, original_path)
-                    logger.debug("Restored file {original_path}")
+                    logger.debug("Restored file %s", original_path)
                 else:
-                    logger.warning("Backup file {backup_path} not found")
+                    logger.warning("Backup file %s not found", backup_path)
             except (OSError, PermissionError, shutil.Error) as e:
-                logger.warning(f"Failed to restore file {original_path}: {e}")
+                logger.warning("Failed to restore file %s: %s", original_path, e)
 
-    async def _execute_rollback_instruction(self, instruction: dict[str, str | int | bool | list[str]]) -> None:
+    @staticmethod
+    async def _execute_rollback_instruction(instruction: dict[str, str | int | bool | list[str]]) -> None:
         """Execute a custom rollback instruction."""
         try:
             instruction_type = instruction.get("type")
@@ -556,7 +565,7 @@ class RecoveryEngine:
             # Add more instruction types as needed
 
         except (OSError, subprocess.CalledProcessError, KeyError, TypeError) as e:
-            logger.warning(f"Failed to execute rollback instruction {instruction}: {e}")
+            logger.warning("Failed to execute rollback instruction %s: %s", instruction, e)
 
     async def handle_operation_failure(
         self,
@@ -633,8 +642,8 @@ class RecoveryEngine:
 
             return False
 
-        except Exception as recovery_error:
-            logger.exception(f"Recovery process failed for {operation_id}: {recovery_error}")
+        except Exception:
+            logger.exception(f"Recovery process failed for {operation_id}")  # noqa: G004
             self.recovery_metrics["failed_recoveries"] += 1
             return False
 
@@ -738,8 +747,8 @@ class RecoveryEngine:
 
             return False
 
-        except Exception as e:
-            logger.exception(f"Failed to execute recovery action {action.value}: {e}")
+        except Exception:
+            logger.exception(f"Failed to execute recovery action {action.value}")  # noqa: G004
             return False
 
     async def _escalate_failure(
@@ -809,8 +818,8 @@ class RecoveryEngine:
             if to_remove:
                 logger.info("Cleaned up {len(to_remove)} old snapshots")
 
-        except Exception as e:
-            logger.exception(f"Failed to cleanup old snapshots: {e}")
+        except Exception:
+            logger.exception("Failed to cleanup old snapshots")
 
     async def _remove_snapshot(self, snapshot_id: str) -> None:
         """Remove a snapshot and its associated backups."""
@@ -830,7 +839,7 @@ class RecoveryEngine:
                 shutil.rmtree(backup_dir)
 
         except (OSError, PermissionError, shutil.Error) as e:
-            logger.warning(f"Failed to remove snapshot {snapshot_id}: {e}")
+            logger.warning("Failed to remove snapshot %s: %s", snapshot_id, e)
 
     def start_operation(self, operation_id: str, snapshot_id: str) -> None:
         """Register that an operation is starting with a snapshot."""

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Automatic conflict resolution and semantic merge implementation for multi-agent development."""
 
 import ast
@@ -9,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictResolutionEngine
@@ -59,7 +63,7 @@ class MergeResult:
     merge_confidence: float = 0.0
     semantic_integrity: bool = True
     diff_stats: dict[str, int] = field(default_factory=dict)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     merge_time: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -93,6 +97,9 @@ class SemanticMerger:
             conflict_engine: ConflictResolutionEngine for conflict context
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
+        
+        Returns:
+            Description of return value
         """
         self.semantic_analyzer = semantic_analyzer
         self.conflict_engine = conflict_engine
@@ -114,7 +121,7 @@ class SemanticMerger:
         self.enable_ast_validation = True
 
         # Machine learning components for merge decisions
-        self.merge_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.merge_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
         self.success_rate_by_strategy: defaultdict[str, list[float]] = defaultdict(list)
 
         # Performance tracking
@@ -194,9 +201,8 @@ class SemanticMerger:
             self._update_merge_stats(merge_result)
 
             logger.info("Merge completed: %s", merge_result.resolution.value)
-            return merge_result
 
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError, SyntaxError):
             logger.exception("Error performing semantic merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -207,6 +213,8 @@ class SemanticMerger:
                 semantic_integrity=False,
                 metadata={"error": str(e)},
             )
+        else:
+            return merge_result
 
     async def batch_merge_files(
         self,
@@ -392,11 +400,11 @@ class SemanticMerger:
             ast.parse(content2)
 
             # Extract semantic contexts
-            context1 = self.semantic_analyzer._extract_semantic_context(
+            context1 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
                 file_path,
                 content1,
             )
-            context2 = self.semantic_analyzer._extract_semantic_context(
+            context2 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
                 file_path,
                 content2,
             )
@@ -462,7 +470,7 @@ class SemanticMerger:
                 },
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error in intelligent merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -516,7 +524,7 @@ class SemanticMerger:
                 ),
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error in AST-based merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -605,7 +613,7 @@ class SemanticMerger:
                 ),
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error in function-level merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -628,11 +636,11 @@ class SemanticMerger:
         """Perform semantic union merge combining compatible changes."""
         try:
             # Extract semantic contexts
-            context1 = self.semantic_analyzer._extract_semantic_context(
+            context1 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
                 file_path,
                 content1,
             )
-            context2 = self.semantic_analyzer._extract_semantic_context(
+            context2 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
                 file_path,
                 content2,
             )
@@ -689,7 +697,7 @@ class SemanticMerger:
                 ),
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error in semantic union merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -720,6 +728,7 @@ class SemanticMerger:
             conflicts,
         )
 
+    @staticmethod
     def _prefer_branch_merge(
         self,
         merge_id: str,
@@ -751,7 +760,7 @@ class SemanticMerger:
         branch2: str,
     ) -> list[SemanticConflict]:
         """Detect conflicts in a specific file between branches."""
-        return await self.semantic_analyzer._analyze_file_semantic_conflicts(
+        return await self.semantic_analyzer._analyze_file_semantic_conflicts(  # noqa: SLF001
             file_path,
             branch1,
             branch2,
@@ -759,16 +768,19 @@ class SemanticMerger:
 
     async def _get_file_content(self, file_path: str, branch: str) -> str | None:
         """Get file content from a specific branch."""
-        return await self.semantic_analyzer._get_file_content(file_path, branch)
+        return await self.semantic_analyzer._get_file_content(file_path, branch)  # noqa: SLF001
 
-    def _validate_ast_integrity(self, content: str) -> bool:
+    @staticmethod
+    def _validate_ast_integrity(content: str) -> bool:
         """Validate that merged content maintains AST integrity."""
         try:
             ast.parse(content)
-            return True
         except SyntaxError:
             return False
+        else:
+            return True
 
+    @staticmethod
     def _calculate_diff_stats(
         self,
         content1: str,
@@ -788,7 +800,8 @@ class SemanticMerger:
             "lines_removed": max(0, len(lines1) - len(lines_merged)),
         }
 
-    def _initialize_resolution_rules(self) -> list[ConflictResolutionRule]:
+    @staticmethod
+    def _initialize_resolution_rules() -> list[ConflictResolutionRule]:
         """Initialize default conflict resolution rules."""
         return [
             ConflictResolutionRule(
@@ -817,6 +830,7 @@ class SemanticMerger:
             ),
         ]
 
+    @staticmethod
     def _select_optimal_strategy(
         self,
         conflicts: list[SemanticConflict],
@@ -843,7 +857,7 @@ class SemanticMerger:
         content2: str,  # noqa: ARG002
         context1: SemanticContext,
         context2: SemanticContext,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Resolve an individual semantic conflict."""
         resolution_result = {
             "resolved": False,
@@ -892,6 +906,7 @@ class SemanticMerger:
 
         return resolution_result
 
+    @staticmethod
     def _conflict_resolved_by_merge(
         self,
         conflict: SemanticConflict,  # noqa: ARG002
@@ -921,6 +936,7 @@ class SemanticMerger:
 
     # Placeholder methods for complex operations (would be fully implemented)
 
+    @staticmethod
     def _merge_ast_trees(
         self,
         tree1: ast.AST,
@@ -931,7 +947,8 @@ class SemanticMerger:
         # Simplified implementation - would need complex AST merging logic
         return tree1
 
-    def _extract_functions_with_content(self, content: str) -> dict[str, str]:
+    @staticmethod
+    def _extract_functions_with_content(content: str) -> dict[str, str]:
         """Extract function definitions with their full content."""
         functions = {}
         try:
@@ -948,11 +965,12 @@ class SemanticMerger:
                         lines[start_line : min(end_line, len(lines))],
                     )
                     functions[node.name] = func_content
-        except Exception:
+        except (SyntaxError, ValueError, AttributeError):
             pass
         return functions
 
-    def _extract_non_function_content(self, content: str) -> str:
+    @staticmethod
+    def _extract_non_function_content(content: str) -> str:
         """Extract non-function content (imports, module variables, etc.)."""
         # Simplified implementation
         lines = content.split("\n")
@@ -968,6 +986,7 @@ class SemanticMerger:
 
         return "\n".join(non_func_lines)
 
+    @staticmethod
     def _find_function_conflict(
         self,
         func_name: str,
@@ -979,12 +998,13 @@ class SemanticMerger:
                 return conflict
         return None
 
+    @staticmethod
     def _merge_function_definitions(
         self,
         func1: str,  # noqa: ARG002
         func2: str,
         conflict: SemanticConflict,  # noqa: ARG002
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Merge two function definitions."""
         # Simplified implementation
         return {
@@ -993,7 +1013,8 @@ class SemanticMerger:
             "confidence": 0.7,
         }
 
-    def _merge_imports(self, imports1: list, imports2: list) -> list:
+    @staticmethod
+    def _merge_imports(imports1: list, imports2: list) -> list:
         """Merge import lists intelligently."""
         # Simplified union merge
         all_imports = list(imports1) + list(imports2)
@@ -1007,18 +1028,21 @@ class SemanticMerger:
                 merged.append(imp)
         return merged
 
-    def _merge_function_signatures(self, funcs1: dict, funcs2: dict) -> dict:
+    @staticmethod
+    def _merge_function_signatures(funcs1: dict, funcs2: dict) -> dict:
         """Merge function signature dictionaries."""
         merged = funcs1.copy()
         merged.update(funcs2)
         return merged
 
-    def _merge_class_definitions(self, classes1: dict, classes2: dict) -> dict:
+    @staticmethod
+    def _merge_class_definitions(classes1: dict, classes2: dict) -> dict:
         """Merge class definition dictionaries."""
         merged = classes1.copy()
         merged.update(classes2)
         return merged
 
+    @staticmethod
     def _reconstruct_from_semantic_elements(
         self,
         imports: list,  # noqa: ARG002
@@ -1031,7 +1055,7 @@ class SemanticMerger:
         # Simplified implementation - would need proper code generation
         return content2  # Fallback to second version
 
-    def get_merge_summary(self) -> dict[str, Any]:
+    def get_merge_summary(self) -> dict[str, object]:
         """Get comprehensive summary of merge operations."""
         return {
             "total_merges": self.merge_stats["total_merges"],

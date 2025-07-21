@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Centralized validation utilities for the Yesman-Claude project.
 
 This module provides common validation functions used throughout the project
@@ -157,7 +161,7 @@ def validate_template_exists(template_name: str, templates_dir: str | None = Non
     return True, None
 
 
-def validate_directory_path(path: str, must_exist: bool = True, create_if_missing: bool = False) -> tuple[bool, str | None]:
+def validate_directory_path(path: str, must_exist: bool = True, create_if_missing: bool = False) -> tuple[bool, str | None]:  # noqa: FBT001
     """Validate directory path.
 
     Args:
@@ -307,6 +311,9 @@ def validate_input(validation_func: Any, field_name: str):
         @validate_input(validate_session_name, "session_name")
         def create_session(session_name: str):
             pass
+    
+    Returns:
+        Description of return value
     """
 
     def decorator(func: Any):

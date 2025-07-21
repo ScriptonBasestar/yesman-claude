@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Content collection system for Claude interactions."""
 
 import hashlib
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from libs.utils import ensure_log_directory, get_default_log_path
@@ -44,7 +48,8 @@ class ClaudeContentCollector:
         session_dir.mkdir(exist_ok=True)
         return session_dir
 
-    def _generate_content_hash(self, content: str) -> str:
+    @staticmethod
+    def _generate_content_hash( content: str) -> str:
         """Generate hash for content to detect changes."""
         return hashlib.sha256(content.encode("utf-8")).hexdigest()[:8]
 
@@ -78,7 +83,7 @@ class ClaudeContentCollector:
 
         # Create interaction record
         interaction = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "session_name": self.session_name,
             "interaction_id": f"{self.session_name}_{self.interaction_count:04d}",
             "content_hash": content_hash,
@@ -95,18 +100,18 @@ class ClaudeContentCollector:
 
         # Save to file
         try:
-            filename = f"interaction_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{content_hash}.json"
+            filename = f"interaction_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{content_hash}.json"
             filepath = self.collection_path / filename
 
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(interaction, f, indent=2, ensure_ascii=False)
 
-            self.logger.info(f"Collected interaction {interaction['interaction_id']} - prompt: {prompt_info is not None}, response: {response}")
+            self.logger.info("Collected interaction %s - prompt: %s, response: %s", interaction['interaction_id'], prompt_info is not None, response)
 
             return True
 
         except Exception as e:
-            self.logger.exception(f"Failed to save interaction: {e}")
+            self.logger.exception("Failed to save interaction")  # noqa: G004
             return False
 
     def collect_raw_content(self, content: str, metadata: dict | None = None) -> bool:
@@ -131,7 +136,7 @@ class ClaudeContentCollector:
 
         # Create raw content record
         record = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "session_name": self.session_name,
             "content_hash": content_hash,
             "content": content,
@@ -141,17 +146,17 @@ class ClaudeContentCollector:
         }
 
         try:
-            filename = f"raw_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{content_hash}.json"
+            filename = f"raw_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{content_hash}.json"
             filepath = self.collection_path / filename
 
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(record, f, indent=2, ensure_ascii=False)
 
-            self.logger.debug(f"Collected raw content - hash: {content_hash}")
+            self.logger.debug("Collected raw content - hash: %s", content_hash)
             return True
 
         except Exception as e:
-            self.logger.exception(f"Failed to save raw content: {e}")
+            self.logger.exception("Failed to save raw content")  # noqa: G004
             return False
 
     def get_collection_stats(self) -> dict:
@@ -175,7 +180,7 @@ class ClaudeContentCollector:
             }
 
         except Exception as e:
-            self.logger.exception(f"Failed to get collection stats: {e}")
+            self.logger.exception("Failed to get collection stats")  # noqa: G004
             return {"error": str(e)}
 
     def cleanup_old_files(self, days_to_keep: int = 7) -> int:
@@ -197,12 +202,12 @@ class ClaudeContentCollector:
                     files_deleted += 1
 
             if files_deleted > 0:
-                self.logger.info(f"Cleaned up {files_deleted} old collection files")
+                self.logger.info("Cleaned up %d old collection files", files_deleted)
 
             return files_deleted
 
         except Exception as e:
-            self.logger.exception(f"Failed to cleanup old files: {e}")
+            self.logger.exception("Failed to cleanup old files")  # noqa: G004
             return 0
 
 

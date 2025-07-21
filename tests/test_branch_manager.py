@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for BranchManager class."""
 
 import subprocess
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -15,7 +19,8 @@ class TestBranchManager:
     """Test cases for BranchManager."""
 
     @pytest.fixture
-    def mock_git_repo(self, tmp_path: Path) -> Path:
+    @staticmethod
+    def mock_git_repo( tmp_path: Path) -> Path:
         """Create a mock git repository."""
         repo_path = tmp_path / "test_repo"
         repo_path.mkdir()
@@ -40,27 +45,32 @@ class TestBranchManager:
         return repo_path
 
     @pytest.fixture
-    def branch_manager(self, mock_git_repo: Path) -> BranchManager:
+    @staticmethod
+    def branch_manager(mock_git_repo: Path) -> BranchManager:
         """Create BranchManager instance."""
         return BranchManager(repo_path=str(mock_git_repo))
 
-    def test_init(self, branch_manager: BranchManager, mock_git_repo: Path) -> None:
+    @staticmethod
+    def test_init(branch_manager: BranchManager, mock_git_repo: Path) -> None:
         """Test BranchManager initialization."""
         assert branch_manager.repo_path == mock_git_repo
         assert branch_manager.branch_prefix == "feat/multi-agent"
         assert branch_manager.branches == {}
 
-    def test_get_current_branch(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_get_current_branch(branch_manager: BranchManager) -> None:
         """Test getting current branch."""
         current = branch_manager._get_current_branch()
         assert current == "develop"
 
-    def test_branch_exists(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_branch_exists(branch_manager: BranchManager) -> None:
         """Test checking if branch exists."""
         assert branch_manager._branch_exists("develop") is True
         assert branch_manager._branch_exists("nonexistent") is False
 
-    def test_create_feature_branch(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_create_feature_branch(branch_manager: BranchManager) -> None:
         """Test creating a feature branch."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             # Mock responses
@@ -85,7 +95,8 @@ class TestBranchManager:
             assert info.status == "active"
             assert info.metadata["issue_name"] == "test-issue-123"
 
-    def test_create_feature_branch_sanitization(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_create_feature_branch_sanitization(branch_manager: BranchManager) -> None:
         """Test branch name sanitization."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.side_effect = [
@@ -104,19 +115,20 @@ class TestBranchManager:
             assert "(" not in branch_name
             assert "!" not in branch_name
 
-    def test_list_active_branches(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_list_active_branches(branch_manager: BranchManager) -> None:
         """Test listing active branches."""
         # Add some test branches to metadata
         branch1 = BranchInfo(
             name="feat/multi-agent/issue1",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             status="active",
         )
         branch2 = BranchInfo(
             name="feat/multi-agent/issue2",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             status="merged",
         )
 
@@ -132,12 +144,13 @@ class TestBranchManager:
             assert len(active) == 1
             assert active[0].name == "feat/multi-agent/issue1"
 
-    def test_get_branch_status(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_get_branch_status(branch_manager: BranchManager) -> None:
         """Test getting branch status."""
         branch_info = BranchInfo(
             name="feat/multi-agent/test",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
         )
         branch_manager.branches["feat/multi-agent/test"] = branch_info
 
@@ -159,7 +172,8 @@ class TestBranchManager:
             assert status["last_commit"]["hash"] == "abc123"
             assert status["last_commit"]["message"] == "Test commit"
 
-    def test_switch_branch(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_switch_branch(branch_manager: BranchManager) -> None:
         """Test switching branches."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.side_effect = [
@@ -178,7 +192,8 @@ class TestBranchManager:
             result = branch_manager.switch_branch("nonexistent")
             assert result is False
 
-    def test_update_branch_metadata(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_update_branch_metadata(branch_manager: BranchManager) -> None:
         """Test updating branch metadata."""
         branch_name = "feat/multi-agent/test"
 
@@ -192,12 +207,13 @@ class TestBranchManager:
         assert branch_manager.branches[branch_name].metadata["agent_id"] == "agent-1"
         assert branch_manager.branches[branch_name].metadata["task"] == "implement feature"
 
-    def test_mark_branch_merged(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_mark_branch_merged(branch_manager: BranchManager) -> None:
         """Test marking branch as merged."""
         branch_info = BranchInfo(
             name="feat/multi-agent/test",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             status="active",
         )
         branch_manager.branches[branch_info.name] = branch_info
@@ -206,19 +222,20 @@ class TestBranchManager:
 
         assert branch_manager.branches[branch_info.name].status == "merged"
 
-    def test_cleanup_merged_branches(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_cleanup_merged_branches(branch_manager: BranchManager) -> None:
         """Test cleaning up merged branches."""
         # Add test branches
         branch1 = BranchInfo(
             name="feat/multi-agent/merged1",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             status="merged",
         )
         branch2 = BranchInfo(
             name="feat/multi-agent/active1",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             status="active",
         )
 
@@ -238,7 +255,8 @@ class TestBranchManager:
                 assert branch1.name not in branch_manager.branches
                 assert branch2.name in branch_manager.branches
 
-    def test_get_branch_conflicts(self, branch_manager: BranchManager) -> None:
+    @staticmethod
+    def test_get_branch_conflicts(branch_manager: BranchManager) -> None:
         """Test checking branch conflicts."""
         with patch.object(branch_manager, "_run_git_command") as mock_run:
             mock_run.side_effect = [
@@ -258,13 +276,14 @@ class TestBranchManager:
             assert len(conflicts["conflicts"]) == 1
             assert "file.py" in conflicts["conflicts"][0]
 
-    def test_metadata_persistence(self, branch_manager: BranchManager, tmp_path: Path) -> None:
+    @staticmethod
+    def test_metadata_persistence(branch_manager: BranchManager, tmp_path: Path) -> None:  # noqa: ARG002
         """Test saving and loading branch metadata."""
         # Create test branch info
         branch_info = BranchInfo(
             name="feat/multi-agent/test",
             base_branch="develop",
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             metadata={"test": "value"},
         )
 

@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Test configuration modes including backward compatibility."""
 
 from pathlib import Path
 from unittest.mock import patch
-from typing import Any
+from typing import object
 
 import pytest
 import yaml
@@ -13,7 +17,8 @@ from libs.yesman_config import YesmanConfig
 class TestConfigModes:
     """Test configuration modes and backward compatibility."""
 
-    def test_merge_mode_default(self, tmp_path: Any) -> None:
+    @staticmethod
+    def test_merge_mode_default( tmp_path: object) -> None:
         """Test default merge mode behavior."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"
@@ -47,7 +52,8 @@ class TestConfigModes:
                 # Local setting is added
                 assert config.get("local_setting") == "local_value"
 
-    def test_isolated_mode(self, tmp_path: Any) -> None:
+    @staticmethod
+    def test_isolated_mode(tmp_path: object) -> None:
         """Test isolated mode (new name)."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"
@@ -81,7 +87,8 @@ class TestConfigModes:
                 # Global setting is NOT included
                 assert config.get("global_setting") is None
 
-    def test_local_mode_backward_compatibility(self, tmp_path: Any) -> None:
+    @staticmethod
+    def test_local_mode_backward_compatibility(tmp_path: object) -> None:
         """Test that 'local' mode still works for backward compatibility."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"
@@ -115,7 +122,8 @@ class TestConfigModes:
                 # Global setting is NOT included
                 assert config.get("global_setting") is None
 
-    def test_isolated_mode_empty_error(self, tmp_path: Any) -> None:
+    @staticmethod
+    def test_isolated_mode_empty_error(tmp_path: object) -> None:
         """Test error when isolated mode is set but local config is empty."""
         # Create empty local config with isolated mode
         local_dir = tmp_path / "project" / ".scripton" / "yesman"
@@ -130,7 +138,8 @@ class TestConfigModes:
                 with pytest.raises(RuntimeError, match="mode: isolated but.*doesn't exist or is empty"):
                     YesmanConfig()
 
-    def test_unsupported_mode_error(self, tmp_path: Any) -> None:
+    @staticmethod
+    def test_unsupported_mode_error(tmp_path: object) -> None:
         """Test error for unsupported mode."""
         # Create local config with invalid mode
         local_dir = tmp_path / "project" / ".scripton" / "yesman"

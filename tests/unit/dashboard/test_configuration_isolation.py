@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import tempfile
 from pathlib import Path
 
@@ -8,7 +12,8 @@ from libs.dashboard.theme_system import ColorPalette, Theme, ThemeMode
 class TestConfigurationIsolation:
     """Tests for configuration isolation between instances."""
 
-    def test_configuration_isolation(self) -> None:
+    @staticmethod
+    def test_configuration_isolation() -> None:
         """Test configuration isolation between instances."""
         with (
             tempfile.TemporaryDirectory() as temp_dir1,

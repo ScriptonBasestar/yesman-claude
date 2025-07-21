@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Test for ls command."""
 
 import unittest
 from unittest.mock import MagicMock, patch
-from typing import Any
+from typing import object
 
 from click.testing import CliRunner
 
@@ -14,7 +18,7 @@ class TestLsCommand(unittest.TestCase):
         self.runner = CliRunner()
 
     @patch("commands.ls.TmuxManager")
-    def test_ls_shows_templates(self, mock_tmux_manager: Any) -> None:
+    def test_ls_shows_templates(self, mock_tmux_manager: object) -> None:
         """Test that ls command shows available templates."""
         # Setup mock
         mock_manager_instance = MagicMock()
@@ -34,7 +38,7 @@ class TestLsCommand(unittest.TestCase):
         assert "template2.yaml" in result.output
 
     @patch("commands.ls.TmuxManager")
-    def test_ls_shows_running_sessions(self, mock_tmux_manager: Any) -> None:
+    def test_ls_shows_running_sessions(self, mock_tmux_manager: object) -> None:
         """Test that ls command shows running sessions."""
         # Setup mock
         mock_manager_instance = MagicMock()
@@ -54,7 +58,7 @@ class TestLsCommand(unittest.TestCase):
         assert "session2" in result.output
 
     @patch("commands.ls.TmuxManager")
-    def test_ls_handles_no_templates(self, mock_tmux_manager: Any) -> None:
+    def test_ls_handles_no_templates(self, mock_tmux_manager: object) -> None:
         """Test ls command when no templates exist."""
         # Setup mock
         mock_manager_instance = MagicMock()
@@ -70,7 +74,7 @@ class TestLsCommand(unittest.TestCase):
         assert "No templates found" in result.output or "Available templates:" in result.output
 
     @patch("commands.ls.TmuxManager")
-    def test_ls_handles_tmux_error(self, mock_tmux_manager: Any) -> None:
+    def test_ls_handles_tmux_error(self, mock_tmux_manager: object) -> None:
         """Test ls command handles tmux errors gracefully."""
         # Setup mock to raise exception
         mock_tmux_manager.side_effect = Exception("Tmux not found")

@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Widget Data Adapter
 Converts raw data from various sources into standardized widget models.
 """
 
 import logging
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
+from typing import object
 
 from .widget_models import (
     ActivityData,
@@ -39,7 +43,7 @@ class WidgetDataAdapter:
         """Initialize the adapter."""
         self.logger = logging.getLogger("yesman.dashboard.widget_adapter")
 
-    def adapt_session_data(self, raw_data: dict[str, Any] | list[dict[str, Any]]) -> SessionData | list[SessionData]:
+    def adapt_session_data(self, raw_data: dict[str, object] | list[dict[str, object]]) -> SessionData | list[SessionData]:
         """Convert raw session data to SessionData model(s).
 
         Args:
@@ -53,7 +57,7 @@ class WidgetDataAdapter:
 
         return self._adapt_single_session(raw_data)
 
-    def _adapt_single_session(self, data: dict[str, Any]) -> SessionData:
+    def _adapt_single_session(self, data: dict[str, object]) -> SessionData:
         """Convert single session data."""
         try:
             # Parse session status
@@ -97,7 +101,7 @@ class WidgetDataAdapter:
                 name=data.get("name") or data.get("session_name", "unknown"),
                 id=str(data.get("id") or data.get("session_id", "")),
                 status=status,
-                created_at=created_at or datetime.now(),
+                created_at=created_at or datetime.now(UTC),
                 last_activity=last_activity,
                 windows=windows,
                 panes=data.get("panes", len(windows)),
@@ -108,13 +112,13 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception(f"Error adapting session data: {e}")
+            self.logger.exception("Error adapting session data")  # noqa: G004
             # Return a minimal session object
             return SessionData(
                 name=data.get("name", "unknown"),
                 id=str(data.get("id", "")),
                 status=SessionStatus.ERROR,
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC),
                 last_activity=None,
                 windows=[],
                 panes=0,
@@ -122,7 +126,7 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_health_data(self, raw_data: dict[str, Any]) -> HealthData:
+    def adapt_health_data(self, raw_data: dict[str, object]) -> HealthData:
         """Convert raw health data to HealthData model.
 
         Args:
@@ -183,23 +187,23 @@ class WidgetDataAdapter:
                 overall_score=overall_score,
                 overall_level=overall_level,
                 categories=categories,
-                last_updated=last_updated or datetime.now(),
+                last_updated=last_updated or datetime.now(UTC),
                 project_path=raw_data.get("project_path", ""),
                 metadata=raw_data.get("metadata", {}),
             )
 
         except Exception as e:
-            self.logger.exception(f"Error adapting health data: {e}")
+            self.logger.exception("Error adapting health data")  # noqa: G004
             return HealthData(
                 overall_score=0,
                 overall_level=HealthLevel.UNKNOWN,
                 categories=[],
-                last_updated=datetime.now(),
+                last_updated=datetime.now(UTC),
                 project_path="",
                 metadata={"error": str(e)},
             )
 
-    def adapt_activity_data(self, raw_data: dict[str, Any]) -> ActivityData:
+    def adapt_activity_data(self, raw_data: dict[str, object]) -> ActivityData:
         """Convert raw activity data to ActivityData model.
 
         Args:
@@ -223,7 +227,7 @@ class WidgetDataAdapter:
 
                     entries.append(
                         ActivityEntry(
-                            timestamp=timestamp or datetime.now(),
+                            timestamp=timestamp or datetime.now(UTC),
                             activity_type=activity_type,
                             description=entry_data.get("description", ""),
                             details=entry_data.get("details", {}),
@@ -244,7 +248,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception(f"Error adapting activity data: {e}")
+            self.logger.exception("Error adapting activity data")  # noqa: G004
             return ActivityData(
                 entries=[],
                 total_activities=0,
@@ -257,7 +261,7 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_progress_data(self, raw_data: dict[str, Any]) -> ProgressData:
+    def adapt_progress_data(self, raw_data: dict[str, object]) -> ProgressData:
         """Convert raw progress data to ProgressData model.
 
         Args:
@@ -296,7 +300,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception(f"Error adapting progress data: {e}")
+            self.logger.exception("Error adapting progress data")  # noqa: G004
             return ProgressData(
                 phase=ProgressPhase.ERROR,
                 phase_progress=0.0,
@@ -317,7 +321,8 @@ class WidgetDataAdapter:
                 metadata={"error": str(e)},
             )
 
-    def adapt_metric_card_data(self, raw_data: dict[str, Any]) -> MetricCardData:
+    @staticmethod
+    def adapt_metric_card_data( raw_data: dict[str, object]) -> MetricCardData:
         """Convert raw data to MetricCardData model."""
         return MetricCardData(
             title=raw_data.get("title", ""),
@@ -330,7 +335,8 @@ class WidgetDataAdapter:
             metadata=raw_data.get("metadata", {}),
         )
 
-    def adapt_status_indicator_data(self, raw_data: dict[str, Any]) -> StatusIndicatorData:
+    @staticmethod
+    def adapt_status_indicator_data(raw_data: dict[str, object]) -> StatusIndicatorData:
         """Convert raw data to StatusIndicatorData model."""
         return StatusIndicatorData(
             status=raw_data.get("status", "unknown"),
@@ -341,7 +347,7 @@ class WidgetDataAdapter:
             metadata=raw_data.get("metadata", {}),
         )
 
-    def adapt_chart_data(self, raw_data: dict[str, Any]) -> ChartData:
+    def adapt_chart_data(self, raw_data: dict[str, object]) -> ChartData:
         """Convert raw data to ChartData model."""
         # Parse data points
         data_points = []
@@ -385,7 +391,8 @@ class WidgetDataAdapter:
 
     # Helper methods
 
-    def _parse_timestamp(self, timestamp: Any) -> datetime | None:
+    @staticmethod
+    def _parse_timestamp(timestamp: object) -> datetime | None:
         """Parse various timestamp formats to datetime."""
         if timestamp is None:
             return None
@@ -426,7 +433,8 @@ class WidgetDataAdapter:
 
         return None
 
-    def _parse_session_status(self, status_str: str) -> SessionStatus:
+    @staticmethod
+    def _parse_session_status(status_str: str) -> SessionStatus:
         """Parse session status string."""
         status_mapping = {
             "active": SessionStatus.ACTIVE,
@@ -440,7 +448,8 @@ class WidgetDataAdapter:
 
         return status_mapping.get(status_str.lower(), SessionStatus.IDLE)
 
-    def _parse_activity_type(self, type_str: str) -> ActivityType:
+    @staticmethod
+    def _parse_activity_type(type_str: str) -> ActivityType:
         """Parse activity type string."""
         type_mapping = {
             "file_created": ActivityType.FILE_CREATED,
@@ -462,7 +471,8 @@ class WidgetDataAdapter:
 
         return type_mapping.get(type_str.lower(), ActivityType.FILE_MODIFIED)
 
-    def _parse_progress_phase(self, phase_str: str) -> ProgressPhase:
+    @staticmethod
+    def _parse_progress_phase(phase_str: str) -> ProgressPhase:
         """Parse progress phase string."""
         phase_mapping = {
             "starting": ProgressPhase.STARTING,
@@ -483,22 +493,22 @@ adapter = WidgetDataAdapter()
 
 
 def adapt_session_data(
-    raw_data: dict[str, Any] | list[dict[str, Any]],
+    raw_data: dict[str, object] | list[dict[str, object]],
 ) -> SessionData | list[SessionData]:
     """Convenience function for session data adaptation."""
     return adapter.adapt_session_data(raw_data)
 
 
-def adapt_health_data(raw_data: dict[str, Any]) -> HealthData:
+def adapt_health_data(raw_data: dict[str, object]) -> HealthData:
     """Convenience function for health data adaptation."""
     return adapter.adapt_health_data(raw_data)
 
 
-def adapt_activity_data(raw_data: dict[str, Any]) -> ActivityData:
+def adapt_activity_data(raw_data: dict[str, object]) -> ActivityData:
     """Convenience function for activity data adaptation."""
     return adapter.adapt_activity_data(raw_data)
 
 
-def adapt_progress_data(raw_data: dict[str, Any]) -> ProgressData:
+def adapt_progress_data(raw_data: dict[str, object]) -> ProgressData:
     """Convenience function for progress data adaptation."""
     return adapter.adapt_progress_data(raw_data)

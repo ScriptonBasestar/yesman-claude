@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Cache cleanup command for removing excessive cache files."""
 
 import os
@@ -21,9 +25,9 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 
     def execute(
         self,
-        dry_run: bool = False,
-        force: bool = False,
-        cleanup_all: bool = False,
+        dry_run: bool = False,  # noqa: FBT001
+        force: bool = False,  # noqa: FBT001
+        cleanup_all: bool = False,  # noqa: FBT001
         **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the cleanup command."""
@@ -64,7 +68,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             "success": len(errors) == 0,
         }
 
-    def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:
+    def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:  # noqa: FBT001
         """Find cache files to clean."""
         cache_paths = []
 
@@ -157,7 +161,8 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             if len(errors) > 5:
                 self.console.print(f"   ... and {len(errors) - 5} more")
 
-    def _human_readable_size(self, size_bytes: int) -> str:
+    @staticmethod
+    def _human_readable_size( size_bytes: int) -> str:
         """Convert bytes to human readable format."""
         if size_bytes == 0:
             return "0 B"
@@ -179,7 +184,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 )
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
-def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:
+def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:  # noqa: FBT001
     """Clean up excessive cache files and temporary data."""
     command = CleanupCommand()
     command.run(dry_run=dry_run, force=force, cleanup_all=cleanup_all)

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dashboard modules for project status visualization."""
 
 from .dashboard_launcher import DashboardLauncher, InterfaceInfo

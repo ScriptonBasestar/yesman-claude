@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for Tauri Renderer."""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 
@@ -72,7 +76,7 @@ class TestTauriRenderer:
 
     def test_render_session_browser(self) -> None:
         """Test session browser rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
         session = SessionData(
@@ -117,7 +121,7 @@ class TestTauriRenderer:
 
     def test_render_health_meter(self) -> None:
         """Test health meter rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         category = HealthCategoryData(
             category="build",
             score=85,
@@ -161,7 +165,7 @@ class TestTauriRenderer:
 
     def test_render_activity_heatmap(self) -> None:
         """Test activity heatmap rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         entry = ActivityEntry(
             timestamp=now,
             activity_type=ActivityType.FILE_CREATED,
@@ -212,7 +216,7 @@ class TestTauriRenderer:
 
     def test_render_progress_tracker(self) -> None:
         """Test progress tracker rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         progress = ProgressData(
             phase=ProgressPhase.IMPLEMENTING,
@@ -389,7 +393,7 @@ class TestTauriRenderer:
 
     def test_render_chart(self) -> None:
         """Test chart rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         points = [
             ChartDataPoint(x=now, y=10),
             ChartDataPoint(x="2023-01-02", y=20),
@@ -549,7 +553,7 @@ class TestTauriRenderer:
 
     def test_json_serialization(self) -> None:
         """Test that rendered output is JSON serializable."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         session = SessionData(
             name="test-session",
             id="session-123",
@@ -652,7 +656,7 @@ class TestTauriRendererIntegration:
 
     def test_full_dashboard_json(self) -> None:
         """Test rendering a complete dashboard as JSON."""
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         # Create sample data
         session = SessionData(

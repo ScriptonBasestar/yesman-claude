@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import asyncio
 
 import pytest
@@ -9,7 +13,8 @@ class TestAsyncPerformanceOptimizer:
     """Tests for async performance optimizer."""
 
     @pytest.mark.asyncio
-    async def test_async_performance_optimizer(self) -> None:
+    @staticmethod
+    async def test_async_performance_optimizer() -> None:
         """Test 17: Async performance optimizer."""
         async_optimizer = AsyncPerformanceOptimizer(monitoring_interval=0.1)
 

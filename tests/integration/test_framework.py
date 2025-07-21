@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Integration Test Framework for Yesman-Claude.
 
 Provides base classes, utilities, and fixtures for comprehensive integration testing
@@ -148,7 +152,8 @@ class IntegrationTestBase:
         self.created_sessions.append(session_name)
         return config
 
-    def wait_for_condition(self, condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
+    @staticmethod
+    def wait_for_condition( condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
         """Wait for a condition to become true."""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -187,7 +192,8 @@ class AsyncIntegrationTestBase(IntegrationTestBase):
             self.event_loop.close()
         super().teardown_method()
 
-    async def async_wait_for_condition(self, condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
+    @staticmethod
+    async def async_wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
         """Async version of wait_for_condition."""
         start_time = time.time()
         while time.time() - start_time < timeout:

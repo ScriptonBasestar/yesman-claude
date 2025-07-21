@@ -1,9 +1,13 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Enter (attach to) a tmux session command."""
 
 import os
 import subprocess
 import sys
-from typing import Any
+from typing import object
 
 import click
 import libtmux
@@ -19,7 +23,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         super().__init__()
         self.server = libtmux.Server()
 
-    def validate_preconditions(self) -> None:
+    @staticmethod
+    def validate_preconditions() -> None:
         """Validate command preconditions."""
         super().validate_preconditions()
 
@@ -28,7 +33,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             msg = "Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts"
             raise CommandError(msg)
 
-    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:
+    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the enter command."""
         if list_sessions:
             # Show available sessions
@@ -97,7 +102,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             try:
                 choice = click.prompt("Select session number", type=int)
                 if 1 <= choice <= len(running_sessions):
-                    session_data: dict[str, Any] = running_sessions[choice - 1]
+                    session_data: dict[str, object] = running_sessions[choice - 1]
                     return str(session_data["session"])
                 self.print_error("Invalid selection")
                 return None
@@ -124,7 +129,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 
         return None
 
-    def _attach_to_session(self, session_name: str) -> None:
+    @staticmethod
+    def _attach_to_session( session_name: str) -> None:
         """Attach to the specified tmux session."""
         # Check if we're already in a tmux session
         if "TMUX" in os.environ:
@@ -138,7 +144,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 @click.command()
 @click.argument("session_name", required=False)
 @click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
-def enter(session_name: str | None, list_sessions: bool) -> None:
+def enter(session_name: str | None, list_sessions: bool) -> None:  # noqa: FBT001
     """Enter (attach to) a tmux session."""
     command = EnterCommand()
     command.run(session_name=session_name, list_sessions=list_sessions)

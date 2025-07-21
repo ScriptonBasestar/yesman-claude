@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Automation Workflows Integration Tests.
 
 Tests the complete automation system including context detection,
@@ -8,7 +12,7 @@ workflow execution, and real-time monitoring across components.
 import asyncio
 import contextlib
 import time
-from typing import Any
+from typing import object
 
 from commands.automate import (
     AutomateConfigCommand,
@@ -288,7 +292,8 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         # (In a real implementation, this would check monitoring logs or events)
         assert True  # Placeholder - actual verification would depend on monitoring implementation
 
-    async def _run_async_monitor(self, command_runner: Any, project_path: Any) -> None:
+    @staticmethod
+    async def _run_async_monitor( command_runner: object, project_path: object) -> None:  # noqa: ARG002
         """Helper to run monitoring in async context."""
         # This would be the actual async monitoring implementation
         # For now, we simulate it

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Comprehensive Renderer System Integration Tests
 Testing the complete renderer ecosystem with cross-format compatibility,
 performance benchmarks, and memory stability.
@@ -7,7 +11,7 @@ import gc
 import os
 import threading
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 
 import psutil
 import pytest
@@ -53,15 +57,17 @@ class TestRendererSystemIntegration:
         RendererFactory.reset()
         self.test_data = self._create_comprehensive_test_data()
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup after each test."""
         clear_all_caches()
         RendererFactory.reset()
         gc.collect()
 
-    def _create_comprehensive_test_data(self):
+    @staticmethod
+    def _create_comprehensive_test_data():
         """Create comprehensive test data covering all widget types."""
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         return {
             "session": SessionData(
@@ -238,7 +244,8 @@ class TestRendererSystemIntegration:
         assert "92.5" in web_result or "92.50" in web_result
         assert tauri_result["data"]["value"] == 92.5
 
-    def test_data_transformation_pipeline(self) -> None:
+    @staticmethod
+    def test_data_transformation_pipeline() -> None:
         """Test complete data transformation from models to rendered output."""
         # Start with raw data
         raw_health_data = {
@@ -264,7 +271,8 @@ class TestRendererSystemIntegration:
                 assert "75" in str(result)
                 assert "build" in str(result).lower()
 
-    def test_error_handling_scenarios(self) -> None:
+    @staticmethod
+    def test_error_handling_scenarios() -> None:
         """Test error handling across different scenarios."""
         # Test with None data
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
@@ -292,7 +300,7 @@ class TestRendererSystemIntegration:
             name="incomplete",
             id="inc-123",
             status=SessionStatus.ACTIVE,
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             windows=[],  # Minimal required fields
         )
 
@@ -301,7 +309,8 @@ class TestRendererSystemIntegration:
             result = render_widget(WidgetType.SESSION_BROWSER, [incomplete_session], render_format)
             assert result is not None
 
-    def test_edge_cases_and_boundaries(self) -> None:
+    @staticmethod
+    def test_edge_cases_and_boundaries() -> None:
         """Test edge cases and boundary conditions."""
         # Empty collections
         empty_sessions = []
@@ -343,7 +352,8 @@ class TestRendererSystemIntegration:
                 assert result["data"]["value"] == 999999.99
                 assert result["data"]["trend"] == -50.0
 
-    def test_concurrent_rendering(self) -> None:
+    @staticmethod
+    def test_concurrent_rendering() -> None:
         """Test concurrent rendering across multiple threads."""
         results = []
         errors = []
@@ -413,7 +423,8 @@ class TestRendererPerformance:
             suffix="%",
         )
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup after performance tests."""
         clear_all_caches()
 
@@ -455,7 +466,8 @@ class TestRendererPerformance:
         # Performance assertions (150ms threshold for 3 formats)
         assert avg_time < 0.15, f"Average multi-format render time {avg_time:.4f}s exceeds 150ms threshold"
 
-    def test_batch_rendering_performance(self) -> None:
+    @staticmethod
+    def test_batch_rendering_performance() -> None:
         """Test batch rendering performance vs individual rendering."""
         metrics = [MetricCardData(title=f"Batch Test {i}", value=i * 10) for i in range(20)]
 
@@ -526,12 +538,14 @@ class TestRendererMemoryStability:
         gc.collect()
         self.initial_memory = self._get_memory_usage()
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup for memory tests."""
         clear_all_caches()
         gc.collect()
 
-    def _get_memory_usage(self):
+    @staticmethod
+    def _get_memory_usage():
         """Get current memory usage in MB."""
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
@@ -547,7 +561,7 @@ class TestRendererMemoryStability:
                 name=f"session-{i}",
                 id=f"id-{i}",
                 status=SessionStatus.ACTIVE,
-                created_at=datetime.now(),
+                created_at=datetime.now(UTC),
                 windows=[WindowData(id=f"{i}-{j}", name=f"window-{j}", active=j == 0, panes=3) for j in range(5)],
                 panes=15,
                 claude_active=i % 2 == 0,
@@ -585,7 +599,8 @@ class TestRendererMemoryStability:
         # Most memory should be released (allow some overhead)
         assert memory_after_cleanup < memory_increase * 0.5, f"Memory not properly released: {memory_after_cleanup:.2f}MB remaining"
 
-    def test_cache_memory_limits(self) -> None:
+    @staticmethod
+    def test_cache_memory_limits() -> None:
         """Test that cache respects memory limits."""
         # Create small cache
         cache = RenderCache(max_size=10, ttl=None)
@@ -644,7 +659,8 @@ class TestRendererMemoryStability:
 class TestRendererCompatibility:
     """Compatibility tests for different data formats and edge cases."""
 
-    def test_data_format_compatibility(self) -> None:
+    @staticmethod
+    def test_data_format_compatibility() -> None:
         """Test compatibility with different data input formats."""
         # Test with dataclass instance
         metric_dataclass = MetricCardData(title="Dataclass Test", value=100)
@@ -675,7 +691,8 @@ class TestRendererCompatibility:
         assert result3["data"]["headers"] == ["String", "Number", "Boolean"]
         assert len(result3["data"]["rows"]) == 3
 
-    def test_unicode_and_special_characters(self) -> None:
+    @staticmethod
+    def test_unicode_and_special_characters() -> None:
         """Test handling of unicode and special characters."""
         # Unicode characters
         unicode_metric = MetricCardData(
@@ -707,10 +724,11 @@ class TestRendererCompatibility:
         # Web format should escape dangerous characters
         assert "<script>" not in web_result or "&lt;script&gt;" in web_result
 
-    def test_timezone_and_datetime_handling(self) -> None:
+    @staticmethod
+    def test_timezone_and_datetime_handling() -> None:
         """Test handling of different datetime formats and timezones."""
         # Different datetime objects
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         session_with_times = SessionData(
             name="time-test",
@@ -731,7 +749,8 @@ class TestRendererCompatibility:
                 # Should be ISO format string
                 assert isinstance(session_data["created_at"], str)
 
-    def test_empty_and_null_data_handling(self) -> None:
+    @staticmethod
+    def test_empty_and_null_data_handling() -> None:
         """Test handling of empty and null data."""
         empty_data_tests = [
             # Empty strings

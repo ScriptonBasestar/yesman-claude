@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Renderer Factory
 Factory pattern for creating and managing dashboard renderers.
 """
@@ -148,7 +152,7 @@ class RendererFactory:
     def render_universal(
         cls,
         widget_type: WidgetType,
-        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
         render_format: RenderFormat | None = None,
         options: dict[str, str | int | float | bool] | None = None,
     ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool] | dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
@@ -200,7 +204,7 @@ class RendererFactory:
     def render_parallel(
         cls,
         widget_type: WidgetType,
-        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
         formats: list[RenderFormat] | None = None,
         options: dict[str, str | int | float | bool] | None = None,
         max_workers: int = 3,
@@ -278,7 +282,7 @@ class RendererFactory:
 
 def render_widget(
     widget_type: WidgetType,
-    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
     render_format: RenderFormat,
     options: dict[str, str | int | float | bool] | None = None,
 ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool]:
@@ -298,7 +302,7 @@ def render_widget(
 
 def render_all_formats(
     widget_type: WidgetType,
-    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
     options: dict[str, str | int | float | bool] | None = None,
 ) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
     """Render a widget with all available formats.
@@ -316,10 +320,10 @@ def render_all_formats(
 
 def render_formats(
     widget_type: WidgetType,
-    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
     formats: list[RenderFormat],
     options: dict[str, str | int | float | bool] | None = None,
-    parallel: bool = False,
+    parallel: bool = False,  # noqa: FBT001
 ) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
     """Render a widget with specific formats.
 

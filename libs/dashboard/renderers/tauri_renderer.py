@@ -1,11 +1,15 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tauri Renderer
 JSON-based renderer for Tauri desktop application integration.
 """
 
 import json
 import uuid
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
+from typing import object
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .widget_models import (
@@ -28,7 +32,7 @@ class TauriRenderer(BaseRenderer):
     to render native UI components with chart data and interactive elements.
     """
 
-    def __init__(self, theme: dict[str, Any] | None = None) -> None:
+    def __init__(self, theme: dict[str, object] | None = None) -> None:
         """Initialize Tauri renderer.
 
         Args:
@@ -74,8 +78,8 @@ class TauriRenderer(BaseRenderer):
     def render_widget(
         self,
         widget_type: WidgetType,
-        data: Any,
-        options: dict[str, Any] | None = None,
+        data: object,
+        options: dict[str, object] | None = None,
     ) -> str:
         """Render a single widget as JSON string.
 
@@ -97,7 +101,7 @@ class TauriRenderer(BaseRenderer):
             "id": widget_id,
             "data": {},
             "metadata": {
-                "created_at": datetime.now().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "format": "tauri",
                 "version": "1.0",
             },
@@ -132,9 +136,9 @@ class TauriRenderer(BaseRenderer):
     def _render_widget_as_dict(
         self,
         widget_type: WidgetType,
-        data: Any,
-        options: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+        data: object,
+        options: dict[str, object] | None = None,
+    ) -> dict[str, object]:
         """Internal method to render widget as dictionary.
 
         Args:
@@ -155,7 +159,7 @@ class TauriRenderer(BaseRenderer):
             "id": widget_id,
             "data": {},
             "metadata": {
-                "created_at": datetime.now().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "format": "tauri",
                 "version": "1.0",
             },
@@ -189,8 +193,8 @@ class TauriRenderer(BaseRenderer):
 
     def render_layout(
         self,
-        widgets: list[dict[str, Any]],
-        layout_config: dict[str, Any] | None = None,
+        widgets: list[dict[str, object]],
+        layout_config: dict[str, object] | None = None,
     ) -> str:
         """Render a layout containing multiple widgets.
 
@@ -221,7 +225,7 @@ class TauriRenderer(BaseRenderer):
             "widgets": rendered_widgets,
             "config": layout_config,
             "metadata": {
-                "created_at": datetime.now().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "widget_count": len(rendered_widgets),
             },
         }
@@ -231,7 +235,7 @@ class TauriRenderer(BaseRenderer):
     def render_container(
         self,
         content: str,
-        container_config: dict[str, Any] | None = None,
+        container_config: dict[str, object] | None = None,
     ) -> str:
         """Render a container wrapping content.
 
@@ -261,7 +265,7 @@ class TauriRenderer(BaseRenderer):
             },
             "style": self._get_container_style(container_config),
             "metadata": {
-                "created_at": datetime.now().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             },
         }
 
@@ -269,11 +273,12 @@ class TauriRenderer(BaseRenderer):
 
     # Widget-specific processors
 
+    @staticmethod
     def _process_session_browser(
         self,
-        widget_json: dict[str, Any],
+        widget_json: dict[str, object],
         data: SessionData | list[SessionData],
-        options: dict[str, Any],
+        options: dict[str, object],
     ) -> None:
         """Process session browser widget."""
         view_mode = options.get("view_mode", "table")
@@ -337,7 +342,7 @@ class TauriRenderer(BaseRenderer):
             },
         ]
 
-    def _process_health_meter(self, widget_json: dict[str, Any], data: HealthData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_health_meter(self, widget_json: dict[str, object], data: HealthData, options: dict[str, object]) -> None:  # noqa: ARG002
         """Process health meter widget."""
         if not isinstance(data, HealthData):
             widget_json["data"] = {"error": "Invalid health data"}
@@ -404,14 +409,14 @@ class TauriRenderer(BaseRenderer):
             )
         )
 
-    def _process_activity_heatmap(self, widget_json: dict[str, Any], data: ActivityData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_activity_heatmap(self, widget_json: dict[str, object], data: ActivityData, options: dict[str, object]) -> None:  # noqa: ARG002
         """Process activity heatmap widget."""
         if not isinstance(data, ActivityData):
             widget_json["data"] = {"error": "Invalid activity data"}
             return
 
         # Process activity entries for matrix display
-        activities_by_date: dict[str, dict[str, Any]] = {}
+        activities_by_date: dict[str, dict[str, object]] = {}
         for entry in data.entries:
             if hasattr(entry, "timestamp") and entry.timestamp:
                 date_key = entry.timestamp.strftime("%Y-%m-%d") if isinstance(entry.timestamp, datetime) else str(entry.timestamp)[:10]
@@ -465,7 +470,7 @@ class TauriRenderer(BaseRenderer):
             )
         )
 
-    def _process_progress_tracker(self, widget_json: dict[str, Any], data: ProgressData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_progress_tracker(self, widget_json: dict[str, object], data: ProgressData, options: dict[str, object]) -> None:  # noqa: ARG002
         """Process progress tracker widget."""
         if not isinstance(data, ProgressData):
             widget_json["data"] = {"error": "Invalid progress data"}
@@ -506,7 +511,7 @@ class TauriRenderer(BaseRenderer):
         phase_color = "success" if data.phase == ProgressPhase.COMPLETED else "warning" if data.phase == ProgressPhase.ERROR else "info"
         widget_json["style"].update(self._style_classes.get(phase_color, self._style_classes["neutral"]))
 
-    def _process_log_viewer(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]) -> None:
+    def _process_log_viewer(self, widget_json: dict[str, object], data: dict[str, object], options: dict[str, object]) -> None:
         """Process log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 100)
@@ -527,7 +532,7 @@ class TauriRenderer(BaseRenderer):
             else:
                 processed_logs.append(
                     {
-                        "timestamp": datetime.now().isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "level": "INFO",
                         "message": str(log_entry),
                         "source": "system",
@@ -562,7 +567,7 @@ class TauriRenderer(BaseRenderer):
             },
         ]
 
-    def _process_metric_card(self, widget_json: dict[str, Any], data: MetricCardData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_metric_card(self, widget_json: dict[str, object], data: MetricCardData, options: dict[str, object]) -> None:  # noqa: ARG002
         """Process metric card widget."""
         if not isinstance(data, MetricCardData):
             widget_json["data"] = {"error": "Invalid metric data"}
@@ -611,9 +616,9 @@ class TauriRenderer(BaseRenderer):
 
     def _process_status_indicator(
         self,
-        widget_json: dict[str, Any],
+        widget_json: dict[str, object],
         data: StatusIndicatorData,
-        options: dict[str, Any],  # noqa: ARG002
+        options: dict[str, object],  # noqa: ARG002
     ) -> None:
         """Process status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
@@ -626,7 +631,7 @@ class TauriRenderer(BaseRenderer):
             "color": data.color,
             "icon": data.icon,
             "pulse": data.pulse,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Animation configuration for Tauri
@@ -640,7 +645,8 @@ class TauriRenderer(BaseRenderer):
         # Color-based styling
         widget_json["style"].update(self._style_classes.get(data.color, self._style_classes["neutral"]))
 
-    def _process_chart(self, widget_json: dict[str, Any], data: ChartData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    @staticmethod
+    def _process_chart(widget_json: dict[str, object], data: ChartData, options: dict[str, object]) -> None:  # noqa: ARG002
         """Process chart widget."""
         if not isinstance(data, ChartData):
             widget_json["data"] = {"error": "Invalid chart data"}
@@ -689,7 +695,8 @@ class TauriRenderer(BaseRenderer):
             },
         }
 
-    def _process_table(self, widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]) -> None:  # noqa: ARG002
+    @staticmethod
+    def _process_table(widget_json: dict[str, object], data: dict[str, object], options: dict[str, object]) -> None:  # noqa: ARG002
         """Process table widget."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -718,10 +725,10 @@ class TauriRenderer(BaseRenderer):
 
     def _process_generic_widget(
         self,
-        widget_json: dict[str, Any],
+        widget_json: dict[str, object],
         widget_type: WidgetType,
-        data: Any,
-        options: dict[str, Any],  # noqa: ARG002
+        data: object,
+        options: dict[str, object],  # noqa: ARG002
     ) -> None:
         """Process generic widget fallback."""
         widget_json["data"] = {
@@ -739,7 +746,8 @@ class TauriRenderer(BaseRenderer):
         self.widget_id_counter += 1
         return f"tauri-widget-{self.widget_id_counter}-{uuid.uuid4().hex[:8]}"
 
-    def _get_default_style(self) -> dict[str, Any]:
+    @staticmethod
+    def _get_default_style() -> dict[str, object]:
         """Get default widget style."""
         return {
             "background": "surface",
@@ -751,7 +759,7 @@ class TauriRenderer(BaseRenderer):
             "border_color": "border",
         }
 
-    def _get_container_style(self, config: dict[str, Any]) -> dict[str, Any]:
+    def _get_container_style(self, config: dict[str, object]) -> dict[str, object]:
         """Get container style based on configuration."""
         style = self._get_default_style()
 
@@ -769,7 +777,8 @@ class TauriRenderer(BaseRenderer):
 
         return style
 
-    def _get_health_color(self, health_level: HealthLevel) -> str:
+    @staticmethod
+    def _get_health_color(health_level: HealthLevel) -> str:
         """Get color for health level."""
         color_mapping = {
             HealthLevel.EXCELLENT: "#10b981",
@@ -780,7 +789,8 @@ class TauriRenderer(BaseRenderer):
         }
         return color_mapping.get(health_level, "#6b7280")
 
-    def _get_phase_emoji(self, phase: ProgressPhase) -> str:
+    @staticmethod
+    def _get_phase_emoji(phase: ProgressPhase) -> str:
         """Get emoji for progress phase."""
         phase_emojis = {
             ProgressPhase.STARTING: "🚀",
@@ -794,7 +804,8 @@ class TauriRenderer(BaseRenderer):
         }
         return phase_emojis.get(phase, "❓")
 
-    def _get_log_level_color(self, level: str) -> str:
+    @staticmethod
+    def _get_log_level_color(level: str) -> str:
         """Get color for log level."""
         level_colors = {
             "ERROR": "#ef4444",
@@ -804,7 +815,8 @@ class TauriRenderer(BaseRenderer):
         }
         return level_colors.get(level.upper(), "#6b7280")
 
-    def _count_log_levels(self, logs: list[dict[str, Any]]) -> dict[str, int]:
+    @staticmethod
+    def _count_log_levels(logs: list[dict[str, object]]) -> dict[str, int]:
         """Count log entries by level."""
         counts = {"ERROR": 0, "WARNING": 0, "INFO": 0, "DEBUG": 0}
         for log in logs:
@@ -813,7 +825,8 @@ class TauriRenderer(BaseRenderer):
                 counts[level] += 1
         return counts
 
-    def supports_feature(self, feature: str) -> bool:
+    @staticmethod
+    def supports_feature(feature: str) -> bool:
         """Check if feature is supported."""
         features = {
             "json": True,

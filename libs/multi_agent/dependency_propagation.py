@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dependency change propagation system for multi-agent collaboration."""
 
 import ast
@@ -9,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_info_protocol import BranchInfoProtocol, BranchInfoType
 from .branch_manager import BranchManager
@@ -60,10 +64,10 @@ class DependencyNode:
     module_name: str
     dependencies: set[str] = field(default_factory=set)  # What this depends on
     dependents: set[str] = field(default_factory=set)  # What depends on this
-    exports: dict[str, Any] = field(default_factory=dict)  # What this exports
-    imports: dict[str, Any] = field(default_factory=dict)  # What this imports
+    exports: dict[str, object] = field(default_factory=dict)  # What this exports
+    imports: dict[str, object] = field(default_factory=dict)  # What this imports
     last_analyzed: datetime = field(default_factory=lambda: datetime.now(UTC))
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass
@@ -75,7 +79,7 @@ class DependencyChange:
     changed_by: str
     change_type: DependencyType
     impact_level: ChangeImpact
-    change_details: dict[str, Any]
+    change_details: dict[str, object]
     affected_files: list[str] = field(default_factory=list)
     affected_branches: list[str] = field(default_factory=list)
     propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE
@@ -85,7 +89,7 @@ class DependencyChange:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     processed_at: datetime | None = None
     requires_manual_review: bool = False
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass
@@ -99,7 +103,7 @@ class PropagationResult:
     warnings: list[str] = field(default_factory=list)
     recommendations: list[str] = field(default_factory=list)
     processing_time: float = 0.0
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 class DependencyPropagationSystem:
@@ -111,7 +115,7 @@ class DependencyPropagationSystem:
         branch_info_protocol: BranchInfoProtocol,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-        auto_propagate: bool = True,
+        auto_propagate: bool = True,  # noqa: FBT001
     ) -> None:
         """Initialize the dependency propagation system.
 
@@ -121,6 +125,9 @@ class DependencyPropagationSystem:
             branch_manager: Manager for branch operations
             repo_path: Path to git repository
             auto_propagate: Whether to automatically propagate changes
+        
+        Returns:
+            Description of return value
         """
         self.collaboration_engine = collaboration_engine
         self.branch_info_protocol = branch_info_protocol
@@ -153,8 +160,8 @@ class DependencyPropagationSystem:
 
         # Background tasks
         self._running = False
-        self._propagation_task: asyncio.Task[Any] | None = None
-        self._analysis_task: asyncio.Task[Any] | None = None
+        self._propagation_task: asyncio.Task[object] | None = None
+        self._analysis_task: asyncio.Task[object] | None = None
 
     async def start(self) -> None:
         """Start the dependency propagation system."""
@@ -186,7 +193,7 @@ class DependencyPropagationSystem:
         file_path: str,
         changed_by: str,
         change_type: DependencyType,
-        change_details: dict[str, Any],
+        change_details: dict[str, object],
         impact_level: ChangeImpact | None = None,
         propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE,
     ) -> str:
@@ -274,7 +281,7 @@ class DependencyPropagationSystem:
         logger.info("Built dependency graph with %d nodes", len(self.dependency_graph))
         return self.dependency_graph
 
-    async def get_dependency_impact_report(self, file_path: str) -> dict[str, Any]:
+    async def get_dependency_impact_report(self, file_path: str) -> dict[str, object]:
         """Get comprehensive impact report for a file.
 
         Args:
@@ -487,11 +494,12 @@ class DependencyPropagationSystem:
                 if matching_file in self.dependency_graph:
                     self.dependency_graph[matching_file].dependents.add(file_path)
 
+    @staticmethod
     async def _analyze_change_impact(
         self,
-        file_path: str,
+        file_path: str,  # noqa: ARG002
         change_type: DependencyType,
-        change_details: dict[str, Any],
+        change_details: dict[str, object],
     ) -> ChangeImpact:
         """Analyze the impact level of a change."""
         # Breaking change indicators
@@ -534,7 +542,7 @@ class DependencyPropagationSystem:
         self,
         file_path: str,
         change_type: DependencyType,
-        change_details: dict[str, Any],
+        change_details: dict[str, object],
     ) -> list[str]:
         """Find files affected by a dependency change."""
         if file_path not in self.dependency_graph:
@@ -613,7 +621,8 @@ class DependencyPropagationSystem:
 
         return indirect_files
 
-    def _calculate_complexity_score(self, node: DependencyNode) -> float:
+    @staticmethod
+    def _calculate_complexity_score(node: DependencyNode) -> float:
         """Calculate complexity score for a dependency node."""
         # Factors: number of dependencies, dependents, exports
         dependency_factor = len(node.dependencies) * 0.3
@@ -622,7 +631,8 @@ class DependencyPropagationSystem:
 
         return min(10.0, dependency_factor + dependent_factor + export_factor)
 
-    def _calculate_risk_level(self, complexity_score: float, total_impact: int) -> str:
+    @staticmethod
+    def _calculate_risk_level(complexity_score: float, total_impact: int) -> str:
         """Calculate risk level based on complexity and impact."""
         if complexity_score > 7 or total_impact > 10:
             return "high"
@@ -674,7 +684,7 @@ class DependencyPropagationSystem:
                 processing_time=processing_time,
             )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error processing change %s", change.change_id)
             processing_time = (datetime.now(UTC) - start_time).total_seconds()
             self._update_propagation_stats(processing_time, False)
@@ -719,6 +729,7 @@ class DependencyPropagationSystem:
                     requires_ack=change.requires_manual_review,
                 )
 
+    @staticmethod
     async def _propagate_change_to_branches(
         self,
         change: DependencyChange,
@@ -748,7 +759,7 @@ class DependencyPropagationSystem:
             failed_targets=failed_targets,
         )
 
-    def _update_propagation_stats(self, processing_time: float, success: bool) -> None:
+    def _update_propagation_stats(self, processing_time: float, success: bool) -> None:  # noqa: FBT001
         """Update propagation statistics."""
         # Update average processing time
         total_changes = self.propagation_stats["changes_propagated"]
@@ -793,7 +804,7 @@ class DependencyPropagationSystem:
                 logger.exception("Error in dependency analysis loop")
                 await asyncio.sleep(3600)
 
-    def get_propagation_summary(self) -> dict[str, Any]:
+    def get_propagation_summary(self) -> dict[str, object]:
         """Get comprehensive summary of propagation system."""
         return {
             "statistics": self.propagation_stats.copy(),

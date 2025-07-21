@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import time
 
 from libs.dashboard.renderers import RendererFactory, RenderFormat
@@ -7,7 +11,8 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 class TestPerformanceBenchmark:
     """Tests for basic performance benchmark."""
 
-    def test_performance_benchmark(self) -> None:
+    @staticmethod
+    def test_performance_benchmark() -> None:
         """Test 16: Basic performance benchmark."""
         factory = RendererFactory()
         renderer = factory.create_renderer(RenderFormat.TUI)

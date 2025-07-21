@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Progress tracking for Claude sessions."""
 
 import re
@@ -152,7 +156,8 @@ class ProgressAnalyzer:
             if re.search(self.TODO_PATTERNS["completed"], line, re.IGNORECASE):
                 task.todos_completed += 1
 
-    def _update_phase_progress(self, task: TaskProgress) -> None:
+    @staticmethod
+    def _update_phase_progress( task: TaskProgress) -> None:
         """Update phase progress based on activity indicators."""
         if task.phase == TaskPhase.STARTING:
             # Starting phase is quick

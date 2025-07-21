@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import os
 
 import pytest
@@ -9,7 +13,8 @@ class TestLinuxSpecificFeatures:
     """Tests for Linux-specific functionality."""
 
     @pytest.mark.skipif(not os.path.exists("/proc"), reason="Linux-specific test")
-    def test_linux_specific_features(self) -> None:
+    @staticmethod
+    def test_linux_specific_features() -> None:
         """Test Linux-specific functionality."""
         # This should not crash on Linux
         theme_mode = SystemThemeDetector.get_system_theme()

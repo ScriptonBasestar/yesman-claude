@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for Renderer Factory."""
 
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
+from typing import object
 
 import pytest
 
@@ -37,41 +41,47 @@ from libs.dashboard.renderers.widget_models import (
 class MockRenderer(BaseRenderer):
     """Mock renderer for testing."""
 
-    def __init__(self, should_fail: bool = False) -> None:
+    def __init__(self, should_fail: bool = False) -> None:  # noqa: FBT001
         super().__init__(RenderFormat.TUI)
         self.should_fail = should_fail
         self.render_count = 0
 
-    def render_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any] | None = None) -> str:
+    def render_widget(self, widget_type: WidgetType, data: object, options: dict[str, object] | None = None) -> str:  # noqa: ARG002
         self.render_count += 1
         if self.should_fail:
             msg = "Mock render failure"
             raise Exception(msg)
         return f"mock-{widget_type.value}-{self.render_count}"
 
-    def render_layout(self, widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None) -> str:
+    @staticmethod
+    def render_layout( widgets: list[dict[str, object]], layout_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
         return f"mock-layout-{len(widgets)}"
 
-    def render_container(self, content: Any, container_config: dict[str, Any] | None = None) -> str:
+    @staticmethod
+    def render_container(content: object, container_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
         return f"mock-container-{type(content).__name__}"
 
-    def supports_feature(self, feature: str) -> bool:
+    @staticmethod
+    def supports_feature(feature: str) -> bool:
         return feature == "mock"
 
 
 class TestRendererFactory:
     """Test cases for RendererFactory."""
 
-    def setup_method(self) -> None:
+    @staticmethod
+    def setup_method() -> None:
         """Setup for each test."""
         # Reset factory state
         RendererFactory.reset()
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup after each test."""
         RendererFactory.reset()
 
-    def test_factory_initialization(self) -> None:
+    @staticmethod
+    def test_factory_initialization() -> None:
         """Test factory initialization."""
         assert not RendererFactory._initialized  # noqa: SLF001
 
@@ -83,14 +93,16 @@ class TestRendererFactory:
         assert RenderFormat.WEB in RendererFactory._renderer_classes  # noqa: SLF001
         assert RenderFormat.TAURI in RendererFactory._renderer_classes  # noqa: SLF001
 
-    def test_double_initialization(self) -> None:
+    @staticmethod
+    def test_double_initialization() -> None:
         """Test that double initialization is safe."""
         RendererFactory.initialize()
         RendererFactory.initialize()  # Should not raise
 
         assert RendererFactory._initialized  # noqa: SLF001
 
-    def test_supported_formats(self) -> None:
+    @staticmethod
+    def test_supported_formats() -> None:
         """Test getting supported formats."""
         formats = RendererFactory.get_supported_formats()
 
@@ -99,13 +111,15 @@ class TestRendererFactory:
         assert RenderFormat.WEB in formats
         assert RenderFormat.TAURI in formats
 
-    def test_format_support_check(self) -> None:
+    @staticmethod
+    def test_format_support_check() -> None:
         """Test checking if format is supported."""
         assert RendererFactory.is_format_supported(RenderFormat.TUI)
         assert RendererFactory.is_format_supported(RenderFormat.WEB)
         assert RendererFactory.is_format_supported(RenderFormat.TAURI)
 
-    def test_create_renderer(self) -> None:
+    @staticmethod
+    def test_create_renderer() -> None:
         """Test creating renderer instances."""
         tui_renderer = RendererFactory.create(RenderFormat.TUI)
         web_renderer = RendererFactory.create(RenderFormat.WEB)
@@ -119,7 +133,8 @@ class TestRendererFactory:
         tui_renderer2 = RendererFactory.create(RenderFormat.TUI)
         assert tui_renderer is not tui_renderer2
 
-    def test_create_unsupported_format(self) -> None:
+    @staticmethod
+    def test_create_unsupported_format() -> None:
         """Test creating renderer with unsupported format."""
         # Create fake enum value
         fake_format = type("FakeFormat", (), {"value": "fake"})()
@@ -127,7 +142,8 @@ class TestRendererFactory:
         with pytest.raises(UnsupportedFormatError):
             RendererFactory.create(fake_format)
 
-    def test_singleton_renderer(self) -> None:
+    @staticmethod
+    def test_singleton_renderer() -> None:
         """Test singleton renderer instances."""
         renderer1 = RendererFactory.get_singleton(RenderFormat.TUI)
         renderer2 = RendererFactory.get_singleton(RenderFormat.TUI)
@@ -140,7 +156,8 @@ class TestRendererFactory:
         assert web_renderer is not renderer1
         assert isinstance(web_renderer, WebRenderer)
 
-    def test_register_custom_renderer(self) -> None:
+    @staticmethod
+    def test_register_custom_renderer() -> None:
         """Test registering custom renderer."""
         # Create fake format
         custom_format = type("CustomFormat", (), {"value": "custom"})()
@@ -154,7 +171,8 @@ class TestRendererFactory:
         renderer = RendererFactory.create(custom_format)
         assert isinstance(renderer, MockRenderer)
 
-    def test_render_universal_single_format(self) -> None:
+    @staticmethod
+    def test_render_universal_single_format() -> None:
         """Test universal rendering with single format."""
         metric = MetricCardData(title="Test", value=100)
 
@@ -167,7 +185,8 @@ class TestRendererFactory:
         assert isinstance(result, str)  # TUI returns string
         assert "Test" in result
 
-    def test_render_universal_all_formats(self) -> None:
+    @staticmethod
+    def test_render_universal_all_formats() -> None:
         """Test universal rendering with all formats."""
         metric = MetricCardData(title="Test", value=100)
 
@@ -187,7 +206,8 @@ class TestRendererFactory:
         assert isinstance(results[RenderFormat.WEB], str)
         assert isinstance(results[RenderFormat.TAURI], dict)
 
-    def test_render_parallel(self) -> None:
+    @staticmethod
+    def test_render_parallel() -> None:
         """Test parallel rendering."""
         metric = MetricCardData(title="Test", value=100)
 
@@ -203,7 +223,8 @@ class TestRendererFactory:
         assert RenderFormat.WEB in results
         assert RenderFormat.TAURI in results
 
-    def test_render_parallel_specific_formats(self) -> None:
+    @staticmethod
+    def test_render_parallel_specific_formats() -> None:
         """Test parallel rendering with specific formats."""
         metric = MetricCardData(title="Test", value=100)
         formats = [RenderFormat.TUI, RenderFormat.WEB]
@@ -219,7 +240,8 @@ class TestRendererFactory:
         assert RenderFormat.WEB in results
         assert RenderFormat.TAURI not in results
 
-    def test_thread_safety(self) -> None:
+    @staticmethod
+    def test_thread_safety() -> None:
         """Test thread safety of factory operations."""
         results = []
         errors = []
@@ -248,7 +270,8 @@ class TestRendererFactory:
         # All should have used same singleton instance
         assert all("Thread Test" in result for result in results)
 
-    def test_error_handling_render_failure(self) -> None:
+    @staticmethod
+    def test_error_handling_render_failure() -> None:
         """Test error handling when rendering fails."""
         # Register failing renderer
         failing_format = type("FailingFormat", (), {"value": "failing"})()
@@ -261,7 +284,8 @@ class TestRendererFactory:
                 failing_format,
             )
 
-    def test_error_handling_all_formats_fail(self) -> None:
+    @staticmethod
+    def test_error_handling_all_formats_fail() -> None:
         """Test error handling when all formats fail."""
         # Replace all renderers with failing ones
         original_classes = RendererFactory._renderer_classes.copy()  # noqa: SLF001
@@ -278,7 +302,8 @@ class TestRendererFactory:
         finally:
             RendererFactory._renderer_classes = original_classes  # noqa: SLF001
 
-    def test_clear_instances(self) -> None:
+    @staticmethod
+    def test_clear_instances() -> None:
         """Test clearing singleton instances."""
         renderer1 = RendererFactory.get_singleton(RenderFormat.TUI)
         assert len(RendererFactory._instances) == 1  # noqa: SLF001
@@ -289,7 +314,8 @@ class TestRendererFactory:
         renderer2 = RendererFactory.get_singleton(RenderFormat.TUI)
         assert renderer1 is not renderer2
 
-    def test_reset_factory(self) -> None:
+    @staticmethod
+    def test_reset_factory() -> None:
         """Test resetting factory state."""
         RendererFactory.initialize()
         RendererFactory.get_singleton(RenderFormat.TUI)
@@ -306,15 +332,18 @@ class TestRendererFactory:
 class TestConvenienceFunctions:
     """Test convenience functions."""
 
-    def setup_method(self) -> None:
+    @staticmethod
+    def setup_method() -> None:
         """Setup for each test."""
         RendererFactory.reset()
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup after each test."""
         RendererFactory.reset()
 
-    def test_render_widget_function(self) -> None:
+    @staticmethod
+    def test_render_widget_function() -> None:
         """Test render_widget convenience function."""
         metric = MetricCardData(title="Test", value=100)
 
@@ -327,7 +356,8 @@ class TestConvenienceFunctions:
         assert isinstance(result, str)
         assert "Test" in result
 
-    def test_render_all_formats_function(self) -> None:
+    @staticmethod
+    def test_render_all_formats_function() -> None:
         """Test render_all_formats convenience function."""
         metric = MetricCardData(title="Test", value=100)
 
@@ -337,7 +367,8 @@ class TestConvenienceFunctions:
         assert len(results) == 3
         assert all(fmt in results for fmt in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI])
 
-    def test_render_formats_function(self) -> None:
+    @staticmethod
+    def test_render_formats_function() -> None:
         """Test render_formats convenience function."""
         metric = MetricCardData(title="Test", value=100)
         formats = [RenderFormat.TUI, RenderFormat.WEB]
@@ -350,13 +381,15 @@ class TestConvenienceFunctions:
         results_par = render_formats(WidgetType.METRIC_CARD, metric, formats, parallel=True)
         assert len(results_par) == 2
 
-    def test_create_renderer_function(self) -> None:
+    @staticmethod
+    def test_create_renderer_function() -> None:
         """Test create_renderer convenience function."""
         renderer = create_renderer(RenderFormat.TUI)
 
         assert isinstance(renderer, TUIRenderer)
 
-    def test_get_renderer_function(self) -> None:
+    @staticmethod
+    def test_get_renderer_function() -> None:
         """Test get_renderer convenience function."""
         renderer1 = get_renderer(RenderFormat.TUI)
         renderer2 = get_renderer(RenderFormat.TUI)
@@ -368,22 +401,25 @@ class TestConvenienceFunctions:
 class TestRendererFactoryIntegration:
     """Integration tests for RendererFactory."""
 
-    def setup_method(self) -> None:
+    @staticmethod
+    def setup_method() -> None:
         """Setup for each test."""
         RendererFactory.reset()
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup after each test."""
         RendererFactory.reset()
 
-    def test_full_workflow(self) -> None:
+    @staticmethod
+    def test_full_workflow() -> None:
         """Test complete rendering workflow."""
         # Create sample data
         session = SessionData(
             name="test-session",
             id="session-123",
             status=SessionStatus.ACTIVE,
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             windows=[WindowData(id="1", name="window", active=True, panes=2)],
         )
 
@@ -408,13 +444,14 @@ class TestRendererFactoryIntegration:
         assert "sessions" in factory_result["data"]
         assert factory_result["data"]["sessions"][0]["name"] == "test-session"
 
-    def test_multiple_widget_rendering(self) -> None:
+    @staticmethod
+    def test_multiple_widget_rendering() -> None:
         """Test rendering multiple different widgets."""
         session = SessionData(
             name="test-session",
             id="session-123",
             status=SessionStatus.ACTIVE,
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             windows=[],
         )
 
@@ -432,7 +469,8 @@ class TestRendererFactoryIntegration:
             assert fmt in session_results
             assert fmt in metric_results
 
-    def test_performance_comparison(self) -> None:
+    @staticmethod
+    def test_performance_comparison() -> None:
         """Test performance between sequential and parallel rendering."""
         metric = MetricCardData(title="Performance Test", value=100)
         formats = list(RendererFactory.get_supported_formats())
@@ -455,7 +493,8 @@ class TestRendererFactoryIntegration:
         assert all(result is not None for result in results_seq.values())
         assert all(result is not None for result in results_par.values())
 
-    def test_stress_testing(self) -> None:
+    @staticmethod
+    def test_stress_testing() -> None:
         """Test factory under stress conditions."""
         metrics = [MetricCardData(title=f"Metric {i}", value=i * 10) for i in range(50)]
 

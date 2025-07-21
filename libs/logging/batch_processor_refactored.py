@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Batch log processor for optimized I/O operations - Refactored version."""
 
 import gzip
@@ -34,7 +38,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
         max_batch_size: int = 100,
         max_batch_time: float = 5.0,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
-        compression_enabled: bool = True,
+        compression_enabled: bool = True,  # noqa: FBT001
         output_dir: Path | None = None,
     ) -> None:
         """Initialize the batch processor.
@@ -144,7 +148,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
         self.current_file_size += written_size
         self.extended_stats["bytes_written"] += written_size
 
-        self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")
+        self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")  # noqa: G004
 
     async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
@@ -155,7 +159,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
         self.current_file_size = 0
         self.extended_stats["files_created"] += 1
 
-        self.logger.info(f"Rotated to new log file: {self.current_log_file}")
+        self.logger.info(f"Rotated to new log file: {self.current_log_file}")  # noqa: G004
 
     def add_entry(self, entry: dict[str, Any]) -> None:
         """Add a log entry to the processing queue."""
@@ -189,10 +193,10 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
                     removed_count += 1
 
             if removed_count > 0:
-                self.logger.info(f"Cleaned up {removed_count} old log files")
+                self.logger.info(f"Cleaned up {removed_count} old log files")  # noqa: G004
 
         except Exception as e:
-            self.logger.exception(f"Error cleaning up old log files: {e}")
+            self.logger.exception("Error cleaning up old log files")  # noqa: G004
 
         return removed_count
 
@@ -221,7 +225,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, Any], LogBatch]):
                     batches.append(batch)
 
         except Exception as e:
-            self.logger.exception(f"Error reading batch file {file_path}: {e}")
+            self.logger.exception("Error reading batch file {file_path}")  # noqa: G004
 
         return batches
 

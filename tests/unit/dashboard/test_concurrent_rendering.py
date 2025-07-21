@@ -1,5 +1,9 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import asyncio
-from typing import Any
+from typing import object
 
 import pytest
 
@@ -11,7 +15,8 @@ class TestConcurrentRendering:
     """Tests for concurrent rendering operations."""
 
     @pytest.mark.asyncio
-    async def test_concurrent_rendering(self) -> None:
+    @staticmethod
+    async def test_concurrent_rendering() -> None:
         """Test 7: Concurrent rendering operations."""
         factory = RendererFactory()
 
@@ -22,7 +27,7 @@ class TestConcurrentRendering:
             uptime=1800,
         )
 
-        async def render_widget_async(format_type: RenderFormat, widget_type: WidgetType, data: Any) -> Any:
+        async def render_widget_async(format_type: RenderFormat, widget_type: WidgetType, data: object) -> Any:
             """Async wrapper for rendering."""
             renderer = factory.create_renderer(format_type)
             return renderer.render_widget(widget_type, data)

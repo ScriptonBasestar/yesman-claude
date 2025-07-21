@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Interactive session browser with tree view and keyboard navigation."""
 
 import logging
@@ -72,7 +76,8 @@ class SessionBrowser:
 
         self.last_update = current_time
 
-    def _calculate_activity_level(self, session_data: dict[str, Any]) -> float:
+    @staticmethod
+    def _calculate_activity_level( session_data: dict[str, Any]) -> float:
         """Calculate activity level (0.0 - 1.0) based on session state."""
         activity = 0.0
 
@@ -89,7 +94,8 @@ class SessionBrowser:
 
         return min(activity, 1.0)
 
-    def _get_session_status(self, session_data: dict[str, Any]) -> str:
+    @staticmethod
+    def _get_session_status(session_data: dict[str, Any]) -> str:
         """Determine session status with emoji indicators."""
         if not session_data.get("exists", True):
             return "❌ Not Found"
@@ -110,7 +116,8 @@ class SessionBrowser:
             return f"🟢 Running ({active_processes} processes)"
         return "🟡 Idle"
 
-    def _detect_claude_status(self, session_data: dict[str, Any]) -> str | None:
+    @staticmethod
+    def _detect_claude_status(session_data: dict[str, Any]) -> str | None:
         """Detect Claude status in session."""
         for window in session_data.get("windows", []):
             for pane in window.get("panes", []):

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Session helper utilities for tmux session management.
 
 This module provides common functions for working with tmux sessions,
@@ -89,8 +93,8 @@ def check_session_exists(session_name: str, server: libtmux.Server | None = None
         server = server or get_tmux_server()
         session = server.find_where({"session_name": session_name})
         return session is not None
-    except Exception as e:
-        logger.exception(f"Error checking session existence: {e}")
+    except Exception:
+        logger.exception("Error checking session existence")
         return False
 
 
@@ -192,8 +196,8 @@ def get_session_info(session_name: str, server: libtmux.Server | None = None) ->
             status="running" if int(session.session_attached or 0) > 0 else "detached",
         )
 
-    except Exception as e:
-        logger.exception(f"Error getting session info for {session_name}: {e}")
+    except Exception:
+        logger.exception("Error getting session info for %s")
         msg = f"Failed to get session information for '{session_name}'"
         raise YesmanError(
             msg,
@@ -349,8 +353,8 @@ def get_active_pane(
             is_controller=False,
         )
 
-    except Exception as e:
-        logger.exception(f"Error getting active pane: {e}")
+    except Exception:
+        logger.exception("Error getting active pane")
         msg = "Failed to get active pane information"
         raise YesmanError(
             msg,
@@ -365,7 +369,7 @@ def send_keys_to_pane(
     pane_index: int,
     keys: str,
     server: libtmux.Server | None = None,
-    enter: bool = True,
+    enter: bool = True,  # noqa: FBT001
 ) -> None:
     """Send keys to a specific pane.
 
@@ -418,11 +422,11 @@ def send_keys_to_pane(
 
         # Send keys
         pane.send_keys(keys, enter=enter)
-        logger.debug(f"Sent keys to {session_name}:{window_index}.{pane_index}")
+        logger.debug("Sent keys to %s:%s.%s", session_name, window_index, pane_index)
 
     except Exception as e:
         if not isinstance(e, YesmanError):
-            logger.exception(f"Error sending keys to pane: {e}")
+            logger.exception("Error sending keys to pane")
             msg = "Failed to send keys to pane"
             raise YesmanError(
                 msg,
@@ -478,7 +482,7 @@ def merge_template_override(template_config: dict[str, Any], override_config: di
     return merged
 
 
-def expand_and_validate_directory(directory: str, create_if_missing: bool = False) -> Path:
+def expand_and_validate_directory(directory: str, create_if_missing: bool = False) -> Path:  # noqa: FBT001
     """Expand user paths and validate directory existence.
 
     Args:
@@ -499,7 +503,7 @@ def expand_and_validate_directory(directory: str, create_if_missing: bool = Fals
         if not path.exists():
             if create_if_missing:
                 path.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Created directory: {path}")
+                logger.info("Created directory: %s", path)
             else:
                 msg = f"Directory does not exist: {path}"
                 raise YesmanError(

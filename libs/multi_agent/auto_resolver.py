@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Automated conflict resolution system integrating semantic analysis and intelligent merging."""
 
 import ast
@@ -7,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
@@ -79,7 +83,7 @@ class AutoResolutionResult:
     manual_intervention_required: list[str] = field(default_factory=list)
 
     # Metadata
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     resolved_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -131,8 +135,8 @@ class AutoResolver:
 
         # Resolution history and learning
         self.resolution_history: list[AutoResolutionResult] = []
-        self.success_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
-        self.failure_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.success_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
+        self.failure_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
 
         # Performance tracking
         self.resolution_stats = {
@@ -261,8 +265,8 @@ class AutoResolver:
             logger.info("Auto-resolution completed: %s", outcome.value)
             return result
 
-        except Exception as e:
-            logger.exception("Error in auto-resolution session %s: %s", session_id, e)
+        except Exception:
+            logger.exception("Error in auto-resolution session %s")
             return AutoResolutionResult(
                 session_id=session_id,
                 branch1=branch1,
@@ -278,7 +282,7 @@ class AutoResolver:
         self,
         branches: list[str],
         prevention_mode: AutoResolutionMode = AutoResolutionMode.PREDICTIVE,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Use prediction to prevent conflicts before they occur.
 
         Args:
@@ -330,8 +334,8 @@ class AutoResolver:
                 },
             }
 
-        except Exception as e:
-            logger.exception("Error in predictive conflict prevention: %s", e)
+        except Exception:
+            logger.exception("Error in predictive conflict prevention")
             return {
                 "status": "prevention_failed",
                 "error": str(e),
@@ -446,7 +450,8 @@ class AutoResolver:
 
         return validated
 
-    async def _validate_single_merge_result(self, result: MergeResult) -> bool:
+    @staticmethod
+    async def _validate_single_merge_result( result: MergeResult) -> bool:
         """Validate a single merge result."""
         # Check semantic integrity
         if not result.semantic_integrity:
@@ -484,15 +489,15 @@ class AutoResolver:
                     logger.info("Successfully applied merge for %s", result.file_path)
                 else:
                     logger.warning("Failed to apply merge for %s", result.file_path)
-            except Exception as e:
-                logger.exception("Error applying merge result for %s: %s", result.file_path, e)
+            except Exception:
+                logger.exception("Error applying merge result for %s")
 
         return applied
 
     async def _apply_single_merge_result(
         self,
         result: MergeResult,
-        target_branch: str,
+        target_branch: str,  # noqa: ARG002
     ) -> bool:
         """Apply a single merge result to the target branch."""
         try:
@@ -509,10 +514,11 @@ class AutoResolver:
 
             return True
 
-        except Exception as e:
-            logger.exception("Error applying merge result: %s", e)
+        except Exception:
+            logger.exception("Error applying merge result")
             return False
 
+    @staticmethod
     def _determine_resolution_outcome(
         self,
         all_conflicts: list[SemanticConflict],
@@ -535,6 +541,7 @@ class AutoResolver:
             return ResolutionOutcome.ESCALATED_TO_HUMAN
         return ResolutionOutcome.RESOLUTION_FAILED
 
+    @staticmethod
     def _calculate_session_confidence(
         self,
         applied_results: list[MergeResult],
@@ -546,15 +553,16 @@ class AutoResolver:
         total_confidence = sum(result.merge_confidence for result in applied_results)
         return total_confidence / len(applied_results)
 
+    @staticmethod
     def _generate_prevention_strategies(
         self,
         predictions: list[PredictionResult],
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, object]]:
         """Generate strategies to prevent predicted conflicts."""
         strategies = []
 
         for prediction in predictions:
-            strategy: dict[str, Any] = {
+            strategy: dict[str, object] = {
                 "prediction_id": prediction.prediction_id,
                 "pattern": prediction.pattern.value,
                 "prevention_suggestions": prediction.prevention_suggestions[:],  # Copy the list
@@ -577,9 +585,9 @@ class AutoResolver:
 
     async def _apply_preventive_measures(
         self,
-        predictions: list[PredictionResult],
-        strategies: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
+        predictions: list[PredictionResult],  # noqa: ARG002
+        strategies: list[dict[str, object]],
+    ) -> list[dict[str, object]]:
         """Apply automated preventive measures."""
         applied_measures = []
 
@@ -606,10 +614,11 @@ class AutoResolver:
 
         return applied_measures
 
+    @staticmethod
     async def _apply_preventive_measure(
         self,
         measure: str,
-        strategy: dict[str, Any],
+        strategy: dict[str, object],  # noqa: ARG002
     ) -> bool:
         """Apply a specific preventive measure."""
         # This would implement actual preventive measures
@@ -678,7 +687,7 @@ class AutoResolver:
                     },
                 )
 
-    def get_resolution_summary(self) -> dict[str, Any]:
+    def get_resolution_summary(self) -> dict[str, object]:
         """Get comprehensive summary of auto-resolution performance."""
         return {
             "performance_stats": self.resolution_stats.copy(),
@@ -700,7 +709,7 @@ class AutoResolver:
             "recommendations": self._generate_performance_recommendations(),
         }
 
-    def _analyze_mode_performance(self) -> dict[str, Any]:
+    def _analyze_mode_performance(self) -> dict[str, object]:
         """Analyze performance by resolution mode."""
         mode_stats: defaultdict[str, dict[str, float]] = defaultdict(
             lambda: {

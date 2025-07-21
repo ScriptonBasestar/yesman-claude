@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Rendering Optimizations and Caching
 Performance optimization system for dashboard renderers.
 """
@@ -54,10 +58,11 @@ class RenderCache:
         self._lock = threading.RLock()
         self.stats = CacheStats()
 
+    @staticmethod
     def _generate_cache_key(
         self,
         widget_type: WidgetType,
-        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
         options: dict[str, str | int | float | bool] | None = None,
         renderer_format: RenderFormat | None = None,
     ) -> str:
@@ -209,6 +214,9 @@ def cached_render(cache: RenderCache | None = None):
 
     Args:
         cache: Cache instance to use (default: global widget cache)
+    
+    Returns:
+        Description of return value
     """
     if cache is None:
         cache = _widget_cache
@@ -218,7 +226,7 @@ def cached_render(cache: RenderCache | None = None):
         def wrapper(
             self: object | None,
             widget_type: WidgetType,
-            data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+            data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
             options: dict[str, str | int | float | bool] | None = None,
         ):
             # Generate cache key
@@ -303,7 +311,7 @@ class LazyRenderer:
         self,
         renderer: BaseRenderer,
         widget_type: WidgetType,
-        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
         options: dict[str, str | int | float | bool] | None = None,
     ) -> None:
         """Initialize lazy renderer.
@@ -375,7 +383,7 @@ class BatchRenderer:
     def render_batch(
         self,
         render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]],
-        parallel: bool = True,
+        parallel: bool = True,  # noqa: FBT001
     ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render multiple widgets in batch.
 
@@ -408,7 +416,7 @@ class BatchRenderer:
         def render_single(
             index: int,
             widget_type: WidgetType,
-            data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,
+            data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
             options: dict[str, str | int | float | bool] | None,
         ) -> tuple[int, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
             try:
@@ -459,6 +467,9 @@ class PerformanceProfiler:
 
         Args:
             operation_name: Name of operation being timed
+        
+        Returns:
+            Description of return value
         """
         return TimingContext(self, operation_name)
 

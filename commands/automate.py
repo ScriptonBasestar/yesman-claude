@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Context-aware automation and workflow management commands."""
 
 import asyncio
 import json
 import time
 from pathlib import Path
-from typing import Any
+from typing import object
 
 import click
 from rich.console import Console
@@ -24,7 +28,7 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", **kwargs) -> dict[str, object]:  # noqa: ARG002
         """Execute the status command."""
         try:
             project_path_obj = Path(project_path).resolve()
@@ -115,7 +119,8 @@ class AutomateStatusCommand(BaseCommand):
             msg = f"Error getting automation status: {e}"
             raise CommandError(msg) from e
 
-    def _format_duration(self, seconds: float) -> str:
+    @staticmethod
+    def _format_duration( seconds: float) -> str:
         """Format duration in human readable format."""
         if seconds < 60:
             return f"{int(seconds)}s"
@@ -133,7 +138,7 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, object]:  # noqa: ARG002
         """Execute the monitor command."""
         try:
             project_path_obj = Path(project_path).resolve()
@@ -145,15 +150,15 @@ class AutomateMonitorCommand(BaseCommand):
             self.console.print("=" * 60)
 
             # Add callback for events
-            def on_context_detected(context_info: Any) -> None:
+            def on_context_detected(context_info: object) -> None:
                 self.console.print(f"[yellow]🔍 Context detected: {context_info.context_type.value}[/]")
                 self.console.print(f"   Details: {context_info.description}")
 
-            def on_workflow_triggered(workflow_name: str, context: Any) -> None:
+            def on_workflow_triggered(workflow_name: str, context: object) -> None:
                 self.console.print(f"[cyan]⚡ Workflow triggered: {workflow_name}[/]")
                 self.console.print(f"   Context: {context.context_type.value}")
 
-            def on_workflow_completed(workflow_name: str, success: bool, results: Any) -> None:
+            def on_workflow_completed(workflow_name: str, success: bool, results: object) -> None:  # noqa: FBT001
                 status = "✅ Success" if success else "❌ Failed"
                 self.console.print(f"[green]{status}: {workflow_name}[/]")
                 if results:
@@ -190,8 +195,8 @@ class AutomateTriggerCommand(BaseCommand):
         project_path: str = ".",
         context_type: str | None = None,
         description: str = "Manual trigger",
-        **kwargs,
-    ) -> dict[str, Any]:
+        **kwargs,  # noqa: ARG002
+    ) -> dict[str, object]:
         """Execute the trigger command."""
         if not context_type:
             msg = "Context type is required"
@@ -245,7 +250,7 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs) -> dict[str, Any]:
+    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs) -> dict[str, object]:
         """Execute the workflow command."""
         # Handle workflow_name from kwargs if not provided as positional argument
         if workflow_name is None:
@@ -302,7 +307,7 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:
+    def execute(self, project_path: str = ".", **kwargs) -> dict[str, object]:  # noqa: ARG002
         """Execute the detect command."""
         try:
             project_path_obj = Path(project_path).resolve()
@@ -376,7 +381,7 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict[str, Any]:
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict[str, object]:  # noqa: ARG002
         """Execute the config command."""
         try:
             # Generate sample workflow configuration

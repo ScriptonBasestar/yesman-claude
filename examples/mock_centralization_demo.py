@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Demo: Mock Centralization Benefits.
 
 Shows the difference between old duplicated mock patterns and new centralized approach

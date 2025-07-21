@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Base Renderer Interface
 Abstract base class for all dashboard renderers.
 """
@@ -6,7 +10,7 @@ import re
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import object
 
 
 class RenderFormat(Enum):
@@ -59,7 +63,7 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None) -> None:
+    def __init__(self, format_type: RenderFormat, theme: dict[str, object] | None = None) -> None:
         """Initialize base renderer.
 
         Args:
@@ -68,14 +72,15 @@ class BaseRenderer(ABC):
         """
         self.format_type = format_type
         self.theme = theme or self._get_default_theme()
-        self._cache: dict[str, Any] = {}
+        self._cache: dict[str, object] = {}
 
     @abstractmethod
+    @staticmethod
     def render_widget(
         self,
         widget_type: WidgetType,
-        data: Any,
-        options: dict[str, Any] | None = None,
+        data: object,
+        options: dict[str, object] | None = None,
     ) -> str:
         """Render a single widget.
 
@@ -89,10 +94,11 @@ class BaseRenderer(ABC):
         """
 
     @abstractmethod
+    @staticmethod
     def render_layout(
         self,
-        widgets: list[dict[str, Any]],
-        layout_config: dict[str, Any] | None = None,
+        widgets: list[dict[str, object]],
+        layout_config: dict[str, object] | None = None,
     ) -> str:
         """Render a layout containing multiple widgets.
 
@@ -105,7 +111,8 @@ class BaseRenderer(ABC):
         """
 
     @abstractmethod
-    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
+    @staticmethod
+    def render_container(content: str, container_config: dict[str, object] | None = None) -> str:
         """Render a container wrapping content.
 
         Args:
@@ -118,7 +125,8 @@ class BaseRenderer(ABC):
 
     # Common utility methods
 
-    def format_number(self, value: float, precision: int = 2, suffix: str = "") -> str:
+    @staticmethod
+    def format_number( value: float, precision: int = 2, suffix: str = "") -> str:
         """Format a number with optional precision and suffix.
 
         Args:
@@ -137,7 +145,8 @@ class BaseRenderer(ABC):
 
         return f"{value:,.{precision}f}{suffix}"
 
-    def format_date(self, date: datetime | str, format_str: str = "%Y-%m-%d %H:%M") -> str:
+    @staticmethod
+    def format_date(date: datetime | str, format_str: str = "%Y-%m-%d %H:%M") -> str:
         """Format a date/datetime object.
 
         Args:
@@ -170,7 +179,8 @@ class BaseRenderer(ABC):
 
         return str(date)
 
-    def format_percentage(self, value: float, precision: int = 1) -> str:
+    @staticmethod
+    def format_percentage(value: float, precision: int = 1) -> str:
         """Format a percentage value.
 
         Args:
@@ -185,7 +195,8 @@ class BaseRenderer(ABC):
 
         return f"{value:.{precision}f}%"
 
-    def format_bytes(self, bytes_value: int) -> str:
+    @staticmethod
+    def format_bytes(bytes_value: int) -> str:
         """Format bytes into human-readable format.
 
         Args:
@@ -205,7 +216,8 @@ class BaseRenderer(ABC):
 
         return f"{bytes_float:.1f} PB"
 
-    def format_duration(self, seconds: float) -> str:
+    @staticmethod
+    def format_duration(seconds: float) -> str:
         """Format duration in seconds to human-readable format.
 
         Args:
@@ -244,7 +256,8 @@ class BaseRenderer(ABC):
 
         return str(color_config)
 
-    def truncate_text(self, text: str, max_length: int, suffix: str = "...") -> str:
+    @staticmethod
+    def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
         """Truncate text to maximum length.
 
         Args:
@@ -263,7 +276,8 @@ class BaseRenderer(ABC):
 
         return text[: max_length - len(suffix)] + suffix
 
-    def sanitize_text(self, text: str) -> str:
+    @staticmethod
+    def sanitize_text(text: str) -> str:
         """Sanitize text for safe rendering.
 
         Args:
@@ -278,7 +292,8 @@ class BaseRenderer(ABC):
         # Remove control characters except newline and tab
         return re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]", "", text)
 
-    def get_status_color(self, status: str) -> ThemeColor:
+    @staticmethod
+    def get_status_color(status: str) -> ThemeColor:
         """Get appropriate color for status.
 
         Args:
@@ -299,7 +314,8 @@ class BaseRenderer(ABC):
             return ThemeColor.INFO
         return ThemeColor.NEUTRAL
 
-    def calculate_health_score(self, metrics: dict[str, int | float]) -> float:
+    @staticmethod
+    def calculate_health_score(metrics: dict[str, int | float]) -> float:
         """Calculate overall health score from metrics.
 
         Args:
@@ -340,7 +356,8 @@ class BaseRenderer(ABC):
 
         return total_score / total_weight if total_weight > 0 else 0.0
 
-    def _get_default_theme(self) -> dict[str, Any]:
+    @staticmethod
+    def _get_default_theme() -> dict[str, object]:
         """Get default theme configuration.
 
         Returns:
@@ -400,7 +417,7 @@ class BaseRenderer(ABC):
         """Clear the internal cache."""
         self._cache.clear()
 
-    def set_theme(self, theme: dict[str, Any]) -> None:
+    def set_theme(self, theme: dict[str, object]) -> None:
         """Set new theme configuration.
 
         Args:

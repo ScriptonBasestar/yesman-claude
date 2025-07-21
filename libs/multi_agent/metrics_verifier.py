@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Success metrics verification system for multi-agent operations."""
 
 import asyncio
@@ -6,9 +10,9 @@ import logging
 import statistics
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .agent_pool import AgentPool
 
@@ -42,9 +46,9 @@ class PerformanceMetrics:
     # Additional performance data
     task_completion_times: list[float] = field(default_factory=list)
     agent_utilization_rates: dict[str, float] = field(default_factory=dict)
-    resource_usage: dict[str, Any] = field(default_factory=dict)
+    resource_usage: dict[str, object] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         return {
             "single_agent_time": self.single_agent_time,
@@ -136,8 +140,8 @@ class MetricsVerifier:
 
                 logger.info("Loaded existing performance metrics")
 
-            except Exception as e:
-                logger.exception("Failed to load metrics: %s", e)
+            except Exception:
+                logger.exception("Failed to load metrics")
 
     def _save_metrics(self) -> None:
         """Save current metrics to disk."""
@@ -146,19 +150,19 @@ class MetricsVerifier:
                 "current_metrics": self.current_metrics.to_dict(),
                 "single_agent_benchmarks": self.single_agent_benchmarks,
                 "multi_agent_benchmarks": self.multi_agent_benchmarks,
-                "last_updated": datetime.now().isoformat(),
+                "last_updated": datetime.now(UTC).isoformat(),
             }
 
             with open(self.metrics_file, "w") as f:
                 json.dump(data, f, indent=2)
 
-        except Exception as e:
-            logger.exception("Failed to save metrics: %s", e)
+        except Exception:
+            logger.exception("Failed to save metrics")
 
     async def measure_single_agent_performance(
         self,
         agent_pool: AgentPool,
-        benchmark_tasks: list[dict[str, Any]],
+        benchmark_tasks: list[dict[str, object]],
         iterations: int = 3,
     ) -> float:
         """Measure single-agent performance baseline.
@@ -232,7 +236,7 @@ class MetricsVerifier:
     async def measure_multi_agent_performance(
         self,
         agent_pool: AgentPool,
-        benchmark_tasks: list[dict[str, Any]],
+        benchmark_tasks: list[dict[str, object]],
         iterations: int = 3,
     ) -> float:
         """Measure multi-agent performance.
@@ -357,7 +361,7 @@ class MetricsVerifier:
         )
         self._save_metrics()
 
-    def verify_success_criteria(self) -> dict[str, Any]:
+    def verify_success_criteria(self) -> dict[str, object]:
         """Verify if system meets all success criteria."""
         compliance = self.success_criteria.check_compliance(self.current_metrics)
 
@@ -372,7 +376,7 @@ class MetricsVerifier:
             },
             "compliance": compliance,
             "overall_success": compliance["overall_success"],
-            "verification_timestamp": datetime.now().isoformat(),
+            "verification_timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Save verification results
@@ -431,12 +435,13 @@ class MetricsVerifier:
             f"  Multi-agent benchmarks: {len(self.multi_agent_benchmarks)} runs",
             f"  Metrics file: {self.metrics_file}",
             "",
-            f"📅 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"📅 Generated: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}",
         ]
 
         return "\n".join(report_lines)
 
-    def get_benchmark_tasks(self) -> list[dict[str, Any]]:
+    @staticmethod
+    def get_benchmark_tasks() -> list[dict[str, object]]:
         """Get standard benchmark tasks for performance testing."""
         return [
             {
@@ -500,7 +505,7 @@ class MetricsVerifier:
 async def run_comprehensive_verification(
     agent_pool: AgentPool,
     work_dir: str = ".scripton/yesman",
-) -> dict[str, Any]:
+) -> dict[str, object]:
     """Run comprehensive metrics verification.
 
     Args:

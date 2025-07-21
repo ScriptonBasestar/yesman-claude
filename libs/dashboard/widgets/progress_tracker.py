@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """TODO progress tracking and visualization widget."""
 
 import re
@@ -72,7 +76,7 @@ class ProgressTracker:
         except Exception:
             return False
 
-    def load_todos_from_api(self, api_endpoint: str) -> bool:
+    def load_todos_from_api(self, api_endpoint: str) -> bool:  # noqa: ARG002
         """Load TODO items from API (placeholder for future implementation)."""
         # This would integrate with the yesman todo system when available
         # For now, return empty list
@@ -135,7 +139,8 @@ class ProgressTracker:
 
         return todos
 
-    def _extract_project_from_text(self, text: str) -> str | None:
+    @staticmethod
+    def _extract_project_from_text( text: str) -> str | None:
         """Extract project name from TODO text."""
         # Look for patterns like "IMPROVE-001:", "Fix:", etc.
         project_patterns = [
@@ -151,7 +156,8 @@ class ProgressTracker:
 
         return None
 
-    def _extract_category_from_text(self, text: str) -> str | None:
+    @staticmethod
+    def _extract_category_from_text(text: str) -> str | None:
         """Extract category from TODO text."""
         categories = {
             "performance": ["performance", "optimization", "cache", "speed"],

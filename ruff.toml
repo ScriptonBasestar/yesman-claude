@@ -64,6 +64,12 @@ select = [
     "N",
     # pydocstyle (docstring linting)
     "D",
+    # flake8-annotations
+    "ANN",
+    # flake8-unused-arguments
+    "ARG",
+    # flake8-try-except-raise
+    "TRY",
 ]
 
 ignore = [

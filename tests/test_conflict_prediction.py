@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for ConflictPredictor."""
 
 import tempfile
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
 
@@ -25,7 +29,8 @@ from libs.multi_agent.conflict_resolution import (
 class TestConflictVector:
     """Test cases for ConflictVector."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test ConflictVector initialization."""
         vector = ConflictVector(
             file_overlap_score=0.5,
@@ -47,7 +52,8 @@ class TestConflictVector:
 class TestPredictionResult:
     """Test cases for PredictionResult."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test PredictionResult initialization."""
         result = PredictionResult(
             prediction_id="test-prediction",
@@ -78,23 +84,27 @@ class TestConflictPredictor:
     """Test cases for ConflictPredictor."""
 
     @pytest.fixture
-    def mock_conflict_engine(self):
+    @staticmethod
+    def mock_conflict_engine():
         """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
-    def mock_branch_manager(self):
+    @staticmethod
+    def mock_branch_manager():
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
-    def temp_repo(self) -> Path:
+    @staticmethod
+    def temp_repo() -> Path:
         """Create temporary repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
     @pytest.fixture
-    def predictor(self, mock_conflict_engine: Mock, mock_branch_manager: Mock, temp_repo: Path) -> ConflictPredictor:
+    @staticmethod
+    def predictor(mock_conflict_engine: Mock, mock_branch_manager: Mock, temp_repo: Path) -> ConflictPredictor:
         """Create ConflictPredictor instance."""
         return ConflictPredictor(
             conflict_engine=mock_conflict_engine,
@@ -102,6 +112,7 @@ class TestConflictPredictor:
             repo_path=str(temp_repo),
         )
 
+    @staticmethod
     def test_init(
         self,
         predictor: ConflictPredictor,
@@ -119,7 +130,8 @@ class TestConflictPredictor:
         assert predictor.min_confidence_threshold == 0.3
         assert predictor.max_predictions_per_run == 50
 
-    def test_likelihood_to_confidence(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_likelihood_to_confidence(predictor: ConflictPredictor) -> None:
         """Test likelihood to confidence conversion."""
         assert predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL  # noqa: SLF001
         assert predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH  # noqa: SLF001
@@ -127,13 +139,15 @@ class TestConflictPredictor:
         assert predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW  # noqa: SLF001
 
     @pytest.mark.asyncio
-    async def test_predict_conflicts_empty_branches(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_predict_conflicts_empty_branches(predictor: ConflictPredictor) -> None:
         """Test conflict prediction with empty branch list."""
         predictions = await predictor.predict_conflicts([])
         assert predictions == []
 
     @pytest.mark.asyncio
-    async def test_calculate_conflict_vector(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_calculate_conflict_vector(predictor: ConflictPredictor) -> None:
         """Test conflict vector calculation."""
         # Mock the required methods
         predictor.conflict_engine._get_changed_files = AsyncMock(  # noqa: SLF001
@@ -155,12 +169,13 @@ class TestConflictPredictor:
         assert vector.semantic_distance_score == 0.4
         assert vector.temporal_proximity_score == 0.3
 
-    def test_extract_imports(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_extract_imports(predictor: ConflictPredictor) -> None:
         """Test import extraction from Python code."""
         code = """
 import os
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 def test():
@@ -170,10 +185,11 @@ def test():
 
         assert "import os" in imports
         assert "import sys" in imports
-        assert "from datetime import datetime" in imports
+        assert "from datetime import UTC, datetime" in imports
         assert "from pathlib import Path" in imports
 
-    def test_extract_imports_with_syntax_error(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_extract_imports_with_syntax_error(predictor: ConflictPredictor) -> None:
         """Test import extraction with syntax errors."""
         code = """
 import os
@@ -187,10 +203,11 @@ from sys import path
         assert any("import os" in imp for imp in imports)
         assert any("from sys import path" in imp for imp in imports)
 
-    def test_imports_likely_to_conflict(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_imports_likely_to_conflict(predictor: ConflictPredictor) -> None:
         """Test import conflict likelihood detection."""
-        imports1 = ["import os", "import sys", "from datetime import datetime"]
-        imports2 = ["import os", "import json", "from datetime import date"]
+        imports1 = ["import os", "import sys", "from datetime import UTC, datetime"]
+        imports2 = ["import os", "import json", "from datetime import UTC, date"]
 
         # Should detect potential conflict due to overlapping but different imports
         result = predictor._imports_likely_to_conflict(imports1, imports2)  # noqa: SLF001
@@ -221,7 +238,8 @@ from sys import path
         assert result is True
 
     @pytest.mark.asyncio
-    async def test_detect_import_conflicts(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_detect_import_conflicts(predictor: ConflictPredictor) -> None:
         """Test import conflict detection."""
         vector = ConflictVector(0.5, 0.3, 0.2, 0.4, 0.6, 0.1)
 
@@ -229,7 +247,7 @@ from sys import path
         predictor._get_python_files_with_imports = AsyncMock(  # noqa: SLF001
             return_value={
                 "file1.py": ["import os", "import sys", "import json"],
-                "file2.py": ["from datetime import datetime"],
+                "file2.py": ["from datetime import UTC, datetime"],
             },
         )
 
@@ -246,7 +264,8 @@ from sys import path
             assert "branch2" in result.affected_branches
 
     @pytest.mark.asyncio
-    async def test_detect_signature_drift(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_detect_signature_drift(predictor: ConflictPredictor) -> None:
         """Test function signature drift detection."""
         vector = ConflictVector(0.4, 0.3, 0.5, 0.2, 0.8, 0.1)
 
@@ -273,7 +292,8 @@ from sys import path
             assert result.likelihood_score > 0
 
     @pytest.mark.asyncio
-    async def test_detect_naming_collisions(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_detect_naming_collisions(predictor: ConflictPredictor) -> None:
         """Test naming collision detection."""
         vector = ConflictVector(0.3, 0.4, 0.6, 0.3, 0.5, 0.2)
 
@@ -293,7 +313,8 @@ from sys import path
             assert result.predicted_conflict_type == ConflictType.SEMANTIC
 
     @pytest.mark.asyncio
-    async def test_detect_version_conflicts(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_detect_version_conflicts(predictor: ConflictPredictor) -> None:
         """Test dependency version conflict detection."""
         vector = ConflictVector(0.2, 0.3, 0.4, 0.7, 0.3, 0.5)
 
@@ -314,7 +335,8 @@ from sys import path
             assert result.pattern == ConflictPattern.DEPENDENCY_VERSION_MISMATCH
             assert result.predicted_conflict_type == ConflictType.DEPENDENCY
 
-    def test_calculate_version_distance(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_calculate_version_distance(predictor: ConflictPredictor) -> None:
         """Test version distance calculation."""
         # Test same versions
         distance = predictor._calculate_version_distance("1.2.3", "1.2.3")  # noqa: SLF001
@@ -330,7 +352,8 @@ from sys import path
         assert distance1 > distance2  # Major version changes should be weighted more
 
     @pytest.mark.asyncio
-    async def test_get_change_frequency(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_get_change_frequency(predictor: ConflictPredictor) -> None:
         """Test change frequency calculation."""
         # Mock git command
         predictor.conflict_engine._run_git_command = AsyncMock(  # noqa: SLF001
@@ -341,7 +364,8 @@ from sys import path
         assert frequency == 2.0  # 14 commits / 7 days
 
     @pytest.mark.asyncio
-    async def test_calculate_branch_complexity(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_calculate_branch_complexity(predictor: ConflictPredictor) -> None:
         """Test branch complexity calculation."""
         # Mock git command with diff stats
         predictor.conflict_engine._run_git_command = AsyncMock(  # noqa: SLF001
@@ -360,7 +384,8 @@ from sys import path
         assert complexity <= 100.0
 
     @pytest.mark.asyncio
-    async def test_get_python_files_with_imports(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_get_python_files_with_imports(predictor: ConflictPredictor) -> None:
         """Test getting Python files with imports."""
         # Mock the required methods
         predictor.conflict_engine._get_python_files_changed = AsyncMock(  # noqa: SLF001
@@ -369,7 +394,7 @@ from sys import path
         predictor.conflict_engine._get_file_content = AsyncMock(  # noqa: SLF001
             side_effect=[
                 "import os\nimport sys\n\ndef test():\n    pass",
-                "from datetime import datetime\n\nclass Test:\n    pass",
+                "from datetime import UTC, datetime\n\nclass Test:\n    pass",
             ],
         )
 
@@ -383,7 +408,8 @@ from sys import path
         assert len(files_with_imports["file2.py"]) >= 1
 
     @pytest.mark.asyncio
-    async def test_get_dependency_versions(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_get_dependency_versions(predictor: ConflictPredictor) -> None:
         """Test dependency version extraction."""
         # Mock requirements.txt content
         requirements_content = """
@@ -414,7 +440,8 @@ pytest = ">=6.0.0"
         assert "pytest" in versions
 
     @pytest.mark.asyncio
-    async def test_apply_ml_scoring(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_apply_ml_scoring(predictor: ConflictPredictor) -> None:
         """Test ML scoring application."""
         # Create test predictions
         predictions = [
@@ -456,7 +483,8 @@ pytest = ">=6.0.0"
         for prediction in scored_predictions:
             assert 0.0 <= prediction.likelihood_score <= 1.0
 
-    def test_get_prediction_summary_empty(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_get_prediction_summary_empty(predictor: ConflictPredictor) -> None:
         """Test prediction summary with no predictions."""
         summary = predictor.get_prediction_summary()
 
@@ -465,7 +493,8 @@ pytest = ">=6.0.0"
         assert summary["by_pattern"] == {}
         assert "accuracy_metrics" in summary
 
-    def test_get_prediction_summary_with_predictions(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    def test_get_prediction_summary_with_predictions(predictor: ConflictPredictor) -> None:
         """Test prediction summary with predictions."""
         # Add test predictions
         prediction1 = PredictionResult(
@@ -478,7 +507,7 @@ pytest = ">=6.0.0"
             predicted_severity=ConflictSeverity.LOW,
             likelihood_score=0.8,
             description="Test prediction 1",
-            timeline_prediction=datetime.now() + timedelta(days=1),
+            timeline_prediction=datetime.now(UTC) + timedelta(days=1),
         )
 
         prediction2 = PredictionResult(
@@ -491,7 +520,7 @@ pytest = ">=6.0.0"
             predicted_severity=ConflictSeverity.HIGH,
             likelihood_score=0.6,
             description="Test prediction 2",
-            timeline_prediction=datetime.now() - timedelta(days=1),  # Past prediction
+            timeline_prediction=datetime.now(UTC) - timedelta(days=1),  # Past prediction
         )
 
         predictor.predictions["test1"] = prediction1
@@ -508,7 +537,8 @@ pytest = ">=6.0.0"
         assert len(summary["most_likely_conflicts"]) == 2
 
     @pytest.mark.asyncio
-    async def test_predict_conflicts_integration(self, predictor: ConflictPredictor) -> None:
+    @staticmethod
+    async def test_predict_conflicts_integration(predictor: ConflictPredictor) -> None:
         """Test full conflict prediction integration."""
         # Mock all required methods for a minimal integration test
         predictor._calculate_conflict_vector = AsyncMock(  # noqa: SLF001

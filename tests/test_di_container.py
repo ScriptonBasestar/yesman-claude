@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for the Dependency Injection Container."""
 
 import pytest
@@ -120,14 +124,16 @@ class TestDIContainer:
 class TestServicesModule:
     """Test cases for the services module."""
 
-    def setup_method(self) -> None:
+    @staticmethod
+    def setup_method() -> None:
         """Set up test environment before each test."""
         # Clear container before each test
         from libs.core.container import container
 
         container.clear()
 
-    def test_register_test_services(self) -> None:
+    @staticmethod
+    def test_register_test_services() -> None:
         """Test registering mock services for testing."""
         mock_config = YesmanConfig()
         register_test_services(config=mock_config)
@@ -135,7 +141,8 @@ class TestServicesModule:
         resolved_config = get_config()
         assert resolved_config is mock_config
 
-    def test_get_convenience_functions(self) -> None:
+    @staticmethod
+    def test_get_convenience_functions() -> None:
         """Test convenience functions for getting services."""
         register_test_services()
 
@@ -145,7 +152,8 @@ class TestServicesModule:
         tmux_manager = get_tmux_manager()
         assert isinstance(tmux_manager, TmuxManager)
 
-    def test_auto_initialization(self) -> None:
+    @staticmethod
+    def test_auto_initialization() -> None:
         """Test that services are auto-initialized when module is imported."""
         # Since we cleared the container in setup_method, we need to trigger initialization
         from libs.core.services import initialize_services

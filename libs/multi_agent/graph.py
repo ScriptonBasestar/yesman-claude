@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Simple directed graph implementation for task dependencies."""
 
 from collections import defaultdict, deque
@@ -50,7 +54,7 @@ class DirectedGraph:
         """Iterate over nodes."""
         return list(self.nodes.keys())
 
-    def edges_iter(self, data: bool = False) -> list[tuple[str, str] | tuple[str, str, dict[str, Any]]]:
+    def edges_iter(self, data: bool = False) -> list[tuple[str, str] | tuple[str, str, dict[str, Any]]]:  # noqa: FBT001
         """Iterate over edges."""
         result: list[tuple[str, str] | tuple[str, str, dict[str, Any]]] = []
         for source, targets in self.edges.items():

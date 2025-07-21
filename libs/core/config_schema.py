@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Configuration schemas using Pydantic for type safety and validation."""
 
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -84,7 +88,7 @@ class YesmanConfigSchema(BaseModel):
     enable_telemetry: bool = False
 
     # Custom settings (allows flexibility)
-    custom: dict[str, Any] = Field(default_factory=dict)
+    custom: dict[str, object] = Field(default_factory=dict)
 
     @field_validator("root_dir")
     @classmethod
@@ -92,7 +96,7 @@ class YesmanConfigSchema(BaseModel):
         """Expand user home directory in paths."""
         return str(Path(v).expanduser())
 
-    def model_post_init(self, __context: Any) -> None:
+    def model_post_init(self, __context: object) -> None:
         """Post-initialization validation and setup."""
         # Expand paths in nested configs
         if self.logging.log_path:

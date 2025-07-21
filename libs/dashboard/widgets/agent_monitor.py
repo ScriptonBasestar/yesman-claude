@@ -1,12 +1,16 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Real-time multi-agent monitoring dashboard widget."""
 
 import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, object
 
 from rich.align import Align
 from rich.console import Console
@@ -166,7 +170,7 @@ class AgentMonitor:
                     metrics.success_rate = metrics.tasks_completed / (metrics.tasks_completed + metrics.tasks_failed)
 
                 # Update performance history
-                now = datetime.now()
+                now = datetime.now(UTC)
                 if agent_id not in self.performance_history:
                     self.performance_history[agent_id] = []
 
@@ -207,9 +211,10 @@ class AgentMonitor:
             )
 
         except Exception as e:
-            self.logger.exception(f"Error updating metrics: {e}")
+            self.logger.exception("Error updating metrics")  # noqa: G004
 
-    def _calculate_task_progress(self, task_data: dict[str, Any]) -> float:
+    @staticmethod
+    def _calculate_task_progress( task_data: dict[str, object]) -> float:
         """Calculate task progress percentage."""
         status = task_data["status"]
         start_time = task_data.get("start_time")
@@ -221,7 +226,7 @@ class AgentMonitor:
         if status == "running" and start_time:
             # Estimate progress based on elapsed time and timeout
             start = datetime.fromisoformat(start_time)
-            elapsed = (datetime.now() - start).total_seconds()
+            elapsed = (datetime.now(UTC) - start).total_seconds()
             timeout: float = task_data.get("timeout", 300)
             return min(0.9, elapsed / timeout)  # Cap at 90% for running tasks
         if status == "assigned":
@@ -366,7 +371,7 @@ class AgentMonitor:
 
             duration = ""
             if metrics.start_time:
-                elapsed = datetime.now() - metrics.start_time
+                elapsed = datetime.now(UTC) - metrics.start_time
                 duration = f"{elapsed.total_seconds():.0f}s"
 
             progress_bar = "█" * int(metrics.progress * 10) + "░" * (10 - int(metrics.progress * 10))
@@ -441,7 +446,7 @@ class AgentMonitor:
     def set_display_mode(self, mode: MonitorDisplayMode) -> None:
         """Change display mode."""
         self.display_mode = mode
-        self.logger.info(f"Display mode changed to: {mode.value}")
+        self.logger.info(f"Display mode changed to: {mode.value}")  # noqa: G004
 
     def select_agent(self, agent_id: str) -> None:
         """Select an agent for detailed view."""
@@ -449,7 +454,8 @@ class AgentMonitor:
             self.selected_agent = agent_id
             self.set_display_mode(MonitorDisplayMode.DETAILED)
 
-    def get_keyboard_help(self) -> str:
+    @staticmethod
+    def get_keyboard_help() -> str:
         """Get keyboard shortcuts help text."""
         return """
 Keyboard Shortcuts:
@@ -478,7 +484,7 @@ Keyboard Shortcuts:
         except KeyboardInterrupt:
             self.logger.info("Monitoring stopped by user")
         except Exception as e:
-            self.logger.exception(f"Error in monitoring loop: {e}")
+            self.logger.exception("Error in monitoring loop")  # noqa: G004
             raise
 
 

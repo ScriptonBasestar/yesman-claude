@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import (
     HealthData,
@@ -9,7 +13,8 @@ from libs.dashboard.renderers.widget_models import (
 class TestMultiFormatRendering:
     """Tests for multi-format rendering across all interfaces."""
 
-    def test_multi_format_rendering(self) -> None:
+    @staticmethod
+    def test_multi_format_rendering() -> None:
         """Test 2: Multi-format rendering across all interfaces."""
         factory = RendererFactory()
 

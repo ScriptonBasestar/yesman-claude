@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dependency management and tracking commands."""
 
 import logging
@@ -10,7 +14,8 @@ logger = logging.getLogger(__name__)
 class DependencyTrackCommand(BaseCommand):
     """Track dependencies across branches."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute( **kwargs) -> dict:  # noqa: ARG002
         """Execute the dependency track command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Tracking dependencies across branches...")
@@ -21,7 +26,8 @@ class DependencyTrackCommand(BaseCommand):
 class DependencyStatusCommand(BaseCommand):
     """Show dependency status."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the dependency status command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Showing dependency status...")
@@ -32,7 +38,8 @@ class DependencyStatusCommand(BaseCommand):
 class DependencyImpactCommand(BaseCommand):
     """Analyze dependency impact."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the dependency impact command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Analyzing dependency impact...")
@@ -43,7 +50,8 @@ class DependencyImpactCommand(BaseCommand):
 class DependencyPropagateCommand(BaseCommand):
     """Propagate dependency changes."""
 
-    def execute(self, **kwargs) -> dict:
+    @staticmethod
+    def execute(**kwargs) -> dict:  # noqa: ARG002
         """Execute the dependency propagate command."""
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Propagating dependency changes...")

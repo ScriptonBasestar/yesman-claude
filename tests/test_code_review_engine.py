@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for CodeReviewEngine module."""
 
 import asyncio
@@ -92,10 +96,12 @@ def long_function_with_many_issues(param1, param2, param3, param4, param5, param
 
 
 class TestClassWithoutDocstring:
-    def public_method_without_docstring(self):
+    @staticmethod
+    def public_method_without_docstring():
         pass
 
-    def _private_method(self):
+    @staticmethod
+    def _private_method():
         pass
 
 
@@ -191,7 +197,8 @@ class TestCodeReviewEngine:
     """Test cases for CodeReviewEngine."""
 
     @pytest.mark.asyncio
-    async def test_initiate_review(self, code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
+    @staticmethod
+    async def test_initiate_review( code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test initiating a code review."""
         review_id = await code_review_engine.initiate_review(
             branch_name="feature/test-branch",
@@ -214,7 +221,8 @@ class TestCodeReviewEngine:
         assert mock_collaboration_engine.send_message.called
 
     @pytest.mark.asyncio
-    async def test_automated_review_style_quality(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_automated_review_style_quality(code_review_engine: CodeReviewEngine) -> None:
         """Test automated style and quality review."""
         findings = await code_review_engine._check_style_quality(["src/test_module.py"])  # noqa: SLF001
 
@@ -228,7 +236,8 @@ class TestCodeReviewEngine:
             assert finding.file_path == "src/test_module.py"
 
     @pytest.mark.asyncio
-    async def test_automated_review_security(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_automated_review_security(code_review_engine: CodeReviewEngine) -> None:
         """Test automated security review."""
         findings = await code_review_engine._check_security(["src/test_module.py"])  # noqa: SLF001
 
@@ -242,7 +251,8 @@ class TestCodeReviewEngine:
             assert finding.file_path == "src/test_module.py"
 
     @pytest.mark.asyncio
-    async def test_automated_review_performance(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_automated_review_performance(code_review_engine: CodeReviewEngine) -> None:
         """Test automated performance review."""
         findings = await code_review_engine._check_performance(["src/test_module.py"])  # noqa: SLF001
 
@@ -259,7 +269,8 @@ class TestCodeReviewEngine:
             assert finding.file_path == "src/test_module.py"
 
     @pytest.mark.asyncio
-    async def test_automated_review_maintainability(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_automated_review_maintainability(code_review_engine: CodeReviewEngine) -> None:
         """Test automated maintainability review."""
         findings = await code_review_engine._check_maintainability(  # noqa: SLF001
             ["src/test_module.py"],
@@ -278,7 +289,8 @@ class TestCodeReviewEngine:
             assert finding.file_path == "src/test_module.py"
 
     @pytest.mark.asyncio
-    async def test_automated_review_documentation(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_automated_review_documentation(code_review_engine: CodeReviewEngine) -> None:
         """Test automated documentation review."""
         findings = await code_review_engine._check_documentation(["src/test_module.py"])  # noqa: SLF001
 
@@ -295,7 +307,8 @@ class TestCodeReviewEngine:
             assert finding.file_path == "src/test_module.py"
 
     @pytest.mark.asyncio
-    async def test_automated_review_testing(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_automated_review_testing(code_review_engine: CodeReviewEngine) -> None:
         """Test automated testing review."""
         findings = await code_review_engine._check_testing(["src/test_module.py"])  # noqa: SLF001
 
@@ -308,7 +321,8 @@ class TestCodeReviewEngine:
             assert finding.file_path == "src/test_module.py"
 
     @pytest.mark.asyncio
-    async def test_quality_metrics_calculation(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_quality_metrics_calculation(code_review_engine: CodeReviewEngine) -> None:
         """Test quality metrics calculation."""
         metrics = await code_review_engine._calculate_quality_metrics(  # noqa: SLF001
             "src/test_module.py",
@@ -323,7 +337,8 @@ class TestCodeReviewEngine:
         assert QualityMetric.CYCLOMATIC_COMPLEXITY in metrics.violations
 
     @pytest.mark.asyncio
-    async def test_quality_check_multiple_files(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_quality_check_multiple_files(code_review_engine: CodeReviewEngine) -> None:
         """Test quality check on multiple files."""
         metrics_list = await code_review_engine.perform_quality_check(
             ["src/test_module.py", "src/good_module.py"],
@@ -340,7 +355,8 @@ class TestCodeReviewEngine:
         assert len(good_metrics.violations) <= len(test_metrics.violations)
 
     @pytest.mark.asyncio
-    async def test_overall_score_calculation(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_overall_score_calculation(code_review_engine: CodeReviewEngine) -> None:
         """Test overall score calculation."""
         # Create some test findings
         findings = [
@@ -375,7 +391,8 @@ class TestCodeReviewEngine:
         assert score >= 0.0
 
     @pytest.mark.asyncio
-    async def test_auto_approval_logic(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_auto_approval_logic(code_review_engine: CodeReviewEngine) -> None:
         """Test auto-approval logic."""
         # Create a review with high score and no critical issues
         review = CodeReview(
@@ -417,7 +434,8 @@ class TestCodeReviewEngine:
         assert not can_approve
 
     @pytest.mark.asyncio
-    async def test_approve_review(self, code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
+    @staticmethod
+    async def test_approve_review(code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test review approval."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
@@ -443,7 +461,8 @@ class TestCodeReviewEngine:
         assert len(approval_messages) > 0
 
     @pytest.mark.asyncio
-    async def test_reject_review(self, code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
+    @staticmethod
+    async def test_reject_review(code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test review rejection."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
@@ -470,7 +489,8 @@ class TestCodeReviewEngine:
         assert len(rejection_messages) > 0
 
     @pytest.mark.asyncio
-    async def test_get_review_status(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_get_review_status(code_review_engine: CodeReviewEngine) -> None:
         """Test getting review status."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
@@ -496,7 +516,8 @@ class TestCodeReviewEngine:
         assert review is not None
         assert review.status == ReviewStatus.APPROVED
 
-    def test_review_summary(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    def test_review_summary(code_review_engine: CodeReviewEngine) -> None:
         """Test review summary generation."""
         # Add some test reviews to history
         test_reviews = [
@@ -551,7 +572,8 @@ class TestCodeReviewEngine:
         assert summary.critical_findings == 1
         assert len(summary.most_common_issues) > 0
 
-    def test_engine_summary(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    def test_engine_summary(code_review_engine: CodeReviewEngine) -> None:
         """Test engine summary generation."""
         summary = code_review_engine.get_engine_summary()
 
@@ -567,7 +589,8 @@ class TestCodeReviewEngine:
         assert isinstance(summary["review_config"], dict)
 
     @pytest.mark.asyncio
-    async def test_find_suitable_reviewers(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    async def test_find_suitable_reviewers(code_review_engine: CodeReviewEngine) -> None:
         """Test finding suitable reviewers."""
         reviewers = await code_review_engine._find_suitable_reviewers(  # noqa: SLF001
             requester_id="agent-1",
@@ -583,7 +606,8 @@ class TestCodeReviewEngine:
         for reviewer in reviewers:
             assert reviewer in available_agent_ids
 
-    def test_cyclomatic_complexity_estimation(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    def test_cyclomatic_complexity_estimation(code_review_engine: CodeReviewEngine) -> None:
         """Test cyclomatic complexity estimation."""
         simple_code = """
 def simple_function():
@@ -610,7 +634,8 @@ def complex_function(x, y):
         complexity = code_review_engine._estimate_cyclomatic_complexity(complex_code)  # noqa: SLF001
         assert complexity > 5.0
 
-    def test_maintainability_index_calculation(self, code_review_engine: CodeReviewEngine) -> None:
+    @staticmethod
+    def test_maintainability_index_calculation(code_review_engine: CodeReviewEngine) -> None:
         """Test maintainability index calculation."""
         well_documented_code = '''
 """Well documented module"""
@@ -633,10 +658,11 @@ def function():
         assert mi < 100.0
 
     @pytest.mark.asyncio
+    @staticmethod
     async def test_full_automated_review_flow(
         self,
         code_review_engine: CodeReviewEngine,
-        mock_collaboration_engine: Mock,
+        mock_collaboration_engine: Mock,  # noqa: ARG002
     ) -> None:
         """Test full automated review flow."""
         # Initiate review
@@ -669,7 +695,8 @@ def function():
 class TestReviewDataClasses:
     """Test the review data classes."""
 
-    def test_review_finding_creation(self) -> None:
+    @staticmethod
+    def test_review_finding_creation() -> None:
         """Test ReviewFinding creation."""
         finding = ReviewFinding(
             finding_id="test_finding",
@@ -690,7 +717,8 @@ class TestReviewDataClasses:
         assert finding.message == "Security issue found"
         assert isinstance(finding.created_at, datetime)
 
-    def test_quality_metrics_creation(self) -> None:
+    @staticmethod
+    def test_quality_metrics_creation() -> None:
         """Test QualityMetrics creation."""
         metrics = QualityMetrics(
             file_path="test.py",
@@ -709,7 +737,8 @@ class TestReviewDataClasses:
         assert QualityMetric.CYCLOMATIC_COMPLEXITY in metrics.violations
         assert isinstance(metrics.calculated_at, datetime)
 
-    def test_code_review_creation(self) -> None:
+    @staticmethod
+    def test_code_review_creation() -> None:
         """Test CodeReview creation."""
         review = CodeReview(
             review_id="test_review",

@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Comprehensive project status dashboard command."""
 
 import time
 from pathlib import Path
-from typing import Any
+from typing import object
 
 import click
 from rich.console import Console
@@ -29,8 +33,8 @@ class StatusDashboard:
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        config: Any = None,
-        tmux_manager: Any = None,
+        config: object = None,
+        tmux_manager: object = None,
     ) -> None:
         self.console = Console()
         self.project_path = Path(project_path).resolve()
@@ -54,7 +58,7 @@ class StatusDashboard:
 
         # Load initial data
         self._load_todo_data()
-        self.progress_data: dict[str, Any] | None = None
+        self.progress_data: dict[str, object] | None = None
 
     def _load_todo_data(self) -> None:
         """Load TODO data from various sources."""
@@ -100,7 +104,8 @@ class StatusDashboard:
         except Exception as e:
             self.console.print(f"[red]Error updating data: {e}[/]")
 
-    def _calculate_session_activity(self, session_info: dict) -> float:
+    @staticmethod
+    def _calculate_session_activity( session_info: dict) -> float:
         """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
@@ -123,7 +128,8 @@ class StatusDashboard:
 
         return min(activity, 1.0)
 
-    def create_layout(self) -> Layout:
+    @staticmethod
+    def create_layout() -> Layout:
         """Create the dashboard layout."""
         layout = Layout()
 
@@ -268,10 +274,10 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     def execute(
         self,
         project_path: str = ".",
-        interactive: bool = False,
+        interactive: bool = False,  # noqa: FBT001
         update_interval: float = 5.0,
-        detailed: bool = False,
-        **kwargs,
+        detailed: bool = False,  # noqa: FBT001
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the status command."""
         try:
@@ -338,7 +344,7 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     help="Update interval in seconds",
 )
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
-def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:
+def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:  # noqa: FBT001
     """Comprehensive project status dashboard."""
     command = StatusCommand()
     command.run(

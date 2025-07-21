@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import time
 
 import pytest
-from typing import Any
+from typing import object
 
 from libs.dashboard import OptimizationLevel, PerformanceOptimizer
 
@@ -10,7 +14,8 @@ class TestPerformanceMonitoring:
     """Tests for performance monitoring and optimization."""
 
     @pytest.fixture
-    def performance_optimizer(self):
+    @staticmethod
+    def performance_optimizer():
         """Create PerformanceOptimizer instance."""
         optimizer = PerformanceOptimizer()
         yield optimizer
@@ -18,7 +23,8 @@ class TestPerformanceMonitoring:
         if optimizer.monitoring:
             optimizer.stop_monitoring()
 
-    def test_performance_monitoring(self, performance_optimizer: Any) -> None:
+    @staticmethod
+    def test_performance_monitoring( performance_optimizer: object) -> None:
         """Test 5: Performance monitoring and optimization."""
         # Test metrics collection
         metrics = performance_optimizer._collect_metrics()

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Async Interactive session browser command with enhanced performance."""
 
 import asyncio
@@ -79,7 +83,8 @@ class AsyncInteractiveBrowser:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.session_manager.get_progress_overview)
 
-    def _calculate_session_activity(self, session_info: dict) -> float:
+    @staticmethod
+    def _calculate_session_activity( session_info: dict) -> float:
         """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
@@ -105,7 +110,8 @@ class AsyncInteractiveBrowser:
 
         return min(activity, 1.0)
 
-    def create_layout(self) -> Layout:
+    @staticmethod
+    def create_layout() -> Layout:
         """Create the main dashboard layout."""
         layout = Layout()
 
@@ -201,7 +207,8 @@ class AsyncInteractiveBrowser:
             with contextlib.suppress(asyncio.CancelledError):
                 await self._update_task
 
-    def _render_heatmap(self, heatmap_data: dict) -> str:
+    @staticmethod
+    def _render_heatmap(heatmap_data: dict) -> str:
         """Render activity heatmap visualization."""
         from rich.text import Text
 
@@ -241,7 +248,7 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:
+    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
         """Execute the async browse command."""
         try:
             browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)
@@ -261,7 +268,8 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = f"Error during async browsing: {e}"
             raise CommandError(msg) from e
 
-    async def update_monitoring_data(self) -> None:
+    @staticmethod
+    async def update_monitoring_data() -> None:
         """Implement monitoring data updates."""
         # This could be used for additional monitoring metrics
         # For now, the browser handles its own updates
@@ -284,7 +292,7 @@ BrowseCommand = AsyncBrowseCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def browse(update_interval: float, async_mode: bool) -> None:
+def browse(update_interval: float, async_mode: bool) -> None:  # noqa: FBT001
     """Interactive session browser with async performance optimizations."""
     if async_mode:
         command = AsyncBrowseCommand()

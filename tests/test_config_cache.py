@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for configuration caching system."""
 
 import tempfile
@@ -15,7 +19,8 @@ from libs.yesman_config import create_cached_yesman_config
 class TestConfigCache:
     """Test the configuration cache functionality."""
 
-    def test_cache_basic_operations(self) -> None:
+    @staticmethod
+    def test_cache_basic_operations() -> None:
         """Test basic cache operations."""
         cache = ConfigCache(cache_ttl=1.0, max_cache_size=5)
 
@@ -30,7 +35,8 @@ class TestConfigCache:
         assert cached_config is not None
         assert cached_config.mode == config.mode
 
-    def test_cache_ttl_expiry(self) -> None:
+    @staticmethod
+    def test_cache_ttl_expiry() -> None:
         """Test cache TTL expiry."""
         cache = ConfigCache(cache_ttl=0.1, max_cache_size=5)
 
@@ -46,7 +52,8 @@ class TestConfigCache:
         # Should miss after expiry
         assert cache.get("test_key") is None
 
-    def test_cache_size_limit(self) -> None:
+    @staticmethod
+    def test_cache_size_limit() -> None:
         """Test cache size limit and eviction."""
         cache = ConfigCache(cache_ttl=10.0, max_cache_size=2)
 
@@ -70,7 +77,8 @@ class TestConfigCache:
         assert cache.get("key2") is not None
         assert cache.get("key3") is not None
 
-    def test_cache_stats(self) -> None:
+    @staticmethod
+    def test_cache_stats() -> None:
         """Test cache statistics."""
         cache = ConfigCache(cache_ttl=10.0, max_cache_size=5)
 
@@ -89,7 +97,8 @@ class TestConfigCache:
 class TestFileWatcher:
     """Test file watching functionality."""
 
-    def test_file_change_detection(self) -> None:
+    @staticmethod
+    def test_file_change_detection() -> None:
         """Test file change detection."""
         cache = ConfigCache()
         watcher = FileWatcher(cache)
@@ -119,7 +128,8 @@ class TestFileWatcher:
 class TestCachedConfigLoader:
     """Test the cached configuration loader."""
 
-    def test_cached_loader_basic(self) -> None:
+    @staticmethod
+    def test_cached_loader_basic() -> None:
         """Test basic cached loader functionality."""
         # Create base loader
         base_loader = ConfigLoader()
@@ -142,7 +152,8 @@ class TestCachedConfigLoader:
         assert stats["hit_count"] >= 1
         assert stats["total_requests"] >= 2
 
-    def test_cached_loader_invalidation(self) -> None:
+    @staticmethod
+    def test_cached_loader_invalidation() -> None:
         """Test cache invalidation."""
         base_loader = ConfigLoader()
         base_loader.add_source(EnvironmentSource())
@@ -161,7 +172,8 @@ class TestCachedConfigLoader:
         stats = cached_loader.get_cache_stats()
         assert stats["miss_count"] >= 2  # At least two misses due to invalidation
 
-    def test_file_watching_integration(self) -> None:
+    @staticmethod
+    def test_file_watching_integration() -> None:
         """Test file watching with cached loader."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("""
@@ -209,7 +221,8 @@ logging:
 class TestYesmanConfigCaching:
     """Test YesmanConfig with caching enabled."""
 
-    def test_cached_yesman_config_creation(self) -> None:
+    @staticmethod
+    def test_cached_yesman_config_creation() -> None:
         """Test creating cached YesmanConfig."""
         config = create_cached_yesman_config(cache_ttl=1.0)
 
@@ -220,7 +233,8 @@ class TestYesmanConfigCaching:
         # Should show cached in repr
         assert "(cached)" in repr(config)
 
-    def test_cache_stats_integration(self) -> None:
+    @staticmethod
+    def test_cache_stats_integration() -> None:
         """Test cache statistics integration."""
         config = create_cached_yesman_config(cache_ttl=1.0)
 
@@ -231,7 +245,8 @@ class TestYesmanConfigCaching:
         assert "miss_count" in stats
         assert "total_requests" in stats
 
-    def test_cache_invalidation_integration(self) -> None:
+    @staticmethod
+    def test_cache_invalidation_integration() -> None:
         """Test cache invalidation integration."""
         config = create_cached_yesman_config(cache_ttl=10.0)
 
@@ -247,7 +262,8 @@ class TestYesmanConfigCaching:
 class TestPerformanceImprovements:
     """Test that caching actually improves performance."""
 
-    def test_performance_improvement(self) -> None:
+    @staticmethod
+    def test_performance_improvement() -> None:
         """Test that cached loading is faster than uncached."""
         # Create configs
         base_loader = ConfigLoader()
@@ -275,7 +291,8 @@ class TestPerformanceImprovements:
         assert second_load_time <= first_load_time * 2, f"Cache hit ({second_load_time:.4f}s) should not be much slower than miss ({first_load_time:.4f}s)"
 
     @pytest.mark.skip(reason="Integration test - requires environment setup")
-    def test_real_world_performance(self) -> None:
+    @staticmethod
+    def test_real_world_performance() -> None:
         """Test performance with real configuration files."""
         # This would test with actual config files in a real environment
         config = create_cached_yesman_config(cache_ttl=60.0)

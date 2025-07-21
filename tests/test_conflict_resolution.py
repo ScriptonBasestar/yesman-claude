@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for ConflictResolutionEngine."""
 
 import tempfile
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -21,7 +25,8 @@ from libs.multi_agent.conflict_resolution import (
 class TestConflictInfo:
     """Test cases for ConflictInfo dataclass."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test ConflictInfo initialization."""
         conflict = ConflictInfo(
             conflict_id="test-conflict",
@@ -45,7 +50,8 @@ class TestConflictInfo:
 class TestResolutionResult:
     """Test cases for ResolutionResult dataclass."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test ResolutionResult initialization."""
         result = ResolutionResult(
             conflict_id="test-conflict",
@@ -68,25 +74,29 @@ class TestConflictResolutionEngine:
     """Test cases for ConflictResolutionEngine."""
 
     @pytest.fixture
-    def mock_branch_manager(self):
+    @staticmethod
+    def mock_branch_manager():
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
-    def temp_repo(self) -> Path:
+    @staticmethod
+    def temp_repo() -> Path:
         """Create temporary repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
     @pytest.fixture
-    def engine(self, mock_branch_manager: Mock, temp_repo: Path) -> ConflictResolutionEngine:
+    @staticmethod
+    def engine(mock_branch_manager: Mock, temp_repo: Path) -> ConflictResolutionEngine:
         """Create ConflictResolutionEngine instance."""
         return ConflictResolutionEngine(
             branch_manager=mock_branch_manager,
             repo_path=str(temp_repo),
         )
 
-    def test_init(self, engine: ConflictResolutionEngine, mock_branch_manager: Mock, temp_repo: Path) -> None:
+    @staticmethod
+    def test_init(engine: ConflictResolutionEngine, mock_branch_manager: Mock, temp_repo: Path) -> None:
         """Test ConflictResolutionEngine initialization."""
         assert engine.branch_manager == mock_branch_manager
         assert engine.repo_path == temp_repo
@@ -96,7 +106,8 @@ class TestConflictResolutionEngine:
         assert engine.max_retry_attempts == 3
         assert len(engine.strategy_handlers) == 5
 
-    def test_load_conflict_patterns(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_load_conflict_patterns(engine: ConflictResolutionEngine) -> None:
         """Test loading of conflict patterns."""
         patterns = engine.conflict_patterns
 
@@ -110,7 +121,8 @@ class TestConflictResolutionEngine:
             assert "auto_resolve" in pattern_info
 
     @pytest.mark.asyncio
-    async def test_detect_potential_conflicts(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_detect_potential_conflicts(engine: ConflictResolutionEngine) -> None:
         """Test conflict detection between branches."""
         branches = ["feature1", "feature2", "main"]
 
@@ -134,7 +146,8 @@ class TestConflictResolutionEngine:
             assert conflicts[0].conflict_id in engine.detected_conflicts
             assert engine.resolution_stats["total_conflicts"] > 0
 
-    def test_parse_merge_tree_output(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_parse_merge_tree_output(engine: ConflictResolutionEngine) -> None:
         """Test parsing of git merge-tree output."""
         output = """
 @@ -1,3 +1,7 @@
@@ -157,7 +170,8 @@ class TestConflictResolutionEngine:
         assert "branch1" in conflict.branches
         assert "branch2" in conflict.branches
 
-    def test_create_merge_conflict(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_create_merge_conflict(engine: ConflictResolutionEngine) -> None:
         """Test creation of merge conflict info."""
         conflict = engine._create_merge_conflict(  # noqa: SLF001
             "test.py",
@@ -172,7 +186,8 @@ class TestConflictResolutionEngine:
         assert "test.py" in conflict.description
         assert conflict.metadata["conflict_content"] == "conflict content"
 
-    def test_suggest_resolution_strategy(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_suggest_resolution_strategy(engine: ConflictResolutionEngine) -> None:
         """Test resolution strategy suggestion."""
         # Test Python file
         strategy = engine._suggest_resolution_strategy("def test():", "test.py")  # noqa: SLF001
@@ -195,7 +210,8 @@ class TestConflictResolutionEngine:
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
     @pytest.mark.asyncio
-    async def test_resolve_conflict_not_found(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_resolve_conflict_not_found(engine: ConflictResolutionEngine) -> None:
         """Test resolving non-existent conflict."""
         result = await engine.resolve_conflict("non-existent")
 
@@ -204,7 +220,8 @@ class TestConflictResolutionEngine:
         assert "not found" in result.message.lower()
 
     @pytest.mark.asyncio
-    async def test_resolve_conflict_success(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_resolve_conflict_success(engine: ConflictResolutionEngine) -> None:
         """Test successful conflict resolution."""
         # Create a test conflict
         conflict = ConflictInfo(
@@ -236,7 +253,8 @@ class TestConflictResolutionEngine:
             assert engine.resolution_stats["auto_resolved"] == 1
 
     @pytest.mark.asyncio
-    async def test_auto_merge_strategy(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_auto_merge_strategy(engine: ConflictResolutionEngine) -> None:
         """Test auto-merge resolution strategy."""
         conflict = ConflictInfo(
             conflict_id="test-conflict",
@@ -258,7 +276,8 @@ class TestConflictResolutionEngine:
             assert "Auto-merged" in result.message
 
     @pytest.mark.asyncio
-    async def test_prefer_latest_strategy(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_prefer_latest_strategy(engine: ConflictResolutionEngine) -> None:
         """Test prefer-latest resolution strategy."""
         conflict = ConflictInfo(
             conflict_id="test-conflict",
@@ -281,7 +300,8 @@ class TestConflictResolutionEngine:
             assert result.metadata["chosen_branch"] == "branch2"
 
     @pytest.mark.asyncio
-    async def test_prefer_main_strategy(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_prefer_main_strategy(engine: ConflictResolutionEngine) -> None:
         """Test prefer-main resolution strategy."""
         conflict = ConflictInfo(
             conflict_id="test-conflict",
@@ -301,7 +321,8 @@ class TestConflictResolutionEngine:
         assert result.metadata["chosen_branch"] == "main"
 
     @pytest.mark.asyncio
-    async def test_custom_merge_strategy(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_custom_merge_strategy(engine: ConflictResolutionEngine) -> None:
         """Test custom merge resolution strategy."""
         conflict = ConflictInfo(
             conflict_id="test-conflict",
@@ -326,7 +347,8 @@ class TestConflictResolutionEngine:
             assert "import conflicts" in result.message
 
     @pytest.mark.asyncio
-    async def test_semantic_analysis_strategy(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_semantic_analysis_strategy(engine: ConflictResolutionEngine) -> None:
         """Test semantic analysis resolution strategy."""
         conflict = ConflictInfo(
             conflict_id="test-conflict",
@@ -350,7 +372,8 @@ class TestConflictResolutionEngine:
         assert "semantic analysis" in result.message
         assert "chosen_signature" in result.metadata
 
-    def test_resolve_import_conflicts(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_resolve_import_conflicts(engine: ConflictResolutionEngine) -> None:
         """Test import conflict resolution."""
         content = "<<<<<<< HEAD\nimport os\nimport sys\n=======\nimport sys\nimport json\n>>>>>>> branch"
 
@@ -364,7 +387,8 @@ class TestConflictResolutionEngine:
         lines = result.split("\n")
         assert lines == sorted(lines)
 
-    def test_extract_function_signatures(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_extract_function_signatures(engine: ConflictResolutionEngine) -> None:
         """Test function signature extraction."""
         content = """
 def simple_func():
@@ -377,7 +401,8 @@ def func_with_return_type(x: int) -> str:
     return str(x)
 
 class TestClass:
-    def method(self):
+    @staticmethod
+    def method():
         pass
 """
 
@@ -392,7 +417,8 @@ class TestClass:
         assert "def func_with_params(a, b, c):" in signatures["func_with_params"]
 
     @pytest.mark.asyncio
-    async def test_auto_resolve_all(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_auto_resolve_all(engine: ConflictResolutionEngine) -> None:
         """Test automatic resolution of all conflicts."""
         # Create test conflicts
         conflict1 = ConflictInfo(
@@ -434,7 +460,8 @@ class TestClass:
             assert len(results) == 1
             mock_resolve.assert_called_once_with("conflict-1")
 
-    def test_get_conflict_summary(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_get_conflict_summary(engine: ConflictResolutionEngine) -> None:
         """Test conflict summary generation."""
         # Add test conflicts
         conflict1 = ConflictInfo(
@@ -445,7 +472,7 @@ class TestClass:
             files=["test1.py"],
             description="Low severity conflict",
             suggested_strategy=ResolutionStrategy.AUTO_MERGE,
-            resolved_at=datetime.now(),
+            resolved_at=datetime.now(UTC),
         )
 
         conflict2 = ConflictInfo(
@@ -473,7 +500,8 @@ class TestClass:
         assert summary["type_breakdown"]["semantic"] == 1
 
     @pytest.mark.asyncio
-    async def test_git_helper_methods(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_git_helper_methods(engine: ConflictResolutionEngine) -> None:
         """Test git helper methods."""
         # Mock git command execution
         with patch.object(engine, "_run_git_command") as mock_git:
@@ -499,7 +527,8 @@ class TestClass:
             assert content == "file content"
 
     @pytest.mark.asyncio
-    async def test_get_latest_branch(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_get_latest_branch(engine: ConflictResolutionEngine) -> None:
         """Test latest branch determination."""
         with patch.object(engine, "_run_git_command") as mock_git:
             # Mock timestamps for different branches
@@ -516,7 +545,8 @@ class TestClass:
             assert latest == "branch2"
 
     @pytest.mark.asyncio
-    async def test_try_git_merge(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    async def test_try_git_merge(engine: ConflictResolutionEngine) -> None:
         """Test git merge attempt."""
         # Test successful merge strategies
         result = await engine._try_git_merge(["branch1", "branch2"], "recursive")  # noqa: SLF001
@@ -533,7 +563,8 @@ class TestClass:
         result = await engine._try_git_merge(["branch1"], "recursive")  # noqa: SLF001
         assert result is False
 
-    def test_resolution_stats_update(self, engine: ConflictResolutionEngine) -> None:
+    @staticmethod
+    def test_resolution_stats_update(engine: ConflictResolutionEngine) -> None:
         """Test resolution statistics tracking."""
         engine.resolution_stats.copy()
 

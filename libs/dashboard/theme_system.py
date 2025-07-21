@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Theme System.
 
 Unified theme management system for all dashboard interfaces
@@ -71,7 +75,8 @@ class ColorPalette:
         """Create from dictionary."""
         return cls(**data)
 
-    def adjust_opacity(self, color: str, opacity: float) -> str:
+    @staticmethod
+    def adjust_opacity( color: str, opacity: float) -> str:
         """Add opacity to a color (simplified - would need color parsing in production)."""
         if color.startswith("#") and len(color) == 7:
             # Convert hex to RGB and add alpha
@@ -225,10 +230,11 @@ class SystemThemeDetector:
             if system == "Linux":
                 return SystemThemeDetector._get_linux_theme()
             logger.warning("Unknown system: %s", system)
-            return ThemeMode.LIGHT
 
-        except Exception as e:
-            logger.exception("Error detecting system theme: %s", e)
+        except (OSError, RuntimeError, ValueError) as e:
+            logger.exception("Error detecting system theme")
+            return ThemeMode.LIGHT
+        else:
             return ThemeMode.LIGHT
 
     @staticmethod
@@ -243,15 +249,15 @@ class SystemThemeDetector:
                 timeout=5,
             )
 
-            if result.returncode == 0 and "Dark" in result.stdout:
-                return ThemeMode.DARK
-            return ThemeMode.LIGHT
-
         except subprocess.TimeoutExpired:
             logger.warning("macOS theme detection timed out")
             return ThemeMode.LIGHT
-        except Exception as e:
+        except (OSError, subprocess.CalledProcessError, RuntimeError) as e:
             logger.warning("macOS theme detection failed: %s", e)
+            return ThemeMode.LIGHT
+        else:
+            if result.returncode == 0 and "Dark" in result.stdout:
+                return ThemeMode.DARK
             return ThemeMode.LIGHT
 
     @staticmethod
@@ -269,14 +275,14 @@ class SystemThemeDetector:
             value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")  # type: ignore[attr-defined]
             winreg.CloseKey(key)  # type: ignore[attr-defined]
 
-            return ThemeMode.LIGHT if value else ThemeMode.DARK
-
         except ImportError:
             logger.warning("winreg not available")
             return ThemeMode.LIGHT
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.warning("Windows theme detection failed: %s", e)
             return ThemeMode.LIGHT
+        else:
+            return ThemeMode.LIGHT if value else ThemeMode.DARK
 
     @staticmethod
     def _get_linux_theme() -> ThemeMode:
@@ -311,10 +317,10 @@ class SystemThemeDetector:
             if os.environ.get("GTK_THEME", "").lower().find("dark") != -1:
                 return ThemeMode.DARK
 
-            return ThemeMode.LIGHT
-
-        except Exception as e:
+        except (OSError, subprocess.TimeoutExpired, subprocess.CalledProcessError, IOError) as e:
             logger.warning("Linux theme detection failed: %s", e)
+            return ThemeMode.LIGHT
+        else:
             return ThemeMode.LIGHT
 
 
@@ -364,7 +370,8 @@ class ThemeManager:
         self.auto_theme_enabled = True
         self.update_from_system()
 
-    def _create_builtin_themes(self) -> dict[str, Theme]:
+    @staticmethod
+    def _create_builtin_themes() -> dict[str, Theme]:
         """Create built-in themes."""
         themes = {}
 
@@ -524,11 +531,12 @@ class ThemeManager:
 
             self.user_themes[name] = theme
             logger.info("Theme saved: %s", name)
-            return True
 
-        except Exception as e:
-            logger.exception("Error saving theme %s: %s", name, e)
+        except (OSError, IOError, json.JSONEncodeError, PermissionError) as e:
+            logger.exception("Error saving theme %s")
             return False
+        else:
+            return True
 
     def load_theme(self, name: str) -> Theme | None:
         """Load user theme from disk.
@@ -551,11 +559,12 @@ class ThemeManager:
             theme = Theme.from_dict(data)
             self.user_themes[name] = theme
             logger.info("Theme loaded: %s", name)
-            return theme
 
-        except Exception as e:
-            logger.exception("Error loading theme %s: %s", name, e)
+        except (OSError, IOError, json.JSONDecodeError, ValueError, KeyError) as e:
+            logger.exception("Error loading theme %s")
             return None
+        else:
+            return theme
 
     def load_user_themes(self) -> None:
         """Load all user themes from config directory."""
@@ -564,8 +573,8 @@ class ThemeManager:
                 theme_name = theme_file.stem
                 self.load_theme(theme_name)
 
-        except Exception as e:
-            logger.exception("Error loading user themes: %s", e)
+        except (OSError, RuntimeError) as e:
+            logger.exception("Error loading user themes")
 
     def delete_theme(self, name: str) -> bool:
         """Delete user theme.
@@ -591,11 +600,12 @@ class ThemeManager:
                 del self.user_themes[name]
 
             logger.info("Theme deleted: %s", name)
-            return True
 
-        except Exception as e:
-            logger.exception("Error deleting theme %s: %s", name, e)
+        except (OSError, PermissionError) as e:
+            logger.exception("Error deleting theme %s")
             return False
+        else:
+            return True
 
     def export_css(self, theme: Theme | None = None) -> str:
         """Export theme as CSS variables.

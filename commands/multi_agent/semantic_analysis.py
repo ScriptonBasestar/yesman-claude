@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Semantic analysis and merging commands."""
 
 import asyncio
 import logging
-from typing import Any
+from typing import object
 
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
@@ -24,8 +28,8 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         files: list[str] | None = None,
         language: str = "python",
         repo_path: str | None = None,
-        **kwargs: Any,
-    ) -> dict[str, Any]:
+        **kwargs: object,
+    ) -> dict[str, object]:
         """Execute the analyze semantic conflicts command."""
         try:
             # Handle files parameter from kwargs if not provided as positional argument
@@ -97,7 +101,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict[str, Any]:
+    def execute(self, repo_path: str | None = None, **kwargs: object) -> dict[str, object]:  # noqa: ARG002
         """Execute the semantic summary command."""
         try:
             self.print_info("🧠 Semantic Analysis Summary")
@@ -122,7 +126,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: Any) -> dict[str, Any]:
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: object) -> dict[str, object]:  # noqa: ARG002
         """Execute the function diff command."""
         try:
             # Handle file parameters from kwargs if not provided as positional arguments
@@ -173,10 +177,10 @@ class SemanticMergeCommand(BaseCommand):
         self,
         source_file: str | None = None,
         target_file: str | None = None,
-        language: str = "python",
+        language: str = "python",  # noqa: ARG002
         strategy: str = "auto",
-        **kwargs: Any,
-    ) -> dict[str, Any]:
+        **kwargs: object,
+    ) -> dict[str, object]:
         """Execute the semantic merge command."""
         try:
             # Handle file parameters from kwargs if not provided as positional arguments

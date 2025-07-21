@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import threading
 
 from libs.dashboard.renderers import RendererFactory, RenderFormat
@@ -7,7 +11,8 @@ from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 class TestThreadSafety:
     """Tests for thread safety of components."""
 
-    def test_thread_safety(self) -> None:
+    @staticmethod
+    def test_thread_safety() -> None:
         """Test 15: Thread safety of components."""
         factory = RendererFactory()
         results = []

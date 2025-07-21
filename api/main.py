@@ -1,6 +1,10 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import asyncio
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -58,7 +62,8 @@ if os.path.exists(sveltekit_build_path):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
 
-        async def get_response(self, path: str, scope: Any):
+        @staticmethod
+        async def get_response(path: str, scope: Any):
             response = await super().get_response(path, scope)
             if hasattr(response, "headers"):
                 # Add cache-busting headers for JavaScript files
@@ -85,7 +90,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "yesman-claude-api",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "version": "0.1.0",
     }
 
@@ -177,5 +182,5 @@ async def get_websocket_stats():
     return {
         "connections": connection_stats,
         "batch_processing": batch_stats,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Session Management Integration Tests.
 
 Tests the complete session lifecycle across CLI, API, and internal components.

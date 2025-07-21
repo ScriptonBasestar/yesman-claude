@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Asynchronous logger with queue-based processing for high performance."""
 
 import asyncio
@@ -12,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from .batch_processor import BatchProcessor
 
@@ -77,9 +81,9 @@ class AsyncLoggerConfig:
         max_queue_size: int = 10000,
         batch_size: int = 50,
         flush_interval: float = 2.0,
-        enable_console: bool = True,
-        enable_file: bool = True,
-        enable_batch_processor: bool = True,
+        enable_console: bool = True,  # noqa: FBT001
+        enable_file: bool = True,  # noqa: FBT001
+        enable_batch_processor: bool = True,  # noqa: FBT001
         log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
         output_dir: Path | None = None,
     ) -> None:
@@ -185,7 +189,7 @@ class AsyncLogger:
         # Start processing task
         self._processing_task = asyncio.create_task(self._processing_loop())
 
-        self.standard_logger.info(f"AsyncLogger '{self.config.name}' started")
+        self.standard_logger.info("AsyncLogger '%s' started", self.config.name)
 
     async def stop(self) -> None:
         """Stop the async logger."""
@@ -215,7 +219,7 @@ class AsyncLogger:
         # Cleanup executor
         self._executor.shutdown(wait=True)
 
-        self.standard_logger.info(f"AsyncLogger '{self.config.name}' stopped")
+        self.standard_logger.info("AsyncLogger '%s' stopped", self.config.name)
 
     async def _processing_loop(self) -> None:
         """Main processing loop."""
@@ -235,7 +239,7 @@ class AsyncLogger:
                     continue
 
         except Exception as e:
-            self.standard_logger.error(f"Error in async logger processing loop: {e}", exc_info=True)
+            self.standard_logger.error("Error in async logger processing loop: %s", e, exc_info=True)
 
     async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
@@ -252,7 +256,7 @@ class AsyncLogger:
                 self.batch_processor.add_entry(entry.to_dict())
 
         except Exception as e:
-            self.standard_logger.exception(f"Error processing log entry: {e}")
+            self.standard_logger.exception("Error processing log entry")
 
     async def _log_to_standard(self, entry: LogEntry) -> None:
         """Log entry to standard Python logging."""
@@ -288,9 +292,9 @@ class AsyncLogger:
 
         except Exception as e:
             # Fallback to standard logging
-            self.standard_logger.exception(f"Failed to queue log entry: {e}")
+            self.standard_logger.exception("Failed to queue log entry")
 
-    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
+    def log(self, level: LogLevel, message: str, **kwargs: object) -> None:
         """Log a message at specified level."""
         # Extract caller information
         frame = None
@@ -324,33 +328,33 @@ class AsyncLogger:
                     entry.exception_info = traceback.format_exc()
             except Exception as e:
                 # Ignore errors in exception info collection
-                self.standard_logger.debug(f"Failed to capture exception info: {e}", exc_info=False)
+                self.standard_logger.debug("Failed to capture exception info: %s", e, exc_info=False)
 
         # Queue the entry
         self._queue_entry(entry)
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs: Any) -> None:
+    def trace(self, message: str, **kwargs: object) -> None:
         """Log a trace message."""
         self.log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs: Any) -> None:
+    def debug(self, message: str, **kwargs: object) -> None:
         """Log a debug message."""
         self.log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs: Any) -> None:
+    def info(self, message: str, **kwargs: object) -> None:
         """Log an info message."""
         self.log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs: Any) -> None:
+    def warning(self, message: str, **kwargs: object) -> None:
         """Log a warning message."""
         self.log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs: Any) -> None:
+    def error(self, message: str, **kwargs: object) -> None:
         """Log an error message."""
         self.log(LogLevel.ERROR, message, **kwargs)
 
-    def critical(self, message: str, **kwargs: Any) -> None:
+    def critical(self, message: str, **kwargs: object) -> None:
         """Log a critical message."""
         self.log(LogLevel.CRITICAL, message, **kwargs)
 
@@ -360,7 +364,7 @@ class AsyncLogger:
         await self.start()
         return self
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def __aexit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: object) -> None:
         """Async context manager exit."""
         await self.stop()
 

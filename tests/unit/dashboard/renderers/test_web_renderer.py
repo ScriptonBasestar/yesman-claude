@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for Web Renderer."""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 
@@ -86,7 +90,7 @@ class TestWebRenderer:
 
     def test_render_session_browser_table(self) -> None:
         """Test session browser table view rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
         session = SessionData(
@@ -118,7 +122,7 @@ class TestWebRenderer:
 
     def test_render_session_browser_cards(self) -> None:
         """Test session browser cards view rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
         session = SessionData(
@@ -146,7 +150,7 @@ class TestWebRenderer:
 
     def test_render_session_browser_list(self) -> None:
         """Test session browser list view rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
         session = SessionData(
@@ -175,7 +179,7 @@ class TestWebRenderer:
 
     def test_render_health_meter(self) -> None:
         """Test health meter rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         category = HealthCategoryData(
             category="build",
             score=85,
@@ -206,7 +210,7 @@ class TestWebRenderer:
 
     def test_render_activity_heatmap(self) -> None:
         """Test activity heatmap rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         entry = ActivityEntry(
             timestamp=now,
             activity_type=ActivityType.FILE_CREATED,
@@ -242,7 +246,7 @@ class TestWebRenderer:
 
     def test_render_progress_tracker(self) -> None:
         """Test progress tracker rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         progress = ProgressData(
             phase=ProgressPhase.IMPLEMENTING,
@@ -367,7 +371,7 @@ class TestWebRenderer:
 
     def test_render_chart(self) -> None:
         """Test chart rendering."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         points = [
             ChartDataPoint(x=now, y=10),
             ChartDataPoint(x="2023-01-02", y=20),
@@ -710,7 +714,7 @@ class TestWebRenderer:
             name="test-session",
             id="session-123",
             status=SessionStatus.ACTIVE,
-            created_at=datetime.now(),
+            created_at=datetime.now(UTC),
             windows=[],
         )
 
@@ -753,7 +757,7 @@ class TestWebRendererIntegration:
 
     def test_full_dashboard_rendering(self) -> None:
         """Test rendering a complete dashboard."""
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         # Create sample data
         session = SessionData(

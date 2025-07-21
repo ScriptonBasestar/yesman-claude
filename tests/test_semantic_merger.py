@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for SemanticMerger automatic conflict resolution."""
 
 import tempfile
@@ -30,7 +34,8 @@ from libs.multi_agent.semantic_merger import (
 class TestMergeResult:
     """Test cases for MergeResult."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test MergeResult initialization."""
         result = MergeResult(
             merge_id="test-merge",
@@ -56,7 +61,8 @@ class TestMergeResult:
 class TestConflictResolutionRule:
     """Test cases for ConflictResolutionRule."""
 
-    def test_init(self) -> None:
+    @staticmethod
+    def test_init() -> None:
         """Test ConflictResolutionRule initialization."""
         rule = ConflictResolutionRule(
             rule_id="test-rule",
@@ -80,7 +86,8 @@ class TestSemanticMerger:
     """Test cases for SemanticMerger."""
 
     @pytest.fixture
-    def mock_semantic_analyzer(self) -> Mock:
+    @staticmethod
+    def mock_semantic_analyzer() -> Mock:
         """Create mock semantic analyzer."""
         analyzer = Mock(spec=SemanticAnalyzer)
         analyzer._extract_semantic_context = Mock()  # noqa: SLF001
@@ -89,22 +96,26 @@ class TestSemanticMerger:
         return analyzer
 
     @pytest.fixture
-    def mock_conflict_engine(self) -> Mock:
+    @staticmethod
+    def mock_conflict_engine() -> Mock:
         """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
-    def mock_branch_manager(self) -> Mock:
+    @staticmethod
+    def mock_branch_manager() -> Mock:
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
     @pytest.fixture
-    def temp_repo(self) -> Path:
+    @staticmethod
+    def temp_repo() -> Path:
         """Create temporary repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield Path(temp_dir)
 
     @pytest.fixture
+    @staticmethod
     def merger(
         self,
         mock_semantic_analyzer: Mock,
@@ -120,6 +131,7 @@ class TestSemanticMerger:
             repo_path=str(temp_repo),
         )
 
+    @staticmethod
     def test_init(
         self,
         merger: SemanticMerger,
@@ -141,7 +153,8 @@ class TestSemanticMerger:
         assert merger.enable_ast_validation is True
         assert len(merger.resolution_rules) > 0
 
-    def test_initialize_resolution_rules(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_initialize_resolution_rules(merger: SemanticMerger) -> None:
         """Test default resolution rules initialization."""
         rules = merger._initialize_resolution_rules()  # noqa: SLF001
 
@@ -154,14 +167,16 @@ class TestSemanticMerger:
         assert SemanticConflictType.IMPORT_SEMANTIC_CONFLICT in import_rule.conflict_types
         assert import_rule.resolution_strategy == MergeStrategy.SEMANTIC_UNION
 
-    def test_validate_ast_integrity(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_validate_ast_integrity(merger: SemanticMerger) -> None:
         """Test AST integrity validation."""
         valid_code = """
 def test_function():
     return True
 
 class TestClass:
-    def method(self):
+    @staticmethod
+    def method():
         pass
 """
         invalid_code = """
@@ -172,7 +187,8 @@ def test_function(
         assert merger._validate_ast_integrity(valid_code) is True  # noqa: SLF001
         assert merger._validate_ast_integrity(invalid_code) is False  # noqa: SLF001
 
-    def test_calculate_diff_stats(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_calculate_diff_stats(merger: SemanticMerger) -> None:
         """Test diff statistics calculation."""
         content1 = "line1\nline2\nline3"
         content2 = "line1\nline2_modified\nline3\nline4"
@@ -186,7 +202,8 @@ def test_function(
         assert stats["lines_added"] == 2  # 5 - 3
         assert stats["lines_removed"] == 0
 
-    def test_select_optimal_strategy(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_select_optimal_strategy(merger: SemanticMerger) -> None:
         """Test optimal strategy selection."""
         # Function signature conflicts
         conflicts1 = [
@@ -239,7 +256,8 @@ def test_function(
         strategy3 = merger._select_optimal_strategy(conflicts3)  # noqa: SLF001
         assert strategy3 == MergeStrategy.AST_BASED_MERGE
 
-    def test_prefer_branch_merge(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_prefer_branch_merge(merger: SemanticMerger) -> None:
         """Test prefer branch merge strategy."""
         conflicts = [
             SemanticConflict(
@@ -280,7 +298,8 @@ def test_function(
         )
         assert result2.strategy_used == MergeStrategy.PREFER_SECOND
 
-    def test_conflict_resolved_by_merge(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_conflict_resolved_by_merge(merger: SemanticMerger) -> None:
         """Test conflict resolution detection."""
         conflict = SemanticConflict(
             conflict_id="test-conflict",
@@ -315,7 +334,8 @@ def test_function(
 
         assert merger._conflict_resolved_by_merge(conflict, failed_result) is False  # noqa: SLF001
 
-    def test_update_merge_stats(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_update_merge_stats(merger: SemanticMerger) -> None:
         """Test merge statistics updates."""
         # Initial stats
         assert merger.merge_stats["total_merges"] == 0
@@ -357,7 +377,8 @@ def test_function(
         assert merger.merge_stats["auto_resolved"] == 1  # Still 1
         assert merger.merge_stats["average_confidence"] == 0.7  # (0.8 + 0.6) / 2
 
-    def test_extract_functions_with_content(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_extract_functions_with_content(merger: SemanticMerger) -> None:
         """Test function content extraction."""
         code = """
 import os
@@ -369,7 +390,8 @@ def function2(x, y):
     return x + y
 
 class TestClass:
-    def method(self):
+    @staticmethod
+    def method():
         pass
 """
 
@@ -383,7 +405,8 @@ class TestClass:
         assert "def function1():" in functions["function1"]
         assert "def function2(x, y):" in functions["function2"]
 
-    def test_extract_non_function_content(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_extract_non_function_content(merger: SemanticMerger) -> None:
         """Test non-function content extraction."""
         code = """
 import os
@@ -407,7 +430,8 @@ def function2():
         assert "variable = 42" in non_func_content
         assert "def function1():" not in non_func_content
 
-    def test_find_function_conflict(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_find_function_conflict(merger: SemanticMerger) -> None:
         """Test finding function-specific conflicts."""
         conflicts = [
             SemanticConflict(
@@ -441,7 +465,8 @@ def function2():
         not_found = merger._find_function_conflict("other_function", conflicts)  # noqa: SLF001
         assert not_found is None
 
-    def test_merge_function_definitions(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_merge_function_definitions(merger: SemanticMerger) -> None:
         """Test merging function definitions."""
         func1 = "def test_func(x):\n    return x"
         func2 = "def test_func(x, y=None):\n    return x + (y or 0)"
@@ -464,7 +489,8 @@ def function2():
         assert "content" in result
 
     @pytest.mark.asyncio
-    async def test_resolve_individual_conflict(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    async def test_resolve_individual_conflict(merger: SemanticMerger) -> None:
         """Test individual conflict resolution."""
         # Create semantic contexts
         context1 = SemanticContext(file_path="test.py")
@@ -509,7 +535,8 @@ def function2():
         assert "strategy" in result
 
     @pytest.mark.asyncio
-    async def test_perform_semantic_merge_success(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    async def test_perform_semantic_merge_success(merger: SemanticMerger) -> None:
         """Test successful semantic merge."""
         # Mock file contents
         content1 = "def test_func(x):\n    return x"
@@ -532,7 +559,8 @@ def function2():
         assert result.semantic_integrity is True
 
     @pytest.mark.asyncio
-    async def test_perform_semantic_merge_missing_content(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    async def test_perform_semantic_merge_missing_content(merger: SemanticMerger) -> None:
         """Test semantic merge with missing file content."""
         merger.semantic_analyzer._get_file_content.side_effect = [None, "content2"]  # noqa: SLF001
 
@@ -544,7 +572,8 @@ def function2():
         assert "error" in result.metadata
 
     @pytest.mark.asyncio
-    async def test_batch_merge_files(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    async def test_batch_merge_files(merger: SemanticMerger) -> None:
         """Test batch merging of multiple files."""
         file_paths = ["file1.py", "file2.py", "file3.py"]
 
@@ -567,7 +596,8 @@ def function2():
         assert all(result.merge_confidence == 0.8 for result in results)
 
     @pytest.mark.asyncio
-    async def test_auto_resolve_conflicts(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    async def test_auto_resolve_conflicts(merger: SemanticMerger) -> None:
         """Test automatic conflict resolution."""
         conflicts = [
             SemanticConflict(
@@ -612,7 +642,8 @@ def function2():
         assert "conflict-1" in results[0].conflicts_resolved
         assert "conflict-2" in results[0].conflicts_resolved
 
-    def test_get_merge_summary(self, merger: SemanticMerger) -> None:
+    @staticmethod
+    def test_get_merge_summary(merger: SemanticMerger) -> None:
         """Test merge summary generation."""
         # Add some test data
         merger.merge_stats["total_merges"] = 10

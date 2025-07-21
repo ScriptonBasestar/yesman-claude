@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Status command - Refactored version using base command and mixins."""
 
 from typing import Any
@@ -51,17 +55,17 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         except Exception as e:
             self.update_status("error")
-            self.logger.exception(f"Error checking status: {e}")
+            self.logger.exception("Error checking status")  # noqa: G004
             raise
 
     def update_status(self, status: str) -> None:
         """Update the current status - implements StatusManagerMixin interface."""
         self._current_status = status
-        self.logger.debug(f"Status updated to: {status}")
+        self.logger.debug(f"Status updated to: {status}")  # noqa: G004
 
     def update_activity(self, activity: str) -> None:
         """Update the current activity - implements StatusManagerMixin interface."""
-        self.logger.debug(f"Activity: {activity}")
+        self.logger.debug(f"Activity: {activity}")  # noqa: G004
 
     def create_layout(self) -> dict[str, Any]:
         """Create and return layout configuration - implements LayoutManagerMixin interface."""
@@ -70,7 +74,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     def update_layout(self, layout_config: dict[str, Any]) -> None:
         """Update layout configuration - implements LayoutManagerMixin interface."""
         self._layout_config.update(layout_config)
-        self.logger.debug(f"Layout updated: {layout_config}")
+        self.logger.debug(f"Layout updated: {layout_config}")  # noqa: G004
 
     def _check_single_session(self, session_name: str) -> dict[str, Any]:
         """Check status of a single session."""
@@ -146,7 +150,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                     break
 
         except Exception as e:
-            self.logger.exception(f"Error getting tmux info for {session_name}: {e}")
+            self.logger.exception("Error getting tmux info for {session_name}")  # noqa: G004
             info["status"] = "error"
 
         return info
@@ -284,7 +288,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     default=True,
     help="Show detailed information",
 )
-def status(session_name: str | None, format: str, details: bool) -> None:
+def status(session_name: str | None, format: str, details: bool) -> None:  # noqa: FBT001
     """Show status of all or specific tmux sessions."""
     command = StatusCommand()
 

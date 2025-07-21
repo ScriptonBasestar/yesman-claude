@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Web dashboard router for FastAPI."""
 
 import logging
 import secrets
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated, TypedDict
 
 from fastapi import APIRouter, HTTPException, Query
@@ -87,8 +91,8 @@ async def get_sessions():
             )
 
         return web_sessions
-    except Exception as e:
-        logger.exception(f"Failed to get sessions: {e!s}")
+    except Exception:
+        logger.exception("Failed to get sessions")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get sessions: {e!s}")
 
 
@@ -145,7 +149,7 @@ async def get_project_health():
                         "Add more documentation",
                     ],
                 ),
-                "last_updated": datetime.now().isoformat(),
+                "last_updated": datetime.now(UTC).isoformat(),
             }
         except ImportError:
             # Fallback with mock data if ProjectHealth is not available
@@ -166,10 +170,10 @@ async def get_project_health():
                     "Update outdated dependencies",
                     "Add more documentation",
                 ],
-                "last_updated": datetime.now().isoformat(),
+                "last_updated": datetime.now(UTC).isoformat(),
             }
-    except Exception as e:
-        logger.exception(f"Failed to get health data: {e!s}")
+    except Exception:
+        logger.exception("Failed to get health data")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get health data: {e!s}")
 
 
@@ -201,7 +205,7 @@ async def get_activity_data():
                     activity_counts[date_str] += 1
 
             # Generate complete date range
-            end_date = datetime.now().date()
+            end_date = datetime.now(UTC).date()
             start_date = end_date - timedelta(days=364)
 
             activities = []
@@ -229,7 +233,7 @@ async def get_activity_data():
             # Fallback with mock data for last 90 days
             from datetime import timedelta
 
-            end_date = datetime.now().date()
+            end_date = datetime.now(UTC).date()
             start_date = end_date - timedelta(days=89)
 
             activities = []
@@ -254,8 +258,8 @@ async def get_activity_data():
                 "max_activity": max((a["activity_count"] for a in activities), default=0),
                 "avg_activity": sum(a["activity_count"] for a in activities) / len(activities) if activities else 0,
             }
-    except Exception as e:
-        logger.exception(f"Failed to get activity data: {e!s}")
+    except Exception:
+        logger.exception("Failed to get activity data")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get activity data: {e!s}")
 
 
@@ -264,8 +268,8 @@ async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1
     """세션별 히트맵 데이터 반환."""
     try:
         return heatmap_generator.generate_heatmap_data([session_name], days=days)
-    except Exception as e:
-        logger.exception(f"Failed to get heatmap data for {session_name}: {e!s}")
+    except Exception:
+        logger.exception("Failed to get heatmap data for {session_name}")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {e!s}")
 
 
@@ -283,8 +287,8 @@ async def get_dashboard_stats():
             "total_projects": 1,  # Current project count
             "health_score": health_data["overall_score"],
             "activity_streak": activity_data["active_days"],
-            "last_update": datetime.now().isoformat(),
+            "last_update": datetime.now(UTC).isoformat(),
         }
-    except Exception as e:
-        logger.exception(f"Failed to get stats: {e!s}")
+    except Exception:
+        logger.exception("Failed to get stats")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {e!s}")

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Isolated work environment management for multi-agent development."""
 
 import json
@@ -83,7 +87,7 @@ class WorkEnvironmentManager:
             return result
 
         except subprocess.TimeoutExpired:
-            logger.exception("Command timed out: %s", " ".join(cmd))
+            logger.exception("Command timed out")
             raise
 
     def _get_environments_file(self) -> Path:
@@ -100,8 +104,8 @@ class WorkEnvironmentManager:
                     data = json.load(f)
                     self.environments = {name: WorkEnvironment.from_dict(info) for name, info in data.items()}
                 logger.info("Loaded {len(self.environments)} work environments")
-            except Exception as e:
-                logger.exception("Failed to load environments: %s", e)
+            except Exception:
+                logger.exception("Failed to load environments")
                 self.environments = {}
 
     def _save_environments(self) -> None:
@@ -115,8 +119,8 @@ class WorkEnvironmentManager:
                 json.dump(data, f, indent=2)
 
             logger.debug("Saved {len(self.environments)} work environments")
-        except Exception as e:
-            logger.exception("Failed to save environments: %s", e)
+        except Exception:
+            logger.exception("Failed to save environments")
 
     def create_work_environment(
         self,
@@ -286,7 +290,8 @@ class WorkEnvironmentManager:
                     shutil.copy2(src, dst)
                     logger.debug("Copied {config_file} to work environment")
 
-    def _create_activation_script(self, env: WorkEnvironment) -> None:
+    @staticmethod
+    def _create_activation_script( env: WorkEnvironment) -> None:
         """Create custom activation script with environment variables."""
         activate_dir = env.venv_path / "bin"
         if not activate_dir.exists():
@@ -395,7 +400,7 @@ class WorkEnvironmentManager:
     def terminate_environment(
         self,
         branch_name: str,
-        remove_files: bool = False,
+        remove_files: bool = False,  # noqa: FBT001
     ) -> None:
         """Terminate a work environment."""
         env = self.get_environment(branch_name)

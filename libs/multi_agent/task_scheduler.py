@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Intelligent task scheduling and distribution algorithms for multi-agent system."""
 
 import heapq
@@ -204,7 +208,7 @@ class TaskScheduler:
         self,
         agent_id: str,
         task: Task,
-        success: bool,
+        success: bool,  # noqa: FBT001
         execution_time: float,
     ) -> None:
         """Update agent performance metrics based on task completion."""
@@ -304,7 +308,8 @@ class TaskScheduler:
 
         return capability.processing_power * 0.4 + capability.success_rate * 0.4 + (1.0 - capability.current_load) * 0.2
 
-    def _are_dependencies_met(self, task: Task) -> bool:
+    @staticmethod
+    def _are_dependencies_met( task: Task) -> bool:
         """Check if task dependencies are satisfied."""
         if not task.dependencies:
             return True
@@ -331,7 +336,8 @@ class TaskScheduler:
 
         return base_time * agent_multiplier
 
-    def _estimate_base_task_time(self, task: Task) -> float:
+    @staticmethod
+    def _estimate_base_task_time(task: Task) -> float:
         """Estimate base time for a task."""
         # Simple heuristic based on complexity and command type
         base_time = task.complexity * 60.0  # Base: complexity * 60 seconds

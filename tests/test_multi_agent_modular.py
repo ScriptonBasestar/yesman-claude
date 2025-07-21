@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for the modular multi-agent system."""
 
 import os
@@ -204,19 +208,22 @@ def test_file_organization() -> None:
 class TestCommandExecution:
     """Test that commands can be instantiated and have execute methods."""
 
-    def test_agent_pool_commands_executable(self) -> None:
+    @staticmethod
+    def test_agent_pool_commands_executable() -> None:
         """Test that agent pool commands can be instantiated."""
         command = AgentStartCommand()
         assert hasattr(command, "execute")
         assert callable(command.execute)
 
-    def test_conflict_resolution_commands_executable(self) -> None:
+    @staticmethod
+    def test_conflict_resolution_commands_executable() -> None:
         """Test that conflict resolution commands can be instantiated."""
         command = ConflictDetectCommand()
         assert hasattr(command, "execute")
         assert callable(command.execute)
 
-    def test_semantic_analysis_commands_executable(self) -> None:
+    @staticmethod
+    def test_semantic_analysis_commands_executable() -> None:
         """Test that semantic analysis commands can be instantiated."""
         command = FunctionDiffCommand()
         assert hasattr(command, "execute")
@@ -226,7 +233,8 @@ class TestCommandExecution:
 class TestRefactoringBenefits:
     """Test the benefits of the refactoring."""
 
-    def test_reduced_file_sizes(self) -> None:
+    @staticmethod
+    def test_reduced_file_sizes() -> None:
         """Test that individual files are much smaller than original."""
         # Original backup file
         backup_size = os.path.getsize("commands/multi_agent_backup.py")
@@ -254,7 +262,8 @@ class TestRefactoringBenefits:
         # New main file should be much smaller
         assert main_size < backup_size / 10, "Main file should be much smaller after refactoring"
 
-    def test_focused_responsibilities(self) -> None:
+    @staticmethod
+    def test_focused_responsibilities() -> None:
         """Test that each module has focused responsibilities."""
         # Agent pool module should only have agent-related commands
         agent_classes = [name for name in dir(agent_pool) if name.endswith("Command") and not name.startswith("_") and name != "BaseCommand"]

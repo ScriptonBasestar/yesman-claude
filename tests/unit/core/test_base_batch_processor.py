@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for the base batch processor."""
 
 import asyncio
@@ -28,7 +32,8 @@ class TestBatchProcessor(BaseBatchProcessor[str, TestBatch]):
         self.processed_batches: list[TestBatch] = []
         self.process_delay = 0.0  # For testing timing
 
-    def create_batch(self, items: list[str]) -> TestBatch:
+    @staticmethod
+    def create_batch( items: list[str]) -> TestBatch:
         """Create a test batch."""
         return TestBatch(items=items.copy())
 
@@ -43,7 +48,8 @@ class TestBaseBatchProcessor:
     """Test cases for base batch processor."""
 
     @pytest.mark.asyncio
-    async def test_basic_functionality(self) -> None:
+    @staticmethod
+    async def test_basic_functionality() -> None:
         """Test basic batch processing functionality."""
         processor = TestBatchProcessor(batch_size=3, flush_interval=1.0)
         await processor.start()
@@ -69,7 +75,8 @@ class TestBaseBatchProcessor:
         await processor.stop()
 
     @pytest.mark.asyncio
-    async def test_immediate_flush_on_size(self) -> None:
+    @staticmethod
+    async def test_immediate_flush_on_size() -> None:
         """Test that batches are flushed immediately when size is reached."""
         processor = TestBatchProcessor(batch_size=2, flush_interval=10.0)
         await processor.start()
@@ -86,7 +93,8 @@ class TestBaseBatchProcessor:
         await processor.stop()
 
     @pytest.mark.asyncio
-    async def test_time_based_flush(self) -> None:
+    @staticmethod
+    async def test_time_based_flush() -> None:
         """Test that batches are flushed based on time interval."""
         processor = TestBatchProcessor(batch_size=10, flush_interval=0.5)
         await processor.start()
@@ -104,7 +112,8 @@ class TestBaseBatchProcessor:
         await processor.stop()
 
     @pytest.mark.asyncio
-    async def test_stop_flushes_pending(self) -> None:
+    @staticmethod
+    async def test_stop_flushes_pending() -> None:
         """Test that stopping flushes all pending items."""
         processor = TestBatchProcessor(batch_size=5, flush_interval=10.0)
         await processor.start()
@@ -120,7 +129,8 @@ class TestBaseBatchProcessor:
         assert processor.processed_batches[0].items == ["item_1", "item_2"]
 
     @pytest.mark.asyncio
-    async def test_statistics(self) -> None:
+    @staticmethod
+    async def test_statistics() -> None:
         """Test statistics collection."""
         processor = TestBatchProcessor(batch_size=2)
         await processor.start()
@@ -147,7 +157,8 @@ class TestBaseBatchProcessor:
         assert final_stats["is_running"] is False
 
     @pytest.mark.asyncio
-    async def test_wait_for_pending(self) -> None:
+    @staticmethod
+    async def test_wait_for_pending() -> None:
         """Test waiting for pending items to be processed."""
         processor = TestBatchProcessor(batch_size=2)
         processor.process_delay = 0.1  # Add delay to test waiting
@@ -165,7 +176,8 @@ class TestBaseBatchProcessor:
         await processor.stop()
 
     @pytest.mark.asyncio
-    async def test_concurrent_adds(self) -> None:
+    @staticmethod
+    async def test_concurrent_adds() -> None:
         """Test thread-safe concurrent additions."""
         processor = TestBatchProcessor(batch_size=5)
         await processor.start()
@@ -190,11 +202,13 @@ class TestBaseBatchProcessor:
         assert total_items == 30
 
     @pytest.mark.asyncio
-    async def test_error_handling(self) -> None:
+    @staticmethod
+    async def test_error_handling() -> None:
         """Test error handling in batch processing."""
 
         class ErrorBatchProcessor(TestBatchProcessor):
-            async def process_batch(self, batch: TestBatch) -> None:
+            @staticmethod
+            async def process_batch(batch: TestBatch) -> None:
                 if "error" in batch.items[0]:
                     msg = "Test error"
                     raise ValueError(msg)
@@ -220,7 +234,8 @@ class TestBaseBatchProcessor:
 
         await processor.stop()
 
-    def test_repr(self) -> None:
+    @staticmethod
+    def test_repr() -> None:
         """Test string representation."""
         processor = TestBatchProcessor(batch_size=100, flush_interval=2.0)
         repr_str = repr(processor)

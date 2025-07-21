@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for WebSocket batch processor functionality."""
 
 import asyncio
@@ -11,7 +15,8 @@ from api.utils import BatchConfig, WebSocketBatchProcessor
 class TestBatchConfig:
     """Test BatchConfig class."""
 
-    def test_default_config(self) -> None:
+    @staticmethod
+    def test_default_config() -> None:
         """Test default configuration values."""
         config = BatchConfig()
 
@@ -20,7 +25,8 @@ class TestBatchConfig:
         assert config.max_memory_size == 1024 * 1024
         assert config.compression_threshold == 5
 
-    def test_custom_config(self) -> None:
+    @staticmethod
+    def test_custom_config() -> None:
         """Test custom configuration values."""
         config = BatchConfig(
             max_batch_size=20,
@@ -37,30 +43,35 @@ class TestWebSocketBatchProcessor:
     """Test WebSocketBatchProcessor class."""
 
     @pytest.fixture
-    def processor(self) -> WebSocketBatchProcessor:
+    @staticmethod
+    def processor() -> WebSocketBatchProcessor:
         """Create a batch processor for testing."""
         config = BatchConfig(max_batch_size=3, max_batch_time=0.05)
         return WebSocketBatchProcessor(config)
 
     @pytest.fixture
-    def mock_handler(self) -> AsyncMock:
+    @staticmethod
+    def mock_handler() -> AsyncMock:
         """Create a mock message handler."""
         return AsyncMock()
 
-    def test_initialization(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_initialization(processor: WebSocketBatchProcessor) -> None:
         """Test processor initialization."""
         assert processor.config.max_batch_size == 3
         assert processor.config.max_batch_time == 0.05
         assert processor.stats["batches_sent"] == 0
         assert processor.stats["messages_processed"] == 0
 
-    def test_register_handler(self, processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
+    @staticmethod
+    def test_register_handler(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test message handler registration."""
         processor.register_message_handler("test_channel", mock_handler)
-        assert "test_channel" in processor._message_handlers
-        assert processor._message_handlers["test_channel"] == mock_handler
+        assert "test_channel" in processor._message_handlers  # noqa: SLF001
+        assert processor._message_handlers["test_channel"] == mock_handler  # noqa: SLF001
 
-    def test_queue_message(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_queue_message(processor: WebSocketBatchProcessor) -> None:
         """Test message queueing."""
         processor.queue_message("test_channel", {"type": "test", "data": "hello"})
 
@@ -73,7 +84,8 @@ class TestWebSocketBatchProcessor:
         assert "queued_at" in message
 
     @pytest.mark.asyncio
-    async def test_send_immediate(self, processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
+    @staticmethod
+    async def test_send_immediate(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test immediate message sending."""
         processor.register_message_handler("test_channel", mock_handler)
 
@@ -84,7 +96,8 @@ class TestWebSocketBatchProcessor:
         assert processor.stats["messages_processed"] == 1
 
     @pytest.mark.asyncio
-    async def test_batch_processing_by_size(self, processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
+    @staticmethod
+    async def test_batch_processing_by_size(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test batch processing triggered by size limit."""
         processor.register_message_handler("test_channel", mock_handler)
         await processor.start()
@@ -106,7 +119,8 @@ class TestWebSocketBatchProcessor:
             await processor.stop()
 
     @pytest.mark.asyncio
-    async def test_batch_processing_by_time(self, processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
+    @staticmethod
+    async def test_batch_processing_by_time(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test batch processing triggered by time limit."""
         processor.register_message_handler("test_channel", mock_handler)
         await processor.start()
@@ -126,7 +140,8 @@ class TestWebSocketBatchProcessor:
         finally:
             await processor.stop()
 
-    def test_message_optimization(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_message_optimization(processor: WebSocketBatchProcessor) -> None:
         """Test message optimization and combining."""
         # Test update message combining
         messages = [
@@ -139,7 +154,7 @@ class TestWebSocketBatchProcessor:
             },
         ]
 
-        optimized = processor._optimize_messages(messages)
+        optimized = processor._optimize_messages(messages)  # noqa: SLF001
 
         # Should combine into single message
         assert len(optimized) == 1
@@ -149,7 +164,8 @@ class TestWebSocketBatchProcessor:
         assert combined["data"]["session1"] == "updated"  # Latest data
         assert combined["data"]["session2"] == "data2"
 
-    def test_log_message_optimization(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_log_message_optimization(processor: WebSocketBatchProcessor) -> None:
         """Test log message batch optimization."""
         messages = [
             {
@@ -164,7 +180,7 @@ class TestWebSocketBatchProcessor:
             },
         ]
 
-        optimized = processor._optimize_messages(messages)
+        optimized = processor._optimize_messages(messages)  # noqa: SLF001
 
         # Should combine into log batch
         assert len(optimized) == 1
@@ -173,7 +189,8 @@ class TestWebSocketBatchProcessor:
         assert len(combined["data"]["entries"]) == 2
         assert combined["data"]["count"] == 2
 
-    def test_get_statistics(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_get_statistics(processor: WebSocketBatchProcessor) -> None:
         """Test statistics reporting."""
         # Add some test data
         processor.queue_message("test1", {"type": "test"})
@@ -190,14 +207,16 @@ class TestWebSocketBatchProcessor:
         assert stats["total_pending_messages"] == 2
         assert "config" in stats
 
-    def test_update_config(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_update_config(processor: WebSocketBatchProcessor) -> None:
         """Test configuration updates."""
         processor.update_config(max_batch_size=15, max_batch_time=0.2)
 
         assert processor.config.max_batch_size == 15
         assert processor.config.max_batch_time == 0.2
 
-    def test_clear_channel(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_clear_channel(processor: WebSocketBatchProcessor) -> None:
         """Test clearing channel messages."""
         processor.queue_message("test_channel", {"type": "test1"})
         processor.queue_message("test_channel", {"type": "test2"})
@@ -212,7 +231,8 @@ class TestWebSocketBatchProcessor:
         assert len(processor.pending_messages["other_channel"]) == 1
 
     @pytest.mark.asyncio
-    async def test_error_handling(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    async def test_error_handling(processor: WebSocketBatchProcessor) -> None:
         """Test error handling in message processing."""
         # Register a handler that raises an exception
         error_handler = AsyncMock(side_effect=Exception("Test error"))
@@ -237,18 +257,20 @@ class TestWebSocketBatchProcessor:
             await processor.stop()
 
     @pytest.mark.asyncio
-    async def test_start_stop_lifecycle(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    async def test_start_stop_lifecycle(processor: WebSocketBatchProcessor) -> None:
         """Test processor start/stop lifecycle."""
-        assert processor._processing_task is None
+        assert processor._processing_task is None  # noqa: SLF001
 
         await processor.start()
-        assert processor._processing_task is not None
-        assert not processor._processing_task.done()
+        assert processor._processing_task is not None  # noqa: SLF001
+        assert not processor._processing_task.done()  # noqa: SLF001
 
         await processor.stop()
-        assert processor._processing_task.done()
+        assert processor._processing_task.done()  # noqa: SLF001
 
-    def test_memory_size_calculation(self, processor: WebSocketBatchProcessor) -> None:
+    @staticmethod
+    def test_memory_size_calculation(processor: WebSocketBatchProcessor) -> None:
         """Test memory size calculation for queues."""
         from collections import deque
 
@@ -263,7 +285,7 @@ class TestWebSocketBatchProcessor:
             ]
         )
 
-        size = processor._get_queue_memory_size(test_queue)
+        size = processor._get_queue_memory_size(test_queue)  # noqa: SLF001
         assert size > 0
         assert isinstance(size, int)
 

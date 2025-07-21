@@ -1,9 +1,13 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """WebSocket connection test script."""
 
 import asyncio
 import contextlib
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 import websockets
 
@@ -25,7 +29,7 @@ async def test_websocket_connection(uri: str, channel: str) -> None:
                                 json.dumps(
                                     {
                                         "type": "pong",
-                                        "timestamp": datetime.now().isoformat(),
+                                        "timestamp": datetime.now(UTC).isoformat(),
                                     }
                                 )
                             )
@@ -72,7 +76,7 @@ async def test_websocket_connection(uri: str, channel: str) -> None:
                     json.dumps(
                         {
                             "type": "refresh",
-                            "timestamp": datetime.now().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                         }
                     )
                 )

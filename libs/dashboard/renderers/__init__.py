@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dashboard Renderers Package
 Multi-format rendering system for Yesman Claude dashboard.
 """

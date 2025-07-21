@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for multi-agent CLI commands."""
 
 from unittest.mock import AsyncMock, Mock, patch
@@ -12,12 +16,14 @@ class TestMultiAgentCLI:
     """Test cases for multi-agent CLI commands."""
 
     @pytest.fixture
-    def runner(self) -> CliRunner:
+    @staticmethod
+    def runner() -> CliRunner:
         """Create CLI test runner."""
         return CliRunner()
 
     @pytest.fixture
-    def mock_agent_pool(self) -> Mock:
+    @staticmethod
+    def mock_agent_pool() -> Mock:
         """Create mock agent pool."""
         pool = Mock()
         pool._running = True
@@ -66,7 +72,8 @@ class TestMultiAgentCLI:
 
         return pool
 
-    def test_multi_agent_cli_help(self, runner: CliRunner) -> None:
+    @staticmethod
+    def test_multi_agent_cli_help(runner: CliRunner) -> None:
         """Test multi-agent CLI help."""
         result = runner.invoke(multi_agent_cli, ["--help"])
 
@@ -78,6 +85,7 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @patch("commands.multi_agent.asyncio.run")
+    @staticmethod
     def test_start_agents_basic(
         self,
         mock_asyncio_run: Mock,
@@ -97,9 +105,10 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @patch("commands.multi_agent.asyncio.run")
+    @staticmethod
     def test_start_agents_with_options(
         self,
-        mock_asyncio_run: Mock,
+        mock_asyncio_run: Mock,  # noqa: ARG002
         mock_agent_pool_class: Mock,
         runner: CliRunner,
         mock_agent_pool: Mock,
@@ -121,9 +130,10 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.AgentPool")
     @patch("commands.multi_agent.run_agent_monitor")
     @patch("commands.multi_agent.asyncio.run")
+    @staticmethod
     def test_start_agents_with_monitor(
         self,
-        mock_asyncio_run: Mock,
+        mock_asyncio_run: Mock,  # noqa: ARG002
         mock_run_monitor: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -139,7 +149,8 @@ class TestMultiAgentCLI:
         assert "Starting monitoring dashboard" in result.output
 
     @patch("commands.multi_agent.AgentPool")
-    def test_status_command(self, mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
+    @staticmethod
+    def test_status_command(mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
         """Test status command."""
         mock_agent_pool_class.return_value = mock_agent_pool
 
@@ -155,6 +166,7 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @patch("commands.multi_agent.asyncio.run")
+    @staticmethod
     def test_stop_command(
         self,
         mock_asyncio_run: Mock,
@@ -173,6 +185,7 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @patch("commands.multi_agent.asyncio.run")
+    @staticmethod
     def test_monitor_command(
         self,
         mock_asyncio_run: Mock,
@@ -191,6 +204,7 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @patch("commands.multi_agent.asyncio.run")
+    @staticmethod
     def test_monitor_with_options(
         self,
         mock_asyncio_run: Mock,
@@ -210,7 +224,8 @@ class TestMultiAgentCLI:
         mock_asyncio_run.assert_called_once()
 
     @patch("commands.multi_agent.AgentPool")
-    def test_add_task_command(self, mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
+    @staticmethod
+    def test_add_task_command(mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
         """Test add-task command."""
         mock_agent_pool_class.return_value = mock_agent_pool
 
@@ -246,7 +261,8 @@ class TestMultiAgentCLI:
         assert call_kwargs["timeout"] == 120
 
     @patch("commands.multi_agent.AgentPool")
-    def test_list_tasks_command(self, mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
+    @staticmethod
+    def test_list_tasks_command(mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
         """Test list-tasks command."""
         mock_agent_pool_class.return_value = mock_agent_pool
 
@@ -260,6 +276,7 @@ class TestMultiAgentCLI:
         assert "Agent: agent-1" in result.output
 
     @patch("commands.multi_agent.AgentPool")
+    @staticmethod
     def test_list_tasks_with_status_filter(
         self,
         mock_agent_pool_class: Mock,
@@ -281,6 +298,7 @@ class TestMultiAgentCLI:
         mock_agent_pool.list_tasks.assert_called_once_with(TaskStatus.RUNNING)
 
     @patch("commands.multi_agent.AgentPool")
+    @staticmethod
     def test_list_tasks_invalid_status(
         self,
         mock_agent_pool_class: Mock,
@@ -296,7 +314,8 @@ class TestMultiAgentCLI:
         assert "Invalid status: invalid" in result.output
 
     @patch("commands.multi_agent.AgentPool")
-    def test_status_command_exception(self, mock_agent_pool_class: Mock, runner: CliRunner) -> None:
+    @staticmethod
+    def test_status_command_exception(mock_agent_pool_class: Mock, runner: CliRunner) -> None:
         """Test status command with exception."""
         mock_agent_pool_class.side_effect = Exception("Test error")
 
@@ -306,7 +325,8 @@ class TestMultiAgentCLI:
         assert "Error getting status: Test error" in result.output
 
     @patch("commands.multi_agent.AgentPool")
-    def test_add_task_exception(self, mock_agent_pool_class: Mock, runner: CliRunner) -> None:
+    @staticmethod
+    def test_add_task_exception(mock_agent_pool_class: Mock, runner: CliRunner) -> None:
         """Test add-task command with exception."""
         mock_agent_pool_class.side_effect = Exception("Test error")
 
@@ -316,7 +336,8 @@ class TestMultiAgentCLI:
         assert "Error adding task: Test error" in result.output
 
     @patch("commands.multi_agent.AgentPool")
-    def test_list_tasks_exception(self, mock_agent_pool_class: Mock, runner: CliRunner) -> None:
+    @staticmethod
+    def test_list_tasks_exception(mock_agent_pool_class: Mock, runner: CliRunner) -> None:
         """Test list-tasks command with exception."""
         mock_agent_pool_class.side_effect = Exception("Test error")
 
@@ -325,7 +346,8 @@ class TestMultiAgentCLI:
         assert result.exit_code == 0
         assert "Error listing tasks: Test error" in result.output
 
-    def test_add_task_required_arguments(self, runner: CliRunner) -> None:
+    @staticmethod
+    def test_add_task_required_arguments(runner: CliRunner) -> None:
         """Test add-task command missing required arguments."""
         result = runner.invoke(multi_agent_cli, ["add-task", "Test Task"])
 
@@ -333,6 +355,7 @@ class TestMultiAgentCLI:
         assert "Missing argument" in result.output
 
     @patch("commands.multi_agent.AgentPool")
+    @staticmethod
     def test_add_task_with_description(
         self,
         mock_agent_pool_class: Mock,
@@ -360,6 +383,7 @@ class TestMultiAgentCLI:
         assert call_kwargs["description"] == "Custom description"
 
     @patch("commands.multi_agent.AgentPool")
+    @staticmethod
     def test_add_task_default_description(
         self,
         mock_agent_pool_class: Mock,
@@ -380,7 +404,8 @@ class TestMultiAgentCLI:
         assert call_kwargs["description"] == "Execute: echo hello"
 
     @patch("commands.multi_agent.AgentPool")
-    def test_monitor_no_active_pool(self, mock_agent_pool_class: Mock, runner: CliRunner) -> None:
+    @staticmethod
+    def test_monitor_no_active_pool(mock_agent_pool_class: Mock, runner: CliRunner) -> None:  # noqa: ARG002
         """Test monitor command when no active pool exists."""
         # Simulate no existing pool directory
         with patch("pathlib.Path.exists", return_value=False):

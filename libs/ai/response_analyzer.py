@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Response pattern analysis and learning engine."""
 
 import json
@@ -60,16 +64,16 @@ class ResponseAnalyzer:
                 with open(self.responses_file) as f:
                     data = json.load(f)
                     self.response_history = [ResponseRecord(**record) for record in data]
-                logger.info(f"Loaded {len(self.response_history)} response records")
+                logger.info("Loaded %d response records", len(self.response_history))
 
             if self.patterns_file.exists():
                 with open(self.patterns_file) as f:
                     data = json.load(f)
                     self.learned_patterns = {pid: PromptPattern(**pattern) for pid, pattern in data.items()}
-                logger.info(f"Loaded {len(self.learned_patterns)} learned patterns")
+                logger.info("Loaded %d learned patterns", len(self.learned_patterns))
 
-        except Exception as e:
-            logger.exception(f"Error loading AI data: {e}")
+        except Exception:
+            logger.exception("Error loading AI data")
 
     def _save_data(self) -> None:
         """Save response history and patterns to disk."""
@@ -86,8 +90,8 @@ class ResponseAnalyzer:
                     indent=2,
                 )
 
-        except Exception as e:
-            logger.exception(f"Error saving AI data: {e}")
+        except Exception:
+            logger.exception("Error saving AI data")
 
     def record_response(
         self,
@@ -117,9 +121,10 @@ class ResponseAnalyzer:
         if len(self.response_history) % 10 == 0:
             self._save_data()
 
-        logger.debug(f"Recorded response: {prompt_type} -> {user_response}")
+        logger.debug("Recorded response: %s -> %s", prompt_type, user_response)
 
-    def _classify_prompt_type(self, prompt_text: str) -> str:
+    @staticmethod
+    def _classify_prompt_type( prompt_text: str) -> str:
         """Classify the type of prompt based on its content."""
         text = prompt_text.lower().strip()
 
@@ -171,7 +176,8 @@ class ResponseAnalyzer:
 
         pattern.last_updated = time.time()
 
-    def _generate_regex_pattern(self, prompt_text: str) -> str:
+    @staticmethod
+    def _generate_regex_pattern(prompt_text: str) -> str:
         """Generate a regex pattern to match similar prompts."""
         # Simplified pattern generation - replace specific words with wildcards
         pattern = re.escape(prompt_text.lower())
@@ -182,7 +188,8 @@ class ResponseAnalyzer:
         # Replace file names/paths with wildcards
         return re.sub(r"[a-zA-Z0-9_\-\.]+\.(py|js|ts|md|txt)", r"[\\w\-\.]+", pattern)
 
-    def _extract_context_key(self, context: str) -> str:
+    @staticmethod
+    def _extract_context_key(context: str) -> str:
         """Extract a key from context for pattern matching."""
         # Simplified context extraction
         context = context.lower()
@@ -250,7 +257,8 @@ class ResponseAnalyzer:
 
         return min(1.0, base_confidence)
 
-    def _get_default_response(self, prompt_type: str) -> tuple[str, float]:
+    @staticmethod
+    def _get_default_response(prompt_type: str) -> tuple[str, float]:
         """Get default response for a prompt type."""
         defaults = {
             "yes_no": ("yes", 0.3),
@@ -296,7 +304,7 @@ class ResponseAnalyzer:
 
         removed = old_count - len(self.response_history)
         if removed > 0:
-            logger.info(f"Cleaned up {removed} old response records")
+            logger.info("Cleaned up %d old response records", removed)
             self._save_data()
 
         return removed

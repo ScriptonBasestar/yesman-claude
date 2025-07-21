@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Configuration caching system for improved performance."""
 
 import hashlib
@@ -9,7 +13,7 @@ import threading
 import time
 import yaml
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .config_schema import YesmanConfigSchema
 
@@ -26,14 +30,15 @@ class ConfigCache:
         """
         self.cache_ttl = cache_ttl
         self.max_cache_size = max_cache_size
-        self._cache: dict[str, dict[str, Any]] = {}
+        self._cache: dict[str, dict[str, object]] = {}
         self._access_times: dict[str, float] = {}
         self._lock = threading.RLock()
         self._logger = logging.getLogger(__name__)
 
-    def _generate_cache_key(self, config_sources: list, env_vars: dict | None = None) -> str:
+    @staticmethod
+    def _generate_cache_key( config_sources: list, env_vars: dict | None = None) -> str:
         """Generate a unique cache key based on configuration sources and environment."""
-        key_data: dict[str, Any] = {
+        key_data: dict[str, object] = {
             "sources": [],
             "env_vars": env_vars or {},
             "timestamp": int(time.time() / 300),  # Round to 5-minute intervals
@@ -117,7 +122,7 @@ class ConfigCache:
                 self._access_times.clear()
                 self._logger.debug("Cache cleared: %d entries", cleared_count)
 
-    def get_stats(self) -> dict[str, Any]:
+    def get_stats(self) -> dict[str, object]:
         """Get cache statistics."""
         with self._lock:
             current_time = time.time()
@@ -209,7 +214,7 @@ class FileWatcher:
 class CachedConfigLoader:
     """Configuration loader with caching capabilities."""
 
-    def __init__(self, base_loader: Any, cache_ttl: float = 300.0) -> None:
+    def __init__(self, base_loader: object, cache_ttl: float = 300.0) -> None:
         """Initialize cached config loader.
 
         Args:
@@ -274,7 +279,7 @@ class CachedConfigLoader:
         self.cache.invalidate()
         self._logger.info("Configuration cache manually invalidated")
 
-    def get_cache_stats(self) -> dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, object]:
         """Get comprehensive cache statistics."""
         cache_stats = self.cache.get_stats()
 
@@ -298,7 +303,7 @@ class CachedConfigLoader:
             "remaining_entries": len(self.cache._cache),
         }
 
-    def get_config_sources_info(self) -> list[dict[str, Any]]:
+    def get_config_sources_info(self) -> list[dict[str, object]]:
         """Get information about configured sources (delegate to base loader)."""
         return self.base_loader.get_config_sources_info()  # type: ignore[no-any-return]
 
@@ -332,18 +337,19 @@ class CacheableEnvironmentSource:
     def __init__(self, prefix: str = "YESMAN_") -> None:
         self.prefix = prefix
 
-    def exists(self) -> bool:
+    @staticmethod
+    def exists() -> bool:
         return True
 
     def load(self) -> dict:
-        config: dict[str, Any] = {}
+        config: dict[str, object] = {}
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
                 # Convert YESMAN_LOGGING_LEVEL to logging.level
                 config_key = key[len(self.prefix) :].lower().replace("_", ".")
 
                 # Type conversion
-                converted_value: Any = value
+                converted_value: object = value
                 if value.lower() in ["true", "false"]:
                     converted_value = value.lower() == "true"
                 elif value.isdigit():
@@ -356,7 +362,8 @@ class CacheableEnvironmentSource:
 
         return config
 
-    def _set_nested_value(self, d: dict, key: str, value: Any) -> None:
+    @staticmethod
+    def _set_nested_value(d: dict, key: str, value: object) -> None:
         """Set value in nested dictionary using dot notation."""
         keys = key.split(".")
         for k in keys[:-1]:

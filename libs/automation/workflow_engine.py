@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Workflow engine for executing automation chains."""
 
 import asyncio
@@ -182,7 +186,8 @@ class ConditionEvaluator:
 
         return self.operators[operator](var_value, expected_value)
 
-    def _parse_value(self, value_str: str) -> str | int | float | bool | None:
+    @staticmethod
+    def _parse_value( value_str: str) -> str | int | float | bool | None:
         """Parse a value string into appropriate Python type."""
         value_str = value_str.strip()
 
@@ -211,50 +216,58 @@ class ConditionEvaluator:
         # Default to string
         return value_str
 
-    def _equals(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Equality comparison."""
         return bool(left == right)
 
-    def _not_equals(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _not_equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Inequality comparison."""
         return bool(left != right)
 
-    def _greater_than(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _greater_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Greater than comparison."""
         try:
             return bool(left > right)
         except TypeError:
             return False
 
-    def _less_than(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _less_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Less than comparison."""
         try:
             return bool(left < right)
         except TypeError:
             return False
 
-    def _greater_equal(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _greater_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Greater than or equal comparison."""
         try:
             return bool(left >= right)
         except TypeError:
             return False
 
-    def _less_equal(self, left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _less_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Less than or equal comparison."""
         try:
             return bool(left <= right)
         except TypeError:
             return False
 
-    def _contains(self, left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Containment check."""
         try:
             return right in left
         except TypeError:
             return False
 
-    def _not_contains(self, left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
+    @staticmethod
+    def _not_contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Not containment check."""
         try:
             return right not in left
@@ -383,7 +396,7 @@ class WorkflowEngine:
                     self.logger.warning("Action failed (attempt %s), retrying in %ss: %s", attempt + 1, action.retry_delay, e)
                     await asyncio.sleep(action.retry_delay)
                 else:
-                    self.logger.exception("Action failed after %s attempts: %s", attempt + 1, e)
+                    self.logger.exception("Action failed after %s attempts")
 
         return False
 
@@ -444,7 +457,8 @@ class WorkflowEngine:
             msg = f"Command timed out after {action.timeout}s: {action.command}"
             raise TimeoutError(msg) from e
 
-    async def _execute_tmux_command(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, int | str]:
+    @staticmethod
+    async def _execute_tmux_command(action: WorkflowAction, execution: WorkflowExecution) -> dict[str, int | str]:
         """Execute tmux command."""
         session_name = execution.context_info.session_name or action.parameters.get("session_name")
 
@@ -468,7 +482,8 @@ class WorkflowEngine:
             "command_sent": action.command,
         }
 
-    async def _execute_claude_input(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str]:
+    @staticmethod
+    async def _execute_claude_input(action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str]:
         """Send input to Claude through the dashboard controller."""
         # This would integrate with the ClaudeManager
         # For now, simulate the action
@@ -517,7 +532,8 @@ class WorkflowEngine:
 
         return {"notification_sent": action.command}
 
-    async def _execute_delay(self, action: WorkflowAction) -> dict[str, int]:
+    @staticmethod
+    async def _execute_delay(action: WorkflowAction) -> dict[str, int]:
         """Execute delay."""
         delay_seconds = int(action.command)
         await asyncio.sleep(delay_seconds)

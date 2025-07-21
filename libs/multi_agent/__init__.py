@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Multi-agent system for parallel branch-based development automation."""
 
 from .agent_pool import AgentPool

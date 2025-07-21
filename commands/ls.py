@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Improved ls command using base command class."""
 
-from typing import Any
+from typing import object
 
 import click
 
@@ -11,7 +15,7 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -45,10 +49,10 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         try:
             return self.tmux_manager.get_templates()
         except Exception as e:
-            self.logger.exception(f"Failed to get templates: {e}")
+            self.logger.exception("Failed to get templates")  # noqa: G004
             return []
 
-    def _get_projects(self) -> list[dict[str, Any]]:
+    def _get_projects(self) -> list[dict[str, object]]:
         """Get configured projects with details."""
         try:
             projects_config = self.load_projects_config()
@@ -73,7 +77,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
             return projects
 
         except Exception as e:
-            self.logger.exception(f"Failed to get projects: {e}")
+            self.logger.exception("Failed to get projects")  # noqa: G004
             return []
 
     def _get_project_status(self, session_name: str) -> str:
@@ -85,7 +89,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         except Exception:
             return "unknown"
 
-    def _display_output(self, data: dict[str, Any], output_format: str) -> None:
+    def _display_output(self, data: dict[str, object], output_format: str) -> None:
         """Display output in specified format."""
         if output_format == "json":
             click.echo(self.format_json(data))
@@ -97,7 +101,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         # Default table format
         self._display_table_format(data)
 
-    def _display_table_format(self, data: dict[str, Any]) -> None:
+    def _display_table_format(self, data: dict[str, object]) -> None:
         """Display output in table format."""
         templates = data["templates"]
         projects = data["projects"]

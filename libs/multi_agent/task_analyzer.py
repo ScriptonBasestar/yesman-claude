@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Task analysis and dependency graph generation for multi-agent development."""
 
 import ast
@@ -115,7 +119,7 @@ class TaskAnalyzer:
             self.file_dependencies[file_path] = dependencies
 
         except Exception as e:
-            logger.exception("Failed to analyze %s: %s", file_path, e)
+            logger.exception("Failed to analyze %s")
 
         return dependencies
 
@@ -195,7 +199,8 @@ class TaskAnalyzer:
 
         return self._python_files_cache
 
-    def _file_to_module(self, file_path: str) -> str:
+    @staticmethod
+    def _file_to_module( file_path: str) -> str:
         """Convert file path to module name."""
         # Remove .py extension and convert path to module
         path = Path(file_path)
@@ -223,7 +228,8 @@ class TaskAnalyzer:
 
         return None
 
-    def _matches_module(self, imported: str, module: str) -> bool:
+    @staticmethod
+    def _matches_module(imported: str, module: str) -> bool:
         """Check if imported module matches target module."""
         # Exact match
         if imported == module:

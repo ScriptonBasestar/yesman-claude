@@ -1,6 +1,10 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for Widget Models and Data Adapter."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from libs.dashboard.renderers.widget_adapter import WidgetDataAdapter
 from libs.dashboard.renderers.widget_models import (
@@ -25,9 +29,10 @@ from libs.dashboard.renderers.widget_models import (
 class TestWidgetModels:
     """Test cases for widget data models."""
 
-    def test_session_data_creation(self) -> None:
+    @staticmethod
+    def test_session_data_creation() -> None:
         """Test SessionData model creation."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window", active=True, panes=2)
 
         session = SessionData(
@@ -49,9 +54,10 @@ class TestWidgetModels:
         assert session.panes == 2
         assert session.claude_active is True
 
-    def test_session_data_to_dict(self) -> None:
+    @staticmethod
+    def test_session_data_to_dict() -> None:
         """Test SessionData to_dict conversion."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window")
 
         session = SessionData(
@@ -70,9 +76,10 @@ class TestWidgetModels:
         assert len(data["windows"]) == 1
         assert data["windows"][0]["name"] == "test-window"
 
-    def test_session_data_from_dict(self) -> None:
+    @staticmethod
+    def test_session_data_from_dict() -> None:
         """Test SessionData from_dict creation."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         data = {
             "name": "test-session",
             "id": "session-123",
@@ -92,9 +99,10 @@ class TestWidgetModels:
         assert session.windows[0].name == "test-window"
         assert session.claude_active is True
 
-    def test_health_data_creation(self) -> None:
+    @staticmethod
+    def test_health_data_creation() -> None:
         """Test HealthData model creation."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         category = HealthCategoryData(
             category="build",
             score=85,
@@ -116,7 +124,8 @@ class TestWidgetModels:
         assert health.categories[0].category == "build"
         assert health.project_path == "/test/project"
 
-    def test_health_level_from_score(self) -> None:
+    @staticmethod
+    def test_health_level_from_score() -> None:
         """Test HealthLevel.from_score method."""
         assert HealthLevel.from_score(95) == HealthLevel.EXCELLENT
         assert HealthLevel.from_score(80) == HealthLevel.GOOD
@@ -124,9 +133,10 @@ class TestWidgetModels:
         assert HealthLevel.from_score(30) == HealthLevel.CRITICAL
         assert HealthLevel.from_score(-1) == HealthLevel.UNKNOWN
 
-    def test_activity_data_creation(self) -> None:
+    @staticmethod
+    def test_activity_data_creation() -> None:
         """Test ActivityData model creation."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         entry = ActivityEntry(
             timestamp=now,
             activity_type=ActivityType.FILE_CREATED,
@@ -146,9 +156,10 @@ class TestWidgetModels:
         assert activity.total_activities == 1
         assert activity.activity_rate == 100.0
 
-    def test_progress_data_creation(self) -> None:
+    @staticmethod
+    def test_progress_data_creation() -> None:
         """Test ProgressData model creation."""
-        now = datetime.now()
+        now = datetime.now(UTC)
 
         progress = ProgressData(
             phase=ProgressPhase.IMPLEMENTING,
@@ -165,7 +176,8 @@ class TestWidgetModels:
         assert progress.files_created == 5
         assert progress.commands_executed == 10
 
-    def test_metric_card_data(self) -> None:
+    @staticmethod
+    def test_metric_card_data() -> None:
         """Test MetricCardData model."""
         metric = MetricCardData(
             title="CPU Usage",
@@ -182,7 +194,8 @@ class TestWidgetModels:
         assert metric.trend == 5.2
         assert metric.color == "warning"
 
-    def test_status_indicator_data(self) -> None:
+    @staticmethod
+    def test_status_indicator_data() -> None:
         """Test StatusIndicatorData model."""
         status = StatusIndicatorData(
             status="running",
@@ -197,9 +210,10 @@ class TestWidgetModels:
         assert status.color == "success"
         assert status.pulse is True
 
-    def test_chart_data_creation(self) -> None:
+    @staticmethod
+    def test_chart_data_creation() -> None:
         """Test ChartData model creation."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         points = [
             ChartDataPoint(x=now, y=10),
             ChartDataPoint(x="2023-01-02", y=20),
@@ -426,7 +440,7 @@ class TestWidgetDataAdapter:
         adapter = self.adapter
 
         # Test datetime object
-        now = datetime.now()
+        now = datetime.now(UTC)
         assert adapter._parse_timestamp(now) == now  # noqa: SLF001
 
         # Test None
@@ -483,9 +497,10 @@ class TestWidgetDataAdapter:
 class TestModelSerialization:
     """Test model serialization and deserialization."""
 
-    def test_session_data_roundtrip(self) -> None:
+    @staticmethod
+    def test_session_data_roundtrip() -> None:
         """Test SessionData serialization roundtrip."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         window = WindowData(id="1", name="test-window", active=True)
 
         original = SessionData(
@@ -508,9 +523,10 @@ class TestModelSerialization:
         assert len(restored.windows) == len(original.windows)
         assert restored.windows[0].name == original.windows[0].name
 
-    def test_health_data_roundtrip(self) -> None:
+    @staticmethod
+    def test_health_data_roundtrip() -> None:
         """Test HealthData serialization roundtrip."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         category = HealthCategoryData(
             category="build",
             score=85,
@@ -535,9 +551,10 @@ class TestModelSerialization:
         assert restored.categories[0].category == original.categories[0].category
         assert restored.categories[0].score == original.categories[0].score
 
-    def test_activity_data_roundtrip(self) -> None:
+    @staticmethod
+    def test_activity_data_roundtrip() -> None:
         """Test ActivityData serialization roundtrip."""
-        now = datetime.now()
+        now = datetime.now(UTC)
         entry = ActivityEntry(
             timestamp=now,
             activity_type=ActivityType.FILE_CREATED,

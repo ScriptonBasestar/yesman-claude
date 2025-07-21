@@ -1,8 +1,12 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for Rendering Optimizations and Caching."""
 
 import threading
 import time
-from typing import Any
+from typing import object
 
 from libs.dashboard.renderers.base_renderer import (
     BaseRenderer,
@@ -37,7 +41,7 @@ class MockRenderer(BaseRenderer):
         self.render_count = 0
         self.last_params = None
 
-    def render_widget(self, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
+    def render_widget(self, widget_type: WidgetType, data: object, options: dict | None = None) -> str:
         self.render_count += 1
         self.last_params = (widget_type, data, options)
 
@@ -46,13 +50,16 @@ class MockRenderer(BaseRenderer):
 
         return f"mock-{widget_type.value}-{self.render_count}"
 
-    def render_layout(self, widgets: list, layout_config: dict | None = None) -> str:
+    @staticmethod
+    def render_layout( widgets: list, layout_config: dict | None = None) -> str:  # noqa: ARG002
         return f"mock-layout-{len(widgets)}"
 
-    def render_container(self, content: str, container_config: dict | None = None) -> str:
+    @staticmethod
+    def render_container(content: str, container_config: dict | None = None) -> str:  # noqa: ARG002
         return "mock-container"
 
-    def supports_feature(self, feature: str) -> bool:
+    @staticmethod
+    def supports_feature(feature: str) -> bool:  # noqa: ARG002
         return True
 
 
@@ -138,7 +145,8 @@ class TestRenderCache:
         assert self.cache.get("key-2") == "value-2"  # Still there
         assert self.cache.get("key-3") == "value-3"  # New item
 
-    def test_cache_ttl_expiry(self) -> None:
+    @staticmethod
+    def test_cache_ttl_expiry() -> None:
         """Test TTL-based cache expiry."""
         cache_with_ttl = RenderCache(max_size=10, ttl=0.1)  # 100ms TTL
 
@@ -246,7 +254,7 @@ class TestCachedDecorators:
         """Test cached_render decorator."""
 
         @cached_render(self.cache)
-        def mock_render(self: MockRenderer, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
+        def mock_render(self: MockRenderer, widget_type: WidgetType, data: object, options: dict | None = None) -> str:
             self.render_count += 1
             return f"render-{self.render_count}"
 
@@ -502,7 +510,8 @@ class TestPerformanceProfiler:
         self.profiler.clear()
         assert len(self.profiler.metrics) == 0
 
-    def test_profile_render_decorator(self) -> None:
+    @staticmethod
+    def test_profile_render_decorator() -> None:
         """Test profile_render decorator."""
 
         @profile_render("decorated_op")
@@ -527,12 +536,14 @@ class TestOptimizationIntegration:
         clear_performance_stats()
         self.renderer = TUIRenderer()
 
-    def teardown_method(self) -> None:
+    @staticmethod
+    def teardown_method() -> None:
         """Cleanup after each test."""
         clear_all_caches()
         clear_performance_stats()
 
-    def test_cache_performance_improvement(self) -> None:
+    @staticmethod
+    def test_cache_performance_improvement() -> None:
         """Test that caching improves performance."""
         metric = MetricCardData(title="Performance Test", value=75.5, suffix="%")
 
@@ -610,7 +621,8 @@ class TestOptimizationIntegration:
         assert all("Performance Test" in str(result) or "Metric" in str(result) for result in individual_results)
         assert all("Performance Test" in str(result) or "Metric" in str(result) for result in batch_results)
 
-    def test_global_cache_utilities(self) -> None:
+    @staticmethod
+    def test_global_cache_utilities() -> None:
         """Test global cache utility functions."""
         # Initially empty stats
         stats = get_cache_stats()
@@ -637,7 +649,8 @@ class TestOptimizationIntegration:
         cleared_stats = get_cache_stats()
         assert cleared_stats["widget_cache"].total_requests == 0
 
-    def test_global_performance_utilities(self) -> None:
+    @staticmethod
+    def test_global_performance_utilities() -> None:
         """Test global performance utility functions."""
         # Initially empty
         stats = get_performance_stats()

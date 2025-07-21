@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 from pathlib import Path
 
 import pytest
@@ -9,7 +13,8 @@ class TestDashboardLaunch:
     """Tests for end-to-end dashboard launch process."""
 
     @pytest.fixture
-    def temp_project_root(self):
+    @staticmethod
+    def temp_project_root():
         """Create temporary project directory."""
         import tempfile
 
@@ -24,11 +29,13 @@ class TestDashboardLaunch:
             yield project_root
 
     @pytest.fixture
-    def launcher(self, temp_project_root: Path) -> DashboardLauncher:
+    @staticmethod
+    def launcher( temp_project_root: Path) -> DashboardLauncher:
         """Create DashboardLauncher with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
-    def test_end_to_end_dashboard_launch(self, launcher: DashboardLauncher, temp_project_root: Path) -> None:
+    @staticmethod
+    def test_end_to_end_dashboard_launch(launcher: DashboardLauncher, temp_project_root: Path) -> None:
         """Test 6: End-to-end dashboard launch process."""
         # 1. Interface detection
         interface = launcher.detect_best_interface()

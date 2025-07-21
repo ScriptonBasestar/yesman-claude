@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Session management for dashboard."""
 
 import logging
@@ -5,7 +9,7 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import object
 
 import libtmux
 
@@ -81,7 +85,7 @@ class SessionManager:
             self.logger.error("Error getting sessions", exc_info=True)
             return []
 
-    def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
+    def _get_session_info(self, project_name: str, project_conf: dict[str, object]) -> SessionInfo:
         """Get information for a single session with mode-aware caching."""
 
         def compute_session_info() -> SessionInfo:
@@ -155,7 +159,7 @@ class SessionManager:
 
         return compute_session_info()
 
-    def _get_window_info(self, window: Any) -> WindowInfo:
+    def _get_window_info(self, window: object) -> WindowInfo:
         """Get information for a single window with detailed pane metrics."""
         panes: list[PaneInfo] = []
 
@@ -184,7 +188,7 @@ class SessionManager:
             panes=panes,
         )
 
-    def _get_detailed_pane_info(self, pane: Any) -> PaneInfo:
+    def _get_detailed_pane_info(self, pane: object) -> PaneInfo:
         """Get detailed information for a single pane including metrics."""
         try:
             # Get basic pane information
@@ -295,7 +299,8 @@ class SessionManager:
                 is_controller=False,
             )
 
-    def _analyze_current_task(self, cmdline: list[str], command: str) -> str:
+    @staticmethod
+    def _analyze_current_task( cmdline: list[str], command: str) -> str:
         """Analyze command line to determine current task."""
         if not cmdline:
             return command
@@ -340,7 +345,7 @@ class SessionManager:
         main_cmd = cmdline[0].split("/")[-1] if cmdline else command
         return f"Running {main_cmd}"
 
-    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
+    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, object]:
         """Attach to a specific tmux pane.
 
         Args:
@@ -400,7 +405,7 @@ class SessionManager:
                 "action": "error",
             }
 
-    def get_progress_overview(self) -> dict[str, Any]:
+    def get_progress_overview(self) -> dict[str, object]:
         """Get progress overview for all sessions."""
         sessions = self.get_all_sessions()
 
@@ -495,7 +500,7 @@ echo "Attaching to tmux pane..."
             self.logger.exception("Error creating attachment script")
             raise
 
-    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
+    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, object]:
         """Execute pane attachment with error handling.
 
         Args:
@@ -536,7 +541,8 @@ echo "Attaching to tmux pane..."
                 "action": "error",
             }
 
-    def _cleanup_cache(self) -> None:
+    @staticmethod
+    def _cleanup_cache() -> None:
         """Clean up stale cached session data."""
         # This is a placeholder method to satisfy the API contract
         # The actual SessionManager doesn't use caching currently

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 import click
 
 from libs.core.base_command import BaseCommand, SessionCommandMixin
@@ -6,7 +10,7 @@ from libs.core.base_command import BaseCommand, SessionCommandMixin
 class ShowCommand(BaseCommand, SessionCommandMixin):
     """List all running tmux sessions."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs) -> dict:  # noqa: ARG002
         """Execute the show command."""
         self.tmux_manager.list_running_sessions()
         return {"success": True, "action": "list_sessions"}

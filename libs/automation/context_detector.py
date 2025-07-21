@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Context detection system for workflow automation."""
 
 import logging
@@ -173,7 +177,7 @@ class ContextDetector:
                 self._last_git_hash = current_hash
 
         except Exception as e:
-            self.logger.debug(f"Git context detection failed: {e}")
+            self.logger.debug(f"Git context detection failed: {e}")  # noqa: G004
 
         return None
 
@@ -217,7 +221,7 @@ class ContextDetector:
                         self._last_file_mtimes[file_key] = current_mtime
 
             except Exception as e:
-                self.logger.debug(f"File change detection failed for {pattern}: {e}")
+                self.logger.debug(f"File change detection failed for {pattern}: {e}")  # noqa: G004
 
         return detected_changes
 
@@ -266,11 +270,12 @@ class ContextDetector:
                 )
 
         except Exception as e:
-            self.logger.debug(f"Deployment readiness check failed: {e}")
+            self.logger.debug(f"Deployment readiness check failed: {e}")  # noqa: G004
 
         return None
 
-    def _calculate_confidence(self, context_type: ContextType, content: str, match: re.Match) -> float:
+    @staticmethod
+    def _calculate_confidence( context_type: ContextType, content: str, match: re.Match) -> float:
         """Calculate confidence score for a detected context."""
         base_confidence = 0.7
 
@@ -328,7 +333,7 @@ class ContextDetector:
             }
 
         except Exception as e:
-            self.logger.debug(f"Failed to get commit info: {e}")
+            self.logger.debug(f"Failed to get commit info: {e}")  # noqa: G004
             return {}
 
     def _run_quick_test_check(self) -> bool:

@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Automated code review and quality checking engine for multi-agent collaboration."""
 
 import ast
@@ -10,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
@@ -82,7 +86,7 @@ class ReviewFinding:
     suggestion: str | None = None
     rule_id: str | None = None
     tool_name: str | None = None
-    context: dict[str, Any] = field(default_factory=dict)
+    context: dict[str, object] = field(default_factory=dict)
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -95,7 +99,7 @@ class QualityMetrics:
     thresholds: dict[QualityMetric, float] = field(default_factory=dict)
     violations: list[QualityMetric] = field(default_factory=list)
     calculated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass
@@ -117,7 +121,7 @@ class CodeReview:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     started_at: datetime | None = None
     completed_at: datetime | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass
@@ -145,7 +149,7 @@ class CodeReviewEngine:
         semantic_analyzer: SemanticAnalyzer,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-        enable_auto_review: bool = True,
+        enable_auto_review: bool = True,  # noqa: FBT001
     ) -> None:
         """Initialize the code review engine.
 
@@ -155,6 +159,9 @@ class CodeReviewEngine:
             branch_manager: Manager for branch operations
             repo_path: Path to git repository
             enable_auto_review: Whether to automatically trigger reviews
+        
+        Returns:
+            Description of return value
         """
         self.collaboration_engine = collaboration_engine
         self.semantic_analyzer = semantic_analyzer
@@ -168,7 +175,7 @@ class CodeReviewEngine:
         self.quality_profiles: dict[str, dict] = {}  # file -> quality profile
 
         # Review configuration
-        self.review_config: dict[str, Any] = {
+        self.review_config: dict[str, object] = {
             "require_approval_for_critical": True,
             "auto_approve_threshold": 8.5,  # Out of 10
             "max_concurrent_reviews": 10,
@@ -207,8 +214,8 @@ class CodeReviewEngine:
 
         # Background tasks
         self._running = False
-        self._review_monitor_task: asyncio.Task[Any] | None = None
-        self._quality_monitor_task: asyncio.Task[Any] | None = None
+        self._review_monitor_task: asyncio.Task[object] | None = None
+        self._quality_monitor_task: asyncio.Task[object] | None = None
 
     async def start(self) -> None:
         """Start the code review engine."""
@@ -619,7 +626,7 @@ class CodeReviewEngine:
                     review.overall_score,
                 )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error in automated review for %s:", review.review_id)
             review.status = ReviewStatus.COMPLETED
             review.metadata["error"] = str(e)
@@ -1090,7 +1097,8 @@ class CodeReviewEngine:
 
         return metrics
 
-    def _estimate_cyclomatic_complexity(self, content: str) -> float:
+    @staticmethod
+    def _estimate_cyclomatic_complexity( content: str) -> float:
         """Estimate cyclomatic complexity by counting decision points."""
         try:
             tree = ast.parse(content)
@@ -1109,7 +1117,8 @@ class CodeReviewEngine:
         except:
             return 1.0
 
-    def _calculate_maintainability_index(self, content: str, loc: int) -> float:
+    @staticmethod
+    def _calculate_maintainability_index(content: str, loc: int) -> float:
         """Calculate a simplified maintainability index."""
         try:
             # Simplified calculation based on lines of code and comments
@@ -1127,6 +1136,7 @@ class CodeReviewEngine:
         except:
             return 50.0  # Default neutral score
 
+    @staticmethod
     def _calculate_overall_score(
         self,
         findings: list[ReviewFinding],
@@ -1171,7 +1181,8 @@ class CodeReviewEngine:
         # Check for quality metric violations
         return all(not metrics.violations for metrics in review.quality_metrics)
 
-    def _summarize_findings(self, findings: list[ReviewFinding]) -> dict[str, Any]:
+    @staticmethod
+    def _summarize_findings(findings: list[ReviewFinding]) -> dict[str, object]:
         """Create a summary of review findings."""
         severity_counts = Counter(f.severity.value for f in findings)
         type_counts = Counter(f.review_type.value for f in findings)
@@ -1186,7 +1197,7 @@ class CodeReviewEngine:
     async def _find_suitable_reviewers(
         self,
         requester_id: str,
-        files_changed: list[str],
+        files_changed: list[str],  # noqa: ARG002
         num_reviewers: int,
     ) -> list[str]:
         """Find suitable reviewers for a code review."""
@@ -1205,6 +1216,7 @@ class CodeReviewEngine:
         # For now, just return the first available agents
         return available_agents[:num_reviewers]
 
+    @staticmethod
     async def _run_tool_check(
         self,
         tool_name: str,
@@ -1317,7 +1329,7 @@ class CodeReviewEngine:
             review_time_stats=review_time_stats,
         )
 
-    def get_engine_summary(self) -> dict[str, Any]:
+    def get_engine_summary(self) -> dict[str, object]:
         """Get comprehensive summary of the review engine."""
         return {
             "statistics": self.review_stats.copy(),

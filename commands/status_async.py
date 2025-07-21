@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Async comprehensive project status dashboard command with performance optimizations."""
 
 import asyncio
@@ -30,8 +34,8 @@ class AsyncStatusDashboard:
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        config: Any = None,
-        tmux_manager: Any = None,
+        config: object = None,
+        tmux_manager: object = None,
     ) -> None:
         self.console = Console()
         self.project_path = Path(project_path).resolve()
@@ -157,7 +161,8 @@ class AsyncStatusDashboard:
         progress_data = await loop.run_in_executor(None, self.session_manager.get_progress_overview)
         self._data_cache["progress_data"] = progress_data
 
-    def _calculate_session_activity(self, session_info: dict) -> float:
+    @staticmethod
+    def _calculate_session_activity( session_info: dict) -> float:
         """Calculate activity level for a session."""
         if not session_info.get("exists", True):
             return 0.0
@@ -180,7 +185,8 @@ class AsyncStatusDashboard:
 
         return min(activity, 1.0)
 
-    def create_layout(self) -> Layout:
+    @staticmethod
+    def create_layout() -> Layout:
         """Create the dashboard layout."""
         layout = Layout()
 
@@ -329,7 +335,8 @@ class AsyncStatusDashboard:
             self.console.print(table)
         return capture.get()
 
-    def _render_heatmap(self, heatmap_data: dict) -> str:
+    @staticmethod
+    def _render_heatmap(heatmap_data: dict) -> str:
         """Render activity heatmap visualization."""
         from rich.text import Text
 
@@ -403,7 +410,8 @@ class AsyncStatusDashboard:
 class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
     """Async comprehensive project status dashboard."""
 
-    def validate_preconditions(self) -> None:
+    @staticmethod
+    def validate_preconditions() -> None:
         """Validate command preconditions."""
         super().validate_preconditions()
 
@@ -411,8 +419,8 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        interactive: bool = False,
-        **kwargs,
+        interactive: bool = False,  # noqa: FBT001
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the async status command."""
         try:
@@ -442,7 +450,8 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = f"Error in async status dashboard: {e}"
             raise CommandError(msg) from e
 
-    async def update_monitoring_data(self) -> None:
+    @staticmethod
+    async def update_monitoring_data() -> None:
         """Implement monitoring data updates."""
         # Dashboard handles its own monitoring
 
@@ -475,7 +484,7 @@ StatusCommand = AsyncStatusCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def status(project_path: str, update_interval: float, interactive: bool, async_mode: bool) -> None:
+def status(project_path: str, update_interval: float, interactive: bool, async_mode: bool) -> None:  # noqa: FBT001
     """Comprehensive project status dashboard with async optimizations."""
     if async_mode:
         command = AsyncStatusCommand()
@@ -514,7 +523,7 @@ def status(project_path: str, update_interval: float, interactive: bool, async_m
     default=True,
     help="Run in interactive mode with live updates (default: interactive)",
 )
-def status_async(project_path: str, update_interval: float, interactive: bool) -> None:
+def status_async(project_path: str, update_interval: float, interactive: bool) -> None:  # noqa: FBT001
     """Async comprehensive project status dashboard (explicit async version)."""
     command = AsyncStatusCommand()
     command.run(

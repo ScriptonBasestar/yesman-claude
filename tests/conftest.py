@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """pytest 전역 설정 파일
 테스트 실행 시 자동으로 로드되며, 공통 fixture와 설정을 제공.
 """

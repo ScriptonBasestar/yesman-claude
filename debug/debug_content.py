@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Debug content capture and prompt detection."""
 
 from libs.core.claude_manager import ClaudeManager

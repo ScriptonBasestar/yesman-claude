@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dashboard Launcher.
 
 Detects optimal dashboard interface and manages system requirements.
@@ -200,18 +204,21 @@ class DashboardLauncher:
 
     # Private methods for environment detection
 
-    def _is_gui_available(self) -> bool:
+    @staticmethod
+    def _is_gui_available() -> bool:
         """Check if GUI environment is available."""
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
         # Linux/Unix
         return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
 
-    def _is_ssh_session(self) -> bool:
+    @staticmethod
+    def _is_ssh_session() -> bool:
         """Check if running in SSH session."""
         return bool(os.environ.get("SSH_CLIENT") or os.environ.get("SSH_TTY"))
 
-    def _is_terminal_capable(self) -> bool:
+    @staticmethod
+    def _is_terminal_capable() -> bool:
         """Check if terminal supports rich output."""
         return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
 
@@ -228,11 +235,13 @@ class DashboardLauncher:
         # Check if npm is available
         return self._is_node_available()
 
-    def _is_node_available(self) -> bool:
+    @staticmethod
+    def _is_node_available() -> bool:
         """Check if Node.js and npm are available."""
         return shutil.which("node") is not None and shutil.which("npm") is not None
 
-    def _is_python_package_available(self, package: str) -> bool:
+    @staticmethod
+    def _is_python_package_available(package: str) -> bool:
         """Check if a Python package is available."""
         try:
             __import__(package)

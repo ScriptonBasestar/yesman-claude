@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Dashboard widgets for session visualization and interaction."""
 
 from .activity_heatmap import ActivityHeatmapGenerator

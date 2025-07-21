@@ -1,7 +1,11 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Test for setup command - Migrated to use centralized mock factories."""
 
 from unittest.mock import patch
-from typing import Any
+from typing import object
 
 from click.testing import CliRunner
 
@@ -16,7 +20,7 @@ class TestSetupCommand:
         self.runner = CliRunner()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_creates_all_sessions(self, mock_config: Any) -> None:
+    def test_setup_creates_all_sessions(self, mock_config: object) -> None:  # noqa: ARG002
         """Test setup command creates all sessions from projects.yaml."""
         projects = {
             "sessions": {
@@ -38,7 +42,7 @@ class TestSetupCommand:
             mock_manager.list_running_sessions.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_specific_project(self, mock_config: Any) -> None:
+    def test_setup_with_specific_project(self, mock_config: object) -> None:  # noqa: ARG002
         """Test setup command with specific project name."""
         projects = {
             "sessions": {
@@ -58,7 +62,7 @@ class TestSetupCommand:
             mock_manager.create_session.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_handles_session_creation_failure(self, mock_config: Any) -> None:
+    def test_setup_handles_session_creation_failure(self, mock_config: object) -> None:  # noqa: ARG002
         """Test setup handles session creation failure gracefully."""
         projects = {
             "sessions": {
@@ -78,7 +82,7 @@ class TestSetupCommand:
             assert "already exists" in result.output or "failed to create" in result.output
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_nonexistent_project(self, mock_config: Any) -> None:
+    def test_setup_with_nonexistent_project(self, mock_config: object) -> None:  # noqa: ARG002
         """Test setup with nonexistent project name."""
         projects = {
             "sessions": {
@@ -98,7 +102,7 @@ class TestSetupCommand:
             mock_manager.create_session.assert_not_called()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_no_projects_found(self, mock_config: Any) -> None:
+    def test_setup_no_projects_found(self, mock_config: object) -> None:  # noqa: ARG002
         """Test setup when no projects are configured."""
         projects = {"sessions": {}}  # Empty sessions
 

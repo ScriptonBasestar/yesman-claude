@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """WebSocket message batch processor for optimized real-time updates - Refactored version."""
 
 import json
@@ -6,7 +10,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from libs.core.base_batch_processor import BaseBatchProcessor
@@ -103,7 +107,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         self.parent_stats["batches_sent"] += 1
         self.parent_stats["messages_processed"] += len(batch.messages)
 
-        self.logger.debug(f"Sent batch {batch.batch_id}: {len(batch.messages)} messages")
+        self.logger.debug("Sent batch %s: %d messages", batch.batch_id, len(batch.messages))
 
     def _optimize_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Optimize a batch of messages by combining similar ones."""
@@ -136,7 +140,8 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
 
         return optimized
 
-    def _combine_update_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
+    @staticmethod
+    def _combine_update_messages( messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple update messages into a single message."""
         if not messages:
             return {}
@@ -161,7 +166,8 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
             },
         }
 
-    def _combine_log_messages(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
+    @staticmethod
+    def _combine_log_messages(messages: list[dict[str, Any]]) -> dict[str, Any]:
         """Combine multiple log messages into a batched log message."""
         if not messages:
             return {}
@@ -174,7 +180,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, Any], MessageBatch]):
         # Create batched log message
         return {
             "type": "log_batch",
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "data": {
                 "entries": log_entries,
                 "count": len(log_entries),
@@ -212,7 +218,7 @@ class WebSocketBatchProcessor:
     def register_message_handler(self, channel: str, handler: Callable) -> None:
         """Register a message handler for a specific channel."""
         self._message_handlers[channel] = handler
-        self.logger.info(f"Registered message handler for channel: {channel}")
+        self.logger.info("Registered message handler for channel: %s", channel)
 
     async def start(self) -> None:
         """Start the batch processing system."""
@@ -247,7 +253,7 @@ class WebSocketBatchProcessor:
         if channel not in self._channel_processors:
             handler = self._message_handlers.get(channel)
             if not handler:
-                self.logger.error(f"No handler registered for channel: {channel}")
+                self.logger.error("No handler registered for channel: %s", channel)
                 return
 
             processor = ChannelBatchProcessor(
@@ -275,9 +281,9 @@ class WebSocketBatchProcessor:
                 await handler([message])
                 self.stats["messages_processed"] += 1
             except Exception as e:
-                self.logger.exception(f"Error sending immediate message to {channel}: {e}")
+                self.logger.exception("Error sending immediate message to {channel}")  # noqa: G004
         else:
-            self.logger.warning(f"No handler registered for channel: {channel}")
+            self.logger.warning("No handler registered for channel: %s", channel)
 
     def get_statistics(self) -> dict[str, Any]:
         """Get processing statistics."""
@@ -314,14 +320,14 @@ class WebSocketBatchProcessor:
         for key, value in kwargs.items():
             if hasattr(self.config, key):
                 setattr(self.config, key, value)
-                self.logger.info(f"Updated config {key} = {value}")
+                self.logger.info("Updated config %s = %s", key, value)
 
                 # Update config for all channel processors
                 for processor in self._channel_processors.values():
                     processor.batch_size = self.config.max_batch_size
                     processor.flush_interval = self.config.max_batch_time
             else:
-                self.logger.warning(f"Unknown config key: {key}")
+                self.logger.warning("Unknown config key: %s", key)
 
     def clear_channel(self, channel: str) -> None:
         """Clear all pending messages for a specific channel."""
@@ -334,7 +340,7 @@ class WebSocketBatchProcessor:
             with processor._lock:
                 processor._pending_items.clear()
 
-            self.logger.info(f"Cleared {cleared_count} pending messages from {channel}")
+            self.logger.info("Cleared %d pending messages from %s", cleared_count, channel)
 
     async def get_channel_processor(self, channel: str) -> ChannelBatchProcessor | None:
         """Get the batch processor for a specific channel."""

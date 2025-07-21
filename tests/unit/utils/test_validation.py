@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for validation utilities."""
 
 import pytest
@@ -17,7 +21,8 @@ from libs.validation import (
 class TestValidationFunctions:
     """Test validation functions."""
 
-    def test_validate_session_name_valid(self) -> None:
+    @staticmethod
+    def test_validate_session_name_valid() -> None:
         """Test valid session names."""
         valid_names = [
             "my-session",
@@ -31,7 +36,8 @@ class TestValidationFunctions:
             assert valid is True, f"'{name}' should be valid"
             assert error is None
 
-    def test_validate_session_name_invalid(self) -> None:
+    @staticmethod
+    def test_validate_session_name_invalid() -> None:
         """Test invalid session names."""
         invalid_cases = [
             ("", "Session name cannot be empty"),
@@ -46,7 +52,8 @@ class TestValidationFunctions:
             assert valid is False, f"'{name}' should be invalid"
             assert expected_error in error
 
-    def test_validate_window_name_valid(self) -> None:
+    @staticmethod
+    def test_validate_window_name_valid() -> None:
         """Test valid window names."""
         valid_names = [
             "my-window",
@@ -59,7 +66,8 @@ class TestValidationFunctions:
             assert valid is True, f"'{name}' should be valid"
             assert error is None
 
-    def test_validate_window_name_invalid(self) -> None:
+    @staticmethod
+    def test_validate_window_name_invalid() -> None:
         """Test invalid window names."""
         invalid_cases = [
             ("", "Window name cannot be empty"),
@@ -71,7 +79,8 @@ class TestValidationFunctions:
             assert valid is False, f"'{name}' should be invalid"
             assert expected_error in error
 
-    def test_validate_pane_command_valid(self) -> None:
+    @staticmethod
+    def test_validate_pane_command_valid() -> None:
         """Test valid pane commands."""
         valid_commands = [
             "",  # empty is valid
@@ -84,7 +93,8 @@ class TestValidationFunctions:
             assert valid is True, f"'{cmd}' should be valid"
             assert error is None
 
-    def test_validate_pane_command_invalid(self) -> None:
+    @staticmethod
+    def test_validate_pane_command_invalid() -> None:
         """Test invalid/dangerous pane commands."""
         invalid_cases = [
             ("rm -rf /", "dangerous pattern"),
@@ -96,14 +106,16 @@ class TestValidationFunctions:
             assert valid is False, f"'{cmd}' should be invalid"
             assert expected_error in error
 
-    def test_validate_port_number_valid(self) -> None:
+    @staticmethod
+    def test_validate_port_number_valid() -> None:
         """Test valid port numbers."""
         valid_ports = ["80", "443", "8080", "3000", "65535"]
         for port in valid_ports:
             valid, error = validate_port_number(port)
             assert valid is True, f"'{port}' should be valid"
 
-    def test_validate_port_number_invalid(self) -> None:
+    @staticmethod
+    def test_validate_port_number_invalid() -> None:
         """Test invalid port numbers."""
         invalid_cases = [
             ("", "cannot be empty"),
@@ -117,13 +129,15 @@ class TestValidationFunctions:
             assert valid is False, f"'{port}' should be invalid"
             assert expected_error in error
 
-    def test_validate_port_privileged_warning(self) -> None:
+    @staticmethod
+    def test_validate_port_privileged_warning() -> None:
         """Test privileged port warning."""
         valid, message = validate_port_number("22")
         assert valid is True
         assert "root privileges" in message
 
-    def test_validate_log_level_valid(self) -> None:
+    @staticmethod
+    def test_validate_log_level_valid() -> None:
         """Test valid log levels."""
         valid_levels = [
             "DEBUG",
@@ -139,7 +153,8 @@ class TestValidationFunctions:
             assert valid is True, f"'{level}' should be valid"
             assert error is None
 
-    def test_validate_log_level_invalid(self) -> None:
+    @staticmethod
+    def test_validate_log_level_invalid() -> None:
         """Test invalid log levels."""
         invalid_cases = [
             ("", "cannot be empty"),
@@ -155,7 +170,8 @@ class TestValidationFunctions:
 class TestValidationDecorator:
     """Test validation decorator."""
 
-    def test_validate_input_decorator_success(self) -> None:
+    @staticmethod
+    def test_validate_input_decorator_success() -> None:
         """Test decorator with valid input."""
 
         @validate_input(validate_session_name, "session_name")
@@ -165,7 +181,8 @@ class TestValidationDecorator:
         result = create_session("my-session")
         assert result == "Created my-session"
 
-    def test_validate_input_decorator_failure(self) -> None:
+    @staticmethod
+    def test_validate_input_decorator_failure() -> None:
         """Test decorator with invalid input."""
 
         @validate_input(validate_session_name, "session_name")
@@ -178,7 +195,8 @@ class TestValidationDecorator:
         assert exc_info.value.field == "session_name"
         assert "invalid characters" in str(exc_info.value)
 
-    def test_validate_input_decorator_kwargs(self) -> None:
+    @staticmethod
+    def test_validate_input_decorator_kwargs() -> None:
         """Test decorator with keyword arguments."""
 
         @validate_input(validate_port_number, "port")

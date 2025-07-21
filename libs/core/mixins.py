@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Common mixin classes for shared functionality across the Yesman-Claude project.
 
 These mixins provide standardized interfaces for common patterns:
@@ -8,18 +12,19 @@ These mixins provide standardized interfaces for common patterns:
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import object
 
 
 class StatisticsProviderMixin(ABC):
     """Mixin for classes that provide statistics information."""
 
     @abstractmethod
-    def get_statistics(self) -> dict[str, Any]:
+    @staticmethod
+    def get_statistics() -> dict[str, object]:
         """Get statistics information from the implementing class.
 
         Returns:
-            dict[str, Any]: Dictionary containing statistics data.
+            dict[str, object]: Dictionary containing statistics data.
                            The structure depends on the implementing class.
 
         Example:
@@ -39,7 +44,8 @@ class StatusManagerMixin(ABC):
     """Mixin for status and activity management."""
 
     @abstractmethod
-    def update_status(self, status: str) -> None:
+    @staticmethod
+    def update_status(status: str) -> None:
         """Update the current status.
 
         Args:
@@ -53,7 +59,8 @@ class StatusManagerMixin(ABC):
         raise NotImplementedError(msg)
 
     @abstractmethod
-    def update_activity(self, activity: str) -> None:
+    @staticmethod
+    def update_activity(activity: str) -> None:
         """Update the current activity description.
 
         Args:
@@ -72,7 +79,8 @@ class LayoutManagerMixin(ABC):
     """Mixin for layout management in UI components."""
 
     @abstractmethod
-    def create_layout(self) -> Any:
+    @staticmethod
+    def create_layout() -> Any:
         """Create and return a layout object.
 
         Returns:
@@ -84,7 +92,8 @@ class LayoutManagerMixin(ABC):
         raise NotImplementedError(msg)
 
     @abstractmethod
-    def update_layout(self, layout: Any) -> None:
+    @staticmethod
+    def update_layout(layout: object) -> None:
         """Update an existing layout with new configuration or content.
 
         Args:
@@ -110,7 +119,7 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
             "failed_operations": 0,
         }
 
-    def get_statistics(self) -> dict[str, Any]:
+    def get_statistics(self) -> dict[str, object]:
         """Get current statistics with calculated success rate."""
         stats = self._statistics.copy()
         total = stats["total_operations"]

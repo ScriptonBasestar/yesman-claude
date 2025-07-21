@@ -1,10 +1,14 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Git activity visualization and metrics widget."""
 
 import re
 import subprocess
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from rich.console import Console
@@ -155,7 +159,8 @@ class GitActivityWidget:
 
         return commits
 
-    def _parse_diff_stats(self, stats_output: str) -> tuple[int, int, int]:
+    @staticmethod
+    def _parse_diff_stats( stats_output: str) -> tuple[int, int, int]:
         """Parse git diff stats output."""
         files_changed = 0
         insertions = 0
@@ -174,7 +179,7 @@ class GitActivityWidget:
 
     def _get_active_contributors(self, days: int = 30) -> dict[str, int]:
         """Get active contributors in the last N days."""
-        since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        since_date = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
 
         output = self._run_git_command(
             [
@@ -194,7 +199,7 @@ class GitActivityWidget:
 
     def _get_daily_activity(self, days: int = 30) -> dict[str, int]:
         """Get daily commit activity for the last N days."""
-        since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        since_date = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
 
         output = self._run_git_command(
             [
@@ -379,7 +384,7 @@ class GitActivityWidget:
 
         # Recent activity
         if stats.daily_activity:
-            today = datetime.now().strftime("%Y-%m-%d")
+            today = datetime.now(UTC).strftime("%Y-%m-%d")
             today_commits = stats.daily_activity.get(today, 0)
             text.append(f"{today_commits} today", style="green")
         else:

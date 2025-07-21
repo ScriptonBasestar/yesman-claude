@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Agent pool management for multi-agent development system."""
 
 import asyncio
@@ -12,7 +16,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Import scheduler types after main types to avoid circular imports
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, object
 
 from .types import Agent, AgentState, Task, TaskStatus
 
@@ -421,7 +425,7 @@ class AgentPool:
                         execution_time,
                     )
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error executing task %s:", task.task_id)
 
             task.status = TaskStatus.FAILED
@@ -497,7 +501,7 @@ class AgentPool:
 
         logger.info("Terminated agent %s", agent_id)
 
-    def get_agent_status(self, agent_id: str) -> dict[str, Any] | None:
+    def get_agent_status(self, agent_id: str) -> dict[str, object] | None:
         """Get status of a specific agent."""
         agent = self.agents.get(agent_id)
         if not agent:
@@ -505,7 +509,7 @@ class AgentPool:
 
         return agent.to_dict()
 
-    def get_task_status(self, task_id: str) -> dict[str, Any] | None:
+    def get_task_status(self, task_id: str) -> dict[str, object] | None:
         """Get status of a specific task."""
         task = self.tasks.get(task_id)
         if not task:
@@ -513,11 +517,11 @@ class AgentPool:
 
         return task.to_dict()
 
-    def list_agents(self) -> list[dict[str, Any]]:
+    def list_agents(self) -> list[dict[str, object]]:
         """List all agents and their status."""
         return [agent.to_dict() for agent in self.agents.values()]
 
-    def list_tasks(self, status: TaskStatus | None = None) -> list[dict[str, Any]]:
+    def list_tasks(self, status: TaskStatus | None = None) -> list[dict[str, object]]:
         """List tasks, optionally filtered by status."""
         tasks = self.tasks.values()
 
@@ -527,7 +531,7 @@ class AgentPool:
 
         return [task.to_dict() for task in tasks]
 
-    def get_pool_statistics(self) -> dict[str, Any]:
+    def get_pool_statistics(self) -> dict[str, object]:
         """Get pool statistics."""
         active_agents = len(
             [a for a in self.agents.values() if a.state != AgentState.TERMINATED],
@@ -581,7 +585,7 @@ class AgentPool:
         """Register callback for agent error events."""
         self.agent_error_callbacks.append(callback)
 
-    def get_scheduling_metrics(self) -> dict[str, Any]:
+    def get_scheduling_metrics(self) -> dict[str, object]:
         """Get intelligent scheduling metrics."""
         if self.intelligent_scheduling:
             return self.scheduler.get_scheduling_metrics()
@@ -590,7 +594,7 @@ class AgentPool:
             "queue_size": self.task_queue.qsize(),
         }
 
-    def set_intelligent_scheduling(self, enabled: bool) -> None:
+    def set_intelligent_scheduling(self, enabled: bool) -> None:  # noqa: FBT001
         """Enable or disable intelligent scheduling."""
         self.intelligent_scheduling = enabled
 
@@ -826,25 +830,25 @@ class AgentPool:
 
         return task_ids
 
-    def get_branch_test_status(self, branch_name: str) -> dict[str, Any]:
+    def get_branch_test_status(self, branch_name: str) -> dict[str, object]:
         """Get test status summary for a branch."""
         if not self._test_integration_enabled or not self.branch_test_manager:
             return {"error": "Branch testing not enabled"}
 
         try:
             return self.branch_test_manager.get_branch_test_summary(branch_name)
-        except Exception as e:
+        except Exception:
             logger.exception("Error getting test status for %s:", branch_name)
             return {"error": str(e)}
 
-    def get_all_branch_test_status(self) -> dict[str, dict[str, Any]]:
+    def get_all_branch_test_status(self) -> dict[str, dict[str, object]]:
         """Get test status for all active branches."""
         if not self._test_integration_enabled or not self.branch_test_manager:
             return {"error": "Branch testing not enabled"}  # type: ignore[dict-item]
 
         try:
             return self.branch_test_manager.get_all_branch_summaries()
-        except Exception as e:
+        except Exception:
             logger.exception("Error getting all branch test status:")
             return {"error": str(e)}
 
@@ -922,7 +926,7 @@ class AgentPool:
         operation_type: str,
         description: str,
         files_to_backup: list[str] | None = None,
-        context: dict[str, Any] | None = None,
+        context: dict[str, object] | None = None,
     ) -> str | None:
         """Create a snapshot before a critical operation.
 
@@ -998,7 +1002,7 @@ class AgentPool:
             logger.exception("Error during rollback to snapshot %s:", snapshot_id)
             return False
 
-    def get_recovery_status(self) -> dict[str, Any]:
+    def get_recovery_status(self) -> dict[str, object]:
         """Get status and metrics of the recovery system."""
         if not self._recovery_enabled or not self.recovery_engine:
             return {"recovery_enabled": False}
@@ -1014,11 +1018,11 @@ class AgentPool:
                 "active_operations": len(self.recovery_engine.active_operations),
             }
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error getting recovery status:")
             return {"recovery_enabled": True, "error": str(e)}
 
-    def list_recovery_snapshots(self) -> list[dict[str, Any]]:
+    def list_recovery_snapshots(self) -> list[dict[str, object]]:
         """List available recovery snapshots."""
         if not self._recovery_enabled or not self.recovery_engine:
             return []
@@ -1048,13 +1052,13 @@ class AgentPool:
 
     async def execute_with_recovery(
         self,
-        operation_func: Callable[[], Awaitable[Any]],
+        operation_func: Callable[[], Awaitable[object]],
         operation_type: str,
         description: str,
         files_to_backup: list[str] | None = None,
         max_retries: int = 3,
-        context: dict[str, Any] | None = None,
-    ) -> tuple[bool, Any]:
+        context: dict[str, object] | None = None,
+    ) -> tuple[bool, object]:
         """Execute an operation with automatic snapshot and recovery.
 
         Args:
@@ -1073,7 +1077,7 @@ class AgentPool:
             try:
                 result = await operation_func()
                 return True, result
-            except Exception as e:
+            except Exception:
                 logger.exception("Operation failed without recovery:")
                 return False, str(e)
 
@@ -1106,7 +1110,7 @@ class AgentPool:
                 logger.info("Operation completed successfully: %s", description)
                 return True, result
 
-            except Exception as e:
+            except Exception:
                 logger.exception("Operation failed (attempt %d):", retry_count + 1)
 
                 if retry_count < max_retries:
@@ -1135,7 +1139,7 @@ class AgentPool:
                     await asyncio.sleep(2**retry_count)  # Exponential backoff
                 else:
                     # Max retries exceeded
-                    logger.exception("Operation failed after %d attempts: %s", max_retries + 1, description)
+                    logger.exception("Operation failed after %d attempts")
                     return False, str(e)
 
         return False, "Max retries exceeded"

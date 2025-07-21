@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Tests for task runner functionality."""
 
 import os
@@ -13,14 +17,16 @@ from libs.task_runner import TaskRunner, TodoFile, TodoTask
 class TestTodoTask:
     """Test TodoTask class."""
 
-    def test_task_creation(self) -> None:
+    @staticmethod
+    def test_task_creation() -> None:
         """Test creating todo tasks."""
         task = TodoTask("Complete feature X", completed=False)
         assert task.content == "Complete feature X"
         assert not task.completed
         assert not task.skipped
 
-    def test_task_str_representation(self) -> None:
+    @staticmethod
+    def test_task_str_representation() -> None:
         """Test string representation of tasks."""
         incomplete = TodoTask("Todo item")
         completed = TodoTask("Done item", completed=True)
@@ -34,7 +40,8 @@ class TestTodoTask:
 class TestTodoFile:
     """Test TodoFile class."""
 
-    def test_parse_todo_file(self) -> None:
+    @staticmethod
+    def test_parse_todo_file() -> None:
         """Test parsing todo markdown file."""
         content = """# Test File
 
@@ -75,7 +82,8 @@ Regular text here.
             finally:
                 os.unlink(f.name)
 
-    def test_get_next_incomplete_task(self) -> None:
+    @staticmethod
+    def test_get_next_incomplete_task() -> None:
         """Test finding next incomplete task."""
         content = """# Test
 - [x] Completed task
@@ -97,7 +105,8 @@ Regular text here.
             finally:
                 os.unlink(f.name)
 
-    def test_all_completed_check(self) -> None:
+    @staticmethod
+    def test_all_completed_check() -> None:
         """Test checking if all tasks are completed."""
         all_done_content = """# Test
 - [x] Task 1
@@ -137,7 +146,8 @@ Regular text here.
 class TestTaskRunner:
     """Test TaskRunner class."""
 
-    def test_analyze_task_dependencies(self) -> None:
+    @staticmethod
+    def test_analyze_task_dependencies() -> None:
         """Test task dependency analysis."""
         runner = TaskRunner("test/todo")
 
@@ -152,7 +162,8 @@ class TestTaskRunner:
         assert len(subtasks) == 5
         assert "Analyze requirements" in subtasks[0]
 
-    def test_find_todo_files(self) -> None:
+    @staticmethod
+    def test_find_todo_files() -> None:
         """Test finding todo files."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test directory structure
@@ -174,7 +185,8 @@ class TestTaskRunner:
             assert not any("README.md" in str(f) for f in todo_files)
 
     @patch("subprocess.run")
-    def test_commit_changes(self, mock_run: MagicMock) -> None:
+    @staticmethod
+    def test_commit_changes(mock_run: MagicMock) -> None:
         """Test committing changes."""
         mock_run.return_value.returncode = 0
 
@@ -198,7 +210,8 @@ class TestTaskRunner:
         assert "feat(task-runner):" in commit_call[0][0][3]
 
     @patch("subprocess.run")
-    def test_run_tests(self, mock_run: MagicMock) -> None:
+    @staticmethod
+    def test_run_tests(mock_run: MagicMock) -> None:
         """Test running tests."""
         mock_run.return_value.returncode = 0
         mock_run.return_value.stdout = "All tests passed"

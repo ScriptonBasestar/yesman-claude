@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Asynchronous logger with queue-based processing for high performance - Refactored version."""
 
 import asyncio
@@ -12,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import object
 
 from libs.core.mixins import StatisticsProviderMixin
 
@@ -48,10 +52,10 @@ class LogEntry:
     line_number: int = 0
     thread_id: int = field(default_factory=lambda: threading.get_ident())
     process_id: int = field(default_factory=lambda: os.getpid())
-    extra_data: dict[str, Any] = field(default_factory=dict)
+    extra_data: dict[str, object] = field(default_factory=dict)
     exception_info: str | None = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert log entry to dictionary for serialization."""
         return {
             "level": self.level.level_name,
@@ -76,7 +80,7 @@ class AsyncLogger(StatisticsProviderMixin):
         self,
         name: str = "async_logger",
         min_level: LogLevel = LogLevel.INFO,
-        enable_batch_processing: bool = True,
+        enable_batch_processing: bool = True,  # noqa: FBT001
         batch_size: int = 100,
         batch_timeout: float = 5.0,
         output_dir: Path | None = None,
@@ -137,7 +141,7 @@ class AsyncLogger(StatisticsProviderMixin):
         # Lock for thread-safe operations
         self._stats_lock = threading.Lock()
 
-    def get_statistics(self) -> dict[str, Any]:
+    def get_statistics(self) -> dict[str, object]:
         """Get logger statistics - implements StatisticsProviderMixin interface."""
         batch_stats = {}
         if self.batch_processor:
@@ -201,7 +205,7 @@ class AsyncLogger(StatisticsProviderMixin):
         self.thread_pool.shutdown(wait=True)
 
         # Log shutdown
-        self.fallback_logger.info(f"AsyncLogger '{self.name}' stopped")
+        self.fallback_logger.info(f"AsyncLogger '{self.name}' stopped")  # noqa: G004
 
     async def _processing_loop(self) -> None:
         """Main processing loop for log entries."""
@@ -225,12 +229,12 @@ class AsyncLogger(StatisticsProviderMixin):
                 except TimeoutError:
                     continue
                 except Exception as e:
-                    self.fallback_logger.exception(f"Error processing log entry: {e}")
+                    self.fallback_logger.exception("Error processing log entry")  # noqa: G004
                     with self._stats_lock:
                         self.stats["errors"] += 1
 
         except Exception as e:
-            self.fallback_logger.exception(f"Fatal error in processing loop: {e}")
+            self.fallback_logger.exception("Fatal error in processing loop")  # noqa: G004
 
     async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
@@ -253,7 +257,7 @@ class AsyncLogger(StatisticsProviderMixin):
                 self.stats["processing_time_ms"] += processing_time
 
         except Exception as e:
-            self.fallback_logger.exception(f"Error processing entry: {e}")
+            self.fallback_logger.exception("Error processing entry")  # noqa: G004
             with self._stats_lock:
                 self.stats["errors"] += 1
 
@@ -279,7 +283,7 @@ class AsyncLogger(StatisticsProviderMixin):
         level: LogLevel,
         message: str,
         exc_info: Exception | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         """Internal method to queue a log entry."""
         if level.level_value < self.min_level.level_value:
@@ -323,30 +327,30 @@ class AsyncLogger(StatisticsProviderMixin):
                 self.stats["queue_full_count"] += 1
 
             # Fallback to standard logger
-            self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")
+            self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")  # noqa: G004
 
     # Convenience methods for different log levels
-    async def trace(self, message: str, **kwargs: Any) -> None:
+    async def trace(self, message: str, **kwargs: object) -> None:
         """Log a trace message."""
         await self._log(LogLevel.TRACE, message, **kwargs)
 
-    async def debug(self, message: str, **kwargs: Any) -> None:
+    async def debug(self, message: str, **kwargs: object) -> None:
         """Log a debug message."""
         await self._log(LogLevel.DEBUG, message, **kwargs)
 
-    async def info(self, message: str, **kwargs: Any) -> None:
+    async def info(self, message: str, **kwargs: object) -> None:
         """Log an info message."""
         await self._log(LogLevel.INFO, message, **kwargs)
 
-    async def warning(self, message: str, **kwargs: Any) -> None:
+    async def warning(self, message: str, **kwargs: object) -> None:
         """Log a warning message."""
         await self._log(LogLevel.WARNING, message, **kwargs)
 
-    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
+    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: object) -> None:
         """Log an error message."""
         await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
 
-    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
+    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: object) -> None:
         """Log a critical message."""
         await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 

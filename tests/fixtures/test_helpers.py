@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """테스트 헬퍼 함수 및 유틸리티
 테스트에서 자주 사용되는 공통 함수들을 제공.
 """
@@ -8,7 +12,7 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Generator
+from typing import object, Callable, Generator
 
 import yaml
 
@@ -35,7 +39,7 @@ def temp_file(content: str = "", suffix: str = ".txt") -> Generator[str, None, N
         os.unlink(path)
 
 
-def create_test_config(config_dict: dict[str, Any], format: str = "yaml") -> str:
+def create_test_config(config_dict: dict[str, object], format: str = "yaml") -> str:
     """테스트용 설정 파일 생성."""
     with temp_file(suffix=f".{format}") as config_path:
         with open(config_path, "w") as f:
@@ -81,7 +85,7 @@ def create_test_project_structure(base_dir: str) -> None:
         "README.md": "# Test Project",
     }
 
-    def create_structure(base_path: str, structure: dict[str, Any]) -> None:
+    def create_structure(base_path: str, structure: dict[str, object]) -> None:
         for name, content in structure.items():
             path = Path(base_path) / name
             if isinstance(content, dict):
@@ -131,7 +135,7 @@ def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5, i
     return False
 
 
-def generate_test_data(data_type: str, count: int = 10) -> list[dict[str, Any]]:
+def generate_test_data(data_type: str, count: int = 10) -> list[dict[str, object]]:
     """테스트 데이터 생성기."""
     if data_type == "sessions":
         return [

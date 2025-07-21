@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Test stub for Tauri IPC communication
 NOTE: These are placeholder tests that require Tauri test environment setup.
 """
@@ -58,7 +62,8 @@ class TestTauriIPCCommunication(unittest.TestCase):
 
         assert response["success"] is True
 
-    def test_event_listening(self) -> None:
+    @staticmethod
+    def test_event_listening() -> None:
         """Test IPC event listening from backend to frontend."""
         # Simulate Tauri event emission
         event_data = {
@@ -117,7 +122,8 @@ class TestTauriIPCCommunication(unittest.TestCase):
         response = self.mock_invoke("window_close")
         assert response["success"] is True
 
-    def test_system_tray_ipc(self) -> None:
+    @staticmethod
+    def test_system_tray_ipc() -> None:
         """Test system tray IPC communication."""
         # Simulate system tray menu click
         menu_event = {
@@ -131,7 +137,8 @@ class TestTauriIPCCommunication(unittest.TestCase):
         event_handler.assert_called_once_with(menu_event)
 
     @unittest.skip("Requires actual Tauri environment")
-    def test_real_ipc_roundtrip(self) -> None:
+    @staticmethod
+    def test_real_ipc_roundtrip() -> None:
         """Test real IPC roundtrip communication."""
         # This test would require actual Tauri runtime
         # Example implementation:
@@ -149,7 +156,8 @@ class TestTauriIPCCommunication(unittest.TestCase):
 class TestTauriIPCPerformance(unittest.TestCase):
     """Test IPC performance and limits."""
 
-    def test_large_payload_handling(self) -> None:
+    @staticmethod
+    def test_large_payload_handling() -> None:
         """Test handling of large IPC payloads."""
         # Create large payload (1MB)
         large_data = {"data": "x" * 1024 * 1024}
@@ -160,7 +168,8 @@ class TestTauriIPCPerformance(unittest.TestCase):
         response = mock_invoke("process_large_data", large_data)
         assert response["received"] > 1024 * 1024
 
-    def test_concurrent_ipc_calls(self) -> None:
+    @staticmethod
+    def test_concurrent_ipc_calls() -> None:
         """Test concurrent IPC calls."""
         import threading
 

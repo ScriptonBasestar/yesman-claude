@@ -1,3 +1,7 @@
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """TUI Session Selector using Rich."""
 
 from typing import Any
@@ -17,7 +21,8 @@ class SessionSelector:
         self.sessions = sessions
         self.console = Console()
 
-    def _get_session_details(self, session_name: str) -> dict[str, Any]:
+    @staticmethod
+    def _get_session_details( session_name: str) -> dict[str, Any]:
         """Get session details from tmux."""
         try:
             server = libtmux.Server()

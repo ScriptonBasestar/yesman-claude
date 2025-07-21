@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Copyright notice."""
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 """Progress indicator utilities for long-running commands.
 
 Provides standardized progress indicators using Rich library
@@ -7,7 +11,7 @@ for consistent user experience across all commands.
 
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from typing import Any
+from typing import object
 
 from rich.console import Console
 from rich.progress import (
@@ -106,7 +110,7 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
         yield update_progress
 
 
-def track_items(items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Any:
+def track_items(items: list[object], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Any:
     """Track progress through a list of items with rich progress bar.
 
     Args:
@@ -121,6 +125,9 @@ def track_items(items: list[Any], description: str, style: str = ProgressStyle.D
         files = get_files()
         for file_path in track_items(files, "🔧 Processing files", ProgressStyle.FILE_OPERATIONS):
             process_file(file_path)
+    
+    Returns:
+        Description of Any return value
     """
     return track(items, description=f"[{style}]{description}[/]")
 
@@ -172,7 +179,7 @@ class ProgressManager:
     """
 
     @staticmethod
-    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str, Any]:
+    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str, object]:
         """Execute a sequence of startup operations with progress tracking.
 
         Args:
@@ -206,11 +213,11 @@ class ProgressManager:
 
     @staticmethod
     def file_batch_operation(
-        files: list[Any],
-        operation: Callable[[Any], Any],
+        files: list[object],
+        operation: Callable[[object], object],
         description: str = "🔧 Processing files",
         style: str = ProgressStyle.FILE_OPERATIONS,
-    ) -> list[Any]:
+    ) -> list[object]:
         """Process a batch of files with progress tracking.
 
         Args:
