@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Summary of lint fixes completed."""
 
 
-def main():
+def main() -> None:
     print("=== LINT ERROR FIXING SUMMARY ===")
     print()
 

@@ -1,16 +1,15 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import tempfile
+from unittest.mock import Mock
+import pytest
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.branch_test_manager import BranchTestManager, TestSuite, TestType
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Simple test for branch testing integration without git dependency."""
-
-import tempfile
-from unittest.mock import Mock
-
-import pytest
-
-from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.branch_test_manager import BranchTestManager, TestSuite, TestType
 
 
 def test_agent_pool_test_integration() -> None:

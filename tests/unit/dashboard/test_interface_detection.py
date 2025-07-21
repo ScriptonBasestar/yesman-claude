@@ -1,13 +1,13 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 from pathlib import Path
-from typing import object
-
+from typing import Any
 import pytest
-
 from libs.dashboard import DashboardLauncher
+import tempfile
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestInterfaceDetection:
@@ -15,9 +15,8 @@ class TestInterfaceDetection:
 
     @pytest.fixture
     @staticmethod
-    def temp_project_root():
+    def temp_project_root() -> object:
         """Create temporary project directory."""
-        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -31,7 +30,7 @@ class TestInterfaceDetection:
 
     @pytest.fixture
     @staticmethod
-    def launcher(temp_project_root: object):
+    def launcher(temp_project_root: object) -> object:
         """Create DashboardLauncher with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
@@ -40,7 +39,7 @@ class TestInterfaceDetection:
         """Test 1: Interface detection and availability checking."""
         # Test auto-detection
         best_interface = launcher.detect_best_interface()
-        assert best_interface in ["tui", "web", "tauri"]
+        assert best_interface in {"tui", "web", "tauri"}
 
         # Test interface availability
         interfaces = launcher.get_available_interfaces()

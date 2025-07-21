@@ -1,13 +1,12 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import time
-
+from typing import Any
 import pytest
-from typing import object
-
 from libs.dashboard import OptimizationLevel, PerformanceOptimizer
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestPerformanceMonitoring:
@@ -15,8 +14,12 @@ class TestPerformanceMonitoring:
 
     @pytest.fixture
     @staticmethod
-    def performance_optimizer():
-        """Create PerformanceOptimizer instance."""
+    def performance_optimizer() -> object:
+        """Create PerformanceOptimizer instance.
+
+        Returns:
+        object: Description of return value.
+        """
         optimizer = PerformanceOptimizer()
         yield optimizer
         # Cleanup
@@ -24,7 +27,7 @@ class TestPerformanceMonitoring:
             optimizer.stop_monitoring()
 
     @staticmethod
-    def test_performance_monitoring( performance_optimizer: object) -> None:
+    def test_performance_monitoring(performance_optimizer: object) -> None:
         """Test 5: Performance monitoring and optimization."""
         # Test metrics collection
         metrics = performance_optimizer._collect_metrics()

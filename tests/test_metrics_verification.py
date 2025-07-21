@@ -1,17 +1,20 @@
-"""Copyright notice."""
+from typing import Any
+import json
+import tempfile
+from unittest.mock import AsyncMock, Mock, patch
+import pytest
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.metrics_verifier import (
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test metrics verification and success criteria validation."""
 
-import json
-import tempfile
-from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
 
-from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.metrics_verifier import (
     MetricsVerifier,
     PerformanceMetrics,
     SuccessCriteria,
@@ -211,7 +214,7 @@ class TestMetricsVerifier:
         # Verify file exists and contains data
         assert metrics_verifier.metrics_file.exists()
 
-        with open(metrics_verifier.metrics_file) as f:
+        with open(metrics_verifier.metrics_file, encoding="utf-8") as f:
             data = json.load(f)
 
         assert "current_metrics" in data
@@ -320,7 +323,7 @@ class TestComprehensiveVerification:
 
     @pytest.fixture
     @staticmethod
-    def mock_agent_pool():
+    def mock_agent_pool() -> object:
         """Create mock agent pool for testing."""
         pool = Mock(spec=AgentPool)
         pool.max_agents = 3
@@ -333,7 +336,7 @@ class TestComprehensiveVerification:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_comprehensive_verification_flow(mock_agent_pool: Mock) -> None:  # noqa: ARG002
+    async def test_comprehensive_verification_flow(mock_agent_pool: Mock) -> None:  # noqa: ARG002  # noqa: ARG004
         """Test complete verification flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Mock time.time to return predictable results

@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+import tempfile
+from pathlib import Path
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.recovery_engine import RecoveryAction
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Demo script showing rollback and error recovery capabilities."""
 
-import asyncio
-import tempfile
-from pathlib import Path
 
-from libs.multi_agent.agent_pool import AgentPool
-
-
-async def demo_recovery_system():
+async def demo_recovery_system() -> None:
     """Demonstrate recovery and rollback functionality."""
     print("🔄 Recovery and Rollback System Demo")
     print("=" * 50)
@@ -97,7 +99,7 @@ async def demo_recovery_system():
         # Create a failing operation that will be retried
         failure_count = 0
 
-        async def unreliable_operation():
+        async def unreliable_operation() -> str:
             nonlocal failure_count
             failure_count += 1
             if failure_count < 3:  # Fail first 2 times
@@ -129,7 +131,6 @@ async def demo_recovery_system():
         print("\n8️⃣ Custom Recovery Strategy...")
 
         # Register a custom recovery strategy
-        from libs.multi_agent.recovery_engine import RecoveryAction
 
         agent_pool.recovery_engine.register_recovery_strategy(
             name="demo_custom_error",

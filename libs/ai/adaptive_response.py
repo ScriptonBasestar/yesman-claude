@@ -15,7 +15,6 @@ import json
 """Adaptive response system that integrates learning with auto-response."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import time
+from libs.core.claude_manager import ClaudeManager
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test full automation workflow."""
-
-import time
-
-from libs.core.claude_manager import ClaudeManager
 
 
 def main() -> None:
@@ -15,7 +16,6 @@ def main() -> None:
     # Create manager and get controller
     manager = ClaudeManager()
     controller = manager.get_controller("proxynd")
-
 
     # Start the controller
     if controller.start():

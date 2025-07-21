@@ -20,9 +20,6 @@ from datetime import UTC, datetime, timedelta
 # Licensed under the MIT License
 
 
-
-
-
 class TmuxManager:
     def __init__(self, config: YesmanConfig) -> None:
         self.config = config
@@ -378,7 +375,6 @@ class TmuxManager:
                 log_file = Path(log_path_str).expanduser() / "yesman.log"
                 if not log_file.exists():
                     return {"session_name": session_name, "activity_data": []}
-
 
             # Activity per hour for the last 7 days
             activity_counts: dict[str, int] = defaultdict(int)

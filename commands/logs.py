@@ -19,9 +19,6 @@ from libs.logging import AsyncLogger, AsyncLoggerConfig, LogLevel
 """Log management and analysis commands."""
 
 
-
-
-
 class LogsConfigureCommand(BaseCommand):
     """Configure async logging system."""
 
@@ -201,9 +198,7 @@ class LogsAnalyzeCommand(BaseCommand):
         return stats
 
     def _display_log_statistics(self, stats: dict[str, object]) -> None:
-        """Display log analysis statistics.
-
-        """
+        """Display log analysis statistics."""
         # Overview
         overview = Panel(
             f"Total Entries: {stats['total_entries']:,}\nTime Range: Last 24 hours\nError Count: {stats['level_counts']['ERROR'] + stats['level_counts']['CRITICAL']}",
@@ -251,9 +246,7 @@ class LogsTailCommand(BaseCommand):
         last_lines: int = 50,
         **kwargs: object,  # noqa: ARG002
     ) -> dict:
-        """Execute the tail command.
-
-        """
+        """Execute the tail command."""
         try:
             log_path = Path(log_dir).expanduser()
 
@@ -285,9 +278,7 @@ class LogsTailCommand(BaseCommand):
             raise CommandError(msg) from e
 
     def _follow_log_file(self, log_file: Path, level_filter: str | None = None) -> None:
-        """Follow a log file like tail -f.
-
-        """
+        """Follow a log file like tail -f."""
         self.console.print(f"📋 Following {log_file.name} (Press Ctrl+C to stop)")
         self.console.print("=" * 60)
 
@@ -334,9 +325,7 @@ class LogsTailCommand(BaseCommand):
                     time.sleep(0.1)
 
     def _show_recent_logs(self, log_file: Path, lines: int, level_filter: str | None = None) -> None:
-        """Show recent log entries.
-
-        """
+        """Show recent log entries."""
         self.console.print(f"📋 Last {lines} entries from {log_file.name}")
         self.console.print("=" * 60)
 
@@ -440,9 +429,7 @@ class LogsCleanupCommand(BaseCommand):
 
 @click.group()
 def logs() -> None:
-    """Log management and analysis.
-
-    """
+    """Log management and analysis."""
 
 
 @logs.command()
@@ -457,9 +444,7 @@ def logs() -> None:
 @click.option("--compression", "-c", is_flag=True, help="Enable gzip compression")
 @click.option("--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching")
 def configure(output_dir: str, format: str, compression: bool, buffer_size: int) -> None:  # noqa: FBT001
-    """Configure async logging system.
-
-    """
+    """Configure async logging system."""
     command = LogsConfigureCommand()
     command.run(
         output_dir=output_dir,
@@ -479,9 +464,7 @@ def configure(output_dir: str, format: str, compression: bool, buffer_size: int)
 @click.option("--last-hours", "-h", default=24, type=int, help="Analyze last N hours")
 @click.option("--level", "-l", help="Filter by log level")
 def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
-    """Analyze log files and show statistics.
-
-    """
+    """Analyze log files and show statistics."""
     command = LogsAnalyzeCommand()
     command.run(log_dir=log_dir, last_hours=last_hours, level=level)
 
@@ -492,9 +475,7 @@ def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
 @click.option("--follow", "-f", is_flag=True, help="Follow log output")
 @click.option("--last-lines", "-n", default=50, type=int, help="Show last N lines")
 def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:  # noqa: FBT001
-    """Tail log files (like tail -f).
-
-    """
+    """Tail log files (like tail -f)."""
     command = LogsTailCommand()
     command.run(log_dir=log_dir, level=level, follow=follow, last_lines=last_lines)
 
@@ -503,9 +484,7 @@ def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:  # no
 @click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
 @click.option("--days", default=7, type=int, help="Days of logs to keep")
 def cleanup(log_dir: str, days: int) -> None:
-    """Clean up old log files.
-
-    """
+    """Clean up old log files."""
     command = LogsCleanupCommand()
     command.run(log_dir=log_dir, days=days)
 

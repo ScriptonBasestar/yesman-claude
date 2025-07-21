@@ -1,15 +1,21 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+from pathlib import Path
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Check all Python files for long lines."""
 
-from pathlib import Path
 
+def check_long_lines(file_path, max_length=88) -> object:
+    """Check file for long lines.
 
-def check_long_lines(file_path, max_length=88):
-    """Check file for long lines."""
+    Returns:
+        object: Description of return value.
+    """
     try:
         with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
@@ -31,7 +37,7 @@ def check_long_lines(file_path, max_length=88):
         return []
 
 
-def main():
+def main() -> None:
     """Check all Python files."""
     base_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 

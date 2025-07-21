@@ -16,9 +16,6 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin
 """Cache cleanup command for removing excessive cache files."""
 
 
-
-
-
 class CleanupCommand(BaseCommand, ConfigCommandMixin):
     """Clean up excessive cache files and temporary data."""
 
@@ -128,9 +125,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         return cache_paths
 
     def _display_summary(self, cache_paths: list[tuple[str, Path, int]], total_size: int) -> None:
-        """Display cache cleanup summary.
-
-        """
+        """Display cache cleanup summary."""
         table = Table(title="Cache Cleanup Summary")
         table.add_column("Type", style="cyan")
         table.add_column("Path", style="yellow")
@@ -169,9 +164,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         return cleaned_count, cleaned_size, errors
 
     def _display_results(self, cleaned_count: int, cleaned_size: int, errors: list[str]) -> None:
-        """Display cleanup results.
-
-        """
+        """Display cleanup results."""
         if cleaned_count > 0:
             self.print_success(f"Cleaned {cleaned_count} items ({self._human_readable_size(cleaned_size)})")
 
@@ -210,9 +203,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
 def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:  # noqa: FBT001
-    """Clean up excessive cache files and temporary data.
-
-    """
+    """Clean up excessive cache files and temporary data."""
     command = CleanupCommand()
     command.run(dry_run=dry_run, force=force, cleanup_all=cleanup_all)
 

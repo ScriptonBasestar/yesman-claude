@@ -1,26 +1,27 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import os
+from pathlib import Path
+from unittest.mock import patch
+import pytest
+import yaml
+from libs.core.config_loader import (
+from libs.core.config_schema import YesmanConfigSchema
+from libs.yesman_config import YesmanConfig
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for centralized configuration management."""
 
-import os
-from pathlib import Path
-from unittest.mock import patch
-from typing import object
 
-import pytest
-import yaml
 
-from libs.core.config_loader import (
     ConfigLoader,
     DictSource,
     EnvironmentSource,
     YamlFileSource,
     create_default_loader,
 )
-from libs.core.config_schema import YesmanConfigSchema
-from libs.yesman_config import YesmanConfig
 
 
 class TestConfigSchema:
@@ -63,7 +64,7 @@ class TestConfigSources:
         # Create test config file
         config_file = tmp_path / "test.yaml"
         config_data = {"mode": "isolated", "logging": {"level": "DEBUG"}}
-        with open(config_file, "w") as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             yaml.dump(config_data, f)
 
         # Test loading

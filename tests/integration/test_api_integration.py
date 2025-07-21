@@ -1,20 +1,23 @@
-"""Copyright notice."""
+from typing import Any
+from unittest.mock import MagicMock, patch
+import pytest
+from fastapi.testclient import TestClient
+from api.main import app
+from libs.core.services import register_test_services
+from libs.core.error_handling import ConfigurationError
+import time
+import threading
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Integration tests for API endpoints."""
 
-from unittest.mock import MagicMock, patch
-
-import pytest
-from fastapi.testclient import TestClient
-
-from api.main import app
-from libs.core.services import register_test_services
-
 
 @pytest.fixture
-def client():
+def client() -> object:
     """FastAPI test client."""
     return TestClient(app)
 
@@ -36,7 +39,7 @@ class TestHealthEndpoints:
     """Test health and info endpoints."""
 
     @staticmethod
-    def test_health_check( client: TestClient) -> None:
+    def test_health_check(client: TestClient) -> None:
         """Test health check endpoint."""
         response = client.get("/healthz")
 
@@ -168,7 +171,6 @@ class TestErrorHandling:
     def test_custom_error_response(client: TestClient) -> None:
         """Test custom YesmanError response format."""
         with patch("api.routers.config.get_config") as mock_get_config:
-            from libs.core.error_handling import ConfigurationError
 
             mock_get_config.side_effect = ConfigurationError("Configuration file not found", config_file="/missing/config.yaml")
 
@@ -209,7 +211,6 @@ class TestAPIPerformance:
     @staticmethod
     def test_health_endpoint_performance(client: TestClient) -> None:
         """Test health endpoint response time."""
-        import time
 
         start_time = time.time()
         response = client.get("/healthz")
@@ -221,7 +222,6 @@ class TestAPIPerformance:
     @staticmethod
     def test_concurrent_requests(client: TestClient) -> None:
         """Test handling multiple concurrent requests."""
-        import threading
 
         results = []
 

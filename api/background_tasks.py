@@ -47,9 +47,7 @@ class BackgroundTaskRunner:
     """Manages background tasks for real-time monitoring."""
 
     def __init__(self) -> None:
-        """Initialize the background task runner.
-
-        """
+        """Initialize the background task runner."""
         self.tasks: list[asyncio.Task] = []
         self.is_running = False
         self.task_states: dict[str, TaskState] = {}

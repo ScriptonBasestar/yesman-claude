@@ -1,11 +1,11 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import pytest
-
 from libs.dashboard import KeyboardNavigationManager, NavigationContext
 from libs.dashboard.keyboard_navigation import KeyModifier
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestKeyboardNavigation:
@@ -14,7 +14,11 @@ class TestKeyboardNavigation:
     @pytest.fixture
     @staticmethod
     def keyboard_manager() -> KeyboardNavigationManager:
-        """Create KeyboardNavigationManager instance."""
+        """Create KeyboardNavigationManager instance.
+
+        Returns:
+        KeyboardNavigationManager: Description of return value.
+        """
         manager = KeyboardNavigationManager()
         yield manager
         # Cleanup

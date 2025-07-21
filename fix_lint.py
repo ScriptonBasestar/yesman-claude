@@ -1,17 +1,24 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+import sys
+    # Step 1: Fix import ordering
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Script to fix lint issues using ruff."""
 
-import os
-import subprocess
-import sys
 
+def run_command(cmd, description) -> object:
+    """Run a command and print its output.
 
-def run_command(cmd, description):
-    """Run a command and print its output."""
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 50}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -36,7 +43,7 @@ def run_command(cmd, description):
         return False
 
 
-def main():
+def main() -> None:
     """Main function to run lint fixes."""
     # Check if we're in the right directory
     if not os.path.exists("pyproject.toml"):
@@ -45,7 +52,6 @@ def main():
 
     print("Starting lint fixes...")
 
-    # Step 1: Fix import ordering
     success1 = run_command(
         [
             "uv",

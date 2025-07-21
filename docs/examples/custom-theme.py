@@ -1,5 +1,12 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+from libs.dashboard import get_theme_manager
+from libs.dashboard.theme_system import ColorPalette, Spacing, Theme, ThemeMode, Typography
+import json
+from pathlib import Path
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,11 +16,8 @@ This example demonstrates how to create and use custom themes
 in Yesman-Claude dashboard system.
 """
 
-from libs.dashboard import get_theme_manager
-from libs.dashboard.theme_system import ColorPalette, Spacing, Theme, ThemeMode, Typography
 
-
-def create_cyberpunk_theme():
+def create_cyberpunk_theme() -> object:
     """Create a cyberpunk-inspired theme with neon colors."""
     return Theme(
         name="Cyberpunk Neon",
@@ -55,7 +59,7 @@ def create_cyberpunk_theme():
     )
 
 
-def create_ocean_theme():
+def create_ocean_theme() -> object:
     """Create a calming ocean-inspired theme."""
     return Theme(
         name="Ocean Depths",
@@ -97,7 +101,7 @@ def create_ocean_theme():
     )
 
 
-def create_minimal_theme():
+def create_minimal_theme() -> object:
     """Create a minimal, clean theme."""
     return Theme(
         name="Minimal Clean",
@@ -139,7 +143,7 @@ def create_minimal_theme():
     )
 
 
-def demo_theme_operations():
+def demo_theme_operations() -> None:
     """Demonstrate theme operations."""
     print("🎨 Custom Theme Demo")
     print("=" * 50)
@@ -201,10 +205,8 @@ def demo_theme_operations():
     print("\n🎉 Theme demo completed!")
 
 
-def save_theme_examples():
+def save_theme_examples() -> None:
     """Save theme examples to files for reference."""
-    import json
-    from pathlib import Path
 
     # Create themes
     themes = {
@@ -228,14 +230,14 @@ def save_theme_examples():
             "spacing": theme.spacing.to_dict(),
         }
 
-        with open(output_dir / f"{theme_id}.json", "w") as f:
+        with open(output_dir / f"{theme_id}.json", "w", encoding="utf-8") as f:
             json.dump(theme_data, f, indent=2)
 
         # Save as CSS
         theme_manager = get_theme_manager()
         css = theme_manager.export_css(theme)
 
-        with open(output_dir / f"{theme_id}.css", "w") as f:
+        with open(output_dir / f"{theme_id}.css", "w", encoding="utf-8") as f:
             f.write(css)
 
         print(f"💾 Saved {theme_id} theme (JSON + CSS)")

@@ -1,18 +1,23 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from collections import deque
+from datetime import UTC, datetime, timedelta
+from unittest.mock import Mock
+import pytest
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.collaboration_engine import (
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
+from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
+from libs.multi_agent.types import AgentState
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for CollaborationEngine multi-agent coordination system."""
 
-from collections import deque
-from datetime import UTC, datetime, timedelta
-from unittest.mock import Mock
 
-import pytest
 
-from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.collaboration_engine import (
     CollaborationEngine,
     CollaborationMessage,
     CollaborationMode,
@@ -21,9 +26,6 @@ from libs.multi_agent.collaboration_engine import (
     MessageType,
     SharedKnowledge,
 )
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.types import AgentState
 
 
 class TestCollaborationMessage:

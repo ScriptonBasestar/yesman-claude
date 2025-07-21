@@ -1,17 +1,19 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
+# Copyright notice.
+
+import json
+from datetime import UTC, datetime
+import pytest
+from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
+from libs.dashboard.renderers.web_renderer import WebRenderer
+from libs.dashboard.renderers.widget_models import (
+import re
+
 # Licensed under the MIT License
 
 """Tests for Web Renderer."""
 
-import json
-from datetime import UTC, datetime
 
-import pytest
 
-from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
-from libs.dashboard.renderers.web_renderer import WebRenderer
-from libs.dashboard.renderers.widget_models import (
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -730,7 +732,6 @@ class TestWebRenderer:
         assert '"view_mode": "table"' in result
 
         # Extract and validate JSON structure
-        import re
 
         # Find the JSON data using regex
         json_match = re.search(r"window\.widgetData\[\'[^\']+\'\] = ({.*?});", result, re.DOTALL)

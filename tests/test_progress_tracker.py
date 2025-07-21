@@ -1,11 +1,12 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from libs.core.models import SessionProgress, TaskPhase, TaskProgress
+from libs.core.progress_tracker import ProgressAnalyzer
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test progress tracking functionality."""
-
-from libs.core.models import SessionProgress, TaskPhase, TaskProgress
-from libs.core.progress_tracker import ProgressAnalyzer
 
 
 class TestTaskProgress:

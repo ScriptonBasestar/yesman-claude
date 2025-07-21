@@ -9,8 +9,6 @@ from pydantic import BaseModel, Field, field_validator
 """Configuration schemas using Pydantic for type safety and validation."""
 
 
-
-
 class TmuxConfig(BaseModel):
     """Tmux-specific configuration settings."""
 
@@ -106,9 +104,7 @@ class YesmanConfigSchema(BaseModel):
         return str(Path(v).expanduser())
 
     def model_post_init(self, __context: object) -> None:
-        """Post-initialization validation and setup.
-
-        """
+        """Post-initialization validation and setup."""
         # Expand paths in nested configs
         if self.logging.log_path:
             self.logging.log_path = str(Path(self.logging.log_path).expanduser())

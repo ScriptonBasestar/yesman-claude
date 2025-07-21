@@ -1,4 +1,9 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from datetime import UTC, datetime
+    # Import here to avoid circular imports
+    from .mock_factories import ComponentMockFactory, ManagerMockFactory
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -8,8 +13,6 @@
 Updated: Enhanced with factory system integration for better mock management
 """
 
-from datetime import UTC, datetime
-from typing import object
 
 
 # Tmux 관련 Mock
@@ -22,7 +25,7 @@ class MockTmuxSession:
         self.id = f"${name}:0"
         self.created_time = datetime.now(UTC)
 
-    def list_windows(self):
+    def list_windows(self) -> object:
         return self.windows
 
     def new_window(self, window_name: str) -> "MockTmuxWindow":
@@ -38,7 +41,7 @@ class MockTmuxWindow:
         self.name = name
         self.panes = []
 
-    def list_panes(self):
+    def list_panes(self) -> object:
         return self.panes
 
 
@@ -49,7 +52,7 @@ class MockTmuxPane:
         self.index = index
         self.content = content
 
-    def capture_pane(self):
+    def capture_pane(self) -> object:
         return self.content
 
 
@@ -65,7 +68,7 @@ class MockClaudeProcess:
     def terminate(self) -> None:
         self.status = "terminated"
 
-    def is_running(self):
+    def is_running(self) -> object:
         return self.status == "running"
 
 
@@ -113,7 +116,7 @@ MOCK_API_RESPONSES = {
 
 
 # Factory Integration - Bridge between old and new systems
-def get_factory_mock(mock_type: str, **kwargs) -> Any:
+def get_factory_mock(mock_type: str, **kwargs: dict[str, object]) -> object:
     """Bridge function to get factory-created mocks
     Provides backward compatibility while encouraging factory usage.
 
@@ -124,8 +127,6 @@ def get_factory_mock(mock_type: str, **kwargs) -> Any:
     Returns:
         Configured mock object from factory system
     """
-    # Import here to avoid circular imports
-    from .mock_factories import ComponentMockFactory, ManagerMockFactory
 
     factory_map = {
         "session_manager": ManagerMockFactory.create_session_manager_mock,
@@ -140,7 +141,7 @@ def get_factory_mock(mock_type: str, **kwargs) -> Any:
         msg = f"Unknown mock type: {mock_type}. Available: {list(factory_map.keys())}"
         raise ValueError(msg)
 
-    return factory_map[mock_type](**kwargs)
+    return factory_map[mock_type](**kwargs: dict[str, object])
 
 
 # Enhanced mock classes with factory integration
@@ -148,22 +149,22 @@ class EnhancedMockTmuxSession(MockTmuxSession):
     """Enhanced TmuxSession mock that integrates with factory system."""
 
     @classmethod
-    def from_factory(cls, name: str = "test-session", **kwargs):
+    def from_factory(cls, name: str = "test-session", **kwargs) -> object:
         """Create enhanced mock using factory system."""
-        return get_factory_mock("tmux_session", name=name, **kwargs)
+        return get_factory_mock("tmux_session", name=name, **kwargs: dict[str, object])
 
     @classmethod
-    def with_windows(cls, name: str = "test-session", window_count: int = 2):
+    def with_windows(cls, name: str = "test-session", window_count: int = 2) -> object:
         """Create mock with specified number of windows."""
         windows = [MockTmuxWindow(f"window-{i}") for i in range(window_count)]
         return cls.from_factory(name=name, windows=windows)
 
 
 # Convenience functions for common mock patterns
-def create_mock_session_with_controller(**kwargs) -> dict[str, object]:
+def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str]:
     """Create a complete mock session with controller for integration tests."""
-    session_mock = get_factory_mock("session_manager", **kwargs)
-    claude_mock = get_factory_mock("claude_manager", **kwargs)
+    session_mock = get_factory_mock("session_manager", **kwargs: dict[str, object])
+    claude_mock = get_factory_mock("claude_manager", **kwargs: dict[str, object])
 
     return {
         "session_manager": session_mock,
@@ -172,7 +173,7 @@ def create_mock_session_with_controller(**kwargs) -> dict[str, object]:
     }
 
 
-def create_api_test_mocks(success: bool = True) -> dict[str, object]:  # noqa: FBT001
+def create_api_test_mocks(success: bool = True) -> dict[str]:  # noqa: FBT001
     """Create standard API test mocks."""
     if success:
         return {

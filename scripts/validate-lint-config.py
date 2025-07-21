@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import subprocess
+import sys
+from pathlib import Path
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -7,13 +13,13 @@
 Ensures make lint, pre-commit, and pre-push hooks are consistent.
 """
 
-import subprocess
-import sys
-from pathlib import Path
-
 
 def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:  # noqa: FBT001
-    """Run a shell command and return the result."""
+    """Run a shell command and return the result.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"🔍 Running: {cmd}")
     # nosec B602 - shell=True is intentional for this validation script
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
@@ -27,8 +33,12 @@ def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:  #
     return result
 
 
-def validate_lint_consistency():
-    """Validate that all lint configurations are consistent."""
+def validate_lint_consistency() -> bool:
+    """Validate that all lint configurations are consistent.
+
+    Returns:
+        bool: Description of return value.
+    """
     print("🔧 Validating lint configuration consistency...")
 
     # Test make lint
@@ -69,14 +79,14 @@ def validate_lint_consistency():
         return False
 
 
-def install_hooks():
+def install_hooks() -> None:
     """Install pre-commit hooks."""
     print("🔗 Installing pre-commit hooks...")
     run_command("uv run pre-commit install")
     run_command("uv run pre-commit install --hook-type pre-push")
 
 
-def main():
+def main() -> None:
     """Main validation function."""
     print("🏁 Starting lint configuration validation...")
 

@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import ast
+import re
+from pathlib import Path
+    # Check for potential circular imports
+    # 6. Unused imports (simple check)
+                            # Simple check for unused imports
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Extract common lint errors from code analysis."""
 
-import ast
-import re
-from pathlib import Path
 
-
-def analyze_common_issues():
+def analyze_common_issues() -> None:
     """Analyze common lint issues in the codebase."""
     project_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
@@ -81,7 +86,6 @@ def analyze_common_issues():
     print("\n3. IMPORT ISSUES:")
     print("-" * 30)
 
-    # Check for potential circular imports
     commands_dir = project_path / "commands"
     if commands_dir.exists():
         for py_file in commands_dir.rglob("*.py"):
@@ -133,11 +137,11 @@ def analyze_common_issues():
                     for node in ast.walk(tree):
                         if isinstance(node, ast.FunctionDef):
                             # Check if function has return type hint
-                            if not node.returns and node.name not in [
+                            if not node.returns and node.name not in {
                                 "__init__",
                                 "__str__",
                                 "__repr__",
-                            ]:
+                            }:
                                 missing_hints_count += 1
                                 if missing_hints_count <= 10:
                                     relative_path = py_file.relative_to(project_path)
@@ -148,7 +152,6 @@ def analyze_common_issues():
     if missing_hints_count > 10:
         print(f"  • ... and {missing_hints_count - 10} more missing type hints")
 
-    # 6. Unused imports (simple check)
     print("\n6. POTENTIAL UNUSED IMPORTS:")
     print("-" * 30)
 
@@ -163,7 +166,6 @@ def analyze_common_issues():
 
                     for i, line in enumerate(lines, 1):
                         if line.strip().startswith("import "):
-                            # Simple check for unused imports
                             import_match = re.match(r"import\s+(\w+)", line.strip())
                             if import_match:
                                 module_name = import_match.group(1)

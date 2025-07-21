@@ -19,7 +19,6 @@ from .collaboration_engine import CollaborationEngine, MessagePriority, MessageT
 """Dependency change propagation system for multi-agent collaboration."""
 
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -769,9 +768,7 @@ class DependencyPropagationSystem:
         )
 
     def _update_propagation_stats(self, processing_time: float, success: bool) -> None:  # noqa: FBT001
-        """Update propagation statistics.
-
-        """
+        """Update propagation statistics."""
         # Update average processing time
         total_changes = self.propagation_stats["changes_propagated"]
         current_avg = self.propagation_stats["average_propagation_time"]

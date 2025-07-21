@@ -1,12 +1,14 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
+from typing import Any
 import pytest
-from typing import object
-
 from libs.dashboard import KeyboardNavigationManager, ThemeManager, ThemeMode
 from libs.dashboard.keyboard_navigation import KeyModifier
+import tempfile
+from pathlib import Path
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestKeyboardThemeIntegration:
@@ -14,7 +16,7 @@ class TestKeyboardThemeIntegration:
 
     @pytest.fixture
     @staticmethod
-    def keyboard_manager():
+    def keyboard_manager() -> object:
         """Create KeyboardNavigationManager instance."""
         manager = KeyboardNavigationManager()
         yield manager
@@ -24,16 +26,14 @@ class TestKeyboardThemeIntegration:
 
     @pytest.fixture
     @staticmethod
-    def theme_manager():
+    def theme_manager() -> object:
         """Create ThemeManager instance."""
-        import tempfile
-        from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     @staticmethod
-    def test_keyboard_theme_integration( keyboard_manager: object, theme_manager: object) -> None:
+    def test_keyboard_theme_integration(keyboard_manager: object, theme_manager: object) -> None:
         """Test 10: Keyboard navigation with theme switching."""
 
         # Register theme switching action

@@ -1,19 +1,25 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-
+from typing import Any
 import os
 import subprocess
 import sys
+
+
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 
 # Change to the correct directory
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
-def run_ruff_check():
-    """Run ruff check command."""
+def run_ruff_check() -> object:
+    """Run ruff check command.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         cmd = [
             "uv",
@@ -50,8 +56,12 @@ def run_ruff_check():
         return False
 
 
-def run_mypy_check():
-    """Run mypy check command."""
+def run_mypy_check() -> object:
+    """Run mypy check command.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         cmd = [
             "uv",

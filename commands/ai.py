@@ -19,9 +19,6 @@ from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 """AI learning system management commands."""
 
 
-
-
-
 class AIStatusCommand(BaseCommand):
     """Show AI learning system status."""
 
@@ -31,9 +28,7 @@ class AIStatusCommand(BaseCommand):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions.
-
-        """
+        """Validate command preconditions."""
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -123,9 +118,7 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions.
-
-        """
+        """Validate command preconditions."""
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -186,9 +179,7 @@ class AIHistoryCommand(BaseCommand):
         self.analyzer: ResponseAnalyzer | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions.
-
-        """
+        """Validate command preconditions."""
         super().validate_preconditions()
         try:
             self.analyzer = ResponseAnalyzer()
@@ -258,9 +249,7 @@ class AIExportCommand(BaseCommand):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions.
-
-        """
+        """Validate command preconditions."""
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -300,9 +289,7 @@ class AICleanupCommand(BaseCommand):
         self.analyzer: ResponseAnalyzer | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions.
-
-        """
+        """Validate command preconditions."""
         super().validate_preconditions()
         try:
             self.analyzer = ResponseAnalyzer()
@@ -340,9 +327,7 @@ class AIPredictCommand(BaseCommand):
         self.adaptive: AdaptiveResponse | None = None
 
     def validate_preconditions(self) -> None:
-        """Validate command preconditions.
-
-        """
+        """Validate command preconditions."""
         super().validate_preconditions()
         try:
             self.adaptive = AdaptiveResponse()
@@ -406,16 +391,12 @@ class AIPredictCommand(BaseCommand):
 
 @click.group()
 def ai() -> None:
-    """AI learning system management.
-
-    """
+    """AI learning system management."""
 
 
 @ai.command()
 def status() -> None:
-    """Show AI learning system status.
-
-    """
+    """Show AI learning system status."""
     command = AIStatusCommand()
     command.run()
 
@@ -429,9 +410,7 @@ def status() -> None:
 )
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
 def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:  # noqa: FBT001
-    """Configure AI learning system settings.
-
-    """
+    """Configure AI learning system settings."""
     command = AIConfigCommand()
     command.run(threshold=threshold, auto_response=auto_response, learning=learning)
 
@@ -441,9 +420,7 @@ def config(threshold: float | None, auto_response: bool | None, learning: bool |
 @click.option("--type", "-t", help="Filter by prompt type")
 @click.option("--project", "-p", help="Filter by project name")
 def history(limit: int, type: str | None, project: str | None) -> None:
-    """Show AI response history.
-
-    """
+    """Show AI response history."""
     command = AIHistoryCommand()
     command.run(limit=limit, type=type, project=project)
 
@@ -451,9 +428,7 @@ def history(limit: int, type: str | None, project: str | None) -> None:
 @ai.command()
 @click.option("--output", "-o", help="Output file path for exported data")
 def export(output: str | None) -> None:
-    """Export AI learning data.
-
-    """
+    """Export AI learning data."""
     command = AIExportCommand()
     command.run(output=output)
 
@@ -461,9 +436,7 @@ def export(output: str | None) -> None:
 @ai.command()
 @click.option("--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)")
 def cleanup(days: int) -> None:
-    """Clean up old AI learning data.
-
-    """
+    """Clean up old AI learning data."""
     command = AICleanupCommand()
     command.run(days=days)
 
@@ -473,9 +446,7 @@ def cleanup(days: int) -> None:
 @click.option("--context", "-c", default="", help="Context for the prompt")
 @click.option("--project", "-p", help="Project name")
 def predict(prompt_text: str, context: str, project: str | None) -> None:
-    """Predict response for a given prompt.
-
-    """
+    """Predict response for a given prompt."""
     command = AIPredictCommand()
     command.run(prompt_text=prompt_text, context=context, project=project)
 

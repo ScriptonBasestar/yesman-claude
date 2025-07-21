@@ -1,15 +1,15 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from unittest.mock import AsyncMock, Mock, patch
+import pytest
+from click.testing import CliRunner
+from commands.multi_agent import multi_agent_cli
+from libs.multi_agent.types import TaskStatus
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for multi-agent CLI commands."""
-
-from unittest.mock import AsyncMock, Mock, patch
-
-import pytest
-from click.testing import CliRunner
-
-from commands.multi_agent import multi_agent_cli
 
 
 class TestMultiAgentCLI:
@@ -287,7 +287,6 @@ class TestMultiAgentCLI:
         mock_agent_pool_class.return_value = mock_agent_pool
 
         # Mock filtered response
-        from libs.multi_agent.types import TaskStatus
 
         mock_agent_pool.list_tasks.return_value = []  # No running tasks
 
@@ -405,7 +404,7 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_monitor_no_active_pool(mock_agent_pool_class: Mock, runner: CliRunner) -> None:  # noqa: ARG002
+    def test_monitor_no_active_pool(mock_agent_pool_class: Mock, runner: CliRunner) -> None:  # noqa: ARG002  # noqa: ARG004
         """Test monitor command when no active pool exists."""
         # Simulate no existing pool directory
         with patch("pathlib.Path.exists", return_value=False):

@@ -1,25 +1,32 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Run make lint command and capture output."""
 
-import os
-import subprocess
 
 # Change to project directory
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
-def run_make_lint():
-    """Run make lint and capture all output."""
+def run_make_lint() -> object:
+    """Run make lint and capture all output.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         # Run make lint command
         result = subprocess.run(["make", "lint"], check=False, capture_output=True, text=True, timeout=120)
 
         # Write output to file
-        with open("lint-output.txt", "w") as f:
+        with open("lint-output.txt", "w", encoding="utf-8") as f:
             f.write("=== MAKE LINT OUTPUT ===\n")
             f.write(f"Exit code: {result.returncode}\n\n")
 

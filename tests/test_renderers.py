@@ -1,4 +1,17 @@
-"""Copyright notice."""
+from typing import Any
+import gc
+import os
+import threading
+import time
+from datetime import UTC, datetime
+import psutil
+import pytest
+from libs.dashboard.renderers import (
+from libs.dashboard.renderers.widget_models import (
+from libs.dashboard.renderers.optimizations import cached_render
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -7,16 +20,8 @@ Testing the complete renderer ecosystem with cross-format compatibility,
 performance benchmarks, and memory stability.
 """
 
-import gc
-import os
-import threading
-import time
-from datetime import UTC, datetime
 
-import psutil
-import pytest
 
-from libs.dashboard.renderers import (
     BatchRenderer,
     LazyRenderer,
     RenderCache,
@@ -29,7 +34,6 @@ from libs.dashboard.renderers import (
     render_all_formats,
     render_widget,
 )
-from libs.dashboard.renderers.widget_models import (
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -65,7 +69,7 @@ class TestRendererSystemIntegration:
         gc.collect()
 
     @staticmethod
-    def _create_comprehensive_test_data():
+    def _create_comprehensive_test_data() -> object:
         """Create comprehensive test data covering all widget types."""
         now = datetime.now(UTC)
 
@@ -431,7 +435,7 @@ class TestRendererPerformance:
     def test_single_widget_render_performance(self) -> None:
         """Test single widget rendering performance."""
 
-        def render_single():
+        def render_single() -> object:
             return render_widget(WidgetType.METRIC_CARD, self.metric, RenderFormat.TUI)
 
         # Time the operation
@@ -450,7 +454,7 @@ class TestRendererPerformance:
     def test_multi_format_render_performance(self) -> None:
         """Test multi-format rendering performance."""
 
-        def render_all():
+        def render_all() -> object:
             return render_all_formats(WidgetType.METRIC_CARD, self.metric)
 
         # Time the operation
@@ -500,7 +504,6 @@ class TestRendererPerformance:
         cache = RenderCache(max_size=100)
 
         # Create renderer with caching
-        from libs.dashboard.renderers.optimizations import cached_render
 
         renderer = TUIRenderer()
         cached_method = cached_render(cache)(renderer.render_widget)
@@ -545,7 +548,7 @@ class TestRendererMemoryStability:
         gc.collect()
 
     @staticmethod
-    def _get_memory_usage():
+    def _get_memory_usage() -> object:
         """Get current memory usage in MB."""
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024

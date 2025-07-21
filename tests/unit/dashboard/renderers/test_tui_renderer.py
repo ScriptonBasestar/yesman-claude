@@ -1,17 +1,20 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for TUI Renderer."""
+# Copyright notice.
 
 from datetime import UTC, datetime
 from io import StringIO
-
 from rich.console import Console
-
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.tui_renderer import TUIRenderer
 from libs.dashboard.renderers.widget_models import (
+
+    Copyright,
+    Licensed,
+
+)
+"""Tests for TUI Renderer."""
+
+
+
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -58,10 +61,10 @@ class TestTUIRenderer:
     def test_get_status_color(self) -> None:
         """Test status color retrieval."""
         color = self.renderer._get_status_color("active")  # noqa: SLF001
-        assert color in ["green", "blue", "cyan", "white"]  # Valid color options
+        assert color in {"green", "blue", "cyan", "white"}  # Valid color options
 
         color = self.renderer._get_status_color("error")  # noqa: SLF001
-        assert color in ["red", "yellow", "white"]
+        assert color in {"red", "yellow", "white"}
 
     def test_get_health_color(self) -> None:
         """Test health level color mapping."""

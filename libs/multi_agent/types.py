@@ -14,7 +14,6 @@ from dataclasses import asdict
 """Shared types for multi-agent system."""
 
 
-
 class AgentState(Enum):
     """Agent states."""
 

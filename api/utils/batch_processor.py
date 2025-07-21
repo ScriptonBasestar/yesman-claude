@@ -16,7 +16,6 @@ from typing import Any
 """WebSocket message batch processor for optimized real-time updates."""
 
 
-
 @dataclass
 class MessageBatch:
     """A batch of WebSocket messages to be sent together."""
@@ -76,9 +75,7 @@ class WebSocketBatchProcessor:
         self.logger = logging.getLogger("yesman.websocket_batch")
 
     def register_message_handler(self, channel: str, handler: Callable[[list[dict[str, object]]], Awaitable[None]]) -> None:
-        """Register a message handler for a specific channel.
-
-        """
+        """Register a message handler for a specific channel."""
         self._message_handlers[channel] = handler
         self.logger.info("Registered message handler for channel: %s", channel)
 
@@ -111,9 +108,7 @@ class WebSocketBatchProcessor:
         self.logger.info("WebSocket batch processor stopped")
 
     def queue_message(self, channel: str, message: dict[str, object]) -> None:
-        """Queue a message for batch processing.
-
-        """
+        """Queue a message for batch processing."""
         # Initialize channel if not exists
         if channel not in self.pending_messages:
             self.pending_messages[channel] = deque()
@@ -389,9 +384,7 @@ class WebSocketBatchProcessor:
         }
 
     def update_config(self, **kwargs: dict[str, object]) -> None:
-        """Update batch processing configuration.
-
-        """
+        """Update batch processing configuration."""
         for key, value in kwargs.items():
             if hasattr(self.config, key):
                 setattr(self.config, key, value)
@@ -400,9 +393,7 @@ class WebSocketBatchProcessor:
                 self.logger.warning("Unknown config key: %s", key)
 
     def clear_channel(self, channel: str) -> None:
-        """Clear all pending messages for a specific channel.
-
-        """
+        """Clear all pending messages for a specific channel."""
         if channel in self.pending_messages:
             cleared_count = len(self.pending_messages[channel])
             self.pending_messages[channel].clear()

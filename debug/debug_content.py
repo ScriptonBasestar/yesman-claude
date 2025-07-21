@@ -1,14 +1,15 @@
+from typing import Any
+from libs.core.claude_manager import ClaudeManager
+
 #!/usr/bin/env python3
-"""Copyright notice."""
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Debug content capture and prompt detection."""
 
-from libs.core.claude_manager import ClaudeManager
 
-
-def main():
+def main() -> object:
     print("🔍 Debugging content and prompt detection...")
 
     # Create manager and get controller

@@ -1,4 +1,18 @@
-"""Copyright notice."""
+from typing import Any
+import sys
+import tempfile
+from pathlib import Path
+import pytest
+import yaml
+# Dashboard imports
+from libs.dashboard import (
+# Fixture imports
+from tests.fixtures.mock_data import (
+from tests.fixtures.mock_factories import ComponentMockFactory, ManagerMockFactory
+from tests.fixtures.test_helpers import temp_directory
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -6,17 +20,8 @@
 테스트 실행 시 자동으로 로드되며, 공통 fixture와 설정을 제공.
 """
 
-import sys
-import tempfile
-import yaml
-from pathlib import Path
-from typing import Generator, Union
-from pathlib import Path as PathType
 
-import pytest
 
-# Dashboard imports
-from libs.dashboard import (
     DashboardLauncher,
     KeyboardNavigationManager,
     PerformanceOptimizer,
@@ -27,76 +32,72 @@ from libs.dashboard import (
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Fixture imports
-from tests.fixtures.mock_data import (
     MOCK_PROMPTS,
     MOCK_SESSION_DATA,
     MockClaudeProcess,
     MockTmuxSession,
 )
-from tests.fixtures.mock_factories import ComponentMockFactory, ManagerMockFactory
-from tests.fixtures.test_helpers import temp_directory
 
 
 # 공통 Fixtures
 @pytest.fixture
-def mock_tmux_session():
+def mock_tmux_session() -> object:
     """Mock tmux 세션 fixture."""
     return MockTmuxSession("test-session")
 
 
 @pytest.fixture
-def mock_claude_process():
+def mock_claude_process() -> object:
     """Mock Claude 프로세스 fixture."""
     return MockClaudeProcess()
 
 
 # New Factory-based Fixtures
 @pytest.fixture
-def mock_session_manager():
+def mock_session_manager() -> object:
     """Centralized SessionManager mock fixture."""
     return ManagerMockFactory.create_session_manager_mock()
 
 
 @pytest.fixture
-def mock_claude_manager():
+def mock_claude_manager() -> object:
     """Centralized ClaudeManager mock fixture."""
     return ManagerMockFactory.create_claude_manager_mock()
 
 
 @pytest.fixture
-def mock_tmux_manager():
+def mock_tmux_manager() -> object:
     """Centralized TmuxManager mock fixture."""
     return ManagerMockFactory.create_tmux_manager_mock()
 
 
 @pytest.fixture
-def mock_subprocess_result():
+def mock_subprocess_result() -> object:
     """Standard subprocess.run result mock."""
     return ComponentMockFactory.create_subprocess_mock()
 
 
 @pytest.fixture
-def mock_api_response():
+def mock_api_response() -> object:
     """Standard API response mock."""
     return ComponentMockFactory.create_api_response_mock()
 
 
 @pytest.fixture
-def temp_dir():
+def temp_dir() -> object:
     """임시 디렉토리 fixture."""
     with temp_directory() as tmpdir:
         yield tmpdir
 
 
 @pytest.fixture
-def sample_session_data():
+def sample_session_data() -> object:
     """샘플 세션 데이터 fixture."""
     return MOCK_SESSION_DATA.copy()
 
 
 @pytest.fixture
-def sample_prompts():
+def sample_prompts() -> object:
     """샘플 프롬프트 데이터 fixture."""
     return MOCK_PROMPTS.copy()
 
@@ -114,13 +115,13 @@ def test_config_file(temp_dir: str) -> Path:
         },
     }
     config_path = Path(temp_dir) / "test_config.yaml"
-    with open(config_path, "w") as f:
+    with open(config_path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
     return config_path
 
 
 @pytest.fixture
-def temp_project_root():
+def temp_project_root() -> object:
     """Create temporary project directory."""
     with tempfile.TemporaryDirectory() as temp_dir:
         project_root = Path(temp_dir)
@@ -140,14 +141,14 @@ def launcher(temp_project_root: Path) -> object:
 
 
 @pytest.fixture
-def theme_manager():
+def theme_manager() -> object:
     """Create ThemeManager instance."""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield ThemeManager(config_dir=Path(temp_dir))
 
 
 @pytest.fixture
-def keyboard_manager():
+def keyboard_manager() -> object:
     """Create KeyboardNavigationManager instance."""
     manager = KeyboardNavigationManager()
     yield manager
@@ -157,7 +158,7 @@ def keyboard_manager():
 
 
 @pytest.fixture
-def performance_optimizer():
+def performance_optimizer() -> object:
     """Create PerformanceOptimizer instance."""
     optimizer = PerformanceOptimizer()
     yield optimizer

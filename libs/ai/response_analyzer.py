@@ -60,9 +60,7 @@ class ResponseAnalyzer:
         self._load_data()
 
     def _load_data(self) -> None:
-        """Load existing response history and patterns.
-
-        """
+        """Load existing response history and patterns."""
         try:
             if self.responses_file.exists():
                 with open(self.responses_file, encoding="utf-8") as f:
@@ -80,9 +78,7 @@ class ResponseAnalyzer:
             logger.exception("Error loading AI data")
 
     def _save_data(self) -> None:
-        """Save response history and patterns to disk.
-
-        """
+        """Save response history and patterns to disk."""
         try:
             # Save response history
             with open(self.responses_file, "w", encoding="utf-8") as f:
@@ -158,9 +154,7 @@ class ResponseAnalyzer:
         return "unknown"
 
     def _update_patterns(self, record: ResponseRecord) -> None:
-        """Update learned patterns based on new response record.
-
-        """
+        """Update learned patterns based on new response record."""
         pattern_id = f"{record.prompt_type}_{record.project_name or 'global'}"
 
         if pattern_id not in self.learned_patterns:

@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+from commands.automate import AutomateDetectCommand, AutomateMonitorCommand
+from commands.browse import BrowseCommand
+from commands.setup import SetupCommand
+from commands.status import StatusCommand
+from libs.ai.learning_engine import LearningEngine
+from .test_framework import (
+from flask import Flask, jsonify
+import sqlite3
+import pytest
+from app import app
+import os
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,14 +23,8 @@ Tests integration across all major system modules including CLI, automation,
 AI learning, session management, and dashboard coordination.
 """
 
-from commands.automate import AutomateDetectCommand, AutomateMonitorCommand
-from commands.browse import BrowseCommand
-from commands.setup import SetupCommand
-from typing import object
-from commands.status import StatusCommand
-from libs.ai.learning_engine import LearningEngine
 
-from .test_framework import (
+
     AsyncIntegrationTestBase,
     CommandTestRunner,
     MockClaudeEnvironment,
@@ -169,21 +177,19 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         assert total_workflow_time < 45.0, f"Complete workflow took {total_workflow_time:.2f}s, should be < 45s"
 
     @staticmethod
-    def _create_comprehensive_project( project_dir: object) -> None:
+    def _create_comprehensive_project(project_dir: object) -> None:
         """Create a comprehensive project with multiple contexts."""
         # Python web application
         (project_dir / "app.py").write_text("""
-from flask import Flask, jsonify
-import sqlite3
 
 app = Flask(__name__)
 
 @app.route('/api/health')
-def health_check():
+def health_check() -> object:
     return jsonify({'status': 'healthy'})
 
 @app.route('/api/data')
-def get_data():
+def get_data() -> object:
     return jsonify({'data': 'sample'})
 
 if __name__ == '__main__':
@@ -219,21 +225,19 @@ CREATE TABLE posts (
         (project_dir / "tests").mkdir()
         (project_dir / "tests" / "__init__.py").write_text("")
         (project_dir / "tests" / "test_app.py").write_text("""
-import pytest
-from app import app
 
 @pytest.fixture
-def client():
+def client() -> object:
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
 
-def test_health_check(client):
+def test_health_check(client) -> object:
     rv = client.get('/api/health')
     assert rv.status_code == 200
     assert b'healthy' in rv.data
 
-def test_get_data(client):
+def test_get_data(client) -> object:
     rv = client.get('/api/data')
     assert rv.status_code == 200
     assert b'data' in rv.data
@@ -316,7 +320,6 @@ jobs:
 
         # Configuration files
         (project_dir / "config.py").write_text("""
-import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'

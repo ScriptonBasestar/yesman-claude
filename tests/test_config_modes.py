@@ -1,24 +1,22 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from pathlib import Path
+from unittest.mock import patch
+import pytest
+import yaml
+from libs.yesman_config import YesmanConfig
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test configuration modes including backward compatibility."""
-
-from pathlib import Path
-from unittest.mock import patch
-from typing import object
-
-import pytest
-import yaml
-
-from libs.yesman_config import YesmanConfig
 
 
 class TestConfigModes:
     """Test configuration modes and backward compatibility."""
 
     @staticmethod
-    def test_merge_mode_default( tmp_path: object) -> None:
+    def test_merge_mode_default(tmp_path: object) -> None:
         """Test default merge mode behavior."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"

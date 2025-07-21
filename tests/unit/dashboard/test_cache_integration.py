@@ -1,8 +1,9 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 from libs.dashboard.renderers.optimizations import RenderCache
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestCacheIntegration:

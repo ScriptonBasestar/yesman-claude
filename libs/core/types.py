@@ -15,7 +15,6 @@ from typing_extensions import TypedDict
 """Type definitions and type hints for Yesman-Claude."""
 
 
-
 # Session-related types
 SessionName = str
 WindowName = str
@@ -241,9 +240,7 @@ class CacheEntry:
         return time.time() > (self.created_at + self.ttl)
 
     def touch(self) -> None:
-        """Update access information.
-
-        """
+        """Update access information."""
         self.access_count += 1
         self.last_accessed = time.time()
 

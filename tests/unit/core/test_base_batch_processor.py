@@ -1,16 +1,18 @@
+from typing import Any
+import asyncio
+from dataclasses import dataclass
+import pytest
+from libs.core.base_batch_processor import BaseBatchProcessor
+
 #!/usr/bin/env python3
-"""Copyright notice."""
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for the base batch processor."""
 
-import asyncio
-from dataclasses import dataclass
 
-import pytest
 
-from libs.core.base_batch_processor import BaseBatchProcessor
 
 
 @dataclass
@@ -20,20 +22,20 @@ class TestBatch:
     items: list[str]
     size: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> object:
         self.size = len(self.items)
 
 
 class TestBatchProcessor(BaseBatchProcessor[str, TestBatch]):
     """Test implementation of batch processor."""
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+    def __init__(self, **kwargs: dict[str, object]) -> None:
+        super().__init__(**kwargs: dict[str, object])
         self.processed_batches: list[TestBatch] = []
         self.process_delay = 0.0  # For testing timing
 
     @staticmethod
-    def create_batch( items: list[str]) -> TestBatch:
+    def create_batch(items: list[str]) -> TestBatch:
         """Create a test batch."""
         return TestBatch(items=items.copy())
 

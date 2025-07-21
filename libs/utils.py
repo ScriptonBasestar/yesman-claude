@@ -10,7 +10,6 @@ from pathlib import Path
 """Utility functions for yesman."""
 
 
-
 def ensure_log_directory(log_path: Path) -> Path:
     """Ensure log directory exists with proper permissions.
 

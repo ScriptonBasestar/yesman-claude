@@ -1,15 +1,14 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import MagicMock, patch
+from click.testing import CliRunner
+from commands.dashboard import dashboard
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test for dashboard command."""
-
-import unittest
-from unittest.mock import MagicMock, patch
-
-from click.testing import CliRunner
-
-from commands.dashboard import dashboard
 
 
 class TestDashboardCommand(unittest.TestCase):

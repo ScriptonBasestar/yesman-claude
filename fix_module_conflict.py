@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import os
+import shutil
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Fix the module naming conflict by removing the wrapper file."""
 
-import os
-import shutil
 
 base_path = "/Users/archmagece/myopen/scripton/yesman-claude"
 

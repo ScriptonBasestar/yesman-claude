@@ -1,14 +1,12 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import asyncio
-from typing import object
-
 import pytest
-
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestConcurrentRendering:
@@ -27,7 +25,7 @@ class TestConcurrentRendering:
             uptime=1800,
         )
 
-        async def render_widget_async(format_type: RenderFormat, widget_type: WidgetType, data: object) -> Any:
+        async def render_widget_async(format_type: RenderFormat, widget_type: WidgetType, data: object) -> object:
             """Async wrapper for rendering."""
             renderer = factory.create_renderer(format_type)
             return renderer.render_widget(widget_type, data)

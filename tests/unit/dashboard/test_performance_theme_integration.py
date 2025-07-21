@@ -1,11 +1,13 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from typing import Any
+import pytest
+from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
+import tempfile
+from pathlib import Path
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
-import pytest
-from typing import object
-
-from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
 
 
 class TestPerformanceThemeIntegration:
@@ -13,7 +15,7 @@ class TestPerformanceThemeIntegration:
 
     @pytest.fixture
     @staticmethod
-    def performance_optimizer():
+    def performance_optimizer() -> object:
         """Create PerformanceOptimizer instance."""
         optimizer = PerformanceOptimizer()
         yield optimizer
@@ -23,16 +25,14 @@ class TestPerformanceThemeIntegration:
 
     @pytest.fixture
     @staticmethod
-    def theme_manager():
+    def theme_manager() -> object:
         """Create ThemeManager instance."""
-        import tempfile
-        from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     @staticmethod
-    def test_performance_theme_integration( performance_optimizer: object, theme_manager: object) -> None:
+    def test_performance_theme_integration(performance_optimizer: object, theme_manager: object) -> None:
         """Test 9: Performance optimization affects theme rendering."""
         # Set aggressive optimization
         performance_optimizer.set_optimization_level(OptimizationLevel.AGGRESSIVE)

@@ -1,16 +1,16 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for WorkEnvironmentManager."""
+# Copyright notice.
 
 import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
 import pytest
-
 from libs.multi_agent.work_environment import WorkEnvironment, WorkEnvironmentManager
+import subprocess
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for WorkEnvironmentManager."""
 
 
 class TestWorkEnvironmentManager:
@@ -18,13 +18,12 @@ class TestWorkEnvironmentManager:
 
     @pytest.fixture
     @staticmethod
-    def temp_repo( tmp_path: Path) -> Path:
+    def temp_repo(tmp_path: Path) -> Path:
         """Create a temporary git repository."""
         repo_path = tmp_path / "test_repo"
         repo_path.mkdir()
 
         # Initialize git repo
-        import subprocess
 
         subprocess.run(["git", "init"], cwd=repo_path, check=True)
         subprocess.run(

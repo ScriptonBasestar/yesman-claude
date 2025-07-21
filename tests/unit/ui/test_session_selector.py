@@ -1,13 +1,13 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import MagicMock, patch
+from libs.ui.session_selector import SessionSelector
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test for session selector UI."""
-
-import unittest
-from unittest.mock import MagicMock, patch
-
-from libs.ui.session_selector import SessionSelector
 
 
 class TestSessionSelector(unittest.TestCase):

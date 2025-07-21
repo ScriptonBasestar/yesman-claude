@@ -1,16 +1,14 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from unittest.mock import patch
+from click.testing import CliRunner
+from commands.setup import setup
+from tests.fixtures.mock_factories import PatchContextFactory
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test for setup command - Migrated to use centralized mock factories."""
-
-from unittest.mock import patch
-from typing import object
-
-from click.testing import CliRunner
-
-from commands.setup import setup
-from tests.fixtures.mock_factories import PatchContextFactory
 
 
 class TestSetupCommand:

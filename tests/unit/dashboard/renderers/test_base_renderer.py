@@ -1,31 +1,32 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
+# Copyright notice.
+
+from datetime import datetime
+import pytest
+from libs.dashboard.renderers.base_renderer import (
+from libs.dashboard.renderers.registry import RendererRegistry
+
 # Licensed under the MIT License
 
 """Tests for BaseRenderer and related components."""
 
-from datetime import datetime
-from typing import object
 
-import pytest
 
-from libs.dashboard.renderers.base_renderer import (
+
     BaseRenderer,
     RenderFormat,
     ThemeColor,
     WidgetType,
 )
-from libs.dashboard.renderers.registry import RendererRegistry
 
 
 class TestRenderer(BaseRenderer):
     """Test implementation of BaseRenderer for testing."""
 
     @staticmethod
-    def render_widget( widget_type: WidgetType, data: object, options: dict[str, object] | None = None) -> str:  # noqa: ARG002
+    def render_widget(data: options, dict[str] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return f"<widget type='{widget_type.value}' data='{data}' />"
 
-    def render_layout(self, widgets: list[dict[str, object]], layout_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
+    def render_layout(self, widgets: list[dict[str]], layout_config: dict[str] | None = None) -> str:  # noqa: ARG002
         rendered_widgets = []
         for widget in widgets:
             widget_html = self.render_widget(
@@ -37,7 +38,7 @@ class TestRenderer(BaseRenderer):
         return f"<layout>{' '.join(rendered_widgets)}</layout>"
 
     @staticmethod
-    def render_container(content: object, container_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
+    def render_container(content: container_config, dict[str] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return f"<container>{content}</container>"
 
 

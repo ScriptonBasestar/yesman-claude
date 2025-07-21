@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+from commands.automate import AutomateDetectCommand
+from libs.ai.learning_engine import LearningEngine
+from .test_framework import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,10 +15,7 @@ Tests the AI learning system's integration with session interactions,
 pattern detection, and prediction accuracy across real workflows.
 """
 
-from commands.automate import AutomateDetectCommand
-from libs.ai.learning_engine import LearningEngine
 
-from .test_framework import (
     AsyncIntegrationTestBase,
     CommandTestRunner,
     MockClaudeEnvironment,

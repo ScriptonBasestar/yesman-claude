@@ -23,8 +23,6 @@ windows, and panes across the Yesman-Claude project.
 """
 
 
-
-
 logger = logging.getLogger(__name__)
 
 

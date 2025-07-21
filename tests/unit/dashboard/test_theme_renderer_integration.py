@@ -1,13 +1,15 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
+from typing import Any
 import pytest
-from typing import object
-
 from libs.dashboard import ThemeManager, ThemeMode
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
+import tempfile
+from pathlib import Path
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestThemeRendererIntegration:
@@ -15,16 +17,14 @@ class TestThemeRendererIntegration:
 
     @pytest.fixture
     @staticmethod
-    def theme_manager():
+    def theme_manager() -> object:
         """Create ThemeManager instance."""
-        import tempfile
-        from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     @staticmethod
-    def test_theme_renderer_integration( theme_manager: object) -> None:
+    def test_theme_renderer_integration(theme_manager: object) -> None:
         """Test 8: Theme and renderer integration."""
         factory = RendererFactory()
 

@@ -1,16 +1,22 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Direct script to run lint commands and save output to file."""
 
-import os
-import subprocess
 
+def run_command(command, description) -> object:
+    """Run a command and capture output.
 
-def run_command(command, description):
-    """Run a command and capture output."""
+    Returns:
+        object: Description of return value.
+    """
     output = []
     output.append(f"\n{'=' * 60}")
     output.append(f"Running: {description}")
@@ -47,7 +53,7 @@ def run_command(command, description):
         return False, "\n".join(output)
 
 
-def main():
+def main() -> None:
     # Change to project directory
     os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
@@ -117,7 +123,7 @@ def main():
     summary.append("\nLint checks completed. Review output above for details.")
 
     # Write all output to file
-    with open("lint_output.txt", "w") as f:
+    with open("lint_output.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(all_output))
         f.write("\n".join(summary))
 

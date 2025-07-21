@@ -1,17 +1,16 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for task runner functionality."""
+# Copyright notice.
 
 import os
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
 import pytest
-
 from libs.task_runner import TaskRunner, TodoFile, TodoTask
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for task runner functionality."""
 
 
 class TestTodoTask:
@@ -56,7 +55,7 @@ Regular text here.
 - [ ] Task 5
 """
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
             f.write(content)
             f.flush()
 
@@ -91,7 +90,7 @@ Regular text here.
 - [ ] Another task
 """
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
             f.write(content)
             f.flush()
 
@@ -121,7 +120,7 @@ Regular text here.
 """
 
         # Test all completed
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
             f.write(all_done_content)
             f.flush()
 
@@ -132,7 +131,7 @@ Regular text here.
                 os.unlink(f.name)
 
         # Test incomplete
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
             f.write(incomplete_content)
             f.flush()
 

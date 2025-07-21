@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for DependencyPropagationSystem dependency change tracking and propagation."""
+# Copyright notice.
 
 import asyncio
 import tempfile
@@ -10,13 +6,22 @@ from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
-
 import pytest
-
 from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import CollaborationEngine
 from libs.multi_agent.dependency_propagation import (
+import pandas as pd
+from .utils import process_data, validate_input
+from src.main import DataProcessor
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for DependencyPropagationSystem dependency change tracking and propagation."""
+
+
+
     ChangeImpact,
     DependencyChange,
     DependencyNode,
@@ -131,15 +136,13 @@ class TestDependencyPropagationSystem:
             # Main module
             (repo_path / "src" / "main.py").write_text(
                 """
-import pandas as pd
-from .utils import process_data, validate_input
 
 class DataProcessor:
-    def __init__(self):
+    def __init__(self) -> None:
         self.data = None
 
     @staticmethod
-    def process(data):
+    def process(data) -> object:
         validated = validate_input(data)
         return process_data(validated)
 """
@@ -148,10 +151,10 @@ class DataProcessor:
             # Utils module
             (repo_path / "src" / "utils.py").write_text(
                 """
-def process_data(data):
+def process_data(data) -> object:
     return data * 2
 
-def validate_input(data):
+def validate_input(data) -> object:
     return data is not None
 """
             )
@@ -159,9 +162,8 @@ def validate_input(data):
             # Test file
             (repo_path / "tests" / "test_main.py").write_text(
                 """
-from src.main import DataProcessor
 
-def test_processor():
+def test_processor() -> object:
     processor = DataProcessor()
     result = processor.process(5)
     assert result == 10
@@ -397,7 +399,7 @@ def test_processor():
         assert len(results) == 2
         for result in results:
             assert isinstance(result, PropagationResult)
-            assert result.change_id in [change_id1, change_id2]
+            assert result.change_id in {change_id1, change_id2}
 
     @pytest.mark.asyncio
     @staticmethod

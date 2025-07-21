@@ -1,12 +1,12 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import tempfile
 from pathlib import Path
-
 from libs.dashboard import ThemeManager
 from libs.dashboard.theme_system import ColorPalette, Theme, ThemeMode
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestConfigurationIsolation:

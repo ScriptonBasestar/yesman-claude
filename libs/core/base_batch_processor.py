@@ -24,7 +24,6 @@ batch processing various types of items with configurable size and time limits.
 """
 
 
-
 # Type variable for generic batch items
 T = TypeVar("T")
 

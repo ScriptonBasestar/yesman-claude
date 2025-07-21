@@ -21,7 +21,6 @@ This module provides automated processing of TODO files:
 """
 
 
-
 class TodoTask:
     """Represents a single todo task item."""
 

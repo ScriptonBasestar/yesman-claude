@@ -11,9 +11,6 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 """Improved ls command using base command class."""
 
 
-
-
-
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 

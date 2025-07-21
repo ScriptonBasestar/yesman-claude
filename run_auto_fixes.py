@@ -1,18 +1,26 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+# 3. Sort imports with ruff
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Run auto-fixes for lint issues."""
 
-import os
-import subprocess
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
-def run_command(cmd, description):
-    """Run command and show results."""
+def run_command(cmd, description) -> object:
+    """Run command and show results.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"{description}")
     print(f"{'=' * 60}")
@@ -40,7 +48,6 @@ run_command(["python", "-m", "ruff", "format", "libs", "commands", "api", "tests
 print("\n2. RUNNING RUFF CHECK WITH FIX")
 run_command(["python", "-m", "ruff", "check", "--fix", "libs", "commands", "api", "tests", "--exclude", "migrations", "--exclude", "node_modules"], "Ruff check with auto-fix")
 
-# 3. Sort imports with ruff
 print("\n3. RUNNING IMPORT SORT")
 run_command(["python", "-m", "ruff", "check", "--select", "I", "--fix", "libs", "commands", "api", "tests"], "Ruff import sorting")
 

@@ -16,8 +16,6 @@ from .workflow_engine import WorkflowChain, WorkflowEngine
 """Automation manager that integrates context detection and workflow execution."""
 
 
-
-
 class AutomationManager:
     """Manages context-aware automation for yesman-claude."""
 
@@ -47,16 +45,12 @@ class AutomationManager:
         }
 
     def add_callback(self, event_type: str, callback: Callable) -> None:
-        """Add callback for automation events.
-
-        """
+        """Add callback for automation events."""
         if event_type in self._callbacks:
             self._callbacks[event_type].append(callback)
 
     def remove_callback(self, event_type: str, callback: Callable) -> None:
-        """Remove callback for automation events.
-
-        """
+        """Remove callback for automation events."""
         if event_type in self._callbacks and callback in self._callbacks[event_type]:
             self._callbacks[event_type].remove(callback)
 
@@ -188,9 +182,7 @@ class AutomationManager:
         return self.context_detector.detect_claude_idle_context(last_activity_time, idle_threshold)
 
     def register_custom_workflow(self, workflow: WorkflowChain) -> None:
-        """Register a custom workflow chain.
-
-        """
+        """Register a custom workflow chain."""
         self.workflow_engine.register_workflow(workflow)
 
     def get_automation_status(self) -> dict[str, object]:
@@ -229,9 +221,7 @@ class AutomationManager:
         return None
 
     def save_automation_config(self, config_path: Path | None = None) -> None:
-        """Save automation configuration to file.
-
-        """
+        """Save automation configuration to file."""
         if not config_path:
             config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
@@ -241,9 +231,7 @@ class AutomationManager:
         self.logger.info("Saved automation config to: %s", config_path)
 
     def load_automation_config(self, config_path: Path | None = None) -> None:
-        """Load automation configuration from file.
-
-        """
+        """Load automation configuration from file."""
         if not config_path:
             config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 

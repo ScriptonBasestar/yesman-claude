@@ -1,18 +1,23 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import tempfile
+from pathlib import Path
+from libs.multi_agent.metrics_verifier import MetricsVerifier
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Simplified demo script for metrics verification system."""
 
-import tempfile
-from pathlib import Path
 
-from libs.multi_agent.metrics_verifier import MetricsVerifier
+def demo_simple_metrics_verification() -> object:
+    """Demonstrate metrics verification with simulated data.
 
-
-def demo_simple_metrics_verification():
-    """Demonstrate metrics verification with simulated data."""
+    Returns:
+        object: Description of return value.
+    """
     print("🎯 Simplified Multi-Agent Metrics Verification Demo")
     print("=" * 60)
 

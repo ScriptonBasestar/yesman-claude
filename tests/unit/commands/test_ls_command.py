@@ -1,16 +1,14 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import MagicMock, patch
+from click.testing import CliRunner
+from commands.ls import ls
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test for ls command."""
-
-import unittest
-from unittest.mock import MagicMock, patch
-from typing import object
-
-from click.testing import CliRunner
-
-from commands.ls import ls
 
 
 class TestLsCommand(unittest.TestCase):

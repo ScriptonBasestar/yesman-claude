@@ -14,8 +14,6 @@ from libs.utils import ensure_log_directory, get_default_log_path
 """Content collection system for Claude interactions."""
 
 
-
-
 class ClaudeContentCollector:
     """Collects and stores Claude Code interactions for pattern analysis."""
 

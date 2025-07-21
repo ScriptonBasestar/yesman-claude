@@ -17,7 +17,6 @@ from .collaboration_engine import CollaborationEngine, MessagePriority, MessageT
 """Branch information sharing protocol for multi-agent collaboration."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

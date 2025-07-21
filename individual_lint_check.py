@@ -1,19 +1,26 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Individual lint tool checks."""
 
-import os
-import subprocess
 
 # Change to project directory
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
-def run_command(cmd, description):
-    """Run a command and capture output."""
+def run_command(cmd, description) -> object:
+    """Run a command and capture output.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -41,7 +48,7 @@ def run_command(cmd, description):
         return False, "", str(e)
 
 
-def main():
+def main() -> None:
     """Run all lint checks individually."""
     # 1. Ruff check
     success1, stdout1, stderr1 = run_command(
@@ -78,7 +85,7 @@ def main():
     success4, stdout4, stderr4 = run_command(["python", "-m", "mdformat", "--check", "--diff", "*.md", "--wrap", "120"], "MDFormat check")
 
     # Write comprehensive output
-    with open("lint-output.txt", "w") as f:
+    with open("lint-output.txt", "w", encoding="utf-8") as f:
         f.write("=== COMPREHENSIVE LINT CHECK RESULTS ===\n\n")
 
         f.write("1. RUFF CHECK\n")

@@ -10,9 +10,6 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 # Licensed under the MIT License
 
 
-
-
-
 class TeardownCommand(BaseCommand, SessionCommandMixin):
     """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
 
@@ -67,9 +64,7 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
 @click.command()
 @click.argument("session_name", required=False)
 def teardown(session_name: str | None) -> None:
-    """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다.
-
-    """
+    """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
     command = TeardownCommand()
     command.run(session_name=session_name)
 
@@ -78,9 +73,7 @@ def teardown(session_name: str | None) -> None:
 @click.command()
 @click.argument("session_name", required=False)
 def down(session_name: str | None) -> None:
-    """Alias for 'teardown' command.
-
-    """
+    """Alias for 'teardown' command."""
     command = TeardownCommand()
     command.run(session_name=session_name)
 

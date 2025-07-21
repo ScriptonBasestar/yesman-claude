@@ -9,8 +9,6 @@ import time
 """Claude process control and lifecycle management."""
 
 
-
-
 class ClaudeProcessController:
     """Controls Claude process lifecycle (start, stop, restart)."""
 

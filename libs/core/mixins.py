@@ -16,7 +16,6 @@ These mixins provide standardized interfaces for common patterns:
 """
 
 
-
 class StatisticsProviderMixin(ABC):
     """Mixin for classes that provide statistics information."""
 
@@ -139,9 +138,7 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
         return stats
 
     def _increment_stat(self, stat_name: str, value: int = 1) -> None:
-        """Helper method to increment statistics counters.
-
-        """
+        """Helper method to increment statistics counters."""
         if stat_name in self._statistics:
             self._statistics[stat_name] += value
 
@@ -156,18 +153,14 @@ class DefaultStatusManagerMixin(StatusManagerMixin):
         self._activity = "No activity"
 
     def update_status(self, status: str) -> None:
-        """Update status with validation.
-
-        """
+        """Update status with validation."""
         if status not in self.VALID_STATUSES:
             msg = f"Invalid status: {status}. Must be one of {self.VALID_STATUSES}"
             raise ValueError(msg)
         self._status = status
 
     def update_activity(self, activity: str) -> None:
-        """Update current activity description.
-
-        """
+        """Update current activity description."""
         if not activity or not isinstance(activity, str):
             msg = "Activity must be a non-empty string"
             raise ValueError(msg)

@@ -29,12 +29,10 @@ from libs.core.base_command import BaseCommand, CommandError
 """Dashboard interface management commands."""
 
 
-
 try:
     pass
 except ImportError:
     uvicorn = None
-
 
 
 class DashboardEnvironment:

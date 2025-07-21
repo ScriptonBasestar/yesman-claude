@@ -27,9 +27,7 @@ Implements the TASK_RUNNER.todo prompt workflow:
 """
 
 
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
 
 
 class TaskRunnerNextCommand(BaseCommand):

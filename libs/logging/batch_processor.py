@@ -16,7 +16,6 @@ from typing import Any
 """Batch log processor for optimized I/O operations."""
 
 
-
 @dataclass
 class LogBatch:
     """A batch of log entries to be processed together."""
@@ -108,9 +107,7 @@ class BatchProcessor:
         self.logger.info("Batch processor stopped")
 
     def add_entry(self, entry: dict[str, object]) -> None:
-        """Add a log entry to the processing queue.
-
-        """
+        """Add a log entry to the processing queue."""
         # Add timestamp if not present
         if "timestamp" not in entry:
             entry["timestamp"] = time.time()

@@ -1,28 +1,38 @@
+from typing import Any
+import argparse
+import time
+from pathlib import Path
+from libs.core.claude_manager import ClaudeManager
+from libs.core.session_manager import SessionManager
+
 #!/usr/bin/env python3
-"""Copyright notice."""
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """실시간 Controller 로그 뷰어 - 디버깅용."""
 
-import argparse
-import time
-from pathlib import Path
-
-from libs.core.claude_manager import ClaudeManager
-from libs.core.session_manager import SessionManager
 
 
-def print_header():
-    """헤더 출력."""
+
+def print_header() -> object:
+    """헤더 출력.
+
+    Returns:
+        object: Description of return value.
+    """
     print("=" * 80)
     print("🚀 YESMAN CONTROLLER REAL-TIME LOG VIEWER")
     print("=" * 80)
     print()
 
 
-def get_controller_status(claude_manager, session_name):
-    """컨트롤러 상태 확인."""
+def get_controller_status(claude_manager, session_name) -> object:
+    """컨트롤러 상태 확인.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         controller = claude_manager.get_controller(session_name)
         if not controller:
@@ -38,8 +48,12 @@ def get_controller_status(claude_manager, session_name):
         return f"❌ Error: {e}"
 
 
-def monitor_logs(session_name, follow=True):
-    """로그 실시간 모니터링."""
+def monitor_logs(session_name, follow=True) -> object:
+    """로그 실시간 모니터링.
+
+    Returns:
+        object: Description of return value.
+    """
     log_path = Path("~/tmp/logs/yesman/").expanduser()
     controller_log = log_path / f"claude_manager_{session_name}.log"
 
@@ -132,8 +146,12 @@ def monitor_logs(session_name, follow=True):
         print("👋 Monitoring stopped by user")
 
 
-def list_sessions():
-    """사용 가능한 세션 목록."""
+def list_sessions() -> object:
+    """사용 가능한 세션 목록.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
@@ -156,7 +174,7 @@ def list_sessions():
         print(f"❌ Error listing sessions: {e}")
 
 
-def main():
+def main() -> object:
     parser = argparse.ArgumentParser(description="Yesman Controller Real-time Log Viewer")
     parser.add_argument("session_name", nargs="?", help="Session name to monitor")
     parser.add_argument("--list", "-l", action="store_true", help="List available sessions")

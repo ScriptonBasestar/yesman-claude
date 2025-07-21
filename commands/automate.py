@@ -20,8 +20,6 @@ from libs.automation.context_detector import ContextInfo, ContextType
 """Context-aware automation and workflow management commands."""
 
 
-
-
 class AutomateStatusCommand(BaseCommand):
     """Show automation system status."""
 
@@ -228,7 +226,6 @@ class AutomateTriggerCommand(BaseCommand):
             # Simulate context detection
             async def trigger_automation():
 
-
                 # Create a context info object
                 context_info = ContextInfo(context_type=context_enum, confidence=1.0, details={"description": description, "manual": True}, timestamp=time.time())
 
@@ -281,7 +278,6 @@ class AutomateExecuteCommand(BaseCommand):
             self.console.print(f"⚡ Executing workflow: {workflow_name}")
 
             async def run_workflow():
-
 
                 # Create a dummy context for manual execution
                 context_info = ContextInfo(context_type=ContextType.UNKNOWN, confidence=1.0, details={"manual_execution": True, "workflow_name": workflow_name}, timestamp=time.time())

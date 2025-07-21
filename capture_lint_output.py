@@ -1,17 +1,23 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Capture lint output by running commands manually."""
-
+from typing import Any
 import os
 import subprocess
 from pathlib import Path
 
 
-def run_command_safely(cmd, description, cwd=None):
-    """Run a command and capture output safely."""
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Capture lint output by running commands manually."""
+
+
+def run_command_safely(cmd, description, cwd=None) -> object:
+    """Run a command and capture output safely.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {cmd}")
@@ -53,7 +59,7 @@ def run_command_safely(cmd, description, cwd=None):
         return False, msg
 
 
-def main():
+def main() -> None:
     """Main function to capture lint output."""
     project_path = "/Users/archmagece/myopen/scripton/yesman-claude"
     os.chdir(project_path)
@@ -113,7 +119,7 @@ def main():
 
     # Save all output to file
     output_file = Path(project_path) / "lint_output.txt"
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write("LINT OUTPUT CAPTURE\n")
         f.write("=" * 80 + "\n\n")
         f.write("\n".join(all_output))

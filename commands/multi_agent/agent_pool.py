@@ -18,8 +18,6 @@ from libs.multi_agent.types import TaskStatus
 """Agent pool management commands."""
 
 
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -304,7 +302,6 @@ class ListTasksCommand(BaseCommand):
         Dict containing."""
         try:
             pool = AgentPool(work_dir=work_dir)
-
 
             filter_status = None
             if status:

@@ -15,8 +15,6 @@ from libs.core.error_handling import YesmanError
 # Licensed under the MIT License
 
 
-
-
 app = FastAPI(title="Yesman Claude API", version="0.1.0")
 
 # Add error handling middleware

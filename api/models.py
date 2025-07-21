@@ -6,7 +6,6 @@ from pydantic import BaseModel
 # Licensed under the MIT License
 
 
-
 class PaneInfo(BaseModel):
     command: str | None = None
     is_claude: bool = False

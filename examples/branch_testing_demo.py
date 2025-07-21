@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+import tempfile
+from pathlib import Path
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.branch_test_manager import BranchTestManager, TestType
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Demo script showing branch testing integration capabilities."""
 
-import asyncio
-import tempfile
-from pathlib import Path
 
-from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.branch_test_manager import BranchTestManager, TestType
-
-
-async def demo_branch_testing():
+async def demo_branch_testing() -> None:
     """Demonstrate branch testing functionality."""
     print("🧪 Branch Testing Integration Demo")
     print("=" * 50)

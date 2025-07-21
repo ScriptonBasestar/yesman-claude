@@ -1,16 +1,25 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import json
+from pathlib import Path
+import pytest
+from libs.multi_agent.graph import DirectedGraph
+from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition
+import os
+from typing import List, Any
+from libs.module_b import helper_function
+from libs.module_c import BaseClass
+from libs.module_a import main
+from libs.module_b import HelperClass
+        # Check standard library import
+        # Check from import
+        # Check local import
+        # Should find module_a (imports module_b) and module_c (imported by module_b)
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for TaskAnalyzer class."""
-
-import json
-from pathlib import Path
-
-import pytest
-
-from libs.multi_agent.graph import DirectedGraph
-from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition
 
 
 class TestTaskAnalyzer:
@@ -18,27 +27,27 @@ class TestTaskAnalyzer:
 
     @pytest.fixture
     @staticmethod
-    def test_repo( tmp_path: Path) -> Path:
-        """Create a test repository structure."""
+    def test_repo(tmp_path: Path) -> Path:
+        """Create a test repository structure.
+
+        Returns:
+        Path: Description of return value.
+        """
         # Create test files
         (tmp_path / "libs").mkdir()
         (tmp_path / "libs" / "__init__.py").write_text("")
         (tmp_path / "libs" / "module_a.py").write_text(
             """
-import os
-from typing import List
-from libs.module_b import helper_function
 
-def main():
+def main() -> object:
     helper_function()
 """
         )
 
         (tmp_path / "libs" / "module_b.py").write_text(
             """
-from libs.module_c import BaseClass
 
-def helper_function():
+def helper_function() -> object:
     return BaseClass()
 
 class HelperClass:
@@ -49,15 +58,13 @@ class HelperClass:
         (tmp_path / "libs" / "module_c.py").write_text(
             """
 class BaseClass:
-    def __init__(self):
+    def __init__(self) -> None:
         self.value = 42
 """
         )
 
         (tmp_path / "main.py").write_text(
             """
-from libs.module_a import main
-from libs.module_b import HelperClass
 
 if __name__ == "__main__":
     main()
@@ -69,7 +76,11 @@ if __name__ == "__main__":
     @pytest.fixture
     @staticmethod
     def analyzer(test_repo: Path) -> TaskAnalyzer:
-        """Create TaskAnalyzer instance."""
+        """Create TaskAnalyzer instance.
+
+        Returns:
+        TaskAnalyzer: Description of return value.
+        """
         return TaskAnalyzer(repo_path=str(test_repo))
 
     @staticmethod
@@ -86,19 +97,16 @@ if __name__ == "__main__":
 
         assert len(deps) == 3
 
-        # Check standard library import
         os_import = next((d for d in deps if d.imported_module == "os"), None)
         assert os_import is not None
         assert os_import.import_type == "import"
         assert os_import.line_number == 2
 
-        # Check from import
         typing_import = next((d for d in deps if d.imported_module == "typing"), None)
         assert typing_import is not None
         assert typing_import.import_type == "from_import"
         assert "List" in typing_import.symbols
 
-        # Check local import
         local_import = next(
             (d for d in deps if d.imported_module == "libs.module_b"),
             None,
@@ -113,7 +121,6 @@ if __name__ == "__main__":
         # Find files related to module_b
         related = analyzer.find_related_files("libs/module_b.py", depth=2)
 
-        # Should find module_a (imports module_b) and module_c (imported by module_b)
         assert "libs/module_b.py" in related
         assert "libs/module_c.py" in related  # Direct dependency
         assert "libs/module_a.py" in related  # Imports module_b
@@ -341,7 +348,7 @@ if __name__ == "__main__":
         assert output_file.exists()
 
         # Load and verify
-        with open(output_file) as f:
+        with open(output_file, encoding="utf-8") as f:
             data = json.load(f)
 
         assert "tasks" in data

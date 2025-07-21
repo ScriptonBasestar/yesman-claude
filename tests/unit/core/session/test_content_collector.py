@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test content collection functionality."""
+# Copyright notice.
 
 import json
 import shutil
@@ -10,8 +6,12 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-
 from libs.core.content_collector import ClaudeContentCollector, ContentCollectionManager
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Test content collection functionality."""
 
 
 class TestClaudeContentCollector(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         assert len(files) == 1
 
         # Check file content
-        with open(files[0]) as f:
+        with open(files[0], encoding="utf-8") as f:
             data = json.load(f)
 
         assert data["session_name"] == self.session_name
@@ -79,7 +79,7 @@ class TestClaudeContentCollector(unittest.TestCase):
         assert len(files) == 1
 
         # Check file content
-        with open(files[0]) as f:
+        with open(files[0], encoding="utf-8") as f:
             data = json.load(f)
 
         assert data["content"] == content

@@ -1,4 +1,9 @@
-"""Copyright notice."""
+from typing import Any
+from unittest.mock import MagicMock, patch
+from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
+# Convenience exports for easy importing
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -6,9 +11,7 @@
 Provides standardized mock objects to reduce duplication across test files.
 """
 
-from unittest.mock import MagicMock, patch
 
-from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
 
 
 class ManagerMockFactory:
@@ -23,7 +26,7 @@ class ManagerMockFactory:
             create_session_result: Return value for create_session (default: True)
             get_session_info_result: Return value for get_session_info (default: MOCK_SESSION_DATA)
             validate_session_name_side_effect: Side effect for validation (default: None)
-            **kwargs: Any: Additional attributes to set on the mock
+            **kwargs: dict[str, object]: Additional attributes to set on the mock
 
         Returns:
             MagicMock configured with standard SessionManager behavior
@@ -74,7 +77,7 @@ class ManagerMockFactory:
             controller_count: Number of active controllers (default: 1)
             get_controller_result: Mock controller object (default: auto-generated)
             controllers_status: Status dict for all controllers (default: {"test-session": "running"})
-            **kwargs: Any: Additional attributes to set on the mock
+            **kwargs: dict[str, object]: Additional attributes to set on the mock
 
         Returns:
             MagicMock configured with standard ClaudeManager behavior
@@ -126,7 +129,7 @@ class ManagerMockFactory:
             sessions: List of session names (default: ["test-session"])
             list_sessions_result: Return value for list_sessions (default: sessions)
             session_exists_result: Return value for session_exists (default: True)
-            **kwargs: Any: Additional attributes to set on the mock
+            **kwargs: dict[str, object]: Additional attributes to set on the mock
 
         Returns:
             MagicMock configured with standard TmuxManager behavior
@@ -209,37 +212,36 @@ class PatchContextFactory:
     """Factory for common patch contexts."""
 
     @staticmethod
-    def patch_session_manager(**kwargs: object):
+    def patch_session_manager(**kwargs: object) -> object:
         """Create a patch context for SessionManager with standard mock."""
-        mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs)
+        mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs: dict[str, object])
         return patch("libs.core.session_manager.SessionManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_claude_manager(**kwargs: object):
+    def patch_claude_manager(**kwargs: object) -> object:
         """Create a patch context for ClaudeManager with standard mock."""
-        mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs)
+        mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs: dict[str, object])
         return patch("libs.core.claude_manager.ClaudeManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_tmux_manager(**kwargs: object):
+    def patch_tmux_manager(**kwargs: object) -> object:
         """Create a patch context for TmuxManager with standard mock."""
-        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
+        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs: dict[str, object])
         return patch("libs.tmux_manager.TmuxManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_setup_tmux_manager(**kwargs: object):
+    def patch_setup_tmux_manager(**kwargs: object) -> object:
         """Create a patch context for TmuxManager in setup commands."""
-        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
+        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs: dict[str, object])
         return patch("commands.setup.TmuxManager", return_value=mock_manager)
 
     @staticmethod
-    def patch_subprocess_run(**kwargs: object):
+    def patch_subprocess_run(**kwargs: object) -> object:
         """Create a patch context for subprocess.run with standard mock."""
-        mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs)
+        mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs: dict[str, object])
         return patch("subprocess.run", return_value=mock_result)
 
 
-# Convenience exports for easy importing
 __all__ = [
     "ComponentMockFactory",
     "ManagerMockFactory",

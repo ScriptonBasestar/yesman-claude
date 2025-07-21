@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
 
-"""Analyze common lint issues by examining the codebase."""
+# Copyright notice.
 
 import ast
 import re
 from pathlib import Path
 from typing import Any
+        # 2. Check imports
+            # Track imports
+                # Parse import
+                        # Handle multiple imports
+        # Check for unused imports
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Analyze common lint issues by examining the codebase."""
+
 
 # Constants for lint analysis
 MAX_LINE_LENGTH = 88  # ruff default
@@ -16,13 +24,17 @@ MAX_ISSUES_TO_DISPLAY = 5
 
 
 class LintAnalyzer:
-    def __init__(self, project_path: str):
+    def __init__(self, project_path: str) -> None:
         self.project_path = Path(project_path)
         self.issues = []
 
     @staticmethod
-    def analyze_file( file_path: Path) -> list[dict[str, Any]]:
-        """Analyze a single Python file for common lint issues."""
+    def analyze_file(file_path: Path) -> list[dict[str, object]]:
+        """Analyze a single Python file for common lint issues.
+
+        Returns:
+        object: Description of return value.
+        """
         issues = []
 
         try:
@@ -54,14 +66,11 @@ class LintAnalyzer:
             )
             return issues
 
-        # 2. Check imports
         imports_used = set()
         imports_defined = {}
 
         for line_num, line in enumerate(lines, 1):
-            # Track imports
             if line.strip().startswith("import ") or line.strip().startswith("from "):
-                # Parse import
                 if line.strip().startswith("import "):
                     import_match = re.match(r"import\s+(\w+)", line.strip())
                     if import_match:
@@ -71,7 +80,6 @@ class LintAnalyzer:
                     from_match = re.match(r"from\s+[\w.]+\s+import\s+(.+)", line.strip())
                     if from_match:
                         imports_str = from_match.group(1)
-                        # Handle multiple imports
                         for imp_name in imports_str.split(","):
                             imp = imp_name.strip().split(" as ")[0]
                             if imp and imp != "*":
@@ -81,7 +89,6 @@ class LintAnalyzer:
             words = re.findall(r"\b\w+\b", line)
             imports_used.update(words)
 
-        # Check for unused imports
         for import_name, line_num in imports_defined.items():
             if import_name not in imports_used:
                 issues.append(
@@ -151,8 +158,12 @@ class LintAnalyzer:
 
         return issues
 
-    def analyze_directory(self, directory: Path) -> list[dict[str, Any]]:
-        """Analyze all Python files in a directory."""
+    def analyze_directory(self, directory: Path) -> list[dict[str, object]]:
+        """Analyze all Python files in a directory.
+
+        Returns:
+        object: Description of return value.
+        """
         all_issues = []
 
         for file_path in directory.rglob("*.py"):
@@ -180,8 +191,12 @@ class LintAnalyzer:
 
         return all_issues
 
-    def run_analysis(self) -> dict[str, Any]:
-        """Run complete analysis."""
+    def run_analysis(self) -> dict[str, object]:
+        """Run complete analysis.
+
+        Returns:
+        object: Description of return value.
+        """
         # Analyze libs directory
         libs_issues = []
         libs_dir = self.project_path / "libs"
@@ -220,7 +235,7 @@ class LintAnalyzer:
         }
 
 
-def main():
+def main() -> None:
     """Main function."""
     project_path = "/Users/archmagece/myopen/scripton/yesman-claude"
     analyzer = LintAnalyzer(project_path)
@@ -251,7 +266,7 @@ def main():
         print()
 
     # Save detailed results
-    with open(f"{project_path}/lint_analysis_results.txt", "w") as f:
+    with open(f"{project_path}/lint_analysis_results.txt", "w", encoding="utf-8") as f:
         f.write("LINT ANALYSIS RESULTS\n")
         f.write("=" * 80 + "\n\n")
 

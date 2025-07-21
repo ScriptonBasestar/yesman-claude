@@ -1,15 +1,22 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import subprocess
+    # 1. Fix import ordering
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Script to run ruff commands using subprocess directly."""
 
-import subprocess
 
+def run_command(cmd, description="") -> object:
+    """Run a command and return success status.
 
-def run_command(cmd, description=""):
-    """Run a command and return success status."""
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -44,11 +51,10 @@ def run_command(cmd, description=""):
         return False
 
 
-def main():
+def main() -> None:
     """Main function."""
     print("Starting ruff lint fixes...")
 
-    # 1. Fix import ordering
     success1 = run_command(
         [
             "uv",

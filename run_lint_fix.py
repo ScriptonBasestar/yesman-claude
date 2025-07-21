@@ -1,16 +1,22 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Run lint-fix commands directly from Python."""
 
-import os
-import subprocess
 
+def run_command(cmd, description) -> object:
+    """Run a command and return the result.
 
-def run_command(cmd, description):
-    """Run a command and return the result."""
+    Returns:
+        object: Description of return value.
+    """
     print(f"Running: {description}")
     print(f"Command: {cmd}")
     try:
@@ -27,7 +33,7 @@ def run_command(cmd, description):
         return False
 
 
-def main():
+def main() -> None:
     os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
     commands = [

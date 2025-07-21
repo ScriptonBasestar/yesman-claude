@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 
-with open("api/routers/controllers.py") as f:
+with open("api/routers/controllers.py", encoding="utf-8") as f:
     lines = f.readlines()
 
 for i, line in enumerate(lines, 1):

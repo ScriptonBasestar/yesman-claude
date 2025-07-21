@@ -1,14 +1,15 @@
+from typing import Any
+import libtmux
+
 #!/usr/bin/env python3
-"""Copyright notice."""
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Debug tmux command issues."""
 
-import libtmux
 
-
-def main():
+def main() -> object:
     print("🔍 Debugging tmux command detection...")
 
     server = libtmux.Server()

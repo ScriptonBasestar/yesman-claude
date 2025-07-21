@@ -8,8 +8,6 @@ from libs.core.base_command import BaseCommand, SessionCommandMixin
 # Licensed under the MIT License
 
 
-
-
 class ShowCommand(BaseCommand, SessionCommandMixin):
     """List all running tmux sessions."""
 
@@ -25,8 +23,6 @@ class ShowCommand(BaseCommand, SessionCommandMixin):
 
 @click.command()
 def show() -> None:
-    """List all running tmux sessions.
-
-    """
+    """List all running tmux sessions."""
     command = ShowCommand()
     command.run()

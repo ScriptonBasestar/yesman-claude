@@ -9,8 +9,6 @@ from ..shared import claude_manager
 """Controller management API endpoints."""
 
 
-
-
 router = APIRouter()
 # Using shared ClaudeManager instance to ensure consistency across all API endpoints
 cm = claude_manager

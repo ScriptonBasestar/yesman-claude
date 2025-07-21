@@ -1,28 +1,33 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import tempfile
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock
+import pytest
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_resolution import (
+from libs.multi_agent.semantic_analyzer import (
+from libs.multi_agent.semantic_merger import (
+import os
+import os
+from typing import List, Any
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for SemanticMerger automatic conflict resolution."""
 
-import tempfile
-from pathlib import Path
-from unittest.mock import AsyncMock, Mock
 
-import pytest
 
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import (
     ConflictResolutionEngine,
     ConflictSeverity,
 )
-from libs.multi_agent.semantic_analyzer import (
     FunctionSignature,
     SemanticAnalyzer,
     SemanticConflict,
     SemanticConflictType,
     SemanticContext,
 )
-from libs.multi_agent.semantic_merger import (
     ConflictResolutionRule,
     MergeResolution,
     MergeResult,
@@ -171,12 +176,12 @@ class TestSemanticMerger:
     def test_validate_ast_integrity(merger: SemanticMerger) -> None:
         """Test AST integrity validation."""
         valid_code = """
-def test_function():
+def test_function() -> object:
     return True
 
 class TestClass:
     @staticmethod
-    def method():
+    def method() -> object:
         pass
 """
         invalid_code = """
@@ -381,17 +386,16 @@ def test_function(
     def test_extract_functions_with_content(merger: SemanticMerger) -> None:
         """Test function content extraction."""
         code = """
-import os
 
-def function1():
+def function1() -> object:
     return "first"
 
-def function2(x, y):
+def function2(x, y) -> object:
     return x + y
 
 class TestClass:
     @staticmethod
-    def method():
+    def method() -> object:
         pass
 """
 
@@ -409,16 +413,14 @@ class TestClass:
     def test_extract_non_function_content(merger: SemanticMerger) -> None:
         """Test non-function content extraction."""
         code = """
-import os
-from typing import List
 
 CONSTANT = "value"
 variable = 42
 
-def function1():
+def function1() -> object:
     return "first"
 
-def function2():
+def function2() -> object:
     return "second"
 """
 

@@ -1,10 +1,12 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import pytest
-
 from libs.dashboard import ThemeManager, ThemeMode
+import tempfile
+from pathlib import Path
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestThemeSwitching:
@@ -14,8 +16,6 @@ class TestThemeSwitching:
     @staticmethod
     def theme_manager() -> ThemeManager:
         """Create ThemeManager instance."""
-        import tempfile
-        from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))

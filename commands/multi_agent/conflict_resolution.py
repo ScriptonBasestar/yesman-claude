@@ -15,8 +15,6 @@ from libs.multi_agent.conflict_resolution import ResolutionStrategy
 """Conflict detection and resolution commands."""
 
 
-
-
 logger = logging.getLogger(__name__)
 
 

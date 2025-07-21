@@ -33,9 +33,7 @@ class DIContainer:
 
         Args:
             service_type: The type/interface to register
-            instance: The singleton instance to register
-
-        """
+            instance: The singleton instance to register."""
         self._singletons[service_type] = instance
         # Remove from factories if it was registered there
         self._factories.pop(service_type, None)
@@ -46,9 +44,7 @@ class DIContainer:
 
         Args:
             service_type: The type/interface to register
-            factory: Factory function that creates instances
-
-        """
+            factory: Factory function that creates instances."""
         self._factories[service_type] = factory
         # Remove from singletons if it was registered there
         self._singletons.pop(service_type, None)
@@ -59,9 +55,7 @@ class DIContainer:
 
         Args:
             service_type: The type/interface to register
-            factory: Factory function that creates instances
-
-        """
+            factory: Factory function that creates instances."""
         self._services[service_type] = factory
         # Remove from other registrations
         self._singletons.pop(service_type, None)
@@ -122,9 +116,7 @@ class DIContainer:
         return service_type in self._singletons or service_type in self._factories or service_type in self._services
 
     def clear(self) -> None:
-        """Clear all registrations and reset the container.
-
-        """
+        """Clear all registrations and reset the container."""
         self._services.clear()
         self._factories.clear()
         self._singletons.clear()

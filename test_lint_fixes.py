@@ -1,17 +1,23 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test script to verify lint fixes are working."""
-
+from typing import Any
 import os
 import subprocess
 import sys
 
 
-def run_command(cmd, description):
-    """Run a command and return results."""
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Test script to verify lint fixes are working."""
+
+
+def run_command(cmd, description) -> object:
+    """Run a command and return results.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
@@ -47,8 +53,12 @@ def run_command(cmd, description):
         return False, "", str(e)
 
 
-def main():
-    """Main test function."""
+def main() -> object:
+    """Main test function.
+
+    Returns:
+        object: Description of return value.
+    """
     print("🔍 Testing lint fixes...")
 
     # Change to project directory

@@ -13,8 +13,6 @@ from libs.core.services import get_config
 # Licensed under the MIT License
 
 
-
-
 logger = logging.getLogger(__name__)
 
 

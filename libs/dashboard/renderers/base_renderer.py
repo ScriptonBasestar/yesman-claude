@@ -13,7 +13,6 @@ Abstract base class for all dashboard renderers.
 """
 
 
-
 class RenderFormat(Enum):
     """Supported rendering formats."""
 
@@ -414,9 +413,7 @@ class BaseRenderer(ABC):
         }
 
     def clear_cache(self) -> None:
-        """Clear the internal cache.
-
-        """
+        """Clear the internal cache."""
         self._cache.clear()
 
     def set_theme(self, theme: dict[str]) -> None:

@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
 
-"""Main entry point for the Yesman Claude application."""
+# Copyright notice.
 
 import click
-
 from commands.ai import ai
 from commands.automate import automate
 from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
 from commands.enter import enter
-
 # from commands.fix_lint import fix_lint  # File doesn't exist
 from commands.logs import logs
 from commands.ls import ls
@@ -25,9 +20,14 @@ from commands.task_runner import task_runner
 from commands.teardown import down, teardown  # teardown is main, down is alias
 from commands.validate import validate
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Main entry point for the Yesman Claude application."""
+
 
 @click.group()
-def cli():
+def cli() -> None:
     """Yesman - Claude automation tool."""
     pass
 

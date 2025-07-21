@@ -1,5 +1,22 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+import os
+import tempfile
+import time
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
+import pytest
+import yaml
+from libs.core.session_manager import SessionManager
+from libs.yesman_config import YesmanConfig
+import shutil
+import shutil
+# Export main classes for easy importing
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,18 +26,8 @@ Provides base classes, utilities, and fixtures for comprehensive integration tes
 across CLI, API, dashboard, and multi-agent components.
 """
 
-import asyncio
-import os
-import tempfile
-import time
-from pathlib import Path
-from typing import Any, Callable
 
-import pytest
-import yaml
 
-from libs.core.session_manager import SessionManager
-from libs.yesman_config import YesmanConfig
 
 
 class IntegrationTestBase:
@@ -61,12 +68,11 @@ class IntegrationTestBase:
                     pass  # Best effort cleanup
 
         # Remove test directory
-        import shutil
 
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir, ignore_errors=True)
 
-    def _create_test_config(self) -> dict[str, Any]:
+    def _create_test_config(self) -> dict[str, object]:
         """Create test configuration."""
         return {
             "mode": "test",
@@ -102,7 +108,7 @@ class IntegrationTestBase:
     def _write_test_config(self) -> None:
         """Write test configuration to file."""
         config_file = self.test_config_dir / "yesman.yaml"
-        with open(config_file, "w") as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             yaml.dump(self.test_config, f, default_flow_style=False)
 
     def get_test_config(self) -> YesmanConfig:
@@ -120,7 +126,7 @@ class IntegrationTestBase:
             self.session_manager = SessionManager()
         return self.session_manager
 
-    def create_test_session(self, session_name: str, **kwargs) -> dict[str, Any]:
+    def create_test_session(self, session_name: str, **kwargs: dict[str, object]) -> dict[str, object]:
         """Create a test session with specified configuration."""
         config = {
             "name": session_name,
@@ -131,7 +137,7 @@ class IntegrationTestBase:
                     "panes": [{"shell_command": ["echo", "test session"]}],
                 }
             ],
-            **kwargs,
+            **kwargs: object,
         }
 
         # Add to projects file
@@ -140,20 +146,20 @@ class IntegrationTestBase:
 
         projects_data = {"sessions": {session_name: config}}
         if projects_file.exists():
-            with open(projects_file) as f:
+            with open(projects_file, encoding="utf-8") as f:
                 existing = yaml.safe_load(f) or {}
             if "sessions" in existing:
                 existing["sessions"][session_name] = config
                 projects_data = existing
 
-        with open(projects_file, "w") as f:
+        with open(projects_file, "w", encoding="utf-8") as f:
             yaml.dump(projects_data, f, default_flow_style=False)
 
         self.created_sessions.append(session_name)
         return config
 
     @staticmethod
-    def wait_for_condition( condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
+    def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
         """Wait for a condition to become true."""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -242,7 +248,7 @@ class IntegrationTestFixtures:
 
     @staticmethod
     @pytest.fixture
-    def test_environment():
+    def test_environment() -> object:
         """Provide clean test environment."""
         base = IntegrationTestBase()
         base.setup_method()
@@ -251,7 +257,7 @@ class IntegrationTestFixtures:
 
     @staticmethod
     @pytest.fixture
-    def async_test_environment():
+    def async_test_environment() -> object:
         """Provide clean async test environment."""
         base = AsyncIntegrationTestBase()
         base.setup_method()
@@ -260,7 +266,7 @@ class IntegrationTestFixtures:
 
     @staticmethod
     @pytest.fixture
-    def mock_claude():
+    def mock_claude() -> object:
         """Provide mock Claude environment."""
         test_dir = Path(tempfile.mkdtemp(prefix="claude_mock_"))
         mock_env = MockClaudeEnvironment(test_dir)
@@ -273,7 +279,6 @@ class IntegrationTestFixtures:
         yield mock_env
 
         # Cleanup
-        import shutil
 
         if test_dir.exists():
             shutil.rmtree(test_dir, ignore_errors=True)
@@ -286,7 +291,7 @@ class CommandTestRunner:
         self.test_base = test_base
         self.command_results = []
 
-    def run_command(self, command_class: type, **kwargs) -> dict[str, Any]:
+    def run_command(self, command_class: type, **kwargs: dict[str, object]) -> dict[str, object]:
         """Run a command and capture results."""
         command = command_class()
 
@@ -294,7 +299,7 @@ class CommandTestRunner:
         command.config = self.test_base.get_test_config()
 
         try:
-            result = command.execute(**kwargs)
+            result = command.execute(**kwargs: dict[str, object])
             self.command_results.append(
                 {
                     "command": command_class.__name__,
@@ -316,7 +321,7 @@ class CommandTestRunner:
             self.command_results.append(error_result)
             raise
 
-    def get_command_history(self) -> list[dict[str, Any]]:
+    def get_command_history(self) -> list[dict[str, object]]:
         """Get history of executed commands."""
         return self.command_results.copy()
 
@@ -367,7 +372,6 @@ class PerformanceMonitor:
         assert avg_time <= max_time, f"Operation {operation} average time {avg_time:.3f}s exceeds threshold {max_time}s"
 
 
-# Export main classes for easy importing
 __all__ = [
     "AsyncIntegrationTestBase",
     "CommandTestRunner",

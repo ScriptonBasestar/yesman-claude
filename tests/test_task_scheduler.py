@@ -1,13 +1,13 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import pytest
+from libs.multi_agent.task_scheduler import AgentCapability, PriorityTask, TaskScheduler
+from libs.multi_agent.types import Agent, Task
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for TaskScheduler class."""
-
-import pytest
-
-from libs.multi_agent.task_scheduler import AgentCapability, PriorityTask, TaskScheduler
-from libs.multi_agent.types import Agent, Task
 
 
 class TestAgentCapability:
@@ -135,19 +135,31 @@ class TestTaskScheduler:
     @pytest.fixture
     @staticmethod
     def scheduler() -> TaskScheduler:
-        """Create TaskScheduler instance."""
+        """Create TaskScheduler instance.
+
+        Returns:
+        TaskScheduler: Description of return value.
+        """
         return TaskScheduler()
 
     @pytest.fixture
     @staticmethod
     def sample_agent() -> Agent:
-        """Create sample agent."""
+        """Create sample agent.
+
+        Returns:
+        Agent: Description of return value.
+        """
         return Agent(agent_id="test-agent")
 
     @pytest.fixture
     @staticmethod
     def sample_task() -> Task:
-        """Create sample task."""
+        """Create sample task.
+
+        Returns:
+        Task: Description of return value.
+        """
         return Task(
             task_id="test-task",
             title="Test Task",
@@ -338,7 +350,11 @@ class TestTaskScheduler:
         sample_agent: Agent,
         sample_task: Task,
     ) -> None:
-        """Test updating agent performance on failure."""
+        """Test updating agent performance on failure.
+
+        Returns:
+        None: Description of return value.
+        """
         scheduler.register_agent(sample_agent)
 
         # Simulate failed task

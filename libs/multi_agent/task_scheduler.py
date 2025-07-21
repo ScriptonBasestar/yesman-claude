@@ -13,7 +13,6 @@ from .types import Agent, Task
 """Intelligent task scheduling and distribution algorithms for multi-agent system."""
 
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -77,9 +76,7 @@ class TaskScheduler:
     """Intelligent task scheduler with priority and complexity-based distribution."""
 
     def __init__(self) -> None:
-        """Initialize the task scheduler.
-
-        """
+        """Initialize the task scheduler."""
         self.agent_capabilities: dict[str, AgentCapability] = {}
         self.priority_queue: list[PriorityTask] = []
         self.task_history: dict[str, list[Task]] = {}  # agent_id -> task history
@@ -119,9 +116,7 @@ class TaskScheduler:
         logger.info("Registered agent %s with scheduler", agent.agent_id)
 
     def add_task(self, task: Task) -> None:
-        """Add a task to the priority queue.
-
-        """
+        """Add a task to the priority queue."""
         priority_score = self._calculate_priority_score(task)
         priority_task = PriorityTask(priority_score=priority_score, task=task)
 
@@ -407,9 +402,7 @@ class TaskScheduler:
         return base_time
 
     def update_agent_load(self, agent_id: str, load: float) -> None:
-        """Update current load for an agent.
-
-        """
+        """Update current load for an agent."""
         capability = self.agent_capabilities.get(agent_id)
         if capability:
             capability.current_load = max(0.0, min(1.0, load))
@@ -512,9 +505,7 @@ class TaskScheduler:
         return rebalancing_actions
 
     def _adjust_assignment_preferences(self, overloaded_agent_id: str, underloaded_agent_id: str) -> None:
-        """Adjust task assignment preferences to favor underloaded agents.
-
-        """
+        """Adjust task assignment preferences to favor underloaded agents."""
         overloaded_cap = self.agent_capabilities.get(overloaded_agent_id)
         underloaded_cap = self.agent_capabilities.get(underloaded_agent_id)
 
@@ -528,9 +519,7 @@ class TaskScheduler:
         logger.debug("Adjusted assignment preferences: %s penalty, %s boost", overloaded_agent_id, underloaded_agent_id)
 
     def reset_assignment_preferences(self, agent_id: str) -> None:
-        """Reset assignment preferences for an agent to baseline values.
-
-        """
+        """Reset assignment preferences for an agent to baseline values."""
         capability = self.agent_capabilities.get(agent_id)
         if not capability:
             return

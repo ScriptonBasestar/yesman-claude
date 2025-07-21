@@ -13,7 +13,6 @@ Common data models used across all renderers for consistent data representation.
 """
 
 
-
 class SessionStatus(Enum):
     """Session status enumeration."""
 

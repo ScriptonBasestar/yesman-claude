@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -15,7 +16,7 @@ def main() -> None:
 
     # TODO: Add error handling for file operations
     try:
-        with open("output.txt", "w") as f:
+        with open("output.txt", "w", encoding="utf-8") as f:
             f.write(f"User name: {name}\n")
     except Exception:
         pass

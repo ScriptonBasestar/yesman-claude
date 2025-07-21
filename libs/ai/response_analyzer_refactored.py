@@ -17,7 +17,6 @@ import math
 """Response pattern analysis and learning engine - Refactored version."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

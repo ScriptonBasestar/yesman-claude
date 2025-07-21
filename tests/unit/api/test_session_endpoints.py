@@ -1,20 +1,19 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import MagicMock, patch
+from fastapi.testclient import TestClient
+        # Import here to avoid circular imports
+from api.main import app
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test for FastAPI session endpoints."""
 
-import unittest
-from unittest.mock import MagicMock, patch
-from typing import object
-
-from fastapi.testclient import TestClient
-
 
 class TestSessionEndpoints(unittest.TestCase):
     def setUp(self) -> None:
-        # Import here to avoid circular imports
-        from api.main import app
 
         self.client = TestClient(app)
 

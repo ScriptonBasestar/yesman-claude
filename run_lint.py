@@ -1,17 +1,23 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Simple script to run lint commands and capture output."""
-
+from typing import Any
 import os
 import subprocess
 import sys
 
 
-def run_command(command, description):
-    """Run a command and capture output."""
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Simple script to run lint commands and capture output."""
+
+
+def run_command(command, description) -> object:
+    """Run a command and capture output.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(command)}")
@@ -47,7 +53,7 @@ def run_command(command, description):
         return False
 
 
-def main():
+def main() -> None:
     # Change to project directory
     os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 

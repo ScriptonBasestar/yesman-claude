@@ -1,13 +1,16 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for Widget Models and Data Adapter."""
+# Copyright notice.
 
 from datetime import UTC, datetime
-
 from libs.dashboard.renderers.widget_adapter import WidgetDataAdapter
 from libs.dashboard.renderers.widget_models import (
+
+    Copyright,
+    Licensed,
+
+)
+"""Tests for Widget Models and Data Adapter."""
+
+
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -297,7 +300,7 @@ class TestWidgetDataAdapter:
         assert isinstance(session, SessionData)
         assert session.name == "test-session"
         # Should handle errors gracefully
-        assert session.status in [SessionStatus.IDLE, SessionStatus.ERROR]
+        assert session.status in {SessionStatus.IDLE, SessionStatus.ERROR}
 
     def test_adapt_health_data(self) -> None:
         """Test adapting health data."""

@@ -1,17 +1,23 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Basic syntax check for key files."""
-
+from typing import Any
 import ast
 import sys
 from pathlib import Path
 
 
-def check_syntax(file_path):
-    """Check if a Python file has valid syntax."""
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Basic syntax check for key files."""
+
+
+def check_syntax(file_path) -> object:
+    """Check if a Python file has valid syntax.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
@@ -24,8 +30,12 @@ def check_syntax(file_path):
         return False, f"Error reading file: {e}"
 
 
-def main():
-    """Check syntax of key files."""
+def main() -> object:
+    """Check syntax of key files.
+
+    Returns:
+        object: Description of return value.
+    """
     base_path = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 
     files_to_check = ["api/routers/controllers.py", "api/background_tasks.py", "api/middleware/error_handler.py", "commands/multi_agent.py", "commands/multi_agent_main.py"]

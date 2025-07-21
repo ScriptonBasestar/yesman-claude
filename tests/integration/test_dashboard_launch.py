@@ -1,12 +1,13 @@
-"""Copyright notice."""
+from typing import Any
+from pathlib import Path
+import pytest
+from libs.dashboard import DashboardLauncher
+import tempfile
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
-from pathlib import Path
-
-import pytest
-
-from libs.dashboard import DashboardLauncher
 
 
 class TestDashboardLaunch:
@@ -14,9 +15,8 @@ class TestDashboardLaunch:
 
     @pytest.fixture
     @staticmethod
-    def temp_project_root():
+    def temp_project_root() -> object:
         """Create temporary project directory."""
-        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -30,7 +30,7 @@ class TestDashboardLaunch:
 
     @pytest.fixture
     @staticmethod
-    def launcher( temp_project_root: Path) -> DashboardLauncher:
+    def launcher(temp_project_root: Path) -> DashboardLauncher:
         """Create DashboardLauncher with temp project root."""
         return DashboardLauncher(project_root=temp_project_root)
 
@@ -39,7 +39,7 @@ class TestDashboardLaunch:
         """Test 6: End-to-end dashboard launch process."""
         # 1. Interface detection
         interface = launcher.detect_best_interface()
-        assert interface in ["tui", "web", "tauri"]
+        assert interface in {"tui", "web", "tauri"}
 
         # 2. Check dependencies
         requirements = launcher.check_system_requirements()

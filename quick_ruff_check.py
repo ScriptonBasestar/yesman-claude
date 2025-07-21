@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import os
+import subprocess
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Quick ruff check to see current status."""
 
-import os
-import subprocess
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 

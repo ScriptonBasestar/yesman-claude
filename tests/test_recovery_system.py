@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test rollback mechanism and error recovery system."""
+# Copyright notice.
 
 import asyncio
 import tempfile
@@ -10,17 +6,23 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
-
 import pytest
-
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.recovery_engine import (
+from libs.multi_agent.types import AgentState, Task, TaskStatus
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Test rollback mechanism and error recovery system."""
+
+
+
     OperationSnapshot,
     OperationType,
     RecoveryAction,
     RecoveryEngine,
 )
-from libs.multi_agent.types import AgentState, Task, TaskStatus
 
 
 class TestRecoveryEngine:

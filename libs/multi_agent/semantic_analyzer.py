@@ -19,7 +19,6 @@ from .conflict_resolution import ConflictSeverity, ResolutionStrategy
 """AST-based semantic conflict analysis engine for multi-agent development."""
 
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -848,9 +847,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self._current_class: str | None = None
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        """Visit function definition.
-
-        """
+        """Visit function definition."""
         signature = self._extract_function_signature(node)
 
         if self._current_class:
@@ -867,9 +864,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        """Visit async function definition.
-
-        """
+        """Visit async function definition."""
         signature = self._extract_function_signature(node)
         signature.name = f"async {signature.name}"
 
@@ -885,9 +880,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """Visit class definition.
-
-        """
+        """Visit class definition."""
         old_class = self._current_class
         self._current_class = node.name
 
@@ -922,9 +915,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self._current_class = old_class
 
     def visit_Import(self, node: ast.Import) -> None:
-        """Visit import statement.
-
-        """
+        """Visit import statement."""
         for alias in node.names:
             import_info = ImportInfo(
                 module=alias.name,
@@ -934,9 +925,7 @@ class SemanticVisitor(ast.NodeVisitor):
             self.imports.append(import_info)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        """Visit from import statement.
-
-        """
+        """Visit from import statement."""
         module = node.module or ""
         level = node.level
 
@@ -951,9 +940,7 @@ class SemanticVisitor(ast.NodeVisitor):
             self.imports.append(import_info)
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        """Visit assignment for global variables.
-
-        """
+        """Visit assignment for global variables."""
         if self._current_class is None:  # Only global assignments
             for target in node.targets:
                 if isinstance(target, ast.Name):
@@ -970,9 +957,7 @@ class SemanticVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
-        """Visit annotated assignment.
-
-        """
+        """Visit annotated assignment."""
         if self._current_class is None and isinstance(node.target, ast.Name):
             var_name = node.target.id
             var_type = ast.unparse(node.annotation)

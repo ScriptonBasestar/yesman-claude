@@ -11,7 +11,6 @@ from libs.yesman_config import YesmanConfig
 # Licensed under the MIT License
 
 
-
 logger = logging.getLogger(__name__)
 
 

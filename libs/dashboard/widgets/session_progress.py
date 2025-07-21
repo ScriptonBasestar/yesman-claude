@@ -13,9 +13,6 @@ from rich.text import Text
 """Session progress overview widget."""
 
 
-
-
-
 class SessionProgressWidget:
     """Widget for displaying session progress overview."""
 

@@ -1,18 +1,22 @@
-"""Copyright notice."""
+from typing import Any
+import tempfile
+from datetime import UTC, datetime
+from pathlib import Path
+from unittest.mock import Mock, patch
+import pytest
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_resolution import (
+        # Test import conflict pattern
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for ConflictResolutionEngine."""
 
-import tempfile
-from datetime import UTC, datetime
-from pathlib import Path
-from unittest.mock import Mock, patch
 
-import pytest
 
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import (
     ConflictInfo,
     ConflictResolutionEngine,
     ConflictSeverity,
@@ -75,7 +79,7 @@ class TestConflictResolutionEngine:
 
     @pytest.fixture
     @staticmethod
-    def mock_branch_manager():
+    def mock_branch_manager() -> object:
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
@@ -204,7 +208,6 @@ class TestConflictResolutionEngine:
         )
         assert strategy == ResolutionStrategy.PREFER_LATEST
 
-        # Test import conflict pattern
         import_content = "<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> "
         strategy = engine._suggest_resolution_strategy(import_content, "test.py")  # noqa: SLF001
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
@@ -391,10 +394,10 @@ class TestConflictResolutionEngine:
     def test_extract_function_signatures(engine: ConflictResolutionEngine) -> None:
         """Test function signature extraction."""
         content = """
-def simple_func():
+def simple_func() -> object:
     pass
 
-def func_with_params(a, b, c):
+def func_with_params(a, b, c) -> object:
     return a + b + c
 
 def func_with_return_type(x: int) -> str:
@@ -402,7 +405,7 @@ def func_with_return_type(x: int) -> str:
 
 class TestClass:
     @staticmethod
-    def method():
+    def method() -> object:
         pass
 """
 

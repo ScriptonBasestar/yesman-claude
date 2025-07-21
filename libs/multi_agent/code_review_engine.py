@@ -21,7 +21,6 @@ from .types import AgentState
 """Automated code review and quality checking engine for multi-agent collaboration."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

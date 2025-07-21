@@ -12,8 +12,6 @@ import websockets
 """WebSocket connection test script."""
 
 
-
-
 async def test_websocket_connection(uri: str, channel: str) -> None:
     """Test WebSocket connection to a specific channel."""
     try:

@@ -1,13 +1,13 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import Mock, patch
+from libs.core.claude_manager import DashboardController
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test claude restart functionality."""
-
-import unittest
-from unittest.mock import Mock, patch
-
-from libs.core.claude_manager import DashboardController
 
 
 class TestClaudeRestart(unittest.TestCase):

@@ -19,8 +19,6 @@ import datetime
 """TODO progress tracking and visualization widget."""
 
 
-
-
 class TodoStatus(Enum):
     """TODO item status."""
 

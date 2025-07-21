@@ -1,25 +1,23 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test for error handling and edge cases."""
+# Copyright notice.
 
 import os
 import shutil
 import tempfile
 import threading
 import unittest
-from typing import object
 from unittest.mock import MagicMock, patch
-
 import pytest
-
 from libs.core.content_collector import ContentCollector
 from libs.core.prompt_detector import ClaudePromptDetector
 from libs.core.session_manager import SessionManager
 from libs.dashboard.renderers.optimizations import RenderCache
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Test for error handling and edge cases."""
 
 
 class TestErrorHandling(unittest.TestCase):
@@ -82,7 +80,7 @@ class TestErrorHandling(unittest.TestCase):
         """Test handling of permission denied errors."""
         # Create a read-only file
         readonly_file = os.path.join(self.temp_dir, "readonly.txt")
-        with open(readonly_file, "w") as f:
+        with open(readonly_file, "w", encoding="utf-8") as f:
             f.write("test")
         os.chmod(readonly_file, 0o444)
 

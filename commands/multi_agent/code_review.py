@@ -10,7 +10,6 @@ from libs.core.base_command import BaseCommand
 """Code review system commands."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

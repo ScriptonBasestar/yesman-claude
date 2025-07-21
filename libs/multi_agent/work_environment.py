@@ -116,9 +116,7 @@ class WorkEnvironmentManager:
         return self.work_dir / "environments.json"
 
     def _load_environments(self) -> None:
-        """Load environments metadata.
-
-        """
+        """Load environments metadata."""
         metadata_file = self._get_environments_file()
 
         if metadata_file.exists():
@@ -132,9 +130,7 @@ class WorkEnvironmentManager:
                 self.environments = {}
 
     def _save_environments(self) -> None:
-        """Save environments metadata.
-
-        """
+        """Save environments metadata."""
         metadata_file = self._get_environments_file()
 
         try:
@@ -259,9 +255,7 @@ class WorkEnvironmentManager:
         return venv_path
 
     def _install_dependencies(self, venv_path: Path, worktree_path: Path) -> None:
-        """Install dependencies in the virtual environment.
-
-        """
+        """Install dependencies in the virtual environment."""
         pip_path = venv_path / "bin" / "pip"
         if not pip_path.exists():
             pip_path = venv_path / "Scripts" / "pip.exe"  # Windows
@@ -295,9 +289,7 @@ class WorkEnvironmentManager:
             self._run_command([str(pip_path), "install", "-e", str(worktree_path)])
 
     def _setup_environment(self, env: WorkEnvironment) -> None:
-        """Set up the work environment.
-
-        """
+        """Set up the work environment."""
         # Copy configuration files if requested
         if env.config.get("copy_config", True):
             self._copy_config_files(env)
@@ -309,9 +301,7 @@ class WorkEnvironmentManager:
         self._run_project_setup(env)
 
     def _copy_config_files(self, env: WorkEnvironment) -> None:
-        """Copy configuration files to the work environment.
-
-        """
+        """Copy configuration files to the work environment."""
         config_files = [
             ".env",
             ".env.local",
@@ -331,9 +321,7 @@ class WorkEnvironmentManager:
 
     @staticmethod
     def _create_activation_script(env: WorkEnvironment) -> None:
-        """Create custom activation script with environment variables.
-
-        """
+        """Create custom activation script with environment variables."""
         activate_dir = env.venv_path / "bin"
         if not activate_dir.exists():
             activate_dir = env.venv_path / "Scripts"  # Windows
@@ -361,9 +349,7 @@ class WorkEnvironmentManager:
         os.chmod(custom_activate, 0o700)
 
     def _run_project_setup(self, env: WorkEnvironment) -> None:
-        """Run any project-specific setup commands.
-
-        """
+        """Run any project-specific setup commands."""
         setup_commands = env.config.get("setup_commands", [])
 
         for cmd in setup_commands:
@@ -437,9 +423,7 @@ class WorkEnvironmentManager:
             os.environ.update(original_env)
 
     def suspend_environment(self, branch_name: str) -> None:
-        """Suspend a work environment.
-
-        """
+        """Suspend a work environment."""
         env = self.get_environment(branch_name)
         if env:
             env.status = "suspended"
@@ -451,9 +435,7 @@ class WorkEnvironmentManager:
         branch_name: str,
         remove_files: bool = False,  # noqa: FBT001
     ) -> None:
-        """Terminate a work environment.
-
-        """
+        """Terminate a work environment."""
         env = self.get_environment(branch_name)
         if not env:
             logger.warning("No environment found for branch {branch_name}")

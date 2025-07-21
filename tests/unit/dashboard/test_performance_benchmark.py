@@ -1,11 +1,11 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import time
-
 from libs.dashboard.renderers import RendererFactory, RenderFormat
 from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestPerformanceBenchmark:

@@ -1,19 +1,13 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Integration tests for CLI commands."""
+# Copyright notice.
 
 import os
 import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Never
+from typing import object, Never
 from unittest.mock import MagicMock, patch
-
 import pytest
-
 from commands.show import ShowCommand
 from commands.validate import ValidateCommand
 from libs.core.base_command import BaseCommand
@@ -21,6 +15,11 @@ from libs.core.config_loader import ConfigLoader, EnvironmentSource, YamlFileSou
 from libs.core.error_handling import ConfigurationError, SessionError, ValidationError
 from libs.core.services import get_config, get_tmux_manager, register_test_services
 from libs.yesman_config import YesmanConfig
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Integration tests for CLI commands."""
 
 
 class TestCommandLineInterface:
@@ -163,7 +162,7 @@ class TestConfigurationIntegration:
     @staticmethod
     def test_config_file_loading() -> None:
         """Test configuration file loading."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
             f.write("""
 mode: isolated
 logging:
@@ -195,7 +194,7 @@ class TestErrorHandlingIntegration:
         """Test that errors propagate correctly through command execution."""
         class TestCommand(BaseCommand):
             @staticmethod
-            def execute(**kwargs) -> Never:  # noqa: ARG002
+            def execute(**kwargs: dict[str, object]) -> Never:  # noqa: ARG002  # noqa: ARG004
                 msg = "Test validation error"
                 raise ValidationError(
                     msg,

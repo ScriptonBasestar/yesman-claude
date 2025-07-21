@@ -15,8 +15,6 @@ from libs.yesman_config import YesmanConfig
 """Claude status and callback management."""
 
 
-
-
 class ClaudeStatusManager:
     """Manages status updates, callbacks, and response history."""
 

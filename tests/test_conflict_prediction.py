@@ -1,25 +1,35 @@
-"""Copyright notice."""
+from typing import Any
+import tempfile
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock
+import pytest
+from libs.multi_agent.branch_manager import BranchManager
+from libs.multi_agent.conflict_prediction import (
+from libs.multi_agent.conflict_resolution import (
+import os
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+import os
+from sys import path
+        # Should detect potential conflict due to overlapping but different imports
+
+
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for ConflictPredictor."""
 
-import tempfile
-from datetime import UTC, datetime, timedelta
-from pathlib import Path
-from unittest.mock import AsyncMock, Mock
 
-import pytest
 
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_prediction import (
     ConflictPattern,
     ConflictPredictor,
     ConflictVector,
     PredictionConfidence,
     PredictionResult,
 )
-from libs.multi_agent.conflict_resolution import (
     ConflictResolutionEngine,
     ConflictSeverity,
     ConflictType,
@@ -85,13 +95,13 @@ class TestConflictPredictor:
 
     @pytest.fixture
     @staticmethod
-    def mock_conflict_engine():
+    def mock_conflict_engine() -> object:
         """Create mock conflict resolution engine."""
         return Mock(spec=ConflictResolutionEngine)
 
     @pytest.fixture
     @staticmethod
-    def mock_branch_manager():
+    def mock_branch_manager() -> object:
         """Create mock branch manager."""
         return Mock(spec=BranchManager)
 
@@ -173,12 +183,8 @@ class TestConflictPredictor:
     def test_extract_imports(predictor: ConflictPredictor) -> None:
         """Test import extraction from Python code."""
         code = """
-import os
-import sys
-from datetime import UTC, datetime
-from pathlib import Path
 
-def test():
+def test() -> object:
     pass
 """
         imports = predictor._extract_imports(code)  # noqa: SLF001
@@ -192,9 +198,7 @@ def test():
     def test_extract_imports_with_syntax_error(predictor: ConflictPredictor) -> None:
         """Test import extraction with syntax errors."""
         code = """
-import os
 invalid syntax here !!!
-from sys import path
 """
         imports = predictor._extract_imports(code)  # noqa: SLF001
 
@@ -209,7 +213,6 @@ from sys import path
         imports1 = ["import os", "import sys", "from datetime import UTC, datetime"]
         imports2 = ["import os", "import json", "from datetime import UTC, date"]
 
-        # Should detect potential conflict due to overlapping but different imports
         result = predictor._imports_likely_to_conflict(imports1, imports2)  # noqa: SLF001
         # This specific case might not trigger conflict, but test the logic exists
         assert isinstance(result, bool)

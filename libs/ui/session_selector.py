@@ -14,8 +14,6 @@ from rich.text import Text
 """TUI Session Selector using Rich."""
 
 
-
-
 class SessionSelector:
     """Interactive TUI session selector."""
 

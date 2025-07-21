@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import os
+import subprocess
+import sys
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Run manual lint check and save results to file."""
 
-import os
-import subprocess
-import sys
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
@@ -19,7 +22,7 @@ try:
         text=True,
     )
 
-    with open("manual_lint_results.txt", "w") as f:
+    with open("manual_lint_results.txt", "w", encoding="utf-8") as f:
         f.write("MANUAL LINT CHECK RESULTS\n")
         f.write("=" * 60 + "\n\n")
         f.write("Return Code: " + str(result.returncode) + "\n\n")

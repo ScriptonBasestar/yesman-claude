@@ -15,8 +15,6 @@ from libs.core.base_batch_processor import BaseBatchProcessor
 """Batch log processor for optimized I/O operations - Refactored version."""
 
 
-
-
 @dataclass
 class LogBatch:
     """A batch of log entries to be processed together."""
@@ -175,9 +173,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
         self.logger.info(f"Rotated to new log file: {self.current_log_file}")  # noqa: G004
 
     def add_entry(self, entry: dict[str, object]) -> None:
-        """Add a log entry to the processing queue.
-
-        """
+        """Add a log entry to the processing queue."""
         self.add(entry)
 
     def get_statistics(self) -> dict[str, object]:

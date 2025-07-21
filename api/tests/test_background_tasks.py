@@ -14,12 +14,8 @@ import websockets
 """Test background tasks and WebSocket updates."""
 
 
-
-
 def check_task_status() -> None:
-    """Check the status of background tasks via API.
-
-    """
+    """Check the status of background tasks via API."""
     response = requests.get("http://localhost:8000/api/tasks/status", timeout=5)
     if response.status_code == 200:
         data = response.json()

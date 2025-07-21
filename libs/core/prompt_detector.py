@@ -12,7 +12,6 @@ from typing import Any
 """Advanced prompt detection system for Claude Code interactions."""
 
 
-
 class PromptType(Enum):
     """Types of prompts that can be detected."""
 
@@ -48,9 +47,7 @@ class ClaudePromptDetector:
         self._compile_patterns()
 
     def _compile_patterns(self) -> None:
-        """Compile regex patterns for prompt detection.
-
-        """
+        """Compile regex patterns for prompt detection."""
         # Numbered selection patterns
         self.numbered_patterns = [
             # ❯ 1. Option format

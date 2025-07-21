@@ -15,8 +15,6 @@ from api.routers.logs import get_logs
 """WebSocket router for real-time updates."""
 
 
-
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ws", tags=["websocket"])

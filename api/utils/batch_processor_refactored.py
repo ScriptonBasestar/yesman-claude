@@ -17,8 +17,6 @@ import asyncio
 """WebSocket message batch processor for optimized real-time updates - Refactored version."""
 
 
-
-
 @dataclass
 class MessageBatch:
     """A batch of WebSocket messages to be sent together."""

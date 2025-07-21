@@ -1,10 +1,12 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import os
 import subprocess
 import sys
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 

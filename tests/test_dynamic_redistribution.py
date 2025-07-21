@@ -1,17 +1,16 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import asyncio
+from unittest.mock import patch
+import pytest
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.task_scheduler import AgentCapability, TaskScheduler
+from libs.multi_agent.types import Agent, Task
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test dynamic work redistribution algorithm."""
-
-import asyncio
-from unittest.mock import patch
-
-import pytest
-
-from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.task_scheduler import AgentCapability, TaskScheduler
-from libs.multi_agent.types import Agent, Task
 
 
 class TestDynamicRedistribution:
@@ -66,7 +65,7 @@ class TestDynamicRedistribution:
         assert any(action[0] == "agent-1" and action[1] == "agent-3" for action in rebalancing_actions)
 
     @staticmethod
-    def test_assignment_preference_adjustment( scheduler: TaskScheduler) -> None:
+    def test_assignment_preference_adjustment(scheduler: TaskScheduler) -> None:
         """Test adjustment of task assignment preferences."""
         # Setup agents
         overloaded_agent = Agent(agent_id="agent-1")

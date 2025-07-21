@@ -12,9 +12,6 @@ from collections import deque
 """Tests for WebSocket batch processor functionality."""
 
 
-
-
-
 class TestBatchConfig:
     """Test BatchConfig class."""
 

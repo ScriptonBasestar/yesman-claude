@@ -343,9 +343,7 @@ class WorkflowEngine:
         self._load_default_workflows()
 
     def register_workflow(self, workflow: WorkflowChain) -> None:
-        """Register a new workflow chain.
-
-        """
+        """Register a new workflow chain."""
         self.workflows[workflow.name] = workflow
         self.logger.info("Registered workflow: %s", workflow.name)
 
@@ -631,9 +629,7 @@ class WorkflowEngine:
             return False
 
     def _load_default_workflows(self) -> None:
-        """Load default workflow configurations.
-
-        """
+        """Load default workflow configurations."""
         # Git commit → test → build workflow
         git_workflow = WorkflowChain(
             name="git_commit_validation",
@@ -725,9 +721,7 @@ class WorkflowEngine:
         }
 
     def save_workflows_config(self, file_path: Path) -> None:
-        """Save workflow configurations to file.
-
-        """
+        """Save workflow configurations to file."""
         config = {
             "workflows": {name: workflow.to_dict() for name, workflow in self.workflows.items()},
             "saved_at": time.time(),
@@ -737,9 +731,7 @@ class WorkflowEngine:
             json.dump(config, f, indent=2)
 
     def load_workflows_config(self, file_path: Path) -> None:
-        """Load workflow configurations from file.
-
-        """
+        """Load workflow configurations from file."""
         if not file_path.exists():
             return
 

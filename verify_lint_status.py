@@ -1,21 +1,27 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Verify lint status based on current codebase analysis."""
-
+from typing import Any
 import subprocess
 import sys
 from pathlib import Path
 
 
-def check_file_exists(file_path):
-    """Check if a file exists."""
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Verify lint status based on current codebase analysis."""
+
+
+def check_file_exists(file_path) -> object:
+    """Check if a file exists.
+
+    Returns:
+        object: Description of return value.
+    """
     return Path(file_path).exists()
 
 
-def analyze_current_status():
+def analyze_current_status() -> None:
     """Analyze the current lint status based on available information."""
     print("=== LINT STATUS VERIFICATION ===")
     print()

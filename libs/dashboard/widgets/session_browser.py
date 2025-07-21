@@ -19,8 +19,6 @@ from rich.padding import Padding
 """Interactive session browser with tree view and keyboard navigation."""
 
 
-
-
 class ViewMode(Enum):
     """Session browser view modes."""
 

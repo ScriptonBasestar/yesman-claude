@@ -1,19 +1,31 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for SemanticAnalyzer."""
+# Copyright notice.
 
 import ast
 import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
-
 import pytest
-
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import ConflictSeverity, ResolutionStrategy
 from libs.multi_agent.semantic_analyzer import (
+import os
+import sys as system
+from pathlib import Path
+from typing import List, Dict as DictType, Any
+        # Check import os
+        # Check import sys as system
+        # Check from pathlib import Path
+        # Check from typing import Dict as DictType
+import os
+from typing import List
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for SemanticAnalyzer."""
+
+
+
     ClassDefinition,
     FunctionSignature,
     ImportInfo,
@@ -145,18 +157,18 @@ def test_func(x: int, y: str = "default") -> bool:
 class TestClass(BaseClass):
     \"\"\"Test class\"\"\"
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @staticmethod
-    def public_method():
+    def public_method() -> object:
         pass
 
     @staticmethod
-    def _protected_method():
+    def _protected_method() -> object:
         pass
 
-    def __private_method(self):
+    def __private_method(self) -> object:
         pass
 """
         tree = ast.parse(code)
@@ -177,10 +189,6 @@ class TestClass(BaseClass):
     def test_visit_imports() -> None:
         """Test import statement parsing."""
         code = """
-import os
-import sys as system
-from pathlib import Path
-from typing import List, Dict as DictType
 """
         tree = ast.parse(code)
         visitor = SemanticVisitor()
@@ -188,20 +196,16 @@ from typing import List, Dict as DictType
 
         assert len(visitor.imports) == 4
 
-        # Check import os
         import_os = next(imp for imp in visitor.imports if imp.module == "os")
         assert import_os.name is None
         assert import_os.alias is None
 
-        # Check import sys as system
         import_sys = next(imp for imp in visitor.imports if imp.module == "sys")
         assert import_sys.alias == "system"
 
-        # Check from pathlib import Path
         import_path = next(imp for imp in visitor.imports if imp.name == "Path")
         assert import_path.module == "pathlib"
 
-        # Check from typing import Dict as DictType
         import_dict = next(imp for imp in visitor.imports if imp.name == "Dict")
         assert import_dict.alias == "DictType"
 
@@ -294,8 +298,6 @@ class TestSemanticAnalyzer:
     def test_extract_semantic_context(analyzer: SemanticAnalyzer) -> None:
         """Test semantic context extraction."""
         code = """
-import os
-from typing import List
 
 CONSTANT = "value"
 
@@ -305,7 +307,7 @@ def test_function(x: int) -> bool:
 
 class TestClass:
     @staticmethod
-    def method():
+    def method() -> object:
         pass
 """
         context = analyzer._extract_semantic_context("test.py", code)  # noqa: SLF001
@@ -434,8 +436,8 @@ class TestClass:
         assert "def test_func(" in sig_str
         assert "y=None" in sig_str
         assert "z=0" in sig_str
-        assert "*args" in sig_str
-        assert "**kwargs" in sig_str
+        assert "*args: Any" in sig_str
+        assert "**kwargs: dict[str, object]" in sig_str
         assert "-> bool" in sig_str
 
     @staticmethod

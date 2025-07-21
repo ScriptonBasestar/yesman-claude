@@ -1,19 +1,26 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for CodeReviewEngine module."""
-
+from typing import Any
 import asyncio
 import tempfile
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
-
 import pytest
-
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.code_review_engine import (
+from libs.multi_agent.collaboration_engine import CollaborationEngine
+from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
+import os
+import sys
+
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for CodeReviewEngine module."""
+
+
+
     CodeReview,
     CodeReviewEngine,
     QualityMetric,
@@ -23,12 +30,10 @@ from libs.multi_agent.code_review_engine import (
     ReviewStatus,
     ReviewType,
 )
-from libs.multi_agent.collaboration_engine import CollaborationEngine
-from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
 
 
 @pytest.fixture
-def temp_repo():
+def temp_repo() -> object:
     """Create a temporary repository for testing."""
     with tempfile.TemporaryDirectory() as temp_dir:
         repo_path = Path(temp_dir)
@@ -43,11 +48,9 @@ def temp_repo():
             '''
 """Test module for code review testing"""
 
-import os
-import sys
 
 
-def long_function_with_many_issues(param1, param2, param3, param4, param5, param6, param7, param8):
+def long_function_with_many_issues(param1, param2, param3, param4, param5, param6, param7, param8) -> object:
     """This function has many issues that should be detected"""
     password = "hardcoded_secret_123"  # Security issue
     result = ""
@@ -97,15 +100,15 @@ def long_function_with_many_issues(param1, param2, param3, param4, param5, param
 
 class TestClassWithoutDocstring:
     @staticmethod
-    def public_method_without_docstring():
+    def public_method_without_docstring() -> object:
         pass
 
     @staticmethod
-    def _private_method():
+    def _private_method() -> object:
         pass
 
 
-def function_without_docstring():
+def function_without_docstring() -> object:
     pass
 '''
         )
@@ -133,7 +136,7 @@ def well_written_function(data: list) -> str:
 class WellWrittenClass:
     """A well-documented class"""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         """Initialize with a value"""
         self.value = value
 
@@ -147,7 +150,7 @@ class WellWrittenClass:
 
 
 @pytest.fixture
-def mock_collaboration_engine():
+def mock_collaboration_engine() -> object:
     """Create a mock collaboration engine."""
     engine = Mock(spec=CollaborationEngine)
     engine.send_message = AsyncMock()
@@ -161,13 +164,13 @@ def mock_collaboration_engine():
 
 
 @pytest.fixture
-def mock_semantic_analyzer():
+def mock_semantic_analyzer() -> object:
     """Create a mock semantic analyzer."""
     return Mock(spec=SemanticAnalyzer)
 
 
 @pytest.fixture
-def mock_branch_manager():
+def mock_branch_manager() -> object:
     """Create a mock branch manager."""
     return Mock(spec=BranchManager)
 
@@ -198,7 +201,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_initiate_review( code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
+    async def test_initiate_review(code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test initiating a code review."""
         review_id = await code_review_engine.initiate_review(
             branch_name="feature/test-branch",
@@ -503,7 +506,7 @@ class TestCodeReviewEngine:
         review = await code_review_engine.get_review_status(review_id)
         assert review is not None
         assert review.review_id == review_id
-        assert review.status in [ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS]
+        assert review.status in {ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS}
 
         # Approve and move to history
         await code_review_engine.approve_review(
@@ -610,14 +613,14 @@ class TestCodeReviewEngine:
     def test_cyclomatic_complexity_estimation(code_review_engine: CodeReviewEngine) -> None:
         """Test cyclomatic complexity estimation."""
         simple_code = """
-def simple_function():
+def simple_function() -> object:
     return True
 """
         complexity = code_review_engine._estimate_cyclomatic_complexity(simple_code)  # noqa: SLF001
         assert complexity == 1.0
 
         complex_code = """
-def complex_function(x, y):
+def complex_function(x, y) -> object:
     if x > 0:
         if y > 0:
             return x + y
@@ -640,7 +643,7 @@ def complex_function(x, y):
         well_documented_code = '''
 """Well documented module"""
 
-def function():
+def function() -> object:
     """Function with docstring"""
     # Comment explaining logic
     return True

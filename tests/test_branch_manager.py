@@ -1,18 +1,16 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+import pytest
+from libs.multi_agent.branch_manager import BranchInfo, BranchManager
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for BranchManager class."""
-
-import subprocess
-from collections.abc import Iterator
-from datetime import UTC, datetime
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
-
-from libs.multi_agent.branch_manager import BranchInfo, BranchManager
 
 
 class TestBranchManager:
@@ -20,8 +18,12 @@ class TestBranchManager:
 
     @pytest.fixture
     @staticmethod
-    def mock_git_repo( tmp_path: Path) -> Path:
-        """Create a mock git repository."""
+    def mock_git_repo(tmp_path: Path) -> Path:
+        """Create a mock git repository.
+
+        Returns:
+        Path: Description of return value.
+        """
         repo_path = tmp_path / "test_repo"
         repo_path.mkdir()
 
@@ -47,7 +49,11 @@ class TestBranchManager:
     @pytest.fixture
     @staticmethod
     def branch_manager(mock_git_repo: Path) -> BranchManager:
-        """Create BranchManager instance."""
+        """Create BranchManager instance.
+
+        Returns:
+        BranchManager: Description of return value.
+        """
         return BranchManager(repo_path=str(mock_git_repo))
 
     @staticmethod
@@ -277,7 +283,7 @@ class TestBranchManager:
             assert "file.py" in conflicts["conflicts"][0]
 
     @staticmethod
-    def test_metadata_persistence(branch_manager: BranchManager, tmp_path: Path) -> None:  # noqa: ARG002
+    def test_metadata_persistence(branch_manager: BranchManager, tmp_path: Path) -> None:  # noqa: ARG002  # noqa: ARG004
         """Test saving and loading branch metadata."""
         # Create test branch info
         branch_info = BranchInfo(

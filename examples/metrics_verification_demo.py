@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+import tempfile
+from pathlib import Path
+from libs.multi_agent.agent_pool import AgentPool
+from libs.multi_agent.metrics_verifier import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Demo script for multi-agent system metrics verification."""
 
-import asyncio
-import tempfile
-from pathlib import Path
 
-from libs.multi_agent.agent_pool import AgentPool
-from libs.multi_agent.metrics_verifier import (
     MetricsVerifier,
 )
 

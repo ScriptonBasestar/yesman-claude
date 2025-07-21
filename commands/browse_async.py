@@ -23,9 +23,6 @@ from commands.browse import BrowseCommand as SyncBrowseCommand
 """Async Interactive session browser command with enhanced performance."""
 
 
-
-
-
 class AsyncInteractiveBrowser:
     """Async interactive session browser with live updates."""
 

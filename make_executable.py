@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+
+# Copyright notice.
 
 import os
 import stat
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
 
 # Make the validation script executable
 script_path = "scripts/validate-lint-config.py"

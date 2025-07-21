@@ -9,31 +9,24 @@ from typing import Any
 """Simple directed graph implementation for task dependencies."""
 
 
-
 class DirectedGraph:
     """Simple directed graph implementation."""
 
     def __init__(self) -> None:
-        """Initialize empty graph.
-
-        """
+        """Initialize empty graph."""
         self.nodes: dict[str, dict[str, object]] = {}
         self.edges: dict[str, dict[str, dict[str, object]]] = defaultdict(dict)
         self.reverse_edges: dict[str, set[str]] = defaultdict(set)
 
     def add_node(self, node_id: str, **attrs) -> None:
-        """Add a node with attributes.
-
-        """
+        """Add a node with attributes."""
         if node_id not in self.nodes:
             self.nodes[node_id] = attrs
         else:
             self.nodes[node_id].update(attrs)
 
     def add_edge(self, source: str, target: str, **attrs) -> None:
-        """Add an edge with attributes.
-
-        """
+        """Add an edge with attributes."""
         # Ensure nodes exist
         if source not in self.nodes:
             self.add_node(source)
@@ -45,9 +38,7 @@ class DirectedGraph:
         self.reverse_edges[target].add(source)
 
     def remove_edge(self, source: str, target: str) -> None:
-        """Remove an edge.
-
-        """
+        """Remove an edge."""
         if source in self.edges and target in self.edges[source]:
             del self.edges[source][target]
             self.reverse_edges[target].discard(source)
@@ -108,9 +99,7 @@ class DirectedGraph:
         return list(self.edges.get(node, {}).keys())
 
     def clear(self) -> None:
-        """Clear the graph.
-
-        """
+        """Clear the graph."""
         self.nodes.clear()
         self.edges.clear()
         self.reverse_edges.clear()

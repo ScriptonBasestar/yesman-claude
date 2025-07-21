@@ -1,16 +1,22 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Simple script to run ruff fix commands."""
 
-import os
-import subprocess
 
+def run_ruff_command(args) -> object:
+    """Run a ruff command with uv.
 
-def run_ruff_command(args):
-    """Run a ruff command with uv."""
+    Returns:
+        object: Description of return value.
+    """
     cmd = ["uv", "run", "ruff"] + args
     print(f"Running: {' '.join(cmd)}")
 

@@ -1,22 +1,36 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import re
+from pathlib import Path
+    # Find imports section
+    # Extract imports
+    # Sort imports (basic sorting)
+    # Reconstruct import section
+    # Replace imports in content
+            # Try to fix long import lines
+                # Extract the import parts
+                    # Split imports
+                    # Create multi-line import
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Manual lint fixes for common issues."""
 
-import re
-from pathlib import Path
 
+def fix_import_order(file_path) -> bool:
+    """Fix basic import ordering issues.
 
-def fix_import_order(file_path):
-    """Fix basic import ordering issues."""
-    with open(file_path) as f:
+    Returns:
+        bool: Description of return value.
+    """
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
 
     lines = content.split("\n")
 
-    # Find imports section
     import_start = None
     import_end = None
 
@@ -33,14 +47,12 @@ def fix_import_order(file_path):
     if import_start is None:
         return False
 
-    # Extract imports
     imports = []
     for i in range(import_start, import_end + 1):
         line = lines[i]
         if line.strip().startswith("import ") or line.strip().startswith("from "):
             imports.append(line)
 
-    # Sort imports (basic sorting)
     stdlib_imports = []
     third_party_imports = []
     local_imports = []
@@ -58,7 +70,6 @@ def fix_import_order(file_path):
     third_party_imports.sort()
     local_imports.sort()
 
-    # Reconstruct import section
     new_imports = []
     if stdlib_imports:
         new_imports.extend(stdlib_imports)
@@ -69,22 +80,25 @@ def fix_import_order(file_path):
     if local_imports:
         new_imports.extend(local_imports)
 
-    # Replace imports in content
     new_lines = lines[:import_start] + new_imports + lines[import_end + 1 :]
 
     new_content = "\n".join(new_lines)
 
     if new_content != content:
-        with open(file_path, "w") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
         return True
 
     return False
 
 
-def fix_long_lines(file_path):
-    """Fix some common long line issues."""
-    with open(file_path) as f:
+def fix_long_lines(file_path) -> bool:
+    """Fix some common long line issues.
+
+    Returns:
+        bool: Description of return value.
+    """
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
 
     lines = content.split("\n")
@@ -92,18 +106,14 @@ def fix_long_lines(file_path):
 
     for i, line in enumerate(lines):
         if len(line) > 120:  # Using 120 as a reasonable limit
-            # Try to fix long import lines
             if "from " in line and "import " in line and line.count(",") > 2 and not line.strip().endswith("("):
-                # Extract the import parts
                 match = re.match(r"(\s*from\s+[^\s]+\s+import\s+)", line)
                 if match:
                     prefix = match.group(1)
                     imports_part = line[len(prefix) :].strip()
 
-                    # Split imports
                     imports = [imp.strip() for imp in imports_part.split(",")]
 
-                    # Create multi-line import
                     new_lines = [prefix + "("]
                     for imp in imports:
                         new_lines.append(f"    {imp},")
@@ -114,14 +124,14 @@ def fix_long_lines(file_path):
                     break
 
     if modified:
-        with open(file_path, "w") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))
         return True
 
     return False
 
 
-def main():
+def main() -> None:
     """Main function."""
     project_root = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 

@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import os
+from pathlib import Path
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Final verification of lint status."""
 
-import os
-from pathlib import Path
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
@@ -67,7 +70,7 @@ for py_file in Path(".").rglob("*.py"):
         continue
 
     try:
-        compile(open(py_file).read(), py_file, "exec")
+        compile(open(py_file, encoding="utf-8").read(), py_file, "exec")
     except SyntaxError:
         syntax_errors += 1
     except Exception:

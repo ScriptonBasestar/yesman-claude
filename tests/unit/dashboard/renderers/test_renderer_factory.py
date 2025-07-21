@@ -1,23 +1,30 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for Renderer Factory."""
+# Copyright notice.
 
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
-from typing import object
-
 import pytest
-
 from libs.dashboard.renderers.base_renderer import (
+from libs.dashboard.renderers.renderer_factory import (
+from libs.dashboard.renderers.tauri_renderer import TauriRenderer
+from libs.dashboard.renderers.tui_renderer import TUIRenderer
+from libs.dashboard.renderers.web_renderer import WebRenderer
+from libs.dashboard.renderers.widget_models import (
+
+    Copyright,
+    Licensed,
+
+)
+"""Tests for Renderer Factory."""
+
+
+
+
     BaseRenderer,
     RenderFormat,
     WidgetType,
 )
-from libs.dashboard.renderers.renderer_factory import (
     RendererFactory,
     RendererFactoryError,
     UnsupportedFormatError,
@@ -27,10 +34,6 @@ from libs.dashboard.renderers.renderer_factory import (
     render_formats,
     render_widget,
 )
-from libs.dashboard.renderers.tauri_renderer import TauriRenderer
-from libs.dashboard.renderers.tui_renderer import TUIRenderer
-from libs.dashboard.renderers.web_renderer import WebRenderer
-from libs.dashboard.renderers.widget_models import (
     MetricCardData,
     SessionData,
     SessionStatus,
@@ -46,7 +49,7 @@ class MockRenderer(BaseRenderer):
         self.should_fail = should_fail
         self.render_count = 0
 
-    def render_widget(self, widget_type: WidgetType, data: object, options: dict[str, object] | None = None) -> str:  # noqa: ARG002
+    def render_widget(data: options, dict[str] | None = None) -> str:  # noqa: ARG002
         self.render_count += 1
         if self.should_fail:
             msg = "Mock render failure"
@@ -54,11 +57,11 @@ class MockRenderer(BaseRenderer):
         return f"mock-{widget_type.value}-{self.render_count}"
 
     @staticmethod
-    def render_layout( widgets: list[dict[str, object]], layout_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
+    def render_layout(widgets: list[dict[str]], layout_config: dict[str] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
-    def render_container(content: object, container_config: dict[str, object] | None = None) -> str:  # noqa: ARG002
+    def render_container(content: container_config, dict[str] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return f"mock-container-{type(content).__name__}"
 
     @staticmethod

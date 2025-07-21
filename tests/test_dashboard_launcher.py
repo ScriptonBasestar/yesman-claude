@@ -1,12 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for DashboardLauncher.
-
-Comprehensive testing of dashboard interface detection, dependency checking,
-and environment analysis.
-"""
+# Copyright notice.
 
 import os
 import shutil
@@ -16,10 +8,17 @@ import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
-
 import pytest
-
 from libs.dashboard.dashboard_launcher import DashboardLauncher, InterfaceInfo
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for DashboardLauncher.
+
+Comprehensive testing of dashboard interface detection, dependency checking,
+and environment analysis.
+"""
 
 
 class TestDashboardLauncher:
@@ -28,7 +27,11 @@ class TestDashboardLauncher:
     @pytest.fixture
     @staticmethod
     def temp_project_root() -> Iterator[Path]:
-        """Create a temporary project directory structure."""
+        """Create a temporary project directory structure.
+
+        Returns:
+        object: Description of return value.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
 
@@ -46,7 +49,11 @@ class TestDashboardLauncher:
     @pytest.fixture
     @staticmethod
     def launcher(temp_project_root: Path) -> DashboardLauncher:
-        """Create DashboardLauncher instance with temp project root."""
+        """Create DashboardLauncher instance with temp project root.
+
+        Returns:
+        DashboardLauncher: Description of return value.
+        """
         return DashboardLauncher(project_root=temp_project_root)
 
     @staticmethod
@@ -169,7 +176,7 @@ class TestDashboardLauncher:
     @staticmethod
     def test_is_node_available_with_both(mock_which: Mock, launcher: DashboardLauncher) -> None:
         """Test Node.js availability with both node and npm."""
-        mock_which.side_effect = lambda cmd: ("/usr/bin/" + cmd if cmd in ["node", "npm"] else None)
+        mock_which.side_effect = lambda cmd: ("/usr/bin/" + cmd if cmd in {"node", "npm"} else None)
         assert launcher._is_node_available() is True  # noqa: SLF001
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")

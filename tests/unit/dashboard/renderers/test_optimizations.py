@@ -1,19 +1,22 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
+# Copyright notice.
+
+import threading
+import time
+from libs.dashboard.renderers.base_renderer import (
+from libs.dashboard.renderers.optimizations import (
+from libs.dashboard.renderers.tui_renderer import TUIRenderer
+from libs.dashboard.renderers.widget_models import MetricCardData
+
 # Licensed under the MIT License
 
 """Tests for Rendering Optimizations and Caching."""
 
-import threading
-import time
-from typing import object
 
-from libs.dashboard.renderers.base_renderer import (
+
     BaseRenderer,
     RenderFormat,
     WidgetType,
 )
-from libs.dashboard.renderers.optimizations import (
     BatchRenderer,
     CacheStats,
     LazyRenderer,
@@ -28,8 +31,6 @@ from libs.dashboard.renderers.optimizations import (
     global_profiler,
     profile_render,
 )
-from libs.dashboard.renderers.tui_renderer import TUIRenderer
-from libs.dashboard.renderers.widget_models import MetricCardData
 
 
 class MockRenderer(BaseRenderer):
@@ -41,7 +42,7 @@ class MockRenderer(BaseRenderer):
         self.render_count = 0
         self.last_params = None
 
-    def render_widget(self, widget_type: WidgetType, data: object, options: dict | None = None) -> str:
+    def render_widget(data: options, dict | None = None) -> str:
         self.render_count += 1
         self.last_params = (widget_type, data, options)
 
@@ -51,15 +52,15 @@ class MockRenderer(BaseRenderer):
         return f"mock-{widget_type.value}-{self.render_count}"
 
     @staticmethod
-    def render_layout( widgets: list, layout_config: dict | None = None) -> str:  # noqa: ARG002
+    def render_layout(widgets: list, layout_config: dict | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
-    def render_container(content: str, container_config: dict | None = None) -> str:  # noqa: ARG002
+    def render_container(content: str, container_config: dict | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return "mock-container"
 
     @staticmethod
-    def supports_feature(feature: str) -> bool:  # noqa: ARG002
+    def supports_feature(feature: str) -> bool:  # noqa: ARG002  # noqa: ARG004
         return True
 
 
@@ -230,7 +231,7 @@ class TestRenderCache:
 
         threads = []
         for i in range(5):
-            thread = threading.Thread(target=cache_worker, args=(i,))
+            thread = threading.Thread(target=cache_worker, args=(i))
             threads.append(thread)
             thread.start()
 
@@ -254,7 +255,7 @@ class TestCachedDecorators:
         """Test cached_render decorator."""
 
         @cached_render(self.cache)
-        def mock_render(self: MockRenderer, widget_type: WidgetType, data: object, options: dict | None = None) -> str:
+        def mock_render(data: options, dict | None = None) -> str:
             self.render_count += 1
             return f"render-{self.render_count}"
 

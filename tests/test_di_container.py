@@ -1,15 +1,18 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for the Dependency Injection Container."""
-
+from typing import Any
 import pytest
-
 from libs.core.container import DIContainer
 from libs.core.services import get_config, get_tmux_manager, register_test_services
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
+from libs.core.container import container
+from libs.core.services import initialize_services
+
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for the Dependency Injection Container."""
 
 
 class TestDIContainer:
@@ -35,7 +38,7 @@ class TestDIContainer:
         """Test factory registration and resolution."""
         call_count = 0
 
-        def config_factory():
+        def config_factory() -> object:
             nonlocal call_count
             call_count += 1
             return YesmanConfig()
@@ -56,7 +59,7 @@ class TestDIContainer:
         """Test transient service registration and resolution."""
         call_count = 0
 
-        def config_factory():
+        def config_factory() -> object:
             nonlocal call_count
             call_count += 1
             return YesmanConfig()
@@ -80,10 +83,10 @@ class TestDIContainer:
     def test_circular_dependency_detection(self) -> None:
         """Test circular dependency detection."""
 
-        def factory_a():
+        def factory_a() -> object:
             return self.container.resolve(TmuxManager)  # This would create a circular dependency
 
-        def factory_b():
+        def factory_b() -> object:
             return self.container.resolve(YesmanConfig)
 
         self.container.register_factory(YesmanConfig, factory_a)
@@ -128,7 +131,6 @@ class TestServicesModule:
     def setup_method() -> None:
         """Set up test environment before each test."""
         # Clear container before each test
-        from libs.core.container import container
 
         container.clear()
 
@@ -156,7 +158,6 @@ class TestServicesModule:
     def test_auto_initialization() -> None:
         """Test that services are auto-initialized when module is imported."""
         # Since we cleared the container in setup_method, we need to trigger initialization
-        from libs.core.services import initialize_services
 
         initialize_services()
 

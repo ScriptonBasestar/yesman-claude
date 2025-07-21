@@ -11,7 +11,6 @@ from typing import Any
 """Data models for dashboard."""
 
 
-
 class TaskPhase(Enum):
     """Phases of a Claude task execution."""
 
@@ -54,18 +53,14 @@ class TaskProgress:
     todos_completed: int = 0
 
     def update_phase(self, new_phase: TaskPhase) -> None:
-        """Update to a new phase.
-
-        """
+        """Update to a new phase."""
         self.phase = new_phase
         self.phase_start_time = datetime.now(UTC)
         self.phase_progress = 0.0
         self._recalculate_overall_progress()
 
     def _recalculate_overall_progress(self) -> None:
-        """Recalculate overall progress based on phase.
-
-        """
+        """Recalculate overall progress based on phase."""
         phase_weights = {
             TaskPhase.STARTING: 0.1,
             TaskPhase.ANALYZING: 0.2,
@@ -169,9 +164,7 @@ class SessionProgress:
         return total_progress / len(self.tasks)
 
     def update_aggregates(self) -> None:
-        """Update aggregate metrics from all tasks.
-
-        """
+        """Update aggregate metrics from all tasks."""
         self.total_files_changed = sum(task.files_created + task.files_modified for task in self.tasks)
         self.total_commands = sum(task.commands_executed for task in self.tasks)
         self.total_todos_completed = sum(task.todos_completed for task in self.tasks)
@@ -225,9 +218,7 @@ class PaneInfo:
             self.last_activity = datetime.now(UTC)
 
     def update_activity(self, new_output: str | None = None) -> None:
-        """Update activity tracking.
-
-        """
+        """Update activity tracking."""
         self.last_activity = datetime.now(UTC)
         self.idle_time = 0.0
         if new_output:

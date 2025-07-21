@@ -17,8 +17,6 @@ from rich.text import Text
 """Git activity visualization and metrics widget."""
 
 
-
-
 @dataclass
 class CommitInfo:
     """Information about a git commit."""

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import sys
+from pathlib import Path
+from unittest.mock import MagicMock
+from tests.fixtures.mock_factories import ManagerMockFactory
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -8,18 +15,13 @@
 Shows the difference between old duplicated mock patterns and new centralized approach
 """
 
-import sys
-from pathlib import Path
-from unittest.mock import MagicMock
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.fixtures.mock_factories import ManagerMockFactory
 
-
-def demo_old_vs_new_patterns():
+def demo_old_vs_new_patterns() -> None:
     """Demonstrate the difference between old and new mock patterns."""
     print("🔧 Mock Centralization Demo")
     print("=" * 50)
@@ -77,7 +79,7 @@ def demo_old_vs_new_patterns():
     print("Benefits: Automatic injection, shared across tests, easy to override")
 
 
-def demo_customization_options():
+def demo_customization_options() -> None:
     """Show how to customize the centralized mocks."""
     print("\n\n🎛️ Customization Examples")
     print("=" * 50)
@@ -120,7 +122,7 @@ def demo_customization_options():
     # Error simulation
     print("\n3️⃣ Error Simulation:")
 
-    def raise_validation_error(session_name):
+    def raise_validation_error(session_name) -> None:
         if "invalid" in session_name:
             raise ValueError(f"Invalid session name: {session_name}")
 
@@ -137,7 +139,7 @@ def demo_customization_options():
     mock_manager.validate_session_name("valid-session")
 
 
-def demo_migration_example():
+def demo_migration_example() -> None:
     """Show a real migration example."""
     print("\n\n📦 Migration Example")
     print("=" * 50)
@@ -146,7 +148,7 @@ def demo_migration_example():
     print("=" * 30)
     old_test_code = """
 @patch('api.routes.sessions.SessionManager')
-def test_get_sessions_list(self, mock_session_manager):
+def test_get_sessions_list(self, mock_session_manager) -> object:
     # 15 lines of repetitive setup
     mock_manager_instance = MagicMock()
     mock_session_data = {
@@ -169,7 +171,7 @@ def test_get_sessions_list(self, mock_session_manager):
     print("\nAfter migration (using centralized factory):")
     print("=" * 30)
     new_test_code = """
-def test_get_sessions_list(mock_session_manager):
+def test_get_sessions_list(mock_session_manager) -> object:
     # 0 lines of setup - fixture handles everything!
 
     # Actual test (2 lines)
@@ -187,7 +189,7 @@ def test_get_sessions_list(mock_session_manager):
     print("✅ Type safety and IDE support")
 
 
-def demo_priority_targets():
+def demo_priority_targets() -> None:
     """Show the highest impact migration targets."""
     print("\n\n🎯 Priority Migration Targets")
     print("=" * 50)

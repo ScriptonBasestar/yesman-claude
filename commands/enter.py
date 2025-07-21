@@ -14,9 +14,6 @@ from libs.ui.session_selector import show_session_selector
 """Enter (attach to) a tmux session command."""
 
 
-
-
-
 class EnterCommand(BaseCommand, SessionCommandMixin):
     """Enter (attach to) a tmux session."""
 

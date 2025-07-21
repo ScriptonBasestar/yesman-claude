@@ -21,10 +21,6 @@ from datetime import timedelta
 """Web dashboard router for FastAPI."""
 
 
-
-
-
-
 class ActivityData(TypedDict):
     """Type definition for activity data."""
 

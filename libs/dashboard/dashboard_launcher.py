@@ -21,7 +21,6 @@ Detects optimal dashboard interface and manages system requirements.
 """
 
 
-
 @dataclass
 class InterfaceInfo:
     """Information about a dashboard interface."""

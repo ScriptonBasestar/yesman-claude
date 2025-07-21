@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
+
+# Copyright notice.
+
+import pytest
+
 # Licensed under the MIT License
 
 """Tests for validation utilities."""
-
-import pytest
 
 from libs.validation import (
     ValidationError,

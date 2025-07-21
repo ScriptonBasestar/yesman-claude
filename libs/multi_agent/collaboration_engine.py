@@ -21,7 +21,6 @@ from .types import AgentState
 """Collaboration engine for multi-agent branch development coordination."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

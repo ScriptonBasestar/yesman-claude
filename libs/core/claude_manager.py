@@ -15,15 +15,11 @@ from .prompt_detector import PromptInfo
 """Claude manager for dashboard integration - Refactored.""" ""
 
 
-
-
 class DashboardController:
     """Main controller that orchestrates Claude session management, process control, and monitoring."""
 
     def __init__(self, session_name: str, pane_id: str | None = None) -> None:
-        """Initialize the dashboard controller.
-
-        """
+        """Initialize the dashboard controller."""
         self.session_name = session_name
         self.pane_id = pane_id
 
@@ -85,15 +81,11 @@ class DashboardController:
         return self.process_controller.selected_model
 
     def set_status_callback(self, callback: Callable) -> None:
-        """Set callback for status updates.
-
-        """
+        """Set callback for status updates."""
         self.status_manager.set_status_callback(callback)
 
     def set_activity_callback(self, callback: Callable) -> None:
-        """Set callback for activity updates.
-
-        """
+        """Set callback for activity updates."""
         self.status_manager.set_activity_callback(callback)
 
     def start(self) -> bool:
@@ -133,33 +125,23 @@ class DashboardController:
         return self.process_controller.restart_claude_pane()
 
     def set_model(self, model: str) -> None:
-        """Set the selected model.
-
-        """
+        """Set the selected model."""
         self.process_controller.set_model(model)
 
     def set_auto_next(self, enabled: bool) -> None:  # noqa: FBT001
-        """Enable or disable auto-next responses.
-
-        """
+        """Enable or disable auto-next responses."""
         self.monitor.set_auto_next(enabled)
 
     def set_mode_yn(self, mode: str, response: str) -> None:
-        """Set manual override for Y/N prompts.
-
-        """
+        """Set manual override for Y/N prompts."""
         self.monitor.set_mode_yn(mode, response)
 
     def set_mode_12(self, mode: str, response: str) -> None:
-        """Set manual override for 1/2 prompts.
-
-        """
+        """Set manual override for 1/2 prompts."""
         self.monitor.set_mode_12(mode, response)
 
     def set_mode_123(self, mode: str, response: str) -> None:
-        """Set manual override for 1/2/3 prompts.
-
-        """
+        """Set manual override for 1/2/3 prompts."""
         self.monitor.set_mode_123(mode, response)
 
     def capture_pane_content(self, lines: int = 50) -> str:
@@ -175,9 +157,7 @@ class DashboardController:
         return content
 
     def send_input(self, text: str) -> None:
-        """Send input to Claude pane.
-
-        """
+        """Send input to Claude pane."""
         self.process_controller.send_input(text)
 
     def is_waiting_for_input(self) -> bool:
@@ -230,21 +210,15 @@ class DashboardController:
         return self.monitor.get_adaptive_statistics()
 
     def set_adaptive_confidence_threshold(self, threshold: float) -> None:
-        """Adjust the confidence threshold for adaptive responses.
-
-        """
+        """Adjust the confidence threshold for adaptive responses."""
         self.monitor.set_adaptive_confidence_threshold(threshold)
 
     def enable_adaptive_response(self, enabled: bool = True) -> None:  # noqa: FBT001
-        """Enable or disable adaptive response functionality.
-
-        """
+        """Enable or disable adaptive response functionality."""
         self.monitor.enable_adaptive_response(enabled)
 
     def enable_adaptive_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
-        """Enable or disable adaptive learning functionality.
-
-        """
+        """Enable or disable adaptive learning functionality."""
         self.monitor.enable_adaptive_learning(enabled)
 
     def export_adaptive_data(self, output_path: str) -> bool:
@@ -286,9 +260,7 @@ class DashboardController:
         return self.monitor.get_automation_status()
 
     def register_automation_workflow(self, workflow: object) -> None:
-        """Register a custom automation workflow.
-
-        """
+        """Register a custom automation workflow."""
         self.monitor.register_automation_workflow(workflow)
 
     async def test_automation(self, context_type_name: str) -> dict:
@@ -304,15 +276,11 @@ class DashboardController:
         return self.monitor.get_automation_execution_history(limit)
 
     def save_automation_config(self) -> None:
-        """Save automation configuration.
-
-        """
+        """Save automation configuration."""
         self.monitor.save_automation_config()
 
     def load_automation_config(self) -> None:
-        """Load automation configuration.
-
-        """
+        """Load automation configuration."""
         self.monitor.load_automation_config()
 
     # Project health monitoring methods
@@ -383,9 +351,7 @@ class DashboardController:
         return self.monitor._check_for_prompt(content)
 
     def clear_prompt_state(self) -> None:
-        """Clear prompt state (deprecated - use monitor methods).
-
-        """
+        """Clear prompt state (deprecated - use monitor methods)."""
         self.monitor._clear_prompt_state()
 
 
@@ -393,9 +359,7 @@ class ClaudeManager:
     """Manages multiple DashboardController instances, one for each session."""
 
     def __init__(self) -> None:
-        """Initialize the Claude manager.
-
-        """
+        """Initialize the Claude manager."""
         self.controllers: dict[str, DashboardController] = {}
         self.logger = logging.getLogger("yesman.dashboard.claude_manager")
 
@@ -416,18 +380,14 @@ class ClaudeManager:
         return self.controllers[session_name]
 
     def remove_controller(self, session_name: str) -> None:
-        """Remove controller for session.
-
-        """
+        """Remove controller for session."""
         if session_name in self.controllers:
             controller = self.controllers[session_name]
             controller.stop()
             del self.controllers[session_name]
 
     def stop_all(self) -> None:
-        """Stop all controllers.
-
-        """
+        """Stop all controllers."""
         for controller in self.controllers.values():
             controller.stop()
         self.controllers.clear()

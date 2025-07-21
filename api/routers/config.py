@@ -9,8 +9,6 @@ from libs.core.services import get_config, get_tmux_manager
 # Licensed under the MIT License
 
 
-
-
 # API 응답을 위한 Pydantic 모델
 class AppConfig(BaseModel):
     log_level: str
@@ -42,9 +40,7 @@ def get_app_config() -> object:
 #       YesmanConfig에 save 메서드를 추가해야 합니다.
 @router.post("/config", status_code=204)
 def save_app_config(config: AppConfig) -> None:
-    """애플리케이션 설정을 저장합니다.
-
-    """
+    """애플리케이션 설정을 저장합니다."""
     try:
         config_manager = get_config()
         config_data = config.dict(exclude_unset=True)

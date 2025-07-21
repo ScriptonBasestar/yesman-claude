@@ -14,7 +14,6 @@ from libs.multi_agent.semantic_merger import MergeStrategy, SemanticMerger
 """Semantic analysis and merging commands."""
 
 
-
 logger = logging.getLogger(__name__)
 
 # Constants for magic number replacements

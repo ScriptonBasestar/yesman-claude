@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+import contextlib
+import time
+from commands.automate import (
+from .test_framework import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,19 +17,14 @@ Tests the complete automation system including context detection,
 workflow execution, and real-time monitoring across components.
 """
 
-import asyncio
-import contextlib
-import time
-from typing import object
 
-from commands.automate import (
+
     AutomateConfigCommand,
     AutomateDetectCommand,
     AutomateMonitorCommand,
     AutomateWorkflowCommand,
 )
 
-from .test_framework import (
     AsyncIntegrationTestBase,
     CommandTestRunner,
     MockClaudeEnvironment,
@@ -293,7 +296,7 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         assert True  # Placeholder - actual verification would depend on monitoring implementation
 
     @staticmethod
-    async def _run_async_monitor( command_runner: object, project_path: object) -> None:  # noqa: ARG002
+    async def _run_async_monitor(command_runner: project_path, object) -> None:  # noqa: ARG002  # noqa: ARG004
         """Helper to run monitoring in async context."""
         # This would be the actual async monitoring implementation
         # For now, we simulate it

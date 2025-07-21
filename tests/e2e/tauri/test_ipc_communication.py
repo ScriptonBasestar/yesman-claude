@@ -1,15 +1,17 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import MagicMock
+import pytest
+        # from tauri_test import TauriTestApp
+import threading
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test stub for Tauri IPC communication
 NOTE: These are placeholder tests that require Tauri test environment setup.
 """
-
-import unittest
-from unittest.mock import MagicMock
-
-import pytest
 
 
 class TestTauriIPCCommunication(unittest.TestCase):
@@ -142,7 +144,6 @@ class TestTauriIPCCommunication(unittest.TestCase):
         """Test real IPC roundtrip communication."""
         # This test would require actual Tauri runtime
         # Example implementation:
-        # from tauri_test import TauriTestApp
         #
         # app = TauriTestApp()
         # app.start()
@@ -171,7 +172,6 @@ class TestTauriIPCPerformance(unittest.TestCase):
     @staticmethod
     def test_concurrent_ipc_calls() -> None:
         """Test concurrent IPC calls."""
-        import threading
 
         mock_invoke = MagicMock()
         mock_invoke.return_value = {"success": True}

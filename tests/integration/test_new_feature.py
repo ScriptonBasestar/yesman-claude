@@ -1,4 +1,4 @@
-"""Copyright notice."""
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,7 +9,7 @@ def test_new_feature_creation_workflow_should_pass_quality_checks() -> None:
     """Test that new feature development passes all quality checks."""
     # 새 기능 개발 시뮬레이션
     feature_code = '''
-def calculate_session_health(session_data):
+def calculate_session_health(session_data) -> object:
     """Calculate health score for a session based on activity metrics.
 
     Args:

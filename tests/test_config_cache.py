@@ -1,19 +1,18 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for configuration caching system."""
+# Copyright notice.
 
 import tempfile
 import time
 from pathlib import Path
-
 import pytest
-
 from libs.core.config_cache import CachedConfigLoader, ConfigCache, FileWatcher
 from libs.core.config_loader import ConfigLoader, EnvironmentSource, YamlFileSource
 from libs.core.config_schema import YesmanConfigSchema
 from libs.yesman_config import create_cached_yesman_config
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for configuration caching system."""
 
 
 class TestConfigCache:
@@ -103,7 +102,7 @@ class TestFileWatcher:
         cache = ConfigCache()
         watcher = FileWatcher(cache)
 
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as f:
             f.write("test content")
             f.flush()
 
@@ -115,7 +114,7 @@ class TestFileWatcher:
 
             # Modify file
             time.sleep(0.1)  # Ensure different mtime
-            with open(file_path, "w") as f2:
+            with open(file_path, "w", encoding="utf-8") as f2:
                 f2.write("modified content")
 
             # Should detect change
@@ -175,7 +174,7 @@ class TestCachedConfigLoader:
     @staticmethod
     def test_file_watching_integration() -> None:
         """Test file watching with cached loader."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
             f.write("""
 mode: merge
 logging:
@@ -198,7 +197,7 @@ logging:
 
                 # Modify file
                 time.sleep(0.1)  # Ensure different mtime
-                with open(file_path, "w") as f2:
+                with open(file_path, "w", encoding="utf-8") as f2:
                     f2.write("""
 mode: merge
 logging:

@@ -11,9 +11,6 @@ from libs.utils import ensure_log_directory, get_default_log_path
 """Claude session and pane management."""
 
 
-
-
-
 class ClaudeSessionManager:
     """Manages tmux session and Claude pane discovery."""
 
@@ -148,9 +145,7 @@ class ClaudeSessionManager:
             return ""
 
     def send_keys(self, keys: str) -> None:
-        """Send keys to Claude pane.
-
-        """
+        """Send keys to Claude pane."""
         if self.claude_pane:
             self.claude_pane.send_keys(keys)
 

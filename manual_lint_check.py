@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import ast
+from pathlib import Path
+from typing import Any
+            # Unused imports (simple check)
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Manual lint check script to analyze files for common issues."""
 
-import ast
-from pathlib import Path
-from typing import Any
 
+def check_file_for_issues(file_path: Path) -> list[dict[str, object]]:
+    """Check a single Python file for common lint issues.
 
-def check_file_for_issues(file_path: Path) -> list[dict[str, Any]]:
-    """Check a single Python file for common lint issues."""
+    Returns:
+        object: Description of return value.
+    """
     issues = []
 
     try:
@@ -47,7 +54,6 @@ def check_file_for_issues(file_path: Path) -> list[dict[str, Any]]:
                     }
                 )
 
-            # Unused imports (simple check)
             if line.strip().startswith("import ") or line.strip().startswith("from "):
                 import_name = line.strip().split()[1].split(".")[0]
                 if import_name not in content:
@@ -102,8 +108,12 @@ def check_file_for_issues(file_path: Path) -> list[dict[str, Any]]:
     return issues
 
 
-def scan_directory(directory: Path) -> list[dict[str, Any]]:
-    """Scan directory for Python files and check for issues."""
+def scan_directory(directory: Path) -> list[dict[str, object]]:
+    """Scan directory for Python files and check for issues.
+
+    Returns:
+        object: Description of return value.
+    """
     all_issues = []
 
     for file_path in directory.rglob("*.py"):
@@ -130,7 +140,7 @@ def scan_directory(directory: Path) -> list[dict[str, Any]]:
     return all_issues
 
 
-def main():
+def main() -> None:
     """Main function to run lint check."""
     project_root = Path("/Users/archmagece/myopen/scripton/yesman-claude")
 

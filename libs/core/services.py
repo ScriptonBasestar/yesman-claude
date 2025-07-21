@@ -12,11 +12,8 @@ from libs.yesman_config import YesmanConfig
 """Service registration and DI container setup."""
 
 
-
 def register_core_services() -> None:
-    """Register all core services with the DI container.
-
-    """
+    """Register all core services with the DI container."""
     # Register YesmanConfig as a singleton factory
     container.register_factory(YesmanConfig, YesmanConfig)
 
@@ -32,9 +29,7 @@ def register_test_services(config: YesmanConfig | None = None, tmux_manager: Tmu
 
     Args:
         config: Optional mock config instance
-        tmux_manager: Optional mock tmux manager instance
-
-    """
+        tmux_manager: Optional mock tmux manager instance."""
     # Clear existing registrations
     container.clear()
 
@@ -90,9 +85,7 @@ def is_container_initialized() -> bool:
 
 
 def initialize_services() -> None:
-    """Initialize services if not already done.
-
-    """
+    """Initialize services if not already done."""
     if not is_container_initialized():
         register_core_services()
 

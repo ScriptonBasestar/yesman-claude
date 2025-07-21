@@ -1,19 +1,26 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+from pathlib import Path
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Direct lint checks without make."""
 
-import os
-import subprocess
-from pathlib import Path
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
-def run_command(cmd, description):
-    """Run command and return results."""
+def run_command(cmd, description) -> object:
+    """Run command and return results.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"{description}")
     print(f"{'=' * 60}")
@@ -54,7 +61,7 @@ files_to_check = ["api/routers/controllers.py", "api/background_tasks.py", "comm
 
 for file_path in files_to_check:
     if Path(file_path).exists():
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         long_lines = [(i + 1, len(line.rstrip())) for i, line in enumerate(lines) if len(line.rstrip()) > 88]
         if long_lines:

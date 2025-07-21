@@ -10,7 +10,6 @@ from libs.core.base_command import BaseCommand
 """Agent collaboration commands."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -1,17 +1,20 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for Tauri Renderer."""
+# Copyright notice.
 
 import json
 from datetime import UTC, datetime
-
 import pytest
-
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.tauri_renderer import TauriRenderer
 from libs.dashboard.renderers.widget_models import (
+
+    Copyright,
+    Licensed,
+
+)
+"""Tests for Tauri Renderer."""
+
+
+
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -782,7 +785,7 @@ class TestTauriRendererIntegration:
                 assert "id" in action
                 assert "label" in action
                 assert "type" in action
-                assert action["type"] in ["button", "dropdown"]
+                assert action["type"] in {"button", "dropdown"}
 
                 if "icon" in action:
                     assert isinstance(action["icon"], str)

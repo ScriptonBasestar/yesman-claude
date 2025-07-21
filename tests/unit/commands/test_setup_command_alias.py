@@ -1,16 +1,14 @@
-"""Copyright notice."""
+# Copyright notice.
+
+import unittest
+from unittest.mock import MagicMock, call, patch
+from click.testing import CliRunner
+from commands.setup import up
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Test for setup alias (up command)."""
-
-import unittest
-from unittest.mock import MagicMock, call, patch
-from typing import object
-
-from click.testing import CliRunner
-
-from commands.setup import up
 
 
 class TestSetupAliasCommand(unittest.TestCase):

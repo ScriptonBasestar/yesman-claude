@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import asyncio
+import time
+from typing import Never, object
+from unittest.mock import AsyncMock, Mock
+import pytest
+from commands.automate import AutomateMonitorCommand
+from commands.setup import SetupCommand
+from commands.status import StatusCommand
+from .test_framework import (
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -9,18 +21,9 @@ Tests the real-time dashboard integration with CLI, API, and automation systems.
 Validates that dashboard updates reflect system state accurately across components.
 """
 
-import asyncio
-import time
-from typing import object, Never
-from unittest.mock import AsyncMock, Mock
 
-import pytest
 
-from commands.automate import AutomateMonitorCommand
-from commands.setup import SetupCommand
-from commands.status import StatusCommand
 
-from .test_framework import (
     AsyncIntegrationTestBase,
     CommandTestRunner,
     MockClaudeEnvironment,
@@ -309,7 +312,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             await dashboard.cleanup()
 
     @staticmethod
-    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:  # noqa: ARG002
+    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:  # noqa: ARG002  # noqa: ARG004
         """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id

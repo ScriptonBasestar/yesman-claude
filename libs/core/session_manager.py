@@ -22,15 +22,12 @@ from libs.tmux_manager import TmuxManager
 """Session management for dashboard."""
 
 
-
 try:
 
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
     psutil = None
-
-
 
 
 class SessionManager:

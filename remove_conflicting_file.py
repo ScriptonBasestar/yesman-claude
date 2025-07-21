@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import os
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-import os
 
 # Remove the conflicting file
 conflicting_file = "/Users/archmagece/myopen/scripton/yesman-claude/commands/multi_agent.py"

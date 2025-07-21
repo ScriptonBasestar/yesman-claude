@@ -1,13 +1,16 @@
-"""Copyright notice."""
+# Copyright notice.
+
+from fastapi import status
+from api.middleware.error_handler import create_error_response, error_to_status_code
+from libs.core.error_handling import (
+import json
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Tests for centralized error handling system."""
 
-from fastapi import status
 
-from api.middleware.error_handler import create_error_response, error_to_status_code
-from libs.core.error_handling import (
     ConfigurationError,
     ErrorCategory,
     ErrorContext,
@@ -173,7 +176,6 @@ class TestAPIErrorHandling:
         assert response.status_code == 400
 
         # Parse JSON content
-        import json
 
         content = json.loads(response.body)
 

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import subprocess
+import sys
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Check mypy progress by analyzing specific error patterns."""
 
-import subprocess
-import sys
 
-
-def run_mypy_check():
+def run_mypy_check() -> None:
     """Run mypy check on specific files to verify fixes."""
     print("=== MyPy Error Check ===")
 
@@ -39,7 +41,7 @@ def run_mypy_check():
             print(f"❌ {file_path}: Error - {e}")
 
 
-def analyze_common_patterns():
+def analyze_common_patterns() -> None:
     """Analyze common error patterns we've addressed."""
     print("\n=== Fixed Error Patterns ===")
 

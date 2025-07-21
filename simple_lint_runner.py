@@ -1,18 +1,25 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import os
+import subprocess
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Simple lint runner to check for issues."""
 
-import os
-import subprocess
 
 os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
 
-def run_single_command(cmd, description):
-    """Run a single command and capture output."""
+def run_single_command(cmd, description) -> object:
+    """Run a single command and capture output.
+
+    Returns:
+        object: Description of return value.
+    """
     print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"{'=' * 60}")

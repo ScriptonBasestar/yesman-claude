@@ -1,17 +1,23 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Script to extract lint output by running each command individually."""
-
+from typing import Any
 import os
 import subprocess
 import sys
 
 
-def run_and_capture(cmd_list, description):
-    """Run command and return output."""
+# !/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Script to extract lint output by running each command individually."""
+
+
+def run_and_capture(cmd_list, description) -> object:
+    """Run command and return output.
+
+    Returns:
+        object: Description of return value.
+    """
     try:
         result = subprocess.run(
             cmd_list,
@@ -108,7 +114,7 @@ for cmd_list, description in commands:
     output_lines.append("")
 
 # Write to file
-with open("lint_output.txt", "w") as f:
+with open("lint_output.txt", "w", encoding="utf-8") as f:
     f.write("\n".join(output_lines))
 
 print("Lint output saved to lint_output.txt")

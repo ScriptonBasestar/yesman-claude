@@ -1,5 +1,15 @@
-#!/usr/bin/env python3
-"""Copyright notice."""
+from typing import Any
+import pytest
+from commands.setup import SetupCommand
+from commands.status import StatusCommand
+from .test_framework import CommandTestRunner, IntegrationTestBase, PerformanceMonitor
+import threading
+import os
+import psutil
+
+
+# !/usr/bin/env python3
+# Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -8,13 +18,6 @@
 Tests the complete session lifecycle across CLI, API, and internal components.
 Validates that session operations work correctly end-to-end.
 """
-
-import pytest
-
-from commands.setup import SetupCommand
-from commands.status import StatusCommand
-
-from .test_framework import CommandTestRunner, IntegrationTestBase, PerformanceMonitor
 
 
 class TestSessionLifecycleIntegration(IntegrationTestBase):
@@ -261,11 +264,10 @@ class TestSessionStateConsistency(IntegrationTestBase):
         # Simulate concurrent access
         session_manager = self.get_session_manager()
 
-        def get_session_info():
+        def get_session_info() -> object:
             return session_manager.get_session_info(session_name)
 
         # Multiple concurrent calls
-        import threading
 
         results = []
         threads = []
@@ -373,9 +375,6 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
 
     def test_memory_usage_stability(self) -> None:
         """Test that session operations don't cause memory leaks."""
-        import os
-
-        import psutil
 
         # Get initial memory usage
         process = psutil.Process(os.getpid())

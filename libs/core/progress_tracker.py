@@ -9,8 +9,6 @@ from .models import SessionProgress, TaskPhase, TaskProgress
 """Progress tracking for Claude sessions."""
 
 
-
-
 class ProgressAnalyzer:
     """Analyzes pane output to determine task progress."""
 
@@ -128,9 +126,7 @@ class ProgressAnalyzer:
         return current_phase
 
     def _analyze_file_activity(self, output_lines: list[str], task: TaskProgress) -> None:
-        """Analyze file-related activity.
-
-        """
+        """Analyze file-related activity."""
         for line in output_lines:
             # Check for file creation
             match = re.search(self.FILE_ACTIVITY_PATTERNS["created"], line, re.IGNORECASE)
@@ -144,9 +140,7 @@ class ProgressAnalyzer:
                 task.files_modified += 1
 
     def _analyze_command_activity(self, output_lines: list[str], task: TaskProgress) -> None:
-        """Analyze command execution activity.
-
-        """
+        """Analyze command execution activity."""
         for i, line in enumerate(output_lines):
             # Check for command execution
             if re.search(self.COMMAND_PATTERNS["executing"], line):
@@ -162,9 +156,7 @@ class ProgressAnalyzer:
                         break
 
     def _analyze_todo_activity(self, output_lines: list[str], task: TaskProgress) -> None:
-        """Analyze TODO-related activity.
-
-        """
+        """Analyze TODO-related activity."""
         for line in output_lines:
             # Check for TODO identification
             if re.search(self.TODO_PATTERNS["identified"], line, re.IGNORECASE):
@@ -176,9 +168,7 @@ class ProgressAnalyzer:
 
     @staticmethod
     def _update_phase_progress(task: TaskProgress) -> None:
-        """Update phase progress based on activity indicators.
-
-        """
+        """Update phase progress based on activity indicators."""
         if task.phase == TaskPhase.STARTING:
             # Starting phase is quick
             task.phase_progress = min(100.0, task.phase_progress + 50.0)
@@ -225,8 +215,6 @@ class ProgressAnalyzer:
         return self.session_progress.copy()
 
     def reset_session_progress(self, session_name: str) -> None:
-        """Reset progress for a specific session.
-
-        """
+        """Reset progress for a specific session."""
         if session_name in self.session_progress:
             del self.session_progress[session_name]

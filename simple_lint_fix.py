@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-"""Copyright notice."""
+
+# Copyright notice.
+
+import os
+import sys
+from ruff.__main__ import main as ruff_main
+import subprocess
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Simple lint fix runner without subprocess."""
 
-import os
-import sys
 
-
-def main():
+def main() -> None:
     # Change to project directory
     os.chdir("/Users/archmagece/myopen/scripton/yesman-claude")
 
     # Import ruff and run directly
     try:
-        from ruff.__main__ import main as ruff_main
 
         print("Running ruff check with auto-fix...")
         sys.argv = [
@@ -56,7 +59,6 @@ def main():
 
     except ImportError:
         print("Ruff not available, trying with sys.executable")
-        import subprocess
 
         # Try with python -m
         commands = [

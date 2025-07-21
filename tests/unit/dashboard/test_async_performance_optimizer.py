@@ -1,12 +1,11 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
+# Copyright notice.
 
 import asyncio
-
 import pytest
-
 from libs.dashboard.performance_optimizer import AsyncPerformanceOptimizer
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 
 class TestAsyncPerformanceOptimizer:

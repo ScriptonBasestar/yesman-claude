@@ -10,7 +10,6 @@ from libs.core.base_command import BaseCommand
 """Dependency management and tracking commands."""
 
 
-
 logger = logging.getLogger(__name__)
 
 

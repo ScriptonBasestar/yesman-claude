@@ -1,17 +1,16 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for AgentPool class."""
+# Copyright notice.
 
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
-
 import pytest
-
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for AgentPool class."""
 
 
 class TestAgentPool:
@@ -19,8 +18,12 @@ class TestAgentPool:
 
     @pytest.fixture
     @staticmethod
-    def work_dir( tmp_path: Path) -> Path:
-        """Create temporary work directory."""
+    def work_dir(tmp_path: Path) -> Path:
+        """Create temporary work directory.
+
+        Returns:
+        Path: Description of return value.
+        """
         work_path = tmp_path / "agent_work"
         work_path.mkdir()
         return work_path
@@ -28,13 +31,21 @@ class TestAgentPool:
     @pytest.fixture
     @staticmethod
     def agent_pool(work_dir: Path) -> AgentPool:
-        """Create AgentPool instance."""
+        """Create AgentPool instance.
+
+        Returns:
+        AgentPool: Description of return value.
+        """
         return AgentPool(max_agents=2, work_dir=str(work_dir))
 
     @pytest.fixture
     @staticmethod
     def sample_task() -> Task:
-        """Create a sample task."""
+        """Create a sample task.
+
+        Returns:
+        Task: Description of return value.
+        """
         return Task(
             task_id="test-task-1",
             title="Test Task",

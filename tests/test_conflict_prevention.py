@@ -1,37 +1,39 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for ConflictPreventionSystem."""
+# Copyright notice.
 
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
-
 import pytest
-
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import (
+from libs.multi_agent.conflict_prediction import (
+from libs.multi_agent.conflict_prevention import (
+from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for ConflictPreventionSystem."""
+
+
+
     CollaborationEngine,
     MessagePriority,
     MessageType,
 )
-from libs.multi_agent.conflict_prediction import (
     ConflictPattern,
     ConflictPredictor,
     PredictionConfidence,
     PredictionResult,
 )
-from libs.multi_agent.conflict_prevention import (
     ConflictPreventionSystem,
     PreventionAction,
     PreventionMeasure,
     PreventionResult,
     PreventionStrategy,
 )
-from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
 
 
 class TestPreventionMeasure:

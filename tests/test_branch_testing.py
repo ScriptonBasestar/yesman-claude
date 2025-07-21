@@ -1,8 +1,4 @@
-"""Copyright notice."""
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test branch testing integration system."""
+# Copyright notice.
 
 import json
 import subprocess
@@ -11,11 +7,17 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
-
 import pytest
-
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_test_manager import (
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Test branch testing integration system."""
+
+
+
     BranchTestManager,
     TestResult,
     TestStatus,
@@ -375,7 +377,7 @@ class TestBranchTestManager:
         assert results_file.exists()
 
         # Verify content
-        with open(results_file) as f:
+        with open(results_file, encoding="utf-8") as f:
             data = json.load(f)
 
         assert len(data) == 1
@@ -393,7 +395,7 @@ class TestBranchTestManager:
 
         # Verify configuration was saved
         config_file = branch_test_manager._get_config_file()
-        with open(config_file) as f:
+        with open(config_file, encoding="utf-8") as f:
             config = json.load(f)
 
         assert config["settings"]["auto_testing_enabled"] is True
