@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from pathlib import Path
+from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -91,7 +92,7 @@ class YesmanConfigSchema(BaseModel):
     enable_telemetry: bool = False
 
     # Custom settings (allows flexibility)
-    custom: dict[str] = Field(default_factory=dict)
+    custom: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("root_dir")
     @classmethod

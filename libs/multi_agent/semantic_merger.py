@@ -1,5 +1,10 @@
 # Copyright notice.
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Automatic conflict resolution and semantic merge implementation for multi-agent development."""
+
 import ast
 import asyncio
 import hashlib
@@ -12,15 +17,6 @@ from pathlib import Path
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictResolutionEngine
 from .semantic_analyzer import (
-            # Start with imports and module-level code from first version
-                # Merge imports by union
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Automatic conflict resolution and semantic merge implementation for multi-agent development."""
-
-
     SemanticAnalyzer,
     SemanticConflict,
     SemanticConflictType,

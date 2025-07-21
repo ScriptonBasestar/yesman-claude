@@ -3,14 +3,6 @@
 from datetime import UTC, datetime
 from libs.dashboard.renderers.widget_adapter import WidgetDataAdapter
 from libs.dashboard.renderers.widget_models import (
-
-    Copyright,
-    Licensed,
-
-)
-"""Tests for Widget Models and Data Adapter."""
-
-
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -27,6 +19,9 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
+
+
+"""Tests for Widget Models and Data Adapter."""
 
 
 class TestWidgetModels:

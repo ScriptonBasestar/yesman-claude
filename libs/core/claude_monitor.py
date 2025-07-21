@@ -565,10 +565,10 @@ class ClaudeMonitor:
             self.async_logger = None
             self.logger.info("Async logging system stopped")
 
-    def _async_log(self, level: LogLevel, message: str, **kwargs: dict[str, object]) -> None:
+    def _async_log(self, level: LogLevel, message: str, **kwargs) -> None:
         """Log message to async logger (safe for sync contexts)."""
         if self.async_logger:
-            self.async_logger.log(level, message, **kwargs: dict[str, object])
+            self.async_logger.log(level, message, **kwargs)
         else:
             # Fallback to standard logger
             self.logger.log(level.level_value, message)

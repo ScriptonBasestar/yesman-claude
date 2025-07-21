@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from pathlib import Path
-from typing import object, Never
+from typing import Any, Never
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from libs.core.base_command import BaseCommand, CommandError
 from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
@@ -29,7 +29,7 @@ class StartAgentsCommand(BaseCommand):
         max_agents: int = 3,
         work_dir: str | None = None,
         monitor: bool = False,  # noqa: FBT001
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the start agents command.
 
@@ -89,7 +89,7 @@ class MonitorAgentsCommand(BaseCommand):
         work_dir: str | None = None,
         duration: float | None = None,
         refresh: float = 1.0,
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the monitor agents command.
 
@@ -150,7 +150,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, work_dir: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the status command.
 
     Returns:
@@ -206,7 +206,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, work_dir: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the stop agents command.
 
     Returns:
@@ -246,7 +246,7 @@ class AddTaskCommand(BaseCommand):
         complexity: int = 5,
         timeout: int = 300,
         description: str | None = None,
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the add task command.
 
@@ -295,7 +295,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the list tasks command.
 
     Returns:

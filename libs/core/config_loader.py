@@ -5,11 +5,12 @@ import json
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 import yaml
 from pydantic import ValidationError
 from .config_schema import YesmanConfigSchema
-    # Import here to avoid circular imports
-    from .config_cache import CachedConfigLoader
+# Import here to avoid circular imports
+from .config_cache import CachedConfigLoader
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -24,13 +25,11 @@ class ConfigSource(ABC):
     """Abstract base class for configuration sources."""
 
     @abstractmethod
-    @staticmethod
-    def load() -> dict[str]:
+    def load(self) -> dict[str, Any]:
         """Load configuration from this source."""
 
     @abstractmethod
-    @staticmethod
-    def exists() -> bool:
+    def exists(self) -> bool:
         """Check if this source exists/is available."""
 
 
@@ -41,7 +40,7 @@ class YamlFileSource(ConfigSource):
         self.path = Path(path).expanduser()
         self.file_path = self.path  # For cache compatibility
 
-    def load(self) -> dict[str]:
+    def load(self) -> dict[str, Any]:
         """Load configuration from YAML file."""
         if not self.exists():
             return {}
@@ -68,9 +67,9 @@ class EnvironmentSource(ConfigSource):
     def __init__(self, prefix: str = "YESMAN_") -> None:
         self.prefix = prefix
 
-    def load(self) -> dict[str]:
+    def load(self) -> dict[str, Any]:
         """Load configuration from environment variables."""
-        config: dict[str] = {}
+        config: dict[str, Any] = {}
 
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
@@ -134,10 +133,10 @@ class EnvironmentSource(ConfigSource):
 class DictSource(ConfigSource):
     """Dictionary configuration source (for programmatic config)."""
 
-    def __init__(self, config: dict[str]) -> None:
+    def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
 
-    def load(self) -> dict[str]:
+    def load(self) -> dict[str, Any]:
         """Return the dictionary."""
         return self.config.copy()
 
@@ -176,7 +175,7 @@ class ConfigLoader:
         if self._cached_config is not None:
             return self._cached_config
 
-        merged_config: dict[str] = {}
+        merged_config: dict[str, Any] = {}
 
         # Load from each source in order (later sources override earlier ones)
         for source in self._sources:
@@ -194,7 +193,7 @@ class ConfigLoader:
         return self._cached_config
 
     @staticmethod
-    def validate(config: dict[str]) -> YesmanConfigSchema:
+    def validate(config: dict[str, Any]) -> YesmanConfigSchema:
         """Validate configuration against schema."""
         try:
             return YesmanConfigSchema.model_validate(config)
@@ -213,7 +212,7 @@ class ConfigLoader:
         self._cached_config = None
         return self.load()
 
-    def _deep_merge(self, dict1: dict[str], dict2: dict[str]) -> dict[str]:
+    def _deep_merge(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> dict[str, Any]:
         """Deep merge two dictionaries."""
         result = dict1.copy()
 
@@ -225,7 +224,7 @@ class ConfigLoader:
 
         return result
 
-    def get_config_sources_info(self) -> list[dict[str]]:
+    def get_config_sources_info(self) -> list[dict[str, Any]]:
         """Get information about configured sources."""
         info = []
         for i, source in enumerate(self._sources):

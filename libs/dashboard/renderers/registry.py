@@ -71,7 +71,7 @@ class RendererRegistry:
         """
         return self._renderers.get(format_type)
 
-    def get_renderer(self, format_type: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer | None:
+    def get_renderer(self, format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
         """Get a renderer instance for a specific format.
 
         Args:
@@ -90,7 +90,7 @@ class RendererRegistry:
 
         # Create new instance
         renderer_class = self._renderers[format_type]
-        instance = renderer_class(format_type, **kwargs: dict[str, object])
+        instance = renderer_class(format_type, **kwargs)
 
         # Cache instance if no custom kwargs
         if not kwargs:
@@ -98,7 +98,7 @@ class RendererRegistry:
 
         return instance
 
-    def get_default_renderer(self, **kwargs: dict[str, object]) -> BaseRenderer | None:
+    def get_default_renderer(self, **kwargs) -> BaseRenderer | None:
         """Get the default renderer instance.
 
         Args:
@@ -110,7 +110,7 @@ class RendererRegistry:
         if self._default_format is None:
             return None
 
-        return self.get_renderer(self._default_format, **kwargs: dict[str, object])
+        return self.get_renderer(self._default_format, **kwargs)
 
     def set_default_format(self, format_type: RenderFormat) -> None:
         """Set the default renderer format.
@@ -189,7 +189,7 @@ def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRender
     registry.register(format_type, renderer_class)
 
 
-def get_renderer(format_type: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer | None:
+def get_renderer(format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
     """Convenience function to get a renderer from global registry.
 
     Args:
@@ -199,10 +199,10 @@ def get_renderer(format_type: RenderFormat, **kwargs: dict[str, object]) -> Base
     Returns:
         Renderer instance or None if not found
     """
-    return registry.get_renderer(format_type, **kwargs: dict[str, object])
+    return registry.get_renderer(format_type, **kwargs)
 
 
-def get_default_renderer(**kwargs: dict[str, object]) -> BaseRenderer | None:
+def get_default_renderer(**kwargs) -> BaseRenderer | None:
     """Convenience function to get default renderer from global registry.
 
     Args:
@@ -211,4 +211,4 @@ def get_default_renderer(**kwargs: dict[str, object]) -> BaseRenderer | None:
     Returns:
         Default renderer instance or None if no default set
     """
-    return registry.get_default_renderer(**kwargs: dict[str, object])
+    return registry.get_default_renderer(**kwargs)

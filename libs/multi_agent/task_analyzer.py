@@ -250,7 +250,7 @@ class TaskAnalyzer:
         title: str,
         file_paths: list[str],
         description: str = "",
-        **kwargs: object,
+        **kwargs,
     ) -> TaskDefinition:
         """Create a task definition from file paths.
 
@@ -275,7 +275,7 @@ class TaskAnalyzer:
             title=title,
             description=description,
             file_paths=sorted(all_files),
-            **kwargs: object,
+            **kwargs,
         )
 
         # Add to graph

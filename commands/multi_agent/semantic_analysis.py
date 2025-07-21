@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from typing import Any
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
@@ -28,8 +29,8 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         files: list[str] | None = None,
         language: str = "python",
         repo_path: str | None = None,
-        **kwargs: object,
-    ) -> dict[str]:
+        **kwargs,
+    ) -> dict[str, Any]:
         """Execute the analyze semantic conflicts command.
 
         Returns:
@@ -105,7 +106,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: object) -> dict[str]:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict[str]:  # noqa: ARG002
         """Execute the semantic summary command.
 
         Returns:
@@ -134,7 +135,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: object) -> dict[str]:  # noqa: ARG002
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs) -> dict[str]:  # noqa: ARG002
         """Execute the function diff command.
 
         Returns:
@@ -191,8 +192,8 @@ class SemanticMergeCommand(BaseCommand):
         target_file: str | None = None,
         language: str = "python",  # noqa: ARG002
         strategy: str = "auto",
-        **kwargs: object,
-    ) -> dict[str]:
+        **kwargs,
+    ) -> dict[str, Any]:
         """Execute the semantic merge command.
 
         Returns:

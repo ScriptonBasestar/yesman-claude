@@ -1,7 +1,7 @@
 # Copyright notice.
 
 from datetime import UTC, datetime, timedelta
-from typing import object, Never
+from typing import Any, Never
 from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from libs.dashboard.widgets.agent_monitor import (

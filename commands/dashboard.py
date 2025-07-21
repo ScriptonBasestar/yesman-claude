@@ -113,7 +113,7 @@ class DashboardRunCommand(BaseCommand):
         theme: str | None = None,
         dev: bool = False,  # noqa: FBT001
         detach: bool = False,  # noqa: FBT001
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the dashboard run command.
 
@@ -478,7 +478,7 @@ class DashboardListCommand(BaseCommand):
         super().__init__()
         self.env = DashboardEnvironment()
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, **kwargs) -> dict:  # noqa: ARG002
         """Execute the list command.
 
     Returns:
@@ -524,7 +524,7 @@ class DashboardListCommand(BaseCommand):
 class DashboardBuildCommand(BaseCommand):
     """Build dashboard for production deployment."""
 
-    def execute(self, interface: str = "tauri", **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, interface: str = "tauri", **kwargs) -> dict:  # noqa: ARG002
         """Execute the build command.
 
     Returns:

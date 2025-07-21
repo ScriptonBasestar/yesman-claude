@@ -166,7 +166,7 @@ class ComponentMockFactory:
     """Factory for commonly mocked component objects."""
 
     @staticmethod
-    def create_tmux_session_mock(name: str = "test-session", **kwargs: object) -> MagicMock:
+    def create_tmux_session_mock(name: str = "test-session", **kwargs) -> MagicMock:
         """Create a standardized tmux session mock."""
         mock_session = MagicMock()
         mock_session.name = name

@@ -335,7 +335,7 @@ def validate_input(validation_func: object, field_name: str) -> object:
             if not valid:
                 raise ValidationError(field_name, str(value), error)
 
-            return func(*args: object, **kwargs)
+            return func(*args, **kwargs)
 
         return wrapper
 

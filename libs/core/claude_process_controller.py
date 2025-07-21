@@ -12,7 +12,7 @@ import time
 class ClaudeProcessController:
     """Controls Claude process lifecycle (start, stop, restart)."""
 
-    def __init__(session_manager: status_manager, object) -> None:
+    def __init__(self, session_manager, status_manager) -> None:
         self.session_manager = session_manager
         self.status_manager = status_manager
         self.selected_model = "default"

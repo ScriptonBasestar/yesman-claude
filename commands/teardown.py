@@ -13,7 +13,7 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 class TeardownCommand(BaseCommand, SessionCommandMixin):
     """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
 
-    def execute(self, session_name: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, session_name: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the teardown command.
 
         Returns:

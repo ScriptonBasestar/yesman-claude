@@ -551,7 +551,7 @@ def profile_render(operation_name: str | None = None) -> object:
         def wrapper(*args, **kwargs) -> object:
             name = operation_name or f"{func.__module__}.{func.__name__}"
             with global_profiler.time_operation(name):
-                return func(*args: object, **kwargs)
+                return func(*args, **kwargs)
 
         return wrapper
 

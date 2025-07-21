@@ -296,7 +296,7 @@ class AsyncLogger:
             # Fallback to standard logging
             self.standard_logger.exception("Failed to queue log entry")
 
-    def log(self, level: LogLevel, message: str, **kwargs: object) -> None:
+    def log(self, level: LogLevel, message: str, **kwargs) -> None:
         """Log a message at specified level."""
         # Extract caller information
         frame = None
@@ -336,29 +336,29 @@ class AsyncLogger:
         self._queue_entry(entry)
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs: object) -> None:
+    def trace(self, message: str, **kwargs) -> None:
         """Log a trace message."""
-        self.log(LogLevel.TRACE, message, **kwargs: dict[str, object])
+        self.log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs: object) -> None:
+    def debug(self, message: str, **kwargs) -> None:
         """Log a debug message."""
-        self.log(LogLevel.DEBUG, message, **kwargs: dict[str, object])
+        self.log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs: object) -> None:
+    def info(self, message: str, **kwargs) -> None:
         """Log an info message."""
-        self.log(LogLevel.INFO, message, **kwargs: dict[str, object])
+        self.log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs: object) -> None:
+    def warning(self, message: str, **kwargs) -> None:
         """Log a warning message."""
-        self.log(LogLevel.WARNING, message, **kwargs: dict[str, object])
+        self.log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs: object) -> None:
+    def error(self, message: str, **kwargs) -> None:
         """Log an error message."""
-        self.log(LogLevel.ERROR, message, **kwargs: dict[str, object])
+        self.log(LogLevel.ERROR, message, **kwargs)
 
-    def critical(self, message: str, **kwargs: object) -> None:
+    def critical(self, message: str, **kwargs) -> None:
         """Log a critical message."""
-        self.log(LogLevel.CRITICAL, message, **kwargs: dict[str, object])
+        self.log(LogLevel.CRITICAL, message, **kwargs)
 
     # Context manager support
     async def __aenter__(self):

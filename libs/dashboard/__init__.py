@@ -2,15 +2,6 @@
 
 from .dashboard_launcher import DashboardLauncher, InterfaceInfo
 from .keyboard_navigation import (
-from .performance_optimizer import (
-from .theme_system import (
-from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Dashboard modules for project status visualization."""
-
     FocusableElement,
     KeyBinding,
     KeyboardNavigationManager,
@@ -19,6 +10,7 @@ from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
     get_keyboard_manager,
     reset_keyboard_manager,
 )
+from .performance_optimizer import (
     AsyncPerformanceOptimizer,
     OptimizationLevel,
     PerformanceMetrics,
@@ -28,6 +20,7 @@ from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
     get_performance_optimizer,
     reset_performance_optimizer,
 )
+from .theme_system import (
     ColorPalette,
     Spacing,
     SystemThemeDetector,
@@ -38,6 +31,12 @@ from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
     get_theme_manager,
     reset_theme_manager,
 )
+from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Dashboard modules for project status visualization."""
 
 __all__ = [
     "AsyncPerformanceOptimizer",

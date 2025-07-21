@@ -31,7 +31,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             msg = "Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts"
             raise CommandError(msg)
 
-    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs: dict[str, object]) -> dict:  # noqa: FBT001, ARG002
+    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the enter command.
 
     Returns:

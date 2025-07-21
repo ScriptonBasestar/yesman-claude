@@ -18,8 +18,8 @@ from .base_command import BaseCommand, CommandError
 class AsyncBaseCommand(BaseCommand, ABC):
     """Async-capable base class for commands with long-running operations."""
 
-    def __init__(self, *args: object, **kwargs) -> None:
-        super().__init__(*args: object, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._running = False
         self._loop = None
 
@@ -28,7 +28,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
     async def execute_async(**kwargs: dict[str, object]) -> dict:
         """Async version of execute method - must be implemented by subclasses."""
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Sync wrapper that runs the async execute method."""
         try:
             # Use existing event loop if available, otherwise create new one
@@ -90,8 +90,8 @@ class AsyncBaseCommand(BaseCommand, ABC):
 class AsyncMonitoringMixin:
     """Mixin for commands that need monitoring capabilities."""
 
-    def __init__(self, *args: object, **kwargs) -> None:
-        super().__init__(*args: object, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.update_interval = 1.0  # Default 1 second
         self._monitor_data = {}
 
@@ -132,8 +132,8 @@ class AsyncMonitoringMixin:
 class AsyncProgressMixin:
     """Mixin for commands that need progress reporting."""
 
-    def __init__(self, *args: object, **kwargs) -> None:
-        super().__init__(*args: object, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._progress_total = 0
         self._progress_current = 0
 
@@ -177,8 +177,8 @@ class AsyncProgressMixin:
 class AsyncRetryMixin:
     """Mixin for commands that need retry capabilities."""
 
-    def __init__(self, *args: object, **kwargs) -> None:
-        super().__init__(*args: object, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.max_retries = 3
         self.retry_delay = 1.0
         self.backoff_multiplier = 2.0

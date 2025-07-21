@@ -28,7 +28,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         dry_run: bool = False,  # noqa: FBT001
         force: bool = False,  # noqa: FBT001
         cleanup_all: bool = False,  # noqa: FBT001
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the cleanup command.
 

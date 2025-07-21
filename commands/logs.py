@@ -32,7 +32,7 @@ class LogsConfigureCommand(BaseCommand):
         format: str = "json",
         compression: bool = False,  # noqa: FBT001
         buffer_size: int = 1000,
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the configure command.
 
@@ -99,7 +99,7 @@ class LogsAnalyzeCommand(BaseCommand):
         log_dir: str = "~/.scripton/yesman/logs",
         last_hours: int = 24,
         level: str | None = None,
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the analyze command.
 
@@ -244,7 +244,7 @@ class LogsTailCommand(BaseCommand):
         level: str = "INFO",
         follow: bool = False,  # noqa: FBT001
         last_lines: int = 50,
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the tail command."""
         try:
@@ -378,7 +378,7 @@ class LogsCleanupCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs) -> dict:  # noqa: ARG002
         """Execute the cleanup command.
 
         Returns:

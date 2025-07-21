@@ -2,20 +2,19 @@
 
 # Copyright notice.
 
-import os
-import click
-import yaml
-from rich.progress import track
-from .base_command import CommandError
-from .settings import settings
-import re
-        from .settings import ValidationPatterns
-import subprocess
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Session setup logic extracted from setup command."""
+
+import os
+import re
+import subprocess
+import click
+import yaml
+from rich.progress import track
+from .base_command import CommandError
+from .settings import settings, ValidationPatterns
 
 
 

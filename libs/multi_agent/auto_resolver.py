@@ -1,5 +1,10 @@
 # Copyright notice.
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Automated conflict resolution system integrating semantic analysis and intelligent merging."""
+
 import ast
 import logging
 from collections import defaultdict
@@ -10,20 +15,12 @@ from pathlib import Path
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
 from .conflict_resolution import (
-from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType
-from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
-                # ast is imported at module level
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Automated conflict resolution system integrating semantic analysis and intelligent merging."""
-
-
     ConflictResolutionEngine,
     ConflictSeverity,
     ResolutionStrategy,
 )
+from .semantic_analyzer import SemanticAnalyzer, SemanticConflict, SemanticConflictType
+from .semantic_merger import MergeResolution, MergeResult, SemanticMerger
 
 logger = logging.getLogger(__name__)
 

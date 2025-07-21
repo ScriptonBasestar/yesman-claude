@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Base command class with common functionality."""
+
 from typing import Any
 import json
 import logging
@@ -13,25 +20,14 @@ from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
 from .claude_manager import ClaudeManager
 from .error_handling import (
-from .services import get_config, get_tmux_manager, initialize_services
-from .settings import ValidationPatterns, settings
-
-#!/usr/bin/env python3
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Base command class with common functionality."""
-
-
-
-
     ConfigurationError,
     ErrorContext,
     ErrorSeverity,
     YesmanError,
     error_handler,
 )
+from .services import get_config, get_tmux_manager, initialize_services
+from .settings import ValidationPatterns, settings
 
 
 class CommandError(YesmanError):
@@ -42,14 +38,14 @@ class CommandError(YesmanError):
         message: str,
         exit_code: int = 1,
         recovery_hint: str | None = None,
-        **kwargs: object,
+        **kwargs,
     ) -> None:
         super().__init__(
             message=message,
             severity=ErrorSeverity.MEDIUM,
             exit_code=exit_code,
             recovery_hint=recovery_hint,
-            **kwargs: object,
+            **kwargs,
         )
 
 
@@ -180,7 +176,7 @@ class BaseCommand(ABC):
         else:
             error_handler.handle_error(error, exit_on_critical=True)
 
-    def log_command_start(self, command_name: str, **kwargs: object) -> None:
+    def log_command_start(self, command_name: str, **kwargs) -> None:
         """Log command start with parameters."""
         params = ", ".join(f"{k}={v}" for k, v in kwargs.items() if v is not None)
         self.logger.info(f"Starting command: {command_name}" + (f" with {params}" if params else ""))
@@ -219,19 +215,18 @@ class BaseCommand(ABC):
         click.echo(click.style(f"ℹ️  {message}", fg="blue"))
 
     @abstractmethod
-    @staticmethod
-    def execute(**kwargs: object) -> object:
+    def execute(self, **kwargs) -> object:
         """Execute the command (must be implemented by subclasses)."""
 
-    def run(self, **kwargs: object) -> object:
+    def run(self, **kwargs) -> object:
         """Main execution wrapper with error handling."""
         command_name = self.__class__.__name__.replace("Command", "").lower()
 
         try:
-            self.log_command_start(command_name, **kwargs: dict[str, object])
+            self.log_command_start(command_name, **kwargs)
             self.validate_preconditions()
 
-            result = self.execute(**kwargs: dict[str, object])
+            result = self.execute(**kwargs)
 
             self.log_command_end(command_name, success=True)
             self.handle_success(result)

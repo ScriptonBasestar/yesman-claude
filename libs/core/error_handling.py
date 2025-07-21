@@ -116,7 +116,7 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, config_file: str | None = None, **kwargs: object) -> None:
+    def __init__(self, message: str, config_file: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -131,14 +131,14 @@ class ConfigurationError(YesmanError):
             message,
             category=ErrorCategory.CONFIGURATION,
             context=context,
-            **kwargs: object,
+            **kwargs,
         )
 
 
 class ValidationError(YesmanError):
     """Validation-related errors."""
 
-    def __init__(self, message: str, field_name: str | None = None, **kwargs: object) -> None:
+    def __init__(self, message: str, field_name: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -156,14 +156,14 @@ class ValidationError(YesmanError):
             message,
             category=ErrorCategory.VALIDATION,
             context=context,
-            **kwargs: object,
+            **kwargs,
         )
 
 
 class SessionError(YesmanError):
     """Session management related errors."""
 
-    def __init__(self, message: str, session_name: str | None = None, **kwargs: object) -> None:
+    def __init__(self, message: str, session_name: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -181,14 +181,14 @@ class SessionError(YesmanError):
             message,
             category=ErrorCategory.SYSTEM,
             context=context,
-            **kwargs: object,
+            **kwargs,
         )
 
 
 class NetworkError(YesmanError):
     """Network-related errors."""
 
-    def __init__(self, message: str, endpoint: str | None = None, **kwargs: object) -> None:
+    def __init__(self, message: str, endpoint: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -198,14 +198,14 @@ class NetworkError(YesmanError):
             message,
             category=ErrorCategory.NETWORK,
             context=context,
-            **kwargs: object,
+            **kwargs,
         )
 
 
 class PermissionError(YesmanError):
     """Permission-related errors."""
 
-    def __init__(self, message: str, resource_path: str | None = None, **kwargs: object) -> None:
+    def __init__(self, message: str, resource_path: str | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -215,14 +215,14 @@ class PermissionError(YesmanError):
             message,
             category=ErrorCategory.PERMISSION,
             context=context,
-            **kwargs: object,
+            **kwargs,
         )
 
 
 class TimeoutError(YesmanError):
     """Timeout-related errors."""
 
-    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: object) -> None:
+    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs) -> None:
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
@@ -232,7 +232,7 @@ class TimeoutError(YesmanError):
             message,
             category=ErrorCategory.TIMEOUT,
             context=context,
-            **kwargs: object,
+            **kwargs,
         )
 
 
@@ -364,9 +364,9 @@ error_handler = ErrorHandler()
 def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
     """Decorator for automatic exception handling."""
 
-    def wrapper(*args: object, **kwargs: object) -> object:
+    def wrapper(*args, **kwargs) -> object:
         try:
-            return func(*args: object, **kwargs)
+            return func(*args, **kwargs)
         except YesmanError as e:
             error_handler.handle_error(e)
         except Exception as e:
@@ -384,9 +384,9 @@ def safe_execute(
     operation: str,
     component: str,
     func: Callable[..., object],
-    *args: object,
+    *args,
     error_category: ErrorCategory = ErrorCategory.UNKNOWN,
-    **kwargs: object,
+    **kwargs,
 ) -> object:
     """Safely execute a function with error handling.
 
@@ -402,7 +402,7 @@ def safe_execute(
         Function result or None on error
     """
     try:
-        return func(*args: object, **kwargs)
+        return func(*args, **kwargs)
     except Exception as e:
         context = ErrorContext(
             operation=operation,

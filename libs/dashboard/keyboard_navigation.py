@@ -5,7 +5,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import object, Optional
+from typing import Any, Optional
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -408,7 +408,7 @@ class KeyboardNavigationManager:
         # Execute action
         return self.execute_action(best_binding.action)
 
-    def execute_action(self, action_name: str, *args: object, **kwargs) -> bool:
+    def execute_action(self, action_name: str, *args, **kwargs) -> bool:
         """Execute a registered action.
 
         Args:
@@ -427,9 +427,9 @@ class KeyboardNavigationManager:
 
             # Handle async actions
             if asyncio.iscoroutinefunction(handler):
-                asyncio.create_task(handler(*args: object, **kwargs))
+                asyncio.create_task(handler(*args, **kwargs))
             else:
-                handler(*args: object, **kwargs)
+                handler(*args, **kwargs)
 
             logger.debug("Executed action: %s", action_name)
             return True

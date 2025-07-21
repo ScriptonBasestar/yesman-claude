@@ -633,14 +633,14 @@ class BranchTestManager:
         name: str,
         test_type: TestType,
         command: list[str],
-        **kwargs: object,
+        **kwargs,
     ) -> None:
         """Configure or update a test suite."""
         self.test_suites[name] = TestSuite(
             name=name,
             test_type=test_type,
             command=command,
-            **kwargs: object,
+            **kwargs,
         )
         self._save_test_configuration()
         logger.info("Configured test suite: %s", name)

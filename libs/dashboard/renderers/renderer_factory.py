@@ -101,7 +101,7 @@ class RendererFactory:
                     ) from e
 
     @classmethod
-    def create(cls, render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
+    def create(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
         """Create a renderer instance for the specified format.
 
         Args:
@@ -126,7 +126,7 @@ class RendererFactory:
 
         try:
             renderer_class = cls._renderer_classes[render_format]
-            return renderer_class(**kwargs: dict[str, object])
+            return renderer_class(**kwargs)
         except Exception as e:
             msg = f"Failed to create {render_format.value} renderer: {e}"
             raise RendererInitializationError(
@@ -134,7 +134,7 @@ class RendererFactory:
             ) from e
 
     @classmethod
-    def get_singleton(cls, render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
+    def get_singleton(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
         """Get or create a singleton renderer instance.
 
         Args:
@@ -146,7 +146,7 @@ class RendererFactory:
         """
         with cls._lock:
             if render_format not in cls._instances:
-                cls._instances[render_format] = cls.create(render_format, **kwargs: dict[str, object])
+                cls._instances[render_format] = cls.create(render_format, **kwargs)
             return cls._instances[render_format]
 
     @classmethod
@@ -346,7 +346,7 @@ def render_formats(
     return results
 
 
-def create_renderer(render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
+def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
     """Create a new renderer instance.
 
     Args:
@@ -356,10 +356,10 @@ def create_renderer(render_format: RenderFormat, **kwargs: dict[str, object]) ->
     Returns:
         New renderer instance
     """
-    return RendererFactory.create(render_format, **kwargs: dict[str, object])
+    return RendererFactory.create(render_format, **kwargs)
 
 
-def get_renderer(render_format: RenderFormat, **kwargs: dict[str, object]) -> BaseRenderer:
+def get_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
     """Get singleton renderer instance.
 
     Args:
@@ -369,4 +369,4 @@ def get_renderer(render_format: RenderFormat, **kwargs: dict[str, object]) -> Ba
     Returns:
         Singleton renderer instance
     """
-    return RendererFactory.get_singleton(render_format, **kwargs: dict[str, object])
+    return RendererFactory.get_singleton(render_format, **kwargs)

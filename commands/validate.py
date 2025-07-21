@@ -19,7 +19,7 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 class ValidateCommand(BaseCommand, SessionCommandMixin):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
 
-    def execute(self, session_name: str | None = None, format: str = "table", **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:  # noqa: ARG002
         """Execute the validate command.
 
         Returns:

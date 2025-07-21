@@ -424,7 +424,7 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         project_path: str = ".",
         update_interval: float = 5.0,
         interactive: bool = False,  # noqa: FBT001
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the async status command."""
         try:

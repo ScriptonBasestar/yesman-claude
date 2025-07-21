@@ -1,7 +1,7 @@
 # Copyright notice.
 
 from collections.abc import Callable
-from typing import object, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

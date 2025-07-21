@@ -1,11 +1,5 @@
 # Copyright notice.
 
-import json
-import uuid
-from datetime import UTC, datetime
-from .base_renderer import BaseRenderer, RenderFormat, WidgetType
-from .widget_models import (
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -13,7 +7,11 @@ from .widget_models import (
 JSON-based renderer for Tauri desktop application integration.
 """
 
-
+import json
+import uuid
+from datetime import UTC, datetime
+from .base_renderer import BaseRenderer, RenderFormat, WidgetType
+from .widget_models import (
     ActivityData,
     ChartData,
     HealthData,

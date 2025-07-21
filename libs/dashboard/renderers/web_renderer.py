@@ -1,12 +1,5 @@
 # Copyright notice.
 
-import html
-import json
-import uuid
-from datetime import UTC, datetime
-from .base_renderer import BaseRenderer, RenderFormat, WidgetType
-from .widget_models import (
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -14,7 +7,13 @@ from .widget_models import (
 HTML/JavaScript generator for dashboard widgets.
 """
 
-
+import html
+import json
+import uuid
+from datetime import UTC, datetime
+from typing import Any
+from .base_renderer import BaseRenderer, RenderFormat, WidgetType
+from .widget_models import (
     ActivityData,
     ChartData,
     HealthData,
@@ -34,7 +33,7 @@ class WebRenderer(BaseRenderer):
     and JavaScript data binding for interactive dashboard widgets.
     """
 
-    def __init__(self, theme: dict[str] | None = None) -> None:
+    def __init__(self, theme: dict[str, Any] | None = None) -> None:
         """Initialize web renderer.
 
         Args:
@@ -66,7 +65,7 @@ class WebRenderer(BaseRenderer):
         self,
         widget_type: WidgetType,
         data: object,
-        options: dict[str] | None = None,
+        options: dict[str, Any] | None = None,
     ) -> str:
         """Render a single widget as HTML.
 
@@ -104,8 +103,8 @@ class WebRenderer(BaseRenderer):
 
     def render_layout(
         self,
-        widgets: list[dict[str]],
-        layout_config: dict[str] | None = None,
+        widgets: list[dict[str, Any]],
+        layout_config: dict[str, Any] | None = None,
     ) -> str:
         """Render a layout containing multiple widgets.
 
@@ -136,7 +135,7 @@ class WebRenderer(BaseRenderer):
             return self._render_flex_layout(rendered_widgets, layout_config)
         return self._render_vertical_layout(rendered_widgets, layout_config)
 
-    def render_container(self, content: str, container_config: dict[str] | None = None) -> str:
+    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """Render a container wrapping content.
 
         Args:
@@ -181,7 +180,7 @@ class WebRenderer(BaseRenderer):
     def _render_session_browser(
         self,
         data: SessionData | list[SessionData],
-        options: dict[str],
+        options: dict[str, Any],
         component_id: str,
     ) -> str:
         """Render session browser widget."""
@@ -201,7 +200,7 @@ class WebRenderer(BaseRenderer):
             return self._render_session_list(sessions, options, component_id)
         return self._render_session_table(sessions, options, component_id)
 
-    def _render_session_table(self, sessions: list[SessionData], options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render sessions as table."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-table overflow-hidden">',
@@ -287,7 +286,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_session_cards(self, sessions: list[SessionData], options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render sessions as cards."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-cards">',
@@ -351,7 +350,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_session_list(self, sessions: list[SessionData], options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_session_list(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render sessions as list."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-list">',
@@ -411,7 +410,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_health_meter(self, data: HealthData, options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_health_meter(self, data: HealthData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render health meter widget."""
         if not isinstance(data, HealthData):
             return self._render_error_widget("Invalid health data", component_id)
@@ -472,7 +471,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_activity_heatmap(self, data: ActivityData, options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render activity heatmap widget."""
         if not isinstance(data, ActivityData):
             return self._render_error_widget("Invalid activity data", component_id)
@@ -526,7 +525,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_progress_tracker(self, data: ProgressData, options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render progress tracker widget."""
         if not isinstance(data, ProgressData):
             return self._render_error_widget("Invalid progress data", component_id)
@@ -594,7 +593,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_log_viewer(self, data: dict[str], options: dict[str], component_id: str) -> str:
+    def _render_log_viewer(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:
         """Render log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 10)
@@ -658,7 +657,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_metric_card(self, data: MetricCardData, options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_metric_card(self, data: MetricCardData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render metric card widget."""
         if not isinstance(data, MetricCardData):
             return self._render_error_widget("Invalid metric data", component_id)
@@ -746,7 +745,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             return self._render_error_widget("Invalid status data", component_id)
@@ -787,7 +786,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_chart(self, data: ChartData, options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_chart(self, data: ChartData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render chart widget."""
         if not isinstance(data, ChartData):
             return self._render_error_widget("Invalid chart data", component_id)
@@ -816,7 +815,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_table(self, data: dict[str], options: dict[str], component_id: str) -> str:  # noqa: ARG002
+    def _render_table(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render generic table."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -889,7 +888,7 @@ class WebRenderer(BaseRenderer):
         self,
         widget_type: WidgetType,
         data: object,
-        options: dict[str],  # noqa: ARG002
+        options: dict[str, Any],  # noqa: ARG002
         component_id: str,
     ) -> str:
         """Render generic widget fallback."""
@@ -923,7 +922,7 @@ class WebRenderer(BaseRenderer):
     # Layout renderers
 
     @staticmethod
-    def _render_vertical_layout(widgets: list[str], config: dict[str]) -> str:
+    def _render_vertical_layout(widgets: list[str], config: dict[str, Any]) -> str:
         """Render widgets in vertical layout."""
         spacing = config.get("spacing", "space-y-4")
         css_classes = ["dashboard-layout-vertical", spacing]
@@ -935,7 +934,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     @staticmethod
-    def _render_flex_layout(widgets: list[str], config: dict[str]) -> str:
+    def _render_flex_layout(widgets: list[str], config: dict[str, Any]) -> str:
         """Render widgets in flex layout."""
         direction = config.get("direction", "row")
         gap = config.get("gap", "gap-4")
@@ -953,7 +952,7 @@ class WebRenderer(BaseRenderer):
         return "\\n".join(html_parts)
 
     @staticmethod
-    def _render_grid_layout(widgets: list[str], config: dict[str]) -> str:
+    def _render_grid_layout(widgets: list[str], config: dict[str, Any]) -> str:
         """Render widgets in grid layout."""
         columns = config.get("columns", 2)
         gap = config.get("gap", "gap-4")
@@ -987,7 +986,7 @@ class WebRenderer(BaseRenderer):
         return color_mapping.get(health_level, "gray-600")
 
     @staticmethod
-    def _embed_widget_data(component_id: str, data: dict[str]) -> str:
+    def _embed_widget_data(component_id: str, data: dict[str, Any]) -> str:
         """Embed JavaScript data for widget."""
         json_data = json.dumps(data, default=str, ensure_ascii=False)
 

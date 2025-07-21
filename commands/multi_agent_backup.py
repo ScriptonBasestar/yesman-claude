@@ -111,7 +111,7 @@ RISK_THRESHOLD_MEDIUM = 0.4
 class StartAgentsCommand(BaseCommand):
     """Start the multi-agent pool."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -175,7 +175,7 @@ class StartAgentsCommand(BaseCommand):
 class MonitorAgentsCommand(BaseCommand):
     """Start real-time agent monitoring dashboard."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -239,7 +239,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -296,7 +296,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -327,7 +327,7 @@ class StopAgentsCommand(BaseCommand):
 class AddTaskCommand(BaseCommand):
     """Add a task to the agent pool queue."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the add task command."""
         # Extract parameters from kwargs
         title = kwargs.get("title", "")
@@ -374,7 +374,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -438,7 +438,7 @@ class ListTasksCommand(BaseCommand):
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -543,7 +543,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -612,7 +612,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -681,7 +681,7 @@ class ConflictSummaryCommand(BaseCommand):
 class PredictConflictsCommand(BaseCommand):
     """Predict potential conflicts between branches."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -801,7 +801,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show conflict prediction summary and statistics."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -876,7 +876,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns between branches."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -972,7 +972,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 class AnalyzeSemanticConflictsCommand(BaseCommand):
     """Analyze AST-based semantic conflicts between branches."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1063,7 +1063,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic structure summary of code."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1130,7 +1130,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Compare function signatures between branches."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1198,7 +1198,7 @@ class FunctionDiffCommand(BaseCommand):
 class SemanticMergeCommand(BaseCommand):
     """Perform intelligent semantic merge."""
 
-    def execute(self, **kwargs: object) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 

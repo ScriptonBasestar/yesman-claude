@@ -229,7 +229,7 @@ class FileWatcher:
 class CachedConfigLoader:
     """Configuration loader with caching capabilities."""
 
-    def __init__(base_loader: cache_ttl, float = 300.0) -> None:
+    def __init__(self, base_loader, cache_ttl: float = 300.0) -> None:
         """Initialize cached config loader.
 
         Args:

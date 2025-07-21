@@ -2,21 +2,13 @@
 
 import threading
 import time
+from typing import Any
 from libs.dashboard.renderers.base_renderer import (
-from libs.dashboard.renderers.optimizations import (
-from libs.dashboard.renderers.tui_renderer import TUIRenderer
-from libs.dashboard.renderers.widget_models import MetricCardData
-
-# Licensed under the MIT License
-
-"""Tests for Rendering Optimizations and Caching."""
-
-
-
     BaseRenderer,
     RenderFormat,
     WidgetType,
 )
+from libs.dashboard.renderers.optimizations import (
     BatchRenderer,
     CacheStats,
     LazyRenderer,
@@ -31,6 +23,11 @@ from libs.dashboard.renderers.widget_models import MetricCardData
     global_profiler,
     profile_render,
 )
+from libs.dashboard.renderers.tui_renderer import TUIRenderer
+from libs.dashboard.renderers.widget_models import MetricCardData
+
+
+"""Tests for Rendering Optimizations and Caching."""
 
 
 class MockRenderer(BaseRenderer):
@@ -42,7 +39,7 @@ class MockRenderer(BaseRenderer):
         self.render_count = 0
         self.last_params = None
 
-    def render_widget(data: options, dict | None = None) -> str:
+    def render_widget(self, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
         self.render_count += 1
         self.last_params = (widget_type, data, options)
 
@@ -231,7 +228,7 @@ class TestRenderCache:
 
         threads = []
         for i in range(5):
-            thread = threading.Thread(target=cache_worker, args=(i))
+            thread = threading.Thread(target=cache_worker, args=(i,))
             threads.append(thread)
             thread.start()
 
@@ -253,9 +250,10 @@ class TestCachedDecorators:
 
     def test_cached_render_decorator(self) -> None:
         """Test cached_render decorator."""
+        self.render_count = 0
 
         @cached_render(self.cache)
-        def mock_render(data: options, dict | None = None) -> str:
+        def mock_render(widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
             self.render_count += 1
             return f"render-{self.render_count}"
 

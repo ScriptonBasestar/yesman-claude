@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 class TaskRunnerNextCommand(BaseCommand):
     """Process the next available task."""
 
-    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs: dict[str, object]) -> dict:  # noqa: FBT001, ARG002
+    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the next command.
 
     Returns:
@@ -61,7 +61,7 @@ class TaskRunnerRunCommand(BaseCommand):
         directory: str | None = None,
         max_iterations: int = 100,
         dry_run: bool = False,  # noqa: FBT001
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the run command.
 
@@ -122,7 +122,7 @@ class TaskRunnerRunCommand(BaseCommand):
 class TaskRunnerStatusCommand(BaseCommand):
     """Show current task status."""
 
-    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs: dict[str, object]) -> dict:  # noqa: FBT001, ARG002
+    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the status command.
 
     Returns:
@@ -208,7 +208,7 @@ class TaskRunnerStatusCommand(BaseCommand):
 class TaskRunnerAddCommand(BaseCommand):
     """Add a new task to a todo file."""
 
-    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the add command.
 
     Returns:

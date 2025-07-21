@@ -383,7 +383,7 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def update_config(self, **kwargs: dict[str, object]) -> None:
+    def update_config(self, **kwargs) -> None:
         """Update batch processing configuration."""
         for key, value in kwargs.items():
             if hasattr(self.config, key):

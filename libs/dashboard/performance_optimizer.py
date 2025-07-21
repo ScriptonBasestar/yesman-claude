@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from functools import wraps
-from typing import Optional, object, Any
+from typing import Optional, Any, Any
 import psutil
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -171,9 +171,9 @@ class PerformanceProfiler:
             name = operation_name or f"{func.__module__}.{func.__name__}"
 
             @wraps(func)
-            def wrapper(*args: object, **kwargs: object) -> object:
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
                 with self.measure(name):
-                    return func(*args: object, **kwargs)
+                    return func(*args, **kwargs)
 
             return wrapper
 

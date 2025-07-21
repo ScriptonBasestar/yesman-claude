@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import object, Never
+from typing import Any, Never
 from unittest.mock import MagicMock, patch
 import pytest
 from commands.show import ShowCommand

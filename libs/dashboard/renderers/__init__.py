@@ -1,15 +1,5 @@
 # Copyright notice.
 
-from .base_renderer import BaseRenderer, RenderFormat, ThemeColor, WidgetType
-from .optimizations import (
-from .registry import RendererRegistry
-from .renderer_factory import (
-from .tauri_renderer import TauriRenderer
-from .tui_renderer import TUIRenderer
-from .web_renderer import WebRenderer
-from .widget_adapter import WidgetDataAdapter
-from .widget_models import (
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -17,6 +7,8 @@ from .widget_models import (
 Multi-format rendering system for Yesman Claude dashboard.
 """
 
+from .base_renderer import BaseRenderer, RenderFormat, ThemeColor, WidgetType
+from .optimizations import (
     BatchRenderer,
     CacheStats,
     LazyRenderer,
@@ -31,6 +23,8 @@ Multi-format rendering system for Yesman Claude dashboard.
     get_performance_stats,
     profile_render,
 )
+from .registry import RendererRegistry
+from .renderer_factory import (
     RendererFactory,
     RendererFactoryError,
     RendererInitializationError,
@@ -41,6 +35,11 @@ Multi-format rendering system for Yesman Claude dashboard.
     render_formats,
     render_widget,
 )
+from .tauri_renderer import TauriRenderer
+from .tui_renderer import TUIRenderer
+from .web_renderer import WebRenderer
+from .widget_adapter import WidgetDataAdapter
+from .widget_models import (
     ActivityData,
     ActivityEntry,
     ActivityType,

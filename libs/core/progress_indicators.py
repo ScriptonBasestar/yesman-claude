@@ -2,11 +2,6 @@
 
 # Copyright notice.
 
-from collections.abc import Callable, Iterator
-from contextlib import contextmanager
-from rich.console import Console
-from rich.progress import (
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -16,7 +11,10 @@ Provides standardized progress indicators using Rich library
 for consistent user experience across all commands.
 """
 
-
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from rich.console import Console
+from rich.progress import (
     BarColumn,
     Progress,
     SpinnerColumn,
@@ -216,7 +214,7 @@ class ProgressManager:
     @staticmethod
     def file_batch_operation(
         files: list[object],
-        operation: Callable[[object]],
+        operation: Callable[[object], object],
         description: str = "🔧 Processing files",
         style: str = ProgressStyle.FILE_OPERATIONS,
     ) -> list[object]:

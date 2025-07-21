@@ -14,7 +14,7 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
-    def execute(self, **kwargs: dict[str, object]) -> dict[str]:
+    def execute(self, **kwargs) -> dict[str]:
         """Execute the command.
 
     Returns:

@@ -28,7 +28,7 @@ class PredictConflictsCommand(BaseCommand):
         time_horizon: int = 7,
         min_confidence: float = 0.3,
         limit: int = 10,
-        **kwargs: object,  # noqa: ARG002
+        **kwargs,  # noqa: ARG002
     ) -> dict:
         """Execute the predict conflicts command.
 
@@ -121,7 +121,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show prediction summary and statistics."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the prediction summary command.
 
         Returns:
@@ -163,7 +163,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns and trends."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the analyze conflict patterns command.
 
         Returns:

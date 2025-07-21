@@ -1,29 +1,26 @@
-from typing import Any
-import click
-from libs.core.base_command import (
-from libs.core.progress_indicators import with_startup_progress
-from libs.core.session_setup import SessionSetupService
-
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Improved setup command using refactored session setup logic."""
 
-
+from typing import Any
+import click
+from libs.core.base_command import (
     BaseCommand,
     CommandError,
     ConfigCommandMixin,
     SessionCommandMixin,
 )
+from libs.core.progress_indicators import with_startup_progress
+from libs.core.session_setup import SessionSetupService
 
 
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     """Create all tmux sessions defined in projects.yaml."""
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the setup command.
 
         Args:

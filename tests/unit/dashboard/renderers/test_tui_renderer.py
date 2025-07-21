@@ -6,15 +6,6 @@ from rich.console import Console
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.tui_renderer import TUIRenderer
 from libs.dashboard.renderers.widget_models import (
-
-    Copyright,
-    Licensed,
-
-)
-"""Tests for TUI Renderer."""
-
-
-
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -31,6 +22,9 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
+
+
+"""Tests for TUI Renderer."""
 
 
 class TestTUIRenderer:

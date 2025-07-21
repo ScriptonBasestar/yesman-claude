@@ -29,7 +29,7 @@ class TestBatch:
 class TestBatchProcessor(BaseBatchProcessor[str, TestBatch]):
     """Test implementation of batch processor."""
 
-    def __init__(self, **kwargs: dict[str, object]) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs: dict[str, object])
         self.processed_batches: list[TestBatch] = []
         self.process_delay = 0.0  # For testing timing

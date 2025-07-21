@@ -126,7 +126,7 @@ class IntegrationTestBase:
             self.session_manager = SessionManager()
         return self.session_manager
 
-    def create_test_session(self, session_name: str, **kwargs: dict[str, object]) -> dict[str, object]:
+    def create_test_session(self, session_name: str, **kwargs) -> dict[str, object]:
         """Create a test session with specified configuration."""
         config = {
             "name": session_name,
@@ -137,7 +137,7 @@ class IntegrationTestBase:
                     "panes": [{"shell_command": ["echo", "test session"]}],
                 }
             ],
-            **kwargs: object,
+            **kwargs: Any,
         }
 
         # Add to projects file
@@ -291,7 +291,7 @@ class CommandTestRunner:
         self.test_base = test_base
         self.command_results = []
 
-    def run_command(self, command_class: type, **kwargs: dict[str, object]) -> dict[str, object]:
+    def run_command(self, command_class: type, **kwargs) -> dict[str, object]:
         """Run a command and capture results."""
         command = command_class()
 

@@ -4,7 +4,7 @@
 
 import asyncio
 import time
-from typing import Never, object
+from typing import Never, Any
 from unittest.mock import AsyncMock, Mock
 import pytest
 from commands.automate import AutomateMonitorCommand

@@ -1,7 +1,13 @@
 # Copyright notice.
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Comprehensive project status dashboard command."""
+
 import time
 from pathlib import Path
+from typing import Any
 import click
 from rich.console import Console
 from rich.layout import Layout
@@ -10,21 +16,13 @@ from rich.panel import Panel
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets import (
-from libs.dashboard.widgets.session_progress import SessionProgressWidget
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Comprehensive project status dashboard command."""
-
-
-
     ActivityHeatmapGenerator,
     GitActivityWidget,
     ProgressTracker,
     ProjectHealth,
     SessionBrowser,
 )
+from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 
 class StatusDashboard:
@@ -278,7 +276,7 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
         interactive: bool = False,  # noqa: FBT001
         update_interval: float = 5.0,
         detailed: bool = False,  # noqa: FBT001
-        **kwargs: object,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002
     ) -> dict:
         """Execute the status command."""
         try:

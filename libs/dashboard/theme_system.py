@@ -8,8 +8,12 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import object, Optional
-import winreg
+from typing import Any, Optional
+
+try:
+    import winreg
+except ImportError:
+    winreg = None
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -302,6 +306,10 @@ class SystemThemeDetector:
 
     Returns:
         Thememode object the requested data."""
+        if winreg is None:
+            logger.warning("winreg not available on non-Windows platform")
+            return ThemeMode.LIGHT
+            
         try:
 
             # Check Windows registry for theme preference
@@ -312,10 +320,6 @@ class SystemThemeDetector:
 
             value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")  # type: ignore[attr-defined]
             winreg.CloseKey(key)  # type: ignore[attr-defined]
-
-        except ImportError:
-            logger.warning("winreg not available")
-            return ThemeMode.LIGHT
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("Windows theme detection failed: %s", e)
             return ThemeMode.LIGHT

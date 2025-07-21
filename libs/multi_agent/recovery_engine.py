@@ -14,7 +14,7 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from .types import Agent, AgentState, Task, TaskStatus
-                    from .branch_manager import BranchInfo
+from .branch_manager import BranchInfo
 import re
 
 # Copyright (c) 2024 Yesman Claude Project

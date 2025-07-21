@@ -8,20 +8,6 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widgets import (
-from .renderers import TUIRenderer, WidgetType
-from .renderers.widget_models import (
-from textual.timer import Timer
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""TUI Dashboard.
-
-Textual-based terminal user interface dashboard for Yesman-Claude
-Provides comprehensive project monitoring with multiple views and real-time updates.
-"""
-
-
     Footer,
     Header,
     Label,
@@ -32,7 +18,9 @@ Provides comprehensive project monitoring with multiple views and real-time upda
     TabbedContent,
     TabPane,
 )
-
+from textual.timer import Timer
+from .renderers import TUIRenderer, WidgetType
+from .renderers.widget_models import (
     ActivityData,
     HealthCategoryData,
     HealthData,
@@ -41,7 +29,17 @@ Provides comprehensive project monitoring with multiple views and real-time upda
     SessionStatus,
 )
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""TUI Dashboard.
+
+Textual-based terminal user interface dashboard for Yesman-Claude
+Provides comprehensive project monitoring with multiple views and real-time updates.
+"""
+
 if TYPE_CHECKING:
+    pass
 
 
 class DashboardWidget(Static):
@@ -56,7 +54,7 @@ class DashboardWidget(Static):
         widget_type: WidgetType,
         title: str = "",
         update_interval: float = 2.0,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
         """Initialize dashboard widget.
 
@@ -65,7 +63,7 @@ class DashboardWidget(Static):
             title: Widget title for display
             update_interval: Auto-update interval in seconds
         """
-        super().__init__(**kwargs: dict[str, object])
+        super().__init__(**kwargs)
         self.widget_type = widget_type
         self.title = title
         self.update_interval = update_interval
@@ -132,12 +130,12 @@ class DashboardWidget(Static):
 class SessionsView(DashboardWidget):
     """Sessions monitoring view."""
 
-    def __init__(self, **kwargs: object) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             widget_type=WidgetType.SESSION_BROWSER,
             title="Active Sessions",
             update_interval=3.0,
-            **kwargs: object,
+            **kwargs,
         )
 
     async def auto_update(self) -> None:
@@ -167,12 +165,12 @@ class SessionsView(DashboardWidget):
 class HealthView(DashboardWidget):
     """Project health monitoring view."""
 
-    def __init__(self, **kwargs: object) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             widget_type=WidgetType.PROJECT_HEALTH,
             title="Project Health",
             update_interval=5.0,
-            **kwargs: object,
+            **kwargs,
         )
 
     async def auto_update(self) -> None:
@@ -200,12 +198,12 @@ class HealthView(DashboardWidget):
 class ActivityView(DashboardWidget):
     """Activity monitoring view."""
 
-    def __init__(self, **kwargs: object) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             widget_type=WidgetType.ACTIVITY_HEATMAP,
             title="Activity Heatmap",
             update_interval=10.0,
-            **kwargs: object,
+            **kwargs,
         )
 
     async def auto_update(self) -> None:
@@ -226,8 +224,8 @@ class ActivityView(DashboardWidget):
 class LogsView(Static):
     """Logs monitoring view."""
 
-    def __init__(self, **kwargs: object) -> None:
-        super().__init__(**kwargs: dict[str, object])
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.log_buffer: list[str] = []
         self.max_logs = 100
 
@@ -271,8 +269,8 @@ class LogsView(Static):
 class SettingsView(Static):
     """Settings and configuration view."""
 
-    def __init__(self, **kwargs: object) -> None:
-        super().__init__(**kwargs: dict[str, object])
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.settings: dict[str, object] = {
             "auto_refresh": True,
             "refresh_interval": 3.0,
@@ -349,9 +347,9 @@ class TUIDashboard(App):
     auto_refresh_enabled = reactive(True)
     refresh_interval = reactive(3.0)
 
-    def __init__(self, **kwargs: object) -> None:
+    def __init__(self, **kwargs) -> None:
         """Initialize TUI Dashboard."""
-        super().__init__(**kwargs: dict[str, object])
+        super().__init__(**kwargs)
         self.title = "Yesman-Claude TUI Dashboard"
         self.sub_title = "Real-time Project Monitoring"
 

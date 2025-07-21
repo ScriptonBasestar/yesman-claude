@@ -4,6 +4,7 @@ import re
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -63,7 +64,7 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(self, format_type: RenderFormat, theme: dict[str] | None = None) -> None:
+    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None) -> None:
         """Initialize base renderer.
 
         Args:
@@ -73,15 +74,14 @@ class BaseRenderer(ABC):
         """
         self.format_type = format_type
         self.theme = theme or self._get_default_theme()
-        self._cache: dict[str] = {}
+        self._cache: dict[str, Any] = {}
 
     @abstractmethod
-    @staticmethod
     def render_widget(
         self,
         widget_type: WidgetType,
         data: object,
-        options: dict[str] | None = None,
+        options: dict[str, Any] | None = None,
     ) -> str:
         """Render a single widget.
 
@@ -93,11 +93,10 @@ class BaseRenderer(ABC):
         """
 
     @abstractmethod
-    @staticmethod
     def render_layout(
         self,
-        widgets: list[dict[str]],
-        layout_config: dict[str] | None = None,
+        widgets: list[dict[str, Any]],
+        layout_config: dict[str, Any] | None = None,
     ) -> str:
         """Render a layout containing multiple widgets.
 
@@ -110,8 +109,7 @@ class BaseRenderer(ABC):
         """
 
     @abstractmethod
-    @staticmethod
-    def render_container(content: str, container_config: dict[str] | None = None) -> str:
+    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """Render a container wrapping content.
 
         Args:
@@ -356,7 +354,7 @@ class BaseRenderer(ABC):
         return total_score / total_weight if total_weight > 0 else 0.0
 
     @staticmethod
-    def _get_default_theme() -> dict[str]:
+    def _get_default_theme() -> dict[str, Any]:
         """Get default theme configuration.
 
         Returns:
@@ -416,7 +414,7 @@ class BaseRenderer(ABC):
         """Clear the internal cache."""
         self._cache.clear()
 
-    def set_theme(self, theme: dict[str]) -> None:
+    def set_theme(self, theme: dict[str, Any]) -> None:
         """Set new theme configuration.
 
         Args:

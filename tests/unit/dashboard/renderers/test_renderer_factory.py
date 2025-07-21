@@ -4,27 +4,14 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
+from typing import Any
 import pytest
 from libs.dashboard.renderers.base_renderer import (
-from libs.dashboard.renderers.renderer_factory import (
-from libs.dashboard.renderers.tauri_renderer import TauriRenderer
-from libs.dashboard.renderers.tui_renderer import TUIRenderer
-from libs.dashboard.renderers.web_renderer import WebRenderer
-from libs.dashboard.renderers.widget_models import (
-
-    Copyright,
-    Licensed,
-
-)
-"""Tests for Renderer Factory."""
-
-
-
-
     BaseRenderer,
     RenderFormat,
     WidgetType,
 )
+from libs.dashboard.renderers.renderer_factory import (
     RendererFactory,
     RendererFactoryError,
     UnsupportedFormatError,
@@ -34,11 +21,18 @@ from libs.dashboard.renderers.widget_models import (
     render_formats,
     render_widget,
 )
+from libs.dashboard.renderers.tauri_renderer import TauriRenderer
+from libs.dashboard.renderers.tui_renderer import TUIRenderer
+from libs.dashboard.renderers.web_renderer import WebRenderer
+from libs.dashboard.renderers.widget_models import (
     MetricCardData,
     SessionData,
     SessionStatus,
     WindowData,
 )
+
+
+"""Tests for Renderer Factory."""
 
 
 class MockRenderer(BaseRenderer):
@@ -49,7 +43,7 @@ class MockRenderer(BaseRenderer):
         self.should_fail = should_fail
         self.render_count = 0
 
-    def render_widget(data: options, dict[str] | None = None) -> str:  # noqa: ARG002
+    def render_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any] | None = None) -> str:  # noqa: ARG002
         self.render_count += 1
         if self.should_fail:
             msg = "Mock render failure"
@@ -61,7 +55,7 @@ class MockRenderer(BaseRenderer):
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
-    def render_container(content: container_config, dict[str] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
+    def render_container(content: str, container_config: dict[str, Any] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
         return f"mock-container-{type(content).__name__}"
 
     @staticmethod

@@ -8,7 +8,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
-import toml
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -793,7 +796,8 @@ class HealthCalculator:
         """Check Rust/Cargo dependencies."""
         try:
 
-            content = toml.load(cargo_toml_path)
+            with open(cargo_toml_path, 'rb') as f:
+                content = tomllib.load(f)
             deps = content.get("dependencies", {})
             dev_deps = content.get("dev-dependencies", {})
             return (

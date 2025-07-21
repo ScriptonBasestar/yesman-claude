@@ -30,7 +30,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             "show_details": True,
         }
 
-    def execute(self, **kwargs: dict[str, object]) -> dict[str, object]:
+    def execute(self, **kwargs) -> dict[str, object]:
         """Execute the status command.
 
         Args:

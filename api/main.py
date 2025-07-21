@@ -56,7 +56,7 @@ if os.path.exists(sveltekit_build_path):
     # Mount SvelteKit static assets with cache control headers
 
     class CacheControlStaticFiles(StaticFiles):
-        def __init__(self, *args: object, **kwargs: dict[str, object]) -> None:
+        def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs)
 
         @staticmethod

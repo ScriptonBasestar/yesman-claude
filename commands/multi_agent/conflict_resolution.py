@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
     Returns:
@@ -122,7 +122,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
     Returns:
@@ -194,7 +194,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
     Returns:

@@ -116,7 +116,7 @@ MOCK_API_RESPONSES = {
 
 
 # Factory Integration - Bridge between old and new systems
-def get_factory_mock(mock_type: str, **kwargs: dict[str, object]) -> object:
+def get_factory_mock(mock_type: str, **kwargs) -> object:
     """Bridge function to get factory-created mocks
     Provides backward compatibility while encouraging factory usage.
 
@@ -151,7 +151,7 @@ class EnhancedMockTmuxSession(MockTmuxSession):
     @classmethod
     def from_factory(cls, name: str = "test-session", **kwargs) -> object:
         """Create enhanced mock using factory system."""
-        return get_factory_mock("tmux_session", name=name, **kwargs: dict[str, object])
+        return get_factory_mock("tmux_session", name=name, **kwargs)
 
     @classmethod
     def with_windows(cls, name: str = "test-session", window_count: int = 2) -> object:
@@ -163,8 +163,8 @@ class EnhancedMockTmuxSession(MockTmuxSession):
 # Convenience functions for common mock patterns
 def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str]:
     """Create a complete mock session with controller for integration tests."""
-    session_mock = get_factory_mock("session_manager", **kwargs: dict[str, object])
-    claude_mock = get_factory_mock("claude_manager", **kwargs: dict[str, object])
+    session_mock = get_factory_mock("session_manager", **kwargs)
+    claude_mock = get_factory_mock("claude_manager", **kwargs)
 
     return {
         "session_manager": session_mock,

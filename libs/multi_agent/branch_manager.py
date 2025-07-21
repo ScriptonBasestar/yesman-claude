@@ -67,7 +67,7 @@ class BranchManager:
         check: bool = True,  # noqa: FBT001
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result."""
-        cmd = ["git", *args: object]
+        cmd = ["git", *args]
         logger.debug("Running git command: %s", " ".join(cmd))
 
         try:

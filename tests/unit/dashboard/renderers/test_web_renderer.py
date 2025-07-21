@@ -6,14 +6,6 @@ import pytest
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.web_renderer import WebRenderer
 from libs.dashboard.renderers.widget_models import (
-import re
-
-# Licensed under the MIT License
-
-"""Tests for Web Renderer."""
-
-
-
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -30,6 +22,10 @@ import re
     StatusIndicatorData,
     WindowData,
 )
+import re
+
+
+"""Tests for Web Renderer."""
 
 
 class TestWebRenderer:

@@ -11,14 +11,11 @@ from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from pathlib import Path
 # Import scheduler types after main types to avoid circular imports
-from typing import TYPE_CHECKING, object, Any
+from typing import TYPE_CHECKING, Any
 from .types import Agent, AgentState, Task, TaskStatus
-    from .task_scheduler import AgentCapability, TaskScheduler
-    from .task_scheduler import TaskScheduler
-            from .branch_test_manager import BranchTestManager
-            from .recovery_engine import RecoveryEngine
-            from .recovery_engine import OperationType
-            from .task_scheduler import TaskScheduler
+from .task_scheduler import AgentCapability, TaskScheduler
+from .branch_test_manager import BranchTestManager
+from .recovery_engine import RecoveryEngine, OperationType
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -29,7 +26,7 @@ from .types import Agent, AgentState, Task, TaskStatus
 
 
 if TYPE_CHECKING:
-else:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +203,7 @@ class AgentPool:
         command: list[str],
         working_directory: str,
         description: str = "",
-        **kwargs: object,
+        **kwargs,
     ) -> Task:
         """Create and add a task."""
         task = Task(
@@ -215,7 +212,7 @@ class AgentPool:
             description=description,
             command=command,
             working_directory=working_directory,
-            **kwargs: object,
+            **kwargs,
         )
 
         self.add_task(task)

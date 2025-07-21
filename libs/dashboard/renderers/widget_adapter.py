@@ -1,9 +1,5 @@
 # Copyright notice.
 
-import logging
-from datetime import UTC, datetime
-from .widget_models import (
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -11,7 +7,9 @@ from .widget_models import (
 Converts raw data from various sources into standardized widget models.
 """
 
-
+import logging
+from datetime import UTC, datetime
+from .widget_models import (
     ActivityData,
     ActivityEntry,
     ActivityType,

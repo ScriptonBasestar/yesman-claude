@@ -1,5 +1,10 @@
 # Copyright notice.
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Predictive conflict prevention system for proactive multi-agent development."""
+
 import asyncio
 import contextlib
 import hashlib
@@ -12,13 +17,6 @@ from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
 from .conflict_prediction import (
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Predictive conflict prevention system for proactive multi-agent development."""
-
-
     ConflictPattern,
     ConflictPredictor,
     PredictionConfidence,

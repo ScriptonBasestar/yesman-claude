@@ -56,7 +56,8 @@
       "Bash(npm run build:*)",
       "WebFetch(domain:svelte.dev)",
       "Bash(mv:*)",
-      "mcp__shrimp__process_thought"
+      "mcp__shrimp__process_thought",
+      "Bash(/opt/homebrew/Caskroom/miniforge/base/bin/python --version)"
     ],
     "deny": []
   }

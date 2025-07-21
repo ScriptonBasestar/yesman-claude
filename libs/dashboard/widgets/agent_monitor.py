@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, object
+from typing import TYPE_CHECKING, Any
 from rich.align import Align
 from rich.console import Console
 from rich.layout import Layout
@@ -26,6 +26,7 @@ from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 
 
 if TYPE_CHECKING:
+    pass
 
 try:
     pass

@@ -809,7 +809,7 @@ class ConflictResolutionEngine:
     # Git helper methods
     async def _run_git_command(self, args: list[str]) -> subprocess.CompletedProcess:
         """Run a git command and return the result."""
-        cmd = ["git", *args: object]
+        cmd = ["git", *args]
         result = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=self.repo_path,

@@ -148,7 +148,7 @@ class IControllerManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def create_controller(session_name: str, **kwargs: dict[str, object]) -> IController:
+    def create_controller(session_name: str, **kwargs) -> IController:
         """Create a new controller."""
 
     @abstractmethod

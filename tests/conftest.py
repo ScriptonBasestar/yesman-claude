@@ -6,8 +6,18 @@ import pytest
 import yaml
 # Dashboard imports
 from libs.dashboard import (
+    DashboardLauncher,
+    KeyboardNavigationManager,
+    PerformanceOptimizer,
+    ThemeManager,
+)
 # Fixture imports
 from tests.fixtures.mock_data import (
+    MOCK_PROMPTS,
+    MOCK_SESSION_DATA,
+    MockClaudeProcess,
+    MockTmuxSession,
+)
 from tests.fixtures.mock_factories import ComponentMockFactory, ManagerMockFactory
 from tests.fixtures.test_helpers import temp_directory
 
@@ -20,23 +30,9 @@ from tests.fixtures.test_helpers import temp_directory
 테스트 실행 시 자동으로 로드되며, 공통 fixture와 설정을 제공.
 """
 
-
-
-    DashboardLauncher,
-    KeyboardNavigationManager,
-    PerformanceOptimizer,
-    ThemeManager,
-)
-
 # 프로젝트 루트를 Python path에 추가
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
-
-    MOCK_PROMPTS,
-    MOCK_SESSION_DATA,
-    MockClaudeProcess,
-    MockTmuxSession,
-)
 
 
 # 공통 Fixtures

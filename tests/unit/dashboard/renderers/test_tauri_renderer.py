@@ -6,15 +6,6 @@ import pytest
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.tauri_renderer import TauriRenderer
 from libs.dashboard.renderers.widget_models import (
-
-    Copyright,
-    Licensed,
-
-)
-"""Tests for Tauri Renderer."""
-
-
-
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -31,6 +22,9 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
+
+
+"""Tests for Tauri Renderer."""
 
 
 class TestTauriRenderer:

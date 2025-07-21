@@ -36,7 +36,7 @@ class AIStatusCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:  # noqa: ARG002
+    def execute(self, **kwargs) -> dict:  # noqa: ARG002
         """Execute the status command.
 
         Returns:
@@ -126,7 +126,7 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
         Returns:
@@ -187,7 +187,7 @@ class AIHistoryCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
         Returns:
@@ -257,7 +257,7 @@ class AIExportCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
         Returns:
@@ -297,7 +297,7 @@ class AICleanupCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
         Returns:
@@ -335,7 +335,7 @@ class AIPredictCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: dict[str, object]) -> dict:
+    def execute(self, **kwargs) -> dict:
         """Execute the command.
 
         Returns:

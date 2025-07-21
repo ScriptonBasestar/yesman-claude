@@ -1,5 +1,10 @@
 # Copyright notice.
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Advanced conflict prediction system for multi-agent branch development."""
+
 import ast
 import difflib
 import logging
@@ -9,25 +14,15 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import NamedTuple, object
+from typing import NamedTuple, Any
 from .branch_manager import BranchManager
 from .conflict_resolution import (
-from .semantic_analyzer import SemanticAnalyzer
-                # Check for conflicting import patterns
-        # Check for overlapping imports with different patterns
-        # Check for similar but slightly different imports
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Advanced conflict prediction system for multi-agent branch development."""
-
-
     ConflictInfo,
     ConflictResolutionEngine,
     ConflictSeverity,
     ConflictType,
 )
+from .semantic_analyzer import SemanticAnalyzer
 
 logger = logging.getLogger(__name__)
 
