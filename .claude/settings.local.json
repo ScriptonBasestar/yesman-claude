@@ -55,7 +55,8 @@
       "Bash(cp:*)",
       "Bash(npm run build:*)",
       "WebFetch(domain:svelte.dev)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "mcp__shrimp__process_thought"
     ],
     "deny": []
   }
