@@ -4,7 +4,7 @@ import heapq
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+
 from .types import Agent, Task
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -130,8 +130,8 @@ class TaskScheduler:
     def get_next_task_for_agent(self, agent: Agent) -> Task | None:
         """Get the best next task for a specific agent.
 
-            Returns:
-                Task | None object the requested data.
+        Returns:
+            Task | None object the requested data.
 
 
         """

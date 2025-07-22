@@ -1,13 +1,13 @@
-from typing import Any
+import threading
+import time
 from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from api.main import app
-from libs.core.services import register_test_services
-from libs.core.error_handling import ConfigurationError
-import time
-import threading
 
+from api.main import app
+from libs.core.error_handling import ConfigurationError
+from libs.core.services import register_test_services
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -211,7 +211,6 @@ class TestAPIPerformance:
     @staticmethod
     def test_health_endpoint_performance(client: TestClient) -> None:
         """Test health endpoint response time."""
-
         start_time = time.time()
         response = client.get("/healthz")
         end_time = time.time()
@@ -222,7 +221,6 @@ class TestAPIPerformance:
     @staticmethod
     def test_concurrent_requests(client: TestClient) -> None:
         """Test handling multiple concurrent requests."""
-
         results = []
 
         def make_request() -> None:

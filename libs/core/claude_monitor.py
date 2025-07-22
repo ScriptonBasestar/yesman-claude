@@ -1,25 +1,23 @@
-from typing import Any
 import asyncio
 import logging
 import threading
 import time
+from pathlib import Path
+
 from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
 from libs.automation.automation_manager import AutomationManager
+from libs.automation.context_detector import ContextType
 from libs.dashboard.health_calculator import HealthCalculator
 from libs.logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
+
 from .content_collector import ClaudeContentCollector
 from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
-from pathlib import Path
-from libs.automation.context_detector import ContextType
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Claude monitoring and auto-response system."""
-
-
-
 
 
 class ClaudeMonitor:
@@ -465,7 +463,6 @@ class ClaudeMonitor:
 
     def export_adaptive_data(self, output_path: str) -> bool:
         """Export adaptive learning data for analysis."""
-
         return self.adaptive_response.export_learning_data(Path(output_path))
 
     def learn_from_user_input(self, prompt_text: str, user_response: str, context: str = "") -> None:
@@ -496,7 +493,6 @@ class ClaudeMonitor:
 
     async def test_automation(self, context_type_name: str) -> dict:
         """Test automation with simulated context."""
-
         try:
             context_type = ContextType(context_type_name)
             return await self.automation_manager.test_automation_chain(context_type)

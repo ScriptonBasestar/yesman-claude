@@ -1,7 +1,9 @@
 # Copyright notice.
 
 from unittest.mock import patch
+
 from click.testing import CliRunner
+
 from commands.setup import setup
 from tests.fixtures.mock_factories import PatchContextFactory
 

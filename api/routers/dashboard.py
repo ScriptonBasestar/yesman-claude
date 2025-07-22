@@ -2,18 +2,20 @@
 
 import logging
 import secrets
-from datetime import UTC, datetime
+import subprocess
+from collections import defaultdict
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, TypedDict
+
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.templating import Jinja2Templates
+
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.project_health import ProjectHealth
 from libs.yesman_config import YesmanConfig
+
 from ..shared import claude_manager
-import subprocess
-from collections import defaultdict
-from datetime import timedelta
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

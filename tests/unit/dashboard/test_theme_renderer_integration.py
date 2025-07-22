@@ -1,12 +1,13 @@
 # Copyright notice.
 
-from typing import Any
+import tempfile
+from pathlib import Path
+
 import pytest
+
 from libs.dashboard import ThemeManager, ThemeMode
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import HealthData, HealthLevel
-import tempfile
-from pathlib import Path
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -19,7 +20,6 @@ class TestThemeRendererIntegration:
     @staticmethod
     def theme_manager() -> object:
         """Create ThemeManager instance."""
-
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 

@@ -1,5 +1,5 @@
-from typing import Any
 import os
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -7,7 +7,9 @@ from rich.progress import track
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
+
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
+
     # Try to keep the important parts (end of path)
 
 

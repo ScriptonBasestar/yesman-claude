@@ -1,6 +1,6 @@
-from typing import Any
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .registry import RendererRegistry
 from .tauri_renderer import TauriRenderer
@@ -14,8 +14,6 @@ from .web_renderer import WebRenderer
 """Renderer Factory
 Factory pattern for creating and managing dashboard renderers.
 """
-
-
 
 
 class RendererFactoryError(Exception):

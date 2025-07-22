@@ -7,7 +7,6 @@ import subprocess
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

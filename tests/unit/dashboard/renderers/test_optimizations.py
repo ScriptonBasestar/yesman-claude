@@ -3,6 +3,7 @@
 import threading
 import time
 from typing import Any
+
 from libs.dashboard.renderers.base_renderer import (
     BaseRenderer,
     RenderFormat,
@@ -25,7 +26,6 @@ from libs.dashboard.renderers.optimizations import (
 )
 from libs.dashboard.renderers.tui_renderer import TUIRenderer
 from libs.dashboard.renderers.widget_models import MetricCardData
-
 
 """Tests for Rendering Optimizations and Caching."""
 

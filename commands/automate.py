@@ -5,15 +5,16 @@ import json
 import time
 from pathlib import Path
 from typing import Any
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
+
 from libs.automation.automation_manager import AutomationManager
-from libs.automation.context_detector import ContextType
-from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 from libs.automation.context_detector import ContextInfo, ContextType
+from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -31,8 +32,9 @@ class AutomateStatusCommand(BaseCommand):
     def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:  # noqa: ARG002
         """Execute the status command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
@@ -126,8 +128,9 @@ class AutomateStatusCommand(BaseCommand):
     def _format_duration(seconds: float) -> str:
         """Format duration in human readable format.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         if seconds < 60:
             return f"{int(seconds)}s"
         if seconds < 3600:
@@ -147,8 +150,9 @@ class AutomateMonitorCommand(BaseCommand):
     def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, Any]:  # noqa: ARG002
         """Execute the monitor command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
@@ -208,8 +212,9 @@ class AutomateTriggerCommand(BaseCommand):
     ) -> dict[str, Any]:
         """Execute the trigger command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         if not context_type:
             msg = "Context type is required"
             raise CommandError(msg)
@@ -262,8 +267,9 @@ class AutomateExecuteCommand(BaseCommand):
     def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs) -> dict[str, Any]:
         """Execute the workflow command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Handle workflow_name from kwargs if not provided as positional argument
         if workflow_name is None:
             workflow_name = kwargs.get("workflow_name")
@@ -319,8 +325,9 @@ class AutomateDetectCommand(BaseCommand):
     def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:  # noqa: ARG002
         """Execute the detect command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
@@ -396,8 +403,9 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
     def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict[str, Any]:  # noqa: ARG002
         """Execute the config command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             # Generate sample workflow configuration
             sample_config = {

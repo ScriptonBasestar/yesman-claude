@@ -1,8 +1,9 @@
 # Copyright notice.
 
 import logging
-from typing import Any
+
 import libtmux
+
 from libs.utils import ensure_log_directory, get_default_log_path
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -72,8 +73,8 @@ class ClaudeSessionManager:
     def _find_claude_pane(self) -> object:
         """Find pane running Claude.
 
-            Returns:
-                Object object.
+        Returns:
+            Object object.
 
 
         """

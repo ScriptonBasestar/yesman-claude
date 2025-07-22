@@ -2,16 +2,17 @@
 
 # Copyright notice.
 
+import copy
 import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+
 import libtmux
 from libtmux.exc import LibTmuxException
+
 from libs.core.error_handling import ErrorCategory, ErrorContext, YesmanError
 from libs.validation import validate_session_name
-import copy
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -467,7 +468,6 @@ def merge_template_override(template_config: dict[str, object], override_config:
     Returns:
         Merged configuration dictionary
     """
-
     # Deep copy template to avoid modifying original
     merged = copy.deepcopy(template_config)
 

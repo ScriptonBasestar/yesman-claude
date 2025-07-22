@@ -10,14 +10,13 @@
 import os
 import re
 import subprocess
+
 import click
 import yaml
 from rich.progress import track
+
 from .base_command import CommandError
-from .settings import settings, ValidationPatterns
-
-
-
+from .settings import ValidationPatterns, settings
 
 
 class SessionValidator:
@@ -63,8 +62,6 @@ class SessionValidator:
                 f"Session name '{session_name}' too long (max {settings.sessions.session_name_max_length} characters)",
             )
             return False
-
-
 
         if not re.match(ValidationPatterns.SESSION_NAME, session_name):
             self.validation_errors.append(
@@ -383,7 +380,6 @@ class SessionSetupService:
     @staticmethod
     def _kill_session(session_name: str) -> None:
         """Kill existing session."""
-
         try:
             subprocess.run(
                 ["tmux", "kill-session", "-t", session_name],

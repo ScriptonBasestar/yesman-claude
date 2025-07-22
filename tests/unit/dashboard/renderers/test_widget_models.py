@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
+
 from libs.dashboard.renderers.widget_adapter import WidgetDataAdapter
 from libs.dashboard.renderers.widget_models import (
     ActivityData,
@@ -19,7 +20,6 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
-
 
 """Tests for Widget Models and Data Adapter."""
 

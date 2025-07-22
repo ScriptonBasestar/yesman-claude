@@ -1,15 +1,14 @@
-from typing import Any
 import os
 import sys
 from pathlib import Path
+from typing import Any
+
 import click
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
+
 # Add libs to path for imports
 from libs.core.base_command import BaseCommand, CommandError
-from libs.task_runner import TaskRunner
-from libs.task_runner import TodoFile
-from libs.task_runner import TodoFile
-
+from libs.task_runner import TaskRunner, TodoFile
 
 # !/usr/bin/env python3
 # Copyright notice.
@@ -36,8 +35,9 @@ class TaskRunnerNextCommand(BaseCommand):
     def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the next command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             runner = TaskRunner()
             success = runner.process_next_task(directory)
@@ -65,8 +65,9 @@ class TaskRunnerRunCommand(BaseCommand):
     ) -> dict:
         """Execute the run command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             runner = TaskRunner()
 
@@ -125,8 +126,9 @@ class TaskRunnerStatusCommand(BaseCommand):
     def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the status command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             runner = TaskRunner()
             todo_files = runner.find_todo_files(directory)
@@ -211,8 +213,9 @@ class TaskRunnerAddCommand(BaseCommand):
     def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the add command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         if not task or not file_path:
             msg = "Both --task and --file options are required"
             raise CommandError(msg)

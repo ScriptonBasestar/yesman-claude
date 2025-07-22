@@ -3,18 +3,19 @@
 # Copyright notice.
 
 import logging
+import re
+import subprocess
+from collections import defaultdict
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+
 import click
 import libtmux
 import yaml
 from tmuxp.workspace.builder import WorkspaceBuilder
 from tmuxp.workspace.loader import expand
+
 from libs.yesman_config import YesmanConfig
-import subprocess
-import re
-from collections import defaultdict
-from datetime import UTC, datetime, timedelta
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -31,8 +32,9 @@ class TmuxManager:
     def create_session(self, session_name: str, config_dict: dict) -> bool:
         """Create tmux session from a YAML config file in templates directory.
 
-    Returns:
-        Boolean indicating the created item."""
+        Returns:
+        Boolean indicating the created item.
+        """
         try:
             server = libtmux.Server()
             session_name_from_config = config_dict.get("session_name", session_name)
@@ -62,15 +64,17 @@ class TmuxManager:
     def get_templates(self) -> list[str]:
         """Get all available session templates.
 
-    Returns:
-        List of the requested data."""
+        Returns:
+        List of the requested data.
+        """
         return [f.stem for f in self.templates_path.glob("*.yaml")]
 
     def load_projects(self) -> dict[str, object]:
         """Load project sessions from individual session files in sessions/ directory.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         projects: dict[str, object] = {"sessions": {}}
 
         # 새로운 sessions/ 디렉토리에서 개별 세션 파일들 로드
@@ -103,8 +107,9 @@ class TmuxManager:
     def save_session_config(self, session_name: str, session_config: dict[str, object]) -> bool:
         """Save a session configuration to an individual file.
 
-    Returns:
-        Configuration object or settings."""
+        Returns:
+        Configuration object or settings.
+        """
         try:
             session_file = self.sessions_path / f"{session_name}.yaml"
             with session_file.open("w", encoding="utf-8") as f:
@@ -120,8 +125,9 @@ class TmuxManager:
     def delete_session_config(self, session_name: str) -> bool:
         """Delete a session configuration file.
 
-    Returns:
-        Configuration object or settings."""
+        Returns:
+        Configuration object or settings.
+        """
         try:
             session_file = self.sessions_path / f"{session_name}.yaml"
             if session_file.exists():
@@ -147,8 +153,9 @@ class TmuxManager:
     def get_session_config_file(self, session_name: str) -> Path | None:
         """Get the path to a session configuration file.
 
-    Returns:
-        Configuration object or settings."""
+        Returns:
+        Configuration object or settings.
+        """
         yaml_file = self.sessions_path / f"{session_name}.yaml"
         yml_file = self.sessions_path / f"{session_name}.yml"
 
@@ -161,8 +168,9 @@ class TmuxManager:
     def list_session_configs(self) -> list[str]:
         """List all available session configurations.
 
-    Returns:
-        Configuration object or settings."""
+        Returns:
+        Configuration object or settings.
+        """
         session_names = set()
 
         # .yaml 파일들
@@ -178,8 +186,9 @@ class TmuxManager:
     def load_template(self, template_name: str) -> dict[str, object]:
         """Load a specific template file.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         template_path = self.templates_path / f"{template_name}.yaml"
         if not template_path.exists():
             msg = f"Template {template_name} not found at {template_path}"
@@ -191,8 +200,9 @@ class TmuxManager:
     def get_session_config(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
         """Get final session configuration after applying template and overrides.
 
-    Returns:
-        Configuration object or settings."""
+        Returns:
+        Configuration object or settings.
+        """
         # Start with base configuration
         final_config = {}
 
@@ -220,8 +230,9 @@ class TmuxManager:
     def _deep_merge_dicts(self, base: dict[str, object], override: dict[str, object]) -> dict[str, object]:
         """Deep merge two dictionaries, with override taking precedence.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         result = base.copy()
 
         for key, value in override.items():
@@ -248,14 +259,16 @@ class TmuxManager:
     def get_session_info(self, session_name: str) -> dict[str, object]:
         """Get session information directly from tmux.
 
-    Returns:
-        Dict containing service information."""
+        Returns:
+        Dict containing service information.
+        """
 
         def fetch_session_info() -> dict[str, object]:
             """Fetch session information from tmux.
 
-    Returns:
-        Dict containing service information."""
+            Returns:
+            Dict containing service information.
+            """
             try:
                 server = libtmux.Server()
                 session = server.find_where({"session_name": session_name})
@@ -302,8 +315,9 @@ class TmuxManager:
     def get_cached_sessions_list(self) -> list[dict[str, object]]:
         """Get list of all sessions directly from tmux.
 
-    Returns:
-        List of items."""
+        Returns:
+        List of items.
+        """
         try:
             server = libtmux.Server()
             sessions = server.list_sessions()
@@ -323,8 +337,9 @@ class TmuxManager:
     def teardown_session(self, session_name: str) -> bool:
         """Teardown a specific tmux session.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         try:
             server = libtmux.Server()
             session = server.find_where({"session_name": session_name})
@@ -351,7 +366,6 @@ class TmuxManager:
 
     def attach_to_session(self, session_name: str) -> None:
         """Attach to a specific tmux session."""
-
         # Use subprocess.run for security (no shell injection)
         try:
             subprocess.run(["tmux", "attach", "-t", session_name], check=True)
@@ -363,8 +377,9 @@ class TmuxManager:
     def get_session_activity(self, session_name: str) -> dict[str, object]:
         """Get session activity data by parsing session logs.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         try:
             log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
             safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()

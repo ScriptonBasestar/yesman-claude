@@ -2,11 +2,13 @@
 
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
+
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.message import Message
 from textual.reactive import reactive
+from textual.timer import Timer
 from textual.widgets import (
     Footer,
     Header,
@@ -18,7 +20,7 @@ from textual.widgets import (
     TabbedContent,
     TabPane,
 )
-from textual.timer import Timer
+
 from .renderers import TUIRenderer, WidgetType
 from .renderers.widget_models import (
     ActivityData,

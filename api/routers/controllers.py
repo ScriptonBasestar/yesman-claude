@@ -1,8 +1,11 @@
-from typing import Any
 import subprocess
+
 from fastapi import APIRouter, HTTPException
+
 from libs.core.session_manager import SessionManager
+
 from ..shared import claude_manager
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -19,7 +22,8 @@ def get_controller_status(session_name: str) -> str | None:
     """지정된 세션의 컨트롤러 상태를 조회합니다 ('running' 또는 'stopped').
 
     Returns:
-        Dict containing status information."""
+        Dict containing status information.
+    """
     try:
         controller = cm.get_controller(session_name)
         return "running" if controller.is_running else "stopped"
@@ -302,7 +306,8 @@ def start_all_controllers() -> object:
     """모든 활성 세션의 컨트롤러를 시작합니다.
 
     Returns:
-        Object object."""
+        Object object.
+    """
     try:
 
         session_manager = SessionManager()
@@ -361,7 +366,8 @@ def stop_all_controllers() -> object:
     """모든 활성 세션의 컨트롤러를 중지합니다.
 
     Returns:
-        Object object."""
+        Object object.
+    """
     try:
 
         session_manager = SessionManager()

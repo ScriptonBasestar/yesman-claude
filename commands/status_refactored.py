@@ -2,11 +2,11 @@
 
 # Copyright notice.
 
-from typing import Any
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
 from libs.core.base_command import BaseCommand
 from libs.core.mixins import LayoutManagerMixin, StatusManagerMixin
 

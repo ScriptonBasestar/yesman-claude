@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+
 from .context_detector import ContextDetector, ContextInfo, ContextType
 from .workflow_engine import WorkflowChain, WorkflowEngine
 

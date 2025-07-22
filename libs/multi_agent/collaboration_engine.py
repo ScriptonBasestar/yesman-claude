@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+
 from .agent_pool import AgentPool
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictInfo, ConflictResolutionEngine

@@ -1,11 +1,12 @@
 # Copyright notice.
 
-from typing import Any
-import pytest
-from libs.dashboard import KeyboardNavigationManager, ThemeManager, ThemeMode
-from libs.dashboard.keyboard_navigation import KeyModifier
 import tempfile
 from pathlib import Path
+
+import pytest
+
+from libs.dashboard import KeyboardNavigationManager, ThemeManager, ThemeMode
+from libs.dashboard.keyboard_navigation import KeyModifier
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -28,7 +29,6 @@ class TestKeyboardThemeIntegration:
     @staticmethod
     def theme_manager() -> object:
         """Create ThemeManager instance."""
-
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 

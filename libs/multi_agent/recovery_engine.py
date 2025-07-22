@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import logging
+import re
 import shutil
 import subprocess
 import time
@@ -13,15 +14,14 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from .types import Agent, AgentState, Task, TaskStatus
+
 from .branch_manager import BranchInfo
-import re
+from .types import Agent, AgentState, Task, TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Rollback mechanism and error recovery system for multi-agent operations."""
-
 
 
 logger = logging.getLogger(__name__)
@@ -669,7 +669,6 @@ class RecoveryEngine:
 
     def _find_recovery_strategy(self, error_message: str) -> RecoveryStrategy | None:
         """Find the best matching recovery strategy for an error."""
-
         # Try to find a specific match first
         for name, strategy in self.recovery_strategies.items():
             if name != "generic_failure" and re.search(strategy.error_pattern, error_message, re.IGNORECASE):

@@ -4,6 +4,7 @@ from libs.core.container import container
 from libs.core.session_manager import SessionManager
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
+
 # Auto-initialize services when module is imported
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -29,7 +30,8 @@ def register_test_services(config: YesmanConfig | None = None, tmux_manager: Tmu
 
     Args:
         config: Optional mock config instance
-        tmux_manager: Optional mock tmux manager instance."""
+        tmux_manager: Optional mock tmux manager instance.
+    """
     # Clear existing registrations
     container.clear()
 

@@ -4,10 +4,11 @@ import asyncio
 import logging
 from collections import defaultdict
 from datetime import UTC, datetime
-from typing import Any
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from api.utils import BatchConfig, WebSocketBatchProcessor
+
 from api.routers.logs import get_logs
+from api.utils import BatchConfig, WebSocketBatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -292,8 +293,9 @@ class ConnectionManager:
     def get_connection_stats(self) -> object:
         """Get statistics about active connections.
 
-    Returns:
-        Object object the requested data."""
+        Returns:
+        Object object the requested data.
+        """
         stats: dict[str, object] = {
             "total_connections": len(self.active_connections),
             "channels": {},
@@ -327,8 +329,9 @@ class ConnectionManager:
     def get_batch_statistics(self) -> object:
         """Get batch processing statistics.
 
-    Returns:
-        Object object the requested data."""
+        Returns:
+        Object object the requested data.
+        """
         return self.batch_processor.get_statistics()
 
 

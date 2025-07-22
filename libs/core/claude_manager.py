@@ -1,12 +1,11 @@
-from typing import Any
 import logging
 from collections.abc import Callable
+
 from .claude_monitor import ClaudeMonitor
 from .claude_process_controller import ClaudeProcessController
 from .claude_session_manager import ClaudeSessionManager
 from .claude_status_manager import ClaudeStatusManager
 from .prompt_detector import PromptInfo
-
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -370,8 +369,8 @@ class ClaudeManager:
     ) -> DashboardController:
         """Get or create controller for session.
 
-            Returns:
-                Dashboardcontroller object the requested data.
+        Returns:
+            Dashboardcontroller object the requested data.
 
 
         """

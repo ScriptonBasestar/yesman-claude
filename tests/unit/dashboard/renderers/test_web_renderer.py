@@ -1,8 +1,11 @@
 # Copyright notice.
 
 import json
+import re
 from datetime import UTC, datetime
+
 import pytest
+
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.web_renderer import WebRenderer
 from libs.dashboard.renderers.widget_models import (
@@ -22,8 +25,6 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
-import re
-
 
 """Tests for Web Renderer."""
 

@@ -8,7 +8,9 @@ import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
+
 import pytest
+
 from libs.dashboard.dashboard_launcher import DashboardLauncher, InterfaceInfo
 
 # Copyright (c) 2024 Yesman Claude Project

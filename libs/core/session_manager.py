@@ -5,16 +5,21 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+
 import libtmux
+
 # Try to import psutil, fall back to basic functionality if not available
 import psutil
+
+# Lazy import to avoid circular dependency
+from libs.tmux_manager import TmuxManager
 from libs.utils import ensure_log_directory
+
+# Import here to avoid circular import
+from libs.yesman_config import YesmanConfig
+
 from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
 from .progress_tracker import ProgressAnalyzer
-        # Import here to avoid circular import
-from libs.yesman_config import YesmanConfig
-        # Lazy import to avoid circular dependency
-from libs.tmux_manager import TmuxManager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -49,8 +54,9 @@ class SessionManager:
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with file-only output.
 
-    Returns:
-        Logging.Logger object."""
+        Returns:
+        Logging.Logger object.
+        """
         logger = logging.getLogger("yesman.dashboard.session_manager")
         logger.setLevel(logging.INFO)
         logger.propagate = False
@@ -70,8 +76,9 @@ class SessionManager:
     def get_all_sessions(self) -> list[SessionInfo]:
         """Get information about all yesman sessions.
 
-    Returns:
-        List of the requested data."""
+        Returns:
+        List of the requested data.
+        """
         sessions_info = []
 
         try:
@@ -92,8 +99,9 @@ class SessionManager:
     def _get_session_info(self, project_name: str, project_conf: dict[str]) -> SessionInfo:
         """Get information for a single session with mode-aware caching.
 
-    Returns:
-        Dict containing service information."""
+        Returns:
+        Dict containing service information.
+        """
 
         def compute_session_info() -> SessionInfo:
             override = project_conf.get("override", {})
@@ -169,8 +177,9 @@ class SessionManager:
     def _get_window_info(self, window: object) -> WindowInfo:
         """Get information for a single window with detailed pane metrics.
 
-    Returns:
-        Dict containing service information."""
+        Returns:
+        Dict containing service information.
+        """
         panes: list[PaneInfo] = []
 
         for pane in window.list_panes():
@@ -201,8 +210,9 @@ class SessionManager:
     def _get_detailed_pane_info(self, pane: object) -> PaneInfo:
         """Get detailed information for a single pane including metrics.
 
-    Returns:
-        Dict containing service information."""
+        Returns:
+        Dict containing service information.
+        """
         try:
             # Get basic pane information
             cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
@@ -316,8 +326,9 @@ class SessionManager:
     def _analyze_current_task(cmdline: list[str], command: str) -> str:
         """Analyze command line to determine current task.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         if not cmdline:
             return command
 
@@ -424,8 +435,9 @@ class SessionManager:
     def get_progress_overview(self) -> dict[str]:
         """Get progress overview for all sessions.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         sessions = self.get_all_sessions()
 
         # Collect progress data

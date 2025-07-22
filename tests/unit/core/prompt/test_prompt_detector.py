@@ -1,6 +1,7 @@
 # Copyright notice.
 
 import pytest
+
 from libs.core.prompt_detector import ClaudePromptDetector, PromptType
 
 # Copyright (c) 2024 Yesman Claude Project

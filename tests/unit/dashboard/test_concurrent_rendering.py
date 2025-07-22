@@ -1,7 +1,9 @@
 # Copyright notice.
 
 import asyncio
+
 import pytest
+
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import SessionData, SessionStatus
 

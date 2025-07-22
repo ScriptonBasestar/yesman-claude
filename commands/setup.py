@@ -5,8 +5,8 @@
 
 """Improved setup command using refactored session setup logic."""
 
-from typing import Any
 import click
+
 from libs.core.base_command import (
     BaseCommand,
     CommandError,

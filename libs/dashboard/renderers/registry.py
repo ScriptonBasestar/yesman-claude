@@ -1,4 +1,3 @@
-from typing import Any
 from .base_renderer import BaseRenderer, RenderFormat
 
 # Copyright notice.
@@ -8,7 +7,6 @@ from .base_renderer import BaseRenderer, RenderFormat
 """Renderer Registry
 Central registry for managing renderer instances and types.
 """
-
 
 
 class RendererRegistry:

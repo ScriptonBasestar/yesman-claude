@@ -5,9 +5,11 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Never
+from typing import Never
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from commands.show import ShowCommand
 from commands.validate import ValidateCommand
 from libs.core.base_command import BaseCommand

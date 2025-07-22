@@ -1,12 +1,11 @@
-from typing import Any
 import asyncio
 import logging
+
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-from libs.multi_agent.conflict_resolution import ResolutionStrategy
-
+from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ResolutionStrategy
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -24,8 +23,9 @@ class DetectConflictsCommand(BaseCommand):
     def execute(self, **kwargs) -> dict:
         """Execute the command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Extract parameters from kwargs
 
         branches = kwargs["branches"]
@@ -125,8 +125,9 @@ class ResolveConflictCommand(BaseCommand):
     def execute(self, **kwargs) -> dict:
         """Execute the command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Extract parameters from kwargs
 
         conflict_id = kwargs["conflict_id"]
@@ -197,8 +198,9 @@ class ConflictSummaryCommand(BaseCommand):
     def execute(self, **kwargs) -> dict:
         """Execute the command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Extract parameters from kwargs
 
         repo_path = kwargs.get("repo_path")

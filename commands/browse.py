@@ -2,10 +2,12 @@
 
 import threading
 import time
+
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
+
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.progress_indicators import with_startup_progress
 from libs.core.session_manager import SessionManager
@@ -72,8 +74,9 @@ class InteractiveBrowser:
     def _calculate_session_activity(session_info: dict) -> float:
         """Calculate activity level for a session.
 
-    Returns:
-        Float representing."""
+        Returns:
+        Float representing.
+        """
         if not session_info.get("exists", True):
             return 0.0
 
@@ -102,8 +105,9 @@ class InteractiveBrowser:
     def create_layout() -> Layout:
         """Create the main dashboard layout.
 
-    Returns:
-        Layout object the created item."""
+        Returns:
+        Layout object the created item.
+        """
         layout = Layout()
 
         layout.split_column(
@@ -198,8 +202,9 @@ class InteractiveBrowser:
     def _render_heatmap_display(heatmap_data: dict[str]) -> str:
         """Render heatmap data as a simple text display.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         if not heatmap_data or "heatmap" not in heatmap_data:
             return "[dim]No activity data available[/dim]"
 
@@ -229,8 +234,9 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
     def execute(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
         """Execute the browse command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             with with_startup_progress("🔧 Initializing session browser...") as update:
                 update("📊 Loading session data...")

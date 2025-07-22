@@ -1,6 +1,7 @@
 # Copyright notice.
 
 import re
+
 from .models import SessionProgress, TaskPhase, TaskProgress
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -65,8 +66,8 @@ class ProgressAnalyzer:
     def analyze_pane_output(self, session_name: str, pane_output: list[str]) -> SessionProgress | None:
         """Analyze pane output to determine progress.
 
-            Returns:
-                Sessionprogress | None object.
+        Returns:
+            Sessionprogress | None object.
 
 
         """

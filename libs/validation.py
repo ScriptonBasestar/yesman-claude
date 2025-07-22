@@ -1,10 +1,11 @@
-from typing import Any
 import os
 import re
 from pathlib import Path
+from typing import Any
+
 from libs.core.settings import ContentLimits, ValidationPatterns
 
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -14,8 +15,6 @@ from libs.core.settings import ContentLimits, ValidationPatterns
 This module provides common validation functions used throughout the project
 for validating session names, project names, paths, and other inputs.
 """
-
-
 
 
 class ValidationError(Exception):

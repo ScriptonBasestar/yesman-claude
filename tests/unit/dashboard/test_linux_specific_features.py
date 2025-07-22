@@ -1,7 +1,9 @@
 # Copyright notice.
 
 import os
+
 import pytest
+
 from libs.dashboard.theme_system import SystemThemeDetector
 
 # Copyright (c) 2024 Yesman Claude Project

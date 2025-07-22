@@ -2,14 +2,15 @@
 
 import asyncio
 import logging
+import signal
 from pathlib import Path
 from typing import Any, Never
+
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+
 from libs.core.base_command import BaseCommand, CommandError
-from libs.dashboard.widgets.agent_monitor import AgentMonitor, run_agent_monitor
+from libs.dashboard.widgets.agent_monitor import AgentMetrics, AgentMonitor, run_agent_monitor
 from libs.multi_agent.agent_pool import AgentPool
-from libs.dashboard.widgets.agent_monitor import AgentMetrics
-import signal
 from libs.multi_agent.types import TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -33,8 +34,9 @@ class StartAgentsCommand(BaseCommand):
     ) -> dict:
         """Execute the start agents command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             # Create progress indicator for agent startup
             with Progress(
@@ -93,8 +95,9 @@ class MonitorAgentsCommand(BaseCommand):
     ) -> dict:
         """Execute the monitor agents command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             self.print_info("📊 Starting agent monitoring dashboard...")
 
@@ -153,8 +156,9 @@ class StatusCommand(BaseCommand):
     def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the status command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             # Initialize agent pool
             pool = AgentPool(work_dir=work_dir)
@@ -209,8 +213,9 @@ class StopAgentsCommand(BaseCommand):
     def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the stop agents command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             self.print_info("🛑 Stopping multi-agent pool...")
 
@@ -250,8 +255,9 @@ class AddTaskCommand(BaseCommand):
     ) -> dict:
         """Execute the add task command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             # Validate required parameters
             if not title:
@@ -298,8 +304,9 @@ class ListTasksCommand(BaseCommand):
     def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:  # noqa: ARG002
         """Execute the list tasks command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         try:
             pool = AgentPool(work_dir=work_dir)
 

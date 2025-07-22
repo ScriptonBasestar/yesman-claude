@@ -2,8 +2,10 @@
 
 import unittest
 from unittest.mock import MagicMock, patch
+
 from fastapi.testclient import TestClient
-        # Import here to avoid circular imports
+
+# Import here to avoid circular imports
 from api.main import app
 
 # Copyright (c) 2024 Yesman Claude Project

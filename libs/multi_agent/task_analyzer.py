@@ -5,8 +5,9 @@ import json
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+
 from .graph import DirectedGraph
+
             # Find imports
                 # Find local files that import this module
                     # Check if this file imports our module
@@ -17,7 +18,6 @@ from .graph import DirectedGraph
 # Licensed under the MIT License
 
 """Task analysis and dependency graph generation for multi-agent development."""
-
 
 
 logger = logging.getLogger(__name__)

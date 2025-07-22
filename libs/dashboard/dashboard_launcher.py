@@ -7,9 +7,9 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-import rich
+
 import fastapi
+import rich
 import uvicorn
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -212,8 +212,9 @@ class DashboardLauncher:
     def _is_gui_available() -> bool:
         """Check if GUI environment is available.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
         # Linux/Unix
@@ -223,23 +224,26 @@ class DashboardLauncher:
     def _is_ssh_session() -> bool:
         """Check if running in SSH session.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         return bool(os.environ.get("SSH_CLIENT") or os.environ.get("SSH_TTY"))
 
     @staticmethod
     def _is_terminal_capable() -> bool:
         """Check if terminal supports rich output.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
 
     def _is_tauri_available(self) -> bool:
         """Check if Tauri desktop app is available.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         # Check if tauri directory exists
         if not self.tauri_path.exists():
             return False
@@ -255,16 +259,18 @@ class DashboardLauncher:
     def _is_node_available() -> bool:
         """Check if Node.js and npm are available.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         return shutil.which("node") is not None and shutil.which("npm") is not None
 
     @staticmethod
     def _is_python_package_available(package: str) -> bool:
         """Check if a Python package is available.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         try:
             __import__(package)
             return True

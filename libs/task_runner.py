@@ -1,11 +1,11 @@
 # Copyright notice.
 
+import argparse
 import glob
 import re
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
-import argparse
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -65,8 +65,9 @@ class TodoFile:
     def _is_task_line(line: str) -> bool:
         """Check if line contains a task marker.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         line = line.strip()
         return bool(re.match(r"^-\s*\[([ x>])\]\s*\]?", line))
 
@@ -74,8 +75,9 @@ class TodoFile:
     def _parse_task_line(line: str, line_num: int) -> TodoTask:
         """Parse a task line into TodoTask object.
 
-    Returns:
-        Todotask object."""
+        Returns:
+        Todotask object.
+        """
         line = line.strip()
         match = re.match(r"^-\s*\[([x >])\]\s*\]?\s*(.+)", line)
         if match:
@@ -88,8 +90,9 @@ class TodoFile:
     def get_next_incomplete_task(self) -> TodoTask | None:
         """Get the next uncompleted task.
 
-    Returns:
-        Todotask | None object the requested data."""
+        Returns:
+        Todotask | None object the requested data.
+        """
         for task in self.tasks:
             if not task.completed and not task.skipped:
                 return task
@@ -147,8 +150,9 @@ class TodoFile:
     def is_all_completed(self) -> bool:
         """Check if all tasks are completed or skipped.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         return all(task.completed or task.skipped for task in self.tasks)
 
 
@@ -168,8 +172,9 @@ class TaskRunner:
     def find_todo_files(self, specific_dir: str | None = None) -> list[Path]:
         """Find all todo .md files in directory order.
 
-    Returns:
-        List of."""
+        Returns:
+        List of.
+        """
         if specific_dir:
             # Handle both absolute and relative paths
             search_dir = Path(specific_dir) if specific_dir.startswith("/") else self.todo_dir / specific_dir
@@ -191,8 +196,9 @@ class TaskRunner:
     def get_next_task(self, specific_dir: str | None = None) -> tuple[TodoFile, TodoTask] | None:
         """Get the next incomplete task from todo files.
 
-    Returns:
-        Tuple[Todofile, Todotask] | None object the requested data."""
+        Returns:
+        Tuple[Todofile, Todotask] | None object the requested data.
+        """
         todo_files = self.find_todo_files(specific_dir)
 
         for file_path in todo_files:
@@ -206,8 +212,9 @@ class TaskRunner:
     def move_completed_file(self, todo_file: TodoFile) -> bool:
         """Move completed file to done directory.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         if not todo_file.is_all_completed():
             return False
 
@@ -225,8 +232,9 @@ class TaskRunner:
     def move_failed_file(self, todo_file: TodoFile, reason: str) -> bool:
         """Move failed file to alert directory.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         today = datetime.now(UTC).strftime("%Y%m%d")
         original_name = todo_file.file_path.stem
         new_name = f"{original_name}__ALERT_{today}.md"
@@ -247,8 +255,9 @@ class TaskRunner:
     def analyze_task_dependencies(task: TodoTask) -> list[str]:
         """Analyze task and break down into subtasks if needed.
 
-    Returns:
-        List of."""
+        Returns:
+        List of.
+        """
         content = task.content.lower()
 
         # Complex tasks that should be broken down
@@ -280,8 +289,9 @@ class TaskRunner:
     def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:  # noqa: ARG002
         """Commit changes with appropriate message.
 
-    Returns:
-        Bool | None object."""
+        Returns:
+        Bool | None object.
+        """
         try:
             # Stage changes
             subprocess.run(["git", "add", "."], check=True, cwd=self.todo_dir.parent)
@@ -308,8 +318,9 @@ class TaskRunner:
     def run_tests(self) -> bool:
         """Run relevant tests for the changes.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         try:
             # Check if pytest is available and run tests
             result = subprocess.run(
@@ -328,8 +339,9 @@ class TaskRunner:
     def process_next_task(self, specific_dir: str | None = None) -> bool:
         """Process the next available task.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         result = self.get_next_task(specific_dir)
         if not result:
             return False
@@ -370,7 +382,6 @@ class TaskRunner:
 
 def main() -> None:
     """CLI entry point for task runner."""
-
     parser = argparse.ArgumentParser(description="Automated TODO task processor")
     parser.add_argument("--dir", "-d", help="Specific directory to process (e.g. /tasks/todo/phase3)")
     parser.add_argument("--single", "-s", action="store_true", help="Process only one task")

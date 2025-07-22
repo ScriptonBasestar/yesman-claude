@@ -2,6 +2,7 @@
 
 import unittest
 from unittest.mock import patch
+
 from libs.core.claude_manager import DashboardController
 
 # Copyright (c) 2024 Yesman Claude Project

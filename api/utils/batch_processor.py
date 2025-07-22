@@ -8,7 +8,6 @@ from collections import deque
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

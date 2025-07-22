@@ -12,6 +12,7 @@ import json
 import uuid
 from datetime import UTC, datetime
 from typing import Any
+
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .widget_models import (
     ActivityData,

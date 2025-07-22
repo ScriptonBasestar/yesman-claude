@@ -1,5 +1,6 @@
 # Copyright notice.
 
+import asyncio
 import json
 import logging
 import time
@@ -7,9 +8,8 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+
 from libs.core.base_batch_processor import BaseBatchProcessor
-import asyncio
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -67,8 +67,9 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
     def create_batch(self, items: list[dict[str, object]]) -> MessageBatch:
         """Create a MessageBatch from messages.
 
-    Returns:
-        Messagebatch object the created item."""
+        Returns:
+        Messagebatch object the created item.
+        """
         # Add metadata to messages
         for msg in items:
             if "queued_at" not in msg:
@@ -116,8 +117,9 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
     def _optimize_messages(self, messages: list[dict[str, object]]) -> list[dict[str, object]]:
         """Optimize a batch of messages by combining similar ones.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         optimized = []
 
         # Group messages by type for potential combination
@@ -151,8 +153,9 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
     def _combine_update_messages(messages: list[dict[str, object]]) -> dict[str, object]:
         """Combine multiple update messages into a single message.
 
-    Returns:
-        Dict containing the updated item."""
+        Returns:
+        Dict containing the updated item.
+        """
         if not messages:
             return {}
 
@@ -180,8 +183,9 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
     def _combine_log_messages(messages: list[dict[str, object]]) -> dict[str, object]:
         """Combine multiple log messages into a batched log message.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         if not messages:
             return {}
 
@@ -300,8 +304,9 @@ class WebSocketBatchProcessor:
     def get_statistics(self) -> dict[str, object]:
         """Get processing statistics.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         # Collect statistics from all channel processors
         channel_stats = {}
         total_pending = 0

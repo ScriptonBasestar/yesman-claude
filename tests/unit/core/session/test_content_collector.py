@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+
 from libs.core.content_collector import ClaudeContentCollector, ContentCollectionManager
 
 # Copyright (c) 2024 Yesman Claude Project

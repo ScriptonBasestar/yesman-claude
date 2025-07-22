@@ -8,6 +8,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+
 from .context_detector import ContextInfo, ContextType
 
 # Copyright (c) 2024 Yesman Claude Project

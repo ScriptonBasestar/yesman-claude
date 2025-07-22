@@ -10,19 +10,19 @@ import uuid
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from pathlib import Path
+
 # Import scheduler types after main types to avoid circular imports
-from typing import TYPE_CHECKING, Any
-from .types import Agent, AgentState, Task, TaskStatus
-from .task_scheduler import AgentCapability, TaskScheduler
+from typing import TYPE_CHECKING
+
 from .branch_test_manager import BranchTestManager
-from .recovery_engine import RecoveryEngine, OperationType
+from .recovery_engine import OperationType, RecoveryEngine
+from .task_scheduler import AgentCapability, TaskScheduler
+from .types import Agent, AgentState, Task, TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Agent pool management for multi-agent development system."""
-
-
 
 
 if TYPE_CHECKING:

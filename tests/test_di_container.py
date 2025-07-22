@@ -1,12 +1,9 @@
-from typing import Any
 import pytest
-from libs.core.container import DIContainer
-from libs.core.services import get_config, get_tmux_manager, register_test_services
+
+from libs.core.container import DIContainer, container
+from libs.core.services import get_config, get_tmux_manager, initialize_services, register_test_services
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
-from libs.core.container import container
-from libs.core.services import initialize_services
-
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

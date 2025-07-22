@@ -1,10 +1,11 @@
 # Copyright notice.
 
+# from tauri_test import TauriTestApp
+import threading
 import unittest
 from unittest.mock import MagicMock
+
 import pytest
-        # from tauri_test import TauriTestApp
-import threading
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -172,7 +173,6 @@ class TestTauriIPCPerformance(unittest.TestCase):
     @staticmethod
     def test_concurrent_ipc_calls() -> None:
         """Test concurrent IPC calls."""
-
         mock_invoke = MagicMock()
         mock_invoke.return_value = {"success": True}
 

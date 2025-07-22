@@ -6,7 +6,9 @@ import tempfile
 import threading
 import unittest
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from libs.core.content_collector import ContentCollector
 from libs.core.prompt_detector import ClaudePromptDetector
 from libs.core.session_manager import SessionManager

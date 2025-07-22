@@ -12,15 +12,14 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional
+
 from .batch_processor import BatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Asynchronous logger with queue-based processing for high performance."""
-
-
 
 
 class LogLevel(Enum):

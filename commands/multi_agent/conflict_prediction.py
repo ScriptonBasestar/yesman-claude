@@ -1,12 +1,11 @@
-from typing import Any
 import asyncio
 import logging
 from datetime import timedelta
+
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_prediction import ConflictPredictor
 from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

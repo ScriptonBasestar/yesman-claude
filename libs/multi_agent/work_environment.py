@@ -9,7 +9,6 @@ import venv
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -80,8 +79,8 @@ class WorkEnvironmentManager:
     ) -> subprocess.CompletedProcess:
         """Run a command with optional working directory and environment.
 
-            Returns:
-                Subprocess.Completedprocess object.
+        Returns:
+            Subprocess.Completedprocess object.
 
 
         """
@@ -154,7 +153,7 @@ class WorkEnvironmentManager:
             branch_name: Name of the branch
             config: Configuration for the environment
 
-            Returns:
+        Returns:
                 Workenvironment object the created item.
         """
         if branch_name in self.environments:

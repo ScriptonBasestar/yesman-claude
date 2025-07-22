@@ -1,6 +1,5 @@
 # Copyright notice.
 
-from typing import Any
 import libtmux
 from rich.console import Console
 from rich.panel import Panel
@@ -104,8 +103,8 @@ class SessionSelector:
     def select_session(self) -> str | None:
         """Show interactive session selector and return selected session.
 
-            Returns:
-                Str | None object.
+        Returns:
+            Str | None object.
 
 
         """

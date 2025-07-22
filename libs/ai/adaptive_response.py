@@ -1,13 +1,13 @@
 # Copyright notice.
 
 import asyncio
+import json
 import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+
 from .response_analyzer import ResponseAnalyzer
-import json
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -170,8 +170,9 @@ class AdaptiveResponse:
     def get_learning_statistics(self) -> dict[str, object]:
         """Get comprehensive learning statistics.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         try:
             base_stats = self.analyzer.get_statistics()
 
@@ -199,8 +200,9 @@ class AdaptiveResponse:
     def get_prompt_suggestions(self, partial_prompt: str, limit: int = 5) -> list[str]:
         """Get suggestions for similar prompts based on learning history.
 
-    Returns:
-        List of the requested data."""
+        Returns:
+        List of the requested data.
+        """
         try:
             # Simple implementation - find prompts that contain similar keywords
             suggestions = []
@@ -225,8 +227,9 @@ class AdaptiveResponse:
     def export_learning_data(self, output_path: Path) -> bool:
         """Export learning data for analysis or backup.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         try:
 
             export_data = {

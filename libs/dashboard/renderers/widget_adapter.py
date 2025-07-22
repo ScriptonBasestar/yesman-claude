@@ -9,6 +9,7 @@ Converts raw data from various sources into standardized widget models.
 
 import logging
 from datetime import UTC, datetime
+
 from .widget_models import (
     ActivityData,
     ActivityEntry,

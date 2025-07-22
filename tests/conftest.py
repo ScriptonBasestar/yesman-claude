@@ -1,9 +1,10 @@
-from typing import Any
 import sys
 import tempfile
 from pathlib import Path
+
 import pytest
 import yaml
+
 # Dashboard imports
 from libs.dashboard import (
     DashboardLauncher,
@@ -11,6 +12,7 @@ from libs.dashboard import (
     PerformanceOptimizer,
     ThemeManager,
 )
+
 # Fixture imports
 from tests.fixtures.mock_data import (
     MOCK_PROMPTS,
@@ -20,7 +22,6 @@ from tests.fixtures.mock_data import (
 )
 from tests.fixtures.mock_factories import ComponentMockFactory, ManagerMockFactory
 from tests.fixtures.test_helpers import temp_directory
-
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

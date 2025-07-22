@@ -4,9 +4,11 @@ import logging
 import re
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+
 from libs.core.services import get_config
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -63,8 +65,8 @@ def get_session_logs(session_name: str, limit: int = 100) -> object:
 def parse_log_line(line: str) -> LogEntry | None:
     """Parse a log line into a structured LogEntry.
 
-        Returns:
-            Logentry | None object.
+    Returns:
+        Logentry | None object.
 
 
     """

@@ -1,11 +1,13 @@
 # Copyright notice.
 
 import os
+import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from libs.multi_agent.work_environment import WorkEnvironment, WorkEnvironmentManager
-import subprocess
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

@@ -1,12 +1,13 @@
-from typing import Any
+import os
+import threading
+
+import psutil
 import pytest
+
 from commands.setup import SetupCommand
 from commands.status import StatusCommand
-from .test_framework import CommandTestRunner, IntegrationTestBase, PerformanceMonitor
-import threading
-import os
-import psutil
 
+from .test_framework import CommandTestRunner, IntegrationTestBase, PerformanceMonitor
 
 # !/usr/bin/env python3
 # Copyright notice.
@@ -375,7 +376,6 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
 
     def test_memory_usage_stability(self) -> None:
         """Test that session operations don't cause memory leaks."""
-
         # Get initial memory usage
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss

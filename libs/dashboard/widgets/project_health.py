@@ -3,7 +3,6 @@
 import logging
 import os
 import subprocess
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

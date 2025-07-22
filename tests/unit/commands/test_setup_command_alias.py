@@ -2,7 +2,9 @@
 
 import unittest
 from unittest.mock import MagicMock, call, patch
+
 from click.testing import CliRunner
+
 from commands.setup import up
 
 # Copyright (c) 2024 Yesman Claude Project

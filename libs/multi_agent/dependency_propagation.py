@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+
 from .branch_info_protocol import BranchInfoProtocol, BranchInfoType
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType

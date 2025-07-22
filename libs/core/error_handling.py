@@ -1,4 +1,3 @@
-from typing import Any
 import hashlib
 import logging
 import sys
@@ -6,13 +5,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Centralized error handling and exception management."""
-
 
 
 class ErrorCategory(Enum):

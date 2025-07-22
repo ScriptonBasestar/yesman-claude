@@ -2,14 +2,14 @@
 
 import json
 import logging
+import math
 import re
 import time
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+
 from libs.core.mixins import StatisticsProviderMixin
-import math
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -77,8 +77,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def get_statistics(self) -> dict[str, object]:
         """Get statistics about learned patterns and responses - implements StatisticsProviderMixin interface.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         total_responses = len(self.response_history)
 
         # Response type distribution
@@ -110,8 +111,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def _load_responses(self) -> list[ResponseRecord]:
         """Load response history from file.
 
-    Returns:
-        List of."""
+        Returns:
+        List of.
+        """
         if not self.responses_file.exists():
             return []
 
@@ -126,8 +128,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def _load_patterns(self) -> dict[str, PromptPattern]:
         """Load learned patterns from file.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         if not self.patterns_file.exists():
             return {}
 
@@ -212,8 +215,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def _generate_regex_pattern(prompt_text: str) -> str:
         """Generate a regex pattern from prompt text.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         # Escape special regex characters
         escaped = re.escape(prompt_text)
 
@@ -240,8 +244,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     ) -> tuple[str | None, float]:
         """Predict the likely user response based on learned patterns.
 
-    Returns:
-        Tuple[Str | None, Float] object."""
+        Returns:
+        Tuple[Str | None, Float] object.
+        """
         # Check cache first
         cache_key = f"{prompt_type}:{prompt_text}:{project_name}"
         if cache_key in self._pattern_cache:
@@ -293,8 +298,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def get_default_response(prompt_type: str) -> tuple[str, float]:
         """Get default response for a prompt type when no pattern matches.
 
-    Returns:
-        Tuple[Str, Float] object the requested data."""
+        Returns:
+        Tuple[Str, Float] object the requested data.
+        """
         defaults = {
             "yes_no": ("y", 0.8),
             "numbered_selection": ("1", 0.6),
@@ -308,8 +314,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def analyze_response_patterns(self, project_name: str | None = None) -> dict[str, object]:
         """Analyze response patterns for insights.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Filter by project if specified
         records = self.response_history
         if project_name:
@@ -344,9 +351,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def _calculate_entropy(counter: Counter) -> float:
         """Calculate Shannon entropy for response distribution.
 
-    Returns:
-        Float representing."""
-
+        Returns:
+        Float representing.
+        """
         total = sum(counter.values())
         if total == 0:
             return 0.0
@@ -362,8 +369,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
     def cleanup_old_data(self, days_to_keep: int = 90) -> object:
         """Remove old response records.
 
-    Returns:
-        Object object."""
+        Returns:
+        Object object.
+        """
         cutoff = time.time() - (days_to_keep * 24 * 3600)
         original_count = len(self.response_history)
 

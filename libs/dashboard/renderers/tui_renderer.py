@@ -9,6 +9,7 @@ Rich-based terminal user interface renderer for dashboard widgets.
 
 from datetime import UTC, datetime
 from typing import Any
+
 from rich.align import Align
 from rich.box import MINIMAL, ROUNDED
 from rich.columns import Columns
@@ -19,6 +20,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
+
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .widget_models import (
     ActivityData,

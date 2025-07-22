@@ -5,7 +5,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from typing import Any
+
 import pytest
+
 from libs.dashboard.renderers.base_renderer import (
     BaseRenderer,
     RenderFormat,
@@ -30,7 +32,6 @@ from libs.dashboard.renderers.widget_models import (
     SessionStatus,
     WindowData,
 )
-
 
 """Tests for Renderer Factory."""
 

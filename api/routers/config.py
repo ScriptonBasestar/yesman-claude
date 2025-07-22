@@ -1,8 +1,7 @@
-from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from libs.core.services import get_config, get_tmux_manager
 
+from libs.core.services import get_config, get_tmux_manager
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

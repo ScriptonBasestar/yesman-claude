@@ -14,7 +14,8 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import NamedTuple, Any
+from typing import NamedTuple
+
 from .branch_manager import BranchManager
 from .conflict_resolution import (
     ConflictInfo,

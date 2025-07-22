@@ -2,8 +2,10 @@
 
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
 import yaml
+
 from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project

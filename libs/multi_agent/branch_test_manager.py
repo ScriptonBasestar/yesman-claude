@@ -5,20 +5,20 @@ import contextlib
 import json
 import logging
 import os
+import re
 import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+
 from .branch_manager import BranchManager
-import re
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Branch-specific test execution and result integration system."""
-
 
 
 logger = logging.getLogger(__name__)

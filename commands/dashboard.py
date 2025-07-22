@@ -1,4 +1,3 @@
-from typing import Any
 import http.server
 import os
 import platform
@@ -12,15 +11,17 @@ import time
 import time as time_module
 import webbrowser
 from pathlib import Path
+from typing import Any
+
 import click
+import uvicorn
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
-import uvicorn
-from libs.core.base_command import BaseCommand, CommandError
 
+from libs.core.base_command import BaseCommand, CommandError
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -42,8 +43,9 @@ class DashboardEnvironment:
     def is_gui_available() -> bool:
         """Check if GUI environment is available.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
         # Linux/Unix
@@ -53,24 +55,27 @@ class DashboardEnvironment:
     def is_ssh_session() -> bool:
         """Check if running in SSH session.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         return bool(os.environ.get("SSH_CLIENT") or os.environ.get("SSH_TTY"))
 
     @staticmethod
     def is_terminal_capable() -> bool:
         """Check if terminal supports rich output.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
 
     @staticmethod
     def get_recommended_interface() -> str:
         """Get recommended interface based on environment.
 
-    Returns:
-        String containing the requested data."""
+        Returns:
+        String containing the requested data.
+        """
         if DashboardEnvironment.is_ssh_session():
             return "tui"
         if DashboardEnvironment.is_gui_available():
@@ -84,7 +89,8 @@ def check_dependencies(interface: str) -> dict[str, bool]:
     """Check if required dependencies are available for interface.
 
     Returns:
-        Dict containing."""
+        Dict containing.
+    """
     deps = {
         "tui": True,  # Always available (uses rich)
         "web": True,  # Uses built-in server
@@ -117,8 +123,9 @@ class DashboardRunCommand(BaseCommand):
     ) -> dict:
         """Execute the dashboard run command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Auto-detect interface if needed
         if interface == "auto":
             interface = self.env.get_recommended_interface()
@@ -171,8 +178,9 @@ class DashboardRunCommand(BaseCommand):
     def _launch_tui_dashboard(self, theme: str | None = None, dev: bool = False) -> None:  # noqa: FBT001, ARG002
         """Launch TUI-based dashboard interface.
 
-    Returns:
-        None."""
+        Returns:
+        None.
+        """
         self.print_info("🖥️  Starting TUI Dashboard...")
 
         try:
@@ -232,8 +240,9 @@ class DashboardRunCommand(BaseCommand):
     ) -> None:
         """Launch web-based dashboard interface.
 
-    Returns:
-        None."""
+        Returns:
+        None.
+        """
         self.print_info(f"🌐 Starting Web Dashboard on http://{host}:{port}...")
 
         try:
@@ -481,8 +490,9 @@ class DashboardListCommand(BaseCommand):
     def execute(self, **kwargs) -> dict:  # noqa: ARG002
         """Execute the list command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         self.print_info("📋 Available Dashboard Interfaces:\n")
 
         deps = check_dependencies("tauri")
@@ -527,8 +537,9 @@ class DashboardBuildCommand(BaseCommand):
     def execute(self, interface: str = "tauri", **kwargs) -> dict:  # noqa: ARG002
         """Execute the build command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         self.print_info(f"🔨 Building {interface} dashboard for production...")
 
         if interface == "tauri":

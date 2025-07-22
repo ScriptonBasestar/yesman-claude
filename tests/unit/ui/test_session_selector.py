@@ -2,6 +2,7 @@
 
 import unittest
 from unittest.mock import MagicMock, patch
+
 from libs.ui.session_selector import SessionSelector
 
 # Copyright (c) 2024 Yesman Claude Project

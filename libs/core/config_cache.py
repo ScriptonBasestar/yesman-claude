@@ -9,7 +9,9 @@ import os
 import threading
 import time
 from pathlib import Path
+
 import yaml
+
 from .config_schema import YesmanConfigSchema
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -39,8 +41,9 @@ class ConfigCache:
     def _generate_cache_key(config_sources: list, env_vars: dict | None = None) -> str:
         """Generate a unique cache key based on configuration sources and environment.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         key_data: dict[str] = {
             "sources": [],
             "env_vars": env_vars or {},
@@ -62,8 +65,9 @@ class ConfigCache:
     def get(self, cache_key: str) -> YesmanConfigSchema | None:
         """Get configuration from cache if valid.
 
-    Returns:
-        Yesmanconfigschema | None object the requested data."""
+        Returns:
+        Yesmanconfigschema | None object the requested data.
+        """
         with self._lock:
             if cache_key not in self._cache:
                 return None
@@ -131,8 +135,9 @@ class ConfigCache:
     def get_stats(self) -> dict[str]:
         """Get cache statistics.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         with self._lock:
             current_time = time.time()
             valid_entries = 0
@@ -158,8 +163,9 @@ class ConfigCache:
     def cleanup_expired(self) -> int:
         """Remove expired cache entries and return count removed.
 
-    Returns:
-        Integer representing."""
+        Returns:
+        Integer representing.
+        """
         with self._lock:
             current_time = time.time()
             expired_keys = []
@@ -197,8 +203,9 @@ class FileWatcher:
     def check_for_changes(self) -> bool:
         """Check if any watched files have changed.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         changes_detected = False
 
         for file_path_str, last_mtime in list(self._watched_files.items()):
@@ -248,8 +255,9 @@ class CachedConfigLoader:
     def load(self) -> YesmanConfigSchema:
         """Load configuration with caching.
 
-    Returns:
-        Yesmanconfigschema object."""
+        Returns:
+        Yesmanconfigschema object.
+        """
         # Check for file changes first
         self.file_watcher.check_for_changes()
 
@@ -281,8 +289,9 @@ class CachedConfigLoader:
     def _generate_current_cache_key(self) -> str:
         """Generate cache key for current loader state.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         # Get environment variables that affect configuration
         env_vars = {key: value for key, value in os.environ.items() if key.startswith("YESMAN_")}
 
@@ -303,8 +312,9 @@ class CachedConfigLoader:
     def get_cache_stats(self) -> dict[str]:
         """Get comprehensive cache statistics.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         cache_stats = self.cache.get_stats()
 
         total_requests = self._hit_count + self._miss_count
@@ -322,8 +332,9 @@ class CachedConfigLoader:
     def cleanup(self) -> dict[str, int]:
         """Cleanup expired cache entries and return statistics.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         expired_count = self.cache.cleanup_expired()
         return {
             "expired_entries_removed": expired_count,
@@ -333,8 +344,9 @@ class CachedConfigLoader:
     def get_config_sources_info(self) -> list[dict[str]]:
         """Get information about configured sources (delegate to base loader).
 
-    Returns:
-        Dict containing service information."""
+        Returns:
+        Dict containing service information.
+        """
         return self.base_loader.get_config_sources_info()  # type: ignore[no-any-return]
 
 
@@ -355,8 +367,9 @@ class CacheableYamlFileSource:
     def get_cache_key(self) -> str:
         """Generate cache key based on file path and modification time.
 
-    Returns:
-        String containing the requested data."""
+        Returns:
+        String containing the requested data.
+        """
         if not self.file_path.exists():
             return f"file:{self.file_path}:missing"
 
@@ -406,8 +419,9 @@ class CacheableEnvironmentSource:
     def get_cache_key(self) -> str:
         """Generate cache key based on relevant environment variables.
 
-    Returns:
-        String containing the requested data."""
+        Returns:
+        String containing the requested data.
+        """
         env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)

@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+
 from libs.dashboard import ThemeManager
 from libs.dashboard.theme_system import ColorPalette, Theme, ThemeMode
 

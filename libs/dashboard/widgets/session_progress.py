@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
+
 from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
@@ -22,8 +23,9 @@ class SessionProgressWidget:
     def render_progress_overview(self, progress_data: dict[str]) -> Panel:
         """Render the main progress overview panel.
 
-    Returns:
-        Panel object."""
+        Returns:
+        Panel object.
+        """
         if not progress_data:
             return Panel(
                 Text("No progress data available", style="dim"),
@@ -49,8 +51,9 @@ class SessionProgressWidget:
     def _render_summary(data: dict[str]) -> Panel:
         """Render summary statistics.
 
-    Returns:
-        Panel object."""
+        Returns:
+        Panel object.
+        """
         content = Text()
 
         # Overall progress bar
@@ -78,8 +81,9 @@ class SessionProgressWidget:
     def _render_sessions_table(self, sessions: list[dict[str]]) -> Panel:
         """Render individual sessions progress table.
 
-    Returns:
-        Panel object."""
+        Returns:
+        Panel object.
+        """
         if not sessions:
             return Panel(Text("No active sessions", style="dim"), title="Sessions")
 
@@ -114,8 +118,9 @@ class SessionProgressWidget:
     def _get_phase_emoji(phase: str) -> str:
         """Get emoji for task phase.
 
-    Returns:
-        String containing the requested data."""
+        Returns:
+        String containing the requested data.
+        """
         phase_emojis = {
             "starting": "🚀",
             "analyzing": "🔍",
@@ -131,8 +136,9 @@ class SessionProgressWidget:
     def render_compact_progress(progress_data: dict[str]) -> Text:
         """Render compact progress for status bars.
 
-    Returns:
-        Text object."""
+        Returns:
+        Text object.
+        """
         if not progress_data:
             return Text("Progress: No data", style="dim")
 
@@ -151,8 +157,9 @@ class SessionProgressWidget:
     def render_session_detail(session_name: str, progress: object) -> Panel:  # noqa: ARG002  # noqa: ARG004
         """Render detailed progress for a specific session.
 
-    Returns:
-        Panel object."""
+        Returns:
+        Panel object.
+        """
         if not progress:
             return Panel(
                 Text("No progress data for this session", style="dim"),

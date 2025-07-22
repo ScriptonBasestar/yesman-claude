@@ -3,12 +3,13 @@
 import asyncio
 import time
 from pathlib import Path
-from typing import Any
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
 from libs.ai.adaptive_response import AdaptiveResponse
 from libs.ai.response_analyzer import ResponseAnalyzer
 from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin

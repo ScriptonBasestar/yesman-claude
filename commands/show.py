@@ -1,7 +1,6 @@
-from typing import Any
 import click
-from libs.core.base_command import BaseCommand, SessionCommandMixin
 
+from libs.core.base_command import BaseCommand, SessionCommandMixin
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

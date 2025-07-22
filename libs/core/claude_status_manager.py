@@ -4,9 +4,10 @@ import datetime
 import logging
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+
 from libs.utils import ensure_log_directory, get_default_log_path
-            # Import here to avoid circular import
+
+# Import here to avoid circular import
 from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -62,15 +63,17 @@ class ClaudeStatusManager:
     def get_response_history(self) -> list[dict[str, object]]:
         """Get the response history.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         return self.response_history
 
     def save_capture_to_file(self, content: str, pane_id: str | None = None) -> str:
         """Save captured content to file and return file path.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         try:
 
             config = YesmanConfig()

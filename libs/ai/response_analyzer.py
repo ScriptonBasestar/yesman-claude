@@ -7,7 +7,6 @@ import time
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

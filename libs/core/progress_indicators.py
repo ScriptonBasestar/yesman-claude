@@ -13,6 +13,7 @@ for consistent user experience across all commands.
 
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+
 from rich.console import Console
 from rich.progress import (
     BarColumn,

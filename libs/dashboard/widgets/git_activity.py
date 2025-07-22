@@ -5,7 +5,7 @@ import subprocess
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Any
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table

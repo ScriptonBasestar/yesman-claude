@@ -3,7 +3,9 @@
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 

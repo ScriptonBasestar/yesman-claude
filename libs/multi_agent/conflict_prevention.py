@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
+
 from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType

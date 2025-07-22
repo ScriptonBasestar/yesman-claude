@@ -26,8 +26,9 @@ class ClaudeProcessController:
     def restart_claude_pane(self) -> bool:
         """Restart Claude pane.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         if not self.session_manager.get_claude_pane():
             self.status_manager.update_status("[red]Cannot restart: No Claude pane in session[/]")
             return False
@@ -94,8 +95,9 @@ class ClaudeProcessController:
     def _get_claude_command(self) -> str:
         """Get claude command based on selected model.
 
-    Returns:
-        String containing the requested data."""
+        Returns:
+        String containing the requested data.
+        """
         if self.selected_model == "opus":
             return "claude --model claude-3-5-opus-20241022"
         if self.selected_model == "sonnet":
@@ -105,8 +107,9 @@ class ClaudeProcessController:
     def is_claude_running(self) -> bool:
         """Check if Claude is currently running.
 
-    Returns:
-        Boolean indicating."""
+        Returns:
+        Boolean indicating.
+        """
         try:
             cmd = self.session_manager.get_current_command()
             return "claude" in cmd.lower()

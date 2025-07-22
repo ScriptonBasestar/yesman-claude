@@ -5,7 +5,6 @@
 
 """Base command class with common functionality."""
 
-from typing import Any
 import json
 import logging
 import re
@@ -14,10 +13,13 @@ import sys
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from pathlib import Path
+
 import click
 import yaml
+
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
+
 from .claude_manager import ClaudeManager
 from .error_handling import (
     ConfigurationError,

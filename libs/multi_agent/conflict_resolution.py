@@ -8,8 +8,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+
 from .branch_manager import BranchManager
+
             # Example: Handle import conflicts
         # Simple approach: merge unique imports
         # Extract imports from conflict markers
@@ -20,7 +21,6 @@ from .branch_manager import BranchManager
 # Licensed under the MIT License
 
 """Conflict resolution engine for multi-agent branch-based development."""
-
 
 
 logger = logging.getLogger(__name__)
@@ -747,7 +747,6 @@ class ConflictResolutionEngine:
     @staticmethod
     def _resolve_import_conflicts(content: str) -> str | None:
         """Resolve import statement conflicts."""
-
         parts = content.split("=======")
         if len(parts) == 2:
             head_part = parts[0].replace("<<<<<<< HEAD", "").strip()

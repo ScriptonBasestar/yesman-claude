@@ -1,8 +1,10 @@
 # Copyright notice.
 
 from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 from click.testing import CliRunner
+
 from commands.multi_agent import multi_agent_cli
 from libs.multi_agent.types import TaskStatus
 

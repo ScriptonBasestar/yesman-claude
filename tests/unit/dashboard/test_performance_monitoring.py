@@ -1,8 +1,9 @@
 # Copyright notice.
 
 import time
-from typing import Any
+
 import pytest
+
 from libs.dashboard import OptimizationLevel, PerformanceOptimizer
 
 # Copyright (c) 2024 Yesman Claude Project

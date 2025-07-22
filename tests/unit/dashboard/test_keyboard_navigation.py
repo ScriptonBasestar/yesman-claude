@@ -1,6 +1,7 @@
 # Copyright notice.
 
 import pytest
+
 from libs.dashboard import KeyboardNavigationManager, NavigationContext
 from libs.dashboard.keyboard_navigation import KeyModifier
 

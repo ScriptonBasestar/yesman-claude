@@ -1,7 +1,6 @@
-from typing import Any
 import logging
-from libs.core.base_command import BaseCommand
 
+from libs.core.base_command import BaseCommand
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

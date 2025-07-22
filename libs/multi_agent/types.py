@@ -1,12 +1,9 @@
 # Copyright notice.
 
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
-from dataclasses import asdict
-from dataclasses import asdict
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -63,9 +60,9 @@ class Task:
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
-
+        Returns:
+        Dict containing.
+        """
         data = asdict(self)
         # Convert enums to strings
         data["status"] = self.status.value
@@ -80,8 +77,9 @@ class Task:
     def from_dict(cls, data: dict[str, object]) -> "Task":
         """Create from dictionary.
 
-    Returns:
-        'Task' object."""
+        Returns:
+        'Task' object.
+        """
         # Convert status back to enum
         if "status" in data:
             data["status"] = TaskStatus(data["status"])
@@ -113,9 +111,9 @@ class Agent:
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary (excluding process).
 
-    Returns:
-        Dict containing."""
-
+        Returns:
+        Dict containing.
+        """
         data = asdict(self)
         # Remove non-serializable fields
         data.pop("process", None)
@@ -129,8 +127,9 @@ class Agent:
     def from_dict(cls, data: dict[str, object]) -> "Agent":
         """Create from dictionary.
 
-    Returns:
-        'Agent' object."""
+        Returns:
+        'Agent' object.
+        """
         # Convert state back to enum
         if "state" in data:
             data["state"] = AgentState(data["state"])

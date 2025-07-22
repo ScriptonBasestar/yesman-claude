@@ -2,7 +2,9 @@
 
 import tempfile
 from unittest.mock import Mock
+
 import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_test_manager import BranchTestManager, TestSuite, TestType
 

@@ -6,7 +6,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+
 from libs.core.base_batch_processor import BaseBatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project

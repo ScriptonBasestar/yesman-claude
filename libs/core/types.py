@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Literal
+
 from typing_extensions import TypedDict
 
 # Copyright (c) 2024 Yesman Claude Project

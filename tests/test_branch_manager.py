@@ -4,7 +4,9 @@ import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from libs.multi_agent.branch_manager import BranchInfo, BranchManager
 
 # Copyright (c) 2024 Yesman Claude Project

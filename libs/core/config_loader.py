@@ -6,19 +6,18 @@ import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+
 import yaml
 from pydantic import ValidationError
-from .config_schema import YesmanConfigSchema
+
 # Import here to avoid circular imports
 from .config_cache import CachedConfigLoader
+from .config_schema import YesmanConfigSchema
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Centralized configuration loader with multiple source support and caching."""
-
-
-
 
 
 class ConfigSource(ABC):
@@ -284,6 +283,5 @@ def create_cached_config_loader(cache_ttl: float = 300.0) -> object:
     Returns:
         CachedConfigLoader instance with all standard sources
     """
-
     base_loader = create_default_loader()
     return CachedConfigLoader(base_loader, cache_ttl=cache_ttl)

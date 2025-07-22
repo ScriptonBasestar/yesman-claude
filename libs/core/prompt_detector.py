@@ -4,7 +4,6 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -112,7 +111,7 @@ class ClaudePromptDetector:
         Args:
             content: The terminal content to analyze
 
-            Returns:
+        Returns:
                 Promptinfo | None object.
         """
         if not content or len(content.strip()) < 3:

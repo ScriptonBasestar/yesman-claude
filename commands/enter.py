@@ -3,8 +3,10 @@
 import os
 import subprocess
 import sys
+
 import click
 import libtmux
+
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.ui.session_selector import show_session_selector
 
@@ -34,8 +36,9 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
     def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
         """Execute the enter command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         if list_sessions:
             # Show available sessions
             self.tmux_manager.list_running_sessions()
@@ -64,8 +67,9 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
     def _select_session(self) -> str | None:
         """Select a session from running sessions.
 
-    Returns:
-        Str | None object."""
+        Returns:
+        Str | None object.
+        """
         # Get all running sessions
         running_sessions = []
         projects = self.tmux_manager.load_projects().get("sessions", {})
@@ -117,8 +121,9 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
     def _resolve_session_name(self, session_name: str) -> str | None:
         """Resolve session name from project name if needed.
 
-    Returns:
-        Str | None object."""
+        Returns:
+        Str | None object.
+        """
         # Check if the session exists directly
         if self.server.find_where({"session_name": session_name}):
             return session_name

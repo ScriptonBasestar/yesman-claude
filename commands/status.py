@@ -8,11 +8,13 @@
 import time
 from pathlib import Path
 from typing import Any
+
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
+
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets import (

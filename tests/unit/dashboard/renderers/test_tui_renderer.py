@@ -2,7 +2,9 @@
 
 from datetime import UTC, datetime
 from io import StringIO
+
 from rich.console import Console
+
 from libs.dashboard.renderers.base_renderer import RenderFormat, WidgetType
 from libs.dashboard.renderers.tui_renderer import TUIRenderer
 from libs.dashboard.renderers.widget_models import (
@@ -22,7 +24,6 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
-
 
 """Tests for TUI Renderer."""
 

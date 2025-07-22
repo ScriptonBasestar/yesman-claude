@@ -1,9 +1,9 @@
-from typing import Any
-from pathlib import Path
-import pytest
-from libs.dashboard import DashboardLauncher
 import tempfile
+from pathlib import Path
 
+import pytest
+
+from libs.dashboard import DashboardLauncher
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -17,7 +17,6 @@ class TestDashboardLaunch:
     @staticmethod
     def temp_project_root() -> object:
         """Create temporary project directory."""
-
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
 

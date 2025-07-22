@@ -1,20 +1,20 @@
-from typing import Any
 import asyncio
 import contextlib
 import time
+
 import click
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
+from rich.text import Text
+
+from commands.browse import BrowseCommand as SyncBrowseCommand
 from libs.core.async_base_command import AsyncMonitoringCommand, CommandError
 from libs.core.base_command import SessionCommandMixin
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
-from rich.text import Text
-from commands.browse import BrowseCommand as SyncBrowseCommand
-
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -89,8 +89,9 @@ class AsyncInteractiveBrowser:
     def _calculate_session_activity(session_info: dict) -> float:
         """Calculate activity level for a session.
 
-    Returns:
-        Float representing."""
+        Returns:
+        Float representing.
+        """
         if not session_info.get("exists", True):
             return 0.0
 
@@ -119,8 +120,9 @@ class AsyncInteractiveBrowser:
     def create_layout() -> Layout:
         """Create the main dashboard layout.
 
-    Returns:
-        Layout object the created item."""
+        Returns:
+        Layout object the created item.
+        """
         layout = Layout()
 
         layout.split_column(
@@ -219,9 +221,9 @@ class AsyncInteractiveBrowser:
     def _render_heatmap(heatmap_data: dict) -> str:
         """Render activity heatmap visualization.
 
-    Returns:
-        String containing."""
-
+        Returns:
+        String containing.
+        """
         # Simple text representation of heatmap
         output = Text()
         output.append("Session Activity (Last 7 days)\n\n")

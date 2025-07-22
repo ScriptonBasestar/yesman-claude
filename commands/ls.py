@@ -3,6 +3,7 @@
 # Copyright notice.
 
 import click
+
 from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -17,8 +18,9 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
     def execute(self, **kwargs) -> dict[str]:
         """Execute the command.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         # Extract parameters from kwargs
 
         output_format = kwargs.get("output_format", "table")
@@ -49,8 +51,9 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
     def _get_templates(self) -> list[str]:
         """Get available session templates.
 
-    Returns:
-        List of the requested data."""
+        Returns:
+        List of the requested data.
+        """
         try:
             return self.tmux_manager.get_templates()
         except Exception as e:
@@ -60,8 +63,9 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
     def _get_projects(self) -> list[dict[str]]:
         """Get configured projects with details.
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         try:
             projects_config = self.load_projects_config()
             sessions = projects_config.get("sessions", {})
@@ -91,8 +95,9 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
     def _get_project_status(self, session_name: str) -> str:
         """Get the current status of a project session.
 
-    Returns:
-        Dict containing status information."""
+        Returns:
+        Dict containing status information.
+        """
         try:
             if self.session_exists(session_name):
                 return "running"

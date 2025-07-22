@@ -1,10 +1,11 @@
 # Copyright notice.
 
-from typing import Any
-import pytest
-from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
 import tempfile
 from pathlib import Path
+
+import pytest
+
+from libs.dashboard import OptimizationLevel, PerformanceOptimizer, ThemeManager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -27,7 +28,6 @@ class TestPerformanceThemeIntegration:
     @staticmethod
     def theme_manager() -> object:
         """Create ThemeManager instance."""
-
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 

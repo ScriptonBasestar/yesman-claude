@@ -1,9 +1,9 @@
-from typing import Any
 import subprocess
+
 import click
 import libtmux
-from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 
+from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project

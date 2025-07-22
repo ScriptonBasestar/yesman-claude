@@ -1,16 +1,19 @@
-from typing import Any
 import asyncio
 import os
 from datetime import UTC, datetime
+from typing import Any
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
 from api.background_tasks import task_runner
 from api.middleware.error_handler import add_request_id_middleware, global_error_handler
 from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
 from libs.core.error_handling import YesmanError
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
@@ -168,7 +171,6 @@ async def get_task_status():
 @app.get("/api/websocket/stats")
 async def get_websocket_stats():
     """Get WebSocket connection and batch processing statistics."""
-
     connection_stats = manager.get_connection_stats()
     batch_stats = manager.get_batch_statistics()
 

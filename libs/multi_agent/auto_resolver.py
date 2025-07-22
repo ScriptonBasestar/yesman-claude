@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
 from .conflict_resolution import (

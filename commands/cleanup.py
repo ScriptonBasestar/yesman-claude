@@ -1,13 +1,14 @@
-from typing import Any
 import os
 import shutil
 from pathlib import Path
+from typing import Any
+
 import click
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
-from libs.core.base_command import BaseCommand, ConfigCommandMixin
 
+from libs.core.base_command import BaseCommand, ConfigCommandMixin
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -32,8 +33,8 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
     ) -> dict:
         """Execute the cleanup command.
 
-            Returns:
-                Dict containing.
+        Returns:
+            Dict containing.
 
 
         """

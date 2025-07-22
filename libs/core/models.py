@@ -3,7 +3,6 @@
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -128,8 +127,8 @@ class SessionProgress:
     def get_current_task(self) -> TaskProgress | None:
         """Get the current task progress.
 
-            Returns:
-                Taskprogress | None object the requested data.
+        Returns:
+            Taskprogress | None object the requested data.
 
 
         """

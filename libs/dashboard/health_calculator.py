@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+
 try:
     import tomllib
 except ImportError:
@@ -54,8 +54,9 @@ class HealthLevel(Enum):
     def from_score(cls, score: int) -> "HealthLevel":
         """Get health level from numeric score.
 
-    Returns:
-        'Healthlevel' object."""
+        Returns:
+        'Healthlevel' object.
+        """
         if score < 0:
             return cls.UNKNOWN
         for level in [cls.EXCELLENT, cls.GOOD, cls.WARNING, cls.CRITICAL]:
@@ -80,8 +81,9 @@ class HealthMetric:
     def health_level(self) -> HealthLevel:
         """Get health level for this metric.
 
-    Returns:
-        Dict containing health status information."""
+        Returns:
+        Dict containing health status information.
+        """
         percentage = (self.score / self.max_score) * 100 if self.max_score > 0 else 0
         return HealthLevel.from_score(int(percentage))
 
@@ -89,15 +91,17 @@ class HealthMetric:
     def percentage(self) -> float:
         """Get percentage score.
 
-    Returns:
-        Float representing."""
+        Returns:
+        Float representing.
+        """
         return (self.score / self.max_score) * 100 if self.max_score > 0 else 0
 
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         return {
             "category": self.category.value,
             "name": self.name,
@@ -125,16 +129,18 @@ class ProjectHealth:
     def overall_health_level(self) -> HealthLevel:
         """Get overall health level.
 
-    Returns:
-        Dict containing health status information."""
+        Returns:
+        Dict containing health status information.
+        """
         return HealthLevel.from_score(self.overall_score)
 
     @property
     def category_scores(self) -> dict[str, float]:
         """Get average scores by category.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         category_metrics: dict[str, list[float]] = {}
         for metric in self.metrics:
             category = metric.category.value
@@ -147,8 +153,9 @@ class ProjectHealth:
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         return {
             "project_path": self.project_path,
             "overall_score": self.overall_score,
@@ -676,8 +683,9 @@ class HealthCalculator:
     def _calculate_overall_score(metrics: list[HealthMetric]) -> int:
         """Calculate overall project health score.
 
-    Returns:
-        Integer representing."""
+        Returns:
+        Integer representing.
+        """
         if not metrics:
             return 0
 
@@ -796,7 +804,7 @@ class HealthCalculator:
         """Check Rust/Cargo dependencies."""
         try:
 
-            with open(cargo_toml_path, 'rb') as f:
+            with open(cargo_toml_path, "rb") as f:
                 content = tomllib.load(f)
             deps = content.get("dependencies", {})
             dev_deps = content.get("dev-dependencies", {})
@@ -811,8 +819,9 @@ class HealthCalculator:
     def _get_dependencies_from_toml(content: str) -> tuple[list[str], list[str]]:
         """Extract dependencies from Cargo.toml content.
 
-    Returns:
-        List of the requested data."""
+        Returns:
+        List of the requested data.
+        """
         dependencies = []
         dev_dependencies = []
         in_deps_section = False
@@ -895,8 +904,9 @@ class HealthCalculator:
     def get_health_summary(health: ProjectHealth) -> dict[str, object]:
         """Get a summary of project health.
 
-    Returns:
-        Dict containing health status information."""
+        Returns:
+        Dict containing health status information.
+        """
         return {
             "overall": {
                 "score": health.overall_score,

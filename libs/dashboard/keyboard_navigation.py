@@ -5,7 +5,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

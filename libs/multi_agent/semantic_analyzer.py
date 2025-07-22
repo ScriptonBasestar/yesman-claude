@@ -7,8 +7,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictSeverity, ResolutionStrategy
+
             # Check import conflicts
         # Compare imports
         # Check for conflicting imports (same name, different module)
@@ -975,8 +977,8 @@ class SemanticVisitor(ast.NodeVisitor):
     ) -> FunctionSignature:
         """Extract detailed function signature.
 
-            Returns:
-                Functionsignature object.
+        Returns:
+            Functionsignature object.
 
 
         """

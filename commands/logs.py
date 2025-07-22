@@ -6,10 +6,12 @@ import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
 from libs.core.base_command import BaseCommand, CommandError
 from libs.logging import AsyncLogger, AsyncLoggerConfig, LogLevel
 
@@ -36,8 +38,8 @@ class LogsConfigureCommand(BaseCommand):
     ) -> dict:
         """Execute the configure command.
 
-            Returns:
-                Dict containing.
+        Returns:
+            Dict containing.
 
 
         """
@@ -103,8 +105,8 @@ class LogsAnalyzeCommand(BaseCommand):
     ) -> dict:
         """Execute the analyze command.
 
-            Returns:
-                Dict containing.
+        Returns:
+            Dict containing.
 
 
         """
@@ -232,7 +234,8 @@ class LogsTailCommand(BaseCommand):
     """Execute the tail command.
 
     Returns:
-        Dict containing."""
+        Dict containing.
+    """
 
     def __init__(self) -> None:
         super().__init__()

@@ -2,7 +2,9 @@
 
 import asyncio
 from unittest.mock import patch
+
 import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.task_scheduler import AgentCapability, TaskScheduler
 from libs.multi_agent.types import Agent, Task

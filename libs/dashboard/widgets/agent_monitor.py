@@ -6,15 +6,17 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+
 from rich.align import Align
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
+from rich.progress import Progress, TaskID
 from rich.table import Table
 from rich.text import Text
-from rich.progress import Progress, TaskID
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 
@@ -22,7 +24,6 @@ from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 # Licensed under the MIT License
 
 """Real-time multi-agent monitoring dashboard widget."""
-
 
 
 if TYPE_CHECKING:
