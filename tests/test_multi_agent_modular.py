@@ -4,42 +4,28 @@
 
 import os
 from pathlib import Path
+
 import click
+
 import commands.multi_agent
 from commands.multi_agent import DetectConflictsCommand, StartAgentsCommand, agent_pool, conflict_resolution
 from commands.multi_agent.agent_pool import (
-from commands.multi_agent.agent_pool import (
-from commands.multi_agent.batch_operations import (
-from commands.multi_agent.cli import multi_agent
-from commands.multi_agent.code_review import (
-from commands.multi_agent.collaboration import (
-from commands.multi_agent.conflict_prediction import (
-from commands.multi_agent.conflict_resolution import (
-from commands.multi_agent.conflict_resolution import (
-from commands.multi_agent.dependency_tracking import (
-from commands.multi_agent.semantic_analysis import (
-from libs.core.base_command import BaseCommand
-# Test that all command classes can be imported from the modular structure
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for the modular multi-agent system."""
-
-
-
     AddTaskCommand,
     ListTasksCommand,
     MonitorAgentsCommand,
     StatusCommand,
     StopAgentsCommand,
 )
+from commands.multi_agent.agent_pool import (
     StartAgentsCommand as AgentStartCommand,
 )
+from commands.multi_agent.batch_operations import (
     AutoResolveCommand,
     BatchMergeCommand,
     PreventConflictsCommand,
 )
+from commands.multi_agent.cli import multi_agent
+from commands.multi_agent.code_review import (
     QualityCheckCommand,
     ReviewApproveCommand,
     ReviewInitiateCommand,
@@ -47,30 +33,37 @@ from libs.core.base_command import BaseCommand
     ReviewStatusCommand,
     ReviewSummaryCommand,
 )
+from commands.multi_agent.collaboration import (
     BranchInfoCommand,
     CollaborateCommand,
     SendMessageCommand,
     ShareKnowledgeCommand,
 )
+from commands.multi_agent.conflict_prediction import (
     AnalyzeConflictPatternsCommand,
     PredictConflictsCommand,
     PredictionSummaryCommand,
 )
+from commands.multi_agent.conflict_resolution import (
     ConflictSummaryCommand,
     ResolveConflictCommand,
 )
+from commands.multi_agent.conflict_resolution import (
     DetectConflictsCommand as ConflictDetectCommand,
 )
+from commands.multi_agent.dependency_tracking import (
     DependencyImpactCommand,
     DependencyPropagateCommand,
     DependencyStatusCommand,
     DependencyTrackCommand,
 )
+from commands.multi_agent.semantic_analysis import (
     AnalyzeSemanticConflictsCommand,
     FunctionDiffCommand,
     SemanticMergeCommand,
     SemanticSummaryCommand,
 )
+from libs.core.base_command import BaseCommand
 
 
 def test_agent_pool_imports() -> None:

@@ -202,7 +202,7 @@ class SemanticMerger:
 
             logger.info("Merge completed: %s", merge_result.resolution.value)
 
-        except (OSError, RuntimeError, ValueError, SyntaxError):
+        except (OSError, RuntimeError, ValueError, SyntaxError) as e:
             logger.exception("Error performing semantic merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -470,7 +470,7 @@ class SemanticMerger:
                 },
             )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in intelligent merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -524,7 +524,7 @@ class SemanticMerger:
                 ),
             )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in AST-based merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -612,7 +612,7 @@ class SemanticMerger:
                 ),
             )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in function-level merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -696,7 +696,7 @@ class SemanticMerger:
                 ),
             )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in semantic union merge")
             return MergeResult(
                 merge_id=merge_id,
@@ -729,7 +729,6 @@ class SemanticMerger:
 
     @staticmethod
     def _prefer_branch_merge(
-        self,
         merge_id: str,
         file_path: str,
         content: str,
@@ -781,7 +780,6 @@ class SemanticMerger:
 
     @staticmethod
     def _calculate_diff_stats(
-        self,
         content1: str,
         content2: str,
         merged: str,
@@ -831,7 +829,6 @@ class SemanticMerger:
 
     @staticmethod
     def _select_optimal_strategy(
-        self,
         conflicts: list[SemanticConflict],
     ) -> MergeStrategy:
         """Select optimal merge strategy based on conflict types and patterns."""
@@ -906,7 +903,6 @@ class SemanticMerger:
 
     @staticmethod
     def _conflict_resolved_by_merge(
-        self,
         conflict: SemanticConflict,  # noqa: ARG002
         merge_result: MergeResult,
     ) -> bool:
@@ -936,7 +932,6 @@ class SemanticMerger:
 
     @staticmethod
     def _merge_ast_trees(
-        self,
         tree1: ast.AST,
         tree2: ast.AST,  # noqa: ARG002
         conflicts: list[SemanticConflict],  # noqa: ARG002
@@ -986,7 +981,6 @@ class SemanticMerger:
 
     @staticmethod
     def _find_function_conflict(
-        self,
         func_name: str,
         conflicts: list[SemanticConflict],
     ) -> SemanticConflict | None:
@@ -998,7 +992,6 @@ class SemanticMerger:
 
     @staticmethod
     def _merge_function_definitions(
-        self,
         func1: str,  # noqa: ARG002
         func2: str,
         conflict: SemanticConflict,  # noqa: ARG002
@@ -1042,7 +1035,6 @@ class SemanticMerger:
 
     @staticmethod
     def _reconstruct_from_semantic_elements(
-        self,
         imports: list,  # noqa: ARG002
         functions: dict,  # noqa: ARG002
         classes: dict,  # noqa: ARG002
