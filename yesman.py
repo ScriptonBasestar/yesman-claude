@@ -3,12 +3,14 @@
 # Copyright notice.
 
 import click
+
 from commands.ai import ai
 from commands.automate import automate
 from commands.browse import browse
 from commands.cleanup import cleanup
 from commands.dashboard import dashboard, dashboard_group
 from commands.enter import enter
+
 # from commands.fix_lint import fix_lint  # File doesn't exist
 from commands.logs import logs
 from commands.ls import ls
