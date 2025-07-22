@@ -368,6 +368,7 @@ def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
             return func(*args, **kwargs)
         except YesmanError as e:
             error_handler.handle_error(e)
+            return None
         except Exception as e:
             # Create context from function
             context = ErrorContext(
@@ -375,6 +376,7 @@ def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
                 component=(func.__module__.split(".")[-1] if hasattr(func, "__module__") else "unknown"),
             )
             error_handler.handle_error(e, context)
+            return None
 
     return wrapper
 

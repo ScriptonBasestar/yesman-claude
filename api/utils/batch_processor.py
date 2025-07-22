@@ -27,12 +27,8 @@ class MessageBatch:
     channel: str
     size_bytes: int = 0
 
-    def __post_init__(self) -> object:
-        """Calculate batch size after initialization.
-
-        Returns:
-        object: Description of return value.
-        """
+    def __post_init__(self) -> None:
+        """Calculate batch size after initialization."""
         if not self.size_bytes:
             self.size_bytes = sum(len(json.dumps(msg)) for msg in self.messages)
 
