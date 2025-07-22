@@ -8,7 +8,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 try:
     import winreg
@@ -76,24 +76,27 @@ class ColorPalette:
     def to_dict(self) -> dict[str, str]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "ColorPalette":
         """Create from dictionary.
 
-    Returns:
-        'Colorpalette' object."""
+        Returns:
+        'Colorpalette' object.
+        """
         return cls(**data)
 
     @staticmethod
     def adjust_opacity(color: str, opacity: float) -> str:
         """Add opacity to a color (simplified - would need color parsing in production).
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         if color.startswith("#") and len(color) == 7:
             # Convert hex to RGB and add alpha
             r = int(color[1:3], 16)
@@ -136,16 +139,18 @@ class Typography:
     def to_dict(self) -> dict[str, str]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "Typography":
         """Create from dictionary.
 
-    Returns:
-        'Typography' object."""
+        Returns:
+        'Typography' object.
+        """
         return cls(**data)
 
 
@@ -185,16 +190,18 @@ class Spacing:
     def to_dict(self) -> dict[str, str]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, str]) -> "Spacing":
         """Create from dictionary.
 
-    Returns:
-        'Spacing' object."""
+        Returns:
+        'Spacing' object.
+        """
         return cls(**data)
 
 
@@ -215,8 +222,9 @@ class Theme:
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary.
 
-    Returns:
-        Dict containing."""
+        Returns:
+        Dict containing.
+        """
         return {
             "name": self.name,
             "mode": self.mode.value,
@@ -233,8 +241,9 @@ class Theme:
     def from_dict(cls, data: dict[str, object]) -> "Theme":
         """Create from dictionary.
 
-    Returns:
-        'Theme' object."""
+        Returns:
+        'Theme' object.
+        """
         return cls(
             name=data["name"],
             mode=ThemeMode(data["mode"]),
@@ -255,8 +264,9 @@ class SystemThemeDetector:
     def get_system_theme() -> ThemeMode:
         """Get system theme preference.
 
-    Returns:
-        Thememode object the requested data."""
+        Returns:
+        Thememode object the requested data.
+        """
         try:
             system = platform.system()
 
@@ -278,8 +288,9 @@ class SystemThemeDetector:
     def _get_macos_theme() -> ThemeMode:
         """Get macOS theme preference.
 
-    Returns:
-        Thememode object the requested data."""
+        Returns:
+        Thememode object the requested data.
+        """
         try:
             result = subprocess.run(
                 ["defaults", "read", "-g", "AppleInterfaceStyle"],
@@ -304,14 +315,14 @@ class SystemThemeDetector:
     def _get_windows_theme() -> ThemeMode:
         """Get Windows theme preference.
 
-    Returns:
-        Thememode object the requested data."""
+        Returns:
+        Thememode object the requested data.
+        """
         if winreg is None:
             logger.warning("winreg not available on non-Windows platform")
             return ThemeMode.LIGHT
-            
-        try:
 
+        try:
             # Check Windows registry for theme preference
             key = winreg.OpenKey(  # type: ignore[attr-defined]
                 winreg.HKEY_CURRENT_USER,  # type: ignore[attr-defined]
@@ -330,8 +341,9 @@ class SystemThemeDetector:
     def _get_linux_theme() -> ThemeMode:
         """Get Linux theme preference.
 
-    Returns:
-        Thememode object the requested data."""
+        Returns:
+        Thememode object the requested data.
+        """
         try:
             # Check various Linux desktop environment settings
 
@@ -378,8 +390,9 @@ class ThemeManager:
     def get_instance(cls, config_dir: Path | None = None) -> "ThemeManager":
         """Get the singleton instance of the theme manager.
 
-    Returns:
-        'Thememanager' object the requested data."""
+        Returns:
+        'Thememanager' object the requested data.
+        """
         if cls._instance is None:
             cls._instance = cls(config_dir=config_dir)
         return cls._instance
@@ -422,8 +435,9 @@ class ThemeManager:
     def _create_builtin_themes() -> dict[str, Theme]:
         """Create built-in themes.
 
-    Returns:
-        Dict containing the created item."""
+        Returns:
+        Dict containing the created item.
+        """
         themes = {}
 
         # Default Light Theme
@@ -497,8 +511,9 @@ class ThemeManager:
     def get_all_themes(self) -> dict[str, Theme]:
         """Get all available themes (built-in + user).
 
-    Returns:
-        Dict containing the requested data."""
+        Returns:
+        Dict containing the requested data.
+        """
         all_themes = self.built_in_themes.copy()
         all_themes.update(self.user_themes)
         return all_themes
@@ -506,8 +521,9 @@ class ThemeManager:
     def get_theme(self, name: str) -> Theme | None:
         """Get theme by name.
 
-    Returns:
-        Theme | None object the requested data."""
+        Returns:
+        Theme | None object the requested data.
+        """
         all_themes = self.get_all_themes()
         return all_themes.get(name)
 
@@ -562,8 +578,9 @@ class ThemeManager:
     def update_from_system(self) -> bool:
         """Update theme from system preference.
 
-    Returns:
-        Boolean indicating the updated item."""
+        Returns:
+        Boolean indicating the updated item.
+        """
         if not self.auto_theme_enabled:
             return False
 
@@ -604,7 +621,7 @@ class ThemeManager:
         Args:
             name: Theme name to load
 
-            Returns:
+        Returns:
                 Theme | None object.
         """
         try:
@@ -758,8 +775,9 @@ class ThemeManager:
     def export_textual_css(self, theme: Theme | None = None) -> str:
         """Export theme as CSS for Textual TUI framework.
 
-    Returns:
-        String containing."""
+        Returns:
+        String containing.
+        """
         theme = theme or self.current_theme
         if not theme:
             return ""
@@ -786,7 +804,8 @@ def get_theme_manager() -> ThemeManager:
     """Get the global theme manager instance.
 
     Returns:
-        Thememanager object the requested data."""
+        Thememanager object the requested data.
+    """
     return ThemeManager.get_instance()
 
 
