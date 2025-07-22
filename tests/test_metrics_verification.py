@@ -1,8 +1,9 @@
-from typing import Any
 import json
 import tempfile
 from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.metrics_verifier import (
     MetricsVerifier,
@@ -326,7 +327,7 @@ class TestComprehensiveVerification:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_comprehensive_verification_flow(mock_agent_pool: Mock) -> None:  # noqa: ARG002  # noqa: ARG004
+    async def test_comprehensive_verification_flow(mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
         """Test complete verification flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Mock time.time to return predictable results

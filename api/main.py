@@ -1,7 +1,7 @@
 import asyncio
 import os
 from datetime import UTC, datetime
-from typing import TypedDict
+from typing import TypedDict, cast
 
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
@@ -212,7 +212,7 @@ async def get_task_status() -> TaskStatesDict:
     """Get status of background tasks."""
     return {
         "is_running": task_runner.is_running,
-        "tasks": task_runner.get_task_states(),
+        "tasks": cast(dict[str, TaskStateDict], task_runner.get_task_states()),
     }
 
 
@@ -224,7 +224,7 @@ async def get_websocket_stats() -> WebSocketStatsDict:
     batch_stats = manager.get_batch_statistics()
 
     return {
-        "connection_stats": connection_stats,
-        "batch_stats": batch_stats,
+        "connection_stats": cast(ConnectionStatsDict, connection_stats),
+        "batch_stats": cast(BatchStatisticsDict, batch_stats),
         "summary": datetime.now(UTC).isoformat(),
     }

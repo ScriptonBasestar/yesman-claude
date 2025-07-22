@@ -219,7 +219,7 @@ class TestAgentPool:
     @staticmethod
     async def test_execute_task_timeout(agent_pool: AgentPool) -> None:
         """Test task timeout handling."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001  # noqa: SLF001
+        agent = await agent_pool._create_agent()  # noqa: SLF001, SLF001
         task = Task(
             task_id="timeout-task",
             title="Timeout Task",
@@ -243,7 +243,7 @@ class TestAgentPool:
     @staticmethod
     async def test_terminate_agent(agent_pool: AgentPool) -> None:
         """Test agent termination."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001  # noqa: SLF001
+        agent = await agent_pool._create_agent()  # noqa: SLF001, SLF001
 
         # Mock process
         mock_process = MagicMock()

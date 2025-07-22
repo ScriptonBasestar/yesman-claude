@@ -4,6 +4,7 @@ import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, cast
 
 from rich.columns import Columns
 from rich.console import Console
@@ -65,12 +66,13 @@ class SessionBrowser:
         for session_data in sessions_data:
             # Calculate activity level based on processes and recent changes
             activity_level = self._calculate_activity_level(session_data)
-            self.activity_levels[session_data["session_name"]] = activity_level
+            session_name = cast(str, session_data["session_name"])
+            self.activity_levels[session_name] = activity_level
 
             node = SessionNode(
-                session_name=session_data["session_name"],
+                session_name=session_name,
                 status=self._get_session_status(session_data),
-                windows=session_data.get("windows", []),
+                windows=cast(list[dict[str, object]], session_data.get("windows", [])),
                 last_activity=current_time,
                 claude_status=self._detect_claude_status(session_data),
             )
@@ -88,8 +90,10 @@ class SessionBrowser:
         activity = 0.0
 
         # Check for active processes
-        for window in session_data.get("windows", []):
-            for pane in window.get("panes", []):
+        windows = cast(list[dict[str, Any]], session_data.get("windows", []))
+        for window in windows:
+            panes = cast(list[dict[str, Any]], window.get("panes", []))
+            for pane in panes:
                 command = pane.get("pane_current_command", "")
                 if command and command not in {"zsh", "bash", "sh"}:
                     activity += 0.3

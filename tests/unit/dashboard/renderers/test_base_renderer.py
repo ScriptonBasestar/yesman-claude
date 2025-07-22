@@ -2,7 +2,9 @@
 
 from datetime import datetime
 from typing import Any
+
 import pytest
+
 from libs.dashboard.renderers.base_renderer import (
     BaseRenderer,
     RenderFormat,
@@ -19,7 +21,7 @@ from libs.dashboard.renderers.registry import RendererRegistry
 class TestRenderer(BaseRenderer):
     """Test implementation of BaseRenderer for testing."""
 
-    def render_widget(self, widget_type: WidgetType, data: dict[str, Any], options: dict[str, Any] | None = None) -> str:
+    def render_widget(self, widget_type: WidgetType, data: dict[str, Any], options: dict[str, Any] | None = None) -> str:  # noqa: ARG002
         return f"<widget type='{widget_type.value}' data='{data}' />"
 
     def render_layout(self, widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None) -> str:
@@ -124,7 +126,7 @@ class TestBaseRenderer:
 
         assert self.renderer.truncate_text(text, 20) == "This is a very lo..."
         assert self.renderer.truncate_text(text, 50) == text  # No truncation needed
-        assert self.renderer.truncate_text(None, 20) == ""
+        assert not self.renderer.truncate_text(None, 20)
 
         # Custom suffix
         assert self.renderer.truncate_text(text, 20, ">>") == "This is a very lon>>"
@@ -139,7 +141,7 @@ class TestBaseRenderer:
         text_with_whitespace = "Hello\nWorld\tTest"
         assert self.renderer.sanitize_text(text_with_whitespace) == "Hello\nWorld\tTest"
 
-        assert self.renderer.sanitize_text(None) == ""
+        assert not self.renderer.sanitize_text(None)
 
     def test_get_status_color(self) -> None:
         """Test status color mapping."""

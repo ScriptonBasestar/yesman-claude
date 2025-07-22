@@ -294,7 +294,7 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         assert True  # Placeholder - actual verification would depend on monitoring implementation
 
     @staticmethod
-    async def _run_async_monitor(command_runner: project_path, object) -> None:  # noqa: ARG002  # noqa: ARG004
+    async def _run_async_monitor(command_runner: project_path, object) -> None:  # noqa: ARG002, ARG004
         """Helper to run monitoring in async context."""
         # This would be the actual async monitoring implementation
         # For now, we simulate it

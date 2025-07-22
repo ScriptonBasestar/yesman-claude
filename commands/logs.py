@@ -5,6 +5,7 @@ import json
 import time
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -18,8 +19,6 @@ from libs.logging import AsyncLogger, AsyncLoggerConfig, LogLevel
 # Licensed under the MIT License
 
 """Log management and analysis commands."""
-
-from typing import Any
 
 
 class LogsConfigureCommand(BaseCommand):
@@ -382,7 +381,7 @@ class LogsCleanupCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
         """Execute the cleanup command.
 
         Returns:

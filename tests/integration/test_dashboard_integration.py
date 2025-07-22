@@ -4,12 +4,15 @@
 
 import asyncio
 import time
-from typing import Never, Any
+from typing import Never
 from unittest.mock import AsyncMock, Mock
+
 import pytest
+
 from commands.automate import AutomateMonitorCommand
 from commands.setup import SetupCommand
 from commands.status import StatusCommand
+
 from .test_framework import (
     AsyncIntegrationTestBase,
     CommandTestRunner,
@@ -258,7 +261,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
     @staticmethod
-    async def _start_mock_dashboard():
+    async def _start_mock_dashboard() -> Mock:
         """Start mock dashboard for testing."""
         # Create mock dashboard that simulates real behavior
         dashboard = Mock()
@@ -308,7 +311,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             await dashboard.cleanup()
 
     @staticmethod
-    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:  # noqa: ARG002  # noqa: ARG004
+    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:  # noqa: ARG002, ARG004
         """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id
@@ -399,7 +402,7 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
     @staticmethod
-    async def _start_mock_dashboard():
+    async def _start_mock_dashboard() -> Mock:
         """Start mock dashboard - reuse from previous class."""
         dashboard = Mock()
         dashboard._state = {  # noqa: SLF001
@@ -484,7 +487,7 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
     @staticmethod
-    async def _start_mock_dashboard():
+    async def _start_mock_dashboard() -> Mock:
         """Start mock dashboard - reuse pattern."""
         dashboard = Mock()
         dashboard._state = {  # noqa: SLF001

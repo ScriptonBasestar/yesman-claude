@@ -1,9 +1,10 @@
-from typing import Any
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
+
 import pytest
+
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import (
     ConflictInfo,

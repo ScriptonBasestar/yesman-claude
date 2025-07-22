@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_manager import BranchManager
 
@@ -19,9 +20,6 @@ from .branch_manager import BranchManager
 # Licensed under the MIT License
 
 """Branch-specific test execution and result integration system."""
-
-from typing import Any
-
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +63,9 @@ class TestResult:
     exit_code: int | None = None
     coverage: float | None = None
     failed_tests: list[str] = field(default_factory=list)
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "test_id": self.test_id,
@@ -86,7 +84,7 @@ class TestResult:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str]) -> "TestResult":
+    def from_dict(cls, data: dict[str, Any]) -> "TestResult":
         """Create from dictionary."""
         data["test_type"] = TestType(data["test_type"])
         data["status"] = TestStatus(data["status"])
@@ -563,7 +561,7 @@ class BranchTestManager:
             logger.exception("Build failed for %s", branch_name)
             return False
 
-    def get_branch_test_summary(self, branch_name: str) -> dict[str]:
+    def get_branch_test_summary(self, branch_name: str) -> dict[str, Any]:
         """Get test summary for a branch."""
         if branch_name not in self.branch_results:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
@@ -573,7 +571,7 @@ class BranchTestManager:
             return {"branch": branch_name, "total_tests": 0, "status": "no_tests"}
 
         # Get latest results for each test type
-        latest_results: dict[str] = {}
+        latest_results: dict[str, Any] = {}
         for result in results:
             key = f"{result.test_type.value}"
             if key not in latest_results or result.start_time > latest_results[key].start_time:
@@ -606,7 +604,7 @@ class BranchTestManager:
             "last_run": max(r.start_time for r in latest_results.values()).isoformat(),
         }
 
-    def get_all_branch_summaries(self) -> dict[str, dict[str]]:
+    def get_all_branch_summaries(self) -> dict[str, dict[str, Any]]:
         """Get test summaries for all active branches."""
         summaries = {}
 
@@ -634,7 +632,7 @@ class BranchTestManager:
         name: str,
         test_type: TestType,
         command: list[str],
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Configure or update a test suite."""
         self.test_suites[name] = TestSuite(

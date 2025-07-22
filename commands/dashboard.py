@@ -11,6 +11,7 @@ import time
 import time as time_module
 import webbrowser
 from pathlib import Path
+from typing import Any
 
 import click
 import uvicorn
@@ -27,9 +28,6 @@ from libs.core.base_command import BaseCommand, CommandError
 # Licensed under the MIT License
 
 """Dashboard interface management commands."""
-
-from typing import Any
-
 
 try:
     pass
@@ -488,7 +486,7 @@ class DashboardListCommand(BaseCommand):
         super().__init__()
         self.env = DashboardEnvironment()
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
         """Execute the list command.
 
         Returns:
@@ -535,7 +533,7 @@ class DashboardListCommand(BaseCommand):
 class DashboardBuildCommand(BaseCommand):
     """Build dashboard for production deployment."""
 
-    def execute(self, interface: str = "tauri", **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, interface: str = "tauri", **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
         """Execute the build command.
 
         Returns:

@@ -11,7 +11,7 @@ import html
 import json
 import uuid
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .widget_models import (
@@ -65,7 +65,7 @@ class WebRenderer(BaseRenderer):
     def render_widget(
         self,
         widget_type: WidgetType,
-        data: object,
+        data: Any,
         options: dict[str, Any] | None = None,
     ) -> str:
         """Render a single widget as HTML.
@@ -83,23 +83,23 @@ class WebRenderer(BaseRenderer):
 
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
-            return self._render_session_browser(data, options, component_id)
+            return self._render_session_browser(cast(SessionData | list[SessionData], data), options, component_id)
         if widget_type == WidgetType.HEALTH_METER:
-            return self._render_health_meter(data, options, component_id)
+            return self._render_health_meter(cast(HealthData, data), options, component_id)
         if widget_type == WidgetType.ACTIVITY_HEATMAP:
-            return self._render_activity_heatmap(data, options, component_id)
+            return self._render_activity_heatmap(cast(ActivityData, data), options, component_id)
         if widget_type == WidgetType.PROGRESS_TRACKER:
-            return self._render_progress_tracker(data, options, component_id)
+            return self._render_progress_tracker(cast(ProgressData, data), options, component_id)
         if widget_type == WidgetType.LOG_VIEWER:
-            return self._render_log_viewer(data, options, component_id)
+            return self._render_log_viewer(cast(dict[str, Any], data), options, component_id)
         if widget_type == WidgetType.METRIC_CARD:
-            return self._render_metric_card(data, options, component_id)
+            return self._render_metric_card(cast(MetricCardData, data), options, component_id)
         if widget_type == WidgetType.STATUS_INDICATOR:
-            return self._render_status_indicator(data, options, component_id)
+            return self._render_status_indicator(cast(StatusIndicatorData, data), options, component_id)
         if widget_type == WidgetType.CHART:
-            return self._render_chart(data, options, component_id)
+            return self._render_chart(cast(ChartData, data), options, component_id)
         if widget_type == WidgetType.TABLE:
-            return self._render_table(data, options, component_id)
+            return self._render_table(cast(dict[str, Any], data), options, component_id)
         return WebRenderer._render_generic_widget(widget_type, data, options, component_id)
 
     def render_layout(

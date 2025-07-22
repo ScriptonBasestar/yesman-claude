@@ -5,6 +5,7 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import libtmux
 
@@ -94,7 +95,7 @@ class SessionManager:
             self.logger.error("Error getting sessions", exc_info=True)
             return []
 
-    def _get_session_info(self, project_name: str, project_conf: dict[str]) -> SessionInfo:
+    def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
         """Get information for a single session with mode-aware caching.
 
         Returns:
@@ -370,7 +371,7 @@ class SessionManager:
         main_cmd = cmdline[0].split("/")[-1] if cmdline else command
         return f"Running {main_cmd}"
 
-    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str]:
+    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """Attach to a specific tmux pane.
 
         Args:
@@ -430,7 +431,7 @@ class SessionManager:
                 "action": "error",
             }
 
-    def get_progress_overview(self) -> dict[str]:
+    def get_progress_overview(self) -> dict[str, Any]:
         """Get progress overview for all sessions.
 
         Returns:
@@ -529,7 +530,7 @@ echo "Attaching to tmux pane..."
             self.logger.exception("Error creating attachment script")
             raise
 
-    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str]:
+    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """Execute pane attachment with error handling.
 
         Args:

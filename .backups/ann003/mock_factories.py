@@ -1,6 +1,7 @@
-from typing import Any
 from unittest.mock import MagicMock, patch
+
 from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
+
 # Convenience exports for easy importing
 
 # Copyright notice.

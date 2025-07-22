@@ -6,7 +6,9 @@ from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
+
 import pytest
+
 from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import CollaborationEngine

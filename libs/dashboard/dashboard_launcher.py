@@ -7,6 +7,7 @@ import subprocess  # noqa: S404
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import fastapi
 import rich
@@ -142,7 +143,7 @@ class DashboardLauncher:
         Returns:
             Dictionary with requirement status for each interface
         """
-        results: dict[str, dict[str, object]] = {}
+        results: dict[str, dict[str, Any]] = {}
 
         for interface, config in self._interface_configs.items():
             results[interface] = {

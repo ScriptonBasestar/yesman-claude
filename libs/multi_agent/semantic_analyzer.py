@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictSeverity, ResolutionStrategy
@@ -120,9 +121,9 @@ class SemanticConflict:
     description: str
     old_definition: str | None = None
     new_definition: str | None = None
-    impact_analysis: dict[str] = field(default_factory=dict)
+    impact_analysis: dict[str, Any] = field(default_factory=dict)
     suggested_resolution: ResolutionStrategy = ResolutionStrategy.HUMAN_REQUIRED
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     detected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -655,13 +656,13 @@ class SemanticAnalyzer:
         self,
         func1: FunctionSignature,
         func2: FunctionSignature,
-    ) -> dict[str]:
+    ) -> dict[str, Any]:
         """Analyze the impact of function signature changes.
 
         Returns:
         object: Description of return value.
         """
-        impact: dict[str] = {
+        impact: dict[str, Any] = {
             "breaking_change": False,
             "parameter_changes": [],
             "return_type_change": func1.return_type != func2.return_type,
@@ -822,7 +823,7 @@ class SemanticAnalyzer:
             logger.exception("Error reading file %s")
         return None
 
-    def get_analysis_summary(self) -> dict[str]:
+    def get_analysis_summary(self) -> dict[str, Any]:
         """Get summary of semantic analysis.
 
         Returns:

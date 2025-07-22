@@ -8,6 +8,7 @@ import time
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -43,7 +44,7 @@ def temp_file(content: str = "", suffix: str = ".txt") -> Generator[str, None, N
         os.unlink(path)
 
 
-def create_test_config(config_dict: dict[str], format: str = "yaml") -> str:
+def create_test_config(config_dict: dict[str, Any], format: str = "yaml") -> str:
     """테스트용 설정 파일 생성."""
     with temp_file(suffix=f".{format}") as config_path:
         with open(config_path, "w", encoding="utf-8") as f:
@@ -87,7 +88,7 @@ def create_test_project_structure(base_dir: str) -> None:
         "README.md": "# Test Project",
     }
 
-    def create_structure(base_path: str, structure: dict[str]) -> None:
+    def create_structure(base_path: str, structure: dict[str, Any]) -> None:
         for name, content in structure.items():
             path = Path(base_path) / name
             if isinstance(content, dict):
@@ -135,7 +136,7 @@ def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5, i
     return False
 
 
-def generate_test_data(data_type: str, count: int = 10) -> list[dict[str]]:
+def generate_test_data(data_type: str, count: int = 10) -> list[dict[str, Any]]:
     """테스트 데이터 생성기."""
     if data_type == "sessions":
         return [

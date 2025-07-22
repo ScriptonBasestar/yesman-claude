@@ -5,7 +5,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Any
+from typing import Any, Optional, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -112,10 +112,10 @@ class KeyBinding:
     def from_dict(cls, data: dict[str, object]) -> "KeyBinding":
         """Create KeyBinding from dictionary."""
         return cls(
-            key=data["key"],
+            key=cast(str, data["key"]),
             modifiers=[KeyModifier(mod) for mod in data.get("modifiers", [])],
-            action=data.get("action", ""),
-            description=data.get("description", ""),
+            action=cast(str, data.get("action", "")),
+            description=cast(str, data.get("description", "")),
             context=NavigationContext(data["context"]) if data.get("context") else None,
             enabled=data.get("enabled", True),
             priority=data.get("priority", 0),
@@ -143,7 +143,7 @@ class FocusableElement:
         }
 
 
-class KeyboardNavigationManager:
+class KeyboardNavigationManager:  # noqa: PLR0904
     """Universal keyboard navigation manager.
 
     Provides consistent keyboard navigation across all dashboard interfaces
@@ -484,7 +484,7 @@ class KeyboardNavigationManager:
         Returns:
             True if element was removed, False otherwise
         """
-        for i, element in enumerate(self.focusable_elements):
+        for i, element in enumerate(list(self.focusable_elements)):
             if element.element_id == element_id:
                 self.focusable_elements.pop(i)
 

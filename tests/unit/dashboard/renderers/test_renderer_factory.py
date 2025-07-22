@@ -4,7 +4,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -52,11 +52,11 @@ class MockRenderer(BaseRenderer):
         return f"mock-{widget_type.value}-{self.render_count}"
 
     @staticmethod
-    def render_layout(widgets: list[dict[str]], layout_config: dict[str] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
+    def render_layout(widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None) -> str:  # noqa: ARG002, ARG004
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
-    def render_container(content: str, container_config: dict[str, Any] | None = None) -> str:  # noqa: ARG002  # noqa: ARG004
+    def render_container(content: str, container_config: dict[str, Any] | None = None) -> str:  # noqa: ARG002, ARG004
         return f"mock-container-{type(content).__name__}"
 
     @staticmethod
@@ -81,15 +81,15 @@ class TestRendererFactory:
     @staticmethod
     def test_factory_initialization() -> None:
         """Test factory initialization."""
-        assert not RendererFactory._initialized  # noqa: SLF001
+        assert not cast(bool, cast(Any, RendererFactory)._initialized)  # noqa: SLF001
 
         RendererFactory.initialize()
 
-        assert RendererFactory._initialized  # noqa: SLF001
-        assert len(RendererFactory._renderer_classes) == 3  # noqa: SLF001
-        assert RenderFormat.TUI in RendererFactory._renderer_classes  # noqa: SLF001
-        assert RenderFormat.WEB in RendererFactory._renderer_classes  # noqa: SLF001
-        assert RenderFormat.TAURI in RendererFactory._renderer_classes  # noqa: SLF001
+        assert cast(bool, cast(Any, RendererFactory)._initialized)  # noqa: SLF001
+        assert len(cast(dict, cast(Any, RendererFactory)._renderer_classes)) == 3  # noqa: SLF001
+        assert RenderFormat.TUI in cast(dict, cast(Any, RendererFactory)._renderer_classes)  # noqa: SLF001
+        assert RenderFormat.WEB in cast(dict, cast(Any, RendererFactory)._renderer_classes)  # noqa: SLF001
+        assert RenderFormat.TAURI in cast(dict, cast(Any, RendererFactory)._renderer_classes)  # noqa: SLF001
 
     @staticmethod
     def test_double_initialization() -> None:
@@ -97,7 +97,7 @@ class TestRendererFactory:
         RendererFactory.initialize()
         RendererFactory.initialize()  # Should not raise
 
-        assert RendererFactory._initialized  # noqa: SLF001
+        assert cast(bool, cast(Any, RendererFactory)._initialized)  # noqa: SLF001
 
     @staticmethod
     def test_supported_formats() -> None:
@@ -176,7 +176,7 @@ class TestRendererFactory:
 
         result = RendererFactory.render_universal(
             WidgetType.METRIC_CARD,
-            metric,
+            cast(Any, metric),
             RenderFormat.TUI,
         )
 
@@ -190,19 +190,19 @@ class TestRendererFactory:
 
         results = RendererFactory.render_universal(
             WidgetType.METRIC_CARD,
-            metric,
+            cast(Any, metric),
         )
 
         assert isinstance(results, dict)
         assert len(results) == 3
-        assert RenderFormat.TUI in results
-        assert RenderFormat.WEB in results
-        assert RenderFormat.TAURI in results
+        assert RenderFormat.TUI in cast(dict[RenderFormat, Any], results)
+        assert RenderFormat.WEB in cast(dict[RenderFormat, Any], results)
+        assert RenderFormat.TAURI in cast(dict[RenderFormat, Any], results)
 
         # Each should have different format output
-        assert isinstance(results[RenderFormat.TUI], str)
-        assert isinstance(results[RenderFormat.WEB], str)
-        assert isinstance(results[RenderFormat.TAURI], dict)
+        assert isinstance(cast(dict[RenderFormat, Any], results)[RenderFormat.TUI], str)
+        assert isinstance(cast(dict[RenderFormat, Any], results)[RenderFormat.WEB], str)
+        assert isinstance(cast(dict[RenderFormat, Any], results)[RenderFormat.TAURI], dict)
 
     @staticmethod
     def test_render_parallel() -> None:
@@ -211,7 +211,7 @@ class TestRendererFactory:
 
         results = RendererFactory.render_parallel(
             WidgetType.METRIC_CARD,
-            metric,
+            cast(Any, metric),
             max_workers=2,
         )
 

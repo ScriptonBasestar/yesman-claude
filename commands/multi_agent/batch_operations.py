@@ -16,7 +16,7 @@ class BatchMergeCommand(BaseCommand):
     """Perform batch merge operations."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the batch merge command.
 
         Returns:
@@ -32,7 +32,7 @@ class AutoResolveCommand(BaseCommand):
     """Auto-resolve conflicts with various strategies."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the auto-resolve command.
 
         Returns:
@@ -48,7 +48,7 @@ class PreventConflictsCommand(BaseCommand):
     """Proactive conflict prevention."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the prevent conflicts command.
 
         Returns:

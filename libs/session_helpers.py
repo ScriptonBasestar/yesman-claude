@@ -7,6 +7,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, cast
 
 import libtmux
 from libtmux.exc import LibTmuxException
@@ -258,9 +259,9 @@ def create_session_windows(
 
     # Create windows
     for i, window_config in enumerate(windows_config):
-        window_name = window_config.get("window_name", f"window_{i}")
-        layout = window_config.get("layout", "tiled")
-        panes = window_config.get("panes", [])
+        window_name = cast(str, window_config.get("window_name", f"window_{i}"))
+        layout = cast(str, window_config.get("layout", "tiled"))
+        panes = cast(list[dict[str, Any]], window_config.get("panes", []))
 
         # Create or get window
         if i == 0:
@@ -271,6 +272,7 @@ def create_session_windows(
             window = session.new_window(window_name=window_name)
 
         # Create panes
+        pane_config: dict[str, Any]
         for j, pane_config in enumerate(panes):
             if j == 0:
                 # First pane already exists
@@ -475,7 +477,7 @@ def merge_template_override(template_config: dict[str, object], override_config:
     for key, value in override_config.items():
         if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
             # Recursively merge dictionaries
-            merged[key] = merge_template_override(merged[key], value)
+            merged[key] = merge_template_override(cast(dict[str, object], merged[key]), value)
         else:
             # Override value
             merged[key] = value
@@ -547,7 +549,7 @@ def get_session_by_project(
     Returns:
         SessionInfo if found, None otherwise
     """
-    sessions = projects_config.get("sessions", {})
+    sessions = cast(dict[str, dict[str, Any]], projects_config.get("sessions", {}))
 
     # Find session with matching project name
     for session_name, session_config in sessions.items():

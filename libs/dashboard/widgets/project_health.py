@@ -3,6 +3,7 @@
 import logging
 import os
 import subprocess  # noqa: S404
+from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -36,7 +37,7 @@ class ProjectHealth:
         object: Description of return value.
         """
         try:
-            scores: dict[str, object] = {}
+            scores: dict[str, Any] = {}
 
             # Calculate individual category scores
             scores["build_score"] = self._check_build_health()
@@ -49,7 +50,7 @@ class ProjectHealth:
             scores["docs_score"] = self._check_documentation_health()
 
             # Calculate overall score
-            valid_scores = [v for v in scores.values() if v is not None]
+            valid_scores = [v for v in scores.values() if v is not None and isinstance(v, (int, float))]
             overall_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
 
             scores["overall_score"] = int(overall_score)
@@ -245,19 +246,24 @@ class ProjectHealth:
         """
         suggestions = []
 
-        if scores.get("test_score", 0) < 70:
+        test_score = scores.get("test_score", 0)
+        if isinstance(test_score, (int, float)) and test_score < 70:
             suggestions.append("Consider increasing test coverage")
 
-        if scores.get("deps_score", 0) < 80:
+        deps_score = scores.get("deps_score", 0)
+        if isinstance(deps_score, (int, float)) and deps_score < 80:
             suggestions.append("Update outdated dependencies")
 
-        if scores.get("docs_score", 0) < 70:
+        docs_score = scores.get("docs_score", 0)
+        if isinstance(docs_score, (int, float)) and docs_score < 70:
             suggestions.append("Add more documentation")
 
-        if scores.get("quality_score", 0) < 80:
+        quality_score = scores.get("quality_score", 0)
+        if isinstance(quality_score, (int, float)) and quality_score < 80:
             suggestions.append("Set up code quality tools (linting, formatting)")
 
-        if scores.get("security_score", 0) < 80:
+        security_score = scores.get("security_score", 0)
+        if isinstance(security_score, (int, float)) and security_score < 80:
             suggestions.append("Review security practices")
 
         return suggestions or ["Project health looks good!"]

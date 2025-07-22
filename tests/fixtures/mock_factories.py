@@ -1,6 +1,8 @@
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
+
 from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
+
 # Convenience exports for easy importing
 
 # Copyright notice.
@@ -236,7 +238,7 @@ class PatchContextFactory:
     @staticmethod
     def patch_subprocess_run(**kwargs: object) -> object:
         """Create a patch context for subprocess.run with standard mock."""
-        mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs)
+        mock_result = ComponentMockFactory.create_subprocess_mock(**cast(dict[str, Any], kwargs))
         return patch("subprocess.run", return_value=mock_result)
 
 

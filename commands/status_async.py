@@ -408,25 +408,25 @@ class AsyncStatusDashboard:
 class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
     """Async comprehensive project status dashboard."""
 
-    @staticmethod
-    def validate_preconditions() -> None:
+    def validate_preconditions(self) -> None:
         """Validate command preconditions."""
         super().validate_preconditions()
 
-    async def execute_async(
-        self,
-        project_path: str = ".",
-        update_interval: float = 5.0,
-        interactive: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
-    ) -> dict:
+    async def execute_async(self, **kwargs: dict[str, object]) -> dict:
         """Execute the async status command."""
+        # Extract parameters from kwargs with defaults
+        project_path = str(kwargs.get('project_path', '.'))
+        update_interval = float(kwargs.get('update_interval', 5.0))
+        interactive = bool(kwargs.get('interactive', False))
+        config = kwargs.get('config', self.config)
+        tmux_manager = kwargs.get('tmux_manager', self.tmux_manager)
+        
         try:
             dashboard = AsyncStatusDashboard(
                 project_path=project_path,
                 update_interval=update_interval,
-                config=self.config,
-                tmux_manager=self.tmux_manager,
+                config=config,
+                tmux_manager=tmux_manager,
             )
 
             if interactive:

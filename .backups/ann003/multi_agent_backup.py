@@ -1570,7 +1570,7 @@ def analyze_semantic_conflicts(
 
         asyncio.run(run_semantic_analysis())
 
-    except (OSError, json.JSONEncodeError, RuntimeError, ValueError) as e:
+    except (OSError, json.JSONDecodeError, RuntimeError, ValueError) as e:
         click.echo(f"❌ Error analyzing semantic conflicts: {e}", err=True)
 
 

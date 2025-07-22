@@ -9,6 +9,7 @@ import os
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -32,7 +33,7 @@ class ConfigCache:
         """
         self.cache_ttl = cache_ttl
         self.max_cache_size = max_cache_size
-        self._cache: dict[str, dict[str]] = {}
+        self._cache: dict[str, dict[str, Any]] = {}
         self._access_times: dict[str, float] = {}
         self._lock = threading.RLock()
         self._logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class ConfigCache:
         Returns:
         String containing.
         """
-        key_data: dict[str] = {
+        key_data: dict[str, Any] = {
             "sources": [],
             "env_vars": env_vars or {},
             "timestamp": int(time.time() / 300),  # Round to 5-minute intervals
@@ -132,7 +133,7 @@ class ConfigCache:
                 self._access_times.clear()
                 self._logger.debug("Cache cleared: %d entries", cleared_count)
 
-    def get_stats(self) -> dict[str]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics.
 
         Returns:
@@ -309,7 +310,7 @@ class CachedConfigLoader:
         self.cache.invalidate()
         self._logger.info("Configuration cache manually invalidated")
 
-    def get_cache_stats(self) -> dict[str]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get comprehensive cache statistics.
 
         Returns:
@@ -341,7 +342,7 @@ class CachedConfigLoader:
             "remaining_entries": len(self.cache._cache),
         }
 
-    def get_config_sources_info(self) -> list[dict[str]]:
+    def get_config_sources_info(self) -> list[dict[str, Any]]:
         """Get information about configured sources (delegate to base loader).
 
         Returns:
@@ -388,7 +389,7 @@ class CacheableEnvironmentSource:
         return True
 
     def load(self) -> dict:
-        config: dict[str] = {}
+        config: dict[str, Any] = {}
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
                 # Convert YESMAN_LOGGING_LEVEL to logging.level

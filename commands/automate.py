@@ -29,7 +29,7 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the status command.
 
         Returns:
@@ -147,7 +147,7 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the monitor command.
 
         Returns:
@@ -208,7 +208,7 @@ class AutomateTriggerCommand(BaseCommand):
         project_path: str = ".",
         context_type: str | None = None,
         description: str = "Manual trigger",
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002, ANN401
     ) -> dict[str, Any]:
         """Execute the trigger command.
 
@@ -230,7 +230,7 @@ class AutomateTriggerCommand(BaseCommand):
             self.console.print(f"Description: {description}")
 
             # Simulate context detection
-            async def trigger_automation():
+            async def trigger_automation() -> None:
                 # Create a context info object
                 context_info = ContextInfo(context_type=context_enum, confidence=1.0, details={"description": description, "manual": True}, timestamp=time.time())
 
@@ -263,7 +263,7 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:
+    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
         """Execute the workflow command.
 
         Returns:
@@ -283,7 +283,7 @@ class AutomateExecuteCommand(BaseCommand):
 
             self.console.print(f"⚡ Executing workflow: {workflow_name}")
 
-            async def run_workflow():
+            async def run_workflow() -> tuple[bool, dict[str, str]]:
                 # Create a dummy context for manual execution
                 context_info = ContextInfo(context_type=ContextType.UNKNOWN, confidence=1.0, details={"manual_execution": True, "workflow_name": workflow_name}, timestamp=time.time())
 
@@ -320,7 +320,7 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the detect command.
 
         Returns:
@@ -342,7 +342,7 @@ class AutomateDetectCommand(BaseCommand):
                     total=None,
                 )
 
-                async def run_detection():
+                async def run_detection() -> list[ContextInfo]:
                     return await automation_manager._detect_all_contexts()
 
                 contexts = asyncio.run(run_detection())
@@ -398,7 +398,7 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the config command.
 
         Returns:

@@ -7,7 +7,9 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_test_manager import (
     BranchTestManager,

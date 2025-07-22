@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
@@ -23,9 +24,6 @@ Implements the TASK_RUNNER.todo prompt workflow:
 3. Implement task and run tests
 4. Commit changes and move completed files
 """
-
-from typing import Any
-
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 

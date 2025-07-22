@@ -194,9 +194,10 @@ class TestErrorHandlingIntegration:
     @staticmethod
     def test_command_error_propagation() -> None:
         """Test that errors propagate correctly through command execution."""
+
         class TestCommand(BaseCommand):
             @staticmethod
-            def execute(**kwargs: dict[str, object]) -> Never:  # noqa: ARG002  # noqa: ARG004
+            def execute(**kwargs: dict[str, object]) -> Never:  # noqa: ARG002, ARG004
                 msg = "Test validation error"
                 raise ValidationError(
                     msg,

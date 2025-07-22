@@ -30,7 +30,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         files: list[str] | None = None,
         language: str = "python",
         repo_path: str | None = None,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> dict[str, Any]:
         """Execute the analyze semantic conflicts command.
 
@@ -52,7 +52,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             branch_manager = BranchManager(repo_path or ".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
 
-            async def run_analysis():
+            async def run_analysis() -> dict[str, Any]:
                 # For semantic conflict analysis, we need branches
                 if len(files) < MIN_BRANCHES_FOR_ANALYSIS:
                     msg = "At least 2 branches are required for conflict analysis"
@@ -107,7 +107,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict[str]:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the semantic summary command.
 
         Returns:
@@ -136,7 +136,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: Any) -> dict[str]:  # noqa: ARG002
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the function diff command.
 
         Returns:
@@ -193,7 +193,7 @@ class SemanticMergeCommand(BaseCommand):
         target_file: str | None = None,
         language: str = "python",  # noqa: ARG002
         strategy: str = "auto",
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> dict[str, Any]:
         """Execute the semantic merge command.
 
@@ -225,7 +225,7 @@ class SemanticMergeCommand(BaseCommand):
             except ValueError:
                 merge_strategy = MergeStrategy.INTELLIGENT_MERGE  # Default fallback
 
-            async def run_merge():
+            async def run_merge() -> dict[str, Any]:
                 result = await merger.perform_semantic_merge(file_path=target_file, branch1="current", branch2="other", strategy=merge_strategy)
 
                 success = result.resolution.value in {"auto_resolved", "partial_resolution"}

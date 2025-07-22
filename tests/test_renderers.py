@@ -1,11 +1,13 @@
-from typing import Any
 import gc
 import os
 import threading
 import time
 from datetime import UTC, datetime
+from typing import Any, cast
+
 import psutil
 import pytest
+
 from libs.dashboard.renderers import (
     BatchRenderer,
     LazyRenderer,
@@ -19,6 +21,7 @@ from libs.dashboard.renderers import (
     render_all_formats,
     render_widget,
 )
+from libs.dashboard.renderers.optimizations import cached_render
 from libs.dashboard.renderers.widget_models import (
     ActivityData,
     ActivityEntry,
@@ -36,7 +39,6 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
-from libs.dashboard.renderers.optimizations import cached_render
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -65,7 +67,7 @@ class TestRendererSystemIntegration:
         gc.collect()
 
     @staticmethod
-    def _create_comprehensive_test_data() -> object:
+    def _create_comprehensive_test_data() -> dict[str, Any]:
         """Create comprehensive test data covering all widget types."""
         now = datetime.now(UTC)
 
@@ -185,15 +187,15 @@ class TestRendererSystemIntegration:
     def test_all_formats_render_all_widgets(self) -> None:
         """Test that all formats can render all widget types."""
         widget_tests = [
-            (WidgetType.SESSION_BROWSER, [self.test_data["session"]]),
-            (WidgetType.HEALTH_METER, self.test_data["health"]),
-            (WidgetType.ACTIVITY_HEATMAP, self.test_data["activity"]),
-            (WidgetType.PROGRESS_TRACKER, self.test_data["progress"]),
-            (WidgetType.METRIC_CARD, self.test_data["metric"]),
-            (WidgetType.STATUS_INDICATOR, self.test_data["status"]),
-            (WidgetType.CHART, self.test_data["chart"]),
-            (WidgetType.LOG_VIEWER, self.test_data["logs"]),
-            (WidgetType.TABLE, self.test_data["table"]),
+            (WidgetType.SESSION_BROWSER, [cast(SessionData, self.test_data["session"])]),
+            (WidgetType.HEALTH_METER, cast(HealthData, self.test_data["health"])),
+            (WidgetType.ACTIVITY_HEATMAP, cast(ActivityData, self.test_data["activity"])),
+            (WidgetType.PROGRESS_TRACKER, cast(ProgressData, self.test_data["progress"])),
+            (WidgetType.METRIC_CARD, cast(MetricCardData, self.test_data["metric"])),
+            (WidgetType.STATUS_INDICATOR, cast(StatusIndicatorData, self.test_data["status"])),
+            (WidgetType.CHART, cast(ChartData, self.test_data["chart"])),
+            (WidgetType.LOG_VIEWER, cast(list, self.test_data["logs"])),
+            (WidgetType.TABLE, cast(dict, self.test_data["table"])),
         ]
 
         formats = [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]
@@ -201,7 +203,7 @@ class TestRendererSystemIntegration:
         for widget_type, data in widget_tests:
             for render_format in formats:
                 try:
-                    result = render_widget(widget_type, data, render_format)
+                    result = render_widget(widget_type, cast(Any, data), render_format)
                     assert result is not None
 
                     # Format-specific validations
@@ -221,9 +223,9 @@ class TestRendererSystemIntegration:
 
     def test_cross_format_consistency(self) -> None:
         """Test that different formats produce consistent data structures."""
-        metric = self.test_data["metric"]
+        metric = cast(MetricCardData, self.test_data["metric"])
 
-        results = render_all_formats(WidgetType.METRIC_CARD, metric)
+        results = render_all_formats(WidgetType.METRIC_CARD, cast(Any, metric))
 
         assert len(results) == 3
         assert RenderFormat.TUI in results
@@ -237,12 +239,12 @@ class TestRendererSystemIntegration:
 
         assert "System Performance" in tui_result
         assert "System Performance" in web_result
-        assert tauri_result["data"]["title"] == "System Performance"
+        assert cast(dict, tauri_result)["data"]["title"] == "System Performance"
 
         # All should reflect the value
         assert "92.5" in tui_result or "92.50" in tui_result
         assert "92.5" in web_result or "92.50" in web_result
-        assert tauri_result["data"]["value"] == 92.5
+        assert cast(dict, tauri_result)["data"]["value"] == 92.5
 
     @staticmethod
     def test_data_transformation_pipeline() -> None:
@@ -259,14 +261,15 @@ class TestRendererSystemIntegration:
         health_data = HealthData.from_dict(raw_health_data)
 
         # Render with all formats
-        results = render_all_formats(WidgetType.HEALTH_METER, health_data)
+        results = render_all_formats(WidgetType.HEALTH_METER, cast(Any, health_data))
 
         # Verify transformation preserved data
         for format_type, result in results.items():
             if format_type == RenderFormat.TAURI:
-                assert result["data"]["overall_score"] == 75
-                assert len(result["data"]["categories"]) == 1
-                assert result["data"]["categories"][0]["category"] == "build"
+                result_dict = cast(dict, result)
+                assert result_dict["data"]["overall_score"] == 75
+                assert len(result_dict["data"]["categories"]) == 1
+                assert result_dict["data"]["categories"][0]["category"] == "build"
             else:
                 assert "75" in str(result)
                 assert "build" in str(result).lower()
@@ -287,9 +290,9 @@ class TestRendererSystemIntegration:
         # Test with invalid data type
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
             try:
-                result = render_widget(WidgetType.HEALTH_METER, "invalid", render_format)
+                result = render_widget(WidgetType.HEALTH_METER, cast(Any, "invalid"), render_format)
                 if render_format == RenderFormat.TAURI:
-                    assert "error" in result.get("data", {})
+                    assert "error" in cast(dict, result).get("data", {})
                 # Other formats should handle gracefully
             except (ValueError, TypeError, AttributeError, KeyError):
                 # Exceptions are acceptable for invalid data
@@ -306,16 +309,16 @@ class TestRendererSystemIntegration:
 
         # Should render without crashing
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
-            result = render_widget(WidgetType.SESSION_BROWSER, [incomplete_session], render_format)
+            result = render_widget(WidgetType.SESSION_BROWSER, cast(Any, [incomplete_session]), render_format)
             assert result is not None
 
     @staticmethod
     def test_edge_cases_and_boundaries() -> None:
         """Test edge cases and boundary conditions."""
         # Empty collections
-        empty_sessions = []
-        empty_logs = {"logs": []}
-        empty_table = {"headers": [], "rows": []}
+        empty_sessions: list[Any] = []
+        empty_logs: dict[str, Any] = {"logs": []}
+        empty_table: dict[str, Any] = {"headers": [], "rows": []}
 
         edge_cases = [
             (WidgetType.SESSION_BROWSER, empty_sessions),
@@ -329,7 +332,7 @@ class TestRendererSystemIntegration:
                 RenderFormat.WEB,
                 RenderFormat.TAURI,
             ]:
-                result = render_widget(widget_type, data, render_format)
+                result = render_widget(widget_type, cast(Any, data), render_format)
                 assert result is not None
 
                 if render_format == RenderFormat.TAURI:
@@ -345,12 +348,13 @@ class TestRendererSystemIntegration:
         )
 
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
-            result = render_widget(WidgetType.METRIC_CARD, extreme_metric, render_format)
+            result = render_widget(WidgetType.METRIC_CARD, cast(Any, extreme_metric), render_format)
             assert result is not None
 
             if render_format == RenderFormat.TAURI:
-                assert result["data"]["value"] == 999999.99
-                assert result["data"]["trend"] == -50.0
+                result_dict = cast(dict, result)
+                assert result_dict["data"]["value"] == 999999.99
+                assert result_dict["data"]["trend"] == -50.0
 
     @staticmethod
     def test_concurrent_rendering() -> None:
@@ -371,7 +375,7 @@ class TestRendererSystemIntegration:
                     RenderFormat.WEB,
                     RenderFormat.TAURI,
                 ]:
-                    result = render_widget(WidgetType.METRIC_CARD, metric, render_format)
+                    result = render_widget(WidgetType.METRIC_CARD, cast(Any, metric), render_format)
                     results.append((worker_id, render_format, result))
 
             except (ValueError, TypeError, AttributeError, KeyError, RuntimeError) as e:
@@ -392,7 +396,7 @@ class TestRendererSystemIntegration:
         assert len(results) == 30  # 10 workers * 3 formats
 
         # Verify each worker produced valid results
-        worker_results = {}
+        worker_results: dict[int, dict[RenderFormat, Any]] = {}
         for worker_id, render_format, result in results:
             if worker_id not in worker_results:
                 worker_results[worker_id] = {}
@@ -406,7 +410,8 @@ class TestRendererSystemIntegration:
             # Check worker ID appears in results
             for render_format, result in format_results.items():
                 if render_format == RenderFormat.TAURI:
-                    assert f"Worker {worker_id}" in result["data"]["title"]
+                    result_dict = cast(dict, result)
+                    assert f"Worker {worker_id}" in result_dict["data"]["title"]
                 else:
                     assert f"Worker {worker_id}" in str(result)
 
@@ -432,7 +437,7 @@ class TestRendererPerformance:
         """Test single widget rendering performance."""
 
         def render_single() -> object:
-            return render_widget(WidgetType.METRIC_CARD, self.metric, RenderFormat.TUI)
+            return render_widget(WidgetType.METRIC_CARD, cast(Any, self.metric), RenderFormat.TUI)
 
         # Time the operation
         start_time = time.time()
@@ -442,7 +447,7 @@ class TestRendererPerformance:
 
         # Verify result
         assert result is not None
-        assert "Performance Test" in result
+        assert "Performance Test" in cast(str, result)
 
         # Performance assertions (50ms threshold)
         assert avg_time < 0.05, f"Average render time {avg_time:.4f}s exceeds 50ms threshold"
@@ -451,7 +456,7 @@ class TestRendererPerformance:
         """Test multi-format rendering performance."""
 
         def render_all() -> object:
-            return render_all_formats(WidgetType.METRIC_CARD, self.metric)
+            return render_all_formats(WidgetType.METRIC_CARD, cast(Any, self.metric))
 
         # Time the operation
         start_time = time.time()
@@ -460,8 +465,9 @@ class TestRendererPerformance:
         avg_time = (time.time() - start_time) / 5
 
         # Verify results
-        assert len(results) == 3
-        assert all(result is not None for result in results.values())
+        results_dict = cast(dict, results)
+        assert len(results_dict) == 3
+        assert all(result is not None for result in results_dict.values())
 
         # Performance assertions (150ms threshold for 3 formats)
         assert avg_time < 0.15, f"Average multi-format render time {avg_time:.4f}s exceeds 150ms threshold"
@@ -478,15 +484,15 @@ class TestRendererPerformance:
         start_individual = time.time()
         individual_results = []
         for metric in metrics:
-            result = renderer.render_widget(WidgetType.METRIC_CARD, metric)
+            result = renderer.render_widget(WidgetType.METRIC_CARD, cast(Any, metric))
             individual_results.append(result)
         individual_time = time.time() - start_individual
 
         # Batch rendering (parallel)
-        requests = [(WidgetType.METRIC_CARD, metric, None) for metric in metrics]
+        requests = [(WidgetType.METRIC_CARD, cast(Any, metric), cast(dict[str, Any], {})) for metric in metrics]
 
         start_batch = time.time()
-        batch_results = batch_renderer.render_batch(requests, parallel=True)
+        batch_results = batch_renderer.render_batch(cast(Any, requests), parallel=True)
         batch_time = time.time() - start_batch
 
         # Verify results are equivalent
@@ -500,19 +506,18 @@ class TestRendererPerformance:
         cache = RenderCache(max_size=100)
 
         # Create renderer with caching
-
         renderer = TUIRenderer()
         cached_method = cached_render(cache)(renderer.render_widget)
-        renderer.render_widget = cached_method.__get__(renderer, TUIRenderer)
+        cast(Any, renderer).render_widget = cached_method  # type: ignore
 
         # First render (cache miss)
         start1 = time.time()
-        result1 = renderer.render_widget(WidgetType.METRIC_CARD, self.metric)
+        result1 = renderer.render_widget(WidgetType.METRIC_CARD, cast(Any, self.metric))
         time1 = time.time() - start1
 
         # Second render (cache hit)
         start2 = time.time()
-        result2 = renderer.render_widget(WidgetType.METRIC_CARD, self.metric)
+        result2 = renderer.render_widget(WidgetType.METRIC_CARD, cast(Any, self.metric))
         time2 = time.time() - start2
 
         # Results should be identical
@@ -570,18 +575,19 @@ class TestRendererMemoryStability:
         # Render large dataset
         result = render_widget(
             WidgetType.SESSION_BROWSER,
-            large_sessions,
+            cast(Any, large_sessions),
             RenderFormat.TAURI,
         )
 
         # Verify result
         assert result is not None
         assert isinstance(result, dict)
-        assert len(result["data"]["sessions"]) == 1000
+        result_dict = cast(dict, result)
+        assert len(result_dict["data"]["sessions"]) == 1000
 
         # Check memory usage
         peak_memory = self._get_memory_usage()
-        memory_increase = peak_memory - initial_memory
+        memory_increase = cast(float, peak_memory) - cast(float, initial_memory)
 
         # Memory increase should be reasonable (less than 100MB for this test)
         assert memory_increase < 100, f"Memory increase {memory_increase:.2f}MB too high"
@@ -593,7 +599,7 @@ class TestRendererMemoryStability:
 
         # Memory should be released
         final_memory = self._get_memory_usage()
-        memory_after_cleanup = final_memory - initial_memory
+        memory_after_cleanup = cast(float, final_memory) - cast(float, initial_memory)
 
         # Most memory should be released (allow some overhead)
         assert memory_after_cleanup < memory_increase * 0.5, f"Memory not properly released: {memory_after_cleanup:.2f}MB remaining"
@@ -607,7 +613,7 @@ class TestRendererMemoryStability:
         # Fill cache beyond capacity
         for i in range(20):
             metric = MetricCardData(title=f"Cache Test {i}", value=i)
-            cache_key = cache._generate_cache_key(WidgetType.METRIC_CARD, metric, None, RenderFormat.TUI)
+            cache_key = cast(Any, cache)._generate_cache_key(WidgetType.METRIC_CARD, cast(Any, metric), None, RenderFormat.TUI)
             cache.set(cache_key, f"result-{i}")
 
         # Cache should not exceed max size
@@ -626,15 +632,15 @@ class TestRendererMemoryStability:
             metric = MetricCardData(title=f"Leak Test {i}", value=i)
 
             # Render with all formats
-            results = render_all_formats(WidgetType.METRIC_CARD, metric)
+            results = render_all_formats(WidgetType.METRIC_CARD, cast(Any, metric))
 
             # Create and use lazy renderer
-            lazy_renderer = LazyRenderer(TUIRenderer(), WidgetType.METRIC_CARD, metric)
+            lazy_renderer = LazyRenderer(TUIRenderer(), WidgetType.METRIC_CARD, cast(Any, metric))
             lazy_result = lazy_renderer.render()
 
             # Use batch renderer
             batch_renderer = BatchRenderer(WebRenderer())
-            batch_results = batch_renderer.render_batch([(WidgetType.METRIC_CARD, metric, None)])
+            batch_results = batch_renderer.render_batch(cast(Any, [(WidgetType.METRIC_CARD, cast(Any, metric), cast(dict[str, Any], {}))]))
 
             # Clean up explicitly
             del results, lazy_renderer, lazy_result, batch_results
@@ -649,7 +655,7 @@ class TestRendererMemoryStability:
 
         # Check final memory usage
         final_memory = self._get_memory_usage()
-        memory_increase = final_memory - initial_memory
+        memory_increase = cast(float, final_memory) - cast(float, initial_memory)
 
         # Memory increase should be minimal (less than 20MB)
         assert memory_increase < 20, f"Potential memory leak detected: {memory_increase:.2f}MB increase"

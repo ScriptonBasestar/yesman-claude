@@ -2,7 +2,9 @@
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock
+
 import pytest
+
 from libs.multi_agent.branch_info_protocol import (
     BranchInfo,
     BranchInfoProtocol,

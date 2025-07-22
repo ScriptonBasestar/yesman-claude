@@ -10,6 +10,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 
 from api.routers.websocket_router import manager
 from libs.core.session_manager import SessionManager
@@ -163,7 +164,7 @@ class BackgroundTaskRunner:
                 # Load projects using tmux_manager
 
                 tmux_manager = TmuxManager(config)
-                project_sessions = tmux_manager.load_projects().get("sessions", {})
+                project_sessions = cast(dict[str, Any], tmux_manager.load_projects().get("sessions", {}))
 
                 # Format session data
                 formatted_sessions = []

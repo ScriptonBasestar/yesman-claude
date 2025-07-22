@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+from typing import cast
 
 from .branch_manager import BranchManager
 
@@ -111,7 +112,7 @@ class ConflictResolutionEngine:
             ResolutionStrategy.PREFER_LATEST: self._prefer_latest_strategy,
             ResolutionStrategy.PREFER_MAIN: self._prefer_main_strategy,
             ResolutionStrategy.CUSTOM_MERGE: self._custom_merge_strategy,
-            ResolutionStrategy.SEMANTIC_ANALYSIS: ConflictResolver._semantic_analysis_strategy,
+            ResolutionStrategy.SEMANTIC_ANALYSIS: self._semantic_analysis_strategy,
         }
 
         # Configuration
@@ -663,8 +664,8 @@ class ConflictResolutionEngine:
             # Check for known patterns and apply custom logic
             content = conflict.metadata.get("conflict_content", "")
 
-            if "import" in content.lower():
-                resolved_content = self._resolve_import_conflicts(content)
+            if "import" in str(content).lower():
+                resolved_content = self._resolve_import_conflicts(cast(str, content))
                 if resolved_content:
                     return ResolutionResult(
                         conflict_id=conflict.conflict_id,

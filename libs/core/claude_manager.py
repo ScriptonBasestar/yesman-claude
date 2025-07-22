@@ -14,7 +14,7 @@ from .prompt_detector import PromptInfo
 """Claude manager for dashboard integration - Refactored.""" ""
 
 
-class DashboardController:
+class DashboardController:  # noqa: PLR0904
     """Main controller that orchestrates Claude session management, process control, and monitoring."""
 
     def __init__(self, session_name: str, pane_id: str | None = None) -> None:

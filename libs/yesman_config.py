@@ -9,6 +9,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -111,10 +112,10 @@ class YesmanConfig:
 
         return value
 
-    def save(self, new_config_data: dict[str]) -> None:
+    def save(self, new_config_data: dict[str, Any]) -> None:
         """Save configuration updates to local file."""
         # Load current local config
-        current_local_cfg: dict[str] = {}
+        current_local_cfg: dict[str, Any] = {}
         if self.local_path.exists():
             with open(self.local_path, encoding="utf-8") as f:
                 current_local_cfg = yaml.safe_load(f) or {}
@@ -167,7 +168,7 @@ class YesmanConfig:
         """Get typed configuration schema."""
         return self._config_schema
 
-    def get_cache_stats(self) -> dict[str] | None:
+    def get_cache_stats(self) -> dict[str, Any] | None:
         """Get cache statistics if using cached loader."""
         if hasattr(self._loader, "get_cache_stats"):
             return self._loader.get_cache_stats()  # type: ignore[no-any-return]

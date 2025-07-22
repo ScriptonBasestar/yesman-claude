@@ -16,7 +16,6 @@ from api.main import app
 
 class TestSessionEndpoints(unittest.TestCase):
     def setUp(self) -> None:
-
         self.client = TestClient(app)
 
     @patch("api.routes.sessions.SessionManager")

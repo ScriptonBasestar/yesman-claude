@@ -7,6 +7,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -452,7 +453,7 @@ class ContextDetector:
         Returns:
         object: Description of return value.
         """
-        summary: dict[str, object] = {
+        summary: dict[str, Any] = {
             "project_path": str(self.project_path),
             "timestamp": time.time(),
             "contexts": [],

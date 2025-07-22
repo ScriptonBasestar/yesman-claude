@@ -1,3 +1,5 @@
+from typing import Any
+
 from .base_renderer import BaseRenderer, RenderFormat
 
 # Copyright notice.
@@ -7,8 +9,6 @@ from .base_renderer import BaseRenderer, RenderFormat
 """Renderer Registry
 Central registry for managing renderer instances and types.
 """
-
-from typing import Any
 
 
 class RendererRegistry:
@@ -36,7 +36,7 @@ class RendererRegistry:
         """
         if not issubclass(renderer_class, BaseRenderer):
             msg = f"Renderer class must be a subclass of BaseRenderer, got {renderer_class}"
-            raise ValueError(msg)
+            raise TypeError(msg)
 
         self._renderers[format_type] = renderer_class
 

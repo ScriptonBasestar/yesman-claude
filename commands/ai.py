@@ -3,6 +3,7 @@
 import asyncio
 import time
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -18,8 +19,6 @@ from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 # Licensed under the MIT License
 
 """AI learning system management commands."""
-
-from typing import Any
 
 
 class AIStatusCommand(BaseCommand):
@@ -39,7 +38,7 @@ class AIStatusCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401  # noqa: ARG002, ANN401
         """Execute the status command.
 
         Returns:
@@ -129,7 +128,7 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
         """Execute the command.
 
         Returns:
@@ -190,7 +189,7 @@ class AIHistoryCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
         """Execute the command.
 
         Returns:
@@ -260,7 +259,7 @@ class AIExportCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
         """Execute the command.
 
         Returns:
@@ -300,7 +299,7 @@ class AICleanupCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
         """Execute the command.
 
         Returns:
@@ -338,7 +337,7 @@ class AIPredictCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
         """Execute the command.
 
         Returns:

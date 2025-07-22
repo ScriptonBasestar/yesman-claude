@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
@@ -87,7 +88,7 @@ class ReviewFinding:
     suggestion: str | None = None
     rule_id: str | None = None
     tool_name: str | None = None
-    context: dict[str] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -100,7 +101,7 @@ class QualityMetrics:
     thresholds: dict[QualityMetric, float] = field(default_factory=dict)
     violations: list[QualityMetric] = field(default_factory=list)
     calculated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -122,7 +123,7 @@ class CodeReview:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     started_at: datetime | None = None
     completed_at: datetime | None = None
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -176,7 +177,7 @@ class CodeReviewEngine:
         self.quality_profiles: dict[str, dict] = {}  # file -> quality profile
 
         # Review configuration
-        self.review_config: dict[str] = {
+        self.review_config: dict[str, Any] = {
             "require_approval_for_critical": True,
             "auto_approve_threshold": 8.5,  # Out of 10
             "max_concurrent_reviews": 10,
@@ -1198,7 +1199,7 @@ class CodeReviewEngine:
         return all(not metrics.violations for metrics in review.quality_metrics)
 
     @staticmethod
-    def _summarize_findings(findings: list[ReviewFinding]) -> dict[str]:
+    def _summarize_findings(findings: list[ReviewFinding]) -> dict[str, Any]:
         """Create a summary of review findings.
 
         Returns:
@@ -1352,7 +1353,7 @@ class CodeReviewEngine:
             review_time_stats=review_time_stats,
         )
 
-    def get_engine_summary(self) -> dict[str]:
+    def get_engine_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of the review engine.
 
         Returns:

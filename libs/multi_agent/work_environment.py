@@ -6,9 +6,11 @@ import os
 import shutil
 import subprocess
 import venv
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -48,9 +50,9 @@ class WorkEnvironment:
         Returns:
         WorkEnvironment: Description of return value.
         """
-        data["worktree_path"] = Path(data["worktree_path"])
-        data["venv_path"] = Path(data["venv_path"])
-        return cls(**data)
+        data["worktree_path"] = Path(cast(str, data["worktree_path"]))
+        data["venv_path"] = Path(cast(str, data["venv_path"]))
+        return cls(**cast(dict[str, Any], data))
 
 
 class WorkEnvironmentManager:
@@ -339,7 +341,8 @@ class WorkEnvironmentManager:
             f.write(f"export YESMAN_BRANCH={env.branch_name}\n")
             f.write(f"export YESMAN_WORKTREE={env.worktree_path}\n")
 
-            f.writelines(f"export {key}={value}\n" for key, value in env.config.get("env_vars", {}).items())
+            env_vars = cast(dict[str, str], env.config.get("env_vars", {}))
+            f.writelines(f"export {key}={value}\n" for key, value in env_vars.items())
 
             f.write("\n# Change to worktree directory\n")
             f.write(f"cd {env.worktree_path}\n")
@@ -349,7 +352,7 @@ class WorkEnvironmentManager:
 
     def _run_project_setup(self, env: WorkEnvironment) -> None:
         """Run any project-specific setup commands."""
-        setup_commands = env.config.get("setup_commands", [])
+        setup_commands = cast(list[str], env.config.get("setup_commands", []))
 
         for cmd in setup_commands:
             logger.info("Running setup command: {cmd}")
@@ -398,7 +401,7 @@ class WorkEnvironmentManager:
         return env.worktree_path, env_vars
 
     @contextmanager
-    def work_in_environment(self, branch_name: str):
+    def work_in_environment(self, branch_name: str) -> Generator[str, None, None]:
         """Context manager to work in an environment."""
         original_cwd = os.getcwd()
         original_env = os.environ.copy()

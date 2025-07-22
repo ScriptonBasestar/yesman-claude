@@ -18,6 +18,8 @@ Updated: Enhanced with factory system integration for better mock management
 # Tmux 관련 Mock
 
 from typing import Any
+
+
 class MockTmuxSession:
     """Tmux 세션 Mock 객체."""
 
@@ -162,7 +164,7 @@ class EnhancedMockTmuxSession(MockTmuxSession):
 
 
 # Convenience functions for common mock patterns
-def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str]:
+def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str, Any]:
     """Create a complete mock session with controller for integration tests."""
     session_mock = get_factory_mock("session_manager", **kwargs)
     claude_mock = get_factory_mock("claude_manager", **kwargs)
@@ -174,7 +176,7 @@ def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str
     }
 
 
-def create_api_test_mocks(success: bool = True) -> dict[str]:  # noqa: FBT001
+def create_api_test_mocks(success: bool = True) -> dict[str, Any]:  # noqa: FBT001
     """Create standard API test mocks."""
     if success:
         return {

@@ -13,14 +13,12 @@ from libs.core.claude_manager import ClaudeManager
 
 
 def main() -> None:
-
     # Create manager and get controller
     manager = ClaudeManager()
     controller = manager.get_controller("proxynd")
 
     # Start the controller
     if controller.start():
-
         try:
             # Let it run for 10 seconds to handle all prompts
             for i in range(10):

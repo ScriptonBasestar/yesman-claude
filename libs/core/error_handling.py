@@ -4,6 +4,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 # !/usr/bin/env python3
 # Copyright notice.
@@ -11,8 +12,6 @@ from enum import Enum
 # Licensed under the MIT License
 
 """Centralized error handling and exception management."""
-
-from typing import Any
 
 
 class ErrorCategory(Enum):
@@ -116,7 +115,7 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, config_file: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, message: str, config_file: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -138,7 +137,7 @@ class ConfigurationError(YesmanError):
 class ValidationError(YesmanError):
     """Validation-related errors."""
 
-    def __init__(self, message: str, field_name: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, message: str, field_name: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -163,7 +162,7 @@ class ValidationError(YesmanError):
 class SessionError(YesmanError):
     """Session management related errors."""
 
-    def __init__(self, message: str, session_name: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, message: str, session_name: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -188,7 +187,7 @@ class SessionError(YesmanError):
 class NetworkError(YesmanError):
     """Network-related errors."""
 
-    def __init__(self, message: str, endpoint: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, message: str, endpoint: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -205,7 +204,7 @@ class NetworkError(YesmanError):
 class PermissionError(YesmanError):
     """Permission-related errors."""
 
-    def __init__(self, message: str, resource_path: str | None = None, **kwargs: Any) -> None:
+    def __init__(self, message: str, resource_path: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -222,7 +221,7 @@ class PermissionError(YesmanError):
 class TimeoutError(YesmanError):
     """Timeout-related errors."""
 
-    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: Any) -> None:
+    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
@@ -241,7 +240,7 @@ class ErrorHandler:
 
     def __init__(self, logger_name: str = "yesman.error_handler") -> None:
         self.logger = logging.getLogger(logger_name)
-        self.error_stats: dict[str, object] = {
+        self.error_stats: dict[str, Any] = {
             "total_errors": 0,
             "by_category": {},
             "by_severity": {},
@@ -364,7 +363,7 @@ error_handler = ErrorHandler()
 def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
     """Decorator for automatic exception handling."""
 
-    def wrapper(*args, **kwargs: Any) -> object:
+    def wrapper(*args: Any, **kwargs: Any) -> object:  # noqa: ANN401
         try:
             return func(*args, **kwargs)
         except YesmanError as e:
@@ -384,9 +383,9 @@ def safe_execute(
     operation: str,
     component: str,
     func: Callable[..., object],
-    *args,
+    *args: Any,  # noqa: ANN401
     error_category: ErrorCategory = ErrorCategory.UNKNOWN,
-    **kwargs: Any,
+    **kwargs: Any,  # noqa: ANN401
 ) -> object:
     """Safely execute a function with error handling.
 

@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -57,7 +59,7 @@ def get_available_projects() -> object:
     """
     try:
         tm = get_tmux_manager()
-        projects = tm.load_projects().get("sessions", {})
+        projects = cast(dict, tm.load_projects().get("sessions", {}))
         return list(projects.keys())
     except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to get projects: {e!s}")

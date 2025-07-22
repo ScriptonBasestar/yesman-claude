@@ -16,7 +16,6 @@ from api.main import app
 
 class TestControllerEndpoints(unittest.TestCase):
     def setUp(self) -> None:
-
         self.client = TestClient(app)
 
     @patch("api.routes.controllers.ClaudeManager")

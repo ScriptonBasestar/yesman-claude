@@ -1,5 +1,11 @@
 import os
 
+# Try to keep the important parts (end of path)
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+from typing import Any
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -9,15 +15,6 @@ from rich.text import Text
 from rich.tree import Tree
 
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
-
-# Try to keep the important parts (end of path)
-
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-from typing import Any
 
 
 class ValidateCommand(BaseCommand, SessionCommandMixin):

@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_manager import BranchManager
 from .collaboration_engine import CollaborationEngine, MessagePriority, MessageType
@@ -62,9 +63,9 @@ class BranchInfo:
     merge_ready: bool = False
     conflicts_detected: list[str] = field(default_factory=list)
     dependencies: dict[str, list[str]] = field(default_factory=dict)
-    api_signatures: dict[str] = field(default_factory=dict)
+    api_signatures: dict[str, Any] = field(default_factory=dict)
     work_items: list[str] = field(default_factory=list)
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -75,7 +76,7 @@ class BranchSyncEvent:
     branch_name: str
     agent_id: str
     event_type: BranchInfoType
-    event_data: dict[str]
+    event_data: dict[str, Any]
     timestamp: datetime = field(default_factory=datetime.now)
     priority: MessagePriority = MessagePriority.NORMAL
     requires_action: bool = False
@@ -201,7 +202,7 @@ class BranchInfoProtocol:
         self,
         branch_name: str,
         info_type: BranchInfoType,
-        update_data: dict[str],
+        update_data: dict[str, Any],
         requires_immediate_sync: bool = False,  # noqa: FBT001
     ) -> None:
         """Update branch information and potentially trigger sync.
@@ -350,7 +351,7 @@ class BranchInfoProtocol:
 
         return conflicts
 
-    async def prepare_merge_report(self, branch_name: str) -> dict[str]:
+    async def prepare_merge_report(self, branch_name: str) -> dict[str, Any]:
         """Prepare a comprehensive merge readiness report.
 
         Args:
@@ -420,7 +421,7 @@ class BranchInfoProtocol:
         self,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: dict[str],
+        event_data: dict[str, Any],
     ) -> None:
         """Share branch information with subscribed agents."""
         # Create sync event
@@ -479,7 +480,7 @@ class BranchInfoProtocol:
         agent_id: str,
         branch_info: BranchInfo,
         info_type: BranchInfoType,
-        event_data: dict[str],
+        event_data: dict[str, Any],
     ) -> None:
         """Send branch update to specific agent."""
         message_type = MessageType.STATUS_UPDATE
@@ -584,7 +585,7 @@ class BranchInfoProtocol:
             except Exception:
                 logger.exception("Error in periodic sync")
 
-    def get_protocol_summary(self) -> dict[str]:
+    def get_protocol_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of protocol activity.
 
         Returns:

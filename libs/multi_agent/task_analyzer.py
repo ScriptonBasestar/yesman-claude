@@ -5,6 +5,7 @@ import json
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any, cast
 
 from .graph import DirectedGraph
 
@@ -18,9 +19,6 @@ from .graph import DirectedGraph
 # Licensed under the MIT License
 
 """Task analysis and dependency graph generation for multi-agent development."""
-
-from typing import Any
-
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +58,7 @@ class TaskDefinition:
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> "TaskDefinition":
         """Create from dictionary."""
-        return cls(**data)
+        return cls(**cast(dict[str, Any], data))
 
 
 class TaskAnalyzer:
@@ -244,7 +242,7 @@ class TaskAnalyzer:
         if module.startswith(imported + "."):
             return True
 
-        return bool("." in imported and imported.split(".")[-1] == module.split(".")[-1])
+        return bool("." in imported and imported.rsplit(".", maxsplit=1)[-1] == module.rsplit(".", maxsplit=1)[-1])
 
     def create_task_from_files(
         self,
@@ -252,7 +250,7 @@ class TaskAnalyzer:
         title: str,
         file_paths: list[str],
         description: str = "",
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> TaskDefinition:
         """Create a task definition from file paths.
 
@@ -428,12 +426,12 @@ class TaskAnalyzer:
 
     def export_dependency_graph(self, output_path: str) -> None:
         """Export dependency graph to JSON format."""
-        data: dict[str, object] = {"tasks": {}, "dependencies": []}
+        data: dict[str, Any] = {"tasks": {}, "dependencies": []}
 
         # Export tasks
         for node_id in self.task_graph.nodes_iter():
             task = self.task_graph.nodes.get(node_id, {}).get("task")
-            if task:
+            if task and hasattr(task, 'to_dict'):
                 data["tasks"][node_id] = task.to_dict()
 
         # Export dependencies
@@ -443,7 +441,7 @@ class TaskAnalyzer:
             if len(edge) == 3:
                 source, target, attrs = edge
                 dep = {"source": source, "target": target, "attributes": attrs}
-                data["dependencies"].append(dep)
+                cast(list[dict[str, Any]], data["dependencies"]).append(dep)
 
         # Write to file
         output_file = Path(output_path)

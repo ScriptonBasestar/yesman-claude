@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Script to systematically fix ANN003 (missing-type-kwargs) errors.
+"""Script to systematically fix ANN003 (missing-type-kwargs) errors.
 
 This script:
 1. Finds all ANN003 errors using ruff
@@ -14,13 +13,9 @@ Usage:
 """
 
 import argparse
-import ast
 import re
-import shutil
 import subprocess
-import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 
 class KwargsTypeFixer:
@@ -28,14 +23,14 @@ class KwargsTypeFixer:
 
     def __init__(self, backup_dir: Path | None = None):
         self.backup_dir = backup_dir
-        self.fixed_files: Set[Path] = set()
-        self.failed_files: Set[Path] = set()
+        self.fixed_files: set[Path] = set()
+        self.failed_files: set[Path] = set()
         self.stats = {"files_processed": 0, "fixes_applied": 0, "imports_added": 0, "errors": 0}
 
-    def get_ann003_errors(self) -> Dict[Path, List[Tuple[int, str]]]:
+    def get_ann003_errors(self) -> dict[Path, list[tuple[int, str]]]:
         """Get all ANN003 errors from ruff."""
         try:
-            result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", ".", "--output-format", "json"], capture_output=True, text=True, cwd=Path.cwd())
+            result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", ".", "--output-format", "json"], capture_output=True, text=True, cwd=Path.cwd(), check=False)
 
             if result.returncode not in (0, 1):  # 0 = no issues, 1 = issues found
                 print(f"Error running ruff: {result.stderr}")
@@ -49,7 +44,7 @@ class KwargsTypeFixer:
             errors = json.loads(result.stdout)
 
             # Group by file
-            file_errors: Dict[Path, List[Tuple[int, str]]] = {}
+            file_errors: dict[Path, list[tuple[int, str]]] = {}
             for error in errors:
                 if error.get("code") == "ANN003":
                     file_path = Path(error["filename"])
@@ -150,7 +145,7 @@ class KwargsTypeFixer:
 
         return fixed_line
 
-    def fix_file(self, file_path: Path, error_lines: List[int], dry_run: bool = False) -> bool:
+    def fix_file(self, file_path: Path, error_lines: list[int], dry_run: bool = False) -> bool:
         """Fix ANN003 errors in a specific file."""
         try:
             content = file_path.read_text(encoding="utf-8")
@@ -184,16 +179,16 @@ class KwargsTypeFixer:
             # Add Any import if needed
             if self.needs_any_import(content):
                 content = self.add_any_import(content)
-                print(f"  Added 'from typing import Any'")
+                print("  Added 'from typing import Any'")
 
             if not dry_run:
                 file_path.write_text(content, encoding="utf-8")
 
                 # Verify the fix with ruff
-                result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", str(file_path)], capture_output=True, text=True)
+                result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", str(file_path)], capture_output=True, text=True, check=False)
 
                 if result.returncode != 0:
-                    print(f"  Warning: Ruff still reports issues after fix")
+                    print("  Warning: Ruff still reports issues after fix")
                     # Restore original content
                     file_path.write_text(original_content, encoding="utf-8")
                     return False
@@ -229,7 +224,7 @@ class KwargsTypeFixer:
             self.fix_file(file_path, error_lines, dry_run)
 
         # Print summary
-        print(f"\n=== SUMMARY ===")
+        print("\n=== SUMMARY ===")
         print(f"Files processed: {self.stats['files_processed']}")
         print(f"Fixes applied: {self.stats['fixes_applied']}")
         print(f"Imports added: {self.stats['imports_added']}")

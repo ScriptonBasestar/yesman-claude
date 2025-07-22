@@ -4,6 +4,7 @@ import heapq
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import Any
 
 from .types import Agent, Task
 
@@ -80,7 +81,7 @@ class TaskScheduler:
         self.agent_capabilities: dict[str, AgentCapability] = {}
         self.priority_queue: list[PriorityTask] = []
         self.task_history: dict[str, list[Task]] = {}  # agent_id -> task history
-        self.scheduling_metrics = {
+        self.scheduling_metrics: dict[str, Any] = {
             "total_scheduled": 0,
             "average_wait_time": 0.0,
             "load_balancing_score": 0.0,
@@ -407,7 +408,7 @@ class TaskScheduler:
         if capability:
             capability.current_load = max(0.0, min(1.0, load))
 
-    def get_scheduling_metrics(self) -> dict[str, object]:
+    def get_scheduling_metrics(self) -> dict[str, Any]:
         """Get current scheduling performance metrics.
 
         Returns:

@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_info_protocol import BranchInfoProtocol, BranchInfoType
 from .branch_manager import BranchManager
@@ -65,10 +66,10 @@ class DependencyNode:
     module_name: str
     dependencies: set[str] = field(default_factory=set)  # What this depends on
     dependents: set[str] = field(default_factory=set)  # What depends on this
-    exports: dict[str] = field(default_factory=dict)  # What this exports
-    imports: dict[str] = field(default_factory=dict)  # What this imports
+    exports: dict[str, Any] = field(default_factory=dict)  # What this exports
+    imports: dict[str, Any] = field(default_factory=dict)  # What this imports
     last_analyzed: datetime = field(default_factory=lambda: datetime.now(UTC))
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -80,7 +81,7 @@ class DependencyChange:
     changed_by: str
     change_type: DependencyType
     impact_level: ChangeImpact
-    change_details: dict[str]
+    change_details: dict[str, Any]
     affected_files: list[str] = field(default_factory=list)
     affected_branches: list[str] = field(default_factory=list)
     propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE
@@ -90,7 +91,7 @@ class DependencyChange:
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     processed_at: datetime | None = None
     requires_manual_review: bool = False
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -104,7 +105,7 @@ class PropagationResult:
     warnings: list[str] = field(default_factory=list)
     recommendations: list[str] = field(default_factory=list)
     processing_time: float = 0.0
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class DependencyPropagationSystem:
@@ -194,7 +195,7 @@ class DependencyPropagationSystem:
         file_path: str,
         changed_by: str,
         change_type: DependencyType,
-        change_details: dict[str],
+        change_details: dict[str, Any],
         impact_level: ChangeImpact | None = None,
         propagation_strategy: PropagationStrategy = PropagationStrategy.IMMEDIATE,
     ) -> str:
@@ -282,7 +283,7 @@ class DependencyPropagationSystem:
         logger.info("Built dependency graph with %d nodes", len(self.dependency_graph))
         return self.dependency_graph
 
-    async def get_dependency_impact_report(self, file_path: str) -> dict[str]:
+    async def get_dependency_impact_report(self, file_path: str) -> dict[str, Any]:
         """Get comprehensive impact report for a file.
 
         Args:
@@ -499,7 +500,7 @@ class DependencyPropagationSystem:
         self,
         file_path: str,  # noqa: ARG002
         change_type: DependencyType,
-        change_details: dict[str],
+        change_details: dict[str, Any],
     ) -> ChangeImpact:
         """Analyze the impact level of a change."""
         # Breaking change indicators
@@ -542,7 +543,7 @@ class DependencyPropagationSystem:
         self,
         file_path: str,
         change_type: DependencyType,
-        change_details: dict[str],
+        change_details: dict[str, Any],
     ) -> list[str]:
         """Find files affected by a dependency change."""
         if file_path not in self.dependency_graph:
@@ -813,7 +814,7 @@ class DependencyPropagationSystem:
                 logger.exception("Error in dependency analysis loop")
                 await asyncio.sleep(3600)
 
-    def get_propagation_summary(self) -> dict[str]:
+    def get_propagation_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of propagation system.
 
         Returns:

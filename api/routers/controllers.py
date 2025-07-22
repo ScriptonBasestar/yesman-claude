@@ -36,7 +36,7 @@ def get_controller_status(session_name: str) -> str | None:
 
 
 @router.post("/sessions/{session_name}/controller/start", status_code=204)
-def start_controller(session_name: str) -> None:
+def start_controller(session_name: str) -> None:  # noqa: PLR1702
     """지정된 세션의 컨트롤러를 시작합니다."""
     try:
         controller = cm.get_controller(session_name)

@@ -3,6 +3,8 @@
 # Copyright notice.
 
 
+from typing import Any
+
 import click
 
 from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
@@ -12,13 +14,11 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 
 """Improved ls command using base command class."""
 
-from typing import Any
-
 
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
-    def execute(self, **kwargs: Any) -> dict[str]:
+    def execute(self, **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
         """Execute the command.
 
         Returns:
@@ -63,7 +63,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
             self.logger.exception("Failed to get templates")  # noqa: G004
             return []
 
-    def _get_projects(self) -> list[dict[str]]:
+    def _get_projects(self) -> list[dict[str, Any]]:
         """Get configured projects with details.
 
         Returns:
@@ -108,7 +108,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         except Exception:
             return "unknown"
 
-    def _display_output(self, data: dict[str], output_format: str) -> None:
+    def _display_output(self, data: dict[str, Any], output_format: str) -> None:
         """Display output in specified format."""
         if output_format == "json":
             click.echo(self.format_json(data))
@@ -120,7 +120,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         # Default table format
         self._display_table_format(data)
 
-    def _display_table_format(self, data: dict[str]) -> None:
+    def _display_table_format(self, data: dict[str, Any]) -> None:
         """Display output in table format."""
         templates = data["templates"]
         projects = data["projects"]

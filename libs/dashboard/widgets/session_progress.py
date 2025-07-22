@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
+from typing import Any
 
 from rich.console import Console
 from rich.layout import Layout
@@ -20,7 +21,7 @@ class SessionProgressWidget:
     def __init__(self, console: Console | None = None) -> None:
         self.console = console or Console()
 
-    def render_progress_overview(self, progress_data: dict[str]) -> Panel:
+    def render_progress_overview(self, progress_data: dict[str, Any]) -> Panel:
         """Render the main progress overview panel.
 
         Returns:
@@ -48,7 +49,7 @@ class SessionProgressWidget:
         return Panel(layout, title="📊 Progress Overview", border_style="cyan")
 
     @staticmethod
-    def _render_summary(data: dict[str]) -> Panel:
+    def _render_summary(data: dict[str, Any]) -> Panel:
         """Render summary statistics.
 
         Returns:
@@ -78,7 +79,7 @@ class SessionProgressWidget:
 
         return Panel(content, title="Summary", border_style="dim")
 
-    def _render_sessions_table(self, sessions: list[dict[str]]) -> Panel:
+    def _render_sessions_table(self, sessions: list[dict[str, Any]]) -> Panel:
         """Render individual sessions progress table.
 
         Returns:
@@ -133,7 +134,7 @@ class SessionProgressWidget:
         return phase_emojis.get(phase, "❓")
 
     @staticmethod
-    def render_compact_progress(progress_data: dict[str]) -> Text:
+    def render_compact_progress(progress_data: dict[str, Any]) -> Text:
         """Render compact progress for status bars.
 
         Returns:
@@ -154,7 +155,7 @@ class SessionProgressWidget:
         return text
 
     @staticmethod
-    def render_session_detail(session_name: str, progress: object) -> Panel:  # noqa: ARG002  # noqa: ARG004
+    def render_session_detail(session_name: str, progress: object) -> Panel:  # noqa: ARG002, ARG004
         """Render detailed progress for a specific session.
 
         Returns:

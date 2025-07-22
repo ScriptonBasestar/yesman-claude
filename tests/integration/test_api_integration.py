@@ -171,7 +171,6 @@ class TestErrorHandling:
     def test_custom_error_response(client: TestClient) -> None:
         """Test custom YesmanError response format."""
         with patch("api.routers.config.get_config") as mock_get_config:
-
             mock_get_config.side_effect = ConfigurationError("Configuration file not found", config_file="/missing/config.yaml")
 
             response = client.get("/api/config")

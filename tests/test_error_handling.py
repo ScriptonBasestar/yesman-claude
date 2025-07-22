@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from fastapi import status
+
 from api.middleware.error_handler import create_error_response, error_to_status_code
 from libs.core.error_handling import (
     ConfigurationError,

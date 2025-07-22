@@ -562,8 +562,8 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_api_changes(
-        branch1: str,  # noqa: ARG002
-        branch2: str,  # noqa: ARG002
+        branch1: str,  # noqa: ARG004
+        branch2: str,  # noqa: ARG004
         vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential API breaking changes."""
@@ -573,8 +573,8 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_resource_conflicts(
-        branch1: str,  # noqa: ARG002
-        branch2: str,  # noqa: ARG002
+        branch1: str,  # noqa: ARG004
+        branch2: str,  # noqa: ARG004
         vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential resource contention conflicts."""
@@ -583,8 +583,8 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_context_loss(
-        branch1: str,  # noqa: ARG002
-        branch2: str,  # noqa: ARG002
+        branch1: str,  # noqa: ARG004
+        branch2: str,  # noqa: ARG004
         vector: ConflictVector,  # noqa: ARG002
     ) -> PredictionResult | None:
         """Detect potential merge context loss scenarios."""
@@ -663,19 +663,19 @@ class ConflictPredictor:
             return 0.0
 
     @staticmethod
-    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG002  # noqa: ARG004
+    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
         """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG002  # noqa: ARG004
+    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
         """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG002  # noqa: ARG004
+    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
         """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5

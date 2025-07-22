@@ -23,7 +23,7 @@ class DIContainer:
     """
 
     def __init__(self) -> None:
-        self._services: dict[type, object] = {}
+        self._services: dict[type, Callable[[], object]] = {}
         self._factories: dict[type, Callable] = {}
         self._singletons: dict[type, object] = {}
         self._resolving: set = set()  # Track circular dependencies

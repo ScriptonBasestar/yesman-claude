@@ -396,7 +396,7 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_monitor_no_active_pool(mock_agent_pool_class: Mock, runner: CliRunner) -> None:  # noqa: ARG002  # noqa: ARG004
+    def test_monitor_no_active_pool(mock_agent_pool_class: Mock, runner: CliRunner) -> None:  # noqa: ARG002, ARG004
         """Test monitor command when no active pool exists."""
         # Simulate no existing pool directory
         with patch("pathlib.Path.exists", return_value=False):

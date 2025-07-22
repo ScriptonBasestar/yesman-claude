@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import time
+from typing import Any
 
 import click
 from rich.console import Console
@@ -21,8 +22,6 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 # Licensed under the MIT License
 
 """Async Interactive session browser command with enhanced performance."""
-
-from typing import Any
 
 
 class AsyncInteractiveBrowser:
@@ -71,18 +70,18 @@ class AsyncInteractiveBrowser:
         except Exception as e:
             self.console.print(f"[red]Error updating session data: {e}[/]")
 
-    async def _get_sessions_async(self):
+    async def _get_sessions_async(self) -> list[dict[str, Any]]:
         """Async wrapper for getting sessions list."""
         # Run blocking operation in thread pool
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
 
-    async def _get_session_info_async(self, session_name: str):
+    async def _get_session_info_async(self, session_name: str) -> dict[str, Any]:
         """Async wrapper for getting session info."""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
 
-    async def _get_progress_overview_async(self):
+    async def _get_progress_overview_async(self) -> dict[str, Any]:
         """Async wrapper for getting progress overview."""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.session_manager.get_progress_overview)
@@ -262,8 +261,11 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    async def execute_async(self, update_interval: float = 2.0, **kwargs: Any) -> dict:  # noqa: ARG002
+    async def execute_async(self, **kwargs: dict[str, object]) -> dict:
         """Execute the async browse command."""
+        # Extract parameters from kwargs with defaults
+        update_interval = float(kwargs.get('update_interval', 2.0))
+        
         try:
             browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)
 

@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictResolutionEngine
@@ -63,7 +64,7 @@ class MergeResult:
     merge_confidence: float = 0.0
     semantic_integrity: bool = True
     diff_stats: dict[str, int] = field(default_factory=dict)
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     merge_time: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -121,7 +122,7 @@ class SemanticMerger:
         self.enable_ast_validation = True
 
         # Machine learning components for merge decisions
-        self.merge_patterns: defaultdict[str, list[dict[str]]] = defaultdict(list)
+        self.merge_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
         self.success_rate_by_strategy: defaultdict[str, list[float]] = defaultdict(list)
 
         # Performance tracking
@@ -853,7 +854,7 @@ class SemanticMerger:
         content2: str,  # noqa: ARG002
         context1: SemanticContext,
         context2: SemanticContext,
-    ) -> dict[str]:
+    ) -> dict[str, Any]:
         """Resolve an individual semantic conflict."""
         resolution_result = {
             "resolved": False,
@@ -903,7 +904,7 @@ class SemanticMerger:
 
     @staticmethod
     def _conflict_resolved_by_merge(
-        conflict: SemanticConflict,  # noqa: ARG002
+        conflict: SemanticConflict,  # noqa: ARG004
         merge_result: MergeResult,
     ) -> bool:
         """Check if a conflict was resolved by the merge operation."""
@@ -933,8 +934,8 @@ class SemanticMerger:
     @staticmethod
     def _merge_ast_trees(
         tree1: ast.AST,
-        tree2: ast.AST,  # noqa: ARG002
-        conflicts: list[SemanticConflict],  # noqa: ARG002
+        tree2: ast.AST,  # noqa: ARG004
+        conflicts: list[SemanticConflict],  # noqa: ARG004
     ) -> ast.AST:
         """Merge two AST trees intelligently."""
         # Simplified implementation - would need complex AST merging logic
@@ -992,10 +993,10 @@ class SemanticMerger:
 
     @staticmethod
     def _merge_function_definitions(
-        func1: str,  # noqa: ARG002
+        func1: str,  # noqa: ARG004
         func2: str,
-        conflict: SemanticConflict,  # noqa: ARG002
-    ) -> dict[str]:
+        conflict: SemanticConflict,  # noqa: ARG004
+    ) -> dict[str, Any]:
         """Merge two function definitions."""
         # Simplified implementation
         return {
@@ -1035,17 +1036,17 @@ class SemanticMerger:
 
     @staticmethod
     def _reconstruct_from_semantic_elements(
-        imports: list,  # noqa: ARG002
-        functions: dict,  # noqa: ARG002
-        classes: dict,  # noqa: ARG002
-        content1: str,  # noqa: ARG002
+        imports: list,  # noqa: ARG004
+        functions: dict,  # noqa: ARG004
+        classes: dict,  # noqa: ARG004
+        content1: str,  # noqa: ARG004
         content2: str,
     ) -> str:
         """Reconstruct source code from semantic elements."""
         # Simplified implementation - would need proper code generation
         return content2  # Fallback to second version
 
-    def get_merge_summary(self) -> dict[str]:
+    def get_merge_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of merge operations."""
         return {
             "total_merges": self.merge_stats["total_merges"],

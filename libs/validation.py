@@ -1,7 +1,7 @@
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from libs.core.settings import ContentLimits, ValidationPatterns
 
@@ -301,7 +301,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
 
 
 # Validation decorators for common use cases
-def validate_input(validation_func: object, field_name: str) -> object:
+def validate_input(validation_func: Callable[[Any], tuple[bool, str]], field_name: str) -> object:
     """Decorator to validate function inputs.
 
     Args:

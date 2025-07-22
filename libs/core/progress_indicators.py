@@ -13,6 +13,7 @@ for consistent user experience across all commands.
 
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from typing import Any
 
 from rich.console import Console
 from rich.progress import (
@@ -180,7 +181,7 @@ class ProgressManager:
     """
 
     @staticmethod
-    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str]:
+    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str, Any]:
         """Execute a sequence of startup operations with progress tracking.
 
         Args:

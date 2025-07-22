@@ -4,7 +4,9 @@ import ast
 import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
+
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import ConflictSeverity, ResolutionStrategy
 from libs.multi_agent.semantic_analyzer import (
@@ -78,7 +80,7 @@ class TestSemanticContext:
         assert context.imports == []
         assert context.global_variables == {}
         assert context.constants == {}
-        assert context.ast_hash == ""
+        assert not context.ast_hash
 
 
 class TestSemanticConflict:
@@ -301,7 +303,7 @@ class TestClass:
         assert "TestClass" in context.classes
         assert len(context.imports) == 2
         assert "CONSTANT" in context.constants
-        assert context.ast_hash != ""
+        assert context.ast_hash
 
     @staticmethod
     def test_functions_have_signature_conflict(analyzer: SemanticAnalyzer) -> None:

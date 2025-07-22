@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import timedelta
+from typing import Any
 
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
@@ -12,9 +13,6 @@ from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 # Licensed under the MIT License
 
 """Conflict prediction and analysis commands."""
-
-from typing import Any
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +27,7 @@ class PredictConflictsCommand(BaseCommand):
         time_horizon: int = 7,
         min_confidence: float = 0.3,
         limit: int = 10,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,  # noqa: ARG002, ANN401
     ) -> dict:
         """Execute the predict conflicts command.
 
@@ -122,7 +120,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show prediction summary and statistics."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
         """Execute the prediction summary command.
 
         Returns:
@@ -164,7 +162,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns and trends."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
         """Execute the analyze conflict patterns command.
 
         Returns:

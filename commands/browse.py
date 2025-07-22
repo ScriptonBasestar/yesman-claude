@@ -2,6 +2,7 @@
 
 import threading
 import time
+from typing import Any
 
 import click
 from rich.console import Console
@@ -19,8 +20,6 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 # Licensed under the MIT License
 
 """Interactive session browser command."""
-
-from typing import Any
 
 
 class InteractiveBrowser:
@@ -42,8 +41,8 @@ class InteractiveBrowser:
         self.update_interval = update_interval
         self.running = False
         self.update_thread: threading.Thread | None = None
-        self.progress_data: dict[str] | None = None
-        self.session_data: list[dict[str]] = []
+        self.progress_data: dict[str, Any] | None = None
+        self.session_data: list[dict[str, Any]] = []
 
     def update_data(self) -> None:
         """Update session data and activity metrics."""
@@ -201,7 +200,7 @@ class InteractiveBrowser:
             self.update_thread.join(timeout=1.0)
 
     @staticmethod
-    def _render_heatmap_display(heatmap_data: dict[str]) -> str:
+    def _render_heatmap_display(heatmap_data: dict[str, Any]) -> str:
         """Render heatmap data as a simple text display.
 
         Returns:
@@ -233,7 +232,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    def execute(self, update_interval: float = 2.0, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(self, update_interval: float = 2.0, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
         """Execute the browse command.
 
         Returns:

@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from typing import Any, cast
 
 from .branch_manager import BranchInfo
 from .types import Agent, AgentState, Task, TaskStatus
@@ -59,16 +60,16 @@ class OperationSnapshot:
     description: str
 
     # System state snapshots
-    agent_states: dict[str, dict[str, str | int | bool | list[str]]] = field(default_factory=dict)
-    task_states: dict[str, dict[str, str | int | bool | float | list[str]]] = field(default_factory=dict)
+    agent_states: dict[str, Any] = field(default_factory=dict)
+    task_states: dict[str, Any] = field(default_factory=dict)
     file_states: dict[str, str] = field(default_factory=dict)  # file_path -> backup_path
-    branch_state: dict[str, str | dict[str, str | int | bool | list[str]]] | None = None
+    branch_state: dict[str, Any] | None = None
 
     # Operation context
-    operation_context: dict[str, str | int | bool | float | list[str]] = field(default_factory=dict)
-    rollback_instructions: list[dict[str, str | int | bool | list[str]]] = field(default_factory=list)
+    operation_context: dict[str, Any] = field(default_factory=dict)
+    rollback_instructions: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, str | int | bool | float | list[str] | dict[str, str | int | bool | float | list[str]] | dict[str, str | int | bool | list[str]]]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "snapshot_id": self.snapshot_id,
@@ -84,10 +85,11 @@ class OperationSnapshot:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, str | int | bool | float | list[str] | dict[str, str | int | bool | float | list[str]]]) -> "OperationSnapshot":
+    def from_dict(cls, data: dict[str, Any]) -> "OperationSnapshot":
         """Create from dictionary."""
-        data["operation_type"] = OperationType(data["operation_type"])
-        data["timestamp"] = datetime.fromisoformat(data["timestamp"])
+        data = dict(data)  # Make a copy to avoid mutating original
+        data["operation_type"] = OperationType(cast(str, data["operation_type"]))
+        data["timestamp"] = datetime.fromisoformat(cast(str, data["timestamp"]))
         return cls(**data)
 
 
@@ -324,19 +326,20 @@ class RecoveryEngine:
         try:
             # Snapshot agent states
             if agent_pool:
-                snapshot.agent_states = {agent_id: agent.to_dict() for agent_id, agent in agent_pool.agents.items()}
-
-                snapshot.task_states = {task_id: task.to_dict() for task_id, task in agent_pool.tasks.items()}
+                pool = cast(Any, agent_pool)
+                snapshot.agent_states = {agent_id: agent.to_dict() for agent_id, agent in pool.agents.items()}
+                snapshot.task_states = {task_id: task.to_dict() for task_id, task in pool.tasks.items()}
 
             # Snapshot branch state
             if branch_manager:
                 try:
-                    current_branch = branch_manager._get_current_branch()
-                    branch_status = branch_manager.get_branch_status(current_branch)
+                    manager = cast(Any, branch_manager)
+                    current_branch = manager._get_current_branch()
+                    branch_status = manager.get_branch_status(current_branch)
                     snapshot.branch_state = {
                         "current_branch": current_branch,
                         "status": branch_status,
-                        "branches": {name: info.to_dict() for name, info in branch_manager.branches.items()},
+                        "branches": {name: info.to_dict() for name, info in manager.branches.items()},
                     }
                 except (AttributeError, KeyError, TypeError) as e:
                     logger.warning("Failed to snapshot branch state: %s", e)
@@ -446,14 +449,18 @@ class RecoveryEngine:
             return False
 
     @staticmethod
-    async def _restore_agent_states(agent_pool: object | None, agent_states: dict[str, dict[str, str | int | bool | list[str]]]) -> None:
+    async def _restore_agent_states(agent_pool: object | None, agent_states: dict[str, Any]) -> None:
         """Restore agent states from snapshot."""
+        if not agent_pool:
+            return
+
+        pool = cast(Any, agent_pool)
         for agent_id, agent_data in agent_states.items():
             try:
-                if agent_id in agent_pool.agents:
+                if agent_id in pool.agents:
                     # Update existing agent
-                    agent = agent_pool.agents[agent_id]
-                    agent.state = AgentState(agent_data["state"])
+                    agent = pool.agents[agent_id]
+                    agent.state = AgentState(cast(str, agent_data["state"]))
                     agent.current_task = agent_data.get("current_task")
                     agent.branch_name = agent_data.get("branch_name")
 
@@ -468,22 +475,26 @@ class RecoveryEngine:
                         agent.process = None
                 else:
                     # Recreate agent
-                    agent = Agent.from_dict(agent_data)
+                    agent = Agent.from_dict(cast(dict[str, Any], agent_data))
                     agent.process = None  # Don't restore processes
-                    agent_pool.agents[agent_id] = agent
+                    pool.agents[agent_id] = agent
 
             except (KeyError, AttributeError, TypeError, ValueError) as e:
                 logger.warning("Failed to restore agent %s: %s", agent_id, e)
 
     @staticmethod
-    async def _restore_task_states(agent_pool: object | None, task_states: dict[str, dict[str, str | int | bool | float | list[str]]]) -> None:
+    async def _restore_task_states(agent_pool: object | None, task_states: dict[str, Any]) -> None:
         """Restore task states from snapshot."""
+        if not agent_pool:
+            return
+
+        pool = cast(Any, agent_pool)
         # Clear current tasks and restore from snapshot
-        agent_pool.tasks.clear()
+        pool.tasks.clear()
 
         for task_id, task_data in task_states.items():
             try:
-                task = Task.from_dict(task_data)
+                task = Task.from_dict(cast(dict[str, Any], task_data))
 
                 # Reset execution state
                 if task.status in {TaskStatus.RUNNING, TaskStatus.ASSIGNED}:
@@ -492,32 +503,37 @@ class RecoveryEngine:
                     task.start_time = None
                     task.end_time = None
 
-                agent_pool.tasks[task_id] = task
+                pool.tasks[task_id] = task
 
             except (KeyError, AttributeError, TypeError, ValueError) as e:
                 logger.warning("Failed to restore task %s: %s", task_id, e)
 
     @staticmethod
-    async def _restore_branch_state(branch_manager: object | None, branch_state: dict[str, str | dict[str, str | int | bool | list[str]]]) -> None:
+    async def _restore_branch_state(branch_manager: object | None, branch_state: dict[str, Any]) -> None:
         """Restore branch state from snapshot."""
+        if not branch_manager:
+            return
+
+        manager = cast(Any, branch_manager)
         try:
             current_branch = branch_state.get("current_branch")
             if current_branch:
-                success = branch_manager.switch_branch(current_branch)
+                success = manager.switch_branch(cast(str, current_branch))
                 if not success:
-                    logger.warning("Failed to switch to branch {current_branch}")
+                    logger.warning("Failed to switch to branch %s", current_branch)
 
             # Restore branch metadata
             branches_data = branch_state.get("branches", {})
-            for branch_name, branch_data in branches_data.items():
-                try:
-                    branch_info = BranchInfo.from_dict(branch_data)
-                    branch_manager.branches[branch_name] = branch_info
-                except (KeyError, AttributeError, TypeError, ImportError) as e:
-                    logger.warning("Failed to restore branch %s: %s", branch_name, e)
+            if isinstance(branches_data, dict):
+                for branch_name, branch_data in branches_data.items():
+                    try:
+                        branch_info = BranchInfo.from_dict(cast(dict[str, Any], branch_data))
+                        manager.branches[branch_name] = branch_info
+                    except (KeyError, AttributeError, TypeError, ImportError) as e:
+                        logger.warning("Failed to restore branch %s: %s", branch_name, e)
 
             # Save restored branch metadata
-            branch_manager._save_branch_metadata()
+            manager._save_branch_metadata()
 
         except (AttributeError, KeyError, ImportError, OSError) as e:
             logger.warning("Failed to restore branch state: %s", e)
@@ -536,7 +552,7 @@ class RecoveryEngine:
                 logger.warning("Failed to restore file %s: %s", original_path, e)
 
     @staticmethod
-    async def _execute_rollback_instruction(instruction: dict[str, str | int | bool | list[str]]) -> None:
+    async def _execute_rollback_instruction(instruction: dict[str, Any]) -> None:
         """Execute a custom rollback instruction."""
         try:
             instruction_type = instruction.get("type")
@@ -545,7 +561,7 @@ class RecoveryEngine:
                 command = instruction.get("command", [])
                 if command:
                     result = subprocess.run(
-                        command,
+                        cast(list[str], command),
                         check=False,
                         capture_output=True,
                         text=True,
@@ -559,9 +575,9 @@ class RecoveryEngine:
                 file_path = instruction.get("file_path")
 
                 if operation == "delete" and file_path:
-                    Path(file_path).unlink(missing_ok=True)
+                    Path(cast(str, file_path)).unlink(missing_ok=True)
                 elif operation == "create" and file_path:
-                    Path(file_path).touch()
+                    Path(cast(str, file_path)).touch()
 
             # Add more instruction types as needed
 
@@ -591,7 +607,7 @@ class RecoveryEngine:
         self.recovery_metrics["failed_operations"] += 1
 
         error_message = str(exception)
-        operation_key = context.get("operation_type", "unknown") if context else "unknown"
+        operation_key = str(context.get("operation_type", "unknown")) if context else "unknown"
 
         # Track failure count
         self.failure_counts[operation_key] = self.failure_counts.get(operation_key, 0) + 1
@@ -741,7 +757,7 @@ class RecoveryEngine:
                 return True
 
             if action == RecoveryAction.ESCALATE:
-                await self._escalate_failure(context.get("operation_id", "unknown"), exception, context)
+                await self._escalate_failure(str(context.get("operation_id", "unknown")), exception, context)
                 return False
 
             return False
@@ -762,7 +778,7 @@ class RecoveryEngine:
             "error": str(exception),
             "context": context,
             "timestamp": datetime.now(UTC).isoformat(),
-            "failure_count": self.failure_counts.get(context.get("operation_type", "unknown"), 0),
+            "failure_count": self.failure_counts.get(str(context.get("operation_type", "unknown")) if context else "unknown", 0),
         }
 
         # Save escalation data

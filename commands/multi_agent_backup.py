@@ -10,7 +10,7 @@ import types
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Never, Any
+from typing import Any, Never, cast
 from unittest.mock import Mock
 
 import click
@@ -64,7 +64,7 @@ RISK_THRESHOLD_MEDIUM = 0.4
 class StartAgentsCommand(BaseCommand):
     """Start the multi-agent pool."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -73,7 +73,6 @@ class StartAgentsCommand(BaseCommand):
         work_dir = kwargs.get("work_dir")
 
         monitor = kwargs.get("monitor", False)
-        """Execute the start agents command."""
         try:
             # Create progress indicator for agent startup
             with Progress(
@@ -128,7 +127,7 @@ class StartAgentsCommand(BaseCommand):
 class MonitorAgentsCommand(BaseCommand):
     """Start real-time agent monitoring dashboard."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -192,12 +191,11 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
         work_dir = kwargs.get("work_dir")
-        """Execute the status command."""
         try:
             # Initialize agent pool
             pool = AgentPool(work_dir=work_dir)
@@ -224,14 +222,15 @@ class StatusCommand(BaseCommand):
             if agents:
                 self.print_info("\n📋 Agents:")
                 for agent in agents:
+                    agent_dict = cast(dict, agent)
                     status_icon = {
                         "idle": "🟢",
                         "working": "🟡",
                         "error": "🔴",
                         "terminated": "⚫",
-                    }.get(agent.get("state", "unknown"), "❓")
+                    }.get(cast(str, agent_dict.get("state", "unknown")), "❓")
 
-                    self.print_info(f"  {status_icon} {agent['agent_id']} - Completed: {agent.get('completed_tasks', 0)}, Failed: {agent.get('failed_tasks', 0)}")
+                    self.print_info(f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}")
 
             return {
                 "success": True,
@@ -249,12 +248,11 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
         work_dir = kwargs.get("work_dir")
-        """Execute the stop agents command."""
         try:
             self.print_info("🛑 Stopping multi-agent pool...")
 
@@ -280,7 +278,7 @@ class StopAgentsCommand(BaseCommand):
 class AddTaskCommand(BaseCommand):
     """Add a task to the agent pool queue."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the add task command."""
         # Extract parameters from kwargs
         title = kwargs.get("title", "")
@@ -327,7 +325,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -359,6 +357,7 @@ class ListTasksCommand(BaseCommand):
             self.print_info("=" * 80)
 
             for task in tasks:
+                task_dict = cast(dict, task)
                 status_icon = {
                     "pending": "⏳",
                     "assigned": "📤",
@@ -366,13 +365,13 @@ class ListTasksCommand(BaseCommand):
                     "completed": "✅",
                     "failed": "❌",
                     "cancelled": "🚫",
-                }.get(task.get("status", "unknown"), "❓")
+                }.get(cast(str, task_dict.get("status", "unknown")), "❓")
 
-                self.print_info(f"{status_icon} {task['task_id'][:8]}... - {task['title']}")
-                self.print_info(f"   Status: {task['status'].upper()}")
-                if task.get("assigned_agent"):
-                    self.print_info(f"   Agent: {task['assigned_agent']}")
-                self.print_info(f"   Command: {' '.join(task['command'])}")
+                self.print_info(f"{status_icon} {task_dict['task_id'][:8]}... - {task_dict['title']}")
+                self.print_info(f"   Status: {cast(str, task_dict['status']).upper()}")
+                if task_dict.get("assigned_agent"):
+                    self.print_info(f"   Agent: {task_dict['assigned_agent']}")
+                self.print_info(f"   Command: {' '.join(cast(list, task_dict['command']))}")
                 self.print_info("")
 
             return {
@@ -391,7 +390,7 @@ class ListTasksCommand(BaseCommand):
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -418,8 +417,9 @@ class DetectConflictsCommand(BaseCommand):
                 branch_manager = BranchManager(repo_path=repo_path)
                 engine = ConflictResolutionEngine(branch_manager, repo_path)
 
-                async def run_detection():
-                    return await engine.detect_potential_conflicts(branches)
+                async def run_detection() -> list:
+                    conflicts_result = await engine.detect_potential_conflicts(branches)
+                    return cast(list, conflicts_result)
 
                 # Run the async detection
                 conflicts = asyncio.run(run_detection())
@@ -439,20 +439,22 @@ class DetectConflictsCommand(BaseCommand):
                 self.print_info("=" * 60)
 
                 for conflict in conflicts:
+                    # conflict is a ConflictInfo object, cast to access attributes properly
+                    conflict_info = cast(Any, conflict)
                     severity_icon = {
                         "low": "🟢",
                         "medium": "🟡",
                         "high": "🔴",
                         "critical": "💀",
-                    }.get(conflict.severity.value, "❓")
+                    }.get(conflict_info.severity.value, "❓")
 
-                    self.print_info(f"{severity_icon} {conflict.conflict_id}")
-                    self.print_info(f"   Type: {conflict.conflict_type.value}")
-                    self.print_info(f"   Severity: {conflict.severity.value}")
-                    self.print_info(f"   Branches: {', '.join(conflict.branches)}")
-                    self.print_info(f"   Files: {', '.join(conflict.files)}")
-                    self.print_info(f"   Description: {conflict.description}")
-                    self.print_info(f"   Suggested Strategy: {conflict.suggested_strategy.value}")
+                    self.print_info(f"{severity_icon} {conflict_info.conflict_id}")
+                    self.print_info(f"   Type: {conflict_info.conflict_type.value}")
+                    self.print_info(f"   Severity: {conflict_info.severity.value}")
+                    self.print_info(f"   Branches: {', '.join(conflict_info.branches)}")
+                    self.print_info(f"   Files: {', '.join(conflict_info.files)}")
+                    self.print_info(f"   Description: {conflict_info.description}")
+                    self.print_info(f"   Suggested Strategy: {conflict_info.suggested_strategy.value}")
                     self.print_info("")
 
                 auto_resolve_results = None
@@ -460,11 +462,12 @@ class DetectConflictsCommand(BaseCommand):
                 if auto_resolve:
                     self.print_info("🔧 Attempting automatic resolution...")
 
-                    async def run_auto_resolve():
-                        return await engine.auto_resolve_all()
+                    async def run_auto_resolve() -> list:
+                        results = await engine.auto_resolve_all()
+                        return cast(list, results)
 
                     results = asyncio.run(run_auto_resolve())
-                    resolved = len([r for r in results if r.success])
+                    resolved = len([r for r in results if cast(Any, r).success])
                     failed = len(results) - resolved
 
                     self.print_success(f"✅ Auto-resolved: {resolved}")
@@ -496,7 +499,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -525,8 +528,8 @@ class ResolveConflictCommand(BaseCommand):
                         recovery_hint="Valid strategies: auto_merge, prefer_latest, prefer_main, custom_merge, semantic_analysis",
                     ) from e
 
-            async def run_resolution():
-                result = await engine.resolve_conflict(conflict_id, resolution_strategy)
+            async def run_resolution() -> dict[str, Any]:
+                result = cast(Any, await engine.resolve_conflict(conflict_id, resolution_strategy))
 
                 if result.success:
                     self.print_success("✅ Conflict resolved successfully!")
@@ -564,7 +567,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -589,7 +592,7 @@ class ConflictSummaryCommand(BaseCommand):
             # Severity breakdown
             if summary["severity_breakdown"]:
                 self.print_info("\n📈 Severity Breakdown:")
-                for severity, count in summary["severity_breakdown"].items():
+                for severity, count in cast(dict, summary["severity_breakdown"]).items():
                     if count > 0:
                         severity_icon = {
                             "low": "🟢",
@@ -602,7 +605,7 @@ class ConflictSummaryCommand(BaseCommand):
             # Type breakdown
             if summary["type_breakdown"]:
                 self.print_info("\n🏷️  Type Breakdown:")
-                for conflict_type, count in summary["type_breakdown"].items():
+                for conflict_type, count in cast(dict, summary["type_breakdown"]).items():
                     if count > 0:
                         type_icon = {
                             "file_modification": "📝",
@@ -615,7 +618,7 @@ class ConflictSummaryCommand(BaseCommand):
                         self.print_info(f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}")
 
             # Resolution statistics
-            stats = summary["resolution_stats"]
+            stats = cast(dict, summary["resolution_stats"])
             if stats["total_conflicts"] > 0:
                 self.print_info("\n⚡ Resolution Statistics:")
                 self.print_info(f"  Auto-resolved: {stats['auto_resolved']}")
@@ -633,7 +636,7 @@ class ConflictSummaryCommand(BaseCommand):
 class PredictConflictsCommand(BaseCommand):
     """Predict potential conflicts between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -661,7 +664,7 @@ class PredictConflictsCommand(BaseCommand):
             predictor.min_confidence_threshold = min_confidence
             predictor.max_predictions_per_run = limit * 2  # Get more, filter later
 
-            async def run_prediction():
+            async def run_prediction() -> dict[str, Any]:
                 horizon = timedelta(days=time_horizon)
                 predictions = await predictor.predict_conflicts(branches, horizon)
 
@@ -752,7 +755,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show conflict prediction summary and statistics."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -776,7 +779,7 @@ class PredictionSummaryCommand(BaseCommand):
             # Confidence breakdown
             if summary["by_confidence"]:
                 self.print_info("\n🎯 Confidence Breakdown:")
-                for confidence, count in summary["by_confidence"].items():
+                for confidence, count in cast(dict, summary["by_confidence"]).items():
                     if count > 0:
                         confidence_icon = {
                             "low": "🟢",
@@ -789,7 +792,7 @@ class PredictionSummaryCommand(BaseCommand):
             # Pattern breakdown
             if summary["by_pattern"]:
                 self.print_info("\n🏷️  Pattern Breakdown:")
-                for pattern, count in summary["by_pattern"].items():
+                for pattern, count in cast(dict, summary["by_pattern"]).items():
                     if count > 0:
                         pattern_icon = {
                             "overlapping_imports": "📦",
@@ -804,7 +807,7 @@ class PredictionSummaryCommand(BaseCommand):
                         self.print_info(f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}")
 
             # Accuracy metrics
-            accuracy = summary["accuracy_metrics"]
+            accuracy = cast(dict, summary["accuracy_metrics"])
             if accuracy["total_predictions"] > 0:
                 self.print_info("\n📊 Accuracy Metrics:")
                 self.print_info(f"  Accuracy Rate: {accuracy['accuracy_rate']:.1%}")
@@ -814,8 +817,9 @@ class PredictionSummaryCommand(BaseCommand):
             # Most likely conflicts
             if summary.get("most_likely_conflicts"):
                 self.print_info("\n🚨 Most Likely Conflicts:")
-                for conflict in summary["most_likely_conflicts"]:
-                    self.print_info(f"  • {conflict['description']} ({conflict['likelihood']:.1%})")
+                for conflict in cast(list, summary["most_likely_conflicts"]):
+                    conflict_dict = cast(dict, conflict)
+                    self.print_info(f"  • {conflict_dict['description']} ({conflict_dict['likelihood']:.1%})")
 
             return {"success": True, "repo_path": repo_path, "summary": summary}
 
@@ -827,7 +831,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -847,7 +851,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
             conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
             predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
 
-            async def run_analysis():
+            async def run_analysis() -> dict[str, Any]:
                 analysis_results = {}
 
                 # Calculate conflict vectors for all pairs
@@ -921,7 +925,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 class AnalyzeSemanticConflictsCommand(BaseCommand):
     """Analyze AST-based semantic conflicts between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -948,7 +952,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             # Parse file list if provided
             file_list = files.split(",") if files else None
 
-            async def run_semantic_analysis():
+            async def run_semantic_analysis() -> None:
                 all_conflicts = []
                 if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze conflicts between the first two branches
@@ -1011,7 +1015,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic structure summary of code."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1032,7 +1036,7 @@ class SemanticSummaryCommand(BaseCommand):
             # Parse file list
             file_list = files.split(",") if files else None
 
-            async def run_summary():
+            async def run_summary() -> None:
                 current_branch = branch or "HEAD"
                 # Get semantic context for files in the current branch
                 contexts = {}
@@ -1078,7 +1082,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Compare function signatures between branches."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1100,7 +1104,7 @@ class FunctionDiffCommand(BaseCommand):
             # Parse file list
             file_list = files.split(",") if files else None
 
-            async def run_diff():
+            async def run_diff() -> None:
                 diff_results = []
                 if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze differences between first two branches
@@ -1145,7 +1149,7 @@ class FunctionDiffCommand(BaseCommand):
 class SemanticMergeCommand(BaseCommand):
     """Perform intelligent semantic merge."""
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1168,7 +1172,7 @@ class SemanticMergeCommand(BaseCommand):
             conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
             SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
 
-            async def run_merge():
+            async def run_merge() -> None:
                 if dry_run:
                     self.print_info("🔍 Dry run mode - no changes will be made")
 
@@ -1262,10 +1266,7 @@ def add_task(
     command: tuple,
     work_dir: str | None,
     directory: str,
-    priority: int,
-    complexity: int,
-    timeout: int,
-    description: str | None,
+    **kwargs,
 ) -> None:
     """Add a task to the agent pool queue."""
     add_command = AddTaskCommand()
@@ -1274,10 +1275,10 @@ def add_task(
         command=list(command),
         work_dir=work_dir,
         directory=directory,
-        priority=priority,
-        complexity=complexity,
-        timeout=timeout,
-        description=description,
+        priority=kwargs.get("priority", 5),
+        complexity=kwargs.get("complexity", 5),
+        timeout=kwargs.get("timeout", 300),
+        description=kwargs.get("description"),
     )
 
 
@@ -1407,9 +1408,7 @@ def analyze_semantic_conflicts(
     branches: tuple,
     repo_path: str | None,
     files: str | None,
-    include_private: bool,  # noqa: FBT001
-    export: str | None,
-    detailed: bool,  # noqa: FBT001
+    **kwargs,
 ) -> None:
     """Analyze AST-based semantic conflicts between branches."""
     try:
@@ -1424,7 +1423,7 @@ def analyze_semantic_conflicts(
         analyzer = SemanticAnalyzer(branch_manager, repo_path)
 
         # Configure analysis options
-        analyzer.check_private_members = include_private
+        analyzer.check_private_members = kwargs.get("include_private", False)
 
         # Parse file list
         file_list = None
@@ -1488,7 +1487,7 @@ def analyze_semantic_conflicts(
                         click.echo(f"   File: {conflict.file_path}")
                         click.echo(f"   Description: {conflict.description}")
 
-                        if detailed:
+                        if kwargs.get("detailed", False):
                             if conflict.old_definition:
                                 click.echo(f"   Old: {conflict.old_definition}")
                             if conflict.new_definition:
@@ -1554,7 +1553,7 @@ def analyze_semantic_conflicts(
                 click.echo(f"  Cache hits: {summary['cache_hits']}")
 
             # Export results
-            if export:
+            if kwargs.get("export"):
                 export_data = {
                     "branches": list(branches),
                     "analysis_timestamp": datetime.now(UTC).isoformat(),
@@ -1563,14 +1562,14 @@ def analyze_semantic_conflicts(
                     "performance_stats": analyzer.get_analysis_summary(),
                 }
 
-                export_path = Path(export)
+                export_path = Path(kwargs.get("export"))
                 with export_path.open("w") as f:
                     json.dump(export_data, f, indent=2, default=str)
-                click.echo(f"\n💾 Results exported to: {export}")
+                click.echo(f"\n💾 Results exported to: {kwargs.get('export')}")
 
         asyncio.run(run_semantic_analysis())
 
-    except (OSError, json.JSONEncodeError, RuntimeError, ValueError) as e:
+    except (OSError, json.JSONDecodeError, RuntimeError, ValueError) as e:
         click.echo(f"❌ Error analyzing semantic conflicts: {e}", err=True)
 
 

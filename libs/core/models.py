@@ -212,7 +212,7 @@ class PaneInfo:
     last_output: str | None = None
     output_lines: int = 0
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.last_activity is None:
             self.last_activity = datetime.now(UTC)
 

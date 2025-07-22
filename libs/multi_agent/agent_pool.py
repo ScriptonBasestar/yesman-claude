@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class AgentPool:
+class AgentPool:  # noqa: PLR0904
     """Manages a pool of agents for parallel task execution."""
 
     def __init__(self, max_agents: int = 3, work_dir: str | None = None) -> None:
@@ -203,7 +203,7 @@ class AgentPool:
         command: list[str],
         working_directory: str,
         description: str = "",
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> Task:
         """Create and add a task."""
         task = Task(

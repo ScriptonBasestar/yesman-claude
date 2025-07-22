@@ -8,6 +8,7 @@ import subprocess
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import cast
 
 import click
 import libtmux
@@ -210,7 +211,7 @@ class TmuxManager:
         template_name = session_config.get("template_name")
         if template_name:
             try:
-                template_config = self.load_template(template_name)
+                template_config = self.load_template(cast(str, template_name))
                 final_config = template_config.copy()
             except FileNotFoundError:
                 self.logger.warning("Template {template_name} not found for session {session_name}")
@@ -219,7 +220,7 @@ class TmuxManager:
         override_config = session_config.get("override", {})
         if override_config:
             # Deep merge override config
-            final_config = self._deep_merge_dicts(final_config, override_config)
+            final_config = self._deep_merge_dicts(final_config, cast(dict[str, object], override_config))
 
         # Ensure session_name is set
         if "session_name" not in final_config:
@@ -237,7 +238,7 @@ class TmuxManager:
 
         for key, value in override.items():
             if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-                result[key] = self._deep_merge_dicts(result[key], value)
+                result[key] = self._deep_merge_dicts(cast(dict[str, object], result[key]), cast(dict[str, object], value))
             else:
                 result[key] = value
 

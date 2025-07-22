@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from typing import Any, cast
 
 from .agent_pool import AgentPool
 from .branch_manager import BranchManager
@@ -563,12 +564,12 @@ class CollaborationEngine:
             raise ValueError(msg)
 
         # Add decision with metadata
-        decision_record = {
+        decision_record: dict[str, Any] = {
             "agent_id": agent_id,
             "timestamp": datetime.now(UTC).isoformat(),
             "decision": decision,
         }
-        session.decisions.append(decision_record)
+        session.decisions.append(cast(dict[str, object], decision_record))
 
     async def end_collaboration_session(
         self,
@@ -619,7 +620,7 @@ class CollaborationEngine:
                 self.dependency_graph[file_path].add(affected_file)
 
         # Queue change for propagation
-        change_info = {
+        change_info: dict[str, Any] = {
             "file_path": file_path,
             "changed_by": changed_by,
             "change_type": change_type,
@@ -648,7 +649,7 @@ class CollaborationEngine:
                     recipient_id=agent_id,
                     message_type=MessageType.DEPENDENCY_CHANGE,
                     subject=f"Dependency change in {file_path}",
-                    content=change_info,
+                    content=cast(dict[str, object], change_info),
                     priority=MessagePriority.HIGH,
                 )
 
@@ -838,7 +839,7 @@ class CollaborationEngine:
                 )
 
                 # Coordinate resolution
-                resolution_context = {
+                resolution_context: dict[str, Any] = {
                     "conflict_id": conflict.conflict_id,
                     "proposed_resolutions": [],
                 }
@@ -846,7 +847,7 @@ class CollaborationEngine:
                 await self.update_session_context(
                     session_id,
                     agents_branch1[0],
-                    resolution_context,
+                    cast(dict[str, object], resolution_context),
                 )
 
                 # If agents agree on resolution, count as prevented

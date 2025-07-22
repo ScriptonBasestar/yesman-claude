@@ -2,16 +2,13 @@
 
 # Copyright notice.
 
-import os
-import sqlite3
-import pytest
-from flask import Flask, jsonify
 
 from commands.automate import AutomateDetectCommand, AutomateMonitorCommand
 from commands.browse import BrowseCommand
 from commands.setup import SetupCommand
 from commands.status import StatusCommand
 from libs.ai.learning_engine import LearningEngine
+
 from .test_framework import (
     AsyncIntegrationTestBase,
     CommandTestRunner,

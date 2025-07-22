@@ -16,7 +16,7 @@ class DependencyTrackCommand(BaseCommand):
     """Track dependencies across branches."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the dependency track command.
 
         Returns:
@@ -32,7 +32,7 @@ class DependencyStatusCommand(BaseCommand):
     """Show dependency status."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the dependency status command.
 
         Returns:
@@ -48,7 +48,7 @@ class DependencyImpactCommand(BaseCommand):
     """Analyze dependency impact."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the dependency impact command.
 
         Returns:
@@ -64,7 +64,7 @@ class DependencyPropagateCommand(BaseCommand):
     """Propagate dependency changes."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the dependency propagate command.
 
         Returns:

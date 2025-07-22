@@ -8,7 +8,7 @@ import subprocess  # noqa: S404
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 try:
     import winreg
@@ -245,15 +245,15 @@ class Theme:
         'Theme' object.
         """
         return cls(
-            name=data["name"],
+            name=cast(str, data["name"]),
             mode=ThemeMode(data["mode"]),
-            colors=ColorPalette.from_dict(data.get("colors", {})),
-            typography=Typography.from_dict(data.get("typography", {})),
-            spacing=Spacing.from_dict(data.get("spacing", {})),
-            custom_css=data.get("custom_css", ""),
-            description=data.get("description", ""),
-            author=data.get("author", ""),
-            version=data.get("version", "1.0.0"),
+            colors=ColorPalette.from_dict(cast(dict[str, str], data.get("colors", {}))),
+            typography=Typography.from_dict(cast(dict[str, str], data.get("typography", {}))),
+            spacing=Spacing.from_dict(cast(dict[str, str], data.get("spacing", {}))),
+            custom_css=cast(str, data.get("custom_css", "")),
+            description=cast(str, data.get("description", "")),
+            author=cast(str, data.get("author", "")),
+            version=cast(str, data.get("version", "1.0.0")),
         )
 
 
@@ -609,7 +609,7 @@ class ThemeManager:
             self.user_themes[name] = theme
             logger.info("Theme saved: %s", name)
 
-        except (OSError, json.JSONEncodeError, PermissionError) as e:
+        except (OSError, json.JSONDecodeError, PermissionError) as e:
             logger.exception("Error saving theme %s")
             return False
         else:

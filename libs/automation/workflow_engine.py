@@ -8,6 +8,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import Any, cast
 
 from .context_detector import ContextInfo, ContextType
 
@@ -119,7 +120,7 @@ class WorkflowExecution:
     results: list[dict[str, str | int | float | bool]] = field(default_factory=list)
     error_message: str | None = None
 
-    def to_dict(self) -> dict[str, str | float | int | list[dict[str, str | int | float | bool]] | dict[str, str | float | int | list[str]]]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization.
 
         Returns:
@@ -202,7 +203,7 @@ class ConditionEvaluator:
             logger.warning("Unsupported operator: %s", operator)
             return False
 
-        return self.operators[operator](var_value, expected_value)
+        return self.operators[operator](cast(str, var_value), expected_value)
 
     @staticmethod
     def _parse_value(value_str: str) -> str | int | float | bool | None:
@@ -264,7 +265,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(left > right)
+            return bool(cast(Any, left) > cast(Any, right))  # type: ignore
         except TypeError:
             return False
 
@@ -276,7 +277,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(left < right)
+            return bool(cast(Any, left) < cast(Any, right))  # type: ignore
         except TypeError:
             return False
 
@@ -288,7 +289,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(left >= right)
+            return bool(cast(Any, left) >= cast(Any, right))  # type: ignore
         except TypeError:
             return False
 
@@ -300,7 +301,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(left <= right)
+            return bool(cast(Any, left) <= cast(Any, right))  # type: ignore
         except TypeError:
             return False
 

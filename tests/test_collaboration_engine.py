@@ -3,7 +3,9 @@
 from collections import deque
 from datetime import UTC, datetime, timedelta
 from unittest.mock import Mock
+
 import pytest
+
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import (

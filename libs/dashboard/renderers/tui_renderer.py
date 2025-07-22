@@ -8,7 +8,7 @@ Rich-based terminal user interface renderer for dashboard widgets.
 """
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from rich.align import Align
 from rich.box import MINIMAL, ROUNDED
@@ -72,7 +72,7 @@ class TUIRenderer(BaseRenderer):
     def render_widget(
         self,
         widget_type: WidgetType,
-        data: object,
+        data: Any,
         options: dict[str, Any] | None = None,
     ) -> str:
         """Render a single widget using Rich components.
@@ -89,23 +89,23 @@ class TUIRenderer(BaseRenderer):
 
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
-            return self._render_session_browser(data, options)
+            return self._render_session_browser(cast(SessionData | list[SessionData], data), options)
         if widget_type == WidgetType.HEALTH_METER:
-            return self._render_health_meter(data, options)
+            return self._render_health_meter(cast(HealthData, data), options)
         if widget_type == WidgetType.ACTIVITY_HEATMAP:
-            return self._render_activity_heatmap(data, options)
+            return self._render_activity_heatmap(cast(ActivityData, data), options)
         if widget_type == WidgetType.PROGRESS_TRACKER:
-            return self._render_progress_tracker(data, options)
+            return self._render_progress_tracker(cast(ProgressData, data), options)
         if widget_type == WidgetType.LOG_VIEWER:
-            return self._render_log_viewer(data, options)
+            return self._render_log_viewer(cast(dict[str, Any], data), options)
         if widget_type == WidgetType.METRIC_CARD:
-            return self._render_metric_card(data, options)
+            return self._render_metric_card(cast(MetricCardData, data), options)
         if widget_type == WidgetType.STATUS_INDICATOR:
-            return self._render_status_indicator(data, options)
+            return self._render_status_indicator(cast(StatusIndicatorData, data), options)
         if widget_type == WidgetType.CHART:
-            return self._render_chart(data, options)
+            return self._render_chart(cast(ChartData, data), options)
         if widget_type == WidgetType.TABLE:
-            return self._render_table(data, options)
+            return self._render_table(cast(dict[str, Any], data), options)
         return self._render_generic_widget(widget_type, data, options)
 
     def render_layout(

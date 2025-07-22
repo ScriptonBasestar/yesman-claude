@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .auto_resolver import AutoResolutionMode, AutoResolver
 from .branch_manager import BranchManager
@@ -76,7 +77,7 @@ class PreventionMeasure:
     effectiveness: float | None = None  # measured post-application
 
     # Metadata
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 
@@ -103,7 +104,7 @@ class PreventionResult:
     analysis_overhead: float = 0.0
 
     # Metadata
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     executed_at: datetime = field(default_factory=datetime.now)
 
 
@@ -304,13 +305,13 @@ class ConflictPreventionSystem:
 
         # Determine strategy based on conflict pattern
         if prediction.pattern == ConflictPattern.OVERLAPPING_IMPORTS:
-            measures.extend(await ConflictPrevention._generate_dependency_measures(prediction))
+            measures.extend(await self._generate_dependency_measures(prediction))
         elif prediction.pattern == ConflictPattern.FUNCTION_SIGNATURE_DRIFT:
-            measures.extend(await ConflictPrevention._generate_coordination_measures(prediction))
+            measures.extend(await self._generate_coordination_measures(prediction))
         elif prediction.pattern == ConflictPattern.API_BREAKING_CHANGE:
-            measures.extend(await ConflictPrevention._generate_interface_measures(prediction))
+            measures.extend(await self._generate_interface_measures(prediction))
         elif prediction.pattern == ConflictPattern.RESOURCE_CONTENTION:
-            measures.extend(await ConflictPrevention._generate_temporal_measures(prediction))
+            measures.extend(await self._generate_temporal_measures(prediction))
         else:
             # Generic measures
             measures.extend(await self._generate_generic_measures(prediction))
@@ -659,7 +660,7 @@ class ConflictPreventionSystem:
             logger.exception("Error getting active branches")
             return []
 
-    def get_prevention_summary(self) -> dict[str]:
+    def get_prevention_summary(self) -> dict[str, Any]:
         """Get summary of prevention system status and performance."""
         active_measures_count = len(self.active_measures)
         recent_results = self.prevention_history[-10:] if self.prevention_history else []

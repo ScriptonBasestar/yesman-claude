@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any, Optional
 
 from .batch_processor import BatchProcessor
 
@@ -295,7 +295,7 @@ class AsyncLogger:
             # Fallback to standard logging
             self.standard_logger.exception("Failed to queue log entry")
 
-    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
+    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a message at specified level."""
         # Extract caller information
         frame = None
@@ -335,32 +335,32 @@ class AsyncLogger:
         self._queue_entry(entry)
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs: Any) -> None:
+    def trace(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a trace message."""
         self.log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs: Any) -> None:
+    def debug(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a debug message."""
         self.log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs: Any) -> None:
+    def info(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log an info message."""
         self.log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs: Any) -> None:
+    def warning(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a warning message."""
         self.log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs: Any) -> None:
+    def error(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log an error message."""
         self.log(LogLevel.ERROR, message, **kwargs)
 
-    def critical(self, message: str, **kwargs: Any) -> None:
+    def critical(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a critical message."""
         self.log(LogLevel.CRITICAL, message, **kwargs)
 
     # Context manager support
-    async def __aenter__(self):
+    async def __aenter__(self) -> "AsyncLogger":
         """Async context manager entry."""
         await self.start()
         return self

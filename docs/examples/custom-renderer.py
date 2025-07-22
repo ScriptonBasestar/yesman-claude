@@ -5,6 +5,7 @@
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from libs.dashboard.renderers import BaseRenderer, RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import ActivityData, HealthData, HealthLevel, SessionData, SessionStatus
@@ -22,7 +23,7 @@ for the Yesman-Claude dashboard system.
 class ASCIIRenderer(BaseRenderer):
     """Custom renderer that outputs ASCII art representations."""
 
-    def __init__(self, theme: dict[str] | None = None) -> None:
+    def __init__(self, theme: dict[str, Any] | None = None) -> None:
         """Initialize ASCII renderer.
 
         Args:
@@ -34,7 +35,7 @@ class ASCIIRenderer(BaseRenderer):
         self.theme = theme or {}
         self.width = 80  # ASCII art width
 
-    def render_widget(self, widget_type: WidgetType, data: object) -> dict[str]:
+    def render_widget(self, widget_type: WidgetType, data: object) -> dict[str, Any]:
         """Render widget as ASCII art."""
         if widget_type == WidgetType.SESSION_BROWSER:
             return self._render_session_browser(data)
@@ -45,7 +46,7 @@ class ASCIIRenderer(BaseRenderer):
         else:
             return {"content": f"Unsupported widget: {widget_type}", "data": data}
 
-    def _render_session_browser(self, sessions: list[SessionData]) -> dict[str]:
+    def _render_session_browser(self, sessions: list[SessionData]) -> dict[str, Any]:
         """Render sessions as ASCII table."""
         lines = []
         lines.append("=" * self.width)
@@ -79,7 +80,7 @@ class ASCIIRenderer(BaseRenderer):
             "session_count": len(sessions),
         }
 
-    def _render_health_chart(self, health: HealthData) -> dict[str]:
+    def _render_health_chart(self, health: HealthData) -> dict[str, Any]:
         """Render health as ASCII bar chart."""
         lines = []
         lines.append("=" * self.width)
@@ -113,7 +114,7 @@ class ASCIIRenderer(BaseRenderer):
             "health_score": health.overall_score,
         }
 
-    def _render_activity_graph(self, activities: list[ActivityData]) -> dict[str]:
+    def _render_activity_graph(self, activities: list[ActivityData]) -> dict[str, Any]:
         """Render activity as ASCII graph."""
         lines = []
         lines.append("=" * self.width)
@@ -205,7 +206,7 @@ class ASCIIRenderer(BaseRenderer):
         else:
             return f"{minutes}m"
 
-    def apply_theme(self, theme: dict[str]) -> None:
+    def apply_theme(self, theme: dict[str, Any]) -> None:
         """Apply theme to renderer."""
         self.theme.update(theme)
 
@@ -223,7 +224,7 @@ class ASCIIRenderer(BaseRenderer):
 class JSONRenderer(BaseRenderer):
     """Custom renderer that outputs structured JSON."""
 
-    def __init__(self, theme: dict[str] | None = None) -> None:
+    def __init__(self, theme: dict[str, Any] | None = None) -> None:
         """Initialize JSON renderer.
 
         Args:
@@ -235,7 +236,7 @@ class JSONRenderer(BaseRenderer):
         self.theme = theme or {}
         self.indent = 2
 
-    def render_widget(self, widget_type: WidgetType, data: object) -> dict[str]:
+    def render_widget(self, widget_type: WidgetType, data: object) -> dict[str, Any]:
         """Render widget as structured JSON."""
         result = {
             "widget_type": widget_type.value,
@@ -286,7 +287,7 @@ class JSONRenderer(BaseRenderer):
             return data
 
     @staticmethod
-    def _summarize_sessions(sessions: list[SessionData]) -> dict[str]:
+    def _summarize_sessions(sessions: list[SessionData]) -> dict[str, Any]:
         """Create session summary."""
         if not sessions:
             return {"total": 0, "active": 0, "inactive": 0}
@@ -304,7 +305,7 @@ class JSONRenderer(BaseRenderer):
         }
 
     @staticmethod
-    def _summarize_health(health: HealthData) -> dict[str]:
+    def _summarize_health(health: HealthData) -> dict[str, Any]:
         """Create health summary."""
         category_avg = 0
         if health.categories:
@@ -318,7 +319,7 @@ class JSONRenderer(BaseRenderer):
         }
 
     @staticmethod
-    def _summarize_activity(activities: list[ActivityData]) -> dict[str]:
+    def _summarize_activity(activities: list[ActivityData]) -> dict[str, Any]:
         """Create activity summary."""
         if not activities:
             return {"total": 0, "sessions": 0, "latest": None}
@@ -336,7 +337,7 @@ class JSONRenderer(BaseRenderer):
             },
         }
 
-    def apply_theme(self, theme: dict[str]) -> None:
+    def apply_theme(self, theme: dict[str, Any]) -> None:
         """Apply theme to renderer."""
         self.theme.update(theme)
         # Adjust indentation based on theme

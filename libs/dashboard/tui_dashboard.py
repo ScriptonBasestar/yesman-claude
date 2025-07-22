@@ -56,7 +56,7 @@ class DashboardWidget(Static):
         widget_type: WidgetType,
         title: str = "",
         update_interval: float = 2.0,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Initialize dashboard widget.
 

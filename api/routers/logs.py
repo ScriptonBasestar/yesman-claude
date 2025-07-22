@@ -4,7 +4,7 @@ import logging
 import re
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
@@ -38,7 +38,7 @@ def get_session_logs(session_name: str, limit: int = 100) -> object:
     """
     try:
         config = get_config()
-        log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
+        log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
         # 세션 이름에 유효하지 않은 문자가 있을 수 있으므로 정제합니다.
         safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
         log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
@@ -126,7 +126,7 @@ def get_logs(
     """
     try:
         config = get_config()
-        log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
+        log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
         log_files = [
             Path(log_path_str).expanduser() / "yesman.log",
             Path(log_path_str).expanduser() / "claude_manager.log",
@@ -179,7 +179,7 @@ def get_log_sources() -> object:
     """
     try:
         config = get_config()
-        log_path_str = config.get("log_path", "~/.scripton/yesman/logs/")
+        log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
         log_files = [
             Path(log_path_str).expanduser() / "yesman.log",
             Path(log_path_str).expanduser() / "claude_manager.log",

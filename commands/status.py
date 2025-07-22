@@ -59,7 +59,7 @@ class StatusDashboard:
 
         # Load initial data
         self._load_todo_data()
-        self.progress_data: dict[str] | None = None
+        self.progress_data: dict[str, Any] | None = None
 
     def _load_todo_data(self) -> None:
         """Load TODO data from various sources."""

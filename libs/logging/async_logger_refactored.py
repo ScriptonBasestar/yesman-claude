@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from libs.core.mixins import StatisticsProviderMixin
 
@@ -21,8 +22,6 @@ from .batch_processor import BatchProcessor
 # Licensed under the MIT License
 
 """Asynchronous logger with queue-based processing for high performance - Refactored version."""
-
-from typing import Any
 
 
 class LogLevel(Enum):
@@ -54,10 +53,10 @@ class LogEntry:
     line_number: int = 0
     thread_id: int = field(default_factory=threading.get_ident)
     process_id: int = field(default_factory=os.getpid)
-    extra_data: dict[str] = field(default_factory=dict)
+    extra_data: dict[str, Any] = field(default_factory=dict)
     exception_info: str | None = None
 
-    def to_dict(self) -> dict[str]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert log entry to dictionary for serialization."""
         return {
             "level": self.level.level_name,
@@ -143,7 +142,7 @@ class AsyncLogger(StatisticsProviderMixin):
         # Lock for thread-safe operations
         self._stats_lock = threading.Lock()
 
-    def get_statistics(self) -> dict[str]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get logger statistics - implements StatisticsProviderMixin interface."""
         batch_stats = {}
         if self.batch_processor:
@@ -285,7 +284,7 @@ class AsyncLogger(StatisticsProviderMixin):
         level: LogLevel,
         message: str,
         exc_info: Exception | None = None,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Internal method to queue a log entry."""
         if level.level_value < self.min_level.level_value:
@@ -332,27 +331,27 @@ class AsyncLogger(StatisticsProviderMixin):
             self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")  # noqa: G004
 
     # Convenience methods for different log levels
-    async def trace(self, message: str, **kwargs: Any) -> None:
+    async def trace(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a trace message."""
         await self._log(LogLevel.TRACE, message, **kwargs)
 
-    async def debug(self, message: str, **kwargs: Any) -> None:
+    async def debug(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a debug message."""
         await self._log(LogLevel.DEBUG, message, **kwargs)
 
-    async def info(self, message: str, **kwargs: Any) -> None:
+    async def info(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log an info message."""
         await self._log(LogLevel.INFO, message, **kwargs)
 
-    async def warning(self, message: str, **kwargs: Any) -> None:
+    async def warning(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a warning message."""
         await self._log(LogLevel.WARNING, message, **kwargs)
 
-    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
+    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         """Log an error message."""
         await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
 
-    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
+    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:  # noqa: ANN401
         """Log a critical message."""
         await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 

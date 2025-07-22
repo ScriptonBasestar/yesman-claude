@@ -1,11 +1,11 @@
 # Copyright notice.
 
-import os
 import tempfile
 from pathlib import Path
-from typing import List, Any
 from unittest.mock import AsyncMock, Mock
+
 import pytest
+
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import (
     ConflictResolutionEngine,

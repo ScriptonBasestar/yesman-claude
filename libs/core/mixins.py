@@ -3,6 +3,7 @@
 # Copyright notice.
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -20,12 +21,11 @@ class StatisticsProviderMixin(ABC):
     """Mixin for classes that provide statistics information."""
 
     @abstractmethod
-    @staticmethod
-    def get_statistics() -> dict[str]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get statistics information from the implementing class.
 
         Returns:
-            dict[str]: Dictionary containing statistics data.
+            dict[str, Any]: Dictionary containing statistics data.
                            The structure depends on the implementing class.
 
         Example:
@@ -45,8 +45,7 @@ class StatusManagerMixin(ABC):
     """Mixin for status and activity management."""
 
     @abstractmethod
-    @staticmethod
-    def update_status(status: str) -> None:
+    def update_status(self, status: str) -> None:
         """Update the current status.
 
         Args:
@@ -61,8 +60,7 @@ class StatusManagerMixin(ABC):
         raise NotImplementedError(msg)
 
     @abstractmethod
-    @staticmethod
-    def update_activity(activity: str) -> None:
+    def update_activity(self, activity: str) -> None:
         """Update the current activity description.
 
         Args:
@@ -82,8 +80,7 @@ class LayoutManagerMixin(ABC):
     """Mixin for layout management in UI components."""
 
     @abstractmethod
-    @staticmethod
-    def create_layout() -> object:
+    def create_layout(self) -> object:
         """Create and return a layout object.
 
         Returns:
@@ -95,8 +92,7 @@ class LayoutManagerMixin(ABC):
         raise NotImplementedError(msg)
 
     @abstractmethod
-    @staticmethod
-    def update_layout(layout: object) -> None:
+    def update_layout(self, layout: object) -> None:
         """Update an existing layout with new configuration or content.
 
         Args:
@@ -123,11 +119,11 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
             "failed_operations": 0,
         }
 
-    def get_statistics(self) -> dict[str]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get current statistics with calculated success rate.
 
         Returns:
-        object: Description of return value.
+        dict[str, Any]: Dictionary containing statistics with calculated success rate.
         """
         stats = self._statistics.copy()
         total = stats["total_operations"]

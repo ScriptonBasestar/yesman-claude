@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from .branch_manager import BranchManager
 from .conflict_prediction import ConflictPredictor, PredictionResult
@@ -83,7 +84,7 @@ class AutoResolutionResult:
     manual_intervention_required: list[str] = field(default_factory=list)
 
     # Metadata
-    metadata: dict[str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     resolved_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -135,8 +136,8 @@ class AutoResolver:
 
         # Resolution history and learning
         self.resolution_history: list[AutoResolutionResult] = []
-        self.success_patterns: defaultdict[str, list[dict[str]]] = defaultdict(list)
-        self.failure_patterns: defaultdict[str, list[dict[str]]] = defaultdict(list)
+        self.success_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.failure_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
 
         # Performance tracking
         self.resolution_stats = {
@@ -282,7 +283,7 @@ class AutoResolver:
         self,
         branches: list[str],
         prevention_mode: AutoResolutionMode = AutoResolutionMode.PREDICTIVE,
-    ) -> dict[str]:
+    ) -> dict[str, Any]:
         """Use prediction to prevent conflicts before they occur.
 
         Args:
@@ -556,12 +557,12 @@ class AutoResolver:
     @staticmethod
     def _generate_prevention_strategies(
         predictions: list[PredictionResult],
-    ) -> list[dict[str]]:
+    ) -> list[dict[str, Any]]:
         """Generate strategies to prevent predicted conflicts."""
         strategies = []
 
         for prediction in predictions:
-            strategy: dict[str] = {
+            strategy: dict[str, Any] = {
                 "prediction_id": prediction.prediction_id,
                 "pattern": prediction.pattern.value,
                 "prevention_suggestions": prediction.prevention_suggestions[:],  # Copy the list
@@ -585,8 +586,8 @@ class AutoResolver:
     async def _apply_preventive_measures(
         self,
         predictions: list[PredictionResult],  # noqa: ARG002
-        strategies: list[dict[str]],
-    ) -> list[dict[str]]:
+        strategies: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """Apply automated preventive measures."""
         applied_measures = []
 
@@ -616,7 +617,7 @@ class AutoResolver:
     @staticmethod
     async def _apply_preventive_measure(
         measure: str,
-        strategy: dict[str],  # noqa: ARG002
+        strategy: dict[str, Any],  # noqa: ARG002
     ) -> bool:
         """Apply a specific preventive measure."""
         # This would implement actual preventive measures
@@ -685,7 +686,7 @@ class AutoResolver:
                     },
                 )
 
-    def get_resolution_summary(self) -> dict[str]:
+    def get_resolution_summary(self) -> dict[str, Any]:
         """Get comprehensive summary of auto-resolution performance."""
         return {
             "performance_stats": self.resolution_stats.copy(),
@@ -707,7 +708,7 @@ class AutoResolver:
             "recommendations": self._generate_performance_recommendations(),
         }
 
-    def _analyze_mode_performance(self) -> dict[str]:
+    def _analyze_mode_performance(self) -> dict[str, Any]:
         """Analyze performance by resolution mode."""
         mode_stats: defaultdict[str, dict[str, float]] = defaultdict(
             lambda: {
@@ -772,6 +773,6 @@ class AutoResolver:
 
         for pattern, failures in common_failures:
             if len(failures) > MIN_FAILURE_COUNT:
-                recommendations.append("Improve resolution strategy for %s conflicts (failed %d times)" % (pattern, len(failures)))
+                recommendations.append(f"Improve resolution strategy for {pattern} conflicts (failed {len(failures)} times)")
 
         return recommendations

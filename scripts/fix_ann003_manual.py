@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-"""
-Manual fixer for remaining ANN003 errors that the main script missed.
-"""
+"""Manual fixer for remaining ANN003 errors that the main script missed."""
 
+import re
 import subprocess
 from pathlib import Path
-import re
 
 
 def fix_remaining_ann003():
     """Fix remaining ANN003 errors manually."""
-
     # Get remaining errors
-    result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", "."], capture_output=True, text=True)
+    result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", "."], capture_output=True, text=True, check=False)
 
     if result.returncode == 0:
         print("No ANN003 errors found!")
@@ -83,7 +80,7 @@ def fix_remaining_ann003():
                                 # Add Any to existing typing import
                                 if "Any" not in line:
                                     lines_list[i] = line.replace("import ", "import Any, ")
-                                    print(f"  Added Any to existing typing import")
+                                    print("  Added Any to existing typing import")
                                 break
                             elif stripped.startswith("import ") or stripped.startswith("from ") and "import" in stripped:
                                 insert_pos = i + 1
@@ -100,12 +97,12 @@ def fix_remaining_ann003():
                     file_path.write_text(content, encoding="utf-8")
 
                     # Verify fix
-                    verify_result = subprocess.run(["ruff", "check", "--select", "ANN003", str(file_path)], capture_output=True, text=True)
+                    verify_result = subprocess.run(["ruff", "check", "--select", "ANN003", str(file_path)], capture_output=True, text=True, check=False)
 
                     if verify_result.returncode == 0:
-                        print(f"  ✅ Fixed successfully")
+                        print("  ✅ Fixed successfully")
                     else:
-                        print(f"  ❌ Still has errors after fix")
+                        print("  ❌ Still has errors after fix")
                 else:
                     print(f"  No changes needed: {original_line.strip()}")
 

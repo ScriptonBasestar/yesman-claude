@@ -4,6 +4,7 @@ import asyncio
 import logging
 from collections import defaultdict
 from datetime import UTC, datetime
+from typing import Any, cast
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -157,7 +158,7 @@ class ConnectionManager:
                 get_sessions,
             )
 
-            initial_data = {}
+            initial_data: dict[str, Any] = {}
 
             if channel in {"dashboard", "sessions"}:
                 sessions = await get_sessions()
@@ -296,13 +297,14 @@ class ConnectionManager:
         Returns:
         dict containing total_connections and channels with connection counts.
         """
+        channels: dict[str, int] = {}
+        for channel, connections in self.channel_connections.items():
+            channels[channel] = len(connections)
+
         stats: dict[str, int | dict[str, int]] = {
             "total_connections": len(self.active_connections),
-            "channels": {},
+            "channels": channels,
         }
-
-        for channel, connections in self.channel_connections.items():
-            stats["channels"][channel] = len(connections)
 
         return stats
 
@@ -332,7 +334,7 @@ class ConnectionManager:
         Returns:
         dict containing batch processing statistics including counts, sizes, and status.
         """
-        return self.batch_processor.get_statistics()
+        return cast(dict[str, int | float | bool], self.batch_processor.get_statistics())
 
 
 # Create global connection manager instance

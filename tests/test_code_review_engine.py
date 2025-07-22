@@ -1,10 +1,12 @@
-from typing import Any
 import asyncio
 import tempfile
+from collections.abc import AsyncGenerator
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
+
 import pytest
+
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.code_review_engine import (
     CodeReview,
@@ -167,7 +169,7 @@ async def code_review_engine(
     mock_collaboration_engine: Mock,
     mock_semantic_analyzer: Mock,
     mock_branch_manager: Mock,
-):
+) -> AsyncGenerator[CodeReviewEngine, None]:
     """Create a CodeReviewEngine instance for testing."""
     engine = CodeReviewEngine(
         collaboration_engine=mock_collaboration_engine,

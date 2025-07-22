@@ -16,7 +16,7 @@ class ReviewInitiateCommand(BaseCommand):
     """Initiate code review."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the review initiate command.
 
         Returns:
@@ -32,7 +32,7 @@ class ReviewApproveCommand(BaseCommand):
     """Approve code review."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the review approve command.
 
         Returns:
@@ -48,7 +48,7 @@ class ReviewRejectCommand(BaseCommand):
     """Reject code review."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the review reject command.
 
         Returns:
@@ -64,7 +64,7 @@ class ReviewStatusCommand(BaseCommand):
     """Show review status."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the review status command.
 
         Returns:
@@ -80,7 +80,7 @@ class QualityCheckCommand(BaseCommand):
     """Perform code quality check."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the quality check command.
 
         Returns:
@@ -96,7 +96,7 @@ class ReviewSummaryCommand(BaseCommand):
     """Show review summary."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002  # noqa: ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
         """Execute the review summary command.
 
         Returns:

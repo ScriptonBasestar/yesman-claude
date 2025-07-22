@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from libs.yesman_config import YesmanConfig
 
@@ -60,7 +61,7 @@ class ActivityHeatmapGenerator:
             logger.exception("Error collecting session activity for {session_name}")  # noqa: G004
             return {}
 
-    def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str]:
+    def generate_heatmap_data(self, sessions: list[str], days: int = 7) -> dict[str, Any]:
         """24x7 그리드 형태의 히트맵 데이터 생성.
 
         Returns:

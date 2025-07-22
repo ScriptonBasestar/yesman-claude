@@ -7,6 +7,7 @@ import subprocess  # noqa: S404
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -28,7 +29,7 @@ class BranchInfo:
     status: str = "active"  # active, merged, abandoned
     metadata: dict[str, object] = None
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.metadata is None:
             self.metadata = {}
 
@@ -41,8 +42,8 @@ class BranchInfo:
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> "BranchInfo":
         """Create from dictionary."""
-        data["created_at"] = datetime.fromisoformat(data["created_at"])
-        return cls(**data)
+        data["created_at"] = datetime.fromisoformat(cast(str, data["created_at"]))
+        return cls(**cast(dict[str, Any], data))
 
 
 class BranchManager:

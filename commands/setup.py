@@ -22,7 +22,7 @@ from libs.core.session_setup import SessionSetupService
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     """Create all tmux sessions defined in projects.yaml."""
 
-    def execute(self, **kwargs: Any) -> dict:
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
         """Execute the setup command.
 
         Args:

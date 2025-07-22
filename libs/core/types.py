@@ -81,7 +81,7 @@ class SessionInfo:
     created_at: float | None = None
     last_activity: float | None = None
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.created_at is None:
             self.created_at = time.time()
         if self.last_activity is None:
@@ -97,7 +97,7 @@ class WindowInfo:
     active: bool = False
     panes: list["PaneInfo"] = None
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.panes is None:
             self.panes = []
 
@@ -125,7 +125,7 @@ class ControllerState:
     response_count: int = 0
     error_count: int = 0
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.last_activity is None:
             self.last_activity = time.time()
 
@@ -151,7 +151,7 @@ class AutoResponse:
     timestamp: float
     success: bool = False
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if hasattr(self, "timestamp") and self.timestamp is None:
             self.timestamp = time.time()
 
@@ -180,7 +180,7 @@ class HealthScore:
     details: dict[str, object]
     last_checked: float
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if hasattr(self, "last_checked") and self.last_checked is None:
             self.last_checked = time.time()
 
@@ -195,7 +195,7 @@ class ProjectHealth:
     last_updated: float
     trends: list["HealthTrend"]
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if hasattr(self, "last_updated") and self.last_updated is None:
             self.last_updated = time.time()
         if not hasattr(self, "trends") or self.trends is None:
@@ -228,7 +228,7 @@ class CacheEntry:
     access_count: int = 0
     last_accessed: float | None = None
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.last_accessed is None:
             self.last_accessed = self.created_at
 
@@ -348,7 +348,7 @@ class UsageStatistics:
     uptime_seconds: float = 0
     last_reset: float = 0
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         if self.last_reset == 0:
             self.last_reset = time.time()
 

@@ -20,13 +20,13 @@ class TestDynamicRedistribution:
 
     @pytest.fixture
     @staticmethod
-    def agent_pool():
+    def agent_pool() -> AgentPool:
         """Create agent pool for testing."""
         return AgentPool(max_agents=3, work_dir="/tmp/test-agents")
 
     @pytest.fixture
     @staticmethod
-    def scheduler():
+    def scheduler() -> TaskScheduler:
         """Create scheduler for testing."""
         return TaskScheduler()
 

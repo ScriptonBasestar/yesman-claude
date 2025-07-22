@@ -46,7 +46,7 @@ class TestErrorHandling(unittest.TestCase):
         collector = ContentCollector()
         # Should handle None gracefully
         result = collector.process_content(None)
-        assert result == "" or result is None
+        assert not result or result is None
 
     @staticmethod
     def test_invalid_session_names() -> None:

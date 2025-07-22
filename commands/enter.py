@@ -112,7 +112,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             try:
                 choice = click.prompt("Select session number", type=int)
                 if 1 <= choice <= len(running_sessions):
-                    session_data: dict[str] = running_sessions[choice - 1]
+                    session_data: dict[str, Any] = running_sessions[choice - 1]
                     return str(session_data["session"])
                 self.print_error("Invalid selection")
                 return None
