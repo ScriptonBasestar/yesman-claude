@@ -30,7 +30,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         files: list[str] | None = None,
         language: str = "python",
         repo_path: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Execute the analyze semantic conflicts command.
 
@@ -107,7 +107,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs) -> dict[str]:  # noqa: ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict[str]:  # noqa: ARG002
         """Execute the semantic summary command.
 
         Returns:
@@ -136,7 +136,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs) -> dict[str]:  # noqa: ARG002
+    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: Any) -> dict[str]:  # noqa: ARG002
         """Execute the function diff command.
 
         Returns:
@@ -193,7 +193,7 @@ class SemanticMergeCommand(BaseCommand):
         target_file: str | None = None,
         language: str = "python",  # noqa: ARG002
         strategy: str = "auto",
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Execute the semantic merge command.
 

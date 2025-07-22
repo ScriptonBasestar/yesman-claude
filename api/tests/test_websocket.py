@@ -91,6 +91,7 @@ async def test_websocket_connection(uri: str, channel: str) -> None:
     except websockets.exceptions.WebSocketException:
         pass
     except Exception:
+        # Test cleanup errors are expected
         pass
 
 
@@ -134,6 +135,7 @@ async def stress_test_connections(num_connections: int = 10) -> None:
             await ws.close()
 
     except Exception:
+        # Connection cleanup errors are expected in tests
         pass
     finally:
         # Ensure all connections are closed

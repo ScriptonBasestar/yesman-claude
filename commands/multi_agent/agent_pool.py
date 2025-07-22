@@ -4,7 +4,7 @@ import asyncio
 import logging
 import signal
 from pathlib import Path
-from typing import Any, Never
+from typing import Never, Any
 
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
@@ -131,7 +131,7 @@ class MonitorAgentsCommand(BaseCommand):
                 if duration:
                     self.print_info(f"⏱️  Monitoring for {duration} seconds...")
 
-                    def timeout_handler(signum: int, frame: Any) -> Never:
+                    def timeout_handler(signum: int, frame) -> Never:  # noqa: ARG001
                         raise KeyboardInterrupt
 
                     signal.signal(signal.SIGALRM, timeout_handler)
@@ -153,7 +153,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the status command.
 
         Returns:
@@ -210,7 +210,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, work_dir: str | None = None, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the stop agents command.
 
         Returns:
@@ -301,7 +301,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the list tasks command.
 
         Returns:

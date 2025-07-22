@@ -322,7 +322,7 @@ export function setupAutoSave(enabled: boolean = true, delay: number = 30000): v
 
   if (!enabled) return;
 
-  let saveTimeout: number;
+  let saveTimeout: ReturnType<typeof setTimeout>;
 
   hasUnsavedChanges.subscribe(hasChanges => {
     if (hasChanges) {
@@ -372,13 +372,18 @@ function mergeConfigs(base: AppConfig, override: Partial<AppConfig>): AppConfig 
   for (const [key, value] of Object.entries(override)) {
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       // 객체 타입은 재귀적으로 병합
-      merged[key as keyof AppConfig] = {
-        ...merged[key as keyof AppConfig],
-        ...value
-      } as any;
+      const baseValue = merged[key as keyof AppConfig];
+      if (baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue)) {
+        (merged as any)[key] = {
+          ...baseValue,
+          ...value
+        };
+      } else {
+        (merged as any)[key] = value;
+      }
     } else {
       // 원시 타입이나 배열은 그대로 덮어씀
-      merged[key as keyof AppConfig] = value as any;
+      (merged as any)[key] = value;
     }
   }
 

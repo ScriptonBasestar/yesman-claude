@@ -2,7 +2,7 @@
 
 import json
 import logging
-import subprocess
+import subprocess  # noqa: S404
 import time
 from dataclasses import dataclass, field
 from enum import Enum

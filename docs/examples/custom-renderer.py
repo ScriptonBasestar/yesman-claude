@@ -4,9 +4,10 @@
 
 import json
 from datetime import UTC, datetime
+from pathlib import Path
+
 from libs.dashboard.renderers import BaseRenderer, RendererFactory, RenderFormat, WidgetType
 from libs.dashboard.renderers.widget_models import ActivityData, HealthData, HealthLevel, SessionData, SessionStatus
-from pathlib import Path
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -435,7 +436,6 @@ def demo_custom_renderers() -> None:
 
 def save_renderer_examples() -> None:
     """Save renderer examples to files."""
-
     # Create output directory
     output_dir = Path("docs/examples/renderers")
     output_dir.mkdir(exist_ok=True)

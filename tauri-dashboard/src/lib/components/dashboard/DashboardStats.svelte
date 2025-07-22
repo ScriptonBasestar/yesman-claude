@@ -4,13 +4,13 @@
 
   // 통계 데이터 계산
   $: totalSessions = $sessions.length;
-  $: activeSessions = $sessions.filter(s => s.status === 'active').length;
-  $: inactiveSessions = $sessions.filter(s => s.status === 'inactive').length;
+  $: activeSessions = $sessions.filter(s => s.status === 'running').length;
+  $: inactiveSessions = $sessions.filter(s => s.status === 'stopped').length;
   $: unknownSessions = $sessions.filter(s => s.status === 'unknown').length;
 
   $: runningControllers = $sessions.filter(s => s.controller_status === 'running').length;
-  $: stoppedControllers = $sessions.filter(s => s.controller_status === 'stopped').length;
-  $: errorControllers = $sessions.filter(s => s.controller_status === 'error').length;
+  $: stoppedControllers = $sessions.filter(s => s.controller_status === 'not running').length;
+  $: errorControllers = $sessions.filter(s => s.controller_error !== null && s.controller_error !== undefined).length;
   $: unknownControllers = $sessions.filter(s => s.controller_status === 'unknown').length;
 
   $: totalWindows = $sessions.reduce((sum, s) => sum + (s.windows?.length || 0), 0);

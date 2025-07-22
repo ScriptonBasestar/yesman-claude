@@ -22,6 +22,8 @@ from .batch_processor import BatchProcessor
 
 """Asynchronous logger with queue-based processing for high performance - Refactored version."""
 
+from typing import Any
+
 
 class LogLevel(Enum):
     """Enhanced log levels with priorities."""
@@ -330,27 +332,27 @@ class AsyncLogger(StatisticsProviderMixin):
             self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")  # noqa: G004
 
     # Convenience methods for different log levels
-    async def trace(self, message: str, **kwargs) -> None:
+    async def trace(self, message: str, **kwargs: Any) -> None:
         """Log a trace message."""
         await self._log(LogLevel.TRACE, message, **kwargs)
 
-    async def debug(self, message: str, **kwargs) -> None:
+    async def debug(self, message: str, **kwargs: Any) -> None:
         """Log a debug message."""
         await self._log(LogLevel.DEBUG, message, **kwargs)
 
-    async def info(self, message: str, **kwargs) -> None:
+    async def info(self, message: str, **kwargs: Any) -> None:
         """Log an info message."""
         await self._log(LogLevel.INFO, message, **kwargs)
 
-    async def warning(self, message: str, **kwargs) -> None:
+    async def warning(self, message: str, **kwargs: Any) -> None:
         """Log a warning message."""
         await self._log(LogLevel.WARNING, message, **kwargs)
 
-    async def error(self, message: str, exc_info: Exception | None = None, **kwargs) -> None:
+    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
         """Log an error message."""
         await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
 
-    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs) -> None:
+    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
         """Log a critical message."""
         await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 

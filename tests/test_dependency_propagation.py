@@ -11,17 +11,6 @@ from libs.multi_agent.branch_info_protocol import BranchInfoProtocol
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import CollaborationEngine
 from libs.multi_agent.dependency_propagation import (
-import pandas as pd
-from .utils import process_data, validate_input
-from src.main import DataProcessor
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for DependencyPropagationSystem dependency change tracking and propagation."""
-
-
-
     ChangeImpact,
     DependencyChange,
     DependencyNode,
@@ -206,7 +195,6 @@ def test_processor() -> object:
     @pytest.fixture
     @staticmethod
     def propagation_system(
-        self,
         mock_collaboration_engine: Mock,
         mock_branch_info_protocol: Mock,
         mock_branch_manager: Mock,
@@ -223,7 +211,6 @@ def test_processor() -> object:
 
     @staticmethod
     def test_init(
-        self,
         propagation_system: DependencyPropagationSystem,
         mock_collaboration_engine: Mock,
         mock_branch_info_protocol: Mock,
@@ -283,7 +270,6 @@ def test_processor() -> object:
         assert change.requires_manual_review is True  # Breaking changes require review
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_track_dependency_change_auto_impact_detection(
         self,
         propagation_system: DependencyPropagationSystem,

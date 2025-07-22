@@ -224,13 +224,13 @@ class AutoResolver:
             )
 
             # Step 6: Calculate final outcome and metrics
-            outcome = self._determine_resolution_outcome(
+            outcome = AutoResolver._determine_resolution_outcome(
                 conflicts,
                 escalated_conflicts,
                 applied_results,
             )
 
-            confidence_score = self._calculate_session_confidence(applied_results)
+            confidence_score = AutoResolver._calculate_session_confidence(applied_results)
             resolution_time = (datetime.now(UTC) - start_time).total_seconds()
 
             # Create result
@@ -265,7 +265,7 @@ class AutoResolver:
             logger.info("Auto-resolution completed: %s", outcome.value)
             return result
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in auto-resolution session %s")
             return AutoResolutionResult(
                 session_id=session_id,
@@ -310,7 +310,7 @@ class AutoResolver:
             high_confidence_predictions = [p for p in predictions if p.likelihood_score >= threshold]
 
             # Generate prevention strategies
-            prevention_strategies = self._generate_prevention_strategies(
+            prevention_strategies = AutoResolver._generate_prevention_strategies(
                 high_confidence_predictions,
             )
 
@@ -334,7 +334,7 @@ class AutoResolver:
                 },
             }
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in predictive conflict prevention")
             return {
                 "status": "prevention_failed",
@@ -522,7 +522,6 @@ class AutoResolver:
 
     @staticmethod
     def _determine_resolution_outcome(
-        self,
         all_conflicts: list[SemanticConflict],
         escalated_conflicts: list[SemanticConflict],
         applied_results: list[MergeResult],
@@ -545,7 +544,6 @@ class AutoResolver:
 
     @staticmethod
     def _calculate_session_confidence(
-        self,
         applied_results: list[MergeResult],
     ) -> float:
         """Calculate overall confidence score for the resolution session."""
@@ -557,7 +555,6 @@ class AutoResolver:
 
     @staticmethod
     def _generate_prevention_strategies(
-        self,
         predictions: list[PredictionResult],
     ) -> list[dict[str]]:
         """Generate strategies to prevent predicted conflicts."""
@@ -596,7 +593,7 @@ class AutoResolver:
         for strategy in strategies:
             for measure in strategy["automated_measures"]:
                 try:
-                    if await self._apply_preventive_measure(measure, strategy):
+                    if await AutoResolver._apply_preventive_measure(measure, strategy):
                         applied_measures.append(
                             {
                                 "measure": measure,
@@ -618,7 +615,6 @@ class AutoResolver:
 
     @staticmethod
     async def _apply_preventive_measure(
-        self,
         measure: str,
         strategy: dict[str],  # noqa: ARG002
     ) -> bool:

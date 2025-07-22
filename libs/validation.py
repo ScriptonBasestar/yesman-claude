@@ -318,7 +318,7 @@ def validate_input(validation_func: object, field_name: str) -> object:
     """
 
     def decorator(func: Any) -> object:
-        def wrapper(*args, **kwargs) -> object:
+        def wrapper(*args, **kwargs: Any) -> object:
             # Get the value to validate
             if field_name in kwargs:
                 value = kwargs[field_name]

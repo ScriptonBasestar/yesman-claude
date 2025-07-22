@@ -9,7 +9,7 @@
 
 import os
 import re
-import subprocess
+import subprocess  # noqa: S404
 
 import click
 import yaml

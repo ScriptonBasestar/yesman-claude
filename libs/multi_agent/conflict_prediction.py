@@ -130,9 +130,9 @@ class ConflictPredictor:
             ConflictPattern.VARIABLE_NAMING_COLLISION: self._detect_naming_collisions,
             ConflictPattern.CLASS_HIERARCHY_CHANGE: self._detect_hierarchy_changes,
             ConflictPattern.DEPENDENCY_VERSION_MISMATCH: self._detect_version_conflicts,
-            ConflictPattern.API_BREAKING_CHANGE: self._detect_api_changes,
-            ConflictPattern.RESOURCE_CONTENTION: self._detect_resource_conflicts,
-            ConflictPattern.MERGE_CONTEXT_LOSS: self._detect_context_loss,
+            ConflictPattern.API_BREAKING_CHANGE: ConflictPredictor._detect_api_changes,
+            ConflictPattern.RESOURCE_CONTENTION: ConflictPredictor._detect_resource_conflicts,
+            ConflictPattern.MERGE_CONTEXT_LOSS: ConflictPredictor._detect_context_loss,
         }
 
         # Machine learning components (simplified heuristics for now)
@@ -562,7 +562,6 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_api_changes(
-        self,
         branch1: str,  # noqa: ARG002
         branch2: str,  # noqa: ARG002
         vector: ConflictVector,  # noqa: ARG002
@@ -574,7 +573,6 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_resource_conflicts(
-        self,
         branch1: str,  # noqa: ARG002
         branch2: str,  # noqa: ARG002
         vector: ConflictVector,  # noqa: ARG002
@@ -585,7 +583,6 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_context_loss(
-        self,
         branch1: str,  # noqa: ARG002
         branch2: str,  # noqa: ARG002
         vector: ConflictVector,  # noqa: ARG002
@@ -730,7 +727,6 @@ class ConflictPredictor:
 
     @staticmethod
     def _imports_likely_to_conflict(
-        self,
         imports1: list[str],
         imports2: list[str],
     ) -> bool:

@@ -8,11 +8,6 @@ import pytest
 from libs.multi_agent.graph import DirectedGraph
 from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition
 
-        # Check standard library import
-        # Check from import
-        # Check local import
-        # Should find module_a (imports module_b) and module_c (imported by module_b)
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 

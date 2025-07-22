@@ -84,6 +84,7 @@ async def monitor_updates(duration: int = 60) -> None:
                     pass
 
     except Exception:
+        # Connection errors are expected during testing
         pass
 
 

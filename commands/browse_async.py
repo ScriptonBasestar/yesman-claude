@@ -22,6 +22,8 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 """Async Interactive session browser command with enhanced performance."""
 
+from typing import Any
+
 
 class AsyncInteractiveBrowser:
     """Async interactive session browser with live updates."""
@@ -260,7 +262,7 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
+    async def execute_async(self, update_interval: float = 2.0, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the async browse command."""
         try:
             browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)

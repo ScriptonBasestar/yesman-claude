@@ -3,14 +3,6 @@
 from fastapi import status
 from api.middleware.error_handler import create_error_response, error_to_status_code
 from libs.core.error_handling import (
-import json
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for centralized error handling system."""
-
-
     ConfigurationError,
     ErrorCategory,
     ErrorContext,

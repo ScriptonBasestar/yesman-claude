@@ -37,11 +37,11 @@
   // 차트 설정
   const maxDataPoints = 20;
   const updateInterval = 5000; // 5초마다 업데이트
-  let metricsInterval: number;
+  let metricsInterval: ReturnType<typeof setInterval>;
 
   // 현재 메트릭 계산
   $: {
-    const activeSessions = $sessions.filter(s => s.status === 'active').length;
+    const activeSessions = $sessions.filter(s => s.status === 'running').length;
     const runningControllers = $sessions.filter(s => s.controller_status === 'running').length;
 
     currentMetrics = {

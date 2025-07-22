@@ -89,7 +89,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_start_agents_basic(
-        self,
         mock_asyncio_run: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -109,7 +108,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_start_agents_with_options(
-        self,
         mock_asyncio_run: Mock,  # noqa: ARG002
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -134,7 +132,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_start_agents_with_monitor(
-        self,
         mock_asyncio_run: Mock,  # noqa: ARG002
         mock_run_monitor: Mock,
         mock_agent_pool_class: Mock,
@@ -170,7 +167,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_stop_command(
-        self,
         mock_asyncio_run: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -189,7 +185,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_monitor_command(
-        self,
         mock_asyncio_run: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -208,7 +203,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_monitor_with_options(
-        self,
         mock_asyncio_run: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -280,7 +274,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
     def test_list_tasks_with_status_filter(
-        self,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
         mock_agent_pool: Mock,
@@ -301,7 +294,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
     def test_list_tasks_invalid_status(
-        self,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
         mock_agent_pool: Mock,
@@ -358,7 +350,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
     def test_add_task_with_description(
-        self,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
         mock_agent_pool: Mock,
@@ -386,7 +377,6 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
     def test_add_task_default_description(
-        self,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
         mock_agent_pool: Mock,

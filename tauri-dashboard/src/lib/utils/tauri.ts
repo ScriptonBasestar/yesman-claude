@@ -385,7 +385,7 @@ export async function executeBatchCommands(
       const result = await safeTauriInvoke(command, args);
       results.push({ success: true, result });
     } catch (error) {
-      results.push({ success: false, error: error.message });
+      results.push({ success: false, error: error instanceof Error ? error.message : String(error) });
     }
   }
 

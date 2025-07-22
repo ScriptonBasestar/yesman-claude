@@ -67,7 +67,7 @@ class PriorityTask:
     priority_score: float
     task: Task
 
-    def __lt__(self, other: "PrioritizedTask") -> bool:
+    def __lt__(self, other: "PriorityTask") -> bool:
         # Higher priority score = higher priority (so negate for min-heap)
         return self.priority_score > other.priority_score
 

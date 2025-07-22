@@ -3,7 +3,7 @@
 import os
 import platform
 import shutil
-import subprocess
+import subprocess  # noqa: S404
 import sys
 from dataclasses import dataclass
 from pathlib import Path

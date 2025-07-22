@@ -247,7 +247,7 @@ class ConflictPreventionSystem:
                     conflicts_prevented += 1
                 else:
                     failed_measures.append(measure)
-            except Exception:
+            except Exception as e:
                 logger.exception("Failed to apply prevention measure %s")
                 measure.status = "failed"
                 measure.metadata["error"] = str(e)
@@ -304,13 +304,13 @@ class ConflictPreventionSystem:
 
         # Determine strategy based on conflict pattern
         if prediction.pattern == ConflictPattern.OVERLAPPING_IMPORTS:
-            measures.extend(await self._generate_dependency_measures(prediction))
+            measures.extend(await ConflictPrevention._generate_dependency_measures(prediction))
         elif prediction.pattern == ConflictPattern.FUNCTION_SIGNATURE_DRIFT:
-            measures.extend(await self._generate_coordination_measures(prediction))
+            measures.extend(await ConflictPrevention._generate_coordination_measures(prediction))
         elif prediction.pattern == ConflictPattern.API_BREAKING_CHANGE:
-            measures.extend(await self._generate_interface_measures(prediction))
+            measures.extend(await ConflictPrevention._generate_interface_measures(prediction))
         elif prediction.pattern == ConflictPattern.RESOURCE_CONTENTION:
-            measures.extend(await self._generate_temporal_measures(prediction))
+            measures.extend(await ConflictPrevention._generate_temporal_measures(prediction))
         else:
             # Generic measures
             measures.extend(await self._generate_generic_measures(prediction))
@@ -320,7 +320,6 @@ class ConflictPreventionSystem:
 
     @staticmethod
     async def _generate_dependency_measures(
-        self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
         """Generate measures for dependency-related conflicts."""
@@ -351,7 +350,6 @@ class ConflictPreventionSystem:
 
     @staticmethod
     async def _generate_coordination_measures(
-        self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
         """Generate measures for coordination-related conflicts."""
@@ -382,7 +380,6 @@ class ConflictPreventionSystem:
 
     @staticmethod
     async def _generate_interface_measures(
-        self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
         """Generate measures for API/interface conflicts."""
@@ -413,7 +410,6 @@ class ConflictPreventionSystem:
 
     @staticmethod
     async def _generate_temporal_measures(
-        self,
         prediction: PredictionResult,
     ) -> list[PreventionMeasure]:
         """Generate measures for temporal/timing conflicts."""
@@ -498,7 +494,7 @@ class ConflictPreventionSystem:
 
             return success
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error applying measure %s")
             measure.status = "failed"
             measure.metadata["error"] = str(e)

@@ -10,14 +10,6 @@ from unittest.mock import patch
 import pytest
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_test_manager import (
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test branch testing integration system."""
-
-
-
     BranchTestManager,
     TestResult,
     TestStatus,

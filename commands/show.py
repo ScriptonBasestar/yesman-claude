@@ -6,11 +6,13 @@ from libs.core.base_command import BaseCommand, SessionCommandMixin
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
+from typing import Any
+
 
 class ShowCommand(BaseCommand, SessionCommandMixin):
     """List all running tmux sessions."""
 
-    def execute(self, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the show command.
 
         Returns:

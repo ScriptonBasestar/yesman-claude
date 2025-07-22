@@ -8,24 +8,6 @@ import pytest
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import ConflictSeverity, ResolutionStrategy
 from libs.multi_agent.semantic_analyzer import (
-import os
-import sys as system
-from pathlib import Path
-from typing import List, Dict as DictType, Any
-        # Check import os
-        # Check import sys as system
-        # Check from pathlib import Path
-        # Check from typing import Dict as DictType
-import os
-from typing import List
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for SemanticAnalyzer."""
-
-
-
     ClassDefinition,
     FunctionSignature,
     ImportInfo,

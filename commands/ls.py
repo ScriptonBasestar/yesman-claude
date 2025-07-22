@@ -2,6 +2,7 @@
 
 # Copyright notice.
 
+
 import click
 
 from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
@@ -11,11 +12,13 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin, OutputFormat
 
 """Improved ls command using base command class."""
 
+from typing import Any
+
 
 class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
-    def execute(self, **kwargs) -> dict[str]:
+    def execute(self, **kwargs: Any) -> dict[str]:
         """Execute the command.
 
         Returns:

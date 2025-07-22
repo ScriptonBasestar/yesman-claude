@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import re
-import subprocess
+import subprocess  # noqa: S404
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
@@ -111,7 +111,7 @@ class ConflictResolutionEngine:
             ResolutionStrategy.PREFER_LATEST: self._prefer_latest_strategy,
             ResolutionStrategy.PREFER_MAIN: self._prefer_main_strategy,
             ResolutionStrategy.CUSTOM_MERGE: self._custom_merge_strategy,
-            ResolutionStrategy.SEMANTIC_ANALYSIS: self._semantic_analysis_strategy,
+            ResolutionStrategy.SEMANTIC_ANALYSIS: ConflictResolver._semantic_analysis_strategy,
         }
 
         # Configuration
@@ -696,7 +696,6 @@ class ConflictResolutionEngine:
 
     @staticmethod
     async def _semantic_analysis_strategy(
-        self,
         conflict: ConflictInfo,
     ) -> ResolutionResult:
         """Use semantic analysis to resolve conflicts."""

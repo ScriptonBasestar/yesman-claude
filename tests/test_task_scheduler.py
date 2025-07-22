@@ -249,7 +249,6 @@ class TestTaskScheduler:
 
     @staticmethod
     def test_get_next_task_for_unregistered_agent(
-        self,
         scheduler: TaskScheduler,
         sample_agent: Agent,
         sample_task: Task,
@@ -346,7 +345,6 @@ class TestTaskScheduler:
 
     @staticmethod
     def test_update_agent_performance_failure(
-        self,
         scheduler: TaskScheduler,
         sample_agent: Agent,
         sample_task: Task,

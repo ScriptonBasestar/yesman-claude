@@ -3,25 +3,25 @@
 # Copyright notice.
 
 import os
+import subprocess  # noqa: S404
+from typing import Any
+
 import click
 import yaml
+
 from libs.validation import (
-from .base_command import CommandError
-from .settings import settings
-import subprocess
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Session setup logic extracted from setup command - Refactored version."""
-
-
-
     validate_directory_path,
     validate_session_name,
     validate_window_name,
 )
 
+from .base_command import CommandError
+from .settings import settings
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Session setup logic extracted from setup command - Refactored version."""
 
 
 class SessionValidator:
@@ -30,7 +30,7 @@ class SessionValidator:
     def __init__(self) -> None:
         self.validation_errors = []
 
-    def validate_session_config(self, session_name: str, config_dict: dict[str]) -> bool:
+    def validate_session_config(self, session_name: str, config_dict: dict[str, Any]) -> bool:
         """Validate session configuration.
 
         Args:
@@ -58,7 +58,7 @@ class SessionValidator:
 
         return len(self.validation_errors) == 0
 
-    def _validate_start_directory(self, session_name: str, config_dict: dict[str]) -> bool:
+    def _validate_start_directory(self, session_name: str, config_dict: dict[str, Any]) -> bool:
         """Validate and potentially create start directory."""
         start_dir = config_dict.get("start_directory")
         if not start_dir:
@@ -91,7 +91,7 @@ class SessionValidator:
         config_dict["start_directory"] = expanded_dir
         return True
 
-    def _validate_windows(self, session_name: str, config_dict: dict[str]) -> bool:
+    def _validate_windows(self, session_name: str, config_dict: dict[str, Any]) -> bool:
         """Validate window configurations."""
         windows = config_dict.get("windows", [])
 
@@ -107,8 +107,8 @@ class SessionValidator:
         self,
         session_name: str,
         window_index: int,
-        window: dict[str],
-        config_dict: dict[str],
+        window: dict[str, Any],
+        config_dict: dict[str, Any],
     ) -> bool:
         """Validate individual window configuration."""
         window_name_str = window.get("window_name", f"window_{window_index}")
@@ -144,7 +144,7 @@ class SessionValidator:
         session_name: str,  # noqa: ARG002
         window_name: str,
         window_start_dir: str,
-        config_dict: dict[str],
+        config_dict: dict[str, Any],
     ) -> bool:
         """Validate window start directory."""
         # If relative path, make it relative to session start_directory
@@ -188,7 +188,7 @@ class SessionConfigBuilder:
     def __init__(self, tmux_manager: object) -> None:
         self.tmux_manager = tmux_manager
 
-    def build_session_config(self, session_name: str, session_conf: dict[str]) -> dict[str]:
+    def build_session_config(self, session_name: str, session_conf: dict[str, Any]) -> dict[str, Any]:
         """Build complete session configuration.
 
         Args:
@@ -218,7 +218,7 @@ class SessionConfigBuilder:
 
         return config_dict
 
-    def _load_template(self, template_name: str | None) -> dict[str]:
+    def _load_template(self, template_name: str | None) -> dict[str, Any]:
         """Load template configuration.
 
         Args:
@@ -293,7 +293,7 @@ class SessionSetupService:
 
         return successful_count, failed_count
 
-    def _load_sessions_config(self, session_filter: str | None = None) -> dict[str]:
+    def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
         """Load sessions configuration with optional filter."""
         all_sessions = self.tmux_manager.load_projects().get("sessions", {})
 
@@ -308,7 +308,7 @@ class SessionSetupService:
 
         return dict(all_sessions)
 
-    def _setup_single_session(self, session_name: str, session_conf: dict[str]) -> bool:
+    def _setup_single_session(self, session_name: str, session_conf: dict[str, Any]) -> bool:
         """Set up a single tmux session.
 
         Args:
@@ -361,7 +361,6 @@ class SessionSetupService:
     @staticmethod
     def _kill_session(session_name: str) -> None:
         """Kill existing session."""
-
         try:
             subprocess.run(
                 ["tmux", "kill-session", "-t", session_name],
@@ -372,7 +371,7 @@ class SessionSetupService:
             msg = f"Failed to kill existing session: {e}"
             raise CommandError(msg) from e
 
-    def _create_session(self, config_dict: dict[str]) -> None:
+    def _create_session(self, config_dict: dict[str, Any]) -> None:
         """Create tmux session from configuration."""
         try:
             self.tmux_manager.create_session_from_config(config_dict)

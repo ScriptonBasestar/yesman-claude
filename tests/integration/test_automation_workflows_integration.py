@@ -5,8 +5,20 @@
 import asyncio
 import contextlib
 import time
+
 from commands.automate import (
+    AutomateConfigCommand,
+    AutomateDetectCommand,
+    AutomateMonitorCommand,
+    AutomateWorkflowCommand,
+)
+
 from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -16,20 +28,6 @@ from .test_framework import (
 Tests the complete automation system including context detection,
 workflow execution, and real-time monitoring across components.
 """
-
-
-
-    AutomateConfigCommand,
-    AutomateDetectCommand,
-    AutomateMonitorCommand,
-    AutomateWorkflowCommand,
-)
-
-    AsyncIntegrationTestBase,
-    CommandTestRunner,
-    MockClaudeEnvironment,
-    PerformanceMonitor,
-)
 
 
 class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):

@@ -23,7 +23,7 @@
 
   // 세션 통계 계산
   $: totalSessions = $sessions.length;
-  $: activeSessions = $sessions.filter(s => s.status === 'active').length;
+  $: activeSessions = $sessions.filter(s => s.status === 'running').length;
   $: runningControllers = $sessions.filter(s => s.controller_status === 'running').length;
   $: unreadNotifications = $notifications.filter(n => !n.read).length;
 

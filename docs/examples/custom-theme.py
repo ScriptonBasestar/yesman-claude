@@ -1,9 +1,8 @@
-from typing import Any
-from libs.dashboard import get_theme_manager
-from libs.dashboard.theme_system import ColorPalette, Spacing, Theme, ThemeMode, Typography
 import json
 from pathlib import Path
 
+from libs.dashboard import get_theme_manager
+from libs.dashboard.theme_system import ColorPalette, Spacing, Theme, ThemeMode, Typography
 
 # !/usr/bin/env python3
 # Copyright notice.
@@ -207,7 +206,6 @@ def demo_theme_operations() -> None:
 
 def save_theme_examples() -> None:
     """Save theme examples to files for reference."""
-
     # Create themes
     themes = {
         "cyberpunk": create_cyberpunk_theme(),

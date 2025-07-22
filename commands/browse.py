@@ -20,6 +20,8 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 """Interactive session browser command."""
 
+from typing import Any
+
 
 class InteractiveBrowser:
     """Interactive session browser with live updates."""
@@ -231,7 +233,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    def execute(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, update_interval: float = 2.0, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the browse command.
 
         Returns:

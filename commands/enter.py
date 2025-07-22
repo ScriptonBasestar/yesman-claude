@@ -1,7 +1,7 @@
 # Copyright notice.
 
 import os
-import subprocess
+import subprocess  # noqa: S404
 import sys
 
 import click
@@ -14,6 +14,8 @@ from libs.ui.session_selector import show_session_selector
 # Licensed under the MIT License
 
 """Enter (attach to) a tmux session command."""
+
+from typing import Any
 
 
 class EnterCommand(BaseCommand, SessionCommandMixin):
@@ -33,7 +35,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             msg = "Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts"
             raise CommandError(msg)
 
-    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
+    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs: Any) -> dict:  # noqa: FBT001, ARG002
         """Execute the enter command.
 
         Returns:

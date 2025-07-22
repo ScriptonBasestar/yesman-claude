@@ -1,8 +1,9 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
-    # Import here to avoid circular imports
-    from .mock_factories import ComponentMockFactory, ManagerMockFactory
+
+# Import here to avoid circular imports
+from .mock_factories import ComponentMockFactory, ManagerMockFactory
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -14,8 +15,9 @@ Updated: Enhanced with factory system integration for better mock management
 """
 
 
-
 # Tmux 관련 Mock
+
+from typing import Any
 class MockTmuxSession:
     """Tmux 세션 Mock 객체."""
 
@@ -116,7 +118,7 @@ MOCK_API_RESPONSES = {
 
 
 # Factory Integration - Bridge between old and new systems
-def get_factory_mock(mock_type: str, **kwargs) -> object:
+def get_factory_mock(mock_type: str, **kwargs: Any) -> object:
     """Bridge function to get factory-created mocks
     Provides backward compatibility while encouraging factory usage.
 
@@ -127,7 +129,6 @@ def get_factory_mock(mock_type: str, **kwargs) -> object:
     Returns:
         Configured mock object from factory system
     """
-
     factory_map = {
         "session_manager": ManagerMockFactory.create_session_manager_mock,
         "claude_manager": ManagerMockFactory.create_claude_manager_mock,
@@ -141,7 +142,7 @@ def get_factory_mock(mock_type: str, **kwargs) -> object:
         msg = f"Unknown mock type: {mock_type}. Available: {list(factory_map.keys())}"
         raise ValueError(msg)
 
-    return factory_map[mock_type](**kwargs: dict[str, object])
+    return factory_map[mock_type](**kwargs)
 
 
 # Enhanced mock classes with factory integration
@@ -149,7 +150,7 @@ class EnhancedMockTmuxSession(MockTmuxSession):
     """Enhanced TmuxSession mock that integrates with factory system."""
 
     @classmethod
-    def from_factory(cls, name: str = "test-session", **kwargs) -> object:
+    def from_factory(cls, name: str = "test-session", **kwargs: Any) -> object:
         """Create enhanced mock using factory system."""
         return get_factory_mock("tmux_session", name=name, **kwargs)
 

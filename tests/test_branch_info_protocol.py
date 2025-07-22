@@ -4,16 +4,6 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock
 import pytest
 from libs.multi_agent.branch_info_protocol import (
-from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.collaboration_engine import CollaborationEngine, MessagePriority
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for BranchInfoProtocol branch information sharing system."""
-
-
-
     BranchInfo,
     BranchInfoProtocol,
     BranchInfoType,

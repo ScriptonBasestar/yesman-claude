@@ -6,36 +6,12 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_prediction import (
-from libs.multi_agent.conflict_resolution import (
-import os
-import sys
-from datetime import UTC, datetime
-from pathlib import Path
-import os
-from sys import path
-        # Should detect potential conflict due to overlapping but different imports
-
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for ConflictPredictor."""
-
-
-
     ConflictPattern,
     ConflictPredictor,
     ConflictVector,
     PredictionConfidence,
     PredictionResult,
 )
-    ConflictResolutionEngine,
-    ConflictSeverity,
-    ConflictType,
-)
-
-
 class TestConflictVector:
     """Test cases for ConflictVector."""
 
@@ -124,7 +100,6 @@ class TestConflictPredictor:
 
     @staticmethod
     def test_init(
-        self,
         predictor: ConflictPredictor,
         mock_conflict_engine: Mock,
         mock_branch_manager: Mock,

@@ -1,24 +1,79 @@
 import asyncio
 import os
 from datetime import UTC, datetime
-from typing import Any
+from typing import TypedDict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import Scope
 
 from api.background_tasks import task_runner
 from api.middleware.error_handler import add_request_id_middleware, global_error_handler
 from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
+from api.routers.websocket_router import ConnectionManager
 from libs.core.error_handling import YesmanError
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 
+# Type definitions for API responses
+class TaskStateDict(TypedDict):
+    """Type definition for individual task state."""
+
+    is_running: bool
+    last_run: str | None
+    error_count: int
+    interval: int | float | None
+
+
+class TaskStatesDict(TypedDict):
+    """Type definition for task runner states response."""
+
+    is_running: bool
+    tasks: dict[str, TaskStateDict]
+
+
+class ConnectionStatsDict(TypedDict):
+    """Type definition for WebSocket connection statistics."""
+
+    total_connections: int
+    channels: dict[str, int]
+
+
+class BatchStatisticsDict(TypedDict):
+    """Type definition for batch processor statistics."""
+
+    batches_processed: int
+    entries_processed: int
+    bytes_written: int
+    compression_ratio: float
+    avg_batch_size: float
+    files_created: int
+    pending_entries: int
+    current_file_size: int
+    max_batch_size: int
+    max_batch_time: float
+    compression_enabled: bool
+    uptime_seconds: float
+
+
+class WebSocketStatsDict(TypedDict):
+    """Type definition for WebSocket stats endpoint response."""
+
+    connection_stats: ConnectionStatsDict
+    batch_stats: BatchStatisticsDict
+    summary: str
+
+
 app = FastAPI(title="Yesman Claude API", version="0.1.0")
+
+# Create WebSocket connection manager
+manager = ConnectionManager()
 
 # Add error handling middleware
 app.add_exception_handler(YesmanError, global_error_handler)
@@ -59,11 +114,7 @@ if os.path.exists(sveltekit_build_path):
     # Mount SvelteKit static assets with cache control headers
 
     class CacheControlStaticFiles(StaticFiles):
-        def __init__(self, *args, **kwargs) -> None:
-            super().__init__(*args, **kwargs)
-
-        @staticmethod
-        async def get_response(path: str, scope: Any):
+        async def get_response(self, path: str, scope: Scope) -> Response:
             response = await super().get_response(path, scope)
             if hasattr(response, "headers"):
                 # Add cache-busting headers for JavaScript files
@@ -85,7 +136,7 @@ if os.path.exists(sveltekit_build_path):
 
 # Health check endpoint
 @app.get("/healthz")
-async def health_check():
+async def health_check() -> dict[str, str]:
     """Health check endpoint for monitoring and load balancer."""
     return {
         "status": "healthy",
@@ -97,7 +148,7 @@ async def health_check():
 
 # API info endpoint
 @app.get("/api")
-async def api_info():
+async def api_info() -> dict[str, str | dict[str, str] | None]:
     """API information and available endpoints."""
     return {
         "service": "Yesman Claude API",
@@ -124,7 +175,7 @@ if os.path.exists(sveltekit_build_path):
 
     @app.get("/")
     @app.get("/{path:path}")
-    async def serve_dashboard(path: str = ""):
+    async def serve_dashboard(path: str = "") -> FileResponse:
         """Serve SvelteKit dashboard at root."""
         # Skip API routes and specific endpoints
         if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
@@ -152,13 +203,12 @@ async def shutdown_event() -> None:
     await task_runner.stop()
 
     # Shutdown WebSocket manager and batch processor
-
     await manager.shutdown()
 
 
 # Add endpoint to check task status
 @app.get("/api/tasks/status")
-async def get_task_status():
+async def get_task_status() -> TaskStatesDict:
     """Get status of background tasks."""
     return {
         "is_running": task_runner.is_running,
@@ -168,13 +218,13 @@ async def get_task_status():
 
 # Add endpoint to check WebSocket batch processing stats
 @app.get("/api/websocket/stats")
-async def get_websocket_stats():
+async def get_websocket_stats() -> WebSocketStatsDict:
     """Get WebSocket connection and batch processing statistics."""
     connection_stats = manager.get_connection_stats()
     batch_stats = manager.get_batch_statistics()
 
     return {
-        "connections": connection_stats,
-        "batch_processing": batch_stats,
-        "timestamp": datetime.now(UTC).isoformat(),
+        "connection_stats": connection_stats,
+        "batch_stats": batch_stats,
+        "summary": datetime.now(UTC).isoformat(),
     }

@@ -13,6 +13,8 @@ from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, Resol
 
 """Conflict detection and resolution commands."""
 
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ logger = logging.getLogger(__name__)
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -122,7 +124,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -194,7 +196,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:

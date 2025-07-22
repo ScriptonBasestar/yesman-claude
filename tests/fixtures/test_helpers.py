@@ -4,12 +4,14 @@ import json
 import os
 import shutil
 import tempfile
+import time
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from pathlib import Path
+
 import yaml
-    from .mock_data import MockTmuxPane, MockTmuxSession
-import time
+
+from .mock_data import MockTmuxPane, MockTmuxSession
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -17,8 +19,6 @@ import time
 """테스트 헬퍼 함수 및 유틸리티
 테스트에서 자주 사용되는 공통 함수들을 제공.
 """
-
-
 
 
 @contextmanager
@@ -56,7 +56,6 @@ def create_test_config(config_dict: dict[str], format: str = "yaml") -> str:
 
 def create_mock_tmux_session(session_name: str = "test-session") -> object:
     """Mock tmux 세션 생성 헬퍼."""
-
     session = MockTmuxSession(session_name)
     window = session.new_window("main")
     window.panes = [
@@ -126,7 +125,6 @@ class CaptureOutput:
 
 def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5, interval: float = 0.1) -> bool:
     """조건이 만족될 때까지 대기."""
-
     start_time = time.time()
 
     while time.time() - start_time < timeout:

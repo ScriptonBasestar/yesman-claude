@@ -1,7 +1,6 @@
 import os
 import shutil
 from pathlib import Path
-from typing import Any
 
 import click
 from rich.console import Console
@@ -15,6 +14,8 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin
 # Licensed under the MIT License
 
 """Cache cleanup command for removing excessive cache files."""
+
+from typing import Any
 
 
 class CleanupCommand(BaseCommand, ConfigCommandMixin):

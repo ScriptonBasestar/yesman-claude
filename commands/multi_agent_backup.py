@@ -5,12 +5,12 @@ import contextlib
 import json
 import logging
 import signal
-import subprocess
+import subprocess  # noqa: S404
 import types
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Never
+from typing import Never, Any
 from unittest.mock import Mock
 
 import click
@@ -64,7 +64,7 @@ RISK_THRESHOLD_MEDIUM = 0.4
 class StartAgentsCommand(BaseCommand):
     """Start the multi-agent pool."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -128,7 +128,7 @@ class StartAgentsCommand(BaseCommand):
 class MonitorAgentsCommand(BaseCommand):
     """Start real-time agent monitoring dashboard."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -192,7 +192,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -249,7 +249,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -280,7 +280,7 @@ class StopAgentsCommand(BaseCommand):
 class AddTaskCommand(BaseCommand):
     """Add a task to the agent pool queue."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the add task command."""
         # Extract parameters from kwargs
         title = kwargs.get("title", "")
@@ -327,7 +327,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -391,7 +391,7 @@ class ListTasksCommand(BaseCommand):
 class DetectConflictsCommand(BaseCommand):
     """Detect conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -496,7 +496,7 @@ class DetectConflictsCommand(BaseCommand):
 class ResolveConflictCommand(BaseCommand):
     """Resolve a specific conflict."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -564,7 +564,7 @@ class ResolveConflictCommand(BaseCommand):
 class ConflictSummaryCommand(BaseCommand):
     """Show conflict resolution summary and statistics."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -633,7 +633,7 @@ class ConflictSummaryCommand(BaseCommand):
 class PredictConflictsCommand(BaseCommand):
     """Predict potential conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -752,7 +752,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show conflict prediction summary and statistics."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -827,7 +827,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns between branches."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -921,7 +921,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
 class AnalyzeSemanticConflictsCommand(BaseCommand):
     """Analyze AST-based semantic conflicts between branches."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1011,7 +1011,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic structure summary of code."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1078,7 +1078,7 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Compare function signatures between branches."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1145,7 +1145,7 @@ class FunctionDiffCommand(BaseCommand):
 class SemanticMergeCommand(BaseCommand):
     """Perform intelligent semantic merge."""
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the command."""
         # Extract parameters from kwargs
 
@@ -1595,7 +1595,7 @@ def semantic_summary(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--file", "-f", help="Specific file containing the function")
 def function_diff(
-    function_name: str,
+    function_name: str,  # noqa: ARG001
     branch1: str,
     branch2: str,
     repo_path: str | None,
@@ -1625,14 +1625,14 @@ def function_diff(
 @click.option("--apply", "-a", is_flag=True, help="Apply merge result to target branch")
 @click.option("--export", "-e", help="Export merge result to file")
 def semantic_merge(
-    file_path: str,
+    file_path: str,  # noqa: ARG001
     branch1: str,
     branch2: str,
     repo_path: str | None,
     target_branch: str | None,
     strategy: str | None,
     apply: bool,  # noqa: FBT001
-    export: str | None,
+    export: str | None,  # noqa: ARG001
 ) -> None:
     """Perform intelligent semantic merge of a file between branches."""
     command = SemanticMergeCommand()
@@ -2092,7 +2092,7 @@ def prevent_conflicts(
     branches: tuple,
     repo_path: str | None,
     mode: str,
-    apply_measures: bool,  # noqa: FBT001
+    apply_measures: bool,  # noqa: FBT001, ARG001
     export: str | None,
 ) -> None:
     """Use AI prediction to prevent conflicts before they occur."""
@@ -2434,7 +2434,7 @@ def send_message(
     subject: str,
     content: str,
     priority: str,
-    repo_path: str | None,
+    repo_path: str | None,  # noqa: ARG001
 ) -> None:
     """Send a message between agents in the collaboration system."""
     try:
@@ -2507,7 +2507,7 @@ def share_knowledge(
     content: str,
     tags: str | None,
     relevance: float,
-    repo_path: str | None,
+    repo_path: str | None,  # noqa: ARG001
 ) -> None:
     """Share knowledge in the collaboration system."""
     try:
@@ -2582,7 +2582,7 @@ def branch_info(
     agent: str | None,
     info_type: str | None,
     data: str | None,
-    repo_path: str | None,
+    repo_path: str | None,  # noqa: ARG001
     sync_strategy: str,
 ) -> None:
     """Manage branch information sharing protocol."""
@@ -2809,7 +2809,7 @@ def dependency_track(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
 @click.option("--export", "-e", help="Export dependency data to JSON file")
-def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:  # noqa: FBT001
+def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:  # noqa: FBT001, ARG001
     """Show dependency propagation system status."""
     try:
         click.echo("📊 Dependency Propagation System Status")

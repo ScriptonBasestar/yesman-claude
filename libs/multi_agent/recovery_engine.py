@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import shutil
-import subprocess
+import subprocess  # noqa: S404
 import time
 import uuid
 from collections.abc import Awaitable, Callable

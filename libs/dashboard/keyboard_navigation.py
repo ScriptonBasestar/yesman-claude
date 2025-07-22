@@ -5,7 +5,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Optional, Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -408,7 +408,7 @@ class KeyboardNavigationManager:
         # Execute action
         return self.execute_action(best_binding.action)
 
-    def execute_action(self, action_name: str, *args, **kwargs) -> bool:
+    def execute_action(self, action_name: str, *args, **kwargs: Any) -> bool:
         """Execute a registered action.
 
         Args:

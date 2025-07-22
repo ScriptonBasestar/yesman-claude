@@ -111,7 +111,7 @@ class TauriRenderer(BaseRenderer):
 
         # Route to specific widget processor
         if widget_type == WidgetType.SESSION_BROWSER:
-            self._process_session_browser(widget_json, data, options)
+            TauriRenderer._process_session_browser(widget_json, data, options)
         elif widget_type == WidgetType.HEALTH_METER:
             self._process_health_meter(widget_json, data, options)
         elif widget_type == WidgetType.ACTIVITY_HEATMAP:
@@ -169,7 +169,7 @@ class TauriRenderer(BaseRenderer):
 
         # Route to specific widget processor
         if widget_type == WidgetType.SESSION_BROWSER:
-            self._process_session_browser(widget_json, data, options)
+            TauriRenderer._process_session_browser(widget_json, data, options)
         elif widget_type == WidgetType.HEALTH_METER:
             self._process_health_meter(widget_json, data, options)
         elif widget_type == WidgetType.ACTIVITY_HEATMAP:
@@ -275,7 +275,6 @@ class TauriRenderer(BaseRenderer):
 
     @staticmethod
     def _process_session_browser(
-        self,
         widget_json: dict[str],
         data: SessionData | list[SessionData],
         options: dict[str],

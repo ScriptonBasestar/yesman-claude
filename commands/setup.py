@@ -5,6 +5,8 @@
 
 """Improved setup command using refactored session setup logic."""
 
+from typing import Any
+
 import click
 
 from libs.core.base_command import (
@@ -20,7 +22,7 @@ from libs.core.session_setup import SessionSetupService
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     """Create all tmux sessions defined in projects.yaml."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the setup command.
 
         Args:

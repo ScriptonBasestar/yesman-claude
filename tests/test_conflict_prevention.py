@@ -8,32 +8,29 @@ import pytest
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import (
-from libs.multi_agent.conflict_prediction import (
-from libs.multi_agent.conflict_prevention import (
-from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for ConflictPreventionSystem."""
-
-
-
     CollaborationEngine,
     MessagePriority,
     MessageType,
 )
+from libs.multi_agent.conflict_prediction import (
     ConflictPattern,
     ConflictPredictor,
     PredictionConfidence,
     PredictionResult,
 )
+from libs.multi_agent.conflict_prevention import (
     ConflictPreventionSystem,
     PreventionAction,
     PreventionMeasure,
     PreventionResult,
     PreventionStrategy,
 )
+from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for ConflictPreventionSystem."""
 
 
 class TestPreventionMeasure:
@@ -246,7 +243,6 @@ class TestConflictPreventionSystem:
         assert prevention_system._prevention_monitor_task.cancelled()  # noqa: SLF001
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_analyze_and_prevent_conflicts_no_predictions(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -282,7 +278,6 @@ class TestConflictPreventionSystem:
         assert result.metadata["significant_predictions"] == 0
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_analyze_and_prevent_conflicts_with_predictions(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -528,7 +523,6 @@ class TestConflictPreventionSystem:
         assert len(measures) == 0
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_prevention_measure_success(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -562,7 +556,6 @@ class TestConflictPreventionSystem:
         mock_handler.assert_called_once_with(measure)
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_prevention_measure_failure(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -595,7 +588,6 @@ class TestConflictPreventionSystem:
         mock_handler.assert_called_once_with(measure)
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_prevention_measure_exception(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -630,7 +622,6 @@ class TestConflictPreventionSystem:
         mock_handler.assert_called_once_with(measure)
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_prevention_measure_no_handler(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -780,7 +771,6 @@ class TestConflictPreventionSystem:
         )
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_early_merge_insufficient_branches(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -855,7 +845,6 @@ class TestConflictPreventionSystem:
             assert content["steps"] == measure.implementation_steps
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_temporal_separation(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -905,7 +894,6 @@ class TestConflictPreventionSystem:
             assert "temporal separation" in content["reason"]
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_apply_semantic_refactoring(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -1054,7 +1042,6 @@ class TestConflictPreventionSystem:
         assert active_branches == []
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_prevention_monitor_loop_integration(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -1095,7 +1082,6 @@ class TestConflictPreventionSystem:
         assert not prevention_system._running  # noqa: SLF001
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_analyze_and_prevent_conflicts_with_time_horizon(
         self,
         prevention_system: ConflictPreventionSystem,
@@ -1125,7 +1111,6 @@ class TestConflictPreventionSystem:
         assert result.metadata["time_horizon"] == str(custom_horizon)
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_analyze_and_prevent_conflicts_with_agents_filter(
         self,
         prevention_system: ConflictPreventionSystem,

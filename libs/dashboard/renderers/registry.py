@@ -8,6 +8,8 @@ from .base_renderer import BaseRenderer, RenderFormat
 Central registry for managing renderer instances and types.
 """
 
+from typing import Any
+
 
 class RendererRegistry:
     """Registry for managing renderer classes and instances.
@@ -69,7 +71,7 @@ class RendererRegistry:
         """
         return self._renderers.get(format_type)
 
-    def get_renderer(self, format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
+    def get_renderer(self, format_type: RenderFormat, **kwargs: Any) -> BaseRenderer | None:
         """Get a renderer instance for a specific format.
 
         Args:
@@ -96,7 +98,7 @@ class RendererRegistry:
 
         return instance
 
-    def get_default_renderer(self, **kwargs) -> BaseRenderer | None:
+    def get_default_renderer(self, **kwargs: Any) -> BaseRenderer | None:
         """Get the default renderer instance.
 
         Args:
@@ -187,7 +189,7 @@ def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRender
     registry.register(format_type, renderer_class)
 
 
-def get_renderer(format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
+def get_renderer(format_type: RenderFormat, **kwargs: Any) -> BaseRenderer | None:
     """Convenience function to get a renderer from global registry.
 
     Args:
@@ -200,7 +202,7 @@ def get_renderer(format_type: RenderFormat, **kwargs) -> BaseRenderer | None:
     return registry.get_renderer(format_type, **kwargs)
 
 
-def get_default_renderer(**kwargs) -> BaseRenderer | None:
+def get_default_renderer(**kwargs: Any) -> BaseRenderer | None:
     """Convenience function to get default renderer from global registry.
 
     Args:

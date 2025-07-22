@@ -7,17 +7,6 @@ import pytest
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.collaboration_engine import (
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
-from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-from libs.multi_agent.types import AgentState
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for CollaborationEngine multi-agent coordination system."""
-
-
-
     CollaborationEngine,
     CollaborationMessage,
     CollaborationMode,
@@ -185,7 +174,6 @@ class TestCollaborationEngine:
     @pytest.fixture
     @staticmethod
     def engine(
-        self,
         mock_agent_pool: Mock,
         mock_branch_manager: Mock,
         mock_conflict_engine: Mock,
@@ -201,7 +189,6 @@ class TestCollaborationEngine:
 
     @staticmethod
     def test_init(
-        self,
         engine: CollaborationEngine,
         mock_agent_pool: Mock,
         mock_branch_manager: Mock,

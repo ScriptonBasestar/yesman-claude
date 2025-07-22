@@ -2,17 +2,22 @@
 
 # Copyright notice.
 
+import os
+import sqlite3
+import pytest
+from flask import Flask, jsonify
+
 from commands.automate import AutomateDetectCommand, AutomateMonitorCommand
 from commands.browse import BrowseCommand
 from commands.setup import SetupCommand
 from commands.status import StatusCommand
 from libs.ai.learning_engine import LearningEngine
 from .test_framework import (
-from flask import Flask, jsonify
-import sqlite3
-import pytest
-from app import app
-import os
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -22,14 +27,6 @@ import os
 Tests integration across all major system modules including CLI, automation,
 AI learning, session management, and dashboard coordination.
 """
-
-
-
-    AsyncIntegrationTestBase,
-    CommandTestRunner,
-    MockClaudeEnvironment,
-    PerformanceMonitor,
-)
 
 
 class TestFullSystemIntegration(AsyncIntegrationTestBase):

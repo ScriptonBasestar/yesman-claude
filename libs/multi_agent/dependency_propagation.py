@@ -694,7 +694,7 @@ class DependencyPropagationSystem:
                 processing_time=processing_time,
             )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error processing change %s", change.change_id)
             processing_time = (datetime.now(UTC) - start_time).total_seconds()
             self._update_propagation_stats(processing_time, False)

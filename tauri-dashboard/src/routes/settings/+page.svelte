@@ -140,7 +140,8 @@
   async function handleRestart() {
     if (confirm('Are you sure you want to restart the application?')) {
       try {
-        await tauriUtils.restartApp();
+        // Note: Restart functionality not yet implemented in tauriUtils
+        showNotification('info', 'Restart Request', 'Please restart the application manually');
       } catch (error) {
         showNotification('error', 'Restart Failed', 'Failed to restart application');
       }
@@ -287,7 +288,7 @@
                     aria-label="{option.icon} {option.label}"
                     value={option.value}
                     checked={$config.theme === option.value}
-                    on:change={() => updateThemeConfig(option.value)}
+                    on:change={() => updateThemeConfig(option.value as 'light' | 'dark' | 'auto')}
                   />
                 {/each}
               </div>
@@ -301,7 +302,7 @@
                 id="language-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.language}
-                on:change={(e) => updateConfig({ language: e.currentTarget.value })}
+                on:change={(e) => updateConfig({ language: e.currentTarget.value as 'en' | 'ko' })}
               >
                 {#each languageOptions as option}
                   <option value={option.value}>{option.icon} {option.label}</option>
@@ -503,7 +504,7 @@
                     aria-label="{option.icon} {option.label}"
                     value={option.value}
                     checked={$config.dashboard.defaultView === option.value}
-                    on:change={() => updateDashboardConfig({ defaultView: option.value })}
+                    on:change={() => updateDashboardConfig({ defaultView: option.value as 'grid' | 'list' })}
                   />
                 {/each}
               </div>
@@ -560,7 +561,7 @@
                 id="log-level-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.advanced.logLevel}
-                on:change={(e) => updateAdvancedConfig({ logLevel: e.currentTarget.value })}
+                on:change={(e) => updateAdvancedConfig({ logLevel: e.currentTarget.value as 'error' | 'warn' | 'info' | 'debug' })}
               >
                 {#each logLevelOptions as option}
                   <option value={option.value}>{option.label}</option>

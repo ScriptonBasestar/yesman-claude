@@ -6,16 +6,6 @@ from unittest.mock import patch
 import pytest
 import yaml
 from libs.core.config_loader import (
-from libs.core.config_schema import YesmanConfigSchema
-from libs.yesman_config import YesmanConfig
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for centralized configuration management."""
-
-
-
     ConfigLoader,
     DictSource,
     EnvironmentSource,

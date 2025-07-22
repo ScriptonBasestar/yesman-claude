@@ -1,5 +1,5 @@
 import logging
-import subprocess
+import subprocess  # noqa: S404
 
 from fastapi import APIRouter, HTTPException, status
 
@@ -409,7 +409,7 @@ class SessionService:
             return False
 
     @staticmethod
-    def _setup_session_internal(session_name: str, session_config: dict[str, object]) -> dict[str, object]:  # noqa: ARG002  # noqa: ARG004
+    def _setup_session_internal(_session_name: str, _session_config: dict[str, object]) -> dict[str, object]:
         """Internal session setup logic.
 
         Returns:

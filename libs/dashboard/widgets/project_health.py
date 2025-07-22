@@ -2,7 +2,7 @@
 
 import logging
 import os
-import subprocess
+import subprocess  # noqa: S404
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

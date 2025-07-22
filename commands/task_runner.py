@@ -1,7 +1,6 @@
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
 import click
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
@@ -25,6 +24,8 @@ Implements the TASK_RUNNER.todo prompt workflow:
 4. Commit changes and move completed files
 """
 
+from typing import Any
+
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -32,7 +33,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 class TaskRunnerNextCommand(BaseCommand):
     """Process the next available task."""
 
-    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
+    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs: Any) -> dict:  # noqa: FBT001, ARG002
         """Execute the next command.
 
         Returns:
@@ -122,7 +123,7 @@ class TaskRunnerRunCommand(BaseCommand):
 class TaskRunnerStatusCommand(BaseCommand):
     """Show current task status."""
 
-    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs) -> dict:  # noqa: FBT001, ARG002
+    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs: Any) -> dict:  # noqa: FBT001, ARG002
         """Execute the status command.
 
         Returns:
@@ -208,7 +209,7 @@ class TaskRunnerStatusCommand(BaseCommand):
 class TaskRunnerAddCommand(BaseCommand):
     """Add a new task to a todo file."""
 
-    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the add command.
 
         Returns:

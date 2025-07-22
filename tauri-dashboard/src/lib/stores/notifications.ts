@@ -348,7 +348,7 @@ export function setupNotificationSystem(): void {
   }
 
   // 백엔드 연결 상태 모니터링
-  let connectionCheckInterval: number;
+  let connectionCheckInterval: ReturnType<typeof setInterval>;
 
   function startConnectionMonitoring() {
     connectionCheckInterval = setInterval(async () => {

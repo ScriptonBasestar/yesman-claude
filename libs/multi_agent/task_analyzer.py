@@ -19,6 +19,8 @@ from .graph import DirectedGraph
 
 """Task analysis and dependency graph generation for multi-agent development."""
 
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +252,7 @@ class TaskAnalyzer:
         title: str,
         file_paths: list[str],
         description: str = "",
-        **kwargs,
+        **kwargs: Any,
     ) -> TaskDefinition:
         """Create a task definition from file paths.
 

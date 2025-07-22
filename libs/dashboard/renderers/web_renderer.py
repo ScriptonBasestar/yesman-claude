@@ -100,7 +100,7 @@ class WebRenderer(BaseRenderer):
             return self._render_chart(data, options, component_id)
         if widget_type == WidgetType.TABLE:
             return self._render_table(data, options, component_id)
-        return self._render_generic_widget(widget_type, data, options, component_id)
+        return WebRenderer._render_generic_widget(widget_type, data, options, component_id)
 
     def render_layout(
         self,
@@ -886,7 +886,6 @@ class WebRenderer(BaseRenderer):
 
     @staticmethod
     def _render_generic_widget(
-        self,
         widget_type: WidgetType,
         data: object,
         options: dict[str, Any],  # noqa: ARG002

@@ -52,9 +52,9 @@
 
   // 세션 통계 계산
   $: totalSessions = $sessions.length;
-  $: activeSessions = $sessions.filter(s => s.status === 'active').length;
+  $: activeSessions = $sessions.filter(s => s.status === 'running').length;
   $: runningControllers = $sessions.filter(s => s.controller_status === 'running').length;
-  $: stoppedControllers = $sessions.filter(s => s.controller_status === 'stopped').length;
+  $: stoppedControllers = $sessions.filter(s => s.controller_status === 'not running').length;
   $: errorControllers = $sessions.filter(s => s.controller_status === 'error').length;
 
   // 액션 핸들러

@@ -7,20 +7,6 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.code_review_engine import (
-from libs.multi_agent.collaboration_engine import CollaborationEngine
-from libs.multi_agent.semantic_analyzer import SemanticAnalyzer
-import os
-import sys
-
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for CodeReviewEngine module."""
-
-
-
     CodeReview,
     CodeReviewEngine,
     QualityMetric,
@@ -661,7 +647,6 @@ def function() -> object:
         assert mi < 100.0
 
     @pytest.mark.asyncio
-    @staticmethod
     async def test_full_automated_review_flow(
         self,
         code_review_engine: CodeReviewEngine,

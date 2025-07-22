@@ -56,9 +56,9 @@
   $: isSessionRunning = session.status === 'running';
 
   // Claude Code가 실행되고 있는지 확인
-  $: hasClaudeRunning = session.claude_active || (session.windows && session.windows.some(w =>
+  $: hasClaudeRunning = session.windows && session.windows.some(w =>
     w.panes && w.panes.some(p => p.is_claude || p.command === 'claude')
-  ));
+  );
 
   // 컨트롤러를 시작할 수 있는지 확인 (세션 실행 중 + Claude Code 실행 중 + 컨트롤러 미실행)
   $: canStartController = isSessionRunning && hasClaudeRunning && session.controller_status !== 'running';

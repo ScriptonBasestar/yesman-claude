@@ -5,16 +5,6 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.metrics_verifier import (
-
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Test metrics verification and success criteria validation."""
-
-
-
     MetricsVerifier,
     PerformanceMetrics,
     SuccessCriteria,

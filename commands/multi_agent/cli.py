@@ -2,12 +2,6 @@
 
 import click
 
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Main CLI group registration for multi-agent commands."""
-
-# Import command classes from modular structure
 from .agent_pool import (
     AddTaskCommand,
     ListTasksCommand,

@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from collections import defaultdict, deque
+from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -17,14 +18,14 @@ class DirectedGraph:
         self.edges: dict[str, dict[str, dict[str, object]]] = defaultdict(dict)
         self.reverse_edges: dict[str, set[str]] = defaultdict(set)
 
-    def add_node(self, node_id: str, **attrs) -> None:
+    def add_node(self, node_id: str, **attrs: Any) -> None:
         """Add a node with attributes."""
         if node_id not in self.nodes:
             self.nodes[node_id] = attrs
         else:
             self.nodes[node_id].update(attrs)
 
-    def add_edge(self, source: str, target: str, **attrs) -> None:
+    def add_edge(self, source: str, target: str, **attrs: Any) -> None:
         """Add an edge with attributes."""
         # Ensure nodes exist
         if source not in self.nodes:

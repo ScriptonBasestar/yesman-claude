@@ -4,7 +4,7 @@ import asyncio
 import hashlib
 import json
 import logging
-import subprocess  # nosec
+import subprocess  # noqa: S404
 import traceback
 from collections import defaultdict
 from collections.abc import Callable

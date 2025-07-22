@@ -171,7 +171,7 @@ class PerformanceProfiler:
             name = operation_name or f"{func.__module__}.{func.__name__}"
 
             @wraps(func)
-            def wrapper(*args: Any, **kwargs: Any) -> Any:
+            def wrapper(*args, **kwargs: Any) -> Any:
                 with self.measure(name):
                     return func(*args, **kwargs)
 
@@ -267,9 +267,7 @@ class PerformanceOptimizer:
         self.process = psutil.Process()
 
     @staticmethod
-    def _create_optimization_strategies(
-        self,
-    ) -> dict[OptimizationLevel, OptimizationStrategy]:
+    def _create_optimization_strategies() -> dict[OptimizationLevel, OptimizationStrategy]:
         """Create built-in optimization strategies."""
         return {
             OptimizationLevel.NONE: OptimizationStrategy(

@@ -118,7 +118,7 @@ def get_logs(
     level: Annotated[str | None, Query()] = None,
     source: Annotated[str | None, Query()] = None,
     search: Annotated[str | None, Query()] = None,
-):
+) -> list[LogEntry]:
     """Get parsed log entries with optional filtering.
 
     Returns:
@@ -144,7 +144,8 @@ def get_logs(
                             log_entry = parse_log_line(line)
                             if log_entry:
                                 all_logs.append(log_entry)
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Failed to parse log file {log_file}: {e}")  # noqa: G004
                     continue
 
         # Sort by timestamp (newest first)

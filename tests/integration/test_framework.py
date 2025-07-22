@@ -4,17 +4,18 @@
 
 import asyncio
 import os
+import shutil
 import tempfile
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+
 import pytest
 import yaml
+
 from libs.core.session_manager import SessionManager
 from libs.yesman_config import YesmanConfig
-import shutil
-import shutil
+
 # Export main classes for easy importing
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -26,8 +27,7 @@ Provides base classes, utilities, and fixtures for comprehensive integration tes
 across CLI, API, dashboard, and multi-agent components.
 """
 
-
-
+from typing import Any
 
 
 class IntegrationTestBase:
@@ -126,7 +126,7 @@ class IntegrationTestBase:
             self.session_manager = SessionManager()
         return self.session_manager
 
-    def create_test_session(self, session_name: str, **kwargs) -> dict[str, object]:
+    def create_test_session(self, session_name: str, **kwargs: Any) -> dict[str, object]:
         """Create a test session with specified configuration."""
         config = {
             "name": session_name,
@@ -137,7 +137,7 @@ class IntegrationTestBase:
                     "panes": [{"shell_command": ["echo", "test session"]}],
                 }
             ],
-            **kwargs: Any,
+            **kwargs,
         }
 
         # Add to projects file
@@ -291,7 +291,7 @@ class CommandTestRunner:
         self.test_base = test_base
         self.command_results = []
 
-    def run_command(self, command_class: type, **kwargs) -> dict[str, object]:
+    def run_command(self, command_class: type, **kwargs: Any) -> dict[str, object]:
         """Run a command and capture results."""
         command = command_class()
 
@@ -299,7 +299,7 @@ class CommandTestRunner:
         command.config = self.test_base.get_test_config()
 
         try:
-            result = command.execute(**kwargs: dict[str, object])
+            result = command.execute(**kwargs)
             self.command_results.append(
                 {
                     "command": command_class.__name__,

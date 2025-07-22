@@ -1,39 +1,35 @@
 # Copyright notice.
 
+import os
 import tempfile
 from pathlib import Path
+from typing import List, Any
 from unittest.mock import AsyncMock, Mock
 import pytest
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import (
-from libs.multi_agent.semantic_analyzer import (
-from libs.multi_agent.semantic_merger import (
-import os
-import os
-from typing import List, Any
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for SemanticMerger automatic conflict resolution."""
-
-
-
     ConflictResolutionEngine,
     ConflictSeverity,
 )
+from libs.multi_agent.semantic_analyzer import (
     FunctionSignature,
     SemanticAnalyzer,
     SemanticConflict,
     SemanticConflictType,
     SemanticContext,
 )
+from libs.multi_agent.semantic_merger import (
     ConflictResolutionRule,
     MergeResolution,
     MergeResult,
     MergeStrategy,
     SemanticMerger,
 )
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Tests for SemanticMerger automatic conflict resolution."""
 
 
 class TestMergeResult:
@@ -122,7 +118,6 @@ class TestSemanticMerger:
     @pytest.fixture
     @staticmethod
     def merger(
-        self,
         mock_semantic_analyzer: Mock,
         mock_conflict_engine: Mock,
         mock_branch_manager: Mock,
@@ -138,7 +133,6 @@ class TestSemanticMerger:
 
     @staticmethod
     def test_init(
-        self,
         merger: SemanticMerger,
         mock_semantic_analyzer: Mock,
         mock_conflict_engine: Mock,

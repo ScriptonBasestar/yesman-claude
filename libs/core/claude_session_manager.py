@@ -20,7 +20,7 @@ class ClaudeSessionManager:
         self.pane_id = pane_id
         self.server = libtmux.Server()
         self.session: libtmux.Session | None = None
-        self.claude_pane: Optional[object] = None
+        self.claude_pane: object | None = None
         self.logger = self._setup_logger()
 
     def _setup_logger(self) -> logging.Logger:

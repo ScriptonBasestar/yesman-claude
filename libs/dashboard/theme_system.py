@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import platform
-import subprocess
+import subprocess  # noqa: S404
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path

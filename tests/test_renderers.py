@@ -7,21 +7,6 @@ from datetime import UTC, datetime
 import psutil
 import pytest
 from libs.dashboard.renderers import (
-from libs.dashboard.renderers.widget_models import (
-from libs.dashboard.renderers.optimizations import cached_render
-
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Comprehensive Renderer System Integration Tests
-Testing the complete renderer ecosystem with cross-format compatibility,
-performance benchmarks, and memory stability.
-"""
-
-
-
     BatchRenderer,
     LazyRenderer,
     RenderCache,
@@ -34,6 +19,7 @@ performance benchmarks, and memory stability.
     render_all_formats,
     render_widget,
 )
+from libs.dashboard.renderers.widget_models import (
     ActivityData,
     ActivityEntry,
     ActivityType,
@@ -50,6 +36,16 @@ performance benchmarks, and memory stability.
     StatusIndicatorData,
     WindowData,
 )
+from libs.dashboard.renderers.optimizations import cached_render
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Comprehensive Renderer System Integration Tests
+Testing the complete renderer ecosystem with cross-format compatibility,
+performance benchmarks, and memory stability.
+"""
 
 
 class TestRendererSystemIntegration:

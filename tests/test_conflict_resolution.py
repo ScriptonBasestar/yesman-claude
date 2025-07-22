@@ -6,17 +6,6 @@ from unittest.mock import Mock, patch
 import pytest
 from libs.multi_agent.branch_manager import BranchManager
 from libs.multi_agent.conflict_resolution import (
-        # Test import conflict pattern
-
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for ConflictResolutionEngine."""
-
-
-
     ConflictInfo,
     ConflictResolutionEngine,
     ConflictSeverity,

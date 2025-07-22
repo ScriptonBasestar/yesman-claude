@@ -11,6 +11,11 @@ from commands.automate import AutomateMonitorCommand
 from commands.setup import SetupCommand
 from commands.status import StatusCommand
 from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -20,15 +25,6 @@ from .test_framework import (
 Tests the real-time dashboard integration with CLI, API, and automation systems.
 Validates that dashboard updates reflect system state accurately across components.
 """
-
-
-
-
-    AsyncIntegrationTestBase,
-    CommandTestRunner,
-    MockClaudeEnvironment,
-    PerformanceMonitor,
-)
 
 
 class TestDashboardSystemIntegration(AsyncIntegrationTestBase):

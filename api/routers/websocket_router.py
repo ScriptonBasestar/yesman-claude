@@ -290,13 +290,13 @@ class ConnectionManager:
             for conn in disconnected:
                 self.disconnect(conn)
 
-    def get_connection_stats(self) -> object:
+    def get_connection_stats(self) -> dict[str, int | dict[str, int]]:
         """Get statistics about active connections.
 
         Returns:
-        Object object the requested data.
+        dict containing total_connections and channels with connection counts.
         """
-        stats: dict[str, object] = {
+        stats: dict[str, int | dict[str, int]] = {
             "total_connections": len(self.active_connections),
             "channels": {},
         }
@@ -326,11 +326,11 @@ class ConnectionManager:
 
         logger.info("WebSocket connection manager shutdown complete")
 
-    def get_batch_statistics(self) -> object:
+    def get_batch_statistics(self) -> dict[str, int | float | bool]:
         """Get batch processing statistics.
 
         Returns:
-        Object object the requested data.
+        dict containing batch processing statistics including counts, sizes, and status.
         """
         return self.batch_processor.get_statistics()
 

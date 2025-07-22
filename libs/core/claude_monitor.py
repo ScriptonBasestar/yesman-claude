@@ -19,6 +19,8 @@ from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 
 """Claude monitoring and auto-response system."""
 
+from typing import Any
+
 
 class ClaudeMonitor:
     """Handles Claude monitoring and auto-response logic."""
@@ -561,7 +563,7 @@ class ClaudeMonitor:
             self.async_logger = None
             self.logger.info("Async logging system stopped")
 
-    def _async_log(self, level: LogLevel, message: str, **kwargs) -> None:
+    def _async_log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
         """Log message to async logger (safe for sync contexts)."""
         if self.async_logger:
             self.async_logger.log(level, message, **kwargs)

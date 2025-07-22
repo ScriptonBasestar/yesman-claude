@@ -75,8 +75,8 @@
   );
 
   $: runningControllers = sessionsWithControllers.filter(s => s.controller_status === 'running');
-  $: stoppedControllers = sessionsWithControllers.filter(s => s.controller_status === 'stopped');
-  $: errorControllers = sessionsWithControllers.filter(s => s.controller_status === 'error');
+  $: stoppedControllers = sessionsWithControllers.filter(s => s.controller_status === 'not running');
+  $: errorControllers = sessionsWithControllers.filter(s => s.controller_error !== null && s.controller_error !== undefined);
 
   // 일괄 컨트롤러 작업
   async function startAllControllers() {

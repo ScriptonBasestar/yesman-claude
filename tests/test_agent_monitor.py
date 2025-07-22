@@ -5,18 +5,6 @@ from typing import Any, Never
 from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from libs.dashboard.widgets.agent_monitor import (
-from libs.multi_agent.types import TaskStatus
-from libs.dashboard.widgets.agent_monitor import create_agent_monitor
-from libs.dashboard.widgets.agent_monitor import create_agent_monitor
-from libs.dashboard.widgets.agent_monitor import run_agent_monitor
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for AgentMonitor dashboard widget."""
-
-
-
     AgentMetrics,
     AgentMonitor,
     MonitorDisplayMode,

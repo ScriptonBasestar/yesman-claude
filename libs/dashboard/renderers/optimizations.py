@@ -18,6 +18,8 @@ from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 Performance optimization system for dashboard renderers.
 """
 
+from typing import Any
+
 
 @dataclass
 class CacheStats:
@@ -59,7 +61,6 @@ class RenderCache:
 
     @staticmethod
     def _generate_cache_key(
-        self,
         widget_type: WidgetType,
         data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
         options: dict[str, str | int | float | bool] | None = None,
@@ -230,7 +231,7 @@ def cached_render(cache: RenderCache | None = None) -> object:
         ):
             # Generate cache key
             renderer_format = getattr(self, "format_type", None)
-            cache_key = cache._generate_cache_key(widget_type, data, options, renderer_format)
+            cache_key = RenderCache._generate_cache_key(widget_type, data, options, renderer_format)
 
             # Try cache first
             cached_result = cache.get(cache_key)
@@ -277,7 +278,7 @@ def cached_layout(cache: RenderCache | None = None) -> object:
             }
 
             renderer_format = getattr(self, "format_type", None)
-            cache_key = cache._generate_cache_key(
+            cache_key = RenderCache._generate_cache_key(
                 WidgetType.TABLE,  # Dummy widget type for layout
                 cache_key_data,
                 None,
@@ -560,7 +561,7 @@ def profile_render(operation_name: str | None = None) -> object:
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> object:
+        def wrapper(*args, **kwargs: Any) -> object:
             name = operation_name or f"{func.__module__}.{func.__name__}"
             with global_profiler.time_operation(name):
                 return func(*args, **kwargs)

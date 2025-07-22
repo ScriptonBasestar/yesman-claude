@@ -1,4 +1,4 @@
-import subprocess
+import subprocess  # noqa: S404
 
 from fastapi import APIRouter, HTTPException
 
@@ -26,12 +26,13 @@ def get_controller_status(session_name: str) -> str | None:
     """
     try:
         controller = cm.get_controller(session_name)
-        return "running" if controller.is_running else "stopped"
     except (AttributeError, KeyError, RuntimeError) as e:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get controller status: {e!s}",
         )
+    else:
+        return "running" if controller.is_running else "stopped"
 
 
 @router.post("/sessions/{session_name}/controller/start", status_code=204)

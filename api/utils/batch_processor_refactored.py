@@ -16,6 +16,8 @@ from libs.core.base_batch_processor import BaseBatchProcessor
 
 """WebSocket message batch processor for optimized real-time updates - Refactored version."""
 
+from typing import Any
+
 
 @dataclass
 class MessageBatch:
@@ -334,7 +336,7 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def update_config(self, **kwargs) -> None:
+    def update_config(self, **kwargs: Any) -> None:
         """Update batch processing configuration."""
         for key, value in kwargs.items():
             if hasattr(self.config, key):

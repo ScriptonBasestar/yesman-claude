@@ -552,7 +552,7 @@ class CodeReviewEngine:
             # Store findings and metrics
             review.findings = all_findings
             review.quality_metrics = all_metrics
-            review.overall_score = self._calculate_overall_score(
+            review.overall_score = CodeReviewEngine._calculate_overall_score(
                 all_findings,
                 all_metrics,
             )
@@ -627,7 +627,7 @@ class CodeReviewEngine:
                     review.overall_score,
                 )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error in automated review for %s:", review.review_id)
             review.status = ReviewStatus.COMPLETED
             review.metadata["error"] = str(e)
@@ -647,7 +647,7 @@ class CodeReviewEngine:
             try:
                 # Check with flake8 if available
                 if self.available_tools.get("flake8"):
-                    result = await self._run_tool_check("flake8", file_path)
+                    result = await CodeReviewEngine._run_tool_check("flake8", file_path)
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
@@ -695,7 +695,7 @@ class CodeReviewEngine:
             try:
                 # Use bandit for security checking if available
                 if self.available_tools.get("bandit"):
-                    result = await self._run_tool_check("bandit", file_path)
+                    result = await CodeReviewEngine._run_tool_check("bandit", file_path)
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
@@ -900,7 +900,7 @@ class CodeReviewEngine:
             try:
                 # Use mypy for type checking if available
                 if self.available_tools.get("mypy"):
-                    result = await self._run_tool_check("mypy", file_path)
+                    result = await CodeReviewEngine._run_tool_check("mypy", file_path)
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
@@ -1024,7 +1024,7 @@ class CodeReviewEngine:
             try:
                 # Use radon for complexity analysis if available
                 if self.available_tools.get("radon"):
-                    result = await self._run_tool_check("radon", file_path)
+                    result = await CodeReviewEngine._run_tool_check("radon", file_path)
                     if result:
                         for issue in result:
                             finding = ReviewFinding(
@@ -1147,7 +1147,6 @@ class CodeReviewEngine:
 
     @staticmethod
     def _calculate_overall_score(
-        self,
         findings: list[ReviewFinding],
         metrics: list[QualityMetrics],
     ) -> float:
@@ -1239,7 +1238,6 @@ class CodeReviewEngine:
 
     @staticmethod
     async def _run_tool_check(
-        self,
         tool_name: str,
         file_path: str,
     ) -> list[str] | None:

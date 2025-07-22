@@ -14,6 +14,8 @@ from datetime import UTC, datetime
 
 """WebSocket message batch processor for optimized real-time updates."""
 
+from typing import Any
+
 
 @dataclass
 class MessageBatch:
@@ -382,7 +384,7 @@ class WebSocketBatchProcessor:
             },
         }
 
-    def update_config(self, **kwargs) -> None:
+    def update_config(self, **kwargs: Any) -> None:
         """Update batch processing configuration."""
         for key, value in kwargs.items():
             if hasattr(self.config, key):

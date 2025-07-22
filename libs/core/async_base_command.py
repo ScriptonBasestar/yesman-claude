@@ -5,6 +5,7 @@
 import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Coroutine
+
 from .base_command import BaseCommand, CommandError
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -12,13 +13,13 @@ from .base_command import BaseCommand, CommandError
 
 """Async-capable base command class for long-running operations."""
 
-
+from typing import Any
 
 
 class AsyncBaseCommand(BaseCommand, ABC):
     """Async-capable base class for commands with long-running operations."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._running = False
         self._loop = None
@@ -28,7 +29,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
     async def execute_async(**kwargs: dict[str, object]) -> dict:
         """Async version of execute method - must be implemented by subclasses."""
 
-    def execute(self, **kwargs) -> dict:
+    def execute(self, **kwargs: Any) -> dict:
         """Sync wrapper that runs the async execute method."""
         try:
             # Use existing event loop if available, otherwise create new one
@@ -36,12 +37,12 @@ class AsyncBaseCommand(BaseCommand, ABC):
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     # We're already in an async context, use run_coroutine_threadsafe directly
-                    coro = self.execute_async(**kwargs: dict[str, object])
+                    coro = self.execute_async(**kwargs)
                     return asyncio.run_coroutine_threadsafe(coro, loop).result()
-                return loop.run_until_complete(self.execute_async(**kwargs: dict[str, object]))
+                return loop.run_until_complete(self.execute_async(**kwargs))
             except RuntimeError:
                 # No event loop exists, create a new one
-                return asyncio.run(self.execute_async(**kwargs: dict[str, object]))
+                return asyncio.run(self.execute_async(**kwargs))
         except Exception as e:
             if isinstance(e, CommandError):
                 raise
@@ -90,7 +91,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
 class AsyncMonitoringMixin:
     """Mixin for commands that need monitoring capabilities."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.update_interval = 1.0  # Default 1 second
         self._monitor_data = {}
@@ -132,7 +133,7 @@ class AsyncMonitoringMixin:
 class AsyncProgressMixin:
     """Mixin for commands that need progress reporting."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._progress_total = 0
         self._progress_current = 0
@@ -177,7 +178,7 @@ class AsyncProgressMixin:
 class AsyncRetryMixin:
     """Mixin for commands that need retry capabilities."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.max_retries = 3
         self.retry_delay = 1.0

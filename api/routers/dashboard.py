@@ -2,10 +2,10 @@
 
 import logging
 import secrets
-import subprocess
+import subprocess  # noqa: S404
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
-from typing import Annotated, TypedDict
+from typing import Annotated, Any, TypedDict
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.templating import Jinja2Templates
@@ -44,7 +44,7 @@ heatmap_generator = ActivityHeatmapGenerator(config)
 
 
 @router.get("/api/dashboard/sessions")
-async def get_sessions():
+async def get_sessions() -> list[dict[str, Any]]:
     """Get session list."""
     try:
         # Get session information from SessionManager
@@ -94,13 +94,13 @@ async def get_sessions():
             )
 
         return web_sessions
-    except Exception:
+    except Exception as e:
         logger.exception("Failed to get sessions")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get sessions: {e!s}")
 
 
 @router.get("/api/dashboard/health")
-async def get_project_health():
+async def get_project_health() -> dict[str, Any]:
     """Get project health metrics."""
     try:
         # Try to use ProjectHealth widget if available
@@ -175,13 +175,13 @@ async def get_project_health():
                 ],
                 "last_updated": datetime.now(UTC).isoformat(),
             }
-    except Exception:
+    except Exception as e:
         logger.exception("Failed to get health data")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get health data: {e!s}")
 
 
 @router.get("/api/dashboard/activity")
-async def get_activity_data():
+async def get_activity_data() -> dict[str, Any]:
     """Get activity heatmap data."""
     try:
         # Try to get real git activity data
@@ -257,23 +257,23 @@ async def get_activity_data():
                 "max_activity": max((a["activity_count"] for a in activities), default=0),
                 "avg_activity": sum(a["activity_count"] for a in activities) / len(activities) if activities else 0,
             }
-    except Exception:
+    except Exception as e:
         logger.exception("Failed to get activity data")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get activity data: {e!s}")
 
 
 @router.get("/api/dashboard/heatmap/{session_name}")
-async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1, le=30)] = 7):
+async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1, le=30)] = 7) -> dict[str, Any]:
     """세션별 히트맵 데이터 반환."""
     try:
         return heatmap_generator.generate_heatmap_data([session_name], days=days)
-    except Exception:
+    except Exception as e:
         logger.exception("Failed to get heatmap data for {session_name}")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {e!s}")
 
 
 @router.get("/api/dashboard/stats")
-async def get_dashboard_stats():
+async def get_dashboard_stats() -> dict[str, Any]:
     """Get dashboard statistics summary."""
     try:
         # Get data from other endpoints
@@ -288,6 +288,6 @@ async def get_dashboard_stats():
             "activity_streak": activity_data["active_days"],
             "last_update": datetime.now(UTC).isoformat(),
         }
-    except Exception:
+    except Exception as e:
         logger.exception("Failed to get stats")  # noqa: G004
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {e!s}")

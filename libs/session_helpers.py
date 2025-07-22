@@ -199,7 +199,7 @@ def get_session_info(session_name: str, server: libtmux.Server | None = None) ->
             status="running" if int(session.session_attached or 0) > 0 else "detached",
         )
 
-    except Exception:
+    except Exception as e:
         logger.exception("Error getting session info for %s")
         msg = f"Failed to get session information for '{session_name}'"
         raise YesmanError(
@@ -356,7 +356,7 @@ def get_active_pane(
             is_controller=False,
         )
 
-    except Exception:
+    except Exception as e:
         logger.exception("Error getting active pane")
         msg = "Failed to get active pane information"
         raise YesmanError(

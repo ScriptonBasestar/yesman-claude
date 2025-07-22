@@ -1,7 +1,7 @@
 # Copyright notice.
 
 import re
-import subprocess
+import subprocess  # noqa: S404
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta

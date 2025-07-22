@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
+
 from .models import SessionInfo
 from .prompt_detector import PromptInfo
 
@@ -11,8 +13,6 @@ from .prompt_detector import PromptInfo
 # Licensed under the MIT License
 
 """Abstract base classes and interfaces for the yesman-claude system."""
-
-
 
 
 class ControllerState(Enum):
@@ -65,7 +65,7 @@ class ISessionManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_cache_stats() -> dict[str]:
+    def get_cache_stats() -> dict[str, Any]:
         """Get cache statistics."""
 
 
@@ -134,7 +134,7 @@ class IController(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_collection_stats() -> dict[str]:
+    def get_collection_stats() -> dict[str, Any]:
         """Get collection statistics."""
 
 
@@ -148,7 +148,7 @@ class IControllerManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def create_controller(session_name: str, **kwargs) -> IController:
+    def create_controller(session_name: str, **kwargs: Any) -> IController:
         """Create a new controller."""
 
     @abstractmethod
@@ -172,7 +172,7 @@ class ICache(ABC):
 
     @abstractmethod
     @staticmethod
-    def put(value: ttl, float | None = None) -> bool:
+    def put(key: str, value: object, ttl: float | None = None) -> bool:
         """Store value in cache."""
 
     @abstractmethod
@@ -187,7 +187,7 @@ class ICache(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_stats() -> dict[str]:
+    def get_stats() -> dict[str, Any]:
         """Get cache statistics."""
 
 
@@ -196,12 +196,12 @@ class ICacheAnalytics(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_cache_health_report() -> dict[str]:
+    def get_cache_health_report() -> dict[str, Any]:
         """Generate comprehensive cache health report."""
 
     @abstractmethod
     @staticmethod
-    def get_visual_status_summary() -> dict[str]:
+    def get_visual_status_summary() -> dict[str, Any]:
         """Get cache status summary for visualization."""
 
     @abstractmethod
@@ -215,7 +215,7 @@ class IPromptDetector(ABC):
 
     @abstractmethod
     @staticmethod
-    def detect_prompts(content: str, context: dict[str] | None = None) -> list[PromptInfo]:
+    def detect_prompts(content: str, context: dict[str, Any] | None = None) -> list[PromptInfo]:
         """Detect prompts in content."""
 
     @abstractmethod
@@ -234,7 +234,7 @@ class IPatternLoader(ABC):
 
     @abstractmethod
     @staticmethod
-    def load_pattern(pattern_type: str) -> dict[str]:
+    def load_pattern(pattern_type: str) -> dict[str, Any]:
         """Load a specific pattern."""
 
     @abstractmethod
@@ -258,7 +258,7 @@ class IPlugin(ABC):
 
     @abstractmethod
     @staticmethod
-    def initialize(config: dict[str]) -> bool:
+    def initialize(config: dict[str, Any]) -> bool:
         """Initialize the plugin."""
 
     @abstractmethod
@@ -373,7 +373,7 @@ class IEventBus(ABC):
 
     @abstractmethod
     @staticmethod
-    def subscribe(event_type: str, handler: Callable[[dict[str]], None]) -> str:
+    def subscribe(event_type: str, handler: Callable[[dict[str, Any]], None]) -> str:
         """Subscribe to events, returns subscription ID."""
 
     @abstractmethod
@@ -383,7 +383,7 @@ class IEventBus(ABC):
 
     @abstractmethod
     @staticmethod
-    def publish(event_type: str, data: dict[str]) -> None:
+    def publish(event_type: str, data: dict[str, Any]) -> None:
         """Publish an event."""
 
     @abstractmethod
@@ -412,7 +412,7 @@ class IConfigManager(ABC):
 
     @abstractmethod
     @staticmethod
-    def get_all_config() -> dict[str]:
+    def get_all_config() -> dict[str, Any]:
         """Get all configuration."""
 
     @abstractmethod

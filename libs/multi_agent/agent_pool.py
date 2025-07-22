@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Import scheduler types after main types to avoid circular imports
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .branch_test_manager import BranchTestManager
 from .recovery_engine import OperationType, RecoveryEngine
@@ -203,7 +203,7 @@ class AgentPool:
         command: list[str],
         working_directory: str,
         description: str = "",
-        **kwargs,
+        **kwargs: Any,
     ) -> Task:
         """Create and add a task."""
         task = Task(
@@ -428,7 +428,7 @@ class AgentPool:
                         execution_time,
                     )
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error executing task %s:", task.task_id)
 
             task.status = TaskStatus.FAILED
@@ -838,7 +838,7 @@ class AgentPool:
 
         try:
             return self.branch_test_manager.get_branch_test_summary(branch_name)
-        except Exception:
+        except Exception as e:
             logger.exception("Error getting test status for %s:", branch_name)
             return {"error": str(e)}
 
@@ -849,7 +849,7 @@ class AgentPool:
 
         try:
             return self.branch_test_manager.get_all_branch_summaries()
-        except Exception:
+        except Exception as e:
             logger.exception("Error getting all branch test status:")
             return {"error": str(e)}
 
@@ -1015,7 +1015,7 @@ class AgentPool:
                 "active_operations": len(self.recovery_engine.active_operations),
             }
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error getting recovery status:")
             return {"recovery_enabled": True, "error": str(e)}
 
@@ -1074,7 +1074,7 @@ class AgentPool:
             try:
                 result = await operation_func()
                 return True, result
-            except Exception:
+            except Exception as e:
                 logger.exception("Operation failed without recovery:")
                 return False, str(e)
 
@@ -1107,7 +1107,7 @@ class AgentPool:
                 logger.info("Operation completed successfully: %s", description)
                 return True, result
 
-            except Exception:
+            except Exception as e:
                 logger.exception("Operation failed (attempt %d):", retry_count + 1)
 
                 if retry_count < max_retries:

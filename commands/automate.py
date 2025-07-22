@@ -29,7 +29,7 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
         """Execute the status command.
 
         Returns:
@@ -147,7 +147,7 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
         """Execute the monitor command.
 
         Returns:
@@ -263,7 +263,7 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs) -> dict[str, Any]:
+    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:
         """Execute the workflow command.
 
         Returns:
@@ -320,7 +320,7 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
         """Execute the detect command.
 
         Returns:
@@ -398,7 +398,7 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", output: str | None = None, **kwargs) -> dict[str, Any]:  # noqa: ARG002
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
         """Execute the config command.
 
         Returns:

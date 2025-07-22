@@ -132,7 +132,7 @@ class DashboardWidget(Static):
 class SessionsView(DashboardWidget):
     """Sessions monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             widget_type=WidgetType.SESSION_BROWSER,
             title="Active Sessions",
@@ -167,7 +167,7 @@ class SessionsView(DashboardWidget):
 class HealthView(DashboardWidget):
     """Project health monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             widget_type=WidgetType.PROJECT_HEALTH,
             title="Project Health",
@@ -200,7 +200,7 @@ class HealthView(DashboardWidget):
 class ActivityView(DashboardWidget):
     """Activity monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             widget_type=WidgetType.ACTIVITY_HEATMAP,
             title="Activity Heatmap",
@@ -226,7 +226,7 @@ class ActivityView(DashboardWidget):
 class LogsView(Static):
     """Logs monitoring view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.log_buffer: list[str] = []
         self.max_logs = 100
@@ -271,7 +271,7 @@ class LogsView(Static):
 class SettingsView(Static):
     """Settings and configuration view."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.settings: dict[str, object] = {
             "auto_refresh": True,
@@ -349,7 +349,7 @@ class TUIDashboard(App):
     auto_refresh_enabled = reactive(True)
     refresh_interval = reactive(3.0)
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize TUI Dashboard."""
         super().__init__(**kwargs)
         self.title = "Yesman-Claude TUI Dashboard"

@@ -15,6 +15,8 @@ from .web_renderer import WebRenderer
 Factory pattern for creating and managing dashboard renderers.
 """
 
+from typing import Any
+
 
 class RendererFactoryError(Exception):
     """Base exception for renderer factory errors."""
@@ -99,7 +101,7 @@ class RendererFactory:
                     ) from e
 
     @classmethod
-    def create(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
+    def create(cls, render_format: RenderFormat, **kwargs: Any) -> BaseRenderer:
         """Create a renderer instance for the specified format.
 
         Args:
@@ -132,7 +134,7 @@ class RendererFactory:
             ) from e
 
     @classmethod
-    def get_singleton(cls, render_format: RenderFormat, **kwargs) -> BaseRenderer:
+    def get_singleton(cls, render_format: RenderFormat, **kwargs: Any) -> BaseRenderer:
         """Get or create a singleton renderer instance.
 
         Args:
@@ -344,7 +346,7 @@ def render_formats(
     return results
 
 
-def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
+def create_renderer(render_format: RenderFormat, **kwargs: Any) -> BaseRenderer:
     """Create a new renderer instance.
 
     Args:
@@ -357,7 +359,7 @@ def create_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
     return RendererFactory.create(render_format, **kwargs)
 
 
-def get_renderer(render_format: RenderFormat, **kwargs) -> BaseRenderer:
+def get_renderer(render_format: RenderFormat, **kwargs: Any) -> BaseRenderer:
     """Get singleton renderer instance.
 
     Args:

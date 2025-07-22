@@ -6,15 +6,6 @@ import time
 from typing import Never
 import pytest
 from libs.core.progress_indicators import (
-import time
-
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Tests for progress indicator utilities."""
-
-
-
     ProgressManager,
     ProgressStyle,
     bar_progress,

@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import re
-import subprocess
+import subprocess  # noqa: S404
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -19,6 +19,8 @@ from .branch_manager import BranchManager
 # Licensed under the MIT License
 
 """Branch-specific test execution and result integration system."""
+
+from typing import Any
 
 
 logger = logging.getLogger(__name__)
@@ -417,7 +419,7 @@ class BranchTestManager:
                 result.end_time = datetime.now(UTC)
                 result.duration = suite.timeout
 
-        except Exception:
+        except Exception as e:
             logger.exception("Error running test %s", test_id)
             result.status = TestStatus.ERROR
             result.error = str(e)
@@ -632,7 +634,7 @@ class BranchTestManager:
         name: str,
         test_type: TestType,
         command: list[str],
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Configure or update a test suite."""
         self.test_suites[name] = TestSuite(

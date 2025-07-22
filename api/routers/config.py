@@ -44,7 +44,6 @@ def save_app_config(config: AppConfig) -> None:
         config_manager = get_config()
         config_data = config.dict(exclude_unset=True)
         config_manager.save(config_data)
-        return
     except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to save config: {e!s}")
 

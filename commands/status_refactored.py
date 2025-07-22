@@ -2,6 +2,7 @@
 
 # Copyright notice.
 
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -14,6 +15,8 @@ from libs.core.mixins import LayoutManagerMixin, StatusManagerMixin
 # Licensed under the MIT License
 
 """Status command - Refactored version using base command and mixins."""
+
+from typing import Any
 
 
 class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
@@ -30,7 +33,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             "show_details": True,
         }
 
-    def execute(self, **kwargs) -> dict[str, object]:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the status command.
 
         Args:

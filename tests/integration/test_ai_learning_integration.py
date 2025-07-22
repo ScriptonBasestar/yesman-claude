@@ -4,7 +4,13 @@
 
 from commands.automate import AutomateDetectCommand
 from libs.ai.learning_engine import LearningEngine
+
 from .test_framework import (
+    AsyncIntegrationTestBase,
+    CommandTestRunner,
+    MockClaudeEnvironment,
+    PerformanceMonitor,
+)
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -14,13 +20,6 @@ from .test_framework import (
 Tests the AI learning system's integration with session interactions,
 pattern detection, and prediction accuracy across real workflows.
 """
-
-
-    AsyncIntegrationTestBase,
-    CommandTestRunner,
-    MockClaudeEnvironment,
-    PerformanceMonitor,
-)
 
 
 class TestAILearningIntegration(AsyncIntegrationTestBase):

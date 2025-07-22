@@ -1,6 +1,5 @@
-from typing import Any
-from templates using Jinja2 template rendering.
 from pathlib import Path
+
 import tmuxp
 import yaml
 from jinja2 import Template
@@ -13,8 +12,6 @@ from jinja2 import Template
 
 This module provides utilities for generating tmux session configurations
 """
-
-
 
 
 def generate(session_name: str, start_directory: str) -> object:

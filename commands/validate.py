@@ -17,11 +17,13 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
+from typing import Any
+
 
 class ValidateCommand(BaseCommand, SessionCommandMixin):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
 
-    def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, session_name: str | None = None, format: str = "table", **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the validate command.
 
         Returns:
@@ -157,7 +159,7 @@ def _display_success(console: Console, valid_count: int, total_count: int) -> No
     console.print(success_panel)
 
 
-def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
+def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
     """Display results in table format."""
     table = Table(
         title="[red]Directory Validation Results[/red]",
@@ -197,7 +199,7 @@ def _display_table_format(console: Console, missing: list, valid_count: int, tot
     console.print(table)
 
 
-def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
+def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
     """Display results in tree format."""
     console.print("\n[red bold]❌ Directory Validation Issues[/red bold]")
     console.print(f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n")
@@ -233,7 +235,7 @@ def _display_tree_format(console: Console, missing: list, valid_count: int, tota
     console.print(tree)
 
 
-def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
+def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
     """Display results in simple format."""
     console.print("[red bold]❌ Missing Directories Found[/red bold]\n")
 
