@@ -85,7 +85,6 @@ class TaskRunnerRunCommand(BaseCommand):
                     description="📁 Analyzing todo files...",
                     style="bold cyan",
                 ):
-
                     todo_file = TodoFile(str(file_path))
                     incomplete_tasks = [t for t in todo_file.tasks if not t.completed and not t.skipped]
                     if incomplete_tasks:
@@ -147,7 +146,6 @@ class TaskRunnerStatusCommand(BaseCommand):
             self.print_info("=" * 50)
 
             for file_path in todo_files:
-
                 todo_file = TodoFile(str(file_path))
 
                 file_total = len(todo_file.tasks)

@@ -147,7 +147,6 @@ class ResolveConflictCommand(BaseCommand):
             resolution_strategy = None
             if strategy:
                 try:
-
                     resolution_strategy = ResolutionStrategy(strategy)
                 except ValueError as e:
                     msg = f"Invalid strategy: {strategy}"

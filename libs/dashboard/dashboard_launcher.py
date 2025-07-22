@@ -328,7 +328,6 @@ class DashboardLauncher:
 
         if requirement == "rich":
             try:
-
                 # Rich might not have __version__ in older versions
                 version = getattr(rich, "__version__", "unknown")
                 return True, f"Rich {version}"
@@ -337,14 +336,12 @@ class DashboardLauncher:
 
         elif requirement == "fastapi":
             try:
-
                 return True, f"FastAPI {fastapi.__version__}"
             except ImportError:
                 return False, "FastAPI not installed"
 
         elif requirement == "uvicorn":
             try:
-
                 return True, f"Uvicorn {uvicorn.__version__}"
             except ImportError:
                 return False, "Uvicorn not installed"

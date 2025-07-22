@@ -511,7 +511,6 @@ class RecoveryEngine:
             branches_data = branch_state.get("branches", {})
             for branch_name, branch_data in branches_data.items():
                 try:
-
                     branch_info = BranchInfo.from_dict(branch_data)
                     branch_manager.branches[branch_name] = branch_info
                 except (KeyError, AttributeError, TypeError, ImportError) as e:

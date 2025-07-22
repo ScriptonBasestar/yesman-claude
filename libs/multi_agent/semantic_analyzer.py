@@ -11,9 +11,9 @@ from pathlib import Path
 from .branch_manager import BranchManager
 from .conflict_resolution import ConflictSeverity, ResolutionStrategy
 
-            # Check import conflicts
-        # Compare imports
-        # Check for conflicting imports (same name, different module)
+# Check import conflicts
+# Compare imports
+# Check for conflicting imports (same name, different module)
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

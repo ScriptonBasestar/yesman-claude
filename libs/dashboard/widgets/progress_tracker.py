@@ -229,7 +229,6 @@ class ProgressTracker:
         # Estimate completion time
         estimated_completion = None
         if velocity > 0 and pending > 0:
-
             current_time = time.time()
             days_remaining = pending / velocity
             estimated_completion = current_time + (days_remaining * 86400)
@@ -283,7 +282,6 @@ class ProgressTracker:
         content.append(f"  Velocity: {stats.velocity:.1f} items/day\\n", style="white")
 
         if stats.estimated_completion:
-
             eta = datetime.datetime.fromtimestamp(stats.estimated_completion)
             content.append(f"  ETA: {eta.strftime('%Y-%m-%d')}\\n", style="cyan")
         else:

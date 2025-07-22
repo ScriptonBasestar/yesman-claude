@@ -10,7 +10,7 @@ from rich.tree import Tree
 
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
 
-    # Try to keep the important parts (end of path)
+# Try to keep the important parts (end of path)
 
 
 # Copyright notice.

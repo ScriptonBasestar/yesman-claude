@@ -8,11 +8,11 @@ from pathlib import Path
 
 from .graph import DirectedGraph
 
-            # Find imports
-                # Find local files that import this module
-                    # Check if this file imports our module
-                # Find files that current file imports
-        # Relative import match
+# Find imports
+# Find local files that import this module
+# Check if this file imports our module
+# Find files that current file imports
+# Relative import match
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

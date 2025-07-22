@@ -11,11 +11,11 @@ from pathlib import Path
 
 from .branch_manager import BranchManager
 
-            # Example: Handle import conflicts
-        # Simple approach: merge unique imports
-        # Extract imports from conflict markers
-            # Extract import statements
-            # Merge unique imports
+# Example: Handle import conflicts
+# Simple approach: merge unique imports
+# Extract imports from conflict markers
+# Extract import statements
+# Merge unique imports
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

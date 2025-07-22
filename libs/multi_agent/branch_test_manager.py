@@ -514,7 +514,6 @@ class BranchTestManager:
             if "pytest" in suite.command:
                 # Extract coverage information
                 if "coverage" in output.lower():
-
                     coverage_match = re.search(r"TOTAL.*?(\d+)%", output)
                     if coverage_match:
                         result.coverage = float(coverage_match.group(1))

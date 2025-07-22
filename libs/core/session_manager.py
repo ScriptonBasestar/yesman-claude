@@ -28,7 +28,6 @@ from .progress_tracker import ProgressAnalyzer
 
 
 try:
-
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -39,7 +38,6 @@ class SessionManager:
     """Manages tmux session information for dashboard."""
 
     def __init__(self) -> None:
-
         self.config = YesmanConfig()
 
         self.tmux_manager = TmuxManager(self.config)

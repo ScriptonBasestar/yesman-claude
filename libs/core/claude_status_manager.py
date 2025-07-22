@@ -75,7 +75,6 @@ class ClaudeStatusManager:
         String containing.
         """
         try:
-
             config = YesmanConfig()
             log_base = config.get("log_path", str(get_default_log_path()))
             log_path = ensure_log_directory(Path(log_base))

@@ -803,7 +803,6 @@ class HealthCalculator:
     async def _check_rust_dependencies(cargo_toml_path: Path) -> tuple[int, int]:
         """Check Rust/Cargo dependencies."""
         try:
-
             with open(cargo_toml_path, "rb") as f:
                 content = tomllib.load(f)
             deps = content.get("dependencies", {})

@@ -309,7 +309,6 @@ def start_all_controllers() -> object:
         Object object.
     """
     try:
-
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
 
@@ -369,7 +368,6 @@ def stop_all_controllers() -> object:
         Object object.
     """
     try:
-
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
 

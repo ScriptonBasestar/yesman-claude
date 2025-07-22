@@ -283,7 +283,6 @@ class WebSocketBatchProcessor:
 
             # Start processor if we're running
             if self._running:
-
                 asyncio.create_task(processor.start())
 
         # Add message to channel processor

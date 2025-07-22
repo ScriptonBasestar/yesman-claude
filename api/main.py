@@ -128,7 +128,6 @@ if os.path.exists(sveltekit_build_path):
         """Serve SvelteKit dashboard at root."""
         # Skip API routes and specific endpoints
         if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
-
             raise HTTPException(status_code=404, detail="Not found")
 
         # For SPA, always serve index.html with cache-busting headers

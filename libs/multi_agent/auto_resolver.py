@@ -364,7 +364,11 @@ class AutoResolver:
 
             # Balanced mode: resolve low-medium risk with good suggestions
             elif mode == AutoResolutionMode.BALANCED:
-                if risk_score <= BALANCED_RISK_THRESHOLD and conflict.severity in {ConflictSeverity.LOW, ConflictSeverity.MEDIUM} and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED:
+                if (
+                    risk_score <= BALANCED_RISK_THRESHOLD
+                    and conflict.severity in {ConflictSeverity.LOW, ConflictSeverity.MEDIUM}
+                    and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED
+                ):
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
@@ -464,7 +468,6 @@ class AutoResolver:
         # Validate AST if it's Python code
         if result.file_path.endswith(".py"):
             try:
-
                 ast.parse(result.merged_content)
             except SyntaxError:
                 return False

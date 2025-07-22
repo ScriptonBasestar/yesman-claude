@@ -701,7 +701,6 @@ class AgentPool:
     def enable_branch_testing(self, repo_path: str | None = None, results_dir: str | None = None) -> None:
         """Enable automatic branch testing integration."""
         try:
-
             repo_path = repo_path or "."
             results_dir = results_dir or ".scripton/yesman/test_results"
 
@@ -857,7 +856,6 @@ class AgentPool:
     def enable_recovery_system(self, work_dir: str | None = None, max_snapshots: int = 50) -> None:
         """Enable automatic rollback and error recovery system."""
         try:
-
             work_dir = work_dir or ".scripton/yesman"
 
             self.recovery_engine = RecoveryEngine(  # type: ignore[assignment]
@@ -945,7 +943,6 @@ class AgentPool:
             return None
 
         try:
-
             # Map string to enum
             op_type_map = {
                 "task_execution": OperationType.TASK_EXECUTION,

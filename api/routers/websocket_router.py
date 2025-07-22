@@ -475,7 +475,6 @@ async def websocket_logs(websocket: WebSocket) -> None:
             elif data.get("type") == "refresh":
                 # Client requests fresh log data
                 try:
-
                     logs = get_logs(limit=100)
                     initial_data = {
                         "type": "initial_logs",

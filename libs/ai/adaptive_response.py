@@ -231,7 +231,6 @@ class AdaptiveResponse:
         Boolean indicating.
         """
         try:
-
             export_data = {
                 "config": {
                     "min_confidence_threshold": self.config.min_confidence_threshold,

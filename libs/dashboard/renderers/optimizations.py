@@ -381,7 +381,9 @@ class BatchRenderer:
 
     def render_batch(
         self,
-        render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]],
+        render_requests: list[
+            tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]
+        ],
         parallel: bool = True,  # noqa: FBT001
     ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render multiple widgets in batch.
@@ -400,7 +402,12 @@ class BatchRenderer:
             return self._render_parallel(render_requests)
         return self._render_sequential(render_requests)
 
-    def _render_sequential(self, render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]]) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
+    def _render_sequential(
+        self,
+        render_requests: list[
+            tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]
+        ],
+    ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render requests sequentially."""
         results = []
         for widget_type, data, options in render_requests:
@@ -408,7 +415,12 @@ class BatchRenderer:
             results.append(result)
         return results
 
-    def _render_parallel(self, render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]]) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
+    def _render_parallel(
+        self,
+        render_requests: list[
+            tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]
+        ],
+    ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render requests in parallel."""
         results = [None] * len(render_requests)
 
@@ -437,7 +449,9 @@ class BatchRenderer:
 
     def render_lazy_batch(
         self,
-        render_requests: list[tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]],
+        render_requests: list[
+            tuple[WidgetType, dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool, dict[str, str | int | float | bool] | None]
+        ],
     ) -> list[LazyRenderer]:
         """Create lazy renderers for batch processing.
 

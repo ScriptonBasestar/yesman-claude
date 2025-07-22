@@ -140,7 +140,9 @@ class ProjectHealth:
         try:
             # Basic security checks
             has_gitignore = os.path.exists(".gitignore")
-            has_secrets = any(keyword in open(f, encoding="utf-8").read().lower() for f in os.listdir(".") if f.endswith((".py", ".yaml", ".yml", ".json")) for keyword in ["password", "secret", "key", "token"])
+            has_secrets = any(
+                keyword in open(f, encoding="utf-8").read().lower() for f in os.listdir(".") if f.endswith((".py", ".yaml", ".yml", ".json")) for keyword in ["password", "secret", "key", "token"]
+            )
 
             score = 70
             if has_gitignore:
