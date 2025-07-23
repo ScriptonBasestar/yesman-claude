@@ -298,7 +298,12 @@ def render_widget(
     Returns:
         Rendered widget output
     """
-    return RendererFactory.render_universal(widget_type, data, render_format, options)
+    result = RendererFactory.render_universal(widget_type, data, render_format, options)
+    # Type narrowing: if render_format is specified, result should be single format output
+    if isinstance(result, dict) and all(isinstance(k, RenderFormat) for k in result.keys()):
+        # This shouldn't happen with specified format, but handle defensively
+        raise ValueError("Unexpected multi-format result when single format requested")
+    return result  # type: ignore[return-value]
 
 
 def render_all_formats(
@@ -316,7 +321,11 @@ def render_all_formats(
     Returns:
         Dict mapping formats to their rendered outputs
     """
-    return RendererFactory.render_universal(widget_type, data, None, options)
+    result = RendererFactory.render_universal(widget_type, data, None, options)
+    # Type narrowing: when no format is specified, result should be multi-format dict
+    if not isinstance(result, dict) or not all(isinstance(k, RenderFormat) for k in result.keys()):
+        raise ValueError("Expected multi-format result when no format specified")
+    return result  # type: ignore[return-value]
 
 
 def render_formats(

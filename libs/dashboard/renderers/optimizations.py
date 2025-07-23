@@ -55,7 +55,7 @@ class RenderCache:
         """
         self.max_size = max_size
         self.ttl = ttl
-        self._cache: OrderedDict[str, dict[str, str | float]] = OrderedDict()
+        self._cache: OrderedDict[str, dict[str, str | float | dict[str, str | int | float | bool] | list[str | int | float | bool]]] = OrderedDict()
         self._lock = threading.RLock()
         self.stats = CacheStats()
 
@@ -131,7 +131,8 @@ class RenderCache:
             cache_entry = self._cache[cache_key]
 
             # Check TTL if configured
-            if self.ttl is not None and time.time() - cache_entry["timestamp"] > self.ttl:
+            timestamp = cache_entry["timestamp"]
+            if self.ttl is not None and isinstance(timestamp, (int, float)) and time.time() - float(timestamp) > self.ttl:
                 del self._cache[cache_key]
                 self.stats.misses += 1
                 self.stats.evictions += 1
@@ -143,7 +144,11 @@ class RenderCache:
 
             self.stats.hits += 1
             self.stats.update_hit_rate()
-            return cache_entry["result"]
+            result = cache_entry["result"]
+            # Type assertion to help mypy understand the return type
+            if isinstance(result, (str, dict, list)):
+                return result
+            return None
 
     def set(self, cache_key: str, result: str | dict[str, str | int | float | bool] | list[str | int | float | bool]) -> None:
         """Store result in cache.
@@ -158,10 +163,12 @@ class RenderCache:
                 self._cache.popitem(last=False)
                 self.stats.evictions += 1
 
-            self._cache[cache_key] = {
+            # Store with proper typing
+            cache_data: dict[str, str | float | dict[str, str | int | float | bool] | list[str | int | float | bool]] = {
                 "result": result,
                 "timestamp": time.time(),
             }
+            self._cache[cache_key] = cache_data
 
             # Move to end
             self._cache.move_to_end(cache_key)
@@ -209,14 +216,14 @@ _widget_cache = RenderCache(max_size=500, ttl=300)  # 5 minute TTL
 _layout_cache = RenderCache(max_size=100, ttl=600)  # 10 minute TTL
 
 
-def cached_render(cache: RenderCache | None = None) -> object:
+def cached_render(cache: RenderCache | None = None) -> Callable:
     """Decorator for caching render method results.
 
     Args:
         cache: Cache instance to use (default: global widget cache)
 
     Returns:
-        Description of return value
+        Decorator function
     """
     if cache is None:
         cache = _widget_cache
@@ -248,7 +255,7 @@ def cached_render(cache: RenderCache | None = None) -> object:
     return decorator
 
 
-def cached_layout(cache: RenderCache | None = None) -> object:
+def cached_layout(cache: RenderCache | None = None) -> Callable:
     """Decorator for caching layout method results.
 
     Args:
@@ -268,7 +275,7 @@ def cached_layout(cache: RenderCache | None = None) -> object:
             cache_key_data = {
                 "widgets": [
                     {
-                        "type": (w.get("type", "").value if hasattr(w.get("type", ""), "value") else str(w.get("type", ""))),
+                        "type": (getattr(w.get("type", ""), "value", None) or str(w.get("type", "unknown"))),
                         "data_hash": str(hash(str(w.get("data", {}))))[:16],
                         "options": w.get("options", {}),
                     }
@@ -278,9 +285,11 @@ def cached_layout(cache: RenderCache | None = None) -> object:
             }
 
             renderer_format = getattr(self, "format_type", None)
+            # Convert cache_key_data to a string representation for type compatibility
+            cache_key_data_str = json.dumps(cache_key_data, sort_keys=True, default=str)
             cache_key = RenderCache._generate_cache_key(
                 WidgetType.TABLE,  # Dummy widget type for layout
-                cache_key_data,
+                cache_key_data_str,
                 None,
                 renderer_format,
             )
@@ -410,7 +419,7 @@ class BatchRenderer:
         ],
     ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render requests sequentially."""
-        results = []
+        results: list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]] = []
         for widget_type, data, options in render_requests:
             result = self.renderer.render_widget(widget_type, data, options or {})
             results.append(result)
@@ -423,7 +432,7 @@ class BatchRenderer:
         ],
     ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render requests in parallel."""
-        results = [None] * len(render_requests)
+        results: list[str | dict[str, str | int | float | bool] | list[str | int | float | bool] | None] = [None] * len(render_requests)
 
         def render_single(
             index: int,
@@ -446,7 +455,8 @@ class BatchRenderer:
                 index, result = future.result()
                 results[index] = result
 
-        return results
+        # Filter out None values and return properly typed results
+        return [r for r in results if r is not None]
 
     def render_lazy_batch(
         self,
@@ -476,14 +486,14 @@ class PerformanceProfiler:
         self.metrics: dict[str, list[float]] = {}
         self._lock = threading.Lock()
 
-    def time_operation(self, operation_name: str) -> object:
+    def time_operation(self, operation_name: str) -> "TimingContext":
         """Context manager for timing operations.
 
         Args:
             operation_name: Name of operation being timed
 
         Returns:
-            Description of return value
+            TimingContext instance
         """
         return TimingContext(self, operation_name)
 
@@ -538,7 +548,7 @@ class TimingContext:
         self.operation_name = operation_name
         self.start_time: float | None = None
 
-    def __enter__(self) -> object:
+    def __enter__(self) -> "TimingContext":
         self.start_time = time.time()
         return self
 
@@ -552,7 +562,7 @@ class TimingContext:
 global_profiler = PerformanceProfiler()
 
 
-def profile_render(operation_name: str | None = None) -> object:
+def profile_render(operation_name: str | None = None) -> Callable:
     """Decorator for profiling render operations.
 
     Args:
