@@ -59,22 +59,24 @@ class AIStatusCommand(BaseCommand):
             table.add_row("Recent Activity (7 days)", str(stats.get("recent_activity", 0)))
 
             # Configuration
-            config = stats.get("adaptive_config", {})
+            config_obj = stats.get("adaptive_config", {})
+            config = config_obj if isinstance(config_obj, dict) else {}
             table.add_row(
                 "Auto-Response",
-                "✅ Enabled" if config.get("auto_response_enabled") else "❌ Disabled",
+                "✅ Enabled" if bool(config.get("auto_response_enabled")) else "❌ Disabled",
             )
             table.add_row(
                 "Learning",
-                "✅ Enabled" if config.get("learning_enabled") else "❌ Disabled",
+                "✅ Enabled" if bool(config.get("learning_enabled")) else "❌ Disabled",
             )
             table.add_row(
                 "Confidence Threshold",
-                f"{config.get('min_confidence_threshold', 0.6):.2f}",
+                f"{float(config.get('min_confidence_threshold', 0.6)):.2f}",
             )
 
             # Runtime info
-            runtime = stats.get("runtime_info", {})
+            runtime_obj = stats.get("runtime_info", {})
+            runtime = runtime_obj if isinstance(runtime_obj, dict) else {}
             table.add_row("Response Queue", str(runtime.get("response_queue_size", 0)))
             table.add_row("Cache Size", str(runtime.get("cache_size", 0)))
 
@@ -87,8 +89,10 @@ class AIStatusCommand(BaseCommand):
                 types_table.add_column("Type", style="yellow")
                 types_table.add_column("Count", style="green", justify="right")
 
-                for response_type, count in stats["response_types"].items():
-                    types_table.add_row(response_type, str(count))
+                response_types_obj = stats["response_types"]
+                if isinstance(response_types_obj, dict):
+                    for response_type, count in response_types_obj.items():
+                        types_table.add_row(response_type, str(count))
 
                 self.console.print(types_table)
 
@@ -99,8 +103,10 @@ class AIStatusCommand(BaseCommand):
                 projects_table.add_column("Project", style="blue")
                 projects_table.add_column("Responses", style="green", justify="right")
 
-                for project, count in stats["project_distribution"].items():
-                    projects_table.add_row(project, str(count))
+                project_dist_obj = stats["project_distribution"]
+                if isinstance(project_dist_obj, dict):
+                    for project, count in project_dist_obj.items():
+                        projects_table.add_row(project, str(count))
 
                 self.console.print(projects_table)
 
@@ -311,7 +317,7 @@ class AICleanupCommand(BaseCommand):
         """Execute the cleanup command."""
         removed_count = self.analyzer.cleanup_old_data(days_to_keep=days)
 
-        if removed_count > 0:
+        if isinstance(removed_count, int) and removed_count > 0:
             self.print_success(f"Cleaned up {removed_count} old response records")
             self.console.print(f"   Kept data from last {days} days")
         else:

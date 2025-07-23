@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Any
+from typing import Any, cast
 
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
@@ -212,7 +212,7 @@ class ConflictSummaryCommand(BaseCommand):
             branch_manager = BranchManager(repo_path=repo_path)
             engine = ConflictResolutionEngine(branch_manager, repo_path)
 
-            summary = engine.get_conflict_summary()
+            summary = cast(dict, engine.get_conflict_summary())
 
             # Overall statistics
             self.print_info(f"Total Conflicts: {summary['total_conflicts']}")
@@ -223,7 +223,7 @@ class ConflictSummaryCommand(BaseCommand):
             # Severity breakdown
             if summary["severity_breakdown"]:
                 self.print_info("\n📈 Severity Breakdown:")
-                for severity, count in summary["severity_breakdown"].items():
+                for severity, count in cast(dict, summary["severity_breakdown"]).items():
                     if count > 0:
                         severity_icon = {
                             "low": "🟢",
@@ -236,7 +236,7 @@ class ConflictSummaryCommand(BaseCommand):
             # Type breakdown
             if summary["type_breakdown"]:
                 self.print_info("\n🏷️  Type Breakdown:")
-                for conflict_type, count in summary["type_breakdown"].items():
+                for conflict_type, count in cast(dict, summary["type_breakdown"]).items():
                     if count > 0:
                         type_icon = {
                             "file_modification": "📝",
@@ -249,7 +249,7 @@ class ConflictSummaryCommand(BaseCommand):
                         self.print_info(f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}")
 
             # Resolution statistics
-            stats = summary["resolution_stats"]
+            stats = cast(dict, summary["resolution_stats"])
             if stats["total_conflicts"] > 0:
                 self.print_info("\n⚡ Resolution Statistics:")
                 self.print_info(f"  Auto-resolved: {stats['auto_resolved']}")

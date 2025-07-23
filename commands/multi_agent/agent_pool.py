@@ -4,7 +4,7 @@ import asyncio
 import logging
 import signal
 from pathlib import Path
-from typing import Any, Never
+from typing import Any, Never, cast
 
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
@@ -190,9 +190,10 @@ class StatusCommand(BaseCommand):
                         "working": "🟡",
                         "error": "🔴",
                         "terminated": "⚫",
-                    }.get(agent.get("state", "unknown"), "❓")
+                    }.get(cast(dict, agent).get("state", "unknown"), "❓")
 
-                    self.print_info(f"  {status_icon} {agent['agent_id']} - Completed: {agent.get('completed_tasks', 0)}, Failed: {agent.get('failed_tasks', 0)}")
+                    agent_dict = cast(dict, agent)
+                    self.print_info(f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}")
 
             return {
                 "success": True,
@@ -338,13 +339,14 @@ class ListTasksCommand(BaseCommand):
                     "completed": "✅",
                     "failed": "❌",
                     "cancelled": "🚫",
-                }.get(task.get("status", "unknown"), "❓")
+                }.get(cast(dict, task).get("status", "unknown"), "❓")
 
-                self.print_info(f"{status_icon} {task['task_id'][:8]}... - {task['title']}")
-                self.print_info(f"   Status: {task['status'].upper()}")
-                if task.get("assigned_agent"):
-                    self.print_info(f"   Agent: {task['assigned_agent']}")
-                self.print_info(f"   Command: {' '.join(task['command'])}")
+                task_dict = cast(dict, task)
+                self.print_info(f"{status_icon} {cast(str, task_dict['task_id'])[:8]}... - {task_dict['title']}")
+                self.print_info(f"   Status: {cast(str, task_dict['status']).upper()}")
+                if task_dict.get("assigned_agent"):
+                    self.print_info(f"   Agent: {task_dict['assigned_agent']}")
+                self.print_info(f"   Command: {' '.join(cast(list, task_dict['command']))}")
                 self.print_info("")
 
             return {

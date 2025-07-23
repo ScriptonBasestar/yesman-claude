@@ -43,7 +43,7 @@ class MockTmuxWindow:
 
     def __init__(self, name: str = "test-window") -> None:
         self.name = name
-        self.panes = []
+        self.panes: list[MockTmuxPane] = []
 
     def list_panes(self) -> object:
         return self.panes

@@ -603,7 +603,7 @@ class ConflictPredictor:
             # Adjust confidence based on historical accuracy
             pattern_history = self.historical_patterns.get(prediction.pattern.value, [])
             if pattern_history:
-                avg_accuracy = sum(p.get("accurate", 0) for p in pattern_history) / len(
+                avg_accuracy = sum(bool(p.get("accurate", 0)) for p in pattern_history) / len(
                     pattern_history,
                 )
                 prediction.likelihood_score *= 0.5 + avg_accuracy * 0.5

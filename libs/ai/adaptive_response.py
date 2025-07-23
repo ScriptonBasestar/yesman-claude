@@ -146,7 +146,7 @@ class AdaptiveResponse:
 
             # Cleanup old data to keep learning fresh
             removed_count = self.analyzer.cleanup_old_data(days_to_keep=30)
-            if removed_count > 0:
+            if isinstance(removed_count, int) and removed_count > 0:
                 logger.info("Cleaned up {removed_count} old response records")
 
             # Get statistics

@@ -34,7 +34,7 @@ class ManagerMockFactory:
         mock_manager = MagicMock()
 
         # Default behaviors
-        sessions = kwargs.get("sessions", [MOCK_SESSION_DATA])
+        sessions = cast(list[dict[str, Any]], kwargs.get("sessions", [MOCK_SESSION_DATA]))
         mock_manager.get_sessions.return_value = sessions
         mock_manager.list_sessions.return_value = [s["session_name"] for s in sessions]
 
@@ -85,7 +85,7 @@ class ManagerMockFactory:
         mock_manager = MagicMock()
 
         # Default controller
-        controller_count = kwargs.get("controller_count", 1)
+        controller_count = cast(int, kwargs.get("controller_count", 1))
         if "get_controller_result" in kwargs:
             mock_controller = kwargs["get_controller_result"]
         else:
@@ -105,7 +105,7 @@ class ManagerMockFactory:
         mock_manager.get_controller_count.return_value = controller_count
 
         # Status tracking
-        controllers_status = kwargs.get("controllers_status", {"test-session": "running"})
+        controllers_status = cast(dict[str, str], kwargs.get("controllers_status", {"test-session": "running"}))
         mock_manager.get_all_status.return_value = controllers_status
         mock_manager.get_status.return_value = next(iter(controllers_status.values())) if controllers_status else "stopped"
 

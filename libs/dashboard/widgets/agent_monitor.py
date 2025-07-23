@@ -165,10 +165,13 @@ class AgentMonitor:
                 metrics.current_task = cast(str, cast(dict, agent_data).get("current_task"))
                 metrics.tasks_completed = cast(int, cast(dict, agent_data).get("completed_tasks", 0))
                 metrics.tasks_failed = cast(int, cast(dict, agent_data).get("failed_tasks", 0))
-                metrics.total_execution_time = cast(float, cast(dict, agent_data).get(
-                    "total_execution_time",
-                    0.0,
-                ))
+                metrics.total_execution_time = cast(
+                    float,
+                    cast(dict, agent_data).get(
+                        "total_execution_time",
+                        0.0,
+                    ),
+                )
 
                 if metrics.tasks_completed > 0:
                     metrics.average_execution_time = metrics.total_execution_time / metrics.tasks_completed
@@ -215,7 +218,7 @@ class AgentMonitor:
                 },
             )
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error updating metrics")  # noqa: G004
 
     @staticmethod
@@ -232,7 +235,8 @@ class AgentMonitor:
             # Estimate progress based on elapsed time and timeout
             start = datetime.fromisoformat(cast(str, start_time))
             elapsed = (datetime.now(UTC) - start).total_seconds()
-            timeout: float = task_data.get("timeout", 300)
+            timeout_val = task_data.get("timeout", 300)
+            timeout: float = float(timeout_val) if isinstance(timeout_val, (int, float, str)) else 300.0
             return min(0.9, elapsed / timeout)  # Cap at 90% for running tasks
         if status == "assigned":
             return 0.1
@@ -488,7 +492,7 @@ Keyboard Shortcuts:
 
         except KeyboardInterrupt:
             self.logger.info("Monitoring stopped by user")
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error in monitoring loop")  # noqa: G004
             raise
 

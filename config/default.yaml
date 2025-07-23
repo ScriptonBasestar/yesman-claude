@@ -38,6 +38,11 @@ ai:
   max_tokens: 4096
   api_key_env: ANTHROPIC_API_KEY
 
+# Server settings
+server:
+  host: localhost
+  port: 8000
+
 # Database settings (disabled by default)
 database:
   enabled: false

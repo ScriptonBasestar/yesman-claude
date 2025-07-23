@@ -164,12 +164,17 @@ class AutomateMonitorCommand(BaseCommand):
 
             # Add callback for events
             def on_context_detected(context_info: object) -> None:
-                self.console.print(f"[yellow]🔍 Context detected: {context_info.context_type.value}[/]")
-                self.console.print(f"   Details: {context_info.description}")
+                context_type = getattr(context_info, "context_type", None)
+                context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
+                description = getattr(context_info, "description", "No description")
+                self.console.print(f"[yellow]🔍 Context detected: {context_type_val}[/]")
+                self.console.print(f"   Details: {description}")
 
             def on_workflow_triggered(workflow_name: str, context: object) -> None:
                 self.console.print(f"[cyan]⚡ Workflow triggered: {workflow_name}[/]")
-                self.console.print(f"   Context: {context.context_type.value}")
+                context_type = getattr(context, "context_type", None)
+                context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
+                self.console.print(f"   Context: {context_type_val}")
 
             def on_workflow_completed(workflow_name: str, success: bool, results: object) -> None:  # noqa: FBT001
                 status = "✅ Success" if success else "❌ Failed"
@@ -230,7 +235,7 @@ class AutomateTriggerCommand(BaseCommand):
             self.console.print(f"Description: {description}")
 
             # Simulate context detection
-            async def trigger_automation() -> None:
+            async def trigger_automation() -> dict[str, object]:
                 # Create a context info object
                 context_info = ContextInfo(context_type=context_enum, confidence=1.0, details={"description": description, "manual": True}, timestamp=time.time())
 
@@ -360,11 +365,16 @@ class AutomateDetectCommand(BaseCommand):
             table.add_column("Data", style="yellow")
 
             for context in contexts:
-                data_summary = str(context.details)[:50] + "..." if len(str(context.details)) > 50 else str(context.details)
+                details = getattr(context, "details", {})
+                details_dict = details if isinstance(details, dict) else {}
+                data_summary = str(details)[:50] + "..." if len(str(details)) > 50 else str(details)
+                context_type = getattr(context, "context_type", None)
+                context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
+                confidence = getattr(context, "confidence", 0.0)
                 table.add_row(
-                    context.context_type.value,
-                    context.details.get("description", "No description"),
-                    f"{context.confidence:.1%}",
+                    context_type_val,
+                    details_dict.get("description", "No description"),
+                    f"{confidence:.1%}",
                     data_summary,
                 )
 

@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -14,8 +15,6 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin
 # Licensed under the MIT License
 
 """Cache cleanup command for removing excessive cache files."""
-
-from typing import Any
 
 
 class CleanupCommand(BaseCommand, ConfigCommandMixin):
@@ -113,10 +112,13 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 
         # Optional: Log files cleanup
         if cleanup_all:
+            logging_config = self.config.get("logging", {})
+            logging_dict = logging_config if isinstance(logging_config, dict) else {}
+
             log_paths = [
-                Path(self.config.get("logging", {}).get("dashboard_log_file", "~/.scripton/yesman/logs/dashboard.log")).expanduser(),
-                Path(self.config.get("logging", {}).get("claude_log_file", "~/.scripton/yesman/logs/claude.log")).expanduser(),
-                Path(self.config.get("logging", {}).get("session_log_file", "~/.scripton/yesman/logs/session.log")).expanduser(),
+                Path(str(logging_dict.get("dashboard_log_file", "~/.scripton/yesman/logs/dashboard.log"))).expanduser(),
+                Path(str(logging_dict.get("claude_log_file", "~/.scripton/yesman/logs/claude.log"))).expanduser(),
+                Path(str(logging_dict.get("session_log_file", "~/.scripton/yesman/logs/session.log"))).expanduser(),
             ]
 
             for log_path in log_paths:

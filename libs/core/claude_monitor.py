@@ -28,7 +28,7 @@ class ClaudeMonitor:  # noqa: PLR0904
         self.session_manager = session_manager
         self.process_controller = process_controller
         self.status_manager = status_manager
-        self.session_name = cast(str, session_manager.session_name)
+        self.session_name = getattr(session_manager, "session_name", "unknown")
 
         # Monitoring state
         self.is_running = False
@@ -46,7 +46,7 @@ class ClaudeMonitor:  # noqa: PLR0904
 
         # Prompt detection
         self.prompt_detector = ClaudePromptDetector()
-        self.content_collector = ClaudeContentCollector(cast(str, session_manager.session_name))
+        self.content_collector = ClaudeContentCollector(getattr(session_manager, "session_name", "unknown"))
         self.current_prompt: PromptInfo | None = None
         self.waiting_for_input = False
 
@@ -276,7 +276,7 @@ class ClaudeMonitor:  # noqa: PLR0904
                                     "confidence": prompt_info.confidence,
                                 }
                             self.content_collector.collect_interaction(content, prompt_dict, None)
-                        except Exception as e:
+                        except Exception:
                             self.logger.exception("Failed to collect content")
 
                     # Update activity if content changed
@@ -284,13 +284,13 @@ class ClaudeMonitor:  # noqa: PLR0904
                         cast(Any, self.status_manager).update_activity("📝 Content updated")
                         last_content = content
 
-                except Exception as e:
+                except Exception:
                     self.logger.exception("Error in monitoring loop")
                     await asyncio.sleep(5)  # Wait longer on errors
 
         except asyncio.CancelledError:
             self.logger.info("Monitoring loop cancelled")
-        except Exception as e:
+        except Exception:
             self.logger.exception("Monitoring loop error")
         finally:
             self.is_running = False
@@ -306,7 +306,7 @@ class ClaudeMonitor:  # noqa: PLR0904
             self.logger.info("Prompt detected: %s - %s", prompt_info.type.value, prompt_info.question)
         else:
             # Check if we're still waiting for input based on content patterns
-            self.waiting_for_input = cast(bool, self.prompt_detector.is_waiting_for_input(content))
+            self.waiting_for_input = self.prompt_detector.is_waiting_for_input(content)
 
         return prompt_info
 
@@ -333,7 +333,7 @@ class ClaudeMonitor:  # noqa: PLR0904
             if prompt_info.type == PromptType.LOGIN_REDIRECT:
                 return self._handle_login_redirect(prompt_info)
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error in auto_respond_to_selection")
 
         return False
@@ -440,7 +440,7 @@ class ClaudeMonitor:  # noqa: PLR0904
                 if "continue" in question or "press enter" in question:
                     return ""  # Just press Enter
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error getting legacy response")
 
         return "1"  # Safe fallback
@@ -490,7 +490,11 @@ class ClaudeMonitor:  # noqa: PLR0904
 
     def register_automation_workflow(self, workflow: object) -> None:
         """Register a custom automation workflow."""
-        self.automation_manager.register_custom_workflow(workflow)
+        from libs.automation.workflow_chain import WorkflowChain
+
+        workflow_chain = workflow if isinstance(workflow, WorkflowChain) else None
+        if workflow_chain:
+            self.automation_manager.register_custom_workflow(workflow_chain)
 
     async def test_automation(self, context_type_name: str) -> dict:
         """Test automation with simulated context."""

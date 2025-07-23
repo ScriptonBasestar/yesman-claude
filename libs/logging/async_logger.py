@@ -256,7 +256,7 @@ class AsyncLogger:
             if self.batch_processor:
                 self.batch_processor.add_entry(entry.to_dict())
 
-        except Exception as e:
+        except Exception:
             self.standard_logger.exception("Error processing log entry")
 
     async def _log_to_standard(self, entry: LogEntry) -> None:
@@ -291,7 +291,7 @@ class AsyncLogger:
             self.log_queue.put_nowait(entry)
             self.stats["entries_queued"] += 1
 
-        except Exception as e:
+        except Exception:
             # Fallback to standard logging
             self.standard_logger.exception("Failed to queue log entry")
 

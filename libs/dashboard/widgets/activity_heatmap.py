@@ -30,10 +30,10 @@ class ActivityHeatmapGenerator:
         try:
             log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
             safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
-            log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
+            log_file = Path(str(log_path_str)).expanduser() / f"{safe_session_name}.log"
 
             if not log_file.exists():
-                log_file = Path(log_path_str).expanduser() / "yesman.log"
+                log_file = Path(str(log_path_str)).expanduser() / "yesman.log"
                 if not log_file.exists():
                     logger.warning(f"Log file not found for session {session_name}. Returning empty activity.")  # noqa: G004
                     return {}

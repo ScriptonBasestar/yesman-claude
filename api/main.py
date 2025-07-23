@@ -105,12 +105,13 @@ app.include_router(dashboard.router, tags=["dashboard-api"])
 # Include WebSocket router
 app.include_router(websocket_router.router, tags=["websocket"])
 
-# Mount SvelteKit static files
-app.mount("/fonts", StaticFiles(directory="tauri-dashboard/build/fonts"), name="fonts")
-
 # Mount SvelteKit assets
 sveltekit_build_path = "tauri-dashboard/build"
 if os.path.exists(sveltekit_build_path):
+    # Mount SvelteKit static files
+    fonts_path = "tauri-dashboard/build/fonts"
+    if os.path.exists(fonts_path):
+        app.mount("/fonts", StaticFiles(directory=fonts_path), name="fonts")
     # Mount SvelteKit static assets with cache control headers
 
     class CacheControlStaticFiles(StaticFiles):
@@ -187,6 +188,67 @@ if os.path.exists(sveltekit_build_path):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
         return response
+
+else:
+    # Development mode: provide a basic dashboard page when Tauri build is not available
+    @app.get("/")
+    async def serve_dev_dashboard() -> Response:
+        """Serve development dashboard when SvelteKit build is not available."""
+        html_content = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Yesman Dashboard - Development Mode</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                h1 { color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+                .status { background: #e8f5e8; border: 1px solid #4CAF50; padding: 15px; border-radius: 4px; margin: 20px 0; }
+                .api-links { background: #f8f9fa; padding: 20px; border-radius: 4px; margin: 20px 0; }
+                .api-links a { display: block; margin: 5px 0; color: #007bff; text-decoration: none; }
+                .api-links a:hover { text-decoration: underline; }
+                .note { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🚀 Yesman Dashboard - Development Mode</h1>
+
+                <div class="status">
+                    <strong>✅ API Server Status:</strong> Running successfully on this port<br>
+                    <strong>🕐 Started:</strong> {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}
+                </div>
+
+                <div class="note">
+                    <strong>📝 Development Mode Active</strong><br>
+                    The full SvelteKit dashboard is not built. This is a basic development interface.
+                </div>
+
+                <div class="api-links">
+                    <h3>🔗 Available API Endpoints:</h3>
+                    <a href="/docs" target="_blank">📚 API Documentation (FastAPI Docs)</a>
+                    <a href="/api" target="_blank">🔍 API Info</a>
+                    <a href="/healthz" target="_blank">❤️ Health Check</a>
+                    <a href="/api/tasks/status" target="_blank">📊 Task Status</a>
+                    <a href="/api/websocket/stats" target="_blank">🌐 WebSocket Stats</a>
+                </div>
+
+                <div class="api-links">
+                    <h3>🛠️ Development Instructions:</h3>
+                    <p>To access the full dashboard interface:</p>
+                    <ol>
+                        <li>Build the Tauri dashboard: <code>cd tauri-dashboard && npm run build</code></li>
+                        <li>Or use the TUI interface: <code>yesman.py dashboard run -i tui</code></li>
+                        <li>Or access Vite dev server at: <a href="http://localhost:5173" target="_blank">http://localhost:5173</a></li>
+                    </ol>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        return Response(content=html_content, media_type="text/html")
 
 
 # Startup event

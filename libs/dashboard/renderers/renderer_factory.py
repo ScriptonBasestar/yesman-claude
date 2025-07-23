@@ -1,5 +1,6 @@
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 from .registry import RendererRegistry
@@ -14,8 +15,6 @@ from .web_renderer import WebRenderer
 """Renderer Factory
 Factory pattern for creating and managing dashboard renderers.
 """
-
-from typing import Any
 
 
 class RendererFactoryError(Exception):
@@ -298,11 +297,12 @@ def render_widget(
     Returns:
         Rendered widget output
     """
+    msg = "Bad result"
     result = RendererFactory.render_universal(widget_type, data, render_format, options)
     # Type narrowing: if render_format is specified, result should be single format output
-    if isinstance(result, dict) and all(isinstance(k, RenderFormat) for k in result.keys()):
+    if isinstance(result, dict) and all(isinstance(k, RenderFormat) for k in result):
         # This shouldn't happen with specified format, but handle defensively
-        raise ValueError("Unexpected multi-format result when single format requested")
+        raise ValueError(msg)
     return result  # type: ignore[return-value]
 
 
@@ -321,10 +321,11 @@ def render_all_formats(
     Returns:
         Dict mapping formats to their rendered outputs
     """
+    msg = "Bad dict"
     result = RendererFactory.render_universal(widget_type, data, None, options)
     # Type narrowing: when no format is specified, result should be multi-format dict
-    if not isinstance(result, dict) or not all(isinstance(k, RenderFormat) for k in result.keys()):
-        raise ValueError("Expected multi-format result when no format specified")
+    if not isinstance(result, dict) or not all(isinstance(k, RenderFormat) for k in result):
+        raise ValueError(msg)
     return result  # type: ignore[return-value]
 
 

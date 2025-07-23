@@ -8,6 +8,7 @@ import time
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import cast
 
 from libs.core.mixins import StatisticsProviderMixin
 
@@ -345,7 +346,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 "entropy": self._calculate_entropy(responses),
             }
 
-        return insights
+        return cast(dict[str, object], insights)
 
     @staticmethod
     def _calculate_entropy(counter: Counter) -> float:

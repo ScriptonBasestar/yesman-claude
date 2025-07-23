@@ -184,7 +184,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
             batch = self._pending_batches.popleft()
             try:
                 await self.process_batch(batch)
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error processing final batch")  # noqa: G004
                 self._stats.failed_batches += 1
 

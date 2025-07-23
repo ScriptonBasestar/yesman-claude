@@ -73,6 +73,13 @@ class DatabaseConfig(BaseModel):
     echo: bool = False
 
 
+class ServerConfig(BaseModel):
+    """Server configuration settings."""
+
+    host: str = "localhost"
+    port: int = Field(default=8000, ge=1, le=65535)
+
+
 class YesmanConfigSchema(BaseModel):
     """Main configuration schema for Yesman."""
 
@@ -86,6 +93,7 @@ class YesmanConfigSchema(BaseModel):
     session: SessionConfig = Field(default_factory=SessionConfig)
     ai: AIConfig = Field(default_factory=AIConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    server: ServerConfig = Field(default_factory=ServerConfig)
 
     # Additional settings
     confidence_threshold: float = Field(default=0.8, ge=0.0, le=1.0)

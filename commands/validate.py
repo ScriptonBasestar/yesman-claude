@@ -4,7 +4,7 @@ import os
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-from typing import Any
+from typing import Any, cast
 
 import click
 from rich.console import Console
@@ -28,7 +28,7 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
         """
         try:
             console = Console()
-            sessions = self.tmux_manager.load_projects().get("sessions", {})
+            sessions = cast(dict, self.tmux_manager.load_projects().get("sessions", {}))
 
             if not sessions:
                 console.print("[red]❌ No sessions defined in projects.yaml[/red]")
@@ -59,12 +59,13 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
 
                     # 세션 시작 디렉토리 검사
                     start_dir = final_config.get("start_directory", os.getcwd())
-                    expanded_dir = os.path.expanduser(start_dir)
+                    expanded_dir = os.path.expanduser(str(start_dir))
                     if not os.path.exists(expanded_dir):
                         session_missing.append(("session", "Session Root", expanded_dir))
 
                     # 윈도우별 start_directory 검사
-                    windows = final_config.get("windows", [])
+                    windows = cast(list, final_config.get("windows", []))
+                    window: dict[str, Any]
                     for i, window in enumerate(windows):
                         window_start_dir = window.get("start_directory")
                         if window_start_dir:

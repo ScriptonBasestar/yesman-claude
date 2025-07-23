@@ -95,7 +95,7 @@ class DashboardWidget(Static):
         Args:
             data: Widget-specific data to display
         """
-        self._last_data = data
+        self._last_data = data if isinstance(data, dict) or data is None else None
 
         try:
             # Render data using TUIRenderer
@@ -517,13 +517,13 @@ class TUIDashboard(App):
     def on_settings_view_setting_changed(self, message: SettingsView.SettingChanged) -> None:
         """Handle settings changes."""
         if message.setting == "auto_refresh":
-            self.auto_refresh_enabled = message.value
-            if message.value:
+            self.auto_refresh_enabled = bool(message.value)
+            if bool(message.value):
                 self.start_auto_refresh()
             else:
                 self.stop_auto_refresh()
         elif message.setting == "dark_mode":
-            self.dark = message.value
+            self.dark = bool(message.value)
 
         if self.logs_view:
             self.logs_view.add_log("INFO", f"Setting changed: {message.setting} = {message.value}")

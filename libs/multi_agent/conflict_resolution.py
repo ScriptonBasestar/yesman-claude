@@ -182,7 +182,7 @@ class ConflictResolutionEngine:
             self.resolution_stats["total_conflicts"] += len(conflicts)
             logger.info("Detected %d potential conflicts", len(conflicts))
 
-        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError):
             logger.exception("Error detecting conflicts")
 
         return conflicts
@@ -220,7 +220,7 @@ class ConflictResolutionEngine:
             semantic_conflicts = await self._detect_semantic_conflicts(branch1, branch2)
             conflicts.extend(semantic_conflicts)
 
-        except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError):
             logger.exception("Error detecting conflicts between %s and %s", branch1, branch2)
 
         return conflicts
@@ -316,7 +316,8 @@ class ConflictResolutionEngine:
         """Suggest the best resolution strategy for a conflict."""
         # Check against known patterns
         for pattern_info in self.conflict_patterns.values():
-            if re.search(pattern_info["pattern"], content):
+            pattern = cast(str, pattern_info["pattern"])
+            if re.search(pattern, content):
                 return ResolutionStrategy(pattern_info["strategy"])
 
         # Default strategies based on file type
@@ -374,7 +375,7 @@ class ConflictResolutionEngine:
                     ),
                 )
 
-        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError):
             logger.exception("Error detecting file conflicts")
 
         return conflicts
@@ -403,7 +404,7 @@ class ConflictResolutionEngine:
                 )
                 conflicts.extend(semantic_conflicts)
 
-        except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError):
             logger.exception("Error detecting semantic conflicts")
 
         return conflicts
@@ -454,7 +455,7 @@ class ConflictResolutionEngine:
                         ),
                     )
 
-        except (subprocess.CalledProcessError, OSError, RuntimeError, ValueError, TypeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError, ValueError, TypeError):
             logger.exception("Error analyzing semantic changes in %s", file_path)
 
         return conflicts
@@ -709,8 +710,8 @@ class ConflictResolutionEngine:
                 metadata = conflict.metadata
                 if "function_name" in metadata:
                     # Simple heuristic: prefer signature with more parameters (more specific)
-                    sig1 = metadata.get("signature1", "")
-                    sig2 = metadata.get("signature2", "")
+                    sig1 = cast(str, metadata.get("signature1", ""))
+                    sig2 = cast(str, metadata.get("signature2", ""))
 
                     params1 = sig1.count(",") + 1 if "(" in sig1 else 0
                     params2 = sig2.count(",") + 1 if "(" in sig2 else 0
@@ -856,7 +857,7 @@ class ConflictResolutionEngine:
         try:
             result = await self._run_git_command(["show", f"{branch}:{file_path}"])
             return str(result.stdout) if result.returncode == 0 else None
-        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError):
             return None
 
     async def _get_latest_branch(self, branches: list[str]) -> str | None:
@@ -887,5 +888,5 @@ class ConflictResolutionEngine:
             # This would be implemented with actual git merge commands
             # For now, return a simulation result
             return strategy in {"recursive", "ours"} and len(branches) == 2
-        except (subprocess.CalledProcessError, OSError, RuntimeError) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError):
             return False

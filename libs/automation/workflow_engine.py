@@ -265,7 +265,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) > cast(Any, right))  # type: ignore
+            return bool(cast(Any, left) > cast(Any, right))
         except TypeError:
             return False
 
@@ -277,7 +277,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) < cast(Any, right))  # type: ignore
+            return bool(cast(Any, left) < cast(Any, right))
         except TypeError:
             return False
 
@@ -289,7 +289,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) >= cast(Any, right))  # type: ignore
+            return bool(cast(Any, left) >= cast(Any, right))
         except TypeError:
             return False
 
@@ -301,7 +301,7 @@ class ConditionEvaluator:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) <= cast(Any, right))  # type: ignore
+            return bool(cast(Any, left) <= cast(Any, right))
         except TypeError:
             return False
 
@@ -431,24 +431,30 @@ class WorkflowEngine:
             try:
                 result = await self._execute_single_action(action, execution)
                 execution.results.append(
-                    {
-                        "action_index": execution.current_action,
-                        "attempt": attempt + 1,
-                        "success": True,
-                        "result": result,
-                        "timestamp": time.time(),
-                    }
+                    cast(
+                        dict[str, str | int | float | bool],
+                        {
+                            "action_index": execution.current_action,
+                            "attempt": attempt + 1,
+                            "success": True,
+                            "result": str(result),
+                            "timestamp": time.time(),
+                        },
+                    )
                 )
                 return True
 
             except Exception as e:
-                error_info = {
-                    "action_index": execution.current_action,
-                    "attempt": attempt + 1,
-                    "success": False,
-                    "error": str(e),
-                    "timestamp": time.time(),
-                }
+                error_info = cast(
+                    dict[str, str | int | float | bool],
+                    {
+                        "action_index": execution.current_action,
+                        "attempt": attempt + 1,
+                        "success": False,
+                        "error": str(e),
+                        "timestamp": time.time(),
+                    },
+                )
                 execution.results.append(error_info)
 
                 if attempt < action.retry_count:
@@ -464,28 +470,28 @@ class WorkflowEngine:
         self.logger.debug("Executing action: %s - %s", action.action_type.value, action.command)
 
         if action.action_type == ActionType.SHELL_COMMAND:
-            return await self._execute_shell_command(action)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_shell_command(action))
 
         if action.action_type == ActionType.TMUX_COMMAND:
-            return await self._execute_tmux_command(action, execution)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_tmux_command(action, execution))
 
         if action.action_type == ActionType.CLAUDE_INPUT:
-            return await self._execute_claude_input(action, execution)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_claude_input(action, execution))
 
         if action.action_type == ActionType.FILE_OPERATION:
-            return await self._execute_file_operation(action)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_file_operation(action))
 
         if action.action_type == ActionType.NOTIFICATION:
-            return await self._execute_notification(action)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_notification(action))
 
         if action.action_type == ActionType.DELAY:
-            return await self._execute_delay(action)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_delay(action))
 
         if action.action_type == ActionType.CONDITION_CHECK:
-            return await self._execute_condition_check(action, execution)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_condition_check(action, execution))
 
         if action.action_type == ActionType.PARALLEL_EXECUTION:
-            return await self._execute_parallel_actions(action, execution)
+            return cast(dict[str, str | int | bool | list[str | Exception]], await self._execute_parallel_actions(action, execution))
 
         msg = f"Unsupported action type: {action.action_type}"
         raise ValueError(msg)
@@ -519,7 +525,7 @@ class WorkflowEngine:
     @staticmethod
     async def _execute_tmux_command(action: WorkflowAction, execution: WorkflowExecution) -> dict[str, int | str]:
         """Execute tmux command."""
-        session_name = execution.context_info.session_name or action.parameters.get("session_name")
+        session_name = execution.context_info.session_name or cast(str, action.parameters.get("session_name"))
 
         if not session_name:
             msg = "No session name provided for tmux command"
@@ -563,7 +569,7 @@ class WorkflowEngine:
             return {"operation": "read", "content_length": len(content)}
 
         if operation == "write":
-            content = action.parameters.get("content", "")
+            content = cast(str, action.parameters.get("content", ""))
             file_path.write_text(content)
             return {"operation": "write", "bytes_written": len(content)}
 
@@ -605,17 +611,17 @@ class WorkflowEngine:
 
     async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, list[dict[str, str | int | bool | list[str | Exception]] | Exception] | int]:
         """Execute multiple actions in parallel."""
-        parallel_actions = action.parameters.get("actions", [])
+        parallel_actions = cast(list, action.parameters.get("actions", []))
 
         tasks = []
         for parallel_action_data in parallel_actions:
-            parallel_action = WorkflowAction(**parallel_action_data)
+            parallel_action = WorkflowAction(**cast(dict, parallel_action_data))
             task = asyncio.create_task(self._execute_single_action(parallel_action, execution))
             tasks.append(task)
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        return {"parallel_results": results, "action_count": len(tasks)}
+        return {"parallel_results": cast(list[dict[str, str | int | bool | list[str | Exception]] | Exception], results), "action_count": len(tasks)}
 
     def _evaluate_condition(self, condition: str, context_info: ContextInfo) -> bool:
         """Evaluate a condition expression safely without using eval().
@@ -718,8 +724,8 @@ class WorkflowEngine:
             "registered_workflows": len(self.workflows),
             "active_executions": len(self.active_executions),
             "execution_history_count": len(self.execution_history),
-            "workflows": {name: workflow.to_dict() for name, workflow in self.workflows.items()},
-            "active": {exec_id: execution.to_dict() for exec_id, execution in self.active_executions.items()},
+            "workflows": cast(dict[str, str | int | bool | list[str]], {name: cast(dict, workflow.to_dict()) for name, workflow in self.workflows.items()}),
+            "active": cast(dict[str, str | int | bool | list[str]], {exec_id: cast(dict, execution.to_dict()) for exec_id, execution in self.active_executions.items()}),
         }
 
     def save_workflows_config(self, file_path: Path) -> None:

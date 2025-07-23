@@ -288,7 +288,7 @@
                     aria-label="{option.icon} {option.label}"
                     value={option.value}
                     checked={$config.theme === option.value}
-                    on:change={() => updateThemeConfig(option.value as 'light' | 'dark' | 'auto')}
+                    on:change={() => updateThemeConfig(option.value)}
                   />
                 {/each}
               </div>
@@ -302,7 +302,7 @@
                 id="language-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.language}
-                on:change={(e) => updateConfig({ language: e.currentTarget.value as 'en' | 'ko' })}
+                on:change={(e) => updateConfig({ language: e.currentTarget.value })}
               >
                 {#each languageOptions as option}
                   <option value={option.value}>{option.icon} {option.label}</option>
@@ -504,7 +504,7 @@
                     aria-label="{option.icon} {option.label}"
                     value={option.value}
                     checked={$config.dashboard.defaultView === option.value}
-                    on:change={() => updateDashboardConfig({ defaultView: option.value as 'grid' | 'list' })}
+                    on:change={() => updateDashboardConfig({ defaultView: option.value })}
                   />
                 {/each}
               </div>
@@ -561,7 +561,7 @@
                 id="log-level-select"
                 class="select select-bordered w-full max-w-xs"
                 bind:value={$config.advanced.logLevel}
-                on:change={(e) => updateAdvancedConfig({ logLevel: e.currentTarget.value as 'error' | 'warn' | 'info' | 'debug' })}
+                on:change={(e) => updateAdvancedConfig({ logLevel: e.currentTarget.value })}
               >
                 {#each logLevelOptions as option}
                   <option value={option.value}>{option.label}</option>

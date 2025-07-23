@@ -127,7 +127,7 @@ class ASCIIRenderer(BaseRenderer):
             return {"content": "\n".join(lines), "format": "ascii"}
 
         # Group activities by session
-        session_activities = {}
+        session_activities: dict[str, list[ActivityData]] = {}
         for activity in activities[-20:]:  # Last 20 activities
             session = activity.session_name
             if session not in session_activities:

@@ -5,6 +5,7 @@ import subprocess  # noqa: S404
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from typing import cast
 
 from rich.console import Console
 from rich.panel import Panel
@@ -298,7 +299,7 @@ class GitActivityWidget:
         )
         info["recent_branches"] = ", ".join(recent_branches.split("\\n")[:5]) if recent_branches else ""
 
-        return info
+        return cast(dict[str, object], info)
 
     def render_activity_overview(self) -> Panel:
         """Render git activity overview.

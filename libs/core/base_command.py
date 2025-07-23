@@ -219,6 +219,7 @@ class BaseCommand(ABC):
     @abstractmethod
     def execute(self, **kwargs) -> object:
         """Execute the command (must be implemented by subclasses)."""
+        raise NotImplementedError("Subclasses must implement the execute method")
 
     def run(self, **kwargs) -> object:
         """Main execution wrapper with error handling."""
@@ -237,9 +238,11 @@ class BaseCommand(ABC):
         except YesmanError as e:
             self.log_command_end(command_name, success=False)
             self.handle_yesman_error(e)
+            return None
         except Exception as e:
             self.log_command_end(command_name, success=False)
             self.handle_unexpected_error(e)
+            return None
 
     def handle_success(self, result: object) -> None:
         """Handle successful command execution."""
@@ -280,7 +283,7 @@ class SessionCommandMixin:
         """Get list of available sessions."""
         try:
             sessions = self.tmux_manager.get_cached_sessions_list()
-            return [session.get("session_name", "unknown") for session in sessions]
+            return [str(session.get("session_name", "unknown")) for session in sessions]
         except Exception:
             self.logger.exception("Failed to get session list")
             return []

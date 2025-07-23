@@ -2,6 +2,7 @@
 
 import asyncio
 from collections import deque
+from typing import cast
 from unittest.mock import AsyncMock
 
 import pytest
@@ -100,7 +101,7 @@ class TestWebSocketBatchProcessor:
         processor.register_message_handler("test_channel", mock_handler)
 
         test_message = {"type": "urgent", "data": "immediate"}
-        await processor.send_immediate("test_channel", test_message)
+        await processor.send_immediate("test_channel", cast(dict[str, object], test_message))
 
         mock_handler.assert_called_once_with([test_message])
         assert processor.stats["messages_processed"] == 1
@@ -168,11 +169,11 @@ class TestWebSocketBatchProcessor:
 
         # Should combine into single message
         assert len(optimized) == 1
-        combined = optimized[0]
+        combined = cast(dict, optimized[0])
         assert combined["type"] == "session_update"
         assert "batch_info" in combined
-        assert combined["data"]["session1"] == "updated"  # Latest data
-        assert combined["data"]["session2"] == "data2"
+        assert cast(dict, combined["data"])["session1"] == "updated"  # Latest data
+        assert cast(dict, combined["data"])["session2"] == "data2"
 
     @staticmethod
     def test_log_message_optimization(processor: WebSocketBatchProcessor) -> None:
@@ -194,10 +195,10 @@ class TestWebSocketBatchProcessor:
 
         # Should combine into log batch
         assert len(optimized) == 1
-        combined = optimized[0]
+        combined = cast(dict, optimized[0])
         assert combined["type"] == "log_batch"
-        assert len(combined["data"]["entries"]) == 2
-        assert combined["data"]["count"] == 2
+        assert len(cast(dict, cast(dict, combined["data"])["entries"])) == 2
+        assert cast(dict, combined["data"])["count"] == 2
 
     @staticmethod
     def test_get_statistics(processor: WebSocketBatchProcessor) -> None:

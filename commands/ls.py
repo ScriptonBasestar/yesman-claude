@@ -59,7 +59,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         """
         try:
             return self.tmux_manager.get_templates()
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to get templates")  # noqa: G004
             return []
 
@@ -71,7 +71,8 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         """
         try:
             projects_config = self.load_projects_config()
-            sessions = projects_config.get("sessions", {})
+            sessions_obj = projects_config.get("sessions", {})
+            sessions = sessions_obj if isinstance(sessions_obj, dict) else {}
 
             projects = []
             for project_name, project_conf in sessions.items():
@@ -91,7 +92,7 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
 
             return projects
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to get projects")  # noqa: G004
             return []
 

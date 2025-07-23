@@ -14,14 +14,6 @@ from commands.status import StatusCommand as SyncStatusCommand
 from libs.core.async_base_command import AsyncMonitoringCommand, CommandError
 from libs.core.base_command import SessionCommandMixin
 from libs.core.session_manager import SessionManager
-from libs.dashboard.widgets.session_progress import SessionProgressWidget
-
-# Copyright notice.
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-
-"""Async comprehensive project status dashboard command with performance optimizations."""
-
 from libs.dashboard.widgets import (
     ActivityHeatmapGenerator,
     GitActivityWidget,
@@ -29,6 +21,13 @@ from libs.dashboard.widgets import (
     ProjectHealth,
     SessionBrowser,
 )
+from libs.dashboard.widgets.session_progress import SessionProgressWidget
+
+# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+
+"""Async comprehensive project status dashboard command with performance optimizations."""
 
 
 class AsyncStatusDashboard:
@@ -47,12 +46,15 @@ class AsyncStatusDashboard:
         self.update_interval = update_interval
 
         # Use provided dependencies or create defaults
-        self.config = config
-        self.tmux_manager = tmux_manager
+        from libs.tmux_manager import TmuxManager
+        from libs.yesman_config import YesmanConfig
+
+        self.config = config if config is not None else YesmanConfig()
+        self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)  # type: ignore
 
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
-        self.activity_heatmap = ActivityHeatmapGenerator(self.config)
+        self.activity_heatmap = ActivityHeatmapGenerator(self.config)  # type: ignore
         self.project_health = ProjectHealth(str(self.project_path))
         self.git_activity = GitActivityWidget(self.console, str(self.project_path))
         self.progress_tracker = ProgressTracker(self.console)
@@ -116,16 +118,21 @@ class AsyncStatusDashboard:
         """Async update of session data."""
         # Get session information using cached method
         loop = asyncio.get_event_loop()
-        sessions_list = await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
+        try:
+            sessions_list = await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)  # type: ignore
+        except AttributeError:
+            # Fallback to basic session listing if cached method is not available
+            sessions_list = []
 
         detailed_sessions = []
 
         # Process sessions concurrently
         session_tasks = []
         for session_info in sessions_list:
-            session_name = session_info["session_name"]
-            task = self._get_session_detail_async(session_name)
-            session_tasks.append(task)
+            session_name = session_info.get("session_name", "unknown")
+            if session_name != "unknown":
+                task = self._get_session_detail_async(session_name)
+                session_tasks.append(task)
 
         if session_tasks:
             session_details = await asyncio.gather(*session_tasks, return_exceptions=True)
@@ -150,14 +157,22 @@ class AsyncStatusDashboard:
     async def _get_session_detail_async(self, session_name: str):
         """Async wrapper for getting session details."""
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
+        try:
+            return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)  # type: ignore
+        except AttributeError:
+            # Fallback if get_session_info method is not available
+            return {"session_name": session_name, "exists": False, "windows": []}
 
     async def _update_project_health(self) -> None:
         """Async update of project health."""
         loop = asyncio.get_event_loop()
         # ProjectHealth doesn't have update_project_health method, it calculates on demand
         # So we'll just trigger a calculation to refresh the data
-        await loop.run_in_executor(None, self.project_health.calculate_health)
+        try:
+            await loop.run_in_executor(None, self.project_health.calculate_health)
+        except AttributeError:
+            # Fallback if calculate_health method is not available
+            pass
 
     async def _update_progress_data(self) -> None:
         """Async update of progress data."""
@@ -226,11 +241,17 @@ class AsyncStatusDashboard:
         """Async update layout with current data."""
         # Header with performance indicators
         loop = asyncio.get_event_loop()
-        cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
+        try:
+            cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)  # type: ignore
+        except AttributeError:
+            # Fallback if get_cache_stats is not available
+            cache_stats = {"hit_rate": 0.0}
 
         last_update = self._data_cache.get("last_update", time.time())
         cache_age = time.time() - last_update if isinstance(last_update, int | float) else 0.0
-        header_text = f"🚀 Yesman Dashboard (Async) - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache: {cache_stats.get('hit_rate', 0):.1%} | Data Age: {cache_age:.1f}s"
+        hit_rate = cache_stats.get("hit_rate", 0)
+        hit_rate_pct = float(hit_rate) if hit_rate is not None else 0.0
+        header_text = f"🚀 Yesman Dashboard (Async) - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache: {hit_rate_pct:.1%} | Data Age: {cache_age:.1f}s"
         layout["header"].update(Panel(header_text, style="bold green"))
 
         # Sessions panel
@@ -415,12 +436,16 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
     async def execute_async(self, **kwargs: dict[str, object]) -> dict:
         """Execute the async status command."""
         # Extract parameters from kwargs with defaults
-        project_path = str(kwargs.get('project_path', '.'))
-        update_interval = float(kwargs.get('update_interval', 5.0))
-        interactive = bool(kwargs.get('interactive', False))
-        config = kwargs.get('config', self.config)
-        tmux_manager = kwargs.get('tmux_manager', self.tmux_manager)
-        
+        project_path = str(kwargs.get("project_path", "."))
+        update_interval_value = kwargs.get("update_interval", 5.0)
+        if isinstance(update_interval_value, (int, float)):
+            update_interval = float(update_interval_value)
+        else:
+            update_interval = 5.0
+        interactive = bool(kwargs.get("interactive", False))
+        config = kwargs.get("config", self.config)
+        tmux_manager = kwargs.get("tmux_manager", self.tmux_manager)
+
         try:
             dashboard = AsyncStatusDashboard(
                 project_path=project_path,

@@ -1,7 +1,8 @@
 import os
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from libs.core.settings import ContentLimits, ValidationPatterns
 

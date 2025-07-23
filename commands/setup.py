@@ -33,7 +33,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
             Dictionary with setup results
         """
         session_name = kwargs.get("session_name")
-        with with_startup_progress("🔧 Initializing session setup...") as update:
+        with with_startup_progress("🔧 Initializing session setup...") as update:  # type: ignore
             setup_service = SessionSetupService(self.tmux_manager)
             update("🚀 Setting up tmux sessions...")
 

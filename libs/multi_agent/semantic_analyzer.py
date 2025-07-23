@@ -756,7 +756,7 @@ class SemanticAnalyzer:
         object: Description of return value.
         """
 
-        def conflict_priority(conflict: object) -> int:
+        def conflict_priority(conflict: SemanticConflict) -> int:
             priority = 0
 
             # Severity weight

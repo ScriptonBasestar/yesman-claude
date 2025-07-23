@@ -114,7 +114,7 @@ class DashboardRunCommand(BaseCommand):
         self,
         interface: str = "auto",
         host: str = "localhost",
-        port: int = 8080,
+        port: int = 8000,
         theme: str | None = None,
         dev: bool = False,  # noqa: FBT001
         detach: bool = False,  # noqa: FBT001
@@ -186,7 +186,7 @@ class DashboardRunCommand(BaseCommand):
             console = Console()
 
             # Create sample dashboard layout
-            def create_dashboard_layout() -> object:
+            def create_dashboard_layout() -> Layout:
                 layout = Layout()
 
                 # Create header
@@ -232,7 +232,7 @@ class DashboardRunCommand(BaseCommand):
     def _launch_web_dashboard(
         self,
         host: str = "localhost",
-        port: int = 8080,
+        port: int = 8000,
         theme: str | None = None,
         dev: bool = False,  # noqa: FBT001
         detach: bool = False,  # noqa: FBT001
@@ -245,14 +245,16 @@ class DashboardRunCommand(BaseCommand):
         self.print_info(f"🌐 Starting Web Dashboard on http://{host}:{port}...")
 
         try:
-            # Check if port is available
+            # Check if port is available by trying to bind to it
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex((host, port))
-            sock.close()
-
-            if result == 0:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                sock.bind((host, port))
+                sock.close()
+            except OSError as e:
+                sock.close()
                 msg = f"Port {port} is already in use. Try a different port with -p option."
-                raise CommandError(msg)
+                raise CommandError(msg) from e
 
             # Start FastAPI server
             api_path = Path(__file__).parent.parent / "api"
@@ -323,12 +325,30 @@ class DashboardRunCommand(BaseCommand):
                     if dev:
                         # 개발 모드에서는 Vite 개발 서버도 함께 실행
                         self.print_info("🚀 Starting Vite dev server for hot module replacement...")
+
+                        # Check if port 5173 is available first
+                        vite_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        vite_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                        try:
+                            vite_sock.bind(("localhost", 5173))
+                            vite_sock.close()
+                        except OSError:
+                            vite_sock.close()
+                            self.print_warning("Port 5173 is already in use. Vite server may not start properly.")
+
                         vite_process = subprocess.Popen(
                             ["npm", "run", "dev"],
                             cwd=Path(__file__).parent.parent / "tauri-dashboard",
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
                         )
+
+                        # Check if process started successfully
+                        time.sleep(1)  # Give process time to start
+                        if vite_process.poll() is not None:
+                            self.print_error("Failed to start Vite development server")
+                            msg = "Could not start Vite server. Check if dependencies are installed."
+                            raise CommandError(msg)
 
                         # Vite 서버가 시작될 때까지 대기
                         def wait_for_vite_server() -> bool:
@@ -596,7 +616,7 @@ def dashboard_group() -> None:
 @click.option(
     "--port",
     "-p",
-    default=8080,
+    default=8000,
     type=int,
     help="Web dashboard port (web only)",
 )

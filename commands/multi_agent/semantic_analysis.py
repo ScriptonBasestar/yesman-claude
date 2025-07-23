@@ -159,7 +159,7 @@ class FunctionDiffCommand(BaseCommand):
             SemanticAnalyzer(branch_manager=branch_manager)
 
             # Since get_function_diff doesn't exist, create basic diff info
-            diff = {"file1": file1, "file2": file2, "function_differences": [], "summary": f"Function differences between {file1} and {file2}"}
+            diff: dict[str, Any] = {"file1": file1, "file2": file2, "function_differences": [], "summary": f"Function differences between {file1} and {file2}"}
 
             self.print_info("📋 Function Differences:")
             self.print_info("=" * 50)

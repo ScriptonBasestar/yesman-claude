@@ -7,13 +7,13 @@ import statistics
 import threading
 import time
 from collections import defaultdict, deque
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from functools import wraps
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import psutil
 
@@ -152,7 +152,7 @@ class PerformanceProfiler:
         self.lock = threading.Lock()
 
     @contextmanager
-    def measure(self, operation_name: str) -> object:
+    def measure(self, operation_name: str) -> Generator[None, None, None]:
         """Context manager for measuring operation time."""
         start_time = time.perf_counter()
         try:
@@ -418,8 +418,8 @@ class PerformanceOptimizer:
                 render_time=render_stats.get("avg", 0.0),
                 widget_count=self._get_widget_count(),
                 active_connections=self._get_active_connections(),
-                cache_hit_rate=cache_stats.get("hit_rate", 0.0),
-                cache_size=cache_stats.get("size", 0),
+                cache_hit_rate=float(cast(float, cache_stats.get("hit_rate", 0.0))),
+                cache_size=int(cast(int, cache_stats.get("size", 0))),
                 fps=1.0 / max(render_stats.get("avg", 0.001), 0.001),
                 response_time=render_stats.get("avg", 0.0),
                 update_frequency=1.0 / self.monitoring_interval,

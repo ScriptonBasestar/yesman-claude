@@ -123,7 +123,7 @@ class ClaudeContentCollector:
 
             return True
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to save interaction")  # noqa: G004
             return False
 
@@ -168,7 +168,7 @@ class ClaudeContentCollector:
             self.logger.debug("Collected raw content - hash: %s", content_hash)
             return True
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to save raw content")  # noqa: G004
             return False
 
@@ -223,7 +223,7 @@ class ClaudeContentCollector:
 
             return files_deleted
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to cleanup old files")  # noqa: G004
             return 0
 

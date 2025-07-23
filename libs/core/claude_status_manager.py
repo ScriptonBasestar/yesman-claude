@@ -47,7 +47,7 @@ class ClaudeStatusManager:
 
     def record_response(self, prompt_type: str, response: str, content: str) -> None:
         """Record auto-response in history."""
-        record = {
+        record: dict[str, object] = {
             "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             "prompt_type": prompt_type,
             "response": response,
@@ -77,7 +77,7 @@ class ClaudeStatusManager:
         try:
             config = YesmanConfig()
             log_base = config.get("log_path", str(get_default_log_path()))
-            log_path = ensure_log_directory(Path(log_base))
+            log_path = ensure_log_directory(Path(str(log_base)))
             capture_dir = ensure_log_directory(log_path / "captures")
 
             ts = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S")
@@ -91,6 +91,6 @@ class ClaudeStatusManager:
             self.logger.info(f"Saved pane capture to {file_path}")  # noqa: G004
             return str(file_path)
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error saving capture to file")  # noqa: G004
             return ""

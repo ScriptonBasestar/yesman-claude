@@ -20,7 +20,7 @@ class ClaudeSessionManager:
         self.pane_id = pane_id
         self.server = libtmux.Server()
         self.session: libtmux.Session | None = None
-        self.claude_pane: object | None = None
+        self.claude_pane: libtmux.Pane | None = None
         self.logger = self._setup_logger()
 
     def _setup_logger(self) -> logging.Logger:
@@ -70,7 +70,7 @@ class ClaudeSessionManager:
             self.logger.exception("Could not initialize session")
             return False
 
-    def _find_claude_pane(self) -> object:
+    def _find_claude_pane(self) -> libtmux.Pane | None:
         """Find pane running Claude.
 
         Returns:

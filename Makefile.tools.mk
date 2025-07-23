@@ -22,41 +22,41 @@ ALL_TOOLS = $(PYTHON_TOOLS) $(DEV_TOOLS) $(QUALITY_TOOLS) $(DOC_TOOLS)
 .PHONY: install-doc-tools install-all-tools tools-upgrade
 
 install-tools: ## install essential development tools
-	@echo "$(CYAN)Installing essential development tools...$(RESET)"
+	@echo -e "$(CYAN)Installing essential development tools...$(RESET)"
 	pip install --upgrade pip setuptools wheel
 	pip install $(PYTHON_TOOLS)
-	@echo "$(GREEN)✅ Essential tools installed$(RESET)"
+	@echo -e "$(GREEN)✅ Essential tools installed$(RESET)"
 
 install-dev-tools: ## install development and debugging tools
-	@echo "$(CYAN)Installing development tools...$(RESET)"
+	@echo -e "$(CYAN)Installing development tools...$(RESET)"
 	pip install $(DEV_TOOLS)
-	@echo "$(GREEN)✅ Development tools installed$(RESET)"
+	@echo -e "$(GREEN)✅ Development tools installed$(RESET)"
 
 install-test-tools: ## install testing tools
-	@echo "$(CYAN)Installing testing tools...$(RESET)"
+	@echo -e "$(CYAN)Installing testing tools...$(RESET)"
 	pip install pytest pytest-cov pytest-mock pytest-asyncio pytest-xdist pytest-watch
 	pip install coverage hypothesis faker factory-boy
-	@echo "$(GREEN)✅ Testing tools installed$(RESET)"
+	@echo -e "$(GREEN)✅ Testing tools installed$(RESET)"
 
 install-quality-tools: ## install code quality tools
-	@echo "$(CYAN)Installing code quality tools...$(RESET)"
+	@echo -e "$(CYAN)Installing code quality tools...$(RESET)"
 	pip install $(QUALITY_TOOLS)
 	pip install pre-commit detect-secrets
-	@echo "$(GREEN)✅ Quality tools installed$(RESET)"
+	@echo -e "$(GREEN)✅ Quality tools installed$(RESET)"
 
 install-doc-tools: ## install documentation tools
-	@echo "$(CYAN)Installing documentation tools...$(RESET)"
+	@echo -e "$(CYAN)Installing documentation tools...$(RESET)"
 	pip install $(DOC_TOOLS)
 	pip install sphinx-rtd-theme sphinx-autodoc-typehints
-	@echo "$(GREEN)✅ Documentation tools installed$(RESET)"
+	@echo -e "$(GREEN)✅ Documentation tools installed$(RESET)"
 
 install-all-tools: install-tools install-dev-tools install-test-tools install-quality-tools install-doc-tools ## install all tools
-	@echo "$(GREEN)✅ All tools installed successfully$(RESET)"
+	@echo -e "$(GREEN)✅ All tools installed successfully$(RESET)"
 
 tools-upgrade: ## upgrade all installed tools
-	@echo "$(CYAN)Upgrading all tools...$(RESET)"
+	@echo -e "$(CYAN)Upgrading all tools...$(RESET)"
 	pip install --upgrade $(ALL_TOOLS)
-	@echo "$(GREEN)✅ All tools upgraded$(RESET)"
+	@echo -e "$(GREEN)✅ All tools upgraded$(RESET)"
 
 # ==============================================================================
 # Tool Status and Management
@@ -65,10 +65,10 @@ tools-upgrade: ## upgrade all installed tools
 .PHONY: tools-status tools-check tools-list tools-outdated tools-clean
 
 tools-status: ## check status of installed tools
-	@echo "$(CYAN)Development Tools Status$(RESET)"
-	@echo "$(BLUE)========================$(RESET)"
+	@echo -e "$(CYAN)Development Tools Status$(RESET)"
+	@echo -e "$(BLUE)========================$(RESET)"
 	@echo ""
-	@echo "$(YELLOW)Essential Tools:$(RESET)"
+	@echo -e "$(YELLOW)Essential Tools:$(RESET)"
 	@for tool in ruff mypy black isort pytest; do \
 		if command -v $$tool >/dev/null 2>&1; then \
 			printf "  %-15s $(GREEN)✅ Installed$(RESET) - " "$$tool"; \
@@ -78,7 +78,7 @@ tools-status: ## check status of installed tools
 		fi; \
 	done
 	@echo ""
-	@echo "$(YELLOW)Quality Tools:$(RESET)"
+	@echo -e "$(YELLOW)Quality Tools:$(RESET)"
 	@for tool in bandit safety radon vulture; do \
 		if command -v $$tool >/dev/null 2>&1; then \
 			printf "  %-15s $(GREEN)✅ Installed$(RESET)\n" "$$tool"; \
@@ -88,7 +88,7 @@ tools-status: ## check status of installed tools
 	done
 
 tools-check: ## verify all required tools are installed
-	@echo "$(CYAN)Checking required tools...$(RESET)"
+	@echo -e "$(CYAN)Checking required tools...$(RESET)"
 	@missing=0; \
 	for tool in python pip uv git make; do \
 		if ! command -v $$tool >/dev/null 2>&1; then \
@@ -104,44 +104,44 @@ tools-check: ## verify all required tools are installed
 	fi
 
 tools-list: ## list all available tools with descriptions
-	@echo "$(CYAN)Available Development Tools$(RESET)"
-	@echo "$(BLUE)============================$(RESET)"
+	@echo -e "$(CYAN)Available Development Tools$(RESET)"
+	@echo -e "$(BLUE)============================$(RESET)"
 	@echo ""
-	@echo "$(YELLOW)🔧 Essential Tools:$(RESET)"
+	@echo -e "$(YELLOW)🔧 Essential Tools:$(RESET)"
 	@echo "  • $(CYAN)ruff$(RESET)         - Fast Python linter"
 	@echo "  • $(CYAN)mypy$(RESET)         - Static type checker"
 	@echo "  • $(CYAN)black$(RESET)        - Code formatter"
 	@echo "  • $(CYAN)isort$(RESET)        - Import sorter"
 	@echo "  • $(CYAN)pytest$(RESET)       - Testing framework"
 	@echo ""
-	@echo "$(YELLOW)🛡️  Security Tools:$(RESET)"
+	@echo -e "$(YELLOW)🛡️  Security Tools:$(RESET)"
 	@echo "  • $(CYAN)bandit$(RESET)       - Security linter"
 	@echo "  • $(CYAN)safety$(RESET)       - Dependency checker"
 	@echo "  • $(CYAN)pip-audit$(RESET)    - Package auditor"
 	@echo ""
-	@echo "$(YELLOW)📊 Analysis Tools:$(RESET)"
+	@echo -e "$(YELLOW)📊 Analysis Tools:$(RESET)"
 	@echo "  • $(CYAN)radon$(RESET)        - Code metrics"
 	@echo "  • $(CYAN)vulture$(RESET)      - Dead code finder"
 	@echo "  • $(CYAN)prospector$(RESET)   - Code analyzer"
 	@echo ""
-	@echo "$(YELLOW)📚 Documentation:$(RESET)"
+	@echo -e "$(YELLOW)📚 Documentation:$(RESET)"
 	@echo "  • $(CYAN)sphinx$(RESET)       - Documentation generator"
 	@echo "  • $(CYAN)mkdocs$(RESET)       - Project documentation"
 	@echo "  • $(CYAN)pdoc$(RESET)         - API documentation"
 
 tools-outdated: ## show outdated tools
-	@echo "$(CYAN)Checking for outdated tools...$(RESET)"
+	@echo -e "$(CYAN)Checking for outdated tools...$(RESET)"
 	@pip list --outdated | grep -E "($(subst $(space),|,$(ALL_TOOLS)))" || echo "$(GREEN)All tools are up to date$(RESET)"
 
 tools-clean: ## remove tool caches and temporary files
-	@echo "$(CYAN)Cleaning tool caches...$(RESET)"
+	@echo -e "$(CYAN)Cleaning tool caches...$(RESET)"
 	@rm -rf .mypy_cache/
 	@rm -rf .pytest_cache/
 	@rm -rf .ruff_cache/
 	@rm -rf .coverage
 	@rm -f .coverage.*
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@echo "$(GREEN)✅ Tool caches cleaned$(RESET)"
+	@echo -e "$(GREEN)✅ Tool caches cleaned$(RESET)"
 
 # ==============================================================================
 # Environment Setup
@@ -150,34 +150,34 @@ tools-clean: ## remove tool caches and temporary files
 .PHONY: setup-env setup-vscode setup-pycharm setup-hooks setup-complete
 
 setup-env: ## setup development environment
-	@echo "$(CYAN)Setting up development environment...$(RESET)"
+	@echo -e "$(CYAN)Setting up development environment...$(RESET)"
 	@$(MAKE) install-all-tools
 	@$(MAKE) deps-install
 	@$(MAKE) setup-hooks
-	@echo "$(GREEN)✅ Development environment ready$(RESET)"
+	@echo -e "$(GREEN)✅ Development environment ready$(RESET)"
 
 setup-vscode: ## setup VS Code settings
-	@echo "$(CYAN)Setting up VS Code...$(RESET)"
+	@echo -e "$(CYAN)Setting up VS Code...$(RESET)"
 	@mkdir -p .vscode
 	@echo '{\n  "python.linting.enabled": true,\n  "python.linting.ruffEnabled": true,\n  "python.formatting.provider": "black",\n  "python.testing.pytestEnabled": true,\n  "editor.formatOnSave": true,\n  "python.linting.mypyEnabled": true\n}' > .vscode/settings.json
-	@echo "$(GREEN)✅ VS Code configured$(RESET)"
+	@echo -e "$(GREEN)✅ VS Code configured$(RESET)"
 
 setup-pycharm: ## setup PyCharm settings
-	@echo "$(CYAN)Setting up PyCharm...$(RESET)"
+	@echo -e "$(CYAN)Setting up PyCharm...$(RESET)"
 	@mkdir -p .idea
-	@echo "$(YELLOW)PyCharm configuration:$(RESET)"
+	@echo -e "$(YELLOW)PyCharm configuration:$(RESET)"
 	@echo "  1. Set Python interpreter"
 	@echo "  2. Enable pytest as test runner"
 	@echo "  3. Configure black as formatter"
 	@echo "  4. Enable mypy inspections"
 
 setup-hooks: pre-commit-install ## setup git hooks
-	@echo "$(GREEN)✅ Git hooks configured$(RESET)"
+	@echo -e "$(GREEN)✅ Git hooks configured$(RESET)"
 
 setup-complete: setup-env setup-vscode ## complete development setup
-	@echo "$(GREEN)🎉 Complete development setup finished!$(RESET)"
+	@echo -e "$(GREEN)🎉 Complete development setup finished!$(RESET)"
 	@echo ""
-	@echo "$(YELLOW)Next steps:$(RESET)"
+	@echo -e "$(YELLOW)Next steps:$(RESET)"
 	@echo "  1. Activate your virtual environment"
 	@echo "  2. Run $(CYAN)make test$(RESET) to verify setup"
 	@echo "  3. Run $(CYAN)make help$(RESET) to see available commands"
@@ -189,20 +189,20 @@ setup-complete: setup-env setup-vscode ## complete development setup
 .PHONY: generate-mocks generate-stubs update-stubs
 
 generate-mocks: ## generate mock files for testing
-	@echo "$(CYAN)Generating mock files...$(RESET)"
+	@echo -e "$(CYAN)Generating mock files...$(RESET)"
 	@command -v pytest-mock >/dev/null 2>&1 || pip install pytest-mock
-	@echo "$(YELLOW)Mock generation is project-specific$(RESET)"
+	@echo -e "$(YELLOW)Mock generation is project-specific$(RESET)"
 	@echo "Add your mock generation commands here"
 
 generate-stubs: ## generate type stubs
-	@echo "$(CYAN)Generating type stubs...$(RESET)"
+	@echo -e "$(CYAN)Generating type stubs...$(RESET)"
 	@command -v stubgen >/dev/null 2>&1 || pip install mypy
 	@stubgen -p libs -o stubs/
 	@stubgen -p commands -o stubs/
-	@echo "$(GREEN)✅ Type stubs generated in stubs/$(RESET)"
+	@echo -e "$(GREEN)✅ Type stubs generated in stubs/$(RESET)"
 
 update-stubs: generate-stubs ## update type stubs
-	@echo "$(GREEN)✅ Type stubs updated$(RESET)"
+	@echo -e "$(GREEN)✅ Type stubs updated$(RESET)"
 
 # ==============================================================================
 # Tool Specific Commands
@@ -211,22 +211,22 @@ update-stubs: generate-stubs ## update type stubs
 .PHONY: ruff-config mypy-config pytest-config pre-commit-config
 
 ruff-config: ## generate ruff configuration
-	@echo "$(CYAN)Generating ruff configuration...$(RESET)"
+	@echo -e "$(CYAN)Generating ruff configuration...$(RESET)"
 	@echo "[tool.ruff]\nline-length = 100\nselect = [\"E\", \"F\", \"I\", \"N\", \"W\"]\nignore = [\"E501\"]\n" > ruff.toml
-	@echo "$(GREEN)✅ ruff.toml created$(RESET)"
+	@echo -e "$(GREEN)✅ ruff.toml created$(RESET)"
 
 mypy-config: ## generate mypy configuration
-	@echo "$(CYAN)Generating mypy configuration...$(RESET)"
+	@echo -e "$(CYAN)Generating mypy configuration...$(RESET)"
 	@echo "[mypy]\npython_version = \"3.11\"\nwarn_return_any = true\nwarn_unused_configs = true\ndisallow_untyped_defs = true\n" > mypy.ini
-	@echo "$(GREEN)✅ mypy.ini created$(RESET)"
+	@echo -e "$(GREEN)✅ mypy.ini created$(RESET)"
 
 pytest-config: ## generate pytest configuration
-	@echo "$(CYAN)Generating pytest configuration...$(RESET)"
+	@echo -e "$(CYAN)Generating pytest configuration...$(RESET)"
 	@echo "[tool.pytest.ini_options]\nminversion = \"6.0\"\naddopts = \"-ra -q --strict-markers\"\ntestpaths = [\"tests\"]\n" > pytest.ini
-	@echo "$(GREEN)✅ pytest.ini created$(RESET)"
+	@echo -e "$(GREEN)✅ pytest.ini created$(RESET)"
 
 pre-commit-config: ## generate pre-commit configuration
-	@echo "$(CYAN)Generating pre-commit configuration...$(RESET)"
+	@echo -e "$(CYAN)Generating pre-commit configuration...$(RESET)"
 	@if [ ! -f .pre-commit-config.yaml ]; then \
 		echo "repos:" > .pre-commit-config.yaml; \
 		echo "  - repo: https://github.com/pre-commit/pre-commit-hooks" >> .pre-commit-config.yaml; \
@@ -260,29 +260,29 @@ pre-commit-config: ## generate pre-commit configuration
 .PHONY: tools-info
 
 tools-info: ## show comprehensive tool information
-	@echo "$(CYAN)"
+	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
 	@echo "║                         $(YELLOW)Tool Management Information$(CYAN)                      ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
 	@echo "$(RESET)"
-	@echo "$(GREEN)🔧 Tool Categories:$(RESET)"
+	@echo -e "$(GREEN)🔧 Tool Categories:$(RESET)"
 	@echo "  • $(CYAN)Essential$(RESET)       Core development tools"
 	@echo "  • $(CYAN)Testing$(RESET)         Test frameworks and utilities"
 	@echo "  • $(CYAN)Quality$(RESET)         Code quality and analysis"
 	@echo "  • $(CYAN)Security$(RESET)        Security scanning tools"
 	@echo "  • $(CYAN)Documentation$(RESET)   Doc generation tools"
 	@echo ""
-	@echo "$(GREEN)📦 Installation Commands:$(RESET)"
+	@echo -e "$(GREEN)📦 Installation Commands:$(RESET)"
 	@echo "  • $(CYAN)install-tools$(RESET)         Essential tools only"
 	@echo "  • $(CYAN)install-all-tools$(RESET)     Everything"
 	@echo "  • $(CYAN)tools-upgrade$(RESET)         Upgrade all tools"
 	@echo ""
-	@echo "$(GREEN)🔍 Management Commands:$(RESET)"
+	@echo -e "$(GREEN)🔍 Management Commands:$(RESET)"
 	@echo "  • $(CYAN)tools-status$(RESET)          Check installed tools"
 	@echo "  • $(CYAN)tools-outdated$(RESET)        Find outdated tools"
 	@echo "  • $(CYAN)tools-clean$(RESET)           Clean tool caches"
 	@echo ""
-	@echo "$(GREEN)⚙️  Setup Commands:$(RESET)"
+	@echo -e "$(GREEN)⚙️  Setup Commands:$(RESET)"
 	@echo "  • $(CYAN)setup-env$(RESET)             Complete environment"
 	@echo "  • $(CYAN)setup-vscode$(RESET)          VS Code configuration"
 	@echo "  • $(CYAN)setup-hooks$(RESET)           Git hooks"

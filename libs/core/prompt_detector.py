@@ -137,7 +137,7 @@ class ClaudePromptDetector:
                 if prompt_info:
                     self.logger.debug(f"Detected prompt: {prompt_info.type.value}")  # noqa: G004
                     return prompt_info
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error in detector {detector.__name__}")  # noqa: G004
 
         return None

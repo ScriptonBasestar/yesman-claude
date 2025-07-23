@@ -92,7 +92,7 @@ class AsyncMonitoringMixin:
     def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
         super().__init__(*args, **kwargs)
         self.update_interval = 1.0  # Default 1 second
-        self._monitor_data = {}
+        self._monitor_data: dict[str, Any] = {}
 
     # Type hints for methods from BaseCommand that will be available when mixed
     print_info: Callable[[str], None]

@@ -1,5 +1,6 @@
 import logging
 import subprocess  # noqa: S404
+from typing import cast
 
 from fastapi import APIRouter, HTTPException, status
 
@@ -7,7 +8,7 @@ from api import models
 from libs.core.error_handling import ErrorCategory, YesmanError
 from libs.core.services import get_session_manager, get_tmux_manager
 from libs.core.session_manager import SessionManager
-from libs.core.types import SessionAPIData
+from libs.core.types import SessionAPIData, SessionStatusType
 from libs.tmux_manager import TmuxManager
 
 # !/usr/bin/env python3
@@ -59,7 +60,10 @@ class SessionService:
         """
         try:
             # Load projects configuration to get project_conf
-            projects = self.tmux_manager.load_projects().get("sessions", {})
+            from typing import cast
+
+            projects_data = self.tmux_manager.load_projects()
+            projects = cast(dict, projects_data.get("sessions", {}))
 
             # Find the project that matches this session name
             project_name = None
@@ -104,7 +108,10 @@ class SessionService:
                 )
 
             # Load projects configuration
-            projects = self.tmux_manager.load_projects().get("sessions", {})
+            from typing import cast
+
+            projects_data = self.tmux_manager.load_projects()
+            projects = cast(dict, projects_data.get("sessions", {}))
             if session_name not in projects:
                 msg = f"Session '{session_name}' not found in projects configuration"
                 raise YesmanError(
@@ -113,7 +120,8 @@ class SessionService:
                 )
 
             # Set up session (this would integrate with the improved setup logic)
-            result = self._setup_session_internal(session_name, projects[session_name])
+            session_config = cast(dict, projects[session_name])
+            result = self._setup_session_internal(session_name, session_config)
 
             return {
                 "session_name": session_name,
@@ -173,7 +181,10 @@ class SessionService:
         """
         try:
             # Load projects configuration to get project_conf
-            projects = self.tmux_manager.load_projects().get("sessions", {})
+            from typing import cast
+
+            projects_data = self.tmux_manager.load_projects()
+            projects = cast(dict, projects_data.get("sessions", {}))
 
             # Find the project that matches this session name
             project_name = None
@@ -203,9 +214,9 @@ class SessionService:
 
             return {
                 "session_name": session_name,
-                "status": session_data.status,
+                "status": getattr(session_data, "status", "unknown"),
                 "exists": True,
-                "windows": len(session_data.windows),
+                "windows": len(getattr(session_data, "windows", [])),
                 "last_activity": getattr(session_data, "last_activity", None),
             }
 
@@ -225,7 +236,10 @@ class SessionService:
         Dict containing.
         """
         try:
-            projects = self.tmux_manager.load_projects().get("sessions", {})
+            from typing import cast
+
+            projects_data = self.tmux_manager.load_projects()
+            projects = cast(dict, projects_data.get("sessions", {}))
             successful = []
             failed = []
 
@@ -268,7 +282,7 @@ class SessionService:
             failed = []
 
             for session in sessions:
-                session_name = session.session_name
+                session_name = getattr(session, "session_name", "unknown")
                 try:
                     self._teardown_session_internal(session_name)
                     successful.append(session_name)
@@ -366,27 +380,53 @@ class SessionService:
         Sessionapidata object.
         """
         try:
-            return {
-                "session_name": session_data.session_name,
-                "status": session_data.status,
-                "windows": [
-                    {
-                        "index": int(w.index) if hasattr(w, "index") else i,
-                        "name": w.name if hasattr(w, "name") else f"window_{i}",
-                        "panes": [
-                            {
-                                "command": p.command if hasattr(p, "command") else "",
-                                "is_claude": p.is_claude if hasattr(p, "is_claude") else False,
-                                "is_controller": p.is_controller if hasattr(p, "is_controller") else False,
-                            }
-                            for p in (w.panes if hasattr(w, "panes") else [])
-                        ],
-                    }
-                    for i, w in enumerate(session_data.windows)
-                ],
-                "created_at": getattr(session_data, "created_at", None),
-                "last_activity": getattr(session_data, "last_activity", None),
-            }
+            # Cast to known SessionInfo type for proper attribute access
+            from typing import cast
+
+            from libs.core.models import SessionInfo
+
+            if hasattr(session_data, "session_name"):
+                session_info = cast(SessionInfo, session_data)
+
+                session_status = session_info.status
+                # Ensure status is a valid SessionStatusType
+                if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                    session_status = "unknown"
+
+                return {
+                    "session_name": session_info.session_name,
+                    "status": cast(SessionStatusType, session_status),
+                    "windows": [
+                        {
+                            "index": int(getattr(w, "index", i)),
+                            "name": getattr(w, "name", f"window_{i}"),
+                            "panes": [
+                                {
+                                    "command": getattr(p, "command", ""),
+                                    "is_claude": getattr(p, "is_claude", False),
+                                    "is_controller": getattr(p, "is_controller", False),
+                                }
+                                for p in getattr(w, "panes", [])
+                            ],
+                        }
+                        for i, w in enumerate(session_info.windows)
+                    ],
+                    "created_at": getattr(session_info, "created_at", None),
+                    "last_activity": getattr(session_info, "last_activity", None),
+                }
+            else:
+                # Fallback for dict-like objects
+                session_status = getattr(session_data, "status", "unknown")
+                if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                    session_status = "unknown"
+
+                return {
+                    "session_name": getattr(session_data, "session_name", "unknown"),
+                    "status": cast(SessionStatusType, session_status),
+                    "windows": [],
+                    "created_at": None,
+                    "last_activity": None,
+                }
         except Exception as e:
             self.logger.exception("Failed to convert session data: {e}")
             msg = "Failed to convert session data format"
@@ -404,7 +444,7 @@ class SessionService:
         """
         try:
             sessions = self.session_manager.get_all_sessions()
-            return any(session.session_name == session_name for session in sessions)
+            return any(getattr(session, "session_name", None) == session_name for session in sessions)
         except Exception:
             return False
 
@@ -456,30 +496,45 @@ def get_all_sessions() -> object:
         sessions_data = service.get_all_sessions()
 
         # Convert to Pydantic models
-        return [
-            models.SessionInfo(
-                session_name=session["session_name"],
-                project_name=str(session.get("project_name", "")) if session.get("project_name") else None,
-                status=session["status"],
-                template=str(session.get("template", "")) if session.get("template") else None,
-                windows=[
-                    models.WindowInfo(
-                        index=window["index"],
-                        name=window["name"],
-                        panes=[
-                            models.PaneInfo(
-                                command=pane["command"],
-                                is_claude=pane["is_claude"],
-                                is_controller=pane["is_controller"],
+        result = []
+        for session in sessions_data:
+            if isinstance(session, dict):
+                windows = []
+                for window in session.get("windows", []):
+                    if isinstance(window, dict):
+                        panes = []
+                        for pane in cast(list, window.get("panes", [])):
+                            if isinstance(pane, dict):
+                                panes.append(
+                                    models.PaneInfo(
+                                        command=str(pane.get("command", "")),
+                                        is_claude=bool(pane.get("is_claude", False)),
+                                        is_controller=bool(pane.get("is_controller", False)),
+                                    )
+                                )
+                        windows.append(
+                            models.WindowInfo(
+                                index=int(cast(int, window.get("index", 0))),
+                                name=str(window.get("name", "")),
+                                panes=panes,
                             )
-                            for pane in window["panes"]
-                        ],
+                        )
+
+                # Ensure status is valid
+                session_status = str(session.get("status", "unknown"))
+                if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                    session_status = "unknown"
+
+                result.append(
+                    models.SessionInfo(
+                        session_name=str(session.get("session_name", "")),
+                        project_name=str(session.get("project_name", "")) if session.get("project_name") else None,
+                        status=session_status,
+                        template=str(session.get("template", "")) if session.get("template") else None,
+                        windows=windows,
                     )
-                    for window in session["windows"]
-                ],
-            )
-            for session in sessions_data
-        ]
+                )
+        return result
 
     except YesmanError as e:
         logger.exception("YesmanError in get_all_sessions: {e.message}")
@@ -520,27 +575,48 @@ def get_session(session_name: str) -> object:
             )
 
         # Convert to Pydantic model
-        return models.SessionInfo(
-            session_name=session_data["session_name"],
-            project_name=str(session_data.get("project_name", "")) if session_data.get("project_name") else None,
-            status=session_data["status"],
-            template=str(session_data.get("template", "")) if session_data.get("template") else None,
-            windows=[
-                models.WindowInfo(
-                    index=window["index"],
-                    name=window["name"],
-                    panes=[
-                        models.PaneInfo(
-                            command=pane["command"],
-                            is_claude=pane["is_claude"],
-                            is_controller=pane["is_controller"],
+        windows = []
+        if isinstance(session_data, dict):
+            for window in session_data.get("windows", []):
+                if isinstance(window, dict):
+                    panes = []
+                    for pane in cast(list, window.get("panes", [])):
+                        if isinstance(pane, dict):
+                            panes.append(
+                                models.PaneInfo(
+                                    command=str(pane.get("command", "")),
+                                    is_claude=bool(pane.get("is_claude", False)),
+                                    is_controller=bool(pane.get("is_controller", False)),
+                                )
+                            )
+                    windows.append(
+                        models.WindowInfo(
+                            index=int(cast(int, window.get("index", 0))),
+                            name=str(window.get("name", "")),
+                            panes=panes,
                         )
-                        for pane in window["panes"]
-                    ],
-                )
-                for window in session_data["windows"]
-            ],
-        )
+                    )
+
+            # Ensure status is valid
+            session_status = str(session_data.get("status", "unknown"))
+            if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                session_status = "unknown"
+
+            return models.SessionInfo(
+                session_name=str(session_data.get("session_name", "")),
+                project_name=str(session_data.get("project_name", "")) if session_data.get("project_name") else None,
+                status=session_status,
+                template=str(session_data.get("template", "")) if session_data.get("template") else None,
+                windows=windows,
+            )
+        else:
+            return models.SessionInfo(
+                session_name="unknown",
+                project_name=None,
+                status="unknown",
+                template=None,
+                windows=[],
+            )
 
     except HTTPException:
         raise

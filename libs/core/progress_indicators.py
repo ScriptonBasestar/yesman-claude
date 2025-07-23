@@ -112,7 +112,7 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
         yield update_progress
 
 
-def track_items(items: list[object], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> object:
+def track_items(items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Any:
     """Track progress through a list of items with rich progress bar.
 
     Args:
@@ -215,11 +215,11 @@ class ProgressManager:
 
     @staticmethod
     def file_batch_operation(
-        files: list[object],
-        operation: Callable[[object], object],
+        files: list[Any],
+        operation: Callable[[Any], Any],
         description: str = "🔧 Processing files",
         style: str = ProgressStyle.FILE_OPERATIONS,
-    ) -> list[object]:
+    ) -> list[dict[str, object]]:
         """Process a batch of files with progress tracking.
 
         Args:

@@ -720,7 +720,7 @@ class RecoveryEngine:
             if action == RecoveryAction.RESET_AGENT:
                 if agent_pool and context.get("agent_id"):
                     agent_id = context["agent_id"]
-                    if agent_id in agent_pool.agents:
+                    if hasattr(agent_pool, "agents") and agent_id in getattr(agent_pool, "agents", {}):
                         agent = agent_pool.agents[agent_id]
 
                         # Terminate any running process

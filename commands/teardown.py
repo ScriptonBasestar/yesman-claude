@@ -21,7 +21,8 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
         dict: Description of return value.
         """
         try:
-            sessions = self.tmux_manager.load_projects().get("sessions", {})
+            sessions_obj = self.tmux_manager.load_projects().get("sessions", {})
+            sessions = sessions_obj if isinstance(sessions_obj, dict) else {}
             if not sessions:
                 self.print_warning("No sessions defined in projects.yaml")
                 return {"success": True, "sessions_found": 0}

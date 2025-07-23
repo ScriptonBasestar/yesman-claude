@@ -952,7 +952,7 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             # Parse file list if provided
             file_list = files.split(",") if files else None
 
-            async def run_semantic_analysis() -> None:
+            async def run_semantic_analysis() -> dict[str, object]:
                 all_conflicts = []
                 if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze conflicts between the first two branches
@@ -1036,7 +1036,7 @@ class SemanticSummaryCommand(BaseCommand):
             # Parse file list
             file_list = files.split(",") if files else None
 
-            async def run_summary() -> None:
+            async def run_summary() -> dict[str, object]:
                 current_branch = branch or "HEAD"
                 # Get semantic context for files in the current branch
                 contexts = {}
@@ -1104,7 +1104,7 @@ class FunctionDiffCommand(BaseCommand):
             # Parse file list
             file_list = files.split(",") if files else None
 
-            async def run_diff() -> None:
+            async def run_diff() -> dict[str, object]:
                 diff_results = []
                 if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze differences between first two branches
@@ -1172,7 +1172,7 @@ class SemanticMergeCommand(BaseCommand):
             conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
             SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
 
-            async def run_merge() -> None:
+            async def run_merge() -> dict[str, object]:
                 if dry_run:
                     self.print_info("🔍 Dry run mode - no changes will be made")
 
@@ -1702,7 +1702,7 @@ def batch_merge(
                         branch1,
                         branch2,
                     )
-                except (OSError, subprocess.CalledProcessError, RuntimeError, AttributeError) as e:
+                except (OSError, subprocess.CalledProcessError, RuntimeError, AttributeError):
                     click.echo(
                         "❌ Could not determine changed files. Please specify --files",
                     )
@@ -1814,9 +1814,9 @@ def batch_merge(
                     ],
                 }
 
-                export_path = Path(export_summary)
-                with export_path.open("w") as f:
-                    json.dump(summary_data, f, indent=2)  # type: ignore[arg-type]
+                export_path = Path(str(export_summary))
+                with export_path.open("w") as export_file:
+                    json.dump(summary_data, export_file, indent=2)
                 click.echo(f"\n💾 Batch summary exported to: {export_summary}")
 
         asyncio.run(run_batch_merge())
@@ -2349,14 +2349,18 @@ def collaborate(
                 )
 
             # Get collaboration summary
-            summary = collab_engine.get_collaboration_summary()
+            summary_obj = collab_engine.get_collaboration_summary()
+            summary = summary_obj if isinstance(summary_obj, dict) else {}
 
             click.echo("\n📊 Collaboration Statistics:")
-            click.echo(f"   Messages sent: {summary['statistics']['messages_sent']}")
-            click.echo(
-                f"   Knowledge shared: {summary['statistics']['knowledge_shared']}",
-            )
-            click.echo(f"   Active sessions: {summary['active_sessions']}")
+            statistics = summary.get("statistics", {}) if isinstance(summary, dict) else {}
+            messages_sent = statistics.get("messages_sent", 0) if isinstance(statistics, dict) else 0
+            knowledge_shared = statistics.get("knowledge_shared", 0) if isinstance(statistics, dict) else 0
+            active_sessions = summary.get("active_sessions", 0) if isinstance(summary, dict) else 0
+
+            click.echo(f"   Messages sent: {messages_sent}")
+            click.echo(f"   Knowledge shared: {knowledge_shared}")
+            click.echo(f"   Active sessions: {active_sessions}")
 
             # Wait for duration or user interrupt
             click.echo(f"\n⏳ Session running for {duration}s (Ctrl+C to stop)...")
@@ -2376,18 +2380,20 @@ def collaborate(
             click.echo("\n✅ Collaboration session ended")
 
             # Final summary
-            final_summary = collab_engine.get_collaboration_summary()
+            final_summary_obj = collab_engine.get_collaboration_summary()
+            final_summary = final_summary_obj if isinstance(final_summary_obj, dict) else {}
+            final_statistics = final_summary.get("statistics", {}) if isinstance(final_summary, dict) else {}
+
             click.echo("\n📈 Final Summary:")
-            click.echo(
-                f"   Total messages: {final_summary['statistics']['messages_sent']}",
-            )
-            click.echo(
-                f"   Messages delivered: {final_summary['statistics']['messages_delivered']}",
-            )
-            click.echo(f"   Knowledge items: {final_summary['shared_knowledge_count']}")
-            click.echo(
-                f"   Successful collaborations: {final_summary['statistics']['successful_collaborations']}",
-            )
+            total_messages = final_statistics.get("messages_sent", 0) if isinstance(final_statistics, dict) else 0
+            messages_delivered = final_statistics.get("messages_delivered", 0) if isinstance(final_statistics, dict) else 0
+            knowledge_count = final_summary.get("shared_knowledge_count", 0) if isinstance(final_summary, dict) else 0
+            successful_collaborations = final_statistics.get("successful_collaborations", 0) if isinstance(final_statistics, dict) else 0
+
+            click.echo(f"   Total messages: {total_messages}")
+            click.echo(f"   Messages delivered: {messages_delivered}")
+            click.echo(f"   Knowledge items: {knowledge_count}")
+            click.echo(f"   Successful collaborations: {successful_collaborations}")
 
         asyncio.run(run_collaboration())
 
@@ -2793,7 +2799,7 @@ def dependency_track(
 
         try:
             asyncio.run(track_change())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             mock_change_id = f"dep_change_{agent}_{file.replace('/', '_')}"
             click.echo("\n✅ Change tracked successfully")
@@ -2934,7 +2940,7 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
 
         try:
             asyncio.run(analyze_impact())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {file_path}")
@@ -3043,7 +3049,7 @@ def dependency_propagate(
 
         try:
             asyncio.run(propagate_changes())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("\n📊 Propagation Results:")
             for change_id in change_ids:
@@ -3180,7 +3186,7 @@ def review_initiate(
 
         try:
             asyncio.run(run_review())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             mock_review_id = f"review_{branch_name}_{agent}"
             click.echo("\n✅ Review initiated successfully")
@@ -3246,7 +3252,7 @@ def review_approve(
 
         try:
             asyncio.run(run_approval())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             click.echo("\n✅ Review approved successfully")
             if comments:
@@ -3329,7 +3335,7 @@ def review_reject(
 
         try:
             asyncio.run(run_rejection())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             click.echo("\n❌ Review rejected")
             click.echo("   Reasons:")
@@ -3450,7 +3456,7 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
 
         try:
             asyncio.run(get_status())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             if review_id:
                 click.echo("\n📋 Review Details:")
@@ -3586,7 +3592,7 @@ def quality_check(
 
         try:
             asyncio.run(run_quality_check())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("\n📊 Quality Check Results:")
             for i, file in enumerate(files, 1):
@@ -3696,7 +3702,7 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
         try:
             asyncio.run(get_summary())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("Engine Status: Running")
             click.echo("Active reviews: 0")

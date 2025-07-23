@@ -392,7 +392,8 @@ class WorkEnvironmentManager:
         )
 
         # Add custom env vars
-        env_vars.update(env.config.get("env_vars", {}))
+        custom_env_vars = cast(dict[str, str], env.config.get("env_vars", {}))
+        env_vars.update(custom_env_vars)
 
         # Update status
         env.status = "active"
@@ -401,7 +402,7 @@ class WorkEnvironmentManager:
         return env.worktree_path, env_vars
 
     @contextmanager
-    def work_in_environment(self, branch_name: str) -> Generator[str, None, None]:
+    def work_in_environment(self, branch_name: str) -> Generator[Path, None, None]:
         """Context manager to work in an environment."""
         original_cwd = os.getcwd()
         original_env = os.environ.copy()

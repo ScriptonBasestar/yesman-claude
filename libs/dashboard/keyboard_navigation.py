@@ -62,7 +62,7 @@ class KeyBinding:
     enabled: bool = True
     priority: int = 0  # Higher priority takes precedence
 
-    def __post_init__(self) -> object:
+    def __post_init__(self) -> None:
         """Validate and normalize key binding."""
         if not self.key:
             msg = "Key cannot be empty"
@@ -113,12 +113,12 @@ class KeyBinding:
         """Create KeyBinding from dictionary."""
         return cls(
             key=cast(str, data["key"]),
-            modifiers=[KeyModifier(mod) for mod in data.get("modifiers", [])],
+            modifiers=[KeyModifier(mod) for mod in cast(list, data.get("modifiers", []))],
             action=cast(str, data.get("action", "")),
             description=cast(str, data.get("description", "")),
             context=NavigationContext(data["context"]) if data.get("context") else None,
-            enabled=data.get("enabled", True),
-            priority=data.get("priority", 0),
+            enabled=cast(bool, data.get("enabled", True)),
+            priority=cast(int, data.get("priority", 0)),
         )
 
 
@@ -434,7 +434,7 @@ class KeyboardNavigationManager:  # noqa: PLR0904
             logger.debug("Executed action: %s", action_name)
             return True
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error executing action %s")
             return False
 
@@ -640,7 +640,7 @@ class KeyboardNavigationManager:  # noqa: PLR0904
 
     def export_bindings(self) -> dict[str, object]:
         """Export all key bindings to dictionary."""
-        exported = {}
+        exported: dict[str, object] = {}
         for key_combo, bindings in self.bindings.items():
             exported[key_combo] = [binding.to_dict() for binding in bindings]
         return exported
@@ -650,7 +650,7 @@ class KeyboardNavigationManager:  # noqa: PLR0904
         self.bindings.clear()
 
         for key_combo, binding_list in bindings_data.items():
-            self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in binding_list]
+            self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in cast(list, binding_list)]
 
     def get_help_text(self, context: NavigationContext | None = None) -> list[str]:
         """Get help text for current context."""

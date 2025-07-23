@@ -7,6 +7,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from functools import wraps
+from typing import Any
 
 from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 
@@ -17,8 +18,6 @@ from .base_renderer import BaseRenderer, RenderFormat, WidgetType
 """Rendering Optimizations and Caching
 Performance optimization system for dashboard renderers.
 """
-
-from typing import Any
 
 
 @dataclass

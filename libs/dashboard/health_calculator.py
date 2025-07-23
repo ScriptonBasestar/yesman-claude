@@ -7,11 +7,12 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import Any, cast
 
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore[no-redef]
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -185,8 +186,9 @@ class HealthCalculator:
 
         if not force_refresh and cache_key in self._cache:
             cached_data = self._cache[cache_key]
-            if time.time() - cached_data["timestamp"] < self._cache_ttl:
-                return ProjectHealth(**cached_data["health"])
+            cached_data_dict = cast(dict[str, Any], cached_data)
+            if time.time() - cast(float, cached_data_dict["timestamp"]) < self._cache_ttl:
+                return ProjectHealth(**cast(dict[str, Any], cached_data_dict["health"]))
 
         self.logger.info("Calculating health for project: %s", self.project_path)
 

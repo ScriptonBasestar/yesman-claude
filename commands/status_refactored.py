@@ -3,7 +3,7 @@
 # Copyright notice.
 
 
-from typing import Any
+from typing import Any, cast
 
 import click
 from rich.console import Console
@@ -56,7 +56,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             self.update_status("idle")
             return result
 
-        except Exception as e:
+        except Exception:
             self.update_status("error")
             self.logger.exception("Error checking status")  # noqa: G004
             raise
@@ -78,9 +78,9 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         """
         return self._layout_config.copy()
 
-    def update_layout(self, layout_config: dict[str, object]) -> None:
+    def update_layout(self, layout_config: object) -> None:
         """Update layout configuration - implements LayoutManagerMixin interface."""
-        self._layout_config.update(layout_config)
+        self._layout_config.update(cast(dict, layout_config))
         self.logger.debug(f"Layout updated: {layout_config}")  # noqa: G004
 
     def _check_single_session(self, session_name: str) -> dict[str, object]:
@@ -93,14 +93,14 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         # Load projects configuration
         projects = self.tmux_manager.load_projects()
-        sessions_config = projects.get("sessions", {})
+        sessions_config = cast(dict, projects.get("sessions", {}))
 
         if session_name not in sessions_config:
             self.print_error(f"Session '{session_name}' not found in configuration")
             return {"error": "session_not_found"}
 
         # Get session info
-        session_info = self._get_session_info(session_name, sessions_config[session_name])
+        session_info = self._get_session_info(session_name, cast(dict, sessions_config[session_name]))
 
         # Display based on layout
         self._display_session_status([session_info])
@@ -117,7 +117,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         # Load projects configuration
         projects = self.tmux_manager.load_projects()
-        sessions_config = projects.get("sessions", {})
+        sessions_config = cast(dict, projects.get("sessions", {}))
 
         if not sessions_config:
             self.print_warning("No sessions configured in projects.yaml")
@@ -126,7 +126,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         # Get info for all sessions
         session_infos = []
         for name, config in sessions_config.items():
-            session_infos.append(self._get_session_info(name, config))
+            session_infos.append(self._get_session_info(name, cast(dict, config)))
 
         # Display based on layout
         self._display_session_status(session_infos)
@@ -163,12 +163,12 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
                     # Get window and pane count
                     session_info = self.tmux_manager.get_session_info(session_name)
-                    windows = session_info.get("windows", [])
+                    windows = cast(list, session_info.get("windows", []))
                     info["windows"] = len(windows)
-                    info["panes"] = sum(len(w.get("panes", [])) for w in windows)
+                    info["panes"] = sum(len(cast(list, w.get("panes", []))) for w in windows)
                     break
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error getting tmux info for {session_name}")  # noqa: G004
             info["status"] = "error"
 
@@ -236,7 +236,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                 elif col == "attached":
                     row.append("✓" if session["attached"] else "")
 
-            table.add_row(*row)
+            table.add_row(*[str(item) for item in row])
 
         self.console.print(table)
 

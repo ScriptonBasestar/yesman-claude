@@ -24,12 +24,8 @@ class LogBatch:
     batch_id: str
     size_bytes: int = 0
 
-    def __post_init__(self) -> object:
-        """Calculate size after initialization.
-
-        Returns:
-        object: Description of return value.
-        """
+    def __post_init__(self) -> None:
+        """Calculate size after initialization."""
         if not self.size_bytes:
             self.size_bytes = sum(len(str(entry)) for entry in self.entries)
 
@@ -162,7 +158,7 @@ class BatchProcessor:
             self.last_flush_time = time.time()
             self.batch_counter += 1
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to write batch {batch.batch_id}")  # noqa: G004
             # Re-queue entries for retry
             self.pending_entries.extendleft(reversed(entries))
@@ -250,7 +246,7 @@ class BatchProcessor:
             if removed_count > 0:
                 self.logger.info("Cleaned up %d old log files", removed_count)
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error cleaning up old log files")  # noqa: G004
 
         return removed_count
@@ -279,7 +275,7 @@ class BatchProcessor:
                     )
                     batches.append(batch)
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error reading batch file {file_path}")  # noqa: G004
 
         return batches

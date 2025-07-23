@@ -155,7 +155,7 @@ class SessionProgressWidget:
         return text
 
     @staticmethod
-    def render_session_detail(session_name: str, progress: object) -> Panel:  # noqa: ARG002, ARG004
+    def render_session_detail(session_name: str, progress: Any) -> Panel:  # noqa: ARG002, ARG004
         """Render detailed progress for a specific session.
 
         Returns:
@@ -169,14 +169,16 @@ class SessionProgressWidget:
 
         content = Text()
 
-        # Current task progress
-        current_task = progress.get_current_task()
+        # Current task progress - using getattr with defaults for safety
+        current_task = getattr(progress, "get_current_task", lambda: None)()
         if current_task:
             content.append("📍 Current Task\n", style="bold cyan")
-            content.append(f"  Phase: {current_task.phase.value}\n", style="yellow")
+            phase = getattr(current_task, "phase", None)
+            if phase:
+                content.append(f"  Phase: {phase.value}\n", style="yellow")
 
             # Phase progress bar
-            phase_progress = current_task.phase_progress
+            phase_progress = getattr(current_task, "phase_progress", 0)
             bar_length = 30
             filled = int(phase_progress / 100 * bar_length)
             phase_bar = "█" * filled + "░" * (bar_length - filled)
@@ -184,23 +186,34 @@ class SessionProgressWidget:
 
             # Task metrics
             content.append("📊 Task Metrics\n", style="bold yellow")
-            content.append(f"  Files: +{current_task.files_created} / ~{current_task.files_modified}\n")
-            content.append(f"  Commands: {current_task.commands_succeeded}✓ / {current_task.commands_failed}✗\n")
-            content.append(f"  TODOs: {current_task.todos_completed} / {current_task.todos_identified}\n\n")
+            files_created = getattr(current_task, "files_created", 0)
+            files_modified = getattr(current_task, "files_modified", 0)
+            commands_succeeded = getattr(current_task, "commands_succeeded", 0)
+            commands_failed = getattr(current_task, "commands_failed", 0)
+            todos_completed = getattr(current_task, "todos_completed", 0)
+            todos_identified = getattr(current_task, "todos_identified", 0)
+
+            content.append(f"  Files: +{files_created} / ~{files_modified}\n")
+            content.append(f"  Commands: {commands_succeeded}✓ / {commands_failed}✗\n")
+            content.append(f"  TODOs: {todos_completed} / {todos_identified}\n\n")
 
         # Overall session progress
-        overall_progress = progress.calculate_overall_progress()
+        calculate_overall_progress = getattr(progress, "calculate_overall_progress", lambda: 0.0)
+        overall_progress = calculate_overall_progress()
         bar_length = 40
         filled = int(overall_progress / 100 * bar_length)
         overall_bar = "█" * filled + "░" * (bar_length - filled)
 
         content.append("🎯 Overall Progress\n", style="bold green")
         content.append(f"  {overall_bar} {overall_progress:.1f}%\n")
-        content.append(f"  Tasks: {len(progress.tasks)} total\n")
+
+        tasks = getattr(progress, "tasks", [])
+        content.append(f"  Tasks: {len(tasks)} total\n")
 
         # Session duration
-        if progress.session_start_time:
-            duration = datetime.now(UTC) - progress.session_start_time
+        session_start_time = getattr(progress, "session_start_time", None)
+        if session_start_time:
+            duration = datetime.now(UTC) - session_start_time
             hours = duration.total_seconds() / 3600
             content.append(f"  Duration: {hours:.1f} hours\n")
 

@@ -25,6 +25,8 @@ from libs.dashboard.widgets import (
     SessionBrowser,
 )
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
+from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
 
 
 class StatusDashboard:
@@ -34,8 +36,8 @@ class StatusDashboard:
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        config: object = None,
-        tmux_manager: object = None,
+        config: YesmanConfig | None = None,
+        tmux_manager: TmuxManager | None = None,
     ) -> None:
         self.console = Console()
         self.project_path = Path(project_path).resolve()
@@ -43,8 +45,8 @@ class StatusDashboard:
         self.update_interval = update_interval
 
         # Use provided dependencies or create defaults
-        self.config = config
-        self.tmux_manager = tmux_manager
+        self.config = config if config is not None else YesmanConfig()
+        self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)
 
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
@@ -83,7 +85,8 @@ class StatusDashboard:
             detailed_sessions = []
 
             for session_info in sessions_list:
-                session_name = session_info["session_name"]
+                session_name_obj = session_info.get("session_name", "unknown")
+                session_name = str(session_name_obj)
                 detailed_info = self.tmux_manager.get_session_info(session_name)
                 detailed_sessions.append(detailed_info)
 

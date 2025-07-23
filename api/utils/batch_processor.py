@@ -8,13 +8,12 @@ from collections import deque
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """WebSocket message batch processor for optimized real-time updates."""
-
-from typing import Any
 
 
 @dataclass
@@ -261,7 +260,7 @@ class WebSocketBatchProcessor:
         # Group messages by type for potential combination
         message_groups: dict[str, list[dict[str, object]]] = {}
         for msg in messages:
-            msg_type = msg.get("type", "unknown")
+            msg_type = cast(str, msg.get("type", "unknown"))
             if msg_type not in message_groups:
                 message_groups[msg_type] = []
             message_groups[msg_type].append(msg)
@@ -312,7 +311,7 @@ class WebSocketBatchProcessor:
             "data": combined_data,
             "batch_info": {
                 "original_count": len(messages),
-                "time_span": messages[-1].get("queued_at", 0) - messages[0].get("queued_at", 0),
+                "time_span": cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0)),
                 "combined_at": time.time(),
             },
         }
@@ -341,7 +340,7 @@ class WebSocketBatchProcessor:
             "data": {
                 "entries": log_entries,
                 "count": len(log_entries),
-                "time_span": messages[-1].get("queued_at", 0) - messages[0].get("queued_at", 0),
+                "time_span": cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0)),
             },
         }
 

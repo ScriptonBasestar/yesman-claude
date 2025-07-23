@@ -1,6 +1,7 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
+from typing import Any, cast
 
 from libs.dashboard.renderers.widget_adapter import WidgetDataAdapter
 from libs.dashboard.renderers.widget_models import (
@@ -66,13 +67,13 @@ class TestWidgetModels:
             windows=[window],
         )
 
-        data = session.to_dict()
+        data = cast(dict[str, Any], session.to_dict())
 
         assert data["name"] == "test-session"
         assert data["status"] == "active"
         assert data["created_at"] == now.isoformat()
-        assert len(data["windows"]) == 1
-        assert data["windows"][0]["name"] == "test-window"
+        assert len(cast(list[Any], data["windows"])) == 1
+        assert cast(list[dict[str, Any]], data["windows"])[0]["name"] == "test-window"
 
     @staticmethod
     def test_session_data_from_dict() -> None:

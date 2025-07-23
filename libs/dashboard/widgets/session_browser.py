@@ -114,14 +114,16 @@ class SessionBrowser:
         if not session_data.get("exists", True):
             return "❌ Not Found"
 
-        window_count = len(session_data.get("windows", []))
+        windows = cast(list[Any], session_data.get("windows", []))
+        window_count = len(windows)
         if window_count == 0:
             return "⚠️  No Windows"
 
         # Check for active processes
         active_processes = 0
-        for window in session_data.get("windows", []):
-            for pane in window.get("panes", []):
+        for window in windows:
+            panes = cast(list[dict[str, Any]], window.get("panes", []))
+            for pane in panes:
                 command = pane.get("pane_current_command", "")
                 if command and command not in {"zsh", "bash", "sh"}:
                     active_processes += 1
@@ -137,8 +139,10 @@ class SessionBrowser:
         Returns:
         Dict containing status information.
         """
-        for window in session_data.get("windows", []):
-            for pane in window.get("panes", []):
+        windows = cast(list[dict[str, Any]], session_data.get("windows", []))
+        for window in windows:
+            panes = cast(list[dict[str, Any]], window.get("panes", []))
+            for pane in panes:
                 command = pane.get("pane_current_command", "")
                 if "claude" in command.lower():
                     # Simple heuristic for Claude status
@@ -182,7 +186,8 @@ class SessionBrowser:
                 window_node = session_node.add(window_text)
 
                 # Add panes as child nodes
-                for pane in window.get("panes", []):
+                panes = cast(list[dict[str, Any]], window.get("panes", []))
+                for pane in panes:
                     pane_text = Text()
                     command = pane.get("pane_current_command", "")
 

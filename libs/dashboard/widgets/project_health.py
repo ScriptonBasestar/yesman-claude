@@ -57,7 +57,7 @@ class ProjectHealth:
             suggestions = self._generate_suggestions(scores)
             scores["suggestions"] = suggestions
 
-        except (OSError, PermissionError, ValueError, TypeError) as e:
+        except (OSError, PermissionError, ValueError, TypeError):
             logger.exception("Error calculating project health")  # noqa: G004
             return {
                 "overall_score": 50,
@@ -86,7 +86,7 @@ class ProjectHealth:
             build_files = ["Makefile", "build.py", "setup.py", "pyproject.toml"]
             has_build_config = any(os.path.exists(f) for f in build_files)
 
-        except (OSError, FileNotFoundError) as e:
+        except (OSError, FileNotFoundError):
             return 50
         else:
             if has_build_config:
@@ -105,7 +105,7 @@ class ProjectHealth:
             test_indicators = ["tests/", "test_", "pytest", "unittest"]
             has_tests = any(os.path.exists(indicator) or any(indicator in f for f in os.listdir(".") if os.path.isfile(f)) for indicator in test_indicators)
 
-        except (OSError, FileNotFoundError) as e:
+        except (OSError, FileNotFoundError):
             return 50
         else:
             if has_tests:
@@ -124,7 +124,7 @@ class ProjectHealth:
             dep_files = ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"]
             has_deps = any(os.path.exists(f) for f in dep_files)
 
-        except (OSError, FileNotFoundError) as e:
+        except (OSError, FileNotFoundError):
             return 50
         else:
             if has_deps:
@@ -152,7 +152,7 @@ class ProjectHealth:
                 score += 20
 
             return min(score, 100)
-        except (OSError, FileNotFoundError) as e:
+        except (OSError, FileNotFoundError):
             return 80
 
     @staticmethod
@@ -182,7 +182,7 @@ class ProjectHealth:
             ]
             has_quality_config = any(os.path.exists(f) for f in quality_files)
 
-        except (OSError, FileNotFoundError) as e:
+        except (OSError, FileNotFoundError):
             return 50
         else:
             if has_quality_config:
@@ -213,7 +213,7 @@ class ProjectHealth:
                     logger.warning(f"Failed to check git log: {e}")  # noqa: G004
                 return 80
 
-        except (OSError, subprocess.CalledProcessError) as e:
+        except (OSError, subprocess.CalledProcessError):
             return 50
         else:
             return 30
@@ -230,7 +230,7 @@ class ProjectHealth:
             doc_files = ["README.md", "README.rst", "docs/", "CHANGELOG.md"]
             has_docs = any(os.path.exists(f) for f in doc_files)
 
-        except (OSError, FileNotFoundError) as e:
+        except (OSError, FileNotFoundError):
             return 50
         else:
             if has_docs:

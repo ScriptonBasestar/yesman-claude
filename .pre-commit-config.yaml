@@ -16,12 +16,12 @@ repos:
         exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
       # Step 2: Apply safe fixes after formatting (essential rules only)
       - id: ruff
-        args: [--fix, --target-version=py311, --select, E,W,F,I]  # E/W/F errors + import sorting
+        args: [--fix, --target-version=py311, --select=E,W,F,I]  # E/W/F errors + import sorting
         exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
       # Step 3: Final validation (ensure fixes worked)
       - id: ruff
         name: ruff-final-check
-        args: [--target-version=py311, --select, E,W,F,I]  # Same rules as step 2
+        args: [--target-version=py311, --select=E,W,F,I]  # Same rules as step 2
         exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
 
   # Essential file checks (ultra-lightweight for pre-commit)

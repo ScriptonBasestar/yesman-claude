@@ -178,20 +178,28 @@ class LogsAnalyzeCommand(BaseCommand):
                             if level_filter and level != level_filter:
                                 continue
 
-                            stats["total_entries"] += 1
-                            stats["level_counts"][level] += 1
+                            current_total = stats["total_entries"]
+                            stats["total_entries"] = (int(current_total) if isinstance(current_total, (int, str)) else 0) + 1
+                            level_counts = stats["level_counts"]
+                            if isinstance(level_counts, dict):
+                                level_counts[level] = level_counts.get(level, 0) + 1
 
                             # Hourly distribution
                             hour = int(timestamp // 3600)
-                            stats["hourly_counts"][hour] += 1
+                            hourly_counts = stats["hourly_counts"]
+                            if isinstance(hourly_counts, dict):
+                                hourly_counts[hour] = hourly_counts.get(hour, 0) + 1
 
                             # Collect errors
-                            if level in {"ERROR", "CRITICAL"} and len(stats["error_messages"]) < 10:
-                                stats["error_messages"].append(entry.get("message", ""))
+                            error_messages = stats["error_messages"]
+                            if isinstance(error_messages, list):
+                                if level in {"ERROR", "CRITICAL"} and len(error_messages) < 10:
+                                    error_messages.append(entry.get("message", ""))
 
                         except json.JSONDecodeError:
                             # Handle text format
-                            stats["total_entries"] += 1
+                            current_total = stats["total_entries"]
+                            stats["total_entries"] = (int(current_total) if isinstance(current_total, (int, str)) else 0) + 1
 
             except Exception as e:
                 self.logger.warning(f"Failed to process log file {log_file}: {e}")  # noqa: G004
@@ -202,8 +210,10 @@ class LogsAnalyzeCommand(BaseCommand):
     def _display_log_statistics(self, stats: dict[str, object]) -> None:
         """Display log analysis statistics."""
         # Overview
+        level_counts = stats["level_counts"] if isinstance(stats["level_counts"], dict) else {}
+        error_count = level_counts.get("ERROR", 0) + level_counts.get("CRITICAL", 0)
         overview = Panel(
-            f"Total Entries: {stats['total_entries']:,}\nTime Range: Last 24 hours\nError Count: {stats['level_counts']['ERROR'] + stats['level_counts']['CRITICAL']}",
+            f"Total Entries: {stats['total_entries']:,}\nTime Range: Last 24 hours\nError Count: {error_count}",
             title="📊 Log Overview",
             border_style="blue",
         )
@@ -216,8 +226,12 @@ class LogsAnalyzeCommand(BaseCommand):
             level_table.add_column("Count", style="green", justify="right")
             level_table.add_column("Percentage", style="yellow", justify="right")
 
-            total = sum(stats["level_counts"].values())
-            for level, count in sorted(stats["level_counts"].items()):
+            level_counts_obj = stats["level_counts"]
+            if not isinstance(level_counts_obj, dict):
+                return
+            level_counts = level_counts_obj
+            total = sum(level_counts.values())
+            for level, count in sorted(level_counts.items()):
                 percentage = (count / total * 100) if total > 0 else 0
                 level_table.add_row(level, str(count), f"{percentage:.1f}%")
 
@@ -226,7 +240,9 @@ class LogsAnalyzeCommand(BaseCommand):
         # Recent errors
         if stats["error_messages"]:
             self.console.print("\n🚨 Recent Errors:")
-            for i, error in enumerate(stats["error_messages"][:5], 1):
+            error_messages_obj = stats["error_messages"]
+            error_messages = list(error_messages_obj) if isinstance(error_messages_obj, list) else []
+            for i, error in enumerate(error_messages[:5], 1):
                 self.console.print(f"  {i}. {error[:80]}{'...' if len(error) > 80 else ''}")
 
 

@@ -146,7 +146,7 @@ class AutomationManager:
                     await callback(context)
                 else:
                     callback(context)
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Callback error")
 
         # Trigger workflows
@@ -162,7 +162,7 @@ class AutomationManager:
                         await callback(context, triggered_executions)
                     else:
                         callback(context, triggered_executions)
-                except Exception as e:
+                except Exception:
                     self.logger.exception("Workflow trigger callback error")
 
     def analyze_content_for_context(self, content: str, session_name: str | None = None) -> list[ContextInfo]:

@@ -3,6 +3,7 @@
 import os
 import subprocess  # noqa: S404
 import sys
+from typing import Any
 
 import click
 import libtmux
@@ -15,8 +16,6 @@ from libs.ui.session_selector import show_session_selector
 
 """Enter (attach to) a tmux session command."""
 
-from typing import Any
-
 
 class EnterCommand(BaseCommand, SessionCommandMixin):
     """Enter (attach to) a tmux session."""
@@ -25,8 +24,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         super().__init__()
         self.server = libtmux.Server()
 
-    @staticmethod
-    def validate_preconditions() -> None:
+    def validate_preconditions(self) -> None:
         """Validate command preconditions."""
         super().validate_preconditions()
 
@@ -74,7 +72,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         """
         # Get all running sessions
         running_sessions = []
-        projects = self.tmux_manager.load_projects().get("sessions", {})
+        projects_obj = self.tmux_manager.load_projects().get("sessions", {})
+        projects = projects_obj if isinstance(projects_obj, dict) else {}
 
         for project_name, project_conf in projects.items():
             override = project_conf.get("override", {})
@@ -131,7 +130,8 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             return session_name
 
         # Try to find by project name
-        projects = self.tmux_manager.load_projects().get("sessions", {})
+        projects_obj = self.tmux_manager.load_projects().get("sessions", {})
+        projects = projects_obj if isinstance(projects_obj, dict) else {}
 
         for project_name, project_conf in projects.items():
             if project_name == session_name:

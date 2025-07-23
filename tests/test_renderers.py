@@ -508,7 +508,7 @@ class TestRendererPerformance:
         # Create renderer with caching
         renderer = TUIRenderer()
         cached_method = cached_render(cache)(renderer.render_widget)
-        cast(Any, renderer).render_widget = cached_method  # type: ignore
+        cast(Any, renderer).render_widget = cached_method
 
         # First render (cache miss)
         start1 = time.time()

@@ -23,7 +23,7 @@ from .mock_data import MockTmuxPane, MockTmuxSession
 
 
 @contextmanager
-def temp_directory() -> object:
+def temp_directory() -> Generator[str, None, None]:
     """임시 디렉토리 생성 컨텍스트 매니저."""
     temp_dir = tempfile.mkdtemp()
     try:
@@ -104,8 +104,8 @@ class CaptureOutput:
     """stdout/stderr 캡처 헬퍼 클래스."""
 
     def __init__(self) -> None:
-        self.stdout = []
-        self.stderr = []
+        self.stdout: list[str] = []
+        self.stderr: list[str] = []
 
     def capture_stdout(self, text: str) -> None:
         self.stdout.append(text)

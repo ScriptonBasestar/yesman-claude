@@ -117,8 +117,8 @@ class TestConflictPredictor:
         assert cast(dict[str, Any], predictor.predictions) == {}
         assert cast(list, predictor.prediction_history) == []
         assert len(cast(dict[str, Any], predictor.pattern_detectors)) == 8
-        assert cast(float, predictor.min_confidence_threshold) == 0.3
-        assert cast(int, predictor.max_predictions_per_run) == 50
+        assert predictor.min_confidence_threshold == 0.3
+        assert predictor.max_predictions_per_run == 50
 
     @staticmethod
     def test_likelihood_to_confidence(predictor: ConflictPredictor) -> None:

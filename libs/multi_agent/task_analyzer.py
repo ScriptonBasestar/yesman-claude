@@ -124,7 +124,7 @@ class TaskAnalyzer:
             # Cache results
             self.file_dependencies[file_path] = dependencies
 
-        except Exception as e:
+        except Exception:
             logger.exception("Failed to analyze %s")
 
         return dependencies
@@ -431,7 +431,7 @@ class TaskAnalyzer:
         # Export tasks
         for node_id in self.task_graph.nodes_iter():
             task = self.task_graph.nodes.get(node_id, {}).get("task")
-            if task and hasattr(task, 'to_dict'):
+            if task and hasattr(task, "to_dict"):
                 data["tasks"][node_id] = task.to_dict()
 
         # Export dependencies

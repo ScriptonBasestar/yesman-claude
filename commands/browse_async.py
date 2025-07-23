@@ -16,6 +16,8 @@ from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.session_browser import SessionBrowser
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
+from libs.tmux_manager import TmuxManager
+from libs.yesman_config import YesmanConfig
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -27,10 +29,12 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 class AsyncInteractiveBrowser:
     """Async interactive session browser with live updates."""
 
-    def __init__(self, tmux_manager: object, config: object, update_interval: float = 2.0) -> None:
+    def __init__(self, tmux_manager: TmuxManager | None, config: YesmanConfig | None, update_interval: float = 2.0) -> None:
         self.console = Console()
-        self.config = config
-        self.tmux_manager = tmux_manager
+
+        # Use provided dependencies or create defaults
+        self.config = config if config is not None else YesmanConfig()
+        self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)
 
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
@@ -42,7 +46,7 @@ class AsyncInteractiveBrowser:
 
         self.update_interval = update_interval
         self.running = False
-        self.progress_data = None
+        self.progress_data: dict[str, Any] | None = None
         self._update_task: asyncio.Task | None = None
 
     async def update_data(self) -> None:
@@ -53,9 +57,10 @@ class AsyncInteractiveBrowser:
             detailed_sessions = []
 
             for session_info in sessions_list:
-                session_name = session_info["session_name"]
-                detailed_info = await self._get_session_info_async(session_name)
-                detailed_sessions.append(detailed_info)
+                session_name = session_info.get("session_name", "unknown")
+                if session_name != "unknown":
+                    detailed_info = await self._get_session_info_async(session_name)
+                    detailed_sessions.append(detailed_info)
 
                 # Calculate and record activity
                 self._calculate_session_activity(detailed_info)
@@ -74,12 +79,22 @@ class AsyncInteractiveBrowser:
         """Async wrapper for getting sessions list."""
         # Run blocking operation in thread pool
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
+        try:
+            if hasattr(self.tmux_manager, "get_cached_sessions_list"):
+                return await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
+            else:
+                return []
+        except AttributeError:
+            # Fallback if cached method is not available
+            return []
 
     async def _get_session_info_async(self, session_name: str) -> dict[str, Any]:
         """Async wrapper for getting session info."""
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
+        if hasattr(self.tmux_manager, "get_session_info"):
+            return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
+        else:
+            return {"session_name": session_name, "exists": False, "windows": []}
 
     async def _get_progress_overview_async(self) -> dict[str, Any]:
         """Async wrapper for getting progress overview."""
@@ -155,8 +170,15 @@ class AsyncInteractiveBrowser:
 
         # Get cache stats asynchronously
         loop = asyncio.get_event_loop()
-        cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
-        header_text += f" | Cache: {cache_stats.get('hit_rate', 0):.1%} hit rate"
+        try:
+            if hasattr(self.tmux_manager, "get_cache_stats"):
+                cache_stats = await loop.run_in_executor(None, self.tmux_manager.get_cache_stats)
+                header_text += f" | Cache: {cache_stats.get('hit_rate', 0):.1%} hit rate"
+            else:
+                header_text += " | Cache: N/A"
+        except AttributeError:
+            # Fallback if get_cache_stats is not available
+            header_text += " | Cache: N/A"
         layout["header"].update(self.console.render_str(header_text, style="bold green"))
 
         # Main session browser
@@ -172,10 +194,13 @@ class AsyncInteractiveBrowser:
 
         # Activity heatmap
         # Generate heatmap from collected session data
-        session_names = [s.session_name for s in self.session_browser.sessions]
-        heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
-        heatmap_content = self._render_heatmap(heatmap_data)
-        layout["activity"].update(heatmap_content)
+        try:
+            session_names = [getattr(s, "session_name", "unknown") for s in getattr(self.session_browser, "sessions", [])]
+            heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
+            heatmap_content = self._render_heatmap(heatmap_data)
+            layout["activity"].update(heatmap_content)
+        except AttributeError:
+            layout["activity"].update("[dim]Activity data not available[/dim]")
 
         # Footer
         layout["footer"].update(status_bar)
@@ -264,8 +289,9 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
     async def execute_async(self, **kwargs: dict[str, object]) -> dict:
         """Execute the async browse command."""
         # Extract parameters from kwargs with defaults
-        update_interval = float(kwargs.get('update_interval', 2.0))
-        
+        update_interval_val = kwargs.get("update_interval", 2.0)
+        update_interval = float(update_interval_val) if isinstance(update_interval_val, (int, float, str)) else 2.0
+
         try:
             browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)
 

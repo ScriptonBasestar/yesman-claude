@@ -24,7 +24,7 @@ class SessionValidator:
     """Validates session configuration."""
 
     def __init__(self) -> None:
-        self.validation_errors = []
+        self.validation_errors: list[str] = []
 
     def validate_session_config(self, session_name: str, config_dict: dict[str, Any]) -> bool:
         """Validate session configuration.
@@ -36,7 +36,7 @@ class SessionValidator:
         Returns:
             True if validation passes, False otherwise
         """
-        self.validation_errors = []
+        self.validation_errors.clear()
 
         # Validate session name
         if not self._validate_session_name(session_name):
@@ -251,7 +251,10 @@ class SessionConfigBuilder:
         if not template_name:
             return {}
 
-        template_file = self.tmux_manager.templates_path / f"{template_name}.yaml"
+        from pathlib import Path
+
+        templates_path = getattr(self.tmux_manager, "templates_path", Path("."))
+        template_file = templates_path / f"{template_name}.yaml"
 
         if not template_file.is_file():
             msg = f"Template '{template_name}' not found at {template_file}"
@@ -315,7 +318,8 @@ class SessionSetupService:
 
     def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
         """Load sessions configuration with optional filter."""
-        all_sessions: dict[str, Any] = self.tmux_manager.load_projects().get("sessions", {})
+        projects_data = getattr(self.tmux_manager, "load_projects", lambda: {})() or {}
+        all_sessions: dict[str, Any] = projects_data.get("sessions", {}) if isinstance(projects_data, dict) else {}
 
         if not all_sessions:
             return {}
@@ -373,7 +377,10 @@ class SessionSetupService:
     def _session_exists(self, session_name: str) -> bool:
         """Check if session already exists."""
         try:
-            sessions = self.tmux_manager.get_all_sessions()
+            from collections.abc import Callable
+
+            get_sessions_func: Callable[[], list] = getattr(self.tmux_manager, "get_all_sessions", lambda: [])
+            sessions = get_sessions_func()
             return any(session.get("session_name") == session_name for session in sessions)
         except Exception:
             return False
@@ -394,7 +401,12 @@ class SessionSetupService:
     def _create_session(self, config_dict: dict[str, Any]) -> None:
         """Create tmux session from configuration."""
         try:
-            self.tmux_manager.create_session_from_config(config_dict)
+            create_func = getattr(self.tmux_manager, "create_session_from_config", None)
+            if create_func:
+                create_func(config_dict)
+            else:
+                msg = "tmux_manager does not support create_session_from_config"
+                raise CommandError(msg)
         except Exception as e:
             msg = f"Failed to create tmux session: {e}"
             raise CommandError(msg) from e

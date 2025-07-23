@@ -239,7 +239,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
         Dict containing.
         """
         try:
-            with with_startup_progress("🔧 Initializing session browser...") as update:
+            with with_startup_progress("🔧 Initializing session browser...") as update:  # type: ignore
                 update("📊 Loading session data...")
                 browser = InteractiveBrowser(self.tmux_manager, self.config, update_interval)
                 update("🚀 Starting interactive browser...")

@@ -49,8 +49,8 @@ class IntegrationTestBase:
         self.config = None
 
         # Track created resources for cleanup
-        self.created_sessions = []
-        self.created_processes = []
+        self.created_sessions: list[str] = []
+        self.created_processes: list[Any] = []
 
     def teardown_method(self) -> None:
         """Cleanup after each test method."""

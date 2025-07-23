@@ -278,7 +278,7 @@ class SystemThemeDetector:
                 return SystemThemeDetector._get_linux_theme()
             logger.warning("Unknown system: %s", system)
 
-        except (OSError, RuntimeError, ValueError) as e:
+        except (OSError, RuntimeError, ValueError):
             logger.exception("Error detecting system theme")
             return ThemeMode.LIGHT
         else:
@@ -609,7 +609,7 @@ class ThemeManager:
             self.user_themes[name] = theme
             logger.info("Theme saved: %s", name)
 
-        except (OSError, json.JSONDecodeError, PermissionError) as e:
+        except (OSError, json.JSONDecodeError, PermissionError):
             logger.exception("Error saving theme %s")
             return False
         else:
@@ -637,7 +637,7 @@ class ThemeManager:
             self.user_themes[name] = theme
             logger.info("Theme loaded: %s", name)
 
-        except (OSError, json.JSONDecodeError, ValueError, KeyError) as e:
+        except (OSError, json.JSONDecodeError, ValueError, KeyError):
             logger.exception("Error loading theme %s")
             return None
         else:
@@ -650,7 +650,7 @@ class ThemeManager:
                 theme_name = theme_file.stem
                 self.load_theme(theme_name)
 
-        except (OSError, RuntimeError) as e:
+        except (OSError, RuntimeError):
             logger.exception("Error loading user themes")
 
     def delete_theme(self, name: str) -> bool:
@@ -678,7 +678,7 @@ class ThemeManager:
 
             logger.info("Theme deleted: %s", name)
 
-        except (OSError, PermissionError) as e:
+        except (OSError, PermissionError):
             logger.exception("Error deleting theme %s")
             return False
         else:

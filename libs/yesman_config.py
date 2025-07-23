@@ -9,7 +9,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -159,7 +159,7 @@ class YesmanConfig:
         try:
             self._loader.validate(self.config)
             return True
-        except ValueError as e:
+        except ValueError:
             self.logger.exception("Configuration validation failed")  # noqa: G004
             return False
 
@@ -196,4 +196,4 @@ def create_cached_yesman_config(cache_ttl: float = 300.0) -> YesmanConfig:
         YesmanConfig instance with caching enabled
     """
     cached_loader = create_cached_config_loader(cache_ttl=cache_ttl)
-    return YesmanConfig(config_loader=cached_loader)
+    return YesmanConfig(config_loader=cast(ConfigLoader, cached_loader))

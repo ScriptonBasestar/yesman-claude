@@ -126,6 +126,9 @@ class ConfigurationError(YesmanError):
         if "recovery_hint" not in kwargs:
             kwargs["recovery_hint"] = "Check the configuration file syntax and ensure all required fields are present. Run 'yesman validate' to check configuration."
 
+        # Remove context from kwargs if it exists to avoid conflict
+        kwargs.pop("context", None)
+
         super().__init__(
             message,
             category=ErrorCategory.CONFIGURATION,
