@@ -84,24 +84,38 @@
   }
 
   async function handleStartSession(event: CustomEvent) {
+    console.log('Sessions page: handleStartSession called with event:', event);
     const { session } = event.detail;
+    console.log('Starting session:', session);
+    
     try {
       // 세션 시작 API 호출
-      const response = await fetch(`/api/sessions/${session}/start`, {
+      const url = `http://localhost:8000/api/sessions/${session}/start`;
+      console.log('Calling API:', url);
+      
+      const response = await fetch(url, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Success result:', result);
         showNotification('success', 'Session Started', `Session "${session}" has been started successfully.`);
         // 세션 목록 새로고침 - 세션이 완전히 시작될 때까지 약간의 지연 필요
         setTimeout(() => refreshSessions(), 1500);
       } else {
-        const errorText = await response.text();
-        showNotification('error', 'Start Failed', `Failed to start session: ${errorText}`);
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        showNotification('error', 'Start Failed', `Failed to start session: ${errorData.detail || errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to start session:', error);
-      showNotification('error', 'Start Failed', `Failed to start session: ${error}`);
+      showNotification('error', 'Start Failed', `Failed to start session: ${error.message || error}`);
     }
   }
 

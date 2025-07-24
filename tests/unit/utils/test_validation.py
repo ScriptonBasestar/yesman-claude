@@ -110,7 +110,7 @@ class TestValidationFunctions:
     @staticmethod
     def test_validate_port_number_valid() -> None:
         """Test valid port numbers."""
-        valid_ports = ["80", "443", "8080", "3000", "65535"]
+        valid_ports = ["80", "443", "8000", "3000", "65535"]
         for port in valid_ports:
             valid, error = validate_port_number(port)
             assert valid is True, f"'{port}' should be valid"
@@ -201,7 +201,7 @@ class TestValidationDecorator:
         """Test decorator with keyword arguments."""
 
         @validate_input(validate_port_number, "port")
-        def start_server(host: str = "localhost", port: str = "8080") -> str:
+        def start_server(host: str = "localhost", port: str = "8000") -> str:
             return f"Server on {host}:{port}"
 
         result = start_server(port="3000")

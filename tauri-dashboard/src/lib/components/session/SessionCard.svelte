@@ -118,7 +118,9 @@
   }
 
   function handleStartSession() {
+    console.log('SessionCard: handleStartSession called for', session.session_name);
     dispatch('startSession', { session: session.session_name });
+    console.log('SessionCard: startSession event dispatched');
   }
 
   function handleStopSession() {

@@ -135,7 +135,7 @@ sessions:
               code .
           - shell_command: |
               echo "Starting server..."
-              python -m http.server 8080
+              python -m http.server 8000
 ```
 
 ### Template Configuration
@@ -231,7 +231,7 @@ export YESMAN_API_KEY=your-secret-key
 export YESMAN_AUTH_ENABLED=true
 
 # CORS configuration
-export YESMAN_CORS_ORIGINS="http://localhost:3000,http://localhost:8080"
+export YESMAN_CORS_ORIGINS="http://localhost:3000,http://localhost:8000"
 export YESMAN_TRUSTED_HOSTS="localhost,127.0.0.1"
 ```
 

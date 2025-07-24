@@ -15,7 +15,7 @@ const isTauri = typeof window !== 'undefined' &&
   window.__TAURI__ !== undefined &&
   window.__TAURI_IPC__ !== undefined;
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = '/api';
 
 /**
  * FastAPI 서버에 API 요청을 보내는 헬퍼 함수

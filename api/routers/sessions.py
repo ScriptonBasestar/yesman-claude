@@ -307,27 +307,78 @@ class SessionService:
             )
 
     def start_session(self, session_name: str) -> dict[str, object]:
-        """Start an existing session.
+        """Start or create and start a session.
 
         Returns:
         Dict containing.
         """
         try:
-            if self._session_exists(session_name):
-                msg = f"Session '{session_name}' is already running"
-                raise YesmanError(
-                    msg,
-                    category=ErrorCategory.VALIDATION,
+            # Check if session exists in tmux
+            session_exists = False
+            try:
+                result = subprocess.run(
+                    ["tmux", "has-session", "-t", session_name],
+                    check=False,
+                    capture_output=True,
                 )
+                session_exists = result.returncode == 0
+            except Exception:
+                session_exists = False
 
-            # Attach to the session
+            if session_exists:
+                # Check if session is already attached (has active clients)
+                try:
+                    result = subprocess.run(
+                        ["tmux", "list-clients", "-t", session_name],
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                    )
+                    if result.returncode == 0 and result.stdout.strip():
+                        msg = f"Session '{session_name}' is already running"
+                        raise YesmanError(
+                            msg,
+                            category=ErrorCategory.VALIDATION,
+                        )
+                except subprocess.CalledProcessError:
+                    # Session exists but no clients attached, continue
+                    pass
 
-            subprocess.run(["tmux", "attach-session", "-t", session_name], check=False)
-
-            return {
-                "session_name": session_name,
-                "status": "started",
-            }
+                # Attach to the existing session in detached mode (for API usage)
+                subprocess.run(["tmux", "attach-session", "-d", "-t", session_name], check=False)
+                
+                return {
+                    "session_name": session_name,
+                    "status": "started",
+                    "action": "attached_to_existing",
+                }
+            else:
+                # Session doesn't exist, try to create it first
+                self.logger.info(f"Session '{session_name}' not found, attempting to create it")
+                
+                # Try to setup the session first
+                try:
+                    setup_result = self.setup_session(session_name)
+                    self.logger.info(f"Successfully created session '{session_name}': {setup_result}")
+                    
+                    return {
+                        "session_name": session_name,
+                        "status": "started",
+                        "action": "created_and_started",
+                        "setup_result": setup_result,
+                    }
+                except YesmanError as setup_error:
+                    if "already exists" in str(setup_error.message):
+                        # Session was created in between checks, try to attach
+                        subprocess.run(["tmux", "attach-session", "-d", "-t", session_name], check=False)
+                        return {
+                            "session_name": session_name,
+                            "status": "started",
+                            "action": "attached_after_race_condition",
+                        }
+                    else:
+                        # Re-raise the setup error
+                        raise
 
         except YesmanError:
             raise
@@ -443,21 +494,84 @@ class SessionService:
         Boolean indicating.
         """
         try:
+            # First check with session manager
             sessions = self.session_manager.get_all_sessions()
-            return any(getattr(session, "session_name", None) == session_name for session in sessions)
+            session_manager_result = any(getattr(session, "session_name", None) == session_name for session in sessions)
+            
+            # Also check directly with tmux
+            try:
+                result = subprocess.run(
+                    ["tmux", "has-session", "-t", session_name],
+                    check=False,
+                    capture_output=True,
+                )
+                tmux_result = result.returncode == 0
+            except Exception:
+                tmux_result = False
+            
+            # Return True if either method confirms the session exists
+            return session_manager_result or tmux_result
         except Exception:
             return False
 
-    @staticmethod
-    def _setup_session_internal(_session_name: str, _session_config: dict[str, object]) -> dict[str, object]:
+    def _setup_session_internal(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
         """Internal session setup logic.
 
         Returns:
-        Dict containing.
+        Dict containing session creation details.
         """
-        # This would integrate with the improved SessionSetupService
-        # For now, return a placeholder
-        return {"message": "Session setup completed"}
+        try:
+            # Get template and project path from config
+            template = str(session_config.get("template", "default"))
+            project_path = str(session_config.get("path", "."))
+            override_config = cast(dict, session_config.get("override", {}))
+            
+            # Use override session name if provided
+            actual_session_name = str(override_config.get("session_name", session_name))
+            
+            # Create tmux session
+            create_cmd = ["tmux", "new-session", "-d", "-s", actual_session_name]
+            
+            # Set working directory if specified
+            if project_path and project_path != ".":
+                create_cmd.extend(["-c", project_path])
+            
+            # Create the session
+            self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
+            result = subprocess.run(create_cmd, capture_output=True, text=True)
+            
+            self.logger.info(f"tmux command result: returncode={result.returncode}, stdout={result.stdout}, stderr={result.stderr}")
+            
+            if result.returncode != 0:
+                if "duplicate session" in result.stderr:
+                    msg = f"Session '{actual_session_name}' already exists"
+                    raise YesmanError(msg, category=ErrorCategory.VALIDATION)
+                else:
+                    msg = f"Failed to create session: {result.stderr}"
+                    raise YesmanError(msg, category=ErrorCategory.SYSTEM)
+            
+            self.logger.info(f"Created tmux session '{actual_session_name}'")
+            
+            # Setup windows based on template
+            # For now, just create a basic window structure
+            if template != "default":
+                # Create additional windows based on template
+                # This would integrate with template system
+                pass
+            
+            return {
+                "message": "Session setup completed",
+                "session_name": actual_session_name,
+                "template": template,
+                "project_path": project_path
+            }
+            
+        except subprocess.CalledProcessError as e:
+            msg = f"Failed to create tmux session: {e}"
+            raise YesmanError(msg, category=ErrorCategory.SYSTEM, cause=e)
+        except Exception as e:
+            msg = f"Unexpected error during session setup: {e}"
+            raise YesmanError(msg, category=ErrorCategory.SYSTEM, cause=e)
 
     @staticmethod
     def _teardown_session_internal(session_name: str) -> None:

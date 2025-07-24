@@ -69,6 +69,68 @@
     window.location.href = `/sessions/${session}`;
   }
 
+  async function handleStartSession(event: CustomEvent) {
+    console.log('handleStartSession called with event:', event);
+    const { session } = event.detail;
+    console.log('Starting session:', session);
+    
+    try {
+      const url = `http://localhost:8000/api/sessions/${session}/start`;
+      console.log('Calling API:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.detail || 'Failed to start session');
+      }
+      
+      const result = await response.json();
+      console.log('Success result:', result);
+      showNotification('success', 'Session Started', `Session ${session} started successfully`);
+      
+      // 세션 목록 새로고침
+      setTimeout(() => refreshSessions(), 1000);
+    } catch (error) {
+      console.error('Failed to start session:', error);
+      showNotification('error', 'Start Failed', `Failed to start session: ${error.message}`);
+    }
+  }
+
+  async function handleStopSession(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      const response = await fetch(`http://localhost:8000/api/sessions/${session}/stop`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to stop session');
+      }
+      
+      const result = await response.json();
+      showNotification('success', 'Session Stopped', `Session ${session} stopped successfully`);
+      
+      // 세션 목록 새로고침
+      setTimeout(() => refreshSessions(), 1000);
+    } catch (error) {
+      console.error('Failed to stop session:', error);
+      showNotification('error', 'Stop Failed', `Failed to stop session: ${error.message}`);
+    }
+  }
+
   // 컨트롤러 상태별 세션 필터링
   $: sessionsWithControllers = $filteredSessions.filter(session =>
     session.controller_status && session.controller_status !== 'unknown'
@@ -263,6 +325,8 @@
                   on:viewLogs={handleViewLogs}
                   on:attachSession={handleAttachSession}
                   on:viewDetails={handleViewDetails}
+                  on:startSession={handleStartSession}
+                  on:stopSession={handleStopSession}
                 />
               {/each}
             </div>
@@ -286,6 +350,8 @@
                   on:viewLogs={handleViewLogs}
                   on:attachSession={handleAttachSession}
                   on:viewDetails={handleViewDetails}
+                  on:startSession={handleStartSession}
+                  on:stopSession={handleStopSession}
                 />
               {/each}
             </div>
@@ -309,6 +375,8 @@
                   on:viewLogs={handleViewLogs}
                   on:attachSession={handleAttachSession}
                   on:viewDetails={handleViewDetails}
+                  on:startSession={handleStartSession}
+                  on:stopSession={handleStopSession}
                 />
               {/each}
             </div>

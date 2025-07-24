@@ -29,6 +29,114 @@
     console.log('View details for:', session);
   }
 
+  // 세션 시작 핸들러
+  async function handleStartSession(event: CustomEvent) {
+    console.log('Main page: handleStartSession called with event:', event);
+    const { session } = event.detail;
+    console.log('Starting session:', session);
+    
+    try {
+      const url = `http://localhost:8000/api/sessions/${session}/start`;
+      console.log('Calling API:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Success result:', result);
+        notifySuccess('Session Started', `Session "${session}" has been started successfully.`);
+        // 세션 목록 새로고침
+        setTimeout(() => refreshSessions(), 1500);
+      } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        notifyError('Start Failed', `Failed to start session: ${errorData.detail || errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Failed to start session:', error);
+      notifyError('Start Failed', `Failed to start session: ${error.message || error}`);
+    }
+  }
+
+  // 세션 중지 핸들러
+  async function handleStopSession(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      const response = await fetch(`http://localhost:8000/api/sessions/${session}/stop`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        notifySuccess('Session Stopped', `Session "${session}" has been stopped successfully.`);
+        setTimeout(() => refreshSessions(), 1000);
+      } else {
+        const errorData = await response.json();
+        notifyError('Stop Failed', `Failed to stop session: ${errorData.detail || errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Failed to stop session:', error);
+      notifyError('Stop Failed', `Failed to stop session: ${error.message || error}`);
+    }
+  }
+
+  // 컨트롤러 핸들러들
+  async function handleStartController(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      const { startController } = await import('$lib/stores/sessions');
+      await startController(session);
+    } catch (error) {
+      console.error('Failed to start controller:', error);
+    }
+  }
+
+  async function handleStopController(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      const { stopController } = await import('$lib/stores/sessions');
+      await stopController(session);
+    } catch (error) {
+      console.error('Failed to stop controller:', error);
+    }
+  }
+
+  async function handleRestartController(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      const { restartController } = await import('$lib/stores/sessions');
+      await restartController(session);
+    } catch (error) {
+      console.error('Failed to restart controller:', error);
+    }
+  }
+
+  async function handleViewLogs(event: CustomEvent) {
+    const { session } = event.detail;
+    try {
+      const { viewSessionLogs } = await import('$lib/stores/sessions');
+      await viewSessionLogs(session);
+    } catch (error) {
+      console.error('Failed to view logs:', error);
+    }
+  }
+
+  async function handleAttachSession(event: CustomEvent) {
+    const { session } = event.detail;
+    notifySuccess('Attach Session', `Opening terminal for ${session}...`);
+    // 터미널에서 tmux attach 명령 실행
+    // 실제 구현은 Tauri command로 처리
+  }
+
   // 빠른 액션 핸들러
   async function handleQuickAction(event: CustomEvent) {
     const { action } = event.detail;
@@ -183,6 +291,13 @@
             {session}
             on:statusChanged={handleSessionStatusChanged}
             on:viewDetails={handleViewDetails}
+            on:startSession={handleStartSession}
+            on:stopSession={handleStopSession}
+            on:startController={handleStartController}
+            on:stopController={handleStopController}
+            on:restartController={handleRestartController}
+            on:viewLogs={handleViewLogs}
+            on:attachSession={handleAttachSession}
           />
         {/each}
       {/if}

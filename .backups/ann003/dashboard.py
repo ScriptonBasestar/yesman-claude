@@ -114,7 +114,7 @@ class DashboardRunCommand(BaseCommand):
         self,
         interface: str = "auto",
         host: str = "localhost",
-        port: int = 8080,
+        port: int = 8000,
         theme: str | None = None,
         dev: bool = False,  # noqa: FBT001
         detach: bool = False,  # noqa: FBT001
@@ -232,7 +232,7 @@ class DashboardRunCommand(BaseCommand):
     def _launch_web_dashboard(
         self,
         host: str = "localhost",
-        port: int = 8080,
+        port: int = 8000,
         theme: str | None = None,
         dev: bool = False,  # noqa: FBT001
         detach: bool = False,  # noqa: FBT001
@@ -596,7 +596,7 @@ def dashboard_group() -> None:
 @click.option(
     "--port",
     "-p",
-    default=8080,
+    default=8000,
     type=int,
     help="Web dashboard port (web only)",
 )
