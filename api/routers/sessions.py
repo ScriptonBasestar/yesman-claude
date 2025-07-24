@@ -68,14 +68,22 @@ class SessionService:
             # Find the project that matches this session name
             project_name = None
             project_conf = None
-            for proj_name, proj_conf in projects.items():
-                session_name_in_conf = proj_conf.get("override", {}).get("session_name", proj_name)
-                if session_name_in_conf == session_name:
-                    project_name = proj_name
-                    project_conf = proj_conf
-                    break
 
-            if not project_name:
+            # First, try direct match by project name
+            if session_name in projects:
+                project_name = session_name
+                project_conf = projects[session_name]
+            else:
+                # Then try to find by override session_name
+                for proj_name, proj_conf in projects.items():
+                    if isinstance(proj_conf, dict):
+                        override_session_name = proj_conf.get("override", {}).get("session_name")
+                        if override_session_name == session_name:
+                            project_name = proj_name
+                            project_conf = proj_conf
+                            break
+
+            if not project_name or not project_conf:
                 # Session not found in configuration
                 return None
 
@@ -112,7 +120,25 @@ class SessionService:
 
             projects_data = self.tmux_manager.load_projects()
             projects = cast(dict, projects_data.get("sessions", {}))
-            if session_name not in projects:
+
+            # Find session configuration (direct match or by override)
+            session_config = None
+            actual_project_name = None
+
+            if session_name in projects:
+                actual_project_name = session_name
+                session_config = cast(dict, projects[session_name])
+            else:
+                # Look for session by override session_name
+                for proj_name, proj_conf in projects.items():
+                    if isinstance(proj_conf, dict):
+                        override_session_name = proj_conf.get("override", {}).get("session_name")
+                        if override_session_name == session_name:
+                            actual_project_name = proj_name
+                            session_config = cast(dict, proj_conf)
+                            break
+
+            if not session_config or not actual_project_name:
                 msg = f"Session '{session_name}' not found in projects configuration"
                 raise YesmanError(
                     msg,
@@ -120,8 +146,7 @@ class SessionService:
                 )
 
             # Set up session (this would integrate with the improved setup logic)
-            session_config = cast(dict, projects[session_name])
-            result = self._setup_session_internal(session_name, session_config)
+            result = self._setup_session_internal(actual_project_name, session_config)
 
             return {
                 "session_name": session_name,
@@ -189,14 +214,22 @@ class SessionService:
             # Find the project that matches this session name
             project_name = None
             project_conf = None
-            for proj_name, proj_conf in projects.items():
-                session_name_in_conf = proj_conf.get("override", {}).get("session_name", proj_name)
-                if session_name_in_conf == session_name:
-                    project_name = proj_name
-                    project_conf = proj_conf
-                    break
 
-            if not project_name:
+            # First, try direct match by project name
+            if session_name in projects:
+                project_name = session_name
+                project_conf = projects[session_name]
+            else:
+                # Then try to find by override session_name
+                for proj_name, proj_conf in projects.items():
+                    if isinstance(proj_conf, dict):
+                        override_session_name = proj_conf.get("override", {}).get("session_name")
+                        if override_session_name == session_name:
+                            project_name = proj_name
+                            project_conf = proj_conf
+                            break
+
+            if not project_name or not project_conf:
                 # Session not found in configuration
                 return {
                     "session_name": session_name,
@@ -494,23 +527,16 @@ class SessionService:
         Boolean indicating.
         """
         try:
-            # First check with session manager
-            sessions = self.session_manager.get_all_sessions()
-            session_manager_result = any(getattr(session, "session_name", None) == session_name for session in sessions)
-
-            # Also check directly with tmux
+            # Check directly with tmux (this is the ground truth)
             try:
                 result = subprocess.run(
                     ["tmux", "has-session", "-t", session_name],
                     check=False,
                     capture_output=True,
                 )
-                tmux_result = result.returncode == 0
+                return result.returncode == 0
             except Exception:
-                tmux_result = False
-
-            # Return True if either method confirms the session exists
-            return session_manager_result or tmux_result
+                return False
         except Exception:
             return False
 
@@ -522,19 +548,26 @@ class SessionService:
         """
         try:
             # Get template and project path from config
-            template = str(session_config.get("template", "default"))
-            project_path = str(session_config.get("path", "."))
+            template = str(session_config.get("template_name", "default"))
             override_config = cast(dict, session_config.get("override", {}))
 
-            # Use override session name if provided
+            # Use override session name if provided, otherwise use session_name
             actual_session_name = str(override_config.get("session_name", session_name))
+
+            # Get start directory from override config
+            start_directory = str(override_config.get("start_directory", "."))
+            project_path = start_directory
 
             # Create tmux session
             create_cmd = ["tmux", "new-session", "-d", "-s", actual_session_name]
 
             # Set working directory if specified
             if project_path and project_path != ".":
-                create_cmd.extend(["-c", project_path])
+                # Expand ~ to home directory
+                import os
+
+                expanded_path = os.path.expanduser(project_path)
+                create_cmd.extend(["-c", expanded_path])
 
             # Create the session
             self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
@@ -552,12 +585,18 @@ class SessionService:
 
             self.logger.info(f"Created tmux session '{actual_session_name}'")
 
-            # Setup windows based on template
-            # For now, just create a basic window structure
-            if template != "default":
-                # Create additional windows based on template
-                # This would integrate with template system
-                pass
+            # Setup windows based on override configuration
+            windows_config = override_config.get("windows", [])
+            if isinstance(windows_config, list) and windows_config:
+                for window_idx, window_config in enumerate(windows_config):
+                    if isinstance(window_config, dict):
+                        window_name = window_config.get("window_name", f"window{window_idx}")
+                        # Create new window (except for the first one which already exists)
+                        if window_idx > 0:
+                            subprocess.run(["tmux", "new-window", "-t", actual_session_name, "-n", window_name], capture_output=True)
+                        else:
+                            # Rename the first window
+                            subprocess.run(["tmux", "rename-window", "-t", f"{actual_session_name}:0", window_name], capture_output=True)
 
             return {"message": "Session setup completed", "session_name": actual_session_name, "template": template, "project_path": project_path}
 
