@@ -1,5 +1,5 @@
-# Makefile.build.mk - Build and Installation targets for yesman-claude
-# Build, installation, and deployment management
+# Makefile.build.mk - Build and Packaging for yesman-claude
+# Pure build operations for Python packages and frontend components
 
 # ==============================================================================
 # Build Configuration
@@ -8,36 +8,10 @@
 # Colors are now exported from main Makefile
 
 # ==============================================================================
-# Build & Installation Targets
+# Build Targets
 # ==============================================================================
 
-.PHONY: build install install-dev install-test install-all dev-install
-.PHONY: clean clean-all clean-build clean-pyc clean-test setup-all
-
-install: ## install yesman-claude in development mode
-	@echo -e "$(CYAN)Installing $(PROJECT_NAME)...$(RESET)"
-	uv pip install -e .
-	@echo -e "$(GREEN)✅ $(PROJECT_NAME) installed successfully$(RESET)"
-
-install-dev: ## install with dev dependencies
-	@echo -e "$(CYAN)Installing with dev dependencies...$(RESET)"
-	uv pip install -e . --group dev
-	@echo -e "$(GREEN)✅ Dev dependencies installed$(RESET)"
-
-install-test: ## install with test dependencies
-	@echo -e "$(CYAN)Installing with test dependencies...$(RESET)"
-	uv pip install -e . --group test
-	@echo -e "$(GREEN)✅ Test dependencies installed$(RESET)"
-
-install-all: ## install with all dependencies (dev + test)
-	@echo -e "$(CYAN)Installing with all dependencies...$(RESET)"
-	uv pip install -e . --group dev --group test
-	@echo -e "$(GREEN)✅ All dependencies installed$(RESET)"
-
-dev-install: ## install with pip editable mode
-	@echo -e "$(CYAN)Installing with pip editable mode...$(RESET)"
-	pip install -e . --config-settings editable_mode=compat
-	@echo -e "$(GREEN)✅ Installed in editable mode$(RESET)"
+.PHONY: build build-dashboard build-tauri build-all build-info
 
 build: ## build Python package
 	@echo -e "$(CYAN)Building $(PROJECT_NAME) package...$(RESET)"
@@ -48,53 +22,13 @@ build: ## build Python package
 # Dashboard Build Targets
 # ==============================================================================
 
-.PHONY: build-dashboard build-dashboard-dev install-dashboard-deps
-.PHONY: run-web-dashboard run-web-dashboard-detached run-tauri-dashboard
-.PHONY: run-tauri-dev build-tauri clean-dashboard build-all
+.PHONY: build-dashboard build-tauri install-dashboard-deps
 
 build-dashboard: ## build SvelteKit dashboard
 	@echo -e "$(CYAN)Building SvelteKit dashboard...$(RESET)"
 	@if [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && npm run build; \
 		echo "$(GREEN)✅ Dashboard built successfully$(RESET)"; \
-	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
-	fi
-
-build-dashboard-dev: ## build dashboard in development mode
-	@echo -e "$(CYAN)Building dashboard in development mode...$(RESET)"
-	@if [ -d "tauri-dashboard" ]; then \
-		cd tauri-dashboard && npm run dev; \
-	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
-	fi
-
-install-dashboard-deps: ## install dashboard dependencies
-	@echo -e "$(CYAN)Installing dashboard dependencies...$(RESET)"
-	@if [ -d "tauri-dashboard" ]; then \
-		cd tauri-dashboard && npm install; \
-		echo "$(GREEN)✅ Dashboard dependencies installed$(RESET)"; \
-	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
-	fi
-
-run-web-dashboard: build-dashboard ## build and run web dashboard
-	@echo -e "$(CYAN)Starting web dashboard...$(RESET)"
-	uv run ./yesman.py dash run -i web -p 8080
-
-run-web-dashboard-detached: build-dashboard ## run web dashboard in background
-	@echo -e "$(CYAN)Starting web dashboard in background...$(RESET)"
-	uv run ./yesman.py dash run -i web -p 8080 --detach
-	@echo -e "$(GREEN)✅ Web dashboard running on http://localhost:8080$(RESET)"
-
-run-tauri-dashboard: build-dashboard ## build and run Tauri app
-	@echo -e "$(CYAN)Starting Tauri app...$(RESET)"
-	uv run ./yesman.py dash run -i tauri
-
-run-tauri-dev: ## run Tauri in development mode
-	@echo -e "$(CYAN)Starting Tauri in development mode...$(RESET)"
-	@if [ -d "tauri-dashboard" ]; then \
-		cd tauri-dashboard && npm run tauri dev; \
 	else \
 		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
@@ -108,63 +42,22 @@ build-tauri: ## build Tauri for production
 		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
 
-build-all: build-dashboard install ## build complete project
-	@echo -e "$(GREEN)✅ Complete project built successfully$(RESET)"
-
-# ==============================================================================
-# Clean Targets
-# ==============================================================================
-
-clean: clean-build clean-pyc clean-test ## clean all build artifacts
-
-clean-all: clean clean-dashboard ## clean everything including dashboard
-
-clean-build: ## clean Python build artifacts
-	@echo -e "$(CYAN)Cleaning build artifacts...$(RESET)"
-	@rm -rf build/ dist/ *.egg-info/
-	@echo -e "$(GREEN)✅ Build artifacts cleaned$(RESET)"
-
-clean-pyc: ## clean Python cache files
-	@echo -e "$(CYAN)Cleaning Python cache files...$(RESET)"
-	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "*.pyc" -delete
-	@find . -type f -name "*.pyo" -delete
-	@find . -type f -name "*~" -delete
-	@echo -e "$(GREEN)✅ Python cache cleaned$(RESET)"
-
-clean-test: ## clean test artifacts
-	@echo -e "$(CYAN)Cleaning test artifacts...$(RESET)"
-	@rm -rf .pytest_cache/
-	@rm -rf htmlcov/
-	@rm -f .coverage
-	@rm -f coverage.xml
-	@echo -e "$(GREEN)✅ Test artifacts cleaned$(RESET)"
-
-clean-dashboard: ## clean dashboard build artifacts
-	@echo -e "$(CYAN)Cleaning dashboard artifacts...$(RESET)"
+install-dashboard-deps: ## install dashboard dependencies
+	@echo -e "$(CYAN)Installing dashboard dependencies...$(RESET)"
 	@if [ -d "tauri-dashboard" ]; then \
-		cd tauri-dashboard && rm -rf build/ .svelte-kit/ node_modules/.vite/; \
-		cd tauri-dashboard && rm -rf src-tauri/target/; \
-		echo "$(GREEN)✅ Dashboard artifacts cleaned$(RESET)"; \
+		cd tauri-dashboard && npm install; \
+		echo "$(GREEN)✅ Dashboard dependencies installed$(RESET)"; \
 	else \
 		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
 
-# ==============================================================================
-# Setup Targets
-# ==============================================================================
+build-all: build build-dashboard ## build complete project
+	@echo -e "$(GREEN)✅ Complete project built successfully$(RESET)"
 
-setup-all: install-all install-dashboard-deps hooks-install ## complete project setup
-	@echo -e "$(GREEN)🎉 Complete project setup finished!$(RESET)"
-	@echo -e "$(YELLOW)Next steps:$(RESET)"
-	@echo "  1. Run $(CYAN)make quick$(RESET) to verify setup"
-	@echo "  2. Run $(CYAN)make help$(RESET) to see available commands"
 
 # ==============================================================================
 # Build Information
 # ==============================================================================
-
-.PHONY: build-info
 
 build-info: ## show build information and targets
 	@echo -e "$(CYAN)"
@@ -180,10 +73,7 @@ build-info: ## show build information and targets
 	@echo ""
 	@echo -e "$(GREEN)🎯 Build Targets:$(RESET)"
 	@echo "  • $(CYAN)build$(RESET)               Build Python package"
-	@echo "  • $(CYAN)install$(RESET)             Install in development mode"
-	@echo "  • $(CYAN)install-all$(RESET)         Install with all dependencies"
 	@echo "  • $(CYAN)build-dashboard$(RESET)     Build SvelteKit dashboard"
 	@echo "  • $(CYAN)build-tauri$(RESET)         Build Tauri desktop app"
 	@echo "  • $(CYAN)build-all$(RESET)           Build complete project"
-	@echo "  • $(CYAN)clean$(RESET)               Clean build artifacts"
-	@echo "  • $(CYAN)setup-all$(RESET)           Complete project setup"
+	@echo "  • $(CYAN)install-dashboard-deps$(RESET) Install dashboard dependencies"

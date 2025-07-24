@@ -37,13 +37,12 @@ endef
 # Include Modular Makefiles
 # ==============================================================================
 
-include Makefile.deps.mk     # Dependency management
-include Makefile.build.mk    # Build and installation
+include Makefile.env.mk      # Environment setup and tool management
+include Makefile.build.mk    # Build and packaging
 include Makefile.test.mk     # Testing and coverage
 include Makefile.quality.mk  # Code quality and linting
-include Makefile.tools.mk    # Tool installation and management
-include Makefile.dev.mk      # Development workflow
-include Makefile.docker.mk   # Docker operations
+include Makefile.dev.mk      # Development workflow and servers
+include Makefile.ops.mk      # Operations and maintenance
 
 # ==============================================================================
 # Enhanced Help System
@@ -51,8 +50,7 @@ include Makefile.docker.mk   # Docker operations
 
 .DEFAULT_GOAL := help
 
-.PHONY: help help-full help-build help-test help-quality help-deps help-dev
-.PHONY: help-tools help-docker
+.PHONY: help help-full help-build help-test help-quality help-env help-dev help-ops
 
 help: ## show main help menu with categories
 	@echo -e "$(CYAN)"
@@ -62,13 +60,12 @@ help: ## show main help menu with categories
 	@echo -e "╚══════════════════════════════════════════════════════════════════════════════╝"
 	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)📋 Main Categories:$(RESET)"
-	@echo -e "  $(YELLOW)make help-build$(RESET)    🔨 Build, installation, and deployment"
+	@echo -e "  $(YELLOW)make help-build$(RESET)    🔨 Build and packaging"
 	@echo -e "  $(YELLOW)make help-test$(RESET)     🧪 Testing, coverage, and validation"
 	@echo -e "  $(YELLOW)make help-quality$(RESET)  ✨ Code quality, formatting, and linting"
-	@echo -e "  $(YELLOW)make help-deps$(RESET)     📦 Dependency management and updates"
-	@echo -e "  $(YELLOW)make help-tools$(RESET)    🔧 Tool installation and management"
-	@echo -e "  $(YELLOW)make help-dev$(RESET)      🛠️  Development tools and workflow"
-	@echo -e "  $(YELLOW)make help-docker$(RESET)   🐳 Docker operations and containers"
+	@echo -e "  $(YELLOW)make help-env$(RESET)      🌍 Environment setup and tool management"
+	@echo -e "  $(YELLOW)make help-dev$(RESET)      🛠️  Development workflow and servers"
+	@echo -e "  $(YELLOW)make help-ops$(RESET)      🔧 Operations and maintenance"
 	@echo ""
 	@echo -e "$(GREEN)🚀 Quick Commands:$(RESET)"
 	@echo -e "  $(CYAN)make start$(RESET)         Start yesman"
@@ -87,19 +84,15 @@ help: ## show main help menu with categories
 	@echo ""
 	@echo -e "$(BLUE)📖 Documentation: $(RESET)https://github.com/yourusername/yesman-claude"
 
-help-full: help help-build help-test help-quality help-deps help-tools help-dev help-docker ## show all help sections
+help-full: help help-build help-test help-quality help-env help-dev help-ops ## show all help sections
 
-help-build: ## show build and deployment help
-	@echo -e "$(GREEN)🔨 Build and Installation Commands:$(RESET)"
+help-build: ## show build and packaging help
+	@echo -e "$(GREEN)🔨 Build and Packaging Commands:$(RESET)"
 	@echo -e "  $(CYAN)build$(RESET)              Build Python package"
-	@echo -e "  $(CYAN)install$(RESET)            Install yesman-claude in development mode"
-	@echo -e "  $(CYAN)install-dev$(RESET)        Install with dev dependencies"
-	@echo -e "  $(CYAN)install-test$(RESET)       Install with test dependencies"
-	@echo -e "  $(CYAN)install-all$(RESET)        Install with all dependencies"
-	@echo -e "  $(CYAN)clean$(RESET)              Clean build artifacts and caches"
 	@echo -e "  $(CYAN)build-dashboard$(RESET)    Build SvelteKit dashboard"
 	@echo -e "  $(CYAN)build-tauri$(RESET)        Build Tauri desktop app"
 	@echo -e "  $(CYAN)build-all$(RESET)          Build complete project"
+	@echo -e "  $(CYAN)install-dashboard-deps$(RESET) Install dashboard dependencies"
 	@echo -e "  $(CYAN)build-info$(RESET)         Show build environment information"
 
 help-test: ## show testing help
@@ -126,48 +119,52 @@ help-quality: ## show quality help
 	@echo -e "  $(CYAN)quality-info$(RESET)       Show quality tools info"
 
 
-help-deps: ## show dependency help
-	@echo -e "$(GREEN)📦 Dependency Management Commands:$(RESET)"
+help-env: ## show environment and tool help
+	@echo -e "$(GREEN)🌍 Environment Setup and Tool Management:$(RESET)"
+	@echo -e "  $(CYAN)install$(RESET)            Install yesman-claude in development mode"
+	@echo -e "  $(CYAN)install-dev$(RESET)        Install with dev dependencies"
+	@echo -e "  $(CYAN)install-all$(RESET)        Install with all dependencies"
+	@echo -e "  $(CYAN)install-tools$(RESET)      Install essential development tools"
+	@echo -e "  $(CYAN)install-all-tools$(RESET)  Install all development tools"
 	@echo -e "  $(CYAN)deps-install$(RESET)       Install project dependencies"
 	@echo -e "  $(CYAN)deps-update$(RESET)        Update to compatible versions"
-	@echo -e "  $(CYAN)deps-upgrade$(RESET)       Upgrade to latest versions"
-	@echo -e "  $(CYAN)deps-tree$(RESET)          Show dependency tree"
-	@echo -e "  $(CYAN)deps-outdated$(RESET)      List outdated packages"
 	@echo -e "  $(CYAN)deps-security$(RESET)      Security vulnerability scan"
-	@echo -e "  $(CYAN)deps-info$(RESET)          Show dependency information"
+	@echo -e "  $(CYAN)setup-all$(RESET)          Complete project setup"
+	@echo -e "  $(CYAN)tools-status$(RESET)       Check tool installation status"
 	@echo -e "  $(CYAN)venv-create$(RESET)        Create virtual environment"
-
-help-tools: ## show tools help
-	@echo -e "$(GREEN)🔧 Tool Management Commands:$(RESET)"
-	@echo -e "  $(CYAN)install-tools$(RESET)      Install essential tools"
-	@echo -e "  $(CYAN)install-all-tools$(RESET)  Install all dev tools"
-	@echo -e "  $(CYAN)tools-status$(RESET)       Check tool installation"
-	@echo -e "  $(CYAN)tools-upgrade$(RESET)      Upgrade all tools"
-	@echo -e "  $(CYAN)setup-env$(RESET)          Setup dev environment"
-	@echo -e "  $(CYAN)setup-complete$(RESET)     Complete dev setup"
-	@echo -e "  $(CYAN)tools-info$(RESET)         Show tool information"
+	@echo -e "  $(CYAN)env-info$(RESET)           Show environment information"
 
 help-dev: ## show development workflow help
-	@echo -e "$(GREEN)🛠️  Development Workflow Commands:$(RESET)"
+	@echo -e "$(GREEN)🛠️  Development Workflow and Server Commands:$(RESET)"
+	@echo -e "  $(CYAN)start$(RESET)              Start yesman services"
+	@echo -e "  $(CYAN)stop$(RESET)               Stop all services"
+	@echo -e "  $(CYAN)restart$(RESET)            Restart services"
+	@echo -e "  $(CYAN)status$(RESET)             Check service status"
+	@echo -e "  $(CYAN)dev-dashboard$(RESET)      Full development environment"
+	@echo -e "  $(CYAN)run-web-dashboard$(RESET)  Run web dashboard"
+	@echo -e "  $(CYAN)run-tauri-dev$(RESET)      Run Tauri in development mode"
 	@echo -e "  $(CYAN)dev$(RESET)                Standard development workflow"
-	@echo -e "  $(CYAN)dev-fast$(RESET)           Quick development cycle"
-	@echo -e "  $(CYAN)quick$(RESET)              Quick check (alias for dev-fast)"
+	@echo -e "  $(CYAN)quick$(RESET)              Quick check (lint + test)"
 	@echo -e "  $(CYAN)full$(RESET)               Full quality check"
 	@echo -e "  $(CYAN)verify$(RESET)             Complete verification before PR"
-	@echo -e "  $(CYAN)ci-local$(RESET)           Run full CI pipeline locally"
-	@echo -e "  $(CYAN)comments$(RESET)           Show TODO/FIXME/NOTE comments"
-	@echo -e "  $(CYAN)structure$(RESET)          Show project structure"
+	@echo -e "  $(CYAN)debug-api$(RESET)          Debug API server"
+	@echo -e "  $(CYAN)logs$(RESET)               Show service logs"
 	@echo -e "  $(CYAN)dev-info$(RESET)           Show development environment info"
 
-help-docker: ## show docker help
-	@echo -e "$(GREEN)🐳 Docker Commands:$(RESET)"
+help-ops: ## show operations help
+	@echo -e "$(GREEN)🔧 Operations and Maintenance Commands:$(RESET)"
+	@echo -e "  $(CYAN)clean$(RESET)              Clean build artifacts"
+	@echo -e "  $(CYAN)clean-all$(RESET)          Clean everything"
+	@echo -e "  $(CYAN)clean-deep$(RESET)         Deep clean including Docker"
 	@echo -e "  $(CYAN)docker-build$(RESET)       Build Docker image"
 	@echo -e "  $(CYAN)docker-run$(RESET)         Run Docker container"
-	@echo -e "  $(CYAN)docker-stop$(RESET)        Stop containers"
-	@echo -e "  $(CYAN)docker-push$(RESET)        Push to registry"
-	@echo -e "  $(CYAN)docker-scan$(RESET)        Security scan image"
-	@echo -e "  $(CYAN)compose-up$(RESET)         Start with docker-compose"
-	@echo -e "  $(CYAN)docker-info$(RESET)        Show Docker information"
+	@echo -e "  $(CYAN)docker-status$(RESET)      Show Docker status"
+	@echo -e "  $(CYAN)info$(RESET)               Project information"
+	@echo -e "  $(CYAN)status$(RESET)             System status"
+	@echo -e "  $(CYAN)maintenance$(RESET)        Routine maintenance"
+	@echo -e "  $(CYAN)backup$(RESET)             Create backup"
+	@echo -e "  $(CYAN)check-health$(RESET)       Health check"
+	@echo -e "  $(CYAN)ops-info$(RESET)           Show operations information"
 
 # ==============================================================================
 # Project Information
@@ -199,13 +196,12 @@ info: ## show project information and current configuration
 	@echo "  • Rich CLI interface with Textual"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Available Modules:$(RESET)"
-	@echo -e "  • $(CYAN)Dependencies$(RESET)     (Makefile.deps.mk)    - Package management"
-	@echo -e "  • $(CYAN)Build & Deploy$(RESET)   (Makefile.build.mk)   - Build and installation"
+	@echo -e "  • $(CYAN)Environment$(RESET)      (Makefile.env.mk)     - Setup and tool management"
+	@echo -e "  • $(CYAN)Build & Package$(RESET)  (Makefile.build.mk)   - Build and packaging"
 	@echo -e "  • $(CYAN)Testing$(RESET)          (Makefile.test.mk)    - Test suites and coverage"
 	@echo -e "  • $(CYAN)Code Quality$(RESET)     (Makefile.quality.mk) - Formatting and analysis"
-	@echo -e "  • $(CYAN)Tools$(RESET)            (Makefile.tools.mk)   - Tool management"
-	@echo -e "  • $(CYAN)Development$(RESET)      (Makefile.dev.mk)     - Dev workflows"
-	@echo -e "  • $(CYAN)Docker$(RESET)           (Makefile.docker.mk)  - Containerization"
+	@echo -e "  • $(CYAN)Development$(RESET)      (Makefile.dev.mk)     - Dev workflows and servers"
+	@echo -e "  • $(CYAN)Operations$(RESET)       (Makefile.ops.mk)     - Operations and maintenance"
 
 
 version: ## show version

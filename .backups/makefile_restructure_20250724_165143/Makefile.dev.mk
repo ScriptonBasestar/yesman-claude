@@ -91,6 +91,46 @@ profile: ## profile the application
 	@echo -e "$(YELLOW)Run: python -m cProfile -o profile.stats yesman.py$(RESET)"
 	@echo -e "$(YELLOW)Then: python -m pstats profile.stats$(RESET)"
 
+# ==============================================================================
+# Documentation
+# ==============================================================================
+
+.PHONY: docs docs-serve docs-build api-docs changelog
+
+docs: docs-serve ## alias for docs-serve
+
+docs-serve: ## serve documentation locally
+	@echo -e "$(CYAN)Starting documentation server...$(RESET)"
+	@if [ -d "docs" ]; then \
+		python -m http.server 8000 --directory docs; \
+	else \
+		echo "$(YELLOW)No docs directory found$(RESET)"; \
+	fi
+
+docs-build: ## build documentation
+	@echo -e "$(CYAN)Building documentation...$(RESET)"
+	@command -v sphinx-build >/dev/null 2>&1 || pip install sphinx
+	@if [ -f "docs/conf.py" ]; then \
+		sphinx-build -b html docs docs/_build; \
+		echo "$(GREEN)✅ Documentation built in docs/_build$(RESET)"; \
+	else \
+		echo "$(YELLOW)No Sphinx configuration found$(RESET)"; \
+	fi
+
+api-docs: ## generate API documentation
+	@echo -e "$(CYAN)Generating API documentation...$(RESET)"
+	@command -v pdoc >/dev/null 2>&1 || pip install pdoc
+	@pdoc --html --output-dir docs/api libs commands
+	@echo -e "$(GREEN)✅ API docs generated in docs/api$(RESET)"
+
+changelog: ## generate changelog
+	@echo -e "$(CYAN)Generating changelog...$(RESET)"
+	@if [ -f ".git/HEAD" ]; then \
+		git log --pretty=format:"* %s (%h)" --reverse > CHANGELOG.tmp.md; \
+		echo "$(GREEN)✅ Changelog generated in CHANGELOG.tmp.md$(RESET)"; \
+	else \
+		echo "$(RED)Not a git repository$(RESET)"; \
+	fi
 
 # ==============================================================================
 # Development Information
@@ -101,36 +141,29 @@ profile: ## profile the application
 dev-info: ## show development environment information
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Development Information$(CYAN)                         ║"
+	@echo "║                         $(MAGENTA)Development Environment$(CYAN)                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
 	@echo "$(RESET)"
-	@echo -e "$(GREEN)🚀 Server Commands:$(RESET)"
-	@echo "  • $(CYAN)start$(RESET)               Start yesman services"
-	@echo "  • $(CYAN)stop$(RESET)                Stop all services"
-	@echo "  • $(CYAN)restart$(RESET)             Restart services"
-	@echo "  • $(CYAN)status$(RESET)              Check service status"
-	@echo "  • $(CYAN)dev-dashboard$(RESET)       Full development environment"
-	@echo ""
-	@echo -e "$(GREEN)🛠️  Development Commands:$(RESET)"
-	@echo "  • $(CYAN)dev$(RESET)                 Standard development workflow"
-	@echo "  • $(CYAN)quick$(RESET)               Quick check (alias for dev-fast)"
-	@echo "  • $(CYAN)full$(RESET)                Full quality check"
-	@echo "  • $(CYAN)verify$(RESET)              Complete verification before PR"
-	@echo ""
-	@echo -e "$(GREEN)🐛 Debug Commands:$(RESET)"
-	@echo "  • $(CYAN)debug-api$(RESET)           Debug API server"
-	@echo "  • $(CYAN)debug-frontend$(RESET)      Debug frontend"
-	@echo "  • $(CYAN)logs$(RESET)                Show service logs"
-	@echo ""
-	@echo -e "$(GREEN)📊 Current Status:$(RESET)"
+	@echo -e "$(GREEN)🏗️  Environment Details:$(RESET)"
 	@echo "  Python:         $$(python --version 2>&1)"
-	@echo "  Git branch:     $$(git branch --show-current 2>/dev/null || echo 'N/A')"
-	@echo "  Git status:     $$(git status --porcelain 2>/dev/null | wc -l | xargs echo) files changed"
-	@echo "  Last commit:    $$(git log -1 --format='%h %s' 2>/dev/null || echo 'N/A')"
+	@echo "  UV:            $$(uv --version 2>&1 || echo 'Not installed')"
+	@echo "  pip:           $$(pip --version | cut -d' ' -f2)"
+	@echo "  Platform:      $$(python -c 'import platform; print(platform.platform())')"
 	@echo ""
-	@echo -e "$(GREEN)🌐 Server Ports:$(RESET)"
-	@echo "  API Server:     $(YELLOW)$(API_SERVER_PORT)$(RESET)"
-	@echo "  Dev Server:     $(YELLOW)$(DEV_SERVER_PORT)$(RESET)"
+	@echo -e "$(GREEN)🔄 Development Workflows:$(RESET)"
+	@echo "  • $(CYAN)dev$(RESET)                 Standard development workflow"
+	@echo "  • $(CYAN)dev-fast$(RESET)            Quick development cycle"
+	@echo "  • $(CYAN)quick$(RESET)               Quick check (lint + test)"
+	@echo "  • $(CYAN)full$(RESET)                Full quality check"
+	@echo "  • $(CYAN)verify$(RESET)              Complete verification"
+	@echo "  • $(CYAN)ci-local$(RESET)            Run full CI locally"
+	@echo ""
+	@echo -e "$(GREEN)🚀 Quick Commands:$(RESET)"
+	@echo "  • $(CYAN)start$(RESET)               Start yesman"
+	@echo "  • $(CYAN)stop$(RESET)                Stop yesman"
+	@echo "  • $(CYAN)restart$(RESET)             Restart yesman"
+	@echo "  • $(CYAN)status$(RESET)              Check status"
+	@echo "  • $(CYAN)logs$(RESET)                Show log files"
 
 dev-status: ## show current development status
 	@echo -e "$(CYAN)Development Status Check$(RESET)"
@@ -145,3 +178,11 @@ dev-status: ## show current development status
 	@printf "  %-20s " "Tests Passing:"; if make test-unit > /dev/null 2>&1; then echo "$(GREEN)Yes$(RESET)"; else echo "$(RED)No$(RESET)"; fi
 	@printf "  %-20s " "Coverage File:"; if [ -f ".coverage" ]; then echo "$(GREEN)Yes$(RESET)"; else echo "$(YELLOW)No$(RESET)"; fi
 	@printf "  %-20s " "Virtual Env:"; if [ -n "$$VIRTUAL_ENV" ]; then echo "$(GREEN)Active$(RESET)"; else echo "$(YELLOW)None$(RESET)"; fi
+
+env-info: ## show environment variables
+	@echo -e "$(CYAN)Environment Variables:$(RESET)"
+	@echo -e "$(YELLOW)Python-related:$(RESET)"
+	@env | grep -E "PYTHON|PATH|VIRTUAL" | sort || echo "  No Python env vars set"
+	@echo ""
+	@echo -e "$(YELLOW)Project-related:$(RESET)"
+	@env | grep -i "yesman" | sort || echo "  No project env vars set"

@@ -42,8 +42,8 @@ Modern web dashboard built with SvelteKit, served via FastAPI.
 cd tauri-dashboard && npm run build
 
 # Start web dashboard
-uv run ./yesman.py dash run --interface web --port 8080
-# Access at: http://localhost:8080
+uv run ./yesman.py dash run --interface web --port 8000
+# Access at: http://localhost:8000
 
 # Background mode
 uv run ./yesman.py dash run --interface web --detach
@@ -85,8 +85,8 @@ uv run ./yesman.py up
 cd tauri-dashboard && npm run build && cd ..
 
 # Launch unified SvelteKit dashboard
-uv run ./yesman.py dash run -i web --port 8080
-# Access at: http://localhost:8080
+uv run ./yesman.py dash run -i web --port 8000
+# Access at: http://localhost:8000
 
 # Auto-detect best interface
 uv run ./yesman.py dash run
