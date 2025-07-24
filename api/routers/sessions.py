@@ -135,7 +135,7 @@ class SessionService:
                         override_session_name = proj_conf.get("override", {}).get("session_name")
                         if override_session_name == session_name:
                             actual_project_name = proj_name
-                            session_config = cast(dict, proj_conf)
+                            session_config = proj_conf
                             break
 
             if not session_config or not actual_project_name:
@@ -571,7 +571,7 @@ class SessionService:
 
             # Create the session
             self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
-            result = subprocess.run(create_cmd, capture_output=True, text=True)
+            result = subprocess.run(create_cmd, check=False, capture_output=True, text=True)
 
             self.logger.info(f"tmux command result: returncode={result.returncode}, stdout={result.stdout}, stderr={result.stderr}")
 
@@ -593,10 +593,10 @@ class SessionService:
                         window_name = window_config.get("window_name", f"window{window_idx}")
                         # Create new window (except for the first one which already exists)
                         if window_idx > 0:
-                            subprocess.run(["tmux", "new-window", "-t", actual_session_name, "-n", window_name], capture_output=True)
+                            subprocess.run(["tmux", "new-window", "-t", actual_session_name, "-n", window_name], check=False, capture_output=True)
                         else:
                             # Rename the first window
-                            subprocess.run(["tmux", "rename-window", "-t", f"{actual_session_name}:0", window_name], capture_output=True)
+                            subprocess.run(["tmux", "rename-window", "-t", f"{actual_session_name}:0", window_name], check=False, capture_output=True)
 
             return {"message": "Session setup completed", "session_name": actual_session_name, "template": template, "project_path": project_path}
 
