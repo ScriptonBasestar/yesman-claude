@@ -527,7 +527,15 @@ class SessionService:
         Boolean indicating.
         """
         try:
+<<<<<<< HEAD
             # Check directly with tmux (this is the ground truth)
+=======
+            # First check with session manager
+            sessions = self.session_manager.get_all_sessions()
+            session_manager_result = any(getattr(session, "session_name", None) == session_name for session in sessions)
+
+            # Also check directly with tmux
+>>>>>>> 1a60727 (fix: lint)
             try:
                 result = subprocess.run(
                     ["tmux", "has-session", "-t", session_name],
@@ -536,7 +544,14 @@ class SessionService:
                 )
                 return result.returncode == 0
             except Exception:
+<<<<<<< HEAD
                 return False
+=======
+                tmux_result = False
+
+            # Return True if either method confirms the session exists
+            return session_manager_result or tmux_result
+>>>>>>> 1a60727 (fix: lint)
         except Exception:
             return False
 
@@ -551,6 +566,7 @@ class SessionService:
             template = str(session_config.get("template_name", "default"))
             override_config = cast(dict, session_config.get("override", {}))
 
+<<<<<<< HEAD
             # Use override session name if provided, otherwise use session_name
             actual_session_name = str(override_config.get("session_name", session_name))
 
@@ -558,11 +574,17 @@ class SessionService:
             start_directory = str(override_config.get("start_directory", "."))
             project_path = start_directory
 
+=======
+            # Use override session name if provided
+            actual_session_name = str(override_config.get("session_name", session_name))
+
+>>>>>>> 1a60727 (fix: lint)
             # Create tmux session
             create_cmd = ["tmux", "new-session", "-d", "-s", actual_session_name]
 
             # Set working directory if specified
             if project_path and project_path != ".":
+<<<<<<< HEAD
                 # Expand ~ to home directory
                 import os
 
@@ -572,6 +594,13 @@ class SessionService:
             # Create the session
             self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
             result = subprocess.run(create_cmd, check=False, capture_output=True, text=True)
+=======
+                create_cmd.extend(["-c", project_path])
+
+            # Create the session
+            self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
+            result = subprocess.run(create_cmd, capture_output=True, text=True)
+>>>>>>> 1a60727 (fix: lint)
 
             self.logger.info(f"tmux command result: returncode={result.returncode}, stdout={result.stdout}, stderr={result.stderr}")
 
@@ -585,6 +614,7 @@ class SessionService:
 
             self.logger.info(f"Created tmux session '{actual_session_name}'")
 
+<<<<<<< HEAD
             # Setup windows based on override configuration
             windows_config = override_config.get("windows", [])
             if isinstance(windows_config, list) and windows_config:
@@ -597,6 +627,14 @@ class SessionService:
                         else:
                             # Rename the first window
                             subprocess.run(["tmux", "rename-window", "-t", f"{actual_session_name}:0", window_name], check=False, capture_output=True)
+=======
+            # Setup windows based on template
+            # For now, just create a basic window structure
+            if template != "default":
+                # Create additional windows based on template
+                # This would integrate with template system
+                pass
+>>>>>>> 1a60727 (fix: lint)
 
             return {"message": "Session setup completed", "session_name": actual_session_name, "template": template, "project_path": project_path}
 
