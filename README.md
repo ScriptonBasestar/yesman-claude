@@ -93,17 +93,11 @@ uv run ./yesman.py dash run -i web --port 8000
 # Auto-detect best interface
 uv run ./yesman.py dash run
 
-# Interactive session browser
-uv run ./yesman.py browse
-
 # AI learning system management
 uv run ./yesman.py ai status
 
 # Comprehensive project status dashboard
 uv run ./yesman.py status -i
-
-# Context-aware automation
-uv run ./yesman.py automate monitor
 ```
 
 ## 📋 Interface Comparison
@@ -134,30 +128,12 @@ uv run ./yesman.py ai history
 uv run ./yesman.py ai export
 ```
 
-### Context-Aware Automation
-
-```bash
-# Monitor development context
-uv run ./yesman.py automate monitor
-
-# Detect workflow patterns
-uv run ./yesman.py automate detect
-
-# Configure automation rules
-uv run ./yesman.py automate config
-```
 
 ### Performance Monitoring
 
 ```bash
 # Live performance dashboard
 uv run ./yesman.py status -i
-
-# Analyze log patterns
-uv run ./yesman.py logs analyze
-
-# Cleanup old logs
-uv run ./yesman.py logs cleanup
 ```
 
 ### Chrome DevTools Integration (Development Only)

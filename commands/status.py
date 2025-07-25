@@ -21,7 +21,6 @@ from libs.dashboard.widgets import (
     GitActivityWidget,
     ProgressTracker,
     ProjectHealth,
-    SessionBrowser,
 )
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 from libs.tmux_manager import TmuxManager
@@ -48,7 +47,6 @@ class StatusDashboard:
         self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)
 
         # Initialize widgets
-        self.session_browser = SessionBrowser(self.console)
         self.activity_heatmap = ActivityHeatmapGenerator(self.config)
         self.project_health = ProjectHealth(str(self.project_path))
         self.git_activity = GitActivityWidget(self.console, str(self.project_path))
@@ -93,8 +91,7 @@ class StatusDashboard:
                 self._calculate_session_activity(detailed_info)
                 # Note: add_activity_point method not available, skip heatmap update
 
-            # Update session browser
-            self.session_browser.update_sessions(detailed_sessions)
+            # Note: SessionBrowser was removed
 
             # Update project health - calculate health directly since update method not available
             self.project_health.calculate_health()
@@ -182,9 +179,8 @@ class StatusDashboard:
         header_text = f"🚀 Yesman Project Dashboard - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache Hit Rate: {cache_hit_rate:.1%}"
         layout["header"].update(Panel(header_text, style="bold blue"))
 
-        # Sessions
-        session_content, _ = self.session_browser.render()
-        layout["sessions"].update(session_content)
+        # Sessions - removed SessionBrowser
+        layout["sessions"].update(Panel("Session browser removed", title="Sessions"))
 
         # Project health - use available method or create fallback
         try:
@@ -251,9 +247,8 @@ class StatusDashboard:
         # Create detailed panels
         panels = []
 
-        # Session browser
-        session_content, _ = self.session_browser.render()
-        panels.append(session_content)
+        # Session browser - removed
+        panels.append(Panel("Session browser removed", title="Sessions"))
 
         # Project health detailed - use fallback since render method not available
         try:
