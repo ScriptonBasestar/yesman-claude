@@ -44,7 +44,8 @@ class AdaptiveResponse:
 
     async def should_auto_respond(self, prompt_text: str, context: str = "", project_name: str | None = None) -> tuple[bool, str, float]:
         """Determine if we should auto-respond to a prompt and what the
-        response should be."""
+        response should be.
+        """
         if not self.config.auto_response_enabled:
             return False, "", 0.0
 
@@ -100,7 +101,8 @@ class AdaptiveResponse:
         success: bool = True,  # noqa: FBT001
     ) -> None:
         """Confirm whether a response was successful and record it for
-        learning."""
+        learning.
+        """
         if not self.config.learning_enabled:
             return
 

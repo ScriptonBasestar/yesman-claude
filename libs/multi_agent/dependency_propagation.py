@@ -109,7 +109,8 @@ class PropagationResult:
 
 class DependencyPropagationSystem:
     """System for tracking and propagating dependency changes across
-    branches."""
+    branches.
+    """
 
     def __init__(
         self,

@@ -121,7 +121,8 @@ class BaseCommand(ABC):
 
     def _create_config(self) -> YesmanConfig:
         """Create YesmanConfig instance with error handling (fallback
-        method)."""
+        method).
+        """
         try:
             return YesmanConfig()
         except Exception as e:
@@ -131,7 +132,8 @@ class BaseCommand(ABC):
 
     def _create_tmux_manager(self) -> TmuxManager:
         """Create TmuxManager instance with error handling (fallback
-        method)."""
+        method).
+        """
         try:
             return TmuxManager(self.config)
         except Exception as e:

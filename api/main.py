@@ -194,7 +194,8 @@ else:
     @app.get("/")
     async def serve_dev_dashboard() -> Response:
         """Serve development dashboard when SvelteKit build is not
-        available."""
+        available.
+        """
         html_content = """
         <!DOCTYPE html>
         <html lang="en">

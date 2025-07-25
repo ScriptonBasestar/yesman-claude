@@ -32,6 +32,7 @@ from libs.dashboard.renderers.widget_models import (
     SessionStatus,
     WindowData,
 )
+
 """Tests for Renderer Factory."""
 
 

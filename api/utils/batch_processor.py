@@ -130,7 +130,8 @@ class WebSocketBatchProcessor:
 
     async def send_immediate(self, channel: str, message: dict[str, object]) -> None:
         """Send a message immediately without batching (for urgent
-        messages)."""
+        messages).
+        """
         handler = self._message_handlers.get(channel)
         if handler:
             try:

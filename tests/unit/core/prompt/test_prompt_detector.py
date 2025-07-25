@@ -16,7 +16,8 @@ class TestClaudePromptDetector:
 
     def test_detect_numbered_selection_prompt_should_return_correct_type(self) -> None:
         """Test that numbered selection prompts are correctly detected and
-        return PromptType.NUMBERED_SELECTION."""
+        return PromptType.NUMBERED_SELECTION.
+        """
         content = """
 Do you want to make this edit to VideoProcessingService.kt?
 ❯ 1. Yes
@@ -34,7 +35,8 @@ Do you want to make this edit to VideoProcessingService.kt?
         self,
     ) -> None:
         """Test that y/n binary choice prompts are correctly detected and
-        return PromptType.BINARY_CHOICE."""
+        return PromptType.BINARY_CHOICE.
+        """
         content = "Do you want to continue? (y/n)"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -44,7 +46,8 @@ Do you want to make this edit to VideoProcessingService.kt?
 
     def test_detect_true_false_prompt_should_return_true_false_type(self) -> None:
         """Test that true/false prompts are correctly detected and return
-        PromptType.TRUE_FALSE."""
+        PromptType.TRUE_FALSE.
+        """
         content = "Enable advanced features? (true/false)"
 
         prompt_info = self.detector.detect_prompt(content)

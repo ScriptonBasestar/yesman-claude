@@ -546,7 +546,8 @@ def status(project_path: str, update_interval: float, interactive: bool, async_m
 )
 def status_async(project_path: str, update_interval: float, interactive: bool) -> None:  # noqa: FBT001
     """Async comprehensive project status dashboard (explicit async
-    version)."""
+    version).
+    """
     command = AsyncStatusCommand()
     command.run(
         project_path=project_path,

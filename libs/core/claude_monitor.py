@@ -335,7 +335,8 @@ class ClaudeMonitor:  # noqa: PLR0904
 
     def _auto_respond_to_selection(self, prompt_info: PromptInfo) -> bool:
         """Auto-respond to selection prompts based on patterns and manual
-        overrides."""
+        overrides.
+        """
         if not self.is_auto_next_enabled:
             self.logger.debug("Auto-response disabled, skipping")
             return False
@@ -641,7 +642,8 @@ class ClaudeMonitor:  # noqa: PLR0904
     @staticmethod
     def _auto_trust_if_needed() -> bool:
         """Auto-respond to trust prompts if detected (legacy compatibility
-        method)."""
+        method).
+        """
         # For safety, this method returns False by default
         # Individual implementations should override based on security requirements
         return False

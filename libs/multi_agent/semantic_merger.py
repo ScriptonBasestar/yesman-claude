@@ -3,7 +3,8 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Automatic conflict resolution and semantic merge implementation for multi-
-agent development."""
+agent development.
+"""
 
 import ast
 import asyncio
@@ -723,7 +724,8 @@ class SemanticMerger:
         conflicts: list[SemanticConflict],
     ) -> MergeResult:
         """Perform contextual merge considering code dependencies and usage
-        patterns."""
+        patterns.
+        """
         # This would implement advanced contextual analysis
         # For now, delegate to intelligent merge
         return await self._intelligent_merge(
@@ -839,7 +841,8 @@ class SemanticMerger:
         conflicts: list[SemanticConflict],
     ) -> MergeStrategy:
         """Select optimal merge strategy based on conflict types and
-        patterns."""
+        patterns.
+        """
         # Count conflict types
         conflict_type_counts: defaultdict[SemanticConflictType, int] = defaultdict(int)
         for conflict in conflicts:

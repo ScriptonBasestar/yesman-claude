@@ -21,7 +21,8 @@ class TestSetupAliasCommand(unittest.TestCase):
         self, mock_session_manager: object
     ) -> None:
         """Test setup alias (up) command creates all sessions from
-        projects.yaml."""
+        projects.yaml.
+        """
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_projects.return_value = [

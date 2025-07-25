@@ -15,7 +15,8 @@ from .prompt_detector import PromptInfo
 
 class DashboardController:  # noqa: PLR0904
     """Main controller that orchestrates Claude session management, process
-    control, and monitoring."""
+    control, and monitoring.
+    """
 
     def __init__(self, session_name: str, pane_id: str | None = None) -> None:
         """Initialize the dashboard controller."""

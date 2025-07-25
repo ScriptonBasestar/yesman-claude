@@ -158,7 +158,8 @@ class WorkflowExecution:
 
 class ConditionEvaluator:
     """Safe condition evaluator that replaces eval() with regex-based
-    parsing."""
+    parsing.
+    """
 
     def __init__(self, context_info: ContextInfo) -> None:
         self.context = {

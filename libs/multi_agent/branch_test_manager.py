@@ -111,7 +111,8 @@ class TestSuite:
 
 class BranchTestManager:
     """Manages automatic testing execution per branch with result
-    integration."""
+    integration.
+    """
 
     def __init__(
         self,

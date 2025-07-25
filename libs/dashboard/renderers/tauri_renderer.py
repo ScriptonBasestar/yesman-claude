@@ -3,7 +3,8 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Tauri Renderer JSON-based renderer for Tauri desktop application
-integration."""
+integration.
+"""
 
 import json
 import uuid

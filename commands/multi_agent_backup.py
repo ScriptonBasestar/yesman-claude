@@ -1889,7 +1889,8 @@ def auto_resolve(
     preview: bool,  # noqa: FBT001
 ) -> None:
     """Automatically resolve conflicts between branches using AI-powered
-    semantic analysis."""
+    semantic analysis.
+    """
     try:
         mode_enum = AutoResolutionMode(mode)
 

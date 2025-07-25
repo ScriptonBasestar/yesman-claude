@@ -172,7 +172,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
     @staticmethod
     def prevention_system(mock_dependencies: dict) -> ConflictPreventionSystem:
         """Create ConflictPreventionSystem instance with mocked
-        dependencies."""
+        dependencies.
+        """
         return ConflictPreventionSystem(
             conflict_predictor=mock_dependencies["conflict_predictor"],
             auto_resolver=mock_dependencies["auto_resolver"],
@@ -512,7 +513,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         prevention_system: ConflictPreventionSystem,
     ) -> None:
         """Test _generate_generic_measures with high confidence for early
-        merge."""
+        merge.
+        """
         mock_prediction = PredictionResult(
             prediction_id="generic_pred_001",
             confidence=PredictionConfidence.CRITICAL,
@@ -551,7 +553,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         prevention_system: ConflictPreventionSystem,
     ) -> None:
         """Test _generate_generic_measures with low confidence (no early
-        merge)."""
+        merge).
+        """
         mock_prediction = PredictionResult(
             prediction_id="generic_pred_002",
             confidence=PredictionConfidence.LOW,

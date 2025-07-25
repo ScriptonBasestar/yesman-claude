@@ -3,7 +3,8 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Widget Data Adapter Converts raw data from various sources into standardized
-widget models."""
+widget models.
+"""
 
 import logging
 from datetime import UTC, datetime

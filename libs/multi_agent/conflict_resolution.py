@@ -334,7 +334,8 @@ class ConflictResolutionEngine:
         branch2: str,
     ) -> list[ConflictInfo]:
         """Detect file-level conflicts (additions, deletions,
-        modifications)."""
+        modifications).
+        """
         conflicts = []
 
         try:

@@ -326,7 +326,8 @@ class TestDashboardLauncher:
         mock_term: Mock, mock_gui: Mock, mock_ssh: Mock, launcher: DashboardLauncher
     ) -> None:
         """Test interface detection with GUI but no Tauri and no terminal
-        capability."""
+        capability.
+        """
         mock_ssh.return_value = False
         mock_gui.return_value = True
         mock_term.return_value = False

@@ -217,7 +217,8 @@ class ConnectionManager:
 
     async def broadcast_to_channel_immediate(self, channel: str, message: dict) -> None:
         """Broadcast message immediately without batching (for urgent
-        messages)."""
+        messages).
+        """
         await self.batch_processor.send_immediate(channel, message)
 
     async def broadcast_session_update(self, session_data: dict) -> None:

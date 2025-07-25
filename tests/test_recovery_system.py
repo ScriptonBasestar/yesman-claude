@@ -194,7 +194,8 @@ class TestRecoveryEngine:
     @staticmethod
     async def test_error_strategy_matching(recovery_engine: RecoveryEngine) -> None:
         """Test finding appropriate recovery strategies for different
-        errors."""
+        errors.
+        """
         # Test timeout error
         strategy = recovery_engine._find_recovery_strategy(
             "Task timed out after 300 seconds"

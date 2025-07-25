@@ -3,7 +3,8 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Automated conflict resolution system integrating semantic analysis and
-intelligent merging."""
+intelligent merging.
+"""
 
 import ast
 import logging
@@ -353,7 +354,8 @@ class AutoResolver:
         mode: AutoResolutionMode,
     ) -> tuple[list[SemanticConflict], list[SemanticConflict]]:
         """Assess which conflicts can be auto-resolved based on mode and
-        risk."""
+        risk.
+        """
         self.confidence_thresholds[mode]
         resolvable = []
         escalated = []

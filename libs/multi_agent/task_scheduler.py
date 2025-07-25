@@ -74,7 +74,8 @@ class PriorityTask:
 
 class TaskScheduler:
     """Intelligent task scheduler with priority and complexity-based
-    distribution."""
+    distribution.
+    """
 
     def __init__(self) -> None:
         """Initialize the task scheduler."""

@@ -18,12 +18,10 @@ from commands.multi_agent.agent_pool import (
     AddTaskCommand,
     ListTasksCommand,
     MonitorAgentsCommand,
-)
-from commands.multi_agent.agent_pool import StartAgentsCommand as AgentStartCommand
-from commands.multi_agent.agent_pool import (
     StatusCommand,
     StopAgentsCommand,
 )
+from commands.multi_agent.agent_pool import StartAgentsCommand as AgentStartCommand
 from commands.multi_agent.batch_operations import (
     AutoResolveCommand,
     BatchMergeCommand,
@@ -51,12 +49,10 @@ from commands.multi_agent.conflict_prediction import (
 )
 from commands.multi_agent.conflict_resolution import (
     ConflictSummaryCommand,
+    ResolveConflictCommand,
 )
 from commands.multi_agent.conflict_resolution import (
     DetectConflictsCommand as ConflictDetectCommand,
-)
-from commands.multi_agent.conflict_resolution import (
-    ResolveConflictCommand,
 )
 from commands.multi_agent.dependency_tracking import (
     DependencyImpactCommand,

@@ -3,7 +3,8 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """TUI Renderer Rich-based terminal user interface renderer for dashboard
-widgets."""
+widgets.
+"""
 
 from datetime import UTC, datetime
 from typing import Any, cast

@@ -3,7 +3,8 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Predictive conflict prevention system for proactive multi-agent
-development."""
+development.
+"""
 
 import asyncio
 import contextlib
@@ -306,7 +307,8 @@ class ConflictPreventionSystem:
         agents: list[str] | None = None,  # noqa: ARG002
     ) -> list[PreventionMeasure]:
         """Generate appropriate prevention measures for a conflict
-        prediction."""
+        prediction.
+        """
         measures = []
 
         # Determine strategy based on conflict pattern

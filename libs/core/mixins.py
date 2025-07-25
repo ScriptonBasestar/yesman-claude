@@ -107,7 +107,8 @@ class LayoutManagerMixin(ABC):
 # Optional: Concrete mixin implementations with default behavior
 class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
     """Default implementation of StatisticsProviderMixin with basic
-    functionality."""
+    functionality.
+    """
 
     def __init__(self) -> None:
         self._statistics = {
@@ -138,7 +139,8 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
 
 class DefaultStatusManagerMixin(StatusManagerMixin):
     """Default implementation of StatusManagerMixin with basic
-    functionality."""
+    functionality.
+    """
 
     VALID_STATUSES = {"running", "stopped", "paused", "error", "initializing", "idle"}
 
