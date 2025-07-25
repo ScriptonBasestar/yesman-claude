@@ -100,7 +100,7 @@ class ConnectionManager:
                     }
                     await connection.send_json(batch_message)
             except Exception:
-                logger.exception(f"Error broadcasting batch to {channel}:")  # noqa: G004
+                logger.exception(f"Error broadcasting batch to {channel}:")
                 disconnected.append(connection)
 
         # Clean up disconnected clients
@@ -125,7 +125,7 @@ class ConnectionManager:
             "last_ping": datetime.now(UTC),
         }
 
-        logger.info(f"WebSocket connected to channel: {channel}")  # noqa: G004
+        logger.info(f"WebSocket connected to channel: {channel}")
 
         # Send initial data
         await self.send_initial_data(websocket, channel)
@@ -335,7 +335,7 @@ class ConnectionManager:
         Returns:
         dict containing batch processing statistics including counts, sizes, and status.
         """
-        return cast(dict[str, int | float | bool], self.batch_processor.get_statistics())
+        return cast("dict[str, int | float | bool]", self.batch_processor.get_statistics())
 
 
 # Create global connection manager instance
@@ -362,7 +362,7 @@ async def websocket_dashboard(websocket: WebSocket) -> None:
                 channels = data.get("channels", [])
                 for channel in channels:
                     manager.channel_connections[channel].add(websocket)
-                    logger.info(f"Dashboard client subscribed to channel: {channel}")  # noqa: G004
+                    logger.info(f"Dashboard client subscribed to channel: {channel}")
 
             elif data.get("type") == "unsubscribe":
                 # Client wants to unsubscribe from specific updates
@@ -370,7 +370,7 @@ async def websocket_dashboard(websocket: WebSocket) -> None:
                 for channel in channels:
                     if websocket in manager.channel_connections[channel]:
                         manager.channel_connections[channel].remove(websocket)
-                        logger.info(f"Dashboard client unsubscribed from channel: {channel}")  # noqa: G004
+                        logger.info(f"Dashboard client unsubscribed from channel: {channel}")
 
             else:
                 # Echo back unknown messages for debugging

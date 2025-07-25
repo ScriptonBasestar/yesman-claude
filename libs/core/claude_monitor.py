@@ -20,7 +20,7 @@ from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 """Claude monitoring and auto-response system."""
 
 
-class ClaudeMonitor:  # noqa: PLR0904
+class ClaudeMonitor:
     """Handles Claude monitoring and auto-response logic."""
 
     def __init__(
@@ -79,11 +79,11 @@ class ClaudeMonitor:  # noqa: PLR0904
 
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
 
-    def set_auto_next(self, enabled: bool) -> None:  # noqa: FBT001
+    def set_auto_next(self, enabled: bool) -> None:
         """Enable or disable auto-next responses."""
         self.is_auto_next_enabled = enabled
         status = "enabled" if enabled else "disabled"
-        cast(Any, self.status_manager).update_status(f"[cyan]Auto next {status}[/]")
+        cast("Any", self.status_manager).update_status(f"[cyan]Auto next {status}[/]")
 
     def set_mode_yn(self, mode: str, response: str) -> None:
         """Set manual override for Y/N prompts."""
@@ -102,17 +102,17 @@ class ClaudeMonitor:  # noqa: PLR0904
 
     def start_monitoring(self) -> bool:
         """Start the monitoring loop."""
-        if not cast(Any, self.session_manager).get_claude_pane():
-            cast(Any, self.status_manager).update_status("[red]Cannot start: No Claude pane in session[/]")
+        if not cast("Any", self.session_manager).get_claude_pane():
+            cast("Any", self.status_manager).update_status("[red]Cannot start: No Claude pane in session[/]")
             return False
 
         if self.is_running:
-            cast(Any, self.status_manager).update_status("[yellow]Monitor already running[/]")
+            cast("Any", self.status_manager).update_status("[yellow]Monitor already running[/]")
             return False
 
         try:
             self.is_running = True
-            cast(Any, self.status_manager).update_status(f"[green]Starting claude monitor for {self.session_name}[/]")
+            cast("Any", self.status_manager).update_status(f"[green]Starting claude monitor for {self.session_name}[/]")
 
             # Start monitoring in a separate thread with its own event loop
             self._monitor_thread = threading.Thread(target=self._run_monitor_loop, daemon=True)
@@ -122,14 +122,14 @@ class ClaudeMonitor:  # noqa: PLR0904
 
         except Exception as e:
             self.is_running = False
-            cast(Any, self.status_manager).update_status(f"[red]Failed to start claude monitor: {e}[/]")
+            cast("Any", self.status_manager).update_status(f"[red]Failed to start claude monitor: {e}[/]")
             self.logger.error("Failed to start claude monitor: %s", e, exc_info=True)
             return False
 
     def stop_monitoring(self) -> bool:
         """Stop the monitoring loop."""
         if not self.is_running:
-            cast(Any, self.status_manager).update_status("[yellow]Claude monitor not running[/]")
+            cast("Any", self.status_manager).update_status("[yellow]Claude monitor not running[/]")
             return False
 
         self.is_running = False
@@ -142,7 +142,7 @@ class ClaudeMonitor:  # noqa: PLR0904
         if self._monitor_thread and self._monitor_thread.is_alive():
             self._monitor_thread.join(timeout=2.0)
 
-        cast(Any, self.status_manager).update_status(f"[red]Stopped claude monitor for {self.session_name}[/]")
+        cast("Any", self.status_manager).update_status(f"[red]Stopped claude monitor for {self.session_name}[/]")
         return True
 
     def _run_monitor_loop(self) -> None:
@@ -160,7 +160,7 @@ class ClaudeMonitor:  # noqa: PLR0904
 
     async def _monitor_loop(self) -> None:
         """Main monitoring loop that runs in background."""
-        if not cast(Any, self.session_manager).get_claude_pane():
+        if not cast("Any", self.session_manager).get_claude_pane():
             self.logger.error("Cannot start monitoring: no Claude pane for %s", self.session_name)
             self.is_running = False
             return
@@ -173,15 +173,15 @@ class ClaudeMonitor:  # noqa: PLR0904
                 await asyncio.sleep(1)  # Check every second
 
                 try:
-                    content = cast(str, cast(Any, self.session_manager).capture_pane_content())
+                    content = cast("str", cast("Any", self.session_manager).capture_pane_content())
 
                     # Check if Claude is still running
-                    if not cast(Any, self.process_controller).is_claude_running():
+                    if not cast("Any", self.process_controller).is_claude_running():
                         if self.is_auto_next_enabled:
-                            cast(Any, self.status_manager).update_activity("🔄 Auto-restarting Claude...")
-                            cast(Any, self.process_controller).restart_claude_pane()
+                            cast("Any", self.status_manager).update_activity("🔄 Auto-restarting Claude...")
+                            cast("Any", self.process_controller).restart_claude_pane()
                             continue
-                        cast(Any, self.status_manager).update_status("[yellow]Claude not running. Auto-restart disabled.[/]")
+                        cast("Any", self.status_manager).update_status("[yellow]Claude not running. Auto-restart disabled.[/]")
                         continue
 
                     # Check for prompts and auto-respond if enabled
@@ -212,9 +212,9 @@ class ClaudeMonitor:  # noqa: PLR0904
                                 )
 
                                 if success:
-                                    cast(Any, self.process_controller).send_input(ai_response)
-                                    cast(Any, self.status_manager).update_activity(f"🤖 AI auto-responded: '{ai_response}' (confidence: {confidence:.2f})")
-                                    cast(Any, self.status_manager).record_response(prompt_info.type.value, ai_response, content)
+                                    cast("Any", self.process_controller).send_input(ai_response)
+                                    cast("Any", self.status_manager).update_activity(f"🤖 AI auto-responded: '{ai_response}' (confidence: {confidence:.2f})")
+                                    cast("Any", self.status_manager).record_response(prompt_info.type.value, ai_response, content)
                                     self.adaptive_response.confirm_response_success(
                                         prompt_info.question,
                                         ai_response,
@@ -228,8 +228,8 @@ class ClaudeMonitor:  # noqa: PLR0904
                             # Fall back to legacy pattern-based auto-response if AI didn't handle it
                             if self._auto_respond_to_selection(prompt_info):
                                 response = self._get_legacy_response(prompt_info)
-                                cast(Any, self.status_manager).update_activity(f"✅ Legacy auto-responded: '{response}' to {prompt_info.type.value}")
-                                cast(Any, self.status_manager).record_response(prompt_info.type.value, response, content)
+                                cast("Any", self.status_manager).update_activity(f"✅ Legacy auto-responded: '{response}' to {prompt_info.type.value}")
+                                cast("Any", self.status_manager).record_response(prompt_info.type.value, response, content)
                                 # Learn from legacy response for future AI improvements
                                 self.adaptive_response.learn_from_manual_response(
                                     prompt_info.question,
@@ -241,14 +241,14 @@ class ClaudeMonitor:  # noqa: PLR0904
                                 continue
 
                         # If auto-response didn't handle it, show waiting status
-                        cast(Any, self.status_manager).update_activity(f"⏳ Waiting for input: {prompt_info.type.value}")
+                        cast("Any", self.status_manager).update_activity(f"⏳ Waiting for input: {prompt_info.type.value}")
                         self.logger.debug(
                             "Prompt detected: %s - %s",
                             prompt_info.type.value,
                             prompt_info.question,
                         )
                     elif self.waiting_for_input:
-                        cast(Any, self.status_manager).update_activity("⏳ Waiting for user input...")
+                        cast("Any", self.status_manager).update_activity("⏳ Waiting for user input...")
                     else:
                         # Clear prompt state if no longer waiting
                         self._clear_prompt_state()
@@ -259,26 +259,26 @@ class ClaudeMonitor:  # noqa: PLR0904
                     # Analyze content for automation contexts
                     if content != last_content and len(content.strip()) > 0:
                         automation_contexts = cast(
-                            list,
+                            "list",
                             self.automation_manager.analyze_content_for_context(content, self.session_name),
                         )
                         for auto_context in automation_contexts:
                             self.logger.info(
                                 "Automation context detected: %s (confidence: %.2f)",
-                                cast(Any, auto_context).context_type.value,
-                                cast(Any, auto_context).confidence,
+                                cast("Any", auto_context).context_type.value,
+                                cast("Any", auto_context).confidence,
                             )
 
                     # Check for Claude idle automation opportunities
                     if hasattr(self.status_manager, "last_activity_time"):
                         idle_context = self.automation_manager.analyze_claude_idle(
-                            cast(Any, self.status_manager).last_activity_time,
+                            cast("Any", self.status_manager).last_activity_time,
                             idle_threshold=60,
                         )
                         if idle_context:
                             self.logger.debug(
                                 "Claude idle context: %.2f",
-                                cast(Any, idle_context).confidence,
+                                cast("Any", idle_context).confidence,
                             )
 
                     # Collect content for pattern analysis
@@ -299,7 +299,7 @@ class ClaudeMonitor:  # noqa: PLR0904
 
                     # Update activity if content changed
                     if content != last_content:
-                        cast(Any, self.status_manager).update_activity("📝 Content updated")
+                        cast("Any", self.status_manager).update_activity("📝 Content updated")
                         last_content = content
 
                 except Exception:
@@ -312,7 +312,7 @@ class ClaudeMonitor:  # noqa: PLR0904
             self.logger.exception("Monitoring loop error")
         finally:
             self.is_running = False
-            cast(Any, self.status_manager).update_status("[red]Claude monitor stopped[/]")
+            cast("Any", self.status_manager).update_status("[red]Claude monitor stopped[/]")
 
     def _check_for_prompt(self, content: str) -> PromptInfo | None:
         """Check if content contains a prompt waiting for input."""
@@ -360,7 +360,7 @@ class ClaudeMonitor:  # noqa: PLR0904
 
     def _handle_numbered_selection(self, prompt_info: PromptInfo) -> bool:
         """Handle numbered selection prompts (1, 2, 3 options)."""
-        opts_count = cast(dict[str, Any], prompt_info.metadata).get("option_count", len(prompt_info.options))
+        opts_count = cast("dict[str, Any]", prompt_info.metadata).get("option_count", len(prompt_info.options))
 
         # Check manual overrides
         if opts_count == 2 and self.mode12 == "Manual":
@@ -371,8 +371,8 @@ class ClaudeMonitor:  # noqa: PLR0904
             # Use pattern-based response or fallback
             response = getattr(prompt_info, "recommended_response", None) or "1"
 
-        cast(Any, self.process_controller).send_input(response)
-        cast(Any, self.status_manager).record_response(prompt_info.type.value, response, prompt_info.question)
+        cast("Any", self.process_controller).send_input(response)
+        cast("Any", self.status_manager).record_response(prompt_info.type.value, response, prompt_info.question)
         self.logger.info("Auto-responding to numbered selection with: %s", response)
         return True
 
@@ -385,8 +385,8 @@ class ClaudeMonitor:  # noqa: PLR0904
             # Use pattern-based response or fallback
             response = getattr(prompt_info, "recommended_response", None) or "y"
 
-        cast(Any, self.process_controller).send_input(response)
-        cast(Any, self.status_manager).record_response(prompt_info.type.value, response, prompt_info.question)
+        cast("Any", self.process_controller).send_input(response)
+        cast("Any", self.status_manager).record_response(prompt_info.type.value, response, prompt_info.question)
         self.logger.info("Auto-responding to binary choice with: %s", response)
         return True
 
@@ -399,8 +399,8 @@ class ClaudeMonitor:  # noqa: PLR0904
             # Use pattern-based response or fallback
             response = getattr(prompt_info, "recommended_response", None) or "1"
 
-        cast(Any, self.process_controller).send_input(response)
-        cast(Any, self.status_manager).record_response(prompt_info.type.value, response, prompt_info.question)
+        cast("Any", self.process_controller).send_input(response)
+        cast("Any", self.status_manager).record_response(prompt_info.type.value, response, prompt_info.question)
         self.logger.info("Auto-responding to binary selection with: %s", response)
         return True
 
@@ -410,8 +410,8 @@ class ClaudeMonitor:  # noqa: PLR0904
 
         if "continue" in question or "press enter" in question:
             response = ""  # Just press Enter
-            cast(Any, self.process_controller).send_input(response)
-            cast(Any, self.status_manager).record_response(prompt_info.type.value, "Enter", prompt_info.question)
+            cast("Any", self.process_controller).send_input(response)
+            cast("Any", self.status_manager).record_response(prompt_info.type.value, "Enter", prompt_info.question)
             self.logger.info("Auto-responding to login redirect with Enter")
             return True
 
@@ -428,7 +428,7 @@ class ClaudeMonitor:  # noqa: PLR0904
 
     def get_collection_stats(self) -> dict[str, Any]:
         """Get content collection statistics."""
-        return cast(dict[str, Any], self.content_collector.get_collection_stats())
+        return cast("dict[str, Any]", self.content_collector.get_collection_stats())
 
     def cleanup_old_collections(self, days_to_keep: int = 7) -> int:
         """Clean up old collection files."""
@@ -438,7 +438,7 @@ class ClaudeMonitor:  # noqa: PLR0904
         """Get response that would be used by legacy auto-response system."""
         try:
             if prompt_info.type == PromptType.NUMBERED_SELECTION:
-                opts_count = cast(dict[str, Any], prompt_info.metadata).get("option_count", len(prompt_info.options))
+                opts_count = cast("dict[str, Any]", prompt_info.metadata).get("option_count", len(prompt_info.options))
                 if opts_count == 2 and self.mode12 == "Manual":
                     return self.mode12_response
                 if opts_count >= 3 and self.mode123 == "Manual":
@@ -468,17 +468,17 @@ class ClaudeMonitor:  # noqa: PLR0904
     # Adaptive response management methods
     def get_adaptive_statistics(self) -> dict[str, Any]:
         """Get statistics from the adaptive response system."""
-        return cast(dict[str, Any], self.adaptive_response.get_learning_statistics())
+        return cast("dict[str, Any]", self.adaptive_response.get_learning_statistics())
 
     def set_adaptive_confidence_threshold(self, threshold: float) -> None:
         """Adjust the confidence threshold for adaptive responses."""
         self.adaptive_response.adjust_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_adaptive_response(self, enabled: bool = True) -> None:
         """Enable or disable adaptive response functionality."""
         self.adaptive_response.enable_auto_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:
         """Enable or disable adaptive learning functionality."""
         self.adaptive_response.enable_learning(enabled)
 
@@ -537,7 +537,7 @@ class ClaudeMonitor:  # noqa: PLR0904
         self.automation_manager.load_automation_config()
 
     # Project health monitoring methods
-    async def calculate_project_health(self, force_refresh: bool = False) -> dict:  # noqa: FBT001
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:
         """Calculate comprehensive project health."""
         health = await self.health_calculator.calculate_health(force_refresh)
         return health.to_dict()

@@ -14,7 +14,7 @@ Ensures make lint, pre-commit, and pre-push hooks are consistent.
 """
 
 
-def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:  # noqa: FBT001
+def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
     """Run a shell command and return the result.
 
     Returns:
@@ -65,18 +65,17 @@ def validate_lint_consistency() -> bool:
     if all_passed:
         print("\n🎉 All lint configurations are consistent and passing!")
         return True
-    else:
-        print("\n💥 Some lint configurations are failing!")
+    print("\n💥 Some lint configurations are failing!")
 
-        # Show detailed errors
-        if make_lint_result.returncode != 0:
-            print(f"\n❌ Make lint errors:\n{make_lint_result.stderr}")
-        if precommit_result.returncode != 0:
-            print(f"\n❌ Pre-commit errors:\n{precommit_result.stderr}")
-        if prepush_result.returncode != 0:
-            print(f"\n❌ Pre-push errors:\n{prepush_result.stderr}")
+    # Show detailed errors
+    if make_lint_result.returncode != 0:
+        print(f"\n❌ Make lint errors:\n{make_lint_result.stderr}")
+    if precommit_result.returncode != 0:
+        print(f"\n❌ Pre-commit errors:\n{precommit_result.stderr}")
+    if prepush_result.returncode != 0:
+        print(f"\n❌ Pre-push errors:\n{prepush_result.stderr}")
 
-        return False
+    return False
 
 
 def install_hooks() -> None:

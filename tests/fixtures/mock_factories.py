@@ -34,7 +34,7 @@ class ManagerMockFactory:
 
         # Default behaviors
         sessions = cast(
-            list[dict[str, Any]], kwargs.get("sessions", [MOCK_SESSION_DATA])
+            "list[dict[str, Any]]", kwargs.get("sessions", [MOCK_SESSION_DATA])
         )
         mock_manager.get_sessions.return_value = sessions
         mock_manager.list_sessions.return_value = [s["session_name"] for s in sessions]
@@ -98,7 +98,7 @@ class ManagerMockFactory:
         mock_manager = MagicMock()
 
         # Default controller
-        controller_count = cast(int, kwargs.get("controller_count", 1))
+        controller_count = cast("int", kwargs.get("controller_count", 1))
         if "get_controller_result" in kwargs:
             mock_controller = kwargs["get_controller_result"]
         else:
@@ -121,7 +121,7 @@ class ManagerMockFactory:
 
         # Status tracking
         controllers_status = cast(
-            dict[str, str],
+            "dict[str, str]",
             kwargs.get("controllers_status", {"test-session": "running"}),
         )
         mock_manager.get_all_status.return_value = controllers_status
@@ -281,7 +281,7 @@ class PatchContextFactory:
     def patch_subprocess_run(**kwargs: object) -> object:
         """Create a patch context for subprocess.run with standard mock."""
         mock_result = ComponentMockFactory.create_subprocess_mock(
-            **cast(dict[str, Any], kwargs)
+            **cast("dict[str, Any]", kwargs)
         )
         return patch("subprocess.run", return_value=mock_result)
 

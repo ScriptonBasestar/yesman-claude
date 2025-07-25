@@ -25,10 +25,10 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 
     def execute(
         self,
-        dry_run: bool = False,  # noqa: FBT001
-        force: bool = False,  # noqa: FBT001
-        cleanup_all: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        dry_run: bool = False,
+        force: bool = False,
+        cleanup_all: bool = False,
+        **kwargs,
     ) -> dict:
         """Execute the cleanup command.
 
@@ -74,7 +74,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             "success": len(errors) == 0,
         }
 
-    def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:  # noqa: FBT001
+    def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:
         """Find cache files to clean.
 
         Returns:
@@ -202,7 +202,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 )
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
 @click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
-def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:  # noqa: FBT001
+def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:
     """Clean up excessive cache files and temporary data."""
     command = CleanupCommand()
     command.run(dry_run=dry_run, force=force, cleanup_all=cleanup_all)

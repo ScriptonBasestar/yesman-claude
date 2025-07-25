@@ -40,7 +40,7 @@ def temp_file(content: str = "", suffix: str = ".txt") -> Generator[str, None, N
             f.write(content)
         yield path
     finally:
-        os.unlink(path)
+        Path(path).unlink()
 
 
 def create_test_config(config_dict: dict[str, Any], format: str = "yaml") -> str:

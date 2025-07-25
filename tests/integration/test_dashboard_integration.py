@@ -51,7 +51,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             self.create_test_session(session_name)
 
         # Start mock dashboard server
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Setup first session via CLI
         self.performance_monitor.start_timing("session_setup_dashboard")
@@ -97,7 +97,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             setup_duration < 5.0
         ), f"Session setup with dashboard took {setup_duration:.2f}s, should be < 5s"
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_automation_monitoring(self) -> None:
         """Test dashboard integration with automation monitoring."""
@@ -109,7 +109,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         (project_dir / "app.py").write_text("print('Dashboard test')")
         (project_dir / "requirements.txt").write_text("flask==2.0.0")
 
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Start automation monitoring
         self.performance_monitor.start_timing("automation_monitoring_dashboard")
@@ -145,11 +145,11 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             monitoring_duration < 8.0
         ), f"Automation monitoring with dashboard took {monitoring_duration:.2f}s, should be < 8s"
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_performance_metrics(self) -> None:
         """Test dashboard performance metrics collection and display."""
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Perform various operations to generate metrics
         operations = [
@@ -185,11 +185,11 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
                 operation_duration, rel=0.1
             )
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_real_time_updates(self) -> None:
         """Test dashboard real-time update mechanism."""
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Track update events
         update_events = []
@@ -225,11 +225,11 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         latest_update = max(update_events, key=lambda e: e["timestamp"])
         assert time.time() - latest_update["timestamp"] < 5.0
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_websocket_performance(self) -> None:
         """Test dashboard WebSocket performance under load."""
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Simulate multiple concurrent clients
         client_count = 5
@@ -241,7 +241,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         for i in range(client_count):
             client = await self._create_mock_websocket_client(
                 dashboard, f"client-{i}"
-            )  # noqa: SLF001
+            )
             clients.append(client)
 
         setup_duration = self.performance_monitor.end_timing("websocket_setup")
@@ -283,7 +283,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         for client in clients:
             await client.disconnect()
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     @staticmethod
     async def _start_mock_dashboard() -> Mock:
@@ -300,7 +300,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         dashboard.register_update_handler = Mock()
 
         # Track state changes
-        dashboard._state = {  # noqa: SLF001
+        dashboard._state = {
             "sessions": [],
             "automation": {"monitored_projects": []},
             "performance_metrics": {},
@@ -308,17 +308,17 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
         # Add helper methods for testing
         async def add_session(session_data: dict[str, object]) -> None:
-            dashboard._state["sessions"].append(session_data)  # noqa: SLF001
+            dashboard._state["sessions"].append(session_data)
 
         async def add_automation_project(project_data: dict[str, object]) -> None:
             dashboard._state["automation"]["monitored_projects"].append(
                 project_data
-            )  # noqa: SLF001
+            )
 
         async def add_performance_metric(metric_name: str, metric_data: object) -> None:
             dashboard._state["performance_metrics"][
                 metric_name
-            ] = metric_data  # noqa: SLF001
+            ] = metric_data
 
         dashboard.add_session = add_session
         dashboard.add_automation_project = add_automation_project
@@ -326,7 +326,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
         # Update get_current_state to return actual state
         async def get_state():
-            return dashboard._state.copy()  # noqa: SLF001
+            return dashboard._state.copy()
 
         dashboard.get_current_state = get_state
 
@@ -342,7 +342,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
     @staticmethod
     async def _create_mock_websocket_client(
         dashboard: object, client_id: str
-    ) -> Mock:  # noqa: ARG002, ARG004
+    ) -> Mock:
         """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id
@@ -369,7 +369,7 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         session_name = "consistency-test-session"
         self.create_test_session(session_name)
 
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Setup session via CLI
         cli_result = self.command_runner.run_command(
@@ -405,7 +405,7 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         # Key attributes should match
         assert cli_session["name"] == dashboard_session["name"]
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     async def test_automation_dashboard_data_sync(self) -> None:
         """Test automation data synchronization with dashboard."""
@@ -414,7 +414,7 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
 
         (project_dir / "main.py").write_text("print('Sync test')")
 
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Start automation monitoring
         monitor_result = self.command_runner.run_command(
@@ -436,20 +436,20 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         project_paths = [p.get("path") for p in monitored_projects]
         assert str(project_dir) in project_paths
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     @staticmethod
     async def _start_mock_dashboard() -> Mock:
         """Start mock dashboard - reuse from previous class."""
         dashboard = Mock()
-        dashboard._state = {  # noqa: SLF001
+        dashboard._state = {
             "sessions": [],
             "automation": {"monitored_projects": []},
             "performance_metrics": {},
         }
 
         async def get_state():
-            return dashboard._state.copy()  # noqa: SLF001
+            return dashboard._state.copy()
 
         dashboard.get_current_state = get_state
         return dashboard
@@ -464,7 +464,7 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
 
     async def test_dashboard_connection_recovery(self) -> None:
         """Test dashboard recovery from connection failures."""
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Simulate connection failure
         original_get_state = dashboard.get_current_state
@@ -493,11 +493,11 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         dashboard_state = await dashboard.get_current_state()
         assert dashboard_state is not None
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     async def test_dashboard_graceful_degradation(self) -> None:
         """Test dashboard graceful degradation under high load."""
-        dashboard = await self._start_mock_dashboard()  # noqa: SLF001
+        dashboard = await self._start_mock_dashboard()
 
         # Simulate high load scenario
         load_operations = 20
@@ -527,20 +527,20 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         dashboard_state = await dashboard.get_current_state()
         assert dashboard_state is not None
 
-        await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
+        await self._stop_mock_dashboard(dashboard)
 
     @staticmethod
     async def _start_mock_dashboard() -> Mock:
         """Start mock dashboard - reuse pattern."""
         dashboard = Mock()
-        dashboard._state = {  # noqa: SLF001
+        dashboard._state = {
             "sessions": [],
             "automation": {"monitored_projects": []},
             "performance_metrics": {},
         }
 
         async def get_state():
-            return dashboard._state.copy()  # noqa: SLF001
+            return dashboard._state.copy()
 
         dashboard.get_current_state = get_state
         return dashboard

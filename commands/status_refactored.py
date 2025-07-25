@@ -32,7 +32,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             "show_details": True,
         }
 
-    def execute(self, **kwargs: Any) -> dict[str, object]:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the status command.
 
         Args:
@@ -57,17 +57,17 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         except Exception:
             self.update_status("error")
-            self.logger.exception("Error checking status")  # noqa: G004
+            self.logger.exception("Error checking status")
             raise
 
     def update_status(self, status: str) -> None:
         """Update the current status - implements StatusManagerMixin interface."""
         self._current_status = status
-        self.logger.debug(f"Status updated to: {status}")  # noqa: G004
+        self.logger.debug(f"Status updated to: {status}")
 
     def update_activity(self, activity: str) -> None:
         """Update the current activity - implements StatusManagerMixin interface."""
-        self.logger.debug(f"Activity: {activity}")  # noqa: G004
+        self.logger.debug(f"Activity: {activity}")
 
     def create_layout(self) -> dict[str, object]:
         """Create and return layout configuration - implements LayoutManagerMixin interface.
@@ -79,8 +79,8 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
     def update_layout(self, layout_config: object) -> None:
         """Update layout configuration - implements LayoutManagerMixin interface."""
-        self._layout_config.update(cast(dict, layout_config))
-        self.logger.debug(f"Layout updated: {layout_config}")  # noqa: G004
+        self._layout_config.update(cast("dict", layout_config))
+        self.logger.debug(f"Layout updated: {layout_config}")
 
     def _check_single_session(self, session_name: str) -> dict[str, object]:
         """Check status of a single session.
@@ -92,14 +92,14 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         # Load projects configuration
         projects = self.tmux_manager.load_projects()
-        sessions_config = cast(dict, projects.get("sessions", {}))
+        sessions_config = cast("dict", projects.get("sessions", {}))
 
         if session_name not in sessions_config:
             self.print_error(f"Session '{session_name}' not found in configuration")
             return {"error": "session_not_found"}
 
         # Get session info
-        session_info = self._get_session_info(session_name, cast(dict, sessions_config[session_name]))
+        session_info = self._get_session_info(session_name, cast("dict", sessions_config[session_name]))
 
         # Display based on layout
         self._display_session_status([session_info])
@@ -116,7 +116,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         # Load projects configuration
         projects = self.tmux_manager.load_projects()
-        sessions_config = cast(dict, projects.get("sessions", {}))
+        sessions_config = cast("dict", projects.get("sessions", {}))
 
         if not sessions_config:
             self.print_warning("No sessions configured in projects.yaml")
@@ -125,7 +125,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         # Get info for all sessions
         session_infos = []
         for name, config in sessions_config.items():
-            session_infos.append(self._get_session_info(name, cast(dict, config)))
+            session_infos.append(self._get_session_info(name, cast("dict", config)))
 
         # Display based on layout
         self._display_session_status(session_infos)
@@ -162,13 +162,13 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
                     # Get window and pane count
                     session_info = self.tmux_manager.get_session_info(session_name)
-                    windows = cast(list, session_info.get("windows", []))
+                    windows = cast("list", session_info.get("windows", []))
                     info["windows"] = len(windows)
-                    info["panes"] = sum(len(cast(list, w.get("panes", []))) for w in windows)
+                    info["panes"] = sum(len(cast("list", w.get("panes", []))) for w in windows)
                     break
 
         except Exception:
-            self.logger.exception("Error getting tmux info for {session_name}")  # noqa: G004
+            self.logger.exception("Error getting tmux info for {session_name}")
             info["status"] = "error"
 
         return info
@@ -306,7 +306,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     default=True,
     help="Show detailed information",
 )
-def status(session_name: str | None, format: str, details: bool) -> None:  # noqa: FBT001
+def status(session_name: str | None, format: str, details: bool) -> None:
     """Show status of all or specific tmux sessions."""
     command = StatusCommand()
 

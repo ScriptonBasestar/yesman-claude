@@ -131,13 +131,13 @@ class AppSettings:
 
     def _expand_paths(self) -> None:
         """Expand user paths (~) to absolute paths."""
-        self.paths.home_dir = os.path.expanduser(self.paths.home_dir)
-        self.paths.templates_dir = os.path.expanduser(self.paths.templates_dir)
-        self.paths.logs_dir = os.path.expanduser(self.paths.logs_dir)
-        self.paths.cache_dir = os.path.expanduser(self.paths.cache_dir)
-        self.paths.projects_file = os.path.expanduser(self.paths.projects_file)
-        self.paths.config_file = os.path.expanduser(self.paths.config_file)
-        self.logging.default_path = os.path.expanduser(self.logging.default_path)
+        self.paths.home_dir = Path(self.paths.home_dir).expanduser()
+        self.paths.templates_dir = Path(self.paths.templates_dir).expanduser()
+        self.paths.logs_dir = Path(self.paths.logs_dir).expanduser()
+        self.paths.cache_dir = Path(self.paths.cache_dir).expanduser()
+        self.paths.projects_file = Path(self.paths.projects_file).expanduser()
+        self.paths.config_file = Path(self.paths.config_file).expanduser()
+        self.logging.default_path = Path(self.logging.default_path).expanduser()
 
     def ensure_directories(self) -> None:
         """Create necessary directories if they don't exist."""

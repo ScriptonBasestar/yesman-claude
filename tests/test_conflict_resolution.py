@@ -159,7 +159,7 @@ class TestConflictResolutionEngine:
 
         conflicts = engine._parse_merge_tree_output(
             output, "branch1", "branch2"
-        )  # noqa: SLF001
+        )
 
         assert len(conflicts) > 0
         conflict = conflicts[0]
@@ -171,7 +171,7 @@ class TestConflictResolutionEngine:
     @staticmethod
     def test_create_merge_conflict(engine: ConflictResolutionEngine) -> None:
         """Test creation of merge conflict info."""
-        conflict = engine._create_merge_conflict(  # noqa: SLF001
+        conflict = engine._create_merge_conflict(
             "test.py",
             "branch1",
             "branch2",
@@ -190,17 +190,17 @@ class TestConflictResolutionEngine:
         # Test Python file
         strategy = engine._suggest_resolution_strategy(
             "def test():", "test.py"
-        )  # noqa: SLF001
+        )
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
         # Test markdown file
         strategy = engine._suggest_resolution_strategy(
             "# Header", "README.md"
-        )  # noqa: SLF001
+        )
         assert strategy == ResolutionStrategy.AUTO_MERGE
 
         # Test JSON file
-        strategy = engine._suggest_resolution_strategy(  # noqa: SLF001
+        strategy = engine._suggest_resolution_strategy(
             '{"key": "value"}',
             "config.json",
         )
@@ -209,7 +209,7 @@ class TestConflictResolutionEngine:
         import_content = "<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> "
         strategy = engine._suggest_resolution_strategy(
             import_content, "test.py"
-        )  # noqa: SLF001
+        )
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
     @pytest.mark.asyncio
@@ -272,7 +272,7 @@ class TestConflictResolutionEngine:
         with patch.object(engine, "_try_git_merge") as mock_merge:
             mock_merge.return_value = True
 
-            result = await engine._auto_merge_strategy(conflict)  # noqa: SLF001
+            result = await engine._auto_merge_strategy(conflict)
 
             assert result.success is True
             assert result.strategy_used == ResolutionStrategy.AUTO_MERGE
@@ -295,7 +295,7 @@ class TestConflictResolutionEngine:
         with patch.object(engine, "_get_latest_branch") as mock_latest:
             mock_latest.return_value = "branch2"
 
-            result = await engine._prefer_latest_strategy(conflict)  # noqa: SLF001
+            result = await engine._prefer_latest_strategy(conflict)
 
             assert result.success is True
             assert result.strategy_used == ResolutionStrategy.PREFER_LATEST
@@ -316,7 +316,7 @@ class TestConflictResolutionEngine:
             suggested_strategy=ResolutionStrategy.PREFER_MAIN,
         )
 
-        result = await engine._prefer_main_strategy(conflict)  # noqa: SLF001
+        result = await engine._prefer_main_strategy(conflict)
 
         assert result.success is True
         assert result.strategy_used == ResolutionStrategy.PREFER_MAIN
@@ -345,7 +345,7 @@ class TestConflictResolutionEngine:
         with patch.object(engine, "_resolve_import_conflicts") as mock_resolve:
             mock_resolve.return_value = "import os\nimport sys"
 
-            result = await engine._custom_merge_strategy(conflict)  # noqa: SLF001
+            result = await engine._custom_merge_strategy(conflict)
 
             assert result.success is True
             assert result.strategy_used == ResolutionStrategy.CUSTOM_MERGE
@@ -370,7 +370,7 @@ class TestConflictResolutionEngine:
             },
         )
 
-        result = await engine._semantic_analysis_strategy(conflict)  # noqa: SLF001
+        result = await engine._semantic_analysis_strategy(conflict)
 
         assert result.success is True
         assert result.strategy_used == ResolutionStrategy.SEMANTIC_ANALYSIS
@@ -382,7 +382,7 @@ class TestConflictResolutionEngine:
         """Test import conflict resolution."""
         content = "<<<<<<< HEAD\nimport os\nimport sys\n=======\nimport sys\nimport json\n>>>>>>> branch"
 
-        result = engine._resolve_import_conflicts(content)  # noqa: SLF001
+        result = engine._resolve_import_conflicts(content)
 
         assert result is not None
         assert "import os" in result
@@ -411,7 +411,7 @@ class TestClass:
         pass
 """
 
-        signatures = engine._extract_function_signatures(content)  # noqa: SLF001
+        signatures = engine._extract_function_signatures(content)
 
         assert "simple_func" in signatures
         assert "func_with_params" in signatures
@@ -512,27 +512,27 @@ class TestClass:
         with patch.object(engine, "_run_git_command") as mock_git:
             # Test get_merge_base
             mock_git.return_value = Mock(stdout="abc123\n")
-            base = await engine._get_merge_base("branch1", "branch2")  # noqa: SLF001
+            base = await engine._get_merge_base("branch1", "branch2")
             assert base == "abc123"
 
             # Test get_changed_files
             mock_git.return_value = Mock(
                 stdout="M\tfile1.py\nA\tfile2.py\nD\tfile3.py\n",
             )
-            files = await engine._get_changed_files("branch1")  # noqa: SLF001
+            files = await engine._get_changed_files("branch1")
             assert files == {"file1.py": "M", "file2.py": "A", "file3.py": "D"}
 
             # Test get_python_files_changed
             python_files = await engine._get_python_files_changed(
                 "branch1"
-            )  # noqa: SLF001
+            )
             assert set(python_files) == {"file1.py", "file2.py"}
 
             # Test get_file_content
             mock_git.return_value = Mock(stdout="file content", returncode=0)
             content = await engine._get_file_content(
                 "test.py", "branch1"
-            )  # noqa: SLF001
+            )
             assert content == "file content"
 
     @pytest.mark.asyncio
@@ -552,7 +552,7 @@ class TestClass:
 
             latest = await engine._get_latest_branch(
                 ["branch1", "branch2", "branch3"]
-            )  # noqa: SLF001
+            )
             assert latest == "branch2"
 
     @pytest.mark.asyncio
@@ -562,22 +562,22 @@ class TestClass:
         # Test successful merge strategies
         result = await engine._try_git_merge(
             ["branch1", "branch2"], "recursive"
-        )  # noqa: SLF001
+        )
         assert result is True
 
         result = await engine._try_git_merge(
             ["branch1", "branch2"], "ours"
-        )  # noqa: SLF001
+        )
         assert result is True
 
         # Test unsupported strategy
         result = await engine._try_git_merge(
             ["branch1", "branch2"], "unsupported"
-        )  # noqa: SLF001
+        )
         assert result is False
 
         # Test with wrong number of branches
-        result = await engine._try_git_merge(["branch1"], "recursive")  # noqa: SLF001
+        result = await engine._try_git_merge(["branch1"], "recursive")
         assert result is False
 
     @staticmethod

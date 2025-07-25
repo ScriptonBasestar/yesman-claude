@@ -154,7 +154,7 @@ class SessionProgressWidget:
         return text
 
     @staticmethod
-    def render_session_detail(session_name: str, progress: Any) -> Panel:  # noqa: ARG002, ARG004
+    def render_session_detail(session_name: str, progress: Any) -> Panel:
         """Render detailed progress for a specific session.
 
         Returns:

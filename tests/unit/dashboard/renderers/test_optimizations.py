@@ -55,17 +55,17 @@ class MockRenderer(BaseRenderer):
     @staticmethod
     def render_layout(
         widgets: list, layout_config: dict | None = None
-    ) -> str:  # noqa: ARG002, ARG004
+    ) -> str:
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
     def render_container(
         content: str, container_config: dict | None = None
-    ) -> str:  # noqa: ARG002, ARG004
+    ) -> str:
         return "mock-container"
 
     @staticmethod
-    def supports_feature(feature: str) -> bool:  # noqa: ARG002, ARG004
+    def supports_feature(feature: str) -> bool:
         return True
 
 

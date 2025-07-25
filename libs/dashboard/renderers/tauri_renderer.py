@@ -112,23 +112,23 @@ class TauriRenderer(BaseRenderer):
 
         # Route to specific widget processor
         if widget_type == WidgetType.SESSION_BROWSER:
-            TauriRenderer._process_session_browser(widget_json, cast(Any, data), options)
+            TauriRenderer._process_session_browser(widget_json, cast("Any", data), options)
         elif widget_type == WidgetType.HEALTH_METER:
-            self._process_health_meter(widget_json, cast(HealthData, data), options)
+            self._process_health_meter(widget_json, cast("HealthData", data), options)
         elif widget_type == WidgetType.ACTIVITY_HEATMAP:
-            self._process_activity_heatmap(widget_json, cast(ActivityData, data), options)
+            self._process_activity_heatmap(widget_json, cast("ActivityData", data), options)
         elif widget_type == WidgetType.PROGRESS_TRACKER:
-            self._process_progress_tracker(widget_json, cast(ProgressData, data), options)
+            self._process_progress_tracker(widget_json, cast("ProgressData", data), options)
         elif widget_type == WidgetType.LOG_VIEWER:
-            self._process_log_viewer(widget_json, cast(dict, data), options)
+            self._process_log_viewer(widget_json, cast("dict", data), options)
         elif widget_type == WidgetType.METRIC_CARD:
-            self._process_metric_card(widget_json, cast(MetricCardData, data), options)
+            self._process_metric_card(widget_json, cast("MetricCardData", data), options)
         elif widget_type == WidgetType.STATUS_INDICATOR:
-            self._process_status_indicator(widget_json, cast(StatusIndicatorData, data), options)
+            self._process_status_indicator(widget_json, cast("StatusIndicatorData", data), options)
         elif widget_type == WidgetType.CHART:
-            self._process_chart(widget_json, cast(ChartData, data), options)
+            self._process_chart(widget_json, cast("ChartData", data), options)
         elif widget_type == WidgetType.TABLE:
-            self._process_table(widget_json, cast(dict, data), options)
+            self._process_table(widget_json, cast("dict", data), options)
         else:
             self._process_generic_widget(widget_json, widget_type, data, options)
 
@@ -170,23 +170,23 @@ class TauriRenderer(BaseRenderer):
 
         # Route to specific widget processor
         if widget_type == WidgetType.SESSION_BROWSER:
-            TauriRenderer._process_session_browser(widget_json, cast(Any, data), options)
+            TauriRenderer._process_session_browser(widget_json, cast("Any", data), options)
         elif widget_type == WidgetType.HEALTH_METER:
-            self._process_health_meter(widget_json, cast(HealthData, data), options)
+            self._process_health_meter(widget_json, cast("HealthData", data), options)
         elif widget_type == WidgetType.ACTIVITY_HEATMAP:
-            self._process_activity_heatmap(widget_json, cast(ActivityData, data), options)
+            self._process_activity_heatmap(widget_json, cast("ActivityData", data), options)
         elif widget_type == WidgetType.PROGRESS_TRACKER:
-            self._process_progress_tracker(widget_json, cast(ProgressData, data), options)
+            self._process_progress_tracker(widget_json, cast("ProgressData", data), options)
         elif widget_type == WidgetType.LOG_VIEWER:
-            self._process_log_viewer(widget_json, cast(dict, data), options)
+            self._process_log_viewer(widget_json, cast("dict", data), options)
         elif widget_type == WidgetType.METRIC_CARD:
-            self._process_metric_card(widget_json, cast(MetricCardData, data), options)
+            self._process_metric_card(widget_json, cast("MetricCardData", data), options)
         elif widget_type == WidgetType.STATUS_INDICATOR:
-            self._process_status_indicator(widget_json, cast(StatusIndicatorData, data), options)
+            self._process_status_indicator(widget_json, cast("StatusIndicatorData", data), options)
         elif widget_type == WidgetType.CHART:
-            self._process_chart(widget_json, cast(ChartData, data), options)
+            self._process_chart(widget_json, cast("ChartData", data), options)
         elif widget_type == WidgetType.TABLE:
-            self._process_table(widget_json, cast(dict, data), options)
+            self._process_table(widget_json, cast("dict", data), options)
         else:
             self._process_generic_widget(widget_json, widget_type, data, options)
 
@@ -342,7 +342,7 @@ class TauriRenderer(BaseRenderer):
             },
         ]
 
-    def _process_health_meter(self, widget_json: dict[str, Any], data: HealthData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_health_meter(self, widget_json: dict[str, Any], data: HealthData, options: dict[str, Any]) -> None:
         """Process health meter widget."""
         if not isinstance(data, HealthData):
             widget_json["data"] = {"error": "Invalid health data"}
@@ -409,7 +409,7 @@ class TauriRenderer(BaseRenderer):
             )
         )
 
-    def _process_activity_heatmap(self, widget_json: dict[str, Any], data: ActivityData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_activity_heatmap(self, widget_json: dict[str, Any], data: ActivityData, options: dict[str, Any]) -> None:
         """Process activity heatmap widget."""
         if not isinstance(data, ActivityData):
             widget_json["data"] = {"error": "Invalid activity data"}
@@ -470,7 +470,7 @@ class TauriRenderer(BaseRenderer):
             )
         )
 
-    def _process_progress_tracker(self, widget_json: dict[str, Any], data: ProgressData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_progress_tracker(self, widget_json: dict[str, Any], data: ProgressData, options: dict[str, Any]) -> None:
         """Process progress tracker widget."""
         if not isinstance(data, ProgressData):
             widget_json["data"] = {"error": "Invalid progress data"}
@@ -567,7 +567,7 @@ class TauriRenderer(BaseRenderer):
             },
         ]
 
-    def _process_metric_card(self, widget_json: dict[str, Any], data: MetricCardData, options: dict[str, Any]) -> None:  # noqa: ARG002
+    def _process_metric_card(self, widget_json: dict[str, Any], data: MetricCardData, options: dict[str, Any]) -> None:
         """Process metric card widget."""
         if not isinstance(data, MetricCardData):
             widget_json["data"] = {"error": "Invalid metric data"}
@@ -618,7 +618,7 @@ class TauriRenderer(BaseRenderer):
         self,
         widget_json: dict[str, Any],
         data: StatusIndicatorData,
-        options: dict[str, Any],  # noqa: ARG002
+        options: dict[str, Any],
     ) -> None:
         """Process status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
@@ -646,7 +646,7 @@ class TauriRenderer(BaseRenderer):
         widget_json["style"].update(self._style_classes.get(data.color, self._style_classes["neutral"]))
 
     @staticmethod
-    def _process_chart(widget_json: dict[str, Any], data: ChartData, options: dict[str, Any]) -> None:  # noqa: ARG002, ARG004
+    def _process_chart(widget_json: dict[str, Any], data: ChartData, options: dict[str, Any]) -> None:
         """Process chart widget."""
         if not isinstance(data, ChartData):
             widget_json["data"] = {"error": "Invalid chart data"}
@@ -696,7 +696,7 @@ class TauriRenderer(BaseRenderer):
         }
 
     @staticmethod
-    def _process_table(widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]) -> None:  # noqa: ARG002, ARG004
+    def _process_table(widget_json: dict[str, Any], data: dict[str, Any], options: dict[str, Any]) -> None:
         """Process table widget."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -728,7 +728,7 @@ class TauriRenderer(BaseRenderer):
         widget_json: dict[str, Any],
         widget_type: WidgetType,
         data: object,
-        options: dict[str, Any],  # noqa: ARG002
+        options: dict[str, Any],
     ) -> None:
         """Process generic widget fallback."""
         widget_json["data"] = {

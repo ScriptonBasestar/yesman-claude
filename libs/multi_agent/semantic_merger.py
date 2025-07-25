@@ -407,11 +407,11 @@ class SemanticMerger:
             ast.parse(content2)
 
             # Extract semantic contexts
-            context1 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
+            context1 = self.semantic_analyzer._extract_semantic_context(
                 file_path,
                 content1,
             )
-            context2 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
+            context2 = self.semantic_analyzer._extract_semantic_context(
                 file_path,
                 content2,
             )
@@ -642,11 +642,11 @@ class SemanticMerger:
         """Perform semantic union merge combining compatible changes."""
         try:
             # Extract semantic contexts
-            context1 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
+            context1 = self.semantic_analyzer._extract_semantic_context(
                 file_path,
                 content1,
             )
-            context2 = self.semantic_analyzer._extract_semantic_context(  # noqa: SLF001
+            context2 = self.semantic_analyzer._extract_semantic_context(
                 file_path,
                 content2,
             )
@@ -767,7 +767,7 @@ class SemanticMerger:
         branch2: str,
     ) -> list[SemanticConflict]:
         """Detect conflicts in a specific file between branches."""
-        return await self.semantic_analyzer._analyze_file_semantic_conflicts(  # noqa: SLF001
+        return await self.semantic_analyzer._analyze_file_semantic_conflicts(
             file_path,
             branch1,
             branch2,
@@ -775,7 +775,7 @@ class SemanticMerger:
 
     async def _get_file_content(self, file_path: str, branch: str) -> str | None:
         """Get file content from a specific branch."""
-        return await self.semantic_analyzer._get_file_content(file_path, branch)  # noqa: SLF001
+        return await self.semantic_analyzer._get_file_content(file_path, branch)
 
     @staticmethod
     def _validate_ast_integrity(content: str) -> bool:
@@ -861,7 +861,7 @@ class SemanticMerger:
         self,
         conflict: SemanticConflict,
         content1: str,
-        content2: str,  # noqa: ARG002
+        content2: str,
         context1: SemanticContext,
         context2: SemanticContext,
     ) -> dict[str, Any]:
@@ -914,7 +914,7 @@ class SemanticMerger:
 
     @staticmethod
     def _conflict_resolved_by_merge(
-        conflict: SemanticConflict,  # noqa: ARG004
+        conflict: SemanticConflict,
         merge_result: MergeResult,
     ) -> bool:
         """Check if a conflict was resolved by the merge operation."""
@@ -944,8 +944,8 @@ class SemanticMerger:
     @staticmethod
     def _merge_ast_trees(
         tree1: ast.AST,
-        tree2: ast.AST,  # noqa: ARG004
-        conflicts: list[SemanticConflict],  # noqa: ARG004
+        tree2: ast.AST,
+        conflicts: list[SemanticConflict],
     ) -> ast.AST:
         """Merge two AST trees intelligently."""
         # Simplified implementation - would need complex AST merging logic
@@ -1003,9 +1003,9 @@ class SemanticMerger:
 
     @staticmethod
     def _merge_function_definitions(
-        func1: str,  # noqa: ARG004
+        func1: str,
         func2: str,
-        conflict: SemanticConflict,  # noqa: ARG004
+        conflict: SemanticConflict,
     ) -> dict[str, Any]:
         """Merge two function definitions."""
         # Simplified implementation
@@ -1046,10 +1046,10 @@ class SemanticMerger:
 
     @staticmethod
     def _reconstruct_from_semantic_elements(
-        imports: list,  # noqa: ARG004
-        functions: dict,  # noqa: ARG004
-        classes: dict,  # noqa: ARG004
-        content1: str,  # noqa: ARG004
+        imports: list,
+        functions: dict,
+        classes: dict,
+        content1: str,
         content2: str,
     ) -> str:
         """Reconstruct source code from semantic elements."""

@@ -125,7 +125,7 @@ class TestDynamicRedistribution:
             complexity=5,
         )
 
-        load = scheduler._estimate_task_load(task, agent_cap)  # noqa: SLF001
+        load = scheduler._estimate_task_load(task, agent_cap)
 
         # Load should be a reasonable fraction
         assert 0.0 <= load <= 1.0
@@ -136,7 +136,7 @@ class TestDynamicRedistribution:
     async def test_auto_rebalancing_loop(agent_pool: AgentPool) -> None:
         """Test automatic rebalancing loop."""
         # Set the agent pool as running
-        agent_pool._running = True  # noqa: SLF001
+        agent_pool._running = True
 
         # Mock the scheduler to return low load balancing score
         with patch.object(agent_pool, "scheduler") as mock_scheduler:
@@ -146,22 +146,22 @@ class TestDynamicRedistribution:
             mock_scheduler.rebalance_tasks.return_value = [("agent-1", "agent-2")]
 
             # Enable auto-rebalancing with short interval
-            agent_pool._auto_rebalancing_enabled = True  # noqa: SLF001
+            agent_pool._auto_rebalancing_enabled = True
             agent_pool._auto_rebalancing_interval = (
-                0.1  # 100ms for testing  # noqa: SLF001
+                0.1  # 100ms for testing
             )
 
             # Start the auto-rebalancing loop
             task = asyncio.create_task(
                 agent_pool._auto_rebalancing_loop()
-            )  # noqa: SLF001
+            )
 
             # Let it run for enough time to execute at least once
             await asyncio.sleep(0.3)
 
             # Stop the loop
-            agent_pool._auto_rebalancing_enabled = False  # noqa: SLF001
-            agent_pool._running = False  # noqa: SLF001
+            agent_pool._auto_rebalancing_enabled = False
+            agent_pool._running = False
 
             try:
                 await asyncio.wait_for(task, timeout=0.1)
@@ -192,7 +192,7 @@ class TestDynamicRedistribution:
         )
 
         # Execute rebalancing
-        agent_pool._execute_rebalancing("agent-1", "agent-2")  # noqa: SLF001
+        agent_pool._execute_rebalancing("agent-1", "agent-2")
 
         # Verify load was redistributed
         cap_1 = agent_pool.scheduler.agent_capabilities["agent-1"]

@@ -1,11 +1,14 @@
 import logging
-import subprocess  # noqa: S404
+import os
+import pathlib
+import subprocess
 from typing import cast
 
 from fastapi import APIRouter, HTTPException, status
 
 from api import models
 from libs.core.error_handling import ErrorCategory, YesmanError
+from libs.core.models import SessionInfo
 from libs.core.services import get_session_manager, get_tmux_manager
 from libs.core.session_manager import SessionManager
 from libs.core.types import SessionAPIData, SessionStatusType
@@ -37,7 +40,10 @@ class SessionService:
         """Get all sessions with error handling.
 
         Returns:
-        List of the requested data.
+            list[SessionAPIData]: List of all session data.
+
+        Raises:
+            YesmanError: If sessions cannot be retrieved.
         """
         try:
             sessions_data = self.session_manager.get_all_sessions()
@@ -55,14 +61,15 @@ class SessionService:
         """Get specific session by name.
 
         Returns:
-        Sessionapidata | None object the requested data.
+            SessionAPIData | None: Session data if found, None otherwise.
+
+        Raises:
+            YesmanError: If session retrieval fails.
         """
         try:
             # Load projects configuration to get project_conf
-            from typing import cast
-
             projects_data = self.tmux_manager.load_projects()
-            projects = cast(dict, projects_data.get("sessions", {}))
+            projects = cast("dict", projects_data.get("sessions", {}))
 
             # Find the project that matches this session name
             project_name = None
@@ -86,7 +93,7 @@ class SessionService:
                 # Session not found in configuration
                 return None
 
-            session_data = self.session_manager._get_session_info(project_name, project_conf)
+            session_data = self.session_manager._get_session_info(project_name, project_conf)  # noqa: SLF001
             if session_data:
                 return self._convert_session_to_api_data(session_data)
             return None
@@ -103,7 +110,10 @@ class SessionService:
         """Set up a specific session.
 
         Returns:
-        Dict containing.
+            dict[str, object]: Dictionary containing session setup details.
+
+        Raises:
+            YesmanError: If session already exists or setup fails.
         """
         try:
             # Check if session already exists
@@ -115,10 +125,9 @@ class SessionService:
                 )
 
             # Load projects configuration
-            from typing import cast
 
             projects_data = self.tmux_manager.load_projects()
-            projects = cast(dict, projects_data.get("sessions", {}))
+            projects = cast("dict", projects_data.get("sessions", {}))
 
             # Find session configuration (direct match or by override)
             session_config = None
@@ -126,7 +135,7 @@ class SessionService:
 
             if session_name in projects:
                 actual_project_name = session_name
-                session_config = cast(dict, projects[session_name])
+                session_config = cast("dict", projects[session_name])
             else:
                 # Look for session by override session_name
                 for proj_name, proj_conf in projects.items():
@@ -168,7 +177,10 @@ class SessionService:
         """Teardown a specific session.
 
         Returns:
-        Dict containing.
+            dict[str, object]: Dictionary containing teardown status.
+
+        Raises:
+            YesmanError: If session not found or teardown fails.
         """
         try:
             if not self._session_exists(session_name):
@@ -201,14 +213,15 @@ class SessionService:
         """Get session status information.
 
         Returns:
-        Dict containing status information.
+            dict[str, object]: Dictionary containing session status information.
+
+        Raises:
+            YesmanError: If status retrieval fails.
         """
         try:
             # Load projects configuration to get project_conf
-            from typing import cast
-
             projects_data = self.tmux_manager.load_projects()
-            projects = cast(dict, projects_data.get("sessions", {}))
+            projects = cast("dict", projects_data.get("sessions", {}))
 
             # Find the project that matches this session name
             project_name = None
@@ -236,7 +249,7 @@ class SessionService:
                     "exists": False,
                 }
 
-            session_data = self.session_manager._get_session_info(project_name, project_conf)
+            session_data = self.session_manager._get_session_info(project_name, project_conf)  # noqa: SLF001
             if not session_data:
                 return {
                     "session_name": session_name,
@@ -265,13 +278,15 @@ class SessionService:
         """Setup all sessions defined in projects.yaml.
 
         Returns:
-        Dict containing.
+            dict[str, object]: Dictionary containing setup results.
+
+        Raises:
+            YesmanError: If setup fails.
         """
         try:
-            from typing import cast
 
             projects_data = self.tmux_manager.load_projects()
-            projects = cast(dict, projects_data.get("sessions", {}))
+            projects = cast("dict", projects_data.get("sessions", {}))
             successful = []
             failed = []
 
@@ -281,7 +296,7 @@ class SessionService:
                         self._setup_session_internal(session_name, session_config)
                         successful.append(session_name)
                     else:
-                        self.logger.info(f"Session '{session_name}' already exists, skipping")  # noqa: G004
+                        self.logger.info("Session '%s' already exists, skipping", session_name)
                 except Exception as e:
                     self.logger.exception("Failed to setup session '{session_name}': {e}")
                     failed.append({"session_name": session_name, "error": str(e)})
@@ -306,7 +321,10 @@ class SessionService:
         """Teardown all managed sessions.
 
         Returns:
-        Dict containing.
+            dict[str, object]: Dictionary containing teardown results.
+
+        Raises:
+            YesmanError: If teardown fails.
         """
         try:
             sessions = self.session_manager.get_all_sessions()
@@ -342,7 +360,10 @@ class SessionService:
         """Start or create and start a session.
 
         Returns:
-        Dict containing.
+            dict[str, object]: Dictionary containing session start details.
+
+        Raises:
+            YesmanError: If session start fails.
         """
         try:
             # Check if session exists in tmux
@@ -384,36 +405,34 @@ class SessionService:
                     "status": "started",
                     "action": "attached_to_existing",
                 }
-            else:
-                # Session doesn't exist, try to create it first
-                self.logger.info(f"Session '{session_name}' not found, attempting to create it")
+            # Session doesn't exist, try to create it first
+            self.logger.info("Session '%s' not found, attempting to create it", session_name)
 
-                # Try to setup the session first
-                try:
-                    setup_result = self.setup_session(session_name)
-                    self.logger.info(f"Successfully created session '{session_name}': {setup_result}")
+            # Try to setup the session first
+            try:
+                setup_result = self.setup_session(session_name)
+                self.logger.info("Successfully created session '%s': %s", session_name, setup_result)
 
+                return {
+                    "session_name": session_name,
+                    "status": "started",
+                    "action": "created_and_started",
+                    "setup_result": setup_result,
+                }
+            except YesmanError as setup_error:
+                if "already exists" in str(setup_error.message):
+                    # Session was created in between checks, try to attach
+                    subprocess.run(
+                        ["tmux", "attach-session", "-d", "-t", session_name],
+                        check=False,
+                    )
                     return {
                         "session_name": session_name,
                         "status": "started",
-                        "action": "created_and_started",
-                        "setup_result": setup_result,
+                        "action": "attached_after_race_condition",
                     }
-                except YesmanError as setup_error:
-                    if "already exists" in str(setup_error.message):
-                        # Session was created in between checks, try to attach
-                        subprocess.run(
-                            ["tmux", "attach-session", "-d", "-t", session_name],
-                            check=False,
-                        )
-                        return {
-                            "session_name": session_name,
-                            "status": "started",
-                            "action": "attached_after_race_condition",
-                        }
-                    else:
-                        # Re-raise the setup error
-                        raise
+                # Re-raise the setup error
+                raise
 
         except YesmanError:
             raise
@@ -430,7 +449,10 @@ class SessionService:
         """Stop a running session.
 
         Returns:
-        Dict containing.
+            dict[str, object]: Dictionary containing stop status.
+
+        Raises:
+            YesmanError: If session not found or stop fails.
         """
         try:
             if not self._session_exists(session_name):
@@ -463,16 +485,15 @@ class SessionService:
         """Convert internal session data to API format.
 
         Returns:
-        Sessionapidata object.
+            SessionAPIData: Converted session data in API format.
+
+        Raises:
+            YesmanError: If conversion fails.
         """
         try:
             # Cast to known SessionInfo type for proper attribute access
-            from typing import cast
-
-            from libs.core.models import SessionInfo
-
             if hasattr(session_data, "session_name"):
-                session_info = cast(SessionInfo, session_data)
+                session_info = cast("SessionInfo", session_data)
 
                 session_status = session_info.status
                 # Ensure status is a valid SessionStatusType
@@ -487,7 +508,7 @@ class SessionService:
 
                 return {
                     "session_name": session_info.session_name,
-                    "status": cast(SessionStatusType, session_status),
+                    "status": cast("SessionStatusType", session_status),
                     "windows": [
                         {
                             "index": int(getattr(w, "index", i)),
@@ -506,25 +527,24 @@ class SessionService:
                     "created_at": getattr(session_info, "created_at", None),
                     "last_activity": getattr(session_info, "last_activity", None),
                 }
-            else:
-                # Fallback for dict-like objects
-                session_status = getattr(session_data, "status", "unknown")
-                if session_status not in {
-                    "running",
-                    "stopped",
-                    "unknown",
-                    "starting",
-                    "stopping",
-                }:
-                    session_status = "unknown"
+            # Fallback for dict-like objects
+            session_status = getattr(session_data, "status", "unknown")
+            if session_status not in {
+                "running",
+                "stopped",
+                "unknown",
+                "starting",
+                "stopping",
+            }:
+                session_status = "unknown"
 
-                return {
-                    "session_name": getattr(session_data, "session_name", "unknown"),
-                    "status": cast(SessionStatusType, session_status),
-                    "windows": [],
-                    "created_at": None,
-                    "last_activity": None,
-                }
+            return {
+                "session_name": getattr(session_data, "session_name", "unknown"),
+                "status": cast("SessionStatusType", session_status),
+                "windows": [],
+                "created_at": None,
+                "last_activity": None,
+            }
         except Exception as e:
             self.logger.exception("Failed to convert session data: {e}")
             msg = "Failed to convert session data format"
@@ -538,7 +558,7 @@ class SessionService:
         """Check if session exists.
 
         Returns:
-        Boolean indicating.
+            bool: True if session exists, False otherwise.
         """
         try:
             # First check with session manager
@@ -565,12 +585,15 @@ class SessionService:
         """Internal session setup logic.
 
         Returns:
-        Dict containing session creation details.
+            dict[str, object]: Dictionary containing session creation details.
+
+        Raises:
+            YesmanError: If session creation fails.
         """
         try:
             # Get template and project path from config
             template = str(session_config.get("template_name", "default"))
-            override_config = cast(dict, session_config.get("override", {}))
+            override_config = cast("dict", session_config.get("override", {}))
 
             # Use override session name if provided, otherwise use session_name
             actual_session_name = str(override_config.get("session_name", session_name))
@@ -584,26 +607,23 @@ class SessionService:
             # Set working directory if specified
             if project_path and project_path != ".":
                 # Expand ~ to home directory
-                import os
-
-                expanded_path = os.path.expanduser(project_path)
-                create_cmd.extend(["-c", expanded_path])
+                expanded_path = pathlib.Path(project_path).expanduser()
+                create_cmd.extend(["-c", str(expanded_path)])
 
             # Create the session
-            self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
+            self.logger.info("Running tmux command: %s", ' '.join(create_cmd))
             result = subprocess.run(create_cmd, check=False, capture_output=True, text=True)
 
-            self.logger.info(f"tmux command result: returncode={result.returncode}, stdout={result.stdout}, stderr={result.stderr}")
+            self.logger.info("tmux command result: returncode=%s, stdout=%s, stderr=%s", result.returncode, result.stdout, result.stderr)
 
             if result.returncode != 0:
                 if "duplicate session" in result.stderr:
                     msg = f"Session '{actual_session_name}' already exists"
                     raise YesmanError(msg, category=ErrorCategory.VALIDATION)
-                else:
-                    msg = f"Failed to create session: {result.stderr}"
-                    raise YesmanError(msg, category=ErrorCategory.SYSTEM)
+                msg = f"Failed to create session: {result.stderr}"
+                raise YesmanError(msg, category=ErrorCategory.SYSTEM)
 
-            self.logger.info(f"Created tmux session '{actual_session_name}'")
+            self.logger.info("Created tmux session '%s'", actual_session_name)
 
             # Setup windows based on override configuration
             windows_config = override_config.get("windows", [])
@@ -655,7 +675,11 @@ class SessionService:
 
     @staticmethod
     def _teardown_session_internal(session_name: str) -> None:
-        """Internal session teardown logic."""
+        """Internal session teardown logic.
+
+        Raises:
+            YesmanError: If teardown fails.
+        """
         try:
             subprocess.run(
                 ["tmux", "kill-session", "-t", session_name],
@@ -681,7 +705,10 @@ def get_all_sessions() -> object:
     """Get all tmux sessions with detailed information.
 
     Returns:
-        Object object the requested data.
+        list[models.SessionInfo]: List of all session information.
+
+    Raises:
+        HTTPException: If session retrieval fails.
     """
     try:
         session_manager = get_session_manager()
@@ -697,7 +724,7 @@ def get_all_sessions() -> object:
                 for window in session.get("windows", []):
                     if isinstance(window, dict):
                         panes = []
-                        for pane in cast(list, window.get("panes", [])):
+                        for pane in cast("list", window.get("panes", [])):
                             if isinstance(pane, dict):
                                 panes.append(
                                     models.PaneInfo(
@@ -708,7 +735,7 @@ def get_all_sessions() -> object:
                                 )
                         windows.append(
                             models.WindowInfo(
-                                index=int(cast(int, window.get("index", 0))),
+                                index=int(cast("int", window.get("index", 0))),
                                 name=str(window.get("name", "")),
                                 panes=panes,
                             )
@@ -760,7 +787,10 @@ def get_session(session_name: str) -> object:
     """Get specific session by name.
 
     Returns:
-        Object object the requested data.
+        models.SessionInfo: Session information.
+
+    Raises:
+        HTTPException: If session not found or retrieval fails.
     """
     try:
         session_manager = get_session_manager()
@@ -780,7 +810,7 @@ def get_session(session_name: str) -> object:
             for window in session_data.get("windows", []):
                 if isinstance(window, dict):
                     panes = []
-                    for pane in cast(list, window.get("panes", [])):
+                    for pane in cast("list", window.get("panes", [])):
                         if isinstance(pane, dict):
                             panes.append(
                                 models.PaneInfo(
@@ -791,7 +821,7 @@ def get_session(session_name: str) -> object:
                             )
                     windows.append(
                         models.WindowInfo(
-                            index=int(cast(int, window.get("index", 0))),
+                            index=int(cast("int", window.get("index", 0))),
                             name=str(window.get("name", "")),
                             panes=panes,
                         )
@@ -815,14 +845,13 @@ def get_session(session_name: str) -> object:
                 template=(str(session_data.get("template", "")) if session_data.get("template") else None),
                 windows=windows,
             )
-        else:
-            return models.SessionInfo(
-                session_name="unknown",
-                project_name=None,
-                status="unknown",
-                template=None,
-                windows=[],
-            )
+        return models.SessionInfo(
+            session_name="unknown",
+            project_name=None,
+            status="unknown",
+            template=None,
+            windows=[],
+        )
 
     except HTTPException:
         raise
@@ -849,7 +878,10 @@ def setup_session(session_name: str) -> object:
     """Setup a specific session.
 
     Returns:
-        Object object.
+        dict: Session setup result.
+
+    Raises:
+        HTTPException: If session setup fails.
     """
     try:
         session_manager = get_session_manager()
@@ -878,7 +910,10 @@ def teardown_session(session_name: str) -> object:
     """Teardown a specific session.
 
     Returns:
-        Object object.
+        dict: Session teardown result.
+
+    Raises:
+        HTTPException: If session teardown fails.
     """
     try:
         session_manager = get_session_manager()
@@ -907,7 +942,10 @@ def get_session_status(session_name: str) -> object:
     """Get session status.
 
     Returns:
-        Dict containing status information.
+        dict: Dictionary containing session status information.
+
+    Raises:
+        HTTPException: If status retrieval fails.
     """
     try:
         session_manager = get_session_manager()
@@ -938,7 +976,10 @@ def setup_all_sessions() -> object:
     """Setup all sessions from projects configuration.
 
     Returns:
-        Object object.
+        dict: Setup results for all sessions.
+
+    Raises:
+        HTTPException: If setup fails.
     """
     try:
         session_manager = get_session_manager()
@@ -969,7 +1010,10 @@ def teardown_all_sessions() -> object:
     """Teardown all managed sessions.
 
     Returns:
-        Object object.
+        dict: Teardown results for all sessions.
+
+    Raises:
+        HTTPException: If teardown fails.
     """
     try:
         session_manager = get_session_manager()
@@ -1000,7 +1044,10 @@ def start_session(session_name: str) -> object:
     """Start a specific session.
 
     Returns:
-        Object object.
+        dict: Session start result.
+
+    Raises:
+        HTTPException: If session start fails.
     """
     try:
         session_manager = get_session_manager()
@@ -1029,7 +1076,10 @@ def stop_session(session_name: str) -> object:
     """Stop a specific session.
 
     Returns:
-        Object object.
+        dict: Session stop result.
+
+    Raises:
+        HTTPException: If session stop fails.
     """
     try:
         session_manager = get_session_manager()

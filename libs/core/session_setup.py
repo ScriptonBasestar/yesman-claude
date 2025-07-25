@@ -8,7 +8,7 @@
 
 import os
 import re
-import subprocess  # noqa: S404
+import subprocess
 from typing import Any
 
 import click
@@ -17,6 +17,7 @@ from rich.progress import track
 
 from .base_command import CommandError
 from .settings import ValidationPatterns, settings
+import pathlib
 
 
 class SessionValidator:
@@ -77,9 +78,9 @@ class SessionValidator:
         if not start_dir:
             return True
 
-        expanded_dir = os.path.expanduser(start_dir)
+        expanded_dir = pathlib.Path(start_dir).expanduser()
 
-        if not os.path.exists(expanded_dir):
+        if not pathlib.Path(expanded_dir).exists():
             click.echo(f"❌ Error: start_directory '{start_dir}' does not exist for session '{session_name}'")
             click.echo(f"   Resolved path: {expanded_dir}")
 
@@ -96,7 +97,7 @@ class SessionValidator:
                 self.validation_errors.append(f"Missing start_directory: {expanded_dir}")
                 return False
 
-        elif not os.path.isdir(expanded_dir):
+        elif not pathlib.Path(expanded_dir).is_dir():
             self.validation_errors.append(
                 f"start_directory '{start_dir}' is not a directory for session '{session_name}'",
             )
@@ -155,20 +156,20 @@ class SessionValidator:
 
     def _validate_window_start_directory(
         self,
-        session_name: str,  # noqa: ARG002
+        session_name: str,
         window_name: str,
         window_start_dir: str,
         config_dict: dict[str, Any],
     ) -> bool:
         """Validate window start directory."""
         # If relative path, make it relative to session start_directory
-        if not os.path.isabs(window_start_dir):
+        if not pathlib.Path(window_start_dir).is_absolute():
             base_dir = config_dict.get("start_directory", os.getcwd())
             window_start_dir = os.path.join(base_dir, window_start_dir)
 
-        expanded_window_dir = os.path.expanduser(window_start_dir)
+        expanded_window_dir = pathlib.Path(window_start_dir).expanduser()
 
-        if not os.path.exists(expanded_window_dir):
+        if not pathlib.Path(expanded_window_dir).exists():
             click.echo(f"❌ Error: Window '{window_name}' start_directory does not exist")
             click.echo(f"   Resolved path: {expanded_window_dir}")
 
@@ -186,7 +187,7 @@ class SessionValidator:
                 self.validation_errors.append(f"Missing window directory: {expanded_window_dir}")
                 return False
 
-        elif not os.path.isdir(expanded_window_dir):
+        elif not pathlib.Path(expanded_window_dir).is_dir():
             self.validation_errors.append(
                 f"Window '{window_name}' start_directory is not a directory: {expanded_window_dir}",
             )
@@ -252,7 +253,7 @@ class SessionConfigBuilder:
 
         from pathlib import Path
 
-        templates_path = getattr(self.tmux_manager, "templates_path", Path("."))
+        templates_path = getattr(self.tmux_manager, "templates_path", Path())
         template_file = templates_path / f"{template_name}.yaml"
 
         if not template_file.is_file():

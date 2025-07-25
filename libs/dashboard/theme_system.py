@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import platform
-import subprocess  # noqa: S404
+import subprocess
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -249,17 +249,17 @@ class Theme:
         'Theme' object.
         """
         return cls(
-            name=cast(str, data["name"]),
+            name=cast("str", data["name"]),
             mode=ThemeMode(data["mode"]),
-            colors=ColorPalette.from_dict(cast(dict[str, str], data.get("colors", {}))),
+            colors=ColorPalette.from_dict(cast("dict[str, str]", data.get("colors", {}))),
             typography=Typography.from_dict(
-                cast(dict[str, str], data.get("typography", {}))
+                cast("dict[str, str]", data.get("typography", {}))
             ),
-            spacing=Spacing.from_dict(cast(dict[str, str], data.get("spacing", {}))),
-            custom_css=cast(str, data.get("custom_css", "")),
-            description=cast(str, data.get("description", "")),
-            author=cast(str, data.get("author", "")),
-            version=cast(str, data.get("version", "1.0.0")),
+            spacing=Spacing.from_dict(cast("dict[str, str]", data.get("spacing", {}))),
+            custom_css=cast("str", data.get("custom_css", "")),
+            description=cast("str", data.get("description", "")),
+            author=cast("str", data.get("author", "")),
+            version=cast("str", data.get("version", "1.0.0")),
         )
 
 

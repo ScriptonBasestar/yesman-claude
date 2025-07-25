@@ -26,7 +26,7 @@ class PredictConflictsCommand(BaseCommand):
         time_horizon: int = 7,
         min_confidence: float = 0.3,
         limit: int = 10,
-        **kwargs: Any,  # noqa: ARG002, ANN401
+        **kwargs: Any,
     ) -> dict:
         """Execute the predict conflicts command.
 
@@ -119,7 +119,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show prediction summary and statistics."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:
         """Execute the prediction summary command.
 
         Returns:
@@ -134,12 +134,12 @@ class PredictionSummaryCommand(BaseCommand):
             conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
             predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
 
-            summary = cast(dict, predictor.get_prediction_summary())
+            summary = cast("dict", predictor.get_prediction_summary())
 
             # Overall statistics
             self.print_info(f"Total Predictions: {summary['total_predictions']}")
             if "accuracy_metrics" in summary:
-                metrics = cast(dict, summary["accuracy_metrics"])
+                metrics = cast("dict", summary["accuracy_metrics"])
                 self.print_info(f"Accurate Predictions: {metrics.get('accurate_predictions', 0)}")
                 self.print_info(f"False Positives: {metrics.get('false_positives', 0)}")
                 self.print_info(f"Accuracy Rate: {metrics.get('accuracy_rate', 0):.1%}")
@@ -147,7 +147,7 @@ class PredictionSummaryCommand(BaseCommand):
             # Confidence breakdown
             if summary.get("by_confidence"):
                 self.print_info("\n📊 Confidence Breakdown:")
-                for confidence, count in cast(dict, summary["by_confidence"]).items():
+                for confidence, count in cast("dict", summary["by_confidence"]).items():
                     if count > 0:
                         self.print_info(f"  {confidence.capitalize()}: {count}")
 
@@ -161,7 +161,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns and trends."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:
         """Execute the analyze conflict patterns command.
 
         Returns:
@@ -175,7 +175,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
             conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
             predictor = ConflictPredictor(conflict_engine, branch_manager, repo_path)
 
-            analysis = cast(dict, predictor.analyze_conflict_patterns())
+            analysis = cast("dict", predictor.analyze_conflict_patterns())
 
             self.print_info("🔍 Conflict Pattern Analysis")
             self.print_info("=" * 50)
@@ -183,12 +183,12 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
             # Display pattern insights
             if analysis.get("frequent_conflict_files"):
                 self.print_info("\n🎯 Most Conflict-Prone Files:")
-                for file_info in cast(list, analysis["frequent_conflict_files"])[:5]:
+                for file_info in cast("list", analysis["frequent_conflict_files"])[:5]:
                     self.print_info(f"  📄 {file_info['file']}: {file_info['conflict_count']} conflicts")
 
             if analysis.get("conflict_hotspots"):
                 self.print_info("\n🔥 Conflict Hotspots:")
-                for hotspot in cast(list, analysis["conflict_hotspots"])[:3]:
+                for hotspot in cast("list", analysis["conflict_hotspots"])[:3]:
                     self.print_info(f"  📍 {hotspot['location']}: {hotspot['severity']}")
 
             return {"success": True, "repo_path": repo_path, "analysis": analysis}

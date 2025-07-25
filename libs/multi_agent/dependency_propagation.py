@@ -118,7 +118,7 @@ class DependencyPropagationSystem:
         branch_info_protocol: BranchInfoProtocol,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-        auto_propagate: bool = True,  # noqa: FBT001
+        auto_propagate: bool = True,
     ) -> None:
         """Initialize the dependency propagation system.
 
@@ -499,7 +499,7 @@ class DependencyPropagationSystem:
 
     async def _analyze_change_impact(
         self,
-        file_path: str,  # noqa: ARG002
+        file_path: str,
         change_type: DependencyType,
         change_details: dict[str, Any],
     ) -> ChangeImpact:
@@ -770,7 +770,7 @@ class DependencyPropagationSystem:
             failed_targets=failed_targets,
         )
 
-    def _update_propagation_stats(self, processing_time: float, success: bool) -> None:  # noqa: FBT001
+    def _update_propagation_stats(self, processing_time: float, success: bool) -> None:
         """Update propagation statistics."""
         # Update average processing time
         total_changes = self.propagation_stats["changes_propagated"]

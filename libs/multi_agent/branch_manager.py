@@ -3,7 +3,7 @@
 import json
 import logging
 import re
-import subprocess  # noqa: S404
+import subprocess
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -41,8 +41,8 @@ class BranchInfo:
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> "BranchInfo":
         """Create from dictionary."""
-        data["created_at"] = datetime.fromisoformat(cast(str, data["created_at"]))
-        return cls(**cast(dict[str, Any], data))
+        data["created_at"] = datetime.fromisoformat(cast("str", data["created_at"]))
+        return cls(**cast("dict[str, Any]", data))
 
 
 class BranchManager:
@@ -63,7 +63,7 @@ class BranchManager:
     def _run_git_command(
         self,
         args: list[str],
-        check: bool = True,  # noqa: FBT001
+        check: bool = True,
     ) -> subprocess.CompletedProcess:
         """Run a git command and return result."""
         cmd = ["git", *args]
@@ -312,7 +312,7 @@ class BranchManager:
             self._save_branch_metadata()
             logger.info("Marked branch '%s' as merged", branch_name)
 
-    def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:  # noqa: FBT001
+    def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:
         """Clean up merged branches."""
         cleaned = []
 

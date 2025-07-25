@@ -221,7 +221,7 @@ class TestCodeReviewEngine:
         """Test automated style and quality review."""
         findings = await code_review_engine._check_style_quality(
             ["src/test_module.py"]
-        )  # noqa: SLF001
+        )
 
         # Should detect line length issues
         line_length_findings = [f for f in findings if "Line too long" in f.message]
@@ -240,7 +240,7 @@ class TestCodeReviewEngine:
         """Test automated security review."""
         findings = await code_review_engine._check_security(
             ["src/test_module.py"]
-        )  # noqa: SLF001
+        )
 
         # Should detect hardcoded password
         security_findings = [
@@ -261,7 +261,7 @@ class TestCodeReviewEngine:
         """Test automated performance review."""
         findings = await code_review_engine._check_performance(
             ["src/test_module.py"]
-        )  # noqa: SLF001
+        )
 
         # Should detect range(len()) pattern
         range_len_findings = [f for f in findings if "enumerate" in f.message]
@@ -281,7 +281,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test automated maintainability review."""
-        findings = await code_review_engine._check_maintainability(  # noqa: SLF001
+        findings = await code_review_engine._check_maintainability(
             ["src/test_module.py"],
         )
 
@@ -305,7 +305,7 @@ class TestCodeReviewEngine:
         """Test automated documentation review."""
         findings = await code_review_engine._check_documentation(
             ["src/test_module.py"]
-        )  # noqa: SLF001
+        )
 
         # Should detect missing docstrings
         docstring_findings = [f for f in findings if "Missing docstring" in f.message]
@@ -327,7 +327,7 @@ class TestCodeReviewEngine:
         """Test automated testing review."""
         findings = await code_review_engine._check_testing(
             ["src/test_module.py"]
-        )  # noqa: SLF001
+        )
 
         # Should detect missing test file
         test_findings = [f for f in findings if "No test file found" in f.message]
@@ -343,7 +343,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test quality metrics calculation."""
-        metrics = await code_review_engine._calculate_quality_metrics(  # noqa: SLF001
+        metrics = await code_review_engine._calculate_quality_metrics(
             "src/test_module.py",
         )
 
@@ -413,7 +413,7 @@ class TestCodeReviewEngine:
 
         score = code_review_engine._calculate_overall_score(
             findings, metrics
-        )  # noqa: SLF001
+        )
 
         # Score should be reduced due to critical finding and violations
         assert score < 10.0
@@ -444,7 +444,7 @@ class TestCodeReviewEngine:
         )
 
         # Should be auto-approvable with high score and no critical issues
-        can_approve = code_review_engine._can_auto_approve(review)  # noqa: SLF001
+        can_approve = code_review_engine._can_auto_approve(review)
         assert can_approve
 
         # Add a critical finding
@@ -459,7 +459,7 @@ class TestCodeReviewEngine:
         )
 
         # Should not be auto-approvable with critical issues
-        can_approve = code_review_engine._can_auto_approve(review)  # noqa: SLF001
+        can_approve = code_review_engine._can_auto_approve(review)
         assert not can_approve
 
     @pytest.mark.asyncio
@@ -635,7 +635,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test finding suitable reviewers."""
-        reviewers = await code_review_engine._find_suitable_reviewers(  # noqa: SLF001
+        reviewers = await code_review_engine._find_suitable_reviewers(
             requester_id="agent-1",
             files_changed=["test.py"],
             num_reviewers=2,
@@ -660,7 +660,7 @@ def simple_function() -> object:
 """
         complexity = code_review_engine._estimate_cyclomatic_complexity(
             simple_code
-        )  # noqa: SLF001
+        )
         assert complexity == 1.0
 
         complex_code = """
@@ -680,7 +680,7 @@ def complex_function(x, y) -> object:
 """
         complexity = code_review_engine._estimate_cyclomatic_complexity(
             complex_code
-        )  # noqa: SLF001
+        )
         assert complexity > 5.0
 
     @staticmethod
@@ -697,7 +697,7 @@ def function() -> object:
     return True
 '''
 
-        mi = code_review_engine._calculate_maintainability_index(  # noqa: SLF001
+        mi = code_review_engine._calculate_maintainability_index(
             well_documented_code,
             10,
         )
@@ -707,14 +707,14 @@ def function() -> object:
         poor_code = "def f(): return True"
         mi = code_review_engine._calculate_maintainability_index(
             poor_code, 1
-        )  # noqa: SLF001
+        )
         assert mi < 100.0
 
     @pytest.mark.asyncio
     async def test_full_automated_review_flow(
         self,
         code_review_engine: CodeReviewEngine,
-        mock_collaboration_engine: Mock,  # noqa: ARG002
+        mock_collaboration_engine: Mock,
     ) -> None:
         """Test full automated review flow."""
         # Initiate review

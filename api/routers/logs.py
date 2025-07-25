@@ -38,7 +38,7 @@ def get_session_logs(session_name: str, limit: int = 100) -> object:
     """
     try:
         config = get_config()
-        log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
+        log_path_str = cast("str", config.get("log_path", "~/.scripton/yesman/logs/"))
         # 세션 이름에 유효하지 않은 문자가 있을 수 있으므로 정제합니다.
         safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
         log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
@@ -124,7 +124,7 @@ def get_logs(
     """
     try:
         config = get_config()
-        log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
+        log_path_str = cast("str", config.get("log_path", "~/.scripton/yesman/logs/"))
         log_files = [
             Path(log_path_str).expanduser() / "yesman.log",
             Path(log_path_str).expanduser() / "claude_manager.log",
@@ -143,7 +143,7 @@ def get_logs(
                             if log_entry:
                                 all_logs.append(log_entry)
                 except Exception as e:
-                    logger.warning(f"Failed to parse log file {log_file}: {e}")  # noqa: G004
+                    logger.warning(f"Failed to parse log file {log_file}: {e}")
                     continue
 
         # Sort by timestamp (newest first)
@@ -177,7 +177,7 @@ def get_log_sources() -> object:
     """
     try:
         config = get_config()
-        log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
+        log_path_str = cast("str", config.get("log_path", "~/.scripton/yesman/logs/"))
         log_files = [
             Path(log_path_str).expanduser() / "yesman.log",
             Path(log_path_str).expanduser() / "claude_manager.log",
@@ -198,7 +198,7 @@ def get_log_sources() -> object:
                             if log_entry:
                                 sources.add(log_entry.source)
                 except Exception as e:
-                    logger.warning(f"Failed to parse log file {log_file}: {e}")  # noqa: G004
+                    logger.warning(f"Failed to parse log file {log_file}: {e}")
                     continue
 
         return {"sources": sorted(sources)}

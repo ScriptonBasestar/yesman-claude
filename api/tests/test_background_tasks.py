@@ -21,8 +21,6 @@ def check_task_status() -> None:
         data = response.json()
         for task_info in data["tasks"].values():
             pass
-    else:
-        pass
 
 
 async def monitor_updates(duration: int = 60) -> None:

@@ -82,10 +82,10 @@ class TestProgressIndicators:
 
         assert "stage_0" in results
         assert "stage_1" in results
-        assert cast(dict[str, Any], results["stage_0"])["success"] is True
-        assert cast(dict[str, Any], results["stage_0"])["result"] == "result1"
-        assert cast(dict[str, Any], results["stage_1"])["success"] is True
-        assert cast(dict[str, Any], results["stage_1"])["result"] == "result2"
+        assert cast("dict[str, Any]", results["stage_0"])["success"] is True
+        assert cast("dict[str, Any]", results["stage_0"])["result"] == "result1"
+        assert cast("dict[str, Any]", results["stage_1"])["success"] is True
+        assert cast("dict[str, Any]", results["stage_1"])["result"] == "result2"
 
     @staticmethod
     def test_progress_manager_startup_sequence_with_error() -> None:
@@ -121,9 +121,9 @@ class TestProgressIndicators:
 
         assert len(results) == 3
         for i, result in enumerate(results):
-            assert cast(dict[str, Any], result)["success"] is True
-            assert cast(dict[str, Any], result)["result"] == f"processed_{files[i]}"
-            assert cast(dict[str, Any], result)["file"] == files[i]
+            assert cast("dict[str, Any]", result)["success"] is True
+            assert cast("dict[str, Any]", result)["result"] == f"processed_{files[i]}"
+            assert cast("dict[str, Any]", result)["file"] == files[i]
 
     @staticmethod
     def test_progress_manager_file_batch_operation_with_errors() -> None:
@@ -141,10 +141,10 @@ class TestProgressIndicators:
         )
 
         assert len(results) == 3
-        assert cast(dict[str, Any], results[0])["success"] is True
-        assert cast(dict[str, Any], results[1])["success"] is False
-        assert "File read error" in cast(dict[str, Any], results[1])["error"]
-        assert cast(dict[str, Any], results[2])["success"] is True
+        assert cast("dict[str, Any]", results[0])["success"] is True
+        assert cast("dict[str, Any]", results[1])["success"] is False
+        assert "File read error" in cast("dict[str, Any]", results[1])["error"]
+        assert cast("dict[str, Any]", results[2])["success"] is True
 
     @staticmethod
     def test_convenience_decorators() -> None:
@@ -232,7 +232,7 @@ class TestIntegrationScenarios:
         )
 
         assert len(results) == 5
-        assert all(cast(dict[str, Any], result)["success"] for result in results)
+        assert all(cast("dict[str, Any]", result)["success"] for result in results)
 
     @staticmethod
     def test_complex_workflow_scenario() -> None:

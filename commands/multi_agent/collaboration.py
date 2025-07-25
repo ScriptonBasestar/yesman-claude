@@ -15,7 +15,7 @@ class CollaborateCommand(BaseCommand):
     """Start agent collaboration session."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:
         """Execute the collaborate command.
 
         Returns:
@@ -31,7 +31,7 @@ class SendMessageCommand(BaseCommand):
     """Send message between agents."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:
         """Execute the send message command.
 
         Returns:
@@ -47,7 +47,7 @@ class ShareKnowledgeCommand(BaseCommand):
     """Share knowledge between agents."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:
         """Execute the share knowledge command.
 
         Returns:
@@ -63,7 +63,7 @@ class BranchInfoCommand(BaseCommand):
     """Get branch information for collaboration."""
 
     @staticmethod
-    def execute(**kwargs: dict[str, object]) -> dict:  # noqa: ARG002, ARG004
+    def execute(**kwargs: dict[str, object]) -> dict:
         """Execute the branch info command.
 
         Returns:

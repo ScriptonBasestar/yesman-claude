@@ -13,7 +13,7 @@ from .prompt_detector import PromptInfo
 """Claude manager for dashboard integration - Refactored.""" ""
 
 
-class DashboardController:  # noqa: PLR0904
+class DashboardController:
     """Main controller that orchestrates Claude session management, process
     control, and monitoring.
     """
@@ -96,7 +96,7 @@ class DashboardController:  # noqa: PLR0904
         """
         # Re-initialize in case session was created after initialization
         if not self.claude_pane and not self.session_manager.initialize_session():
-            self.logger.error(f"Failed to initialize session '{self.session_name}'")  # noqa: G004
+            self.logger.error(f"Failed to initialize session '{self.session_name}'")
             return False
 
         if not self.claude_pane:
@@ -128,7 +128,7 @@ class DashboardController:  # noqa: PLR0904
         """Set the selected model."""
         self.process_controller.set_model(model)
 
-    def set_auto_next(self, enabled: bool) -> None:  # noqa: FBT001
+    def set_auto_next(self, enabled: bool) -> None:
         """Enable or disable auto-next responses."""
         self.monitor.set_auto_next(enabled)
 
@@ -213,11 +213,11 @@ class DashboardController:  # noqa: PLR0904
         """Adjust the confidence threshold for adaptive responses."""
         self.monitor.set_adaptive_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_adaptive_response(self, enabled: bool = True) -> None:
         """Enable or disable adaptive response functionality."""
         self.monitor.enable_adaptive_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:
         """Enable or disable adaptive learning functionality."""
         self.monitor.enable_adaptive_learning(enabled)
 
@@ -284,7 +284,7 @@ class DashboardController:  # noqa: PLR0904
         self.monitor.load_automation_config()
 
     # Project health monitoring methods
-    async def calculate_project_health(self, force_refresh: bool = False) -> dict:  # noqa: FBT001
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:
         """Calculate comprehensive project health."""
         return await self.monitor.calculate_project_health(force_refresh)
 

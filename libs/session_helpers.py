@@ -262,9 +262,9 @@ def create_session_windows(
 
     # Create windows
     for i, window_config in enumerate(windows_config):
-        window_name = cast(str, window_config.get("window_name", f"window_{i}"))
-        layout = cast(str, window_config.get("layout", "tiled"))
-        panes = cast(list[dict[str, Any]], window_config.get("panes", []))
+        window_name = cast("str", window_config.get("window_name", f"window_{i}"))
+        layout = cast("str", window_config.get("layout", "tiled"))
+        panes = cast("list[dict[str, Any]]", window_config.get("panes", []))
 
         # Create or get window
         if i == 0:
@@ -377,7 +377,7 @@ def send_keys_to_pane(
     pane_index: int,
     keys: str,
     server: libtmux.Server | None = None,
-    enter: bool = True,  # noqa: FBT001
+    enter: bool = True,
 ) -> None:
     """Send keys to a specific pane.
 
@@ -480,7 +480,7 @@ def merge_template_override(template_config: dict[str, object], override_config:
     for key, value in override_config.items():
         if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
             # Recursively merge dictionaries
-            merged[key] = merge_template_override(cast(dict[str, object], merged[key]), value)
+            merged[key] = merge_template_override(cast("dict[str, object]", merged[key]), value)
         else:
             # Override value
             merged[key] = value
@@ -488,7 +488,7 @@ def merge_template_override(template_config: dict[str, object], override_config:
     return merged
 
 
-def expand_and_validate_directory(directory: str, create_if_missing: bool = False) -> Path:  # noqa: FBT001
+def expand_and_validate_directory(directory: str, create_if_missing: bool = False) -> Path:
     """Expand user paths and validate directory existence.
 
     Args:
@@ -503,7 +503,7 @@ def expand_and_validate_directory(directory: str, create_if_missing: bool = Fals
     """
     try:
         # Expand user and environment variables
-        expanded = os.path.expanduser(os.path.expandvars(directory))
+        expanded = Path(os.path.expandvars(directory)).expanduser()
         path = Path(expanded).resolve()
 
         if not path.exists():
@@ -552,7 +552,7 @@ def get_session_by_project(
     Returns:
         SessionInfo if found, None otherwise
     """
-    sessions = cast(dict[str, dict[str, Any]], projects_config.get("sessions", {}))
+    sessions = cast("dict[str, dict[str, Any]]", projects_config.get("sessions", {}))
 
     # Find session with matching project name
     for session_name, session_config in sessions.items():

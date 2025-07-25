@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import re
-import subprocess  # noqa: S404
+import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -305,7 +305,7 @@ class BranchTestManager:
         self,
         branch_name: str,
         suite_name: str,
-        force: bool = False,  # noqa: FBT001, ARG002
+        force: bool = False,
     ) -> TestResult:
         """Run a specific test suite on a branch.
 
@@ -449,7 +449,7 @@ class BranchTestManager:
     async def run_all_tests(
         self,
         branch_name: str,
-        parallel: bool = True,  # noqa: FBT001
+        parallel: bool = True,
     ) -> list[TestResult]:
         """Run all test suites on a branch.
 
@@ -633,7 +633,7 @@ class BranchTestManager:
         name: str,
         test_type: TestType,
         command: list[str],
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Configure or update a test suite."""
         self.test_suites[name] = TestSuite(
@@ -645,7 +645,7 @@ class BranchTestManager:
         self._save_test_configuration()
         logger.info("Configured test suite: %s", name)
 
-    def enable_auto_testing(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_auto_testing(self, enabled: bool = True) -> None:
         """Enable or disable automatic testing."""
         self.auto_testing_enabled = enabled
         self._save_test_configuration()

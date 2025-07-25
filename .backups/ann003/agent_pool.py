@@ -597,7 +597,7 @@ class AgentPool:
             "queue_size": self.task_queue.qsize(),
         }
 
-    def set_intelligent_scheduling(self, enabled: bool) -> None:  # noqa: FBT001
+    def set_intelligent_scheduling(self, enabled: bool) -> None:
         """Enable or disable intelligent scheduling."""
         self.intelligent_scheduling = enabled
 

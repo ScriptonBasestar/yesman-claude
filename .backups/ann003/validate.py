@@ -9,6 +9,7 @@ from rich.text import Text
 from rich.tree import Tree
 
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
+import pathlib
 
 # Try to keep the important parts (end of path)
 
@@ -21,7 +22,7 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 class ValidateCommand(BaseCommand, SessionCommandMixin):
     """Check if all directories in projects.yaml exist (or only for a specific session)."""
 
-    def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, session_name: str | None = None, format: str = "table", **kwargs) -> dict:
         """Execute the validate command.
 
         Returns:
@@ -60,8 +61,8 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
 
                     # 세션 시작 디렉토리 검사
                     start_dir = final_config.get("start_directory", os.getcwd())
-                    expanded_dir = os.path.expanduser(start_dir)
-                    if not os.path.exists(expanded_dir):
+                    expanded_dir = pathlib.Path(start_dir).expanduser()
+                    if not pathlib.Path(expanded_dir).exists():
                         session_missing.append(("session", "Session Root", expanded_dir))
 
                     # 윈도우별 start_directory 검사
@@ -69,12 +70,12 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
                     for i, window in enumerate(windows):
                         window_start_dir = window.get("start_directory")
                         if window_start_dir:
-                            if not os.path.isabs(window_start_dir):
+                            if not pathlib.Path(window_start_dir).is_absolute():
                                 # 상대 경로인 경우 세션의 시작 디렉토리를 기준으로 함
                                 base_dir = expanded_dir
                                 window_start_dir = os.path.join(base_dir, window_start_dir)
-                            expanded_window_dir = os.path.expanduser(window_start_dir)
-                            if not os.path.exists(expanded_window_dir):
+                            expanded_window_dir = pathlib.Path(window_start_dir).expanduser()
+                            if not pathlib.Path(expanded_window_dir).exists():
                                 window_name = window.get("window_name", f"window_{i}")
                                 session_missing.append(("window", window_name, expanded_window_dir))
 
@@ -83,11 +84,11 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
                         for j, pane in enumerate(panes):
                             if isinstance(pane, dict) and "start_directory" in pane:
                                 pane_start_dir = pane["start_directory"]
-                                if not os.path.isabs(pane_start_dir):
+                                if not pathlib.Path(pane_start_dir).is_absolute():
                                     base_dir = expanded_dir
                                     pane_start_dir = os.path.join(base_dir, pane_start_dir)
-                                expanded_pane_dir = os.path.expanduser(pane_start_dir)
-                                if not os.path.exists(expanded_pane_dir):
+                                expanded_pane_dir = pathlib.Path(pane_start_dir).expanduser()
+                                if not pathlib.Path(expanded_pane_dir).exists():
                                     window_name = window.get("window_name", f"window_{i}")
                                     session_missing.append(
                                         (
@@ -157,7 +158,7 @@ def _display_success(console: Console, valid_count: int, total_count: int) -> No
     console.print(success_panel)
 
 
-def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
+def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
     """Display results in table format."""
     table = Table(
         title="[red]Directory Validation Results[/red]",
@@ -197,7 +198,7 @@ def _display_table_format(console: Console, missing: list, valid_count: int, tot
     console.print(table)
 
 
-def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
+def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
     """Display results in tree format."""
     console.print("\n[red bold]❌ Directory Validation Issues[/red bold]")
     console.print(f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n")
@@ -233,7 +234,7 @@ def _display_tree_format(console: Console, missing: list, valid_count: int, tota
     console.print(tree)
 
 
-def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
+def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:
     """Display results in simple format."""
     console.print("[red bold]❌ Missing Directories Found[/red bold]\n")
 

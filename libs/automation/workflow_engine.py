@@ -223,7 +223,7 @@ class ConditionEvaluator:
             logger.warning("Unsupported operator: %s", operator)
             return False
 
-        return self.operators[operator](cast(str, var_value), expected_value)
+        return self.operators[operator](cast("str", var_value), expected_value)
 
     @staticmethod
     def _parse_value(value_str: str) -> str | int | float | bool | None:
@@ -260,7 +260,7 @@ class ConditionEvaluator:
         return value_str
 
     @staticmethod
-    def _equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Equality comparison.
 
         Returns:
@@ -269,7 +269,7 @@ class ConditionEvaluator:
         return bool(left == right)
 
     @staticmethod
-    def _not_equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _not_equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Inequality comparison.
 
         Returns:
@@ -278,55 +278,55 @@ class ConditionEvaluator:
         return bool(left != right)
 
     @staticmethod
-    def _greater_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _greater_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Greater than comparison.
 
         Returns:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) > cast(Any, right))
+            return bool(cast("Any", left) > cast("Any", right))
         except TypeError:
             return False
 
     @staticmethod
-    def _less_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _less_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Less than comparison.
 
         Returns:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) < cast(Any, right))
+            return bool(cast("Any", left) < cast("Any", right))
         except TypeError:
             return False
 
     @staticmethod
-    def _greater_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _greater_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Greater than or equal comparison.
 
         Returns:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) >= cast(Any, right))
+            return bool(cast("Any", left) >= cast("Any", right))
         except TypeError:
             return False
 
     @staticmethod
-    def _less_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _less_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
         """Less than or equal comparison.
 
         Returns:
         bool: Description of return value.
         """
         try:
-            return bool(cast(Any, left) <= cast(Any, right))
+            return bool(cast("Any", left) <= cast("Any", right))
         except TypeError:
             return False
 
     @staticmethod
-    def _contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
         """Containment check.
 
         Returns:
@@ -338,7 +338,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _not_contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
+    def _not_contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
         """Not containment check.
 
         Returns:
@@ -456,7 +456,7 @@ class WorkflowEngine:
                 result = await self._execute_single_action(action, execution)
                 execution.results.append(
                     cast(
-                        dict[str, str | int | float | bool],
+                        "dict[str, str | int | float | bool]",
                         {
                             "action_index": execution.current_action,
                             "attempt": attempt + 1,
@@ -470,7 +470,7 @@ class WorkflowEngine:
 
             except Exception as e:
                 error_info = cast(
-                    dict[str, str | int | float | bool],
+                    "dict[str, str | int | float | bool]",
                     {
                         "action_index": execution.current_action,
                         "attempt": attempt + 1,
@@ -500,49 +500,49 @@ class WorkflowEngine:
 
         if action.action_type == ActionType.SHELL_COMMAND:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_shell_command(action),
             )
 
         if action.action_type == ActionType.TMUX_COMMAND:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_tmux_command(action, execution),
             )
 
         if action.action_type == ActionType.CLAUDE_INPUT:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_claude_input(action, execution),
             )
 
         if action.action_type == ActionType.FILE_OPERATION:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_file_operation(action),
             )
 
         if action.action_type == ActionType.NOTIFICATION:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_notification(action),
             )
 
         if action.action_type == ActionType.DELAY:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_delay(action),
             )
 
         if action.action_type == ActionType.CONDITION_CHECK:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_condition_check(action, execution),
             )
 
         if action.action_type == ActionType.PARALLEL_EXECUTION:
             return cast(
-                dict[str, str | int | bool | list[str | Exception]],
+                "dict[str, str | int | bool | list[str | Exception]]",
                 await self._execute_parallel_actions(action, execution),
             )
 
@@ -578,7 +578,7 @@ class WorkflowEngine:
     @staticmethod
     async def _execute_tmux_command(action: WorkflowAction, execution: WorkflowExecution) -> dict[str, int | str]:
         """Execute tmux command."""
-        session_name = execution.context_info.session_name or cast(str, action.parameters.get("session_name"))
+        session_name = execution.context_info.session_name or cast("str", action.parameters.get("session_name"))
 
         if not session_name:
             msg = "No session name provided for tmux command"
@@ -622,7 +622,7 @@ class WorkflowEngine:
             return {"operation": "read", "content_length": len(content)}
 
         if operation == "write":
-            content = cast(str, action.parameters.get("content", ""))
+            content = cast("str", action.parameters.get("content", ""))
             file_path.write_text(content)
             return {"operation": "write", "bytes_written": len(content)}
 
@@ -664,11 +664,11 @@ class WorkflowEngine:
 
     async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, list[dict[str, str | int | bool | list[str | Exception]] | Exception] | int]:
         """Execute multiple actions in parallel."""
-        parallel_actions = cast(list, action.parameters.get("actions", []))
+        parallel_actions = cast("list", action.parameters.get("actions", []))
 
         tasks = []
         for parallel_action_data in parallel_actions:
-            parallel_action = WorkflowAction(**cast(dict, parallel_action_data))
+            parallel_action = WorkflowAction(**cast("dict", parallel_action_data))
             task = asyncio.create_task(self._execute_single_action(parallel_action, execution))
             tasks.append(task)
 
@@ -676,7 +676,7 @@ class WorkflowEngine:
 
         return {
             "parallel_results": cast(
-                list[dict[str, str | int | bool | list[str | Exception]] | Exception],
+                "list[dict[str, str | int | bool | list[str | Exception]] | Exception]",
                 results,
             ),
             "action_count": len(tasks),
@@ -784,12 +784,12 @@ class WorkflowEngine:
             "active_executions": len(self.active_executions),
             "execution_history_count": len(self.execution_history),
             "workflows": cast(
-                dict[str, str | int | bool | list[str]],
-                {name: cast(dict, workflow.to_dict()) for name, workflow in self.workflows.items()},
+                "dict[str, str | int | bool | list[str]]",
+                {name: cast("dict", workflow.to_dict()) for name, workflow in self.workflows.items()},
             ),
             "active": cast(
-                dict[str, str | int | bool | list[str]],
-                {exec_id: cast(dict, execution.to_dict()) for exec_id, execution in self.active_executions.items()},
+                "dict[str, str | int | bool | list[str]]",
+                {exec_id: cast("dict", execution.to_dict()) for exec_id, execution in self.active_executions.items()},
             ),
         }
 

@@ -38,7 +38,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
         max_batch_size: int = 100,
         max_batch_time: float = 5.0,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
-        compression_enabled: bool = True,  # noqa: FBT001
+        compression_enabled: bool = True,
         output_dir: Path | None = None,
     ) -> None:
         """Initialize the batch processor.
@@ -155,7 +155,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
         self.current_file_size += written_size
         self.extended_stats["bytes_written"] += written_size
 
-        self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")  # noqa: G004
+        self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")
 
     async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
@@ -166,7 +166,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
         self.current_file_size = 0
         self.extended_stats["files_created"] += 1
 
-        self.logger.info(f"Rotated to new log file: {self.current_log_file}")  # noqa: G004
+        self.logger.info(f"Rotated to new log file: {self.current_log_file}")
 
     def add_entry(self, entry: dict[str, object]) -> None:
         """Add a log entry to the processing queue."""
@@ -189,7 +189,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
             "max_file_size": self.max_file_size,
             "compression_enabled": self.compression_enabled,
             "output_directory": str(self.output_dir),
-            "entries_per_second": (cast(float, base_stats["total_items"]) / max(time.time() - self._stats.last_batch_time.timestamp(), 1) if self._stats.last_batch_time else 0),
+            "entries_per_second": (cast("float", base_stats["total_items"]) / max(time.time() - self._stats.last_batch_time.timestamp(), 1) if self._stats.last_batch_time else 0),
         }
 
     async def cleanup_old_files(self, days_to_keep: int = 7) -> int:
@@ -204,10 +204,10 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
                     removed_count += 1
 
             if removed_count > 0:
-                self.logger.info(f"Cleaned up {removed_count} old log files")  # noqa: G004
+                self.logger.info(f"Cleaned up {removed_count} old log files")
 
         except Exception:
-            self.logger.exception("Error cleaning up old log files")  # noqa: G004
+            self.logger.exception("Error cleaning up old log files")
 
         return removed_count
 
@@ -236,7 +236,7 @@ class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
                     batches.append(batch)
 
         except Exception:
-            self.logger.exception("Error reading batch file {file_path}")  # noqa: G004
+            self.logger.exception("Error reading batch file {file_path}")
 
         return batches
 

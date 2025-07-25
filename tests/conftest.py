@@ -192,7 +192,7 @@ def pytest_sessionfinish(session: object, exitstatus: int) -> None:
 # 테스트 결과 리포팅 커스터마이징
 def pytest_report_teststatus(
     report: object, config: object
-) -> tuple[str, str, str] | None:  # noqa: ARG001
+) -> tuple[str, str, str] | None:
     """테스트 상태 리포팅 커스터마이징."""
     if report.when == "call":
         if report.passed:

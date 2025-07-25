@@ -5,7 +5,7 @@ import contextlib
 import json
 import logging
 import signal
-import subprocess  # noqa: S404
+import subprocess
 import types
 from collections import Counter
 from datetime import UTC, datetime, timedelta
@@ -110,7 +110,7 @@ class StartAgentsCommand(BaseCommand):
                             while not event.is_set():
                                 if hasattr(pool, "is_running") and not pool.is_running:
                                     break
-                                if hasattr(pool, "_running") and not pool._running:  # noqa: SLF001
+                                if hasattr(pool, "_running") and not pool._running:
                                     break
                                 await event.wait()
                         except KeyboardInterrupt:
@@ -1216,7 +1216,7 @@ def multi_agent_cli(ctx: click.Context) -> None:
 @click.option("--max-agents", "-a", default=3, help="Maximum number of agents")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
-def start_agents(max_agents: int, work_dir: str | None, monitor: bool) -> None:  # noqa: FBT001
+def start_agents(max_agents: int, work_dir: str | None, monitor: bool) -> None:
     """Start the multi-agent pool."""
     command = StartAgentsCommand()
     command.run(max_agents=max_agents, work_dir=work_dir, monitor=monitor)
@@ -1294,7 +1294,7 @@ def list_tasks(work_dir: str | None, status: str | None) -> None:
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--auto-resolve", "-a", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool) -> None:  # noqa: FBT001
+def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool) -> None:
     """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
@@ -1407,9 +1407,9 @@ def analyze_semantic_conflicts(
     branches: tuple,
     repo_path: str | None,
     files: str | None,
-    include_private: bool,  # noqa: FBT001
+    include_private: bool,
     export: str | None,
-    detailed: bool,  # noqa: FBT001
+    detailed: bool,
 ) -> None:
     """Analyze AST-based semantic conflicts between branches."""
     try:
@@ -1595,7 +1595,7 @@ def semantic_summary(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--file", "-f", help="Specific file containing the function")
 def function_diff(
-    function_name: str,  # noqa: ARG001
+    function_name: str,
     branch1: str,
     branch2: str,
     repo_path: str | None,
@@ -1625,14 +1625,14 @@ def function_diff(
 @click.option("--apply", "-a", is_flag=True, help="Apply merge result to target branch")
 @click.option("--export", "-e", help="Export merge result to file")
 def semantic_merge(
-    file_path: str,  # noqa: ARG001
+    file_path: str,
     branch1: str,
     branch2: str,
     repo_path: str | None,
     target_branch: str | None,
     strategy: str | None,
-    apply: bool,  # noqa: FBT001
-    export: str | None,  # noqa: ARG001
+    apply: bool,
+    export: str | None,
 ) -> None:
     """Perform intelligent semantic merge of a file between branches."""
     command = SemanticMergeCommand()
@@ -1672,7 +1672,7 @@ def batch_merge(
     files: str | None,
     strategy: str | None,
     max_concurrent: int,
-    apply: bool,  # noqa: FBT001
+    apply: bool,
     export_summary: str | None,
 ) -> None:
     """Perform batch semantic merge of multiple files between branches."""
@@ -1858,9 +1858,9 @@ def auto_resolve(
     target_branch: str | None,
     mode: str,
     files: str | None,
-    apply: bool,  # noqa: FBT001
+    apply: bool,
     export: str | None,
-    preview: bool,  # noqa: FBT001
+    preview: bool,
 ) -> None:
     """Automatically resolve conflicts between branches using AI-powered semantic analysis."""
     try:
@@ -2092,7 +2092,7 @@ def prevent_conflicts(
     branches: tuple,
     repo_path: str | None,
     mode: str,
-    apply_measures: bool,  # noqa: FBT001, ARG001
+    apply_measures: bool,
     export: str | None,
 ) -> None:
     """Use AI prediction to prevent conflicts before they occur."""
@@ -2268,7 +2268,7 @@ def collaborate(
     mode: str,
     purpose: str,
     duration: int,
-    enable_sync: bool,  # noqa: FBT001
+    enable_sync: bool,
 ) -> None:
     """Start a collaboration session between multiple agents."""
     try:
@@ -2434,7 +2434,7 @@ def send_message(
     subject: str,
     content: str,
     priority: str,
-    repo_path: str | None,  # noqa: ARG001
+    repo_path: str | None,
 ) -> None:
     """Send a message between agents in the collaboration system."""
     try:
@@ -2507,7 +2507,7 @@ def share_knowledge(
     content: str,
     tags: str | None,
     relevance: float,
-    repo_path: str | None,  # noqa: ARG001
+    repo_path: str | None,
 ) -> None:
     """Share knowledge in the collaboration system."""
     try:
@@ -2582,7 +2582,7 @@ def branch_info(
     agent: str | None,
     info_type: str | None,
     data: str | None,
-    repo_path: str | None,  # noqa: ARG001
+    repo_path: str | None,
     sync_strategy: str,
 ) -> None:
     """Manage branch information sharing protocol."""
@@ -2809,7 +2809,7 @@ def dependency_track(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
 @click.option("--export", "-e", help="Export dependency data to JSON file")
-def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:  # noqa: FBT001, ARG001
+def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:
     """Show dependency propagation system status."""
     try:
         click.echo("📊 Dependency Propagation System Status")
@@ -3346,7 +3346,7 @@ def review_reject(
 @click.argument("review_id", required=False)
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed review information")
-def review_status(review_id: str | None, repo_path: str | None, detailed: bool) -> None:  # noqa: FBT001
+def review_status(review_id: str | None, repo_path: str | None, detailed: bool) -> None:
     """Get status of a specific review or all reviews."""
     try:
         if review_id:

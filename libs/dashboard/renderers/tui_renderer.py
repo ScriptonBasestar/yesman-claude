@@ -88,23 +88,23 @@ class TUIRenderer(BaseRenderer):
 
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
-            return self._render_session_browser(cast(SessionData | list[SessionData], data), options)
+            return self._render_session_browser(cast("SessionData | list[SessionData]", data), options)
         if widget_type == WidgetType.HEALTH_METER:
-            return self._render_health_meter(cast(HealthData, data), options)
+            return self._render_health_meter(cast("HealthData", data), options)
         if widget_type == WidgetType.ACTIVITY_HEATMAP:
-            return self._render_activity_heatmap(cast(ActivityData, data), options)
+            return self._render_activity_heatmap(cast("ActivityData", data), options)
         if widget_type == WidgetType.PROGRESS_TRACKER:
-            return self._render_progress_tracker(cast(ProgressData, data), options)
+            return self._render_progress_tracker(cast("ProgressData", data), options)
         if widget_type == WidgetType.LOG_VIEWER:
-            return self._render_log_viewer(cast(dict[str, Any], data), options)
+            return self._render_log_viewer(cast("dict[str, Any]", data), options)
         if widget_type == WidgetType.METRIC_CARD:
-            return self._render_metric_card(cast(MetricCardData, data), options)
+            return self._render_metric_card(cast("MetricCardData", data), options)
         if widget_type == WidgetType.STATUS_INDICATOR:
-            return self._render_status_indicator(cast(StatusIndicatorData, data), options)
+            return self._render_status_indicator(cast("StatusIndicatorData", data), options)
         if widget_type == WidgetType.CHART:
-            return self._render_chart(cast(ChartData, data), options)
+            return self._render_chart(cast("ChartData", data), options)
         if widget_type == WidgetType.TABLE:
-            return self._render_table(cast(dict[str, Any], data), options)
+            return self._render_table(cast("dict[str, Any]", data), options)
         return self._render_generic_widget(widget_type, data, options)
 
     def render_layout(
@@ -191,7 +191,7 @@ class TUIRenderer(BaseRenderer):
             return self._render_session_cards(sessions, options)
         return self._render_session_table(sessions, options)
 
-    def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
         """Render sessions as table."""
         table = Table(title="Active Sessions", box=ROUNDED)
 
@@ -239,7 +239,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(table)
         return capture.get()
 
-    def _render_session_tree(self, sessions: list[SessionData], options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_session_tree(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
         """Render sessions as tree."""
         tree = Tree("📂 Sessions", style="bold blue")
 
@@ -272,7 +272,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(tree)
         return capture.get()
 
-    def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any]) -> str:
         """Render sessions as cards."""
         cards = []
 
@@ -312,7 +312,7 @@ class TUIRenderer(BaseRenderer):
             return capture.get()
         return "No sessions found"
 
-    def _render_health_meter(self, data: HealthData, options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_health_meter(self, data: HealthData, options: dict[str, Any]) -> str:
         """Render health meter widget."""
         if not isinstance(data, HealthData):
             return "Invalid health data"
@@ -357,7 +357,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(panel)
         return capture.get()
 
-    def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any]) -> str:
         """Render activity heatmap as ASCII art."""
         if not isinstance(data, ActivityData):
             return "Invalid activity data"
@@ -401,7 +401,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(panel)
         return capture.get()
 
-    def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any]) -> str:
         """Render progress tracker widget."""
         if not isinstance(data, ProgressData):
             return "Invalid progress data"
@@ -510,7 +510,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(panel)
         return capture.get()
 
-    def _render_metric_card(self, data: MetricCardData, options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_metric_card(self, data: MetricCardData, options: dict[str, Any]) -> str:
         """Render metric card widget."""
         if not isinstance(data, MetricCardData):
             return "Invalid metric data"
@@ -581,7 +581,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(panel)
         return capture.get()
 
-    def _render_chart(self, data: ChartData, options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_chart(self, data: ChartData, options: dict[str, Any]) -> str:
         """Render chart as ASCII representation."""
         if not isinstance(data, ChartData):
             return "Invalid chart data"
@@ -622,7 +622,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(panel)
         return capture.get()
 
-    def _render_table(self, data: dict[str, Any], options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_table(self, data: dict[str, Any], options: dict[str, Any]) -> str:
         """Render generic table."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -644,7 +644,7 @@ class TUIRenderer(BaseRenderer):
             self.console.print(table)
         return capture.get()
 
-    def _render_generic_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_generic_widget(self, widget_type: WidgetType, data: Any, options: dict[str, Any]) -> str:
         """Render generic widget fallback."""
         content = Text()
         content.append(f"Widget Type: {widget_type.value}\n", style="bold")
@@ -676,7 +676,7 @@ class TUIRenderer(BaseRenderer):
 
         return "".join(result)
 
-    def _render_horizontal_layout(self, widgets: list[str], config: dict[str, Any]) -> str:  # noqa: ARG002
+    def _render_horizontal_layout(self, widgets: list[str], config: dict[str, Any]) -> str:
         """Render widgets in horizontal layout."""
         if not widgets:
             return ""

@@ -28,7 +28,7 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:
         """Execute the status command.
 
         Returns:
@@ -146,7 +146,7 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: Any) -> dict[str, Any]:
         """Execute the monitor command.
 
         Returns:
@@ -175,7 +175,7 @@ class AutomateMonitorCommand(BaseCommand):
                 context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
                 self.console.print(f"   Context: {context_type_val}")
 
-            def on_workflow_completed(workflow_name: str, success: bool, results: object) -> None:  # noqa: FBT001
+            def on_workflow_completed(workflow_name: str, success: bool, results: object) -> None:
                 status = "✅ Success" if success else "❌ Failed"
                 self.console.print(f"[green]{status}: {workflow_name}[/]")
                 if results:
@@ -212,7 +212,7 @@ class AutomateTriggerCommand(BaseCommand):
         project_path: str = ".",
         context_type: str | None = None,
         description: str = "Manual trigger",
-        **kwargs: Any,  # noqa: ARG002, ANN401
+        **kwargs: Any,
     ) -> dict[str, Any]:
         """Execute the trigger command.
 
@@ -272,7 +272,7 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
+    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:
         """Execute the workflow command.
 
         Returns:
@@ -334,7 +334,7 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:
         """Execute the detect command.
 
         Returns:
@@ -420,7 +420,7 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: Any) -> dict[str, Any]:
         """Execute the config command.
 
         Returns:

@@ -417,8 +417,8 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         self,
         project_path: str = ".",
         update_interval: float = 5.0,
-        interactive: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        interactive: bool = False,
+        **kwargs,
     ) -> dict:
         """Execute the async status command."""
         try:
@@ -482,7 +482,7 @@ StatusCommand = AsyncStatusCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def status(project_path: str, update_interval: float, interactive: bool, async_mode: bool) -> None:  # noqa: FBT001
+def status(project_path: str, update_interval: float, interactive: bool, async_mode: bool) -> None:
     """Comprehensive project status dashboard with async optimizations."""
     if async_mode:
         command = AsyncStatusCommand()
@@ -520,7 +520,7 @@ def status(project_path: str, update_interval: float, interactive: bool, async_m
     default=True,
     help="Run in interactive mode with live updates (default: interactive)",
 )
-def status_async(project_path: str, update_interval: float, interactive: bool) -> None:  # noqa: FBT001
+def status_async(project_path: str, update_interval: float, interactive: bool) -> None:
     """Async comprehensive project status dashboard (explicit async version)."""
     command = AsyncStatusCommand()
     command.run(

@@ -510,7 +510,7 @@ class AutoResolver:
     async def _apply_single_merge_result(
         self,
         result: MergeResult,
-        target_branch: str,  # noqa: ARG002
+        target_branch: str,
     ) -> bool:
         """Apply a single merge result to the target branch."""
         try:
@@ -595,7 +595,7 @@ class AutoResolver:
 
     async def _apply_preventive_measures(
         self,
-        predictions: list[PredictionResult],  # noqa: ARG002
+        predictions: list[PredictionResult],
         strategies: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         """Apply automated preventive measures."""
@@ -627,7 +627,7 @@ class AutoResolver:
     @staticmethod
     async def _apply_preventive_measure(
         measure: str,
-        strategy: dict[str, Any],  # noqa: ARG002
+        strategy: dict[str, Any],
     ) -> bool:
         """Apply a specific preventive measure."""
         # This would implement actual preventive measures

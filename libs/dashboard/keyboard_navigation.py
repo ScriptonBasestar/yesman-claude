@@ -111,13 +111,13 @@ class KeyBinding:
     def from_dict(cls, data: dict[str, object]) -> "KeyBinding":
         """Create KeyBinding from dictionary."""
         return cls(
-            key=cast(str, data["key"]),
-            modifiers=[KeyModifier(mod) for mod in cast(list, data.get("modifiers", []))],
-            action=cast(str, data.get("action", "")),
-            description=cast(str, data.get("description", "")),
+            key=cast("str", data["key"]),
+            modifiers=[KeyModifier(mod) for mod in cast("list", data.get("modifiers", []))],
+            action=cast("str", data.get("action", "")),
+            description=cast("str", data.get("description", "")),
             context=NavigationContext(data["context"]) if data.get("context") else None,
-            enabled=cast(bool, data.get("enabled", True)),
-            priority=cast(int, data.get("priority", 0)),
+            enabled=cast("bool", data.get("enabled", True)),
+            priority=cast("int", data.get("priority", 0)),
         )
 
 
@@ -142,7 +142,7 @@ class FocusableElement:
         }
 
 
-class KeyboardNavigationManager:  # noqa: PLR0904
+class KeyboardNavigationManager:
     """Universal keyboard navigation manager.
 
     Provides consistent keyboard navigation across all dashboard
@@ -650,7 +650,7 @@ class KeyboardNavigationManager:  # noqa: PLR0904
         self.bindings.clear()
 
         for key_combo, binding_list in bindings_data.items():
-            self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in cast(list, binding_list)]
+            self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in cast("list", binding_list)]
 
     def get_help_text(self, context: NavigationContext | None = None) -> list[str]:
         """Get help text for current context."""

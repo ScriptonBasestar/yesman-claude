@@ -194,7 +194,7 @@ custom:
                 assert config.get("custom.test_value") == 42
 
             finally:
-                os.unlink(f.name)
+                Path(f.name).unlink()
 
 
 class TestErrorHandlingIntegration:
@@ -206,7 +206,7 @@ class TestErrorHandlingIntegration:
 
         class TestCommand(BaseCommand):
             @staticmethod
-            def execute(**kwargs: dict[str, object]) -> Never:  # noqa: ARG002, ARG004
+            def execute(**kwargs: dict[str, object]) -> Never:
                 msg = "Test validation error"
                 raise ValidationError(
                     msg,

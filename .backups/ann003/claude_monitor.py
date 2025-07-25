@@ -74,7 +74,7 @@ class ClaudeMonitor:
 
         self.logger = logging.getLogger(f"yesman.claude_monitor.{self.session_name}")
 
-    def set_auto_next(self, enabled: bool) -> None:  # noqa: FBT001
+    def set_auto_next(self, enabled: bool) -> None:
         """Enable or disable auto-next responses."""
         self.is_auto_next_enabled = enabled
         status = "enabled" if enabled else "disabled"
@@ -453,11 +453,11 @@ class ClaudeMonitor:
         """Adjust the confidence threshold for adaptive responses."""
         self.adaptive_response.adjust_confidence_threshold(threshold)
 
-    def enable_adaptive_response(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_adaptive_response(self, enabled: bool = True) -> None:
         """Enable or disable adaptive response functionality."""
         self.adaptive_response.enable_auto_response(enabled)
 
-    def enable_adaptive_learning(self, enabled: bool = True) -> None:  # noqa: FBT001
+    def enable_adaptive_learning(self, enabled: bool = True) -> None:
         """Enable or disable adaptive learning functionality."""
         self.adaptive_response.enable_learning(enabled)
 
@@ -512,7 +512,7 @@ class ClaudeMonitor:
         self.automation_manager.load_automation_config()
 
     # Project health monitoring methods
-    async def calculate_project_health(self, force_refresh: bool = False) -> dict:  # noqa: FBT001
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:
         """Calculate comprehensive project health."""
         health = await self.health_calculator.calculate_health(force_refresh)
         return health.to_dict()

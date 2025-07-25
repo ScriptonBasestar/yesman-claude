@@ -90,11 +90,11 @@ class TestSemanticMerger:
     def mock_semantic_analyzer() -> Mock:
         """Create mock semantic analyzer."""
         analyzer = Mock(spec=SemanticAnalyzer)
-        analyzer._extract_semantic_context = Mock()  # noqa: SLF001
+        analyzer._extract_semantic_context = Mock()
         analyzer._analyze_file_semantic_conflicts = AsyncMock(
             return_value=[]
-        )  # noqa: SLF001
-        analyzer._get_file_content = AsyncMock()  # noqa: SLF001
+        )
+        analyzer._get_file_content = AsyncMock()
         return analyzer
 
     @pytest.fixture
@@ -156,7 +156,7 @@ class TestSemanticMerger:
     @staticmethod
     def test_initialize_resolution_rules(merger: SemanticMerger) -> None:
         """Test default resolution rules initialization."""
-        rules = merger._initialize_resolution_rules()  # noqa: SLF001
+        rules = merger._initialize_resolution_rules()
 
         assert len(rules) > 0
         assert all(isinstance(rule, ConflictResolutionRule) for rule in rules)
@@ -186,8 +186,8 @@ def test_function(
     return True  # Missing closing parenthesis
 """
 
-        assert merger._validate_ast_integrity(valid_code) is True  # noqa: SLF001
-        assert merger._validate_ast_integrity(invalid_code) is False  # noqa: SLF001
+        assert merger._validate_ast_integrity(valid_code) is True
+        assert merger._validate_ast_integrity(invalid_code) is False
 
     @staticmethod
     def test_calculate_diff_stats(merger: SemanticMerger) -> None:
@@ -196,7 +196,7 @@ def test_function(
         content2 = "line1\nline2_modified\nline3\nline4"
         merged = "line1\nline2_modified\nline3\nline4\nline5"
 
-        stats = merger._calculate_diff_stats(content1, content2, merged)  # noqa: SLF001
+        stats = merger._calculate_diff_stats(content1, content2, merged)
 
         assert stats["lines_original1"] == 3
         assert stats["lines_original2"] == 4
@@ -221,7 +221,7 @@ def test_function(
             ),
         ]
 
-        strategy1 = merger._select_optimal_strategy(conflicts1)  # noqa: SLF001
+        strategy1 = merger._select_optimal_strategy(conflicts1)
         assert strategy1 == MergeStrategy.FUNCTION_LEVEL_MERGE
 
         # Import conflicts
@@ -238,7 +238,7 @@ def test_function(
             ),
         ]
 
-        strategy2 = merger._select_optimal_strategy(conflicts2)  # noqa: SLF001
+        strategy2 = merger._select_optimal_strategy(conflicts2)
         assert strategy2 == MergeStrategy.SEMANTIC_UNION
 
         # Class interface conflicts
@@ -255,7 +255,7 @@ def test_function(
             ),
         ]
 
-        strategy3 = merger._select_optimal_strategy(conflicts3)  # noqa: SLF001
+        strategy3 = merger._select_optimal_strategy(conflicts3)
         assert strategy3 == MergeStrategy.AST_BASED_MERGE
 
     @staticmethod
@@ -277,7 +277,7 @@ def test_function(
         content = "def test_function():\n    return True"
 
         # Test prefer first
-        result1 = merger._prefer_branch_merge(  # noqa: SLF001
+        result1 = merger._prefer_branch_merge(
             "merge-1",
             "test.py",
             content,
@@ -291,7 +291,7 @@ def test_function(
         assert result1.conflicts_resolved == ["test-conflict"]
 
         # Test prefer second
-        result2 = merger._prefer_branch_merge(  # noqa: SLF001
+        result2 = merger._prefer_branch_merge(
             "merge-2",
             "test.py",
             content,
@@ -325,7 +325,7 @@ def test_function(
 
         assert (
             merger._conflict_resolved_by_merge(conflict, successful_result) is True
-        )  # noqa: SLF001
+        )
 
         # Failed merge
         failed_result = MergeResult(
@@ -338,7 +338,7 @@ def test_function(
 
         assert (
             merger._conflict_resolved_by_merge(conflict, failed_result) is False
-        )  # noqa: SLF001
+        )
 
     @staticmethod
     def test_update_merge_stats(merger: SemanticMerger) -> None:
@@ -358,7 +358,7 @@ def test_function(
             semantic_integrity=True,
         )
 
-        merger._update_merge_stats(successful_result)  # noqa: SLF001
+        merger._update_merge_stats(successful_result)
 
         assert merger.merge_stats["total_merges"] == 1
         assert merger.merge_stats["successful_merges"] == 1
@@ -376,7 +376,7 @@ def test_function(
             semantic_integrity=True,
         )
 
-        merger._update_merge_stats(partial_result)  # noqa: SLF001
+        merger._update_merge_stats(partial_result)
 
         assert merger.merge_stats["total_merges"] == 2
         assert merger.merge_stats["successful_merges"] == 2
@@ -400,7 +400,7 @@ class TestClass:
         pass
 """
 
-        functions = merger._extract_functions_with_content(code)  # noqa: SLF001
+        functions = merger._extract_functions_with_content(code)
 
         assert "function1" in functions
         assert "function2" in functions
@@ -425,7 +425,7 @@ def function2() -> object:
     return "second"
 """
 
-        non_func_content = merger._extract_non_function_content(code)  # noqa: SLF001
+        non_func_content = merger._extract_non_function_content(code)
 
         assert "import os" in non_func_content
         assert "from typing import List" in non_func_content
@@ -462,14 +462,14 @@ def function2() -> object:
         # Find existing function conflict
         found_conflict = merger._find_function_conflict(
             "target_function", conflicts
-        )  # noqa: SLF001
+        )
         assert found_conflict is not None
         assert found_conflict.conflict_id == "function-conflict"
 
         # Try to find non-existing function conflict
         not_found = merger._find_function_conflict(
             "other_function", conflicts
-        )  # noqa: SLF001
+        )
         assert not_found is None
 
     @staticmethod
@@ -491,7 +491,7 @@ def function2() -> object:
 
         result = merger._merge_function_definitions(
             func1, func2, conflict
-        )  # noqa: SLF001
+        )
 
         assert result["resolved"] is True
         assert result["confidence"] > 0
@@ -531,7 +531,7 @@ def function2() -> object:
         content1 = "def test_func(x): return x"
         content2 = "def test_func(x, y): return x + y"
 
-        result = await merger._resolve_individual_conflict(  # noqa: SLF001
+        result = await merger._resolve_individual_conflict(
             conflict,
             content1,
             content2,
@@ -554,10 +554,10 @@ def function2() -> object:
         merger.semantic_analyzer._get_file_content.side_effect = [
             content1,
             content2,
-        ]  # noqa: SLF001
+        ]
         merger.semantic_analyzer._analyze_file_semantic_conflicts.return_value = (
             []
-        )  # noqa: SLF001
+        )
 
         result = await merger.perform_semantic_merge(
             "test.py",
@@ -581,7 +581,7 @@ def function2() -> object:
         merger.semantic_analyzer._get_file_content.side_effect = [
             None,
             "content2",
-        ]  # noqa: SLF001
+        ]
 
         result = await merger.perform_semantic_merge("test.py", "branch1", "branch2")
 

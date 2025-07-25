@@ -199,28 +199,28 @@ class TestRecoveryEngine:
         # Test timeout error
         strategy = recovery_engine._find_recovery_strategy(
             "Task timed out after 300 seconds"
-        )  # noqa: SLF001
+        )
         assert strategy is not None
         assert strategy.error_pattern == r"timed? ?out|timeout"
 
         # Test agent error
         strategy = recovery_engine._find_recovery_strategy(
             "Agent execution error occurred"
-        )  # noqa: SLF001
+        )
         assert strategy is not None
         assert "agent" in strategy.error_pattern.lower()
 
         # Test git error
         strategy = recovery_engine._find_recovery_strategy(
             "fatal: git repository not found"
-        )  # noqa: SLF001
+        )
         assert strategy is not None
         assert "git" in strategy.error_pattern.lower()
 
         # Test generic error (fallback)
         strategy = recovery_engine._find_recovery_strategy(
             "Some unknown error"
-        )  # noqa: SLF001
+        )
         assert strategy is not None
 
     @pytest.mark.asyncio
@@ -274,7 +274,7 @@ class TestRecoveryEngine:
     async def test_recovery_action_execution(recovery_engine: RecoveryEngine) -> None:
         """Test execution of different recovery actions."""
         # Test SKIP action
-        success = await recovery_engine._execute_recovery_action(  # noqa: SLF001
+        success = await recovery_engine._execute_recovery_action(
             action=RecoveryAction.SKIP,
             snapshot_id=None,
             exception=Exception("test"),
@@ -290,7 +290,7 @@ class TestRecoveryEngine:
         agent.current_task = "task-1"
         agent_pool.agents = {"agent-1": agent}
 
-        success = await recovery_engine._execute_recovery_action(  # noqa: SLF001
+        success = await recovery_engine._execute_recovery_action(
             action=RecoveryAction.RESET_AGENT,
             snapshot_id=None,
             exception=Exception("test"),
@@ -318,7 +318,7 @@ class TestRecoveryEngine:
         assert len(recovery_engine.snapshots) == 15
 
         # Cleanup should reduce to max_snapshots
-        asyncio.run(recovery_engine._cleanup_old_snapshots())  # noqa: SLF001
+        asyncio.run(recovery_engine._cleanup_old_snapshots())
         assert len(recovery_engine.snapshots) <= recovery_engine.max_snapshots
 
     @staticmethod
@@ -358,19 +358,19 @@ class TestRecoveryEngine:
         recovery_engine.failure_counts["test_operation"] = 3
 
         # Save state
-        recovery_engine._save_state()  # noqa: SLF001
+        recovery_engine._save_state()
 
         # Clear current data
         recovery_engine.failure_counts.clear()
 
         # Load state back
-        recovery_engine._load_state()  # noqa: SLF001
+        recovery_engine._load_state()
 
         # Verify data was persisted
         assert recovery_engine.failure_counts.get("test_operation") == 3
 
         # Test that state file exists
-        state_file = recovery_engine._get_state_file()  # noqa: SLF001
+        state_file = recovery_engine._get_state_file()
         assert state_file.exists()
 
 
@@ -391,7 +391,7 @@ class TestAgentPoolRecoveryIntegration:
         with tempfile.TemporaryDirectory() as tmpdir:
             agent_pool.enable_recovery_system(work_dir=tmpdir)
 
-            assert agent_pool._recovery_enabled  # noqa: SLF001
+            assert agent_pool._recovery_enabled
             assert agent_pool.recovery_engine is not None
 
     @pytest.mark.asyncio

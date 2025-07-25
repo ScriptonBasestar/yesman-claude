@@ -274,10 +274,10 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     def execute(
         self,
         project_path: str = ".",
-        interactive: bool = False,  # noqa: FBT001
+        interactive: bool = False,
         update_interval: float = 5.0,
-        detailed: bool = False,  # noqa: FBT001
-        **kwargs,  # noqa: ARG002
+        detailed: bool = False,
+        **kwargs,
     ) -> dict:
         """Execute the status command."""
         try:
@@ -344,7 +344,7 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     help="Update interval in seconds",
 )
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
-def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:  # noqa: FBT001
+def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:
     """Comprehensive project status dashboard."""
     command = StatusCommand()
     command.run(

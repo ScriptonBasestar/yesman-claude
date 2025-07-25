@@ -178,7 +178,7 @@ def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str
     }
 
 
-def create_api_test_mocks(success: bool = True) -> dict[str, Any]:  # noqa: FBT001
+def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
     """Create standard API test mocks."""
     if success:
         return {

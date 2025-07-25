@@ -31,9 +31,9 @@ class LogsConfigureCommand(BaseCommand):
         self,
         output_dir: str = "~/.scripton/yesman/logs",
         format: str = "json",
-        compression: bool = False,  # noqa: FBT001
+        compression: bool = False,
         buffer_size: int = 1000,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
     ) -> dict:
         """Execute the configure command.
 
@@ -98,7 +98,7 @@ class LogsAnalyzeCommand(BaseCommand):
         log_dir: str = "~/.scripton/yesman/logs",
         last_hours: int = 24,
         level: str | None = None,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
     ) -> dict:
         """Execute the analyze command.
 
@@ -197,7 +197,7 @@ class LogsAnalyzeCommand(BaseCommand):
                             stats["total_entries"] = (int(current_total) if isinstance(current_total, (int, str)) else 0) + 1
 
             except Exception as e:
-                self.logger.warning(f"Failed to process log file {log_file}: {e}")  # noqa: G004
+                self.logger.warning(f"Failed to process log file {log_file}: {e}")
                 continue  # Skip problematic files
 
         return stats
@@ -256,9 +256,9 @@ class LogsTailCommand(BaseCommand):
         self,
         log_dir: str = "~/.scripton/yesman/logs",
         level: str = "INFO",
-        follow: bool = False,  # noqa: FBT001
+        follow: bool = False,
         last_lines: int = 50,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
     ) -> dict:
         """Execute the tail command."""
         try:
@@ -392,7 +392,7 @@ class LogsCleanupCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: Any) -> dict:
         """Execute the cleanup command.
 
         Returns:
@@ -457,7 +457,7 @@ def logs() -> None:
 )
 @click.option("--compression", "-c", is_flag=True, help="Enable gzip compression")
 @click.option("--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching")
-def configure(output_dir: str, format: str, compression: bool, buffer_size: int) -> None:  # noqa: FBT001
+def configure(output_dir: str, format: str, compression: bool, buffer_size: int) -> None:
     """Configure async logging system."""
     command = LogsConfigureCommand()
     command.run(
@@ -488,7 +488,7 @@ def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
 @click.option("--level", "-l", default="INFO", help="Log level filter")
 @click.option("--follow", "-f", is_flag=True, help="Follow log output")
 @click.option("--last-lines", "-n", default=50, type=int, help="Show last N lines")
-def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:  # noqa: FBT001
+def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:
     """Tail log files (like tail -f)."""
     command = LogsTailCommand()
     command.run(log_dir=log_dir, level=level, follow=follow, last_lines=last_lines)

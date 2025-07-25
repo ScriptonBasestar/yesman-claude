@@ -66,7 +66,7 @@ class RenderCache:
     @staticmethod
     def _generate_cache_key(
         widget_type: WidgetType,
-        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
+        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
         options: dict[str, str | int | float | bool] | None = None,
         renderer_format: RenderFormat | None = None,
     ) -> str:
@@ -244,7 +244,7 @@ def cached_render(cache: RenderCache | None = None) -> Callable:
         def wrapper(
             self: object | None,
             widget_type: WidgetType,
-            data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
+            data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
             options: dict[str, str | int | float | bool] | None = None,
         ):
             # Generate cache key
@@ -331,7 +331,7 @@ class LazyRenderer:
         self,
         renderer: BaseRenderer,
         widget_type: WidgetType,
-        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
+        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
         options: dict[str, str | int | float | bool] | None = None,
     ) -> None:
         """Initialize lazy renderer.
@@ -411,7 +411,7 @@ class BatchRenderer:
                 dict[str, str | int | float | bool] | None,
             ]
         ],
-        parallel: bool = True,  # noqa: FBT001
+        parallel: bool = True,
     ) -> list[str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
         """Render multiple widgets in batch.
 
@@ -462,7 +462,7 @@ class BatchRenderer:
         def render_single(
             index: int,
             widget_type: WidgetType,
-            data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
+            data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
             options: dict[str, str | int | float | bool] | None,
         ) -> tuple[
             int,

@@ -77,8 +77,8 @@ class TestWebSocketBatchProcessor:
     def test_register_handler(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test message handler registration."""
         processor.register_message_handler("test_channel", mock_handler)
-        assert "test_channel" in processor._message_handlers  # noqa: SLF001
-        assert processor._message_handlers["test_channel"] == mock_handler  # noqa: SLF001
+        assert "test_channel" in processor._message_handlers
+        assert processor._message_handlers["test_channel"] == mock_handler
 
     @staticmethod
     def test_queue_message(processor: WebSocketBatchProcessor) -> None:
@@ -100,7 +100,7 @@ class TestWebSocketBatchProcessor:
         processor.register_message_handler("test_channel", mock_handler)
 
         test_message = {"type": "urgent", "data": "immediate"}
-        await processor.send_immediate("test_channel", cast(dict[str, object], test_message))
+        await processor.send_immediate("test_channel", cast("dict[str, object]", test_message))
 
         mock_handler.assert_called_once_with([test_message])
         assert processor.stats["messages_processed"] == 1
@@ -164,15 +164,15 @@ class TestWebSocketBatchProcessor:
             },
         ]
 
-        optimized = processor._optimize_messages(messages)  # noqa: SLF001
+        optimized = processor._optimize_messages(messages)
 
         # Should combine into single message
         assert len(optimized) == 1
-        combined = cast(dict, optimized[0])
+        combined = cast("dict", optimized[0])
         assert combined["type"] == "session_update"
         assert "batch_info" in combined
-        assert cast(dict, combined["data"])["session1"] == "updated"  # Latest data
-        assert cast(dict, combined["data"])["session2"] == "data2"
+        assert cast("dict", combined["data"])["session1"] == "updated"  # Latest data
+        assert cast("dict", combined["data"])["session2"] == "data2"
 
     @staticmethod
     def test_log_message_optimization(processor: WebSocketBatchProcessor) -> None:
@@ -190,14 +190,14 @@ class TestWebSocketBatchProcessor:
             },
         ]
 
-        optimized = processor._optimize_messages(messages)  # noqa: SLF001
+        optimized = processor._optimize_messages(messages)
 
         # Should combine into log batch
         assert len(optimized) == 1
-        combined = cast(dict, optimized[0])
+        combined = cast("dict", optimized[0])
         assert combined["type"] == "log_batch"
-        assert len(cast(dict, cast(dict, combined["data"])["entries"])) == 2
-        assert cast(dict, combined["data"])["count"] == 2
+        assert len(cast("dict", cast("dict", combined["data"])["entries"])) == 2
+        assert cast("dict", combined["data"])["count"] == 2
 
     @staticmethod
     def test_get_statistics(processor: WebSocketBatchProcessor) -> None:
@@ -270,14 +270,14 @@ class TestWebSocketBatchProcessor:
     @staticmethod
     async def test_start_stop_lifecycle(processor: WebSocketBatchProcessor) -> None:
         """Test processor start/stop lifecycle."""
-        assert processor._processing_task is None  # noqa: SLF001
+        assert processor._processing_task is None
 
         await processor.start()
-        assert processor._processing_task is not None  # noqa: SLF001
-        assert not processor._processing_task.done()  # noqa: SLF001
+        assert processor._processing_task is not None
+        assert not processor._processing_task.done()
 
         await processor.stop()
-        assert processor._processing_task.done()  # noqa: SLF001
+        assert processor._processing_task.done()
 
     @staticmethod
     def test_memory_size_calculation(processor: WebSocketBatchProcessor) -> None:
@@ -293,7 +293,7 @@ class TestWebSocketBatchProcessor:
             ]
         )
 
-        size = processor._get_queue_memory_size(test_queue)  # noqa: SLF001
+        size = processor._get_queue_memory_size(test_queue)
         assert size > 0
         assert isinstance(size, int)
 

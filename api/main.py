@@ -16,6 +16,7 @@ from api.middleware.error_handler import add_request_id_middleware, global_error
 from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
 from api.routers.websocket_router import ConnectionManager
 from libs.core.error_handling import YesmanError
+import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -107,10 +108,10 @@ app.include_router(websocket_router.router, tags=["websocket"])
 
 # Mount SvelteKit assets
 sveltekit_build_path = "tauri-dashboard/build"
-if os.path.exists(sveltekit_build_path):
+if pathlib.Path(sveltekit_build_path).exists():
     # Mount SvelteKit static files
     fonts_path = "tauri-dashboard/build/fonts"
-    if os.path.exists(fonts_path):
+    if pathlib.Path(fonts_path).exists():
         app.mount("/fonts", StaticFiles(directory=fonts_path), name="fonts")
     # Mount SvelteKit static assets with cache control headers
 
@@ -164,7 +165,7 @@ async def api_info() -> dict[str, str | dict[str, str] | None]:
             "health": "/healthz",
         },
         "ui": {
-            "dashboard": "/" if os.path.exists(sveltekit_build_path) else None,
+            "dashboard": "/" if pathlib.Path(sveltekit_build_path).exists() else None,
         },
         "docs": "/docs",
         "openapi": "/openapi.json",
@@ -172,7 +173,7 @@ async def api_info() -> dict[str, str | dict[str, str] | None]:
 
 
 # SvelteKit dashboard route (serves at root)
-if os.path.exists(sveltekit_build_path):
+if pathlib.Path(sveltekit_build_path).exists():
 
     @app.get("/")
     @app.get("/{path:path}")
@@ -276,7 +277,7 @@ async def get_task_status() -> TaskStatesDict:
     """Get status of background tasks."""
     return {
         "is_running": task_runner.is_running,
-        "tasks": cast(dict[str, TaskStateDict], task_runner.get_task_states()),
+        "tasks": cast("dict[str, TaskStateDict]", task_runner.get_task_states()),
     }
 
 
@@ -288,7 +289,7 @@ async def get_websocket_stats() -> WebSocketStatsDict:
     batch_stats = manager.get_batch_statistics()
 
     return {
-        "connection_stats": cast(ConnectionStatsDict, connection_stats),
-        "batch_stats": cast(BatchStatisticsDict, batch_stats),
+        "connection_stats": cast("ConnectionStatsDict", connection_stats),
+        "batch_stats": cast("BatchStatisticsDict", batch_stats),
         "summary": datetime.now(UTC).isoformat(),
     }

@@ -150,7 +150,7 @@ class CodeReviewEngine:
         semantic_analyzer: SemanticAnalyzer,
         branch_manager: BranchManager,
         repo_path: str | None = None,
-        enable_auto_review: bool = True,  # noqa: FBT001
+        enable_auto_review: bool = True,
     ) -> None:
         """Initialize the code review engine.
 
@@ -1217,7 +1217,7 @@ class CodeReviewEngine:
     async def _find_suitable_reviewers(
         self,
         requester_id: str,
-        files_changed: list[str],  # noqa: ARG002
+        files_changed: list[str],
         num_reviewers: int,
     ) -> list[str]:
         """Find suitable reviewers for a code review."""

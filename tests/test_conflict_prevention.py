@@ -149,7 +149,7 @@ class TestPreventionResult:
         assert isinstance(result.executed_at, datetime)
 
 
-class TestConflictPreventionSystem:  # noqa: PLR0904
+class TestConflictPreventionSystem:
     """Test cases for ConflictPreventionSystem."""
 
     @pytest.fixture
@@ -210,8 +210,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         # Check initial state
         assert prevention_system.active_measures == {}
         assert prevention_system.prevention_history == []
-        assert not prevention_system._running  # noqa: SLF001
-        assert prevention_system._prevention_monitor_task is None  # noqa: SLF001
+        assert not prevention_system._running
+        assert prevention_system._prevention_monitor_task is None
 
         # Check strategy handlers
         assert len(prevention_system.strategy_handlers) == 7
@@ -254,9 +254,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         # Start monitoring
         await prevention_system.start_prevention_monitoring(monitoring_interval=0.1)
 
-        assert prevention_system._running is True  # noqa: SLF001
-        assert prevention_system._prevention_monitor_task is not None  # noqa: SLF001
-        assert not prevention_system._prevention_monitor_task.done()  # noqa: SLF001
+        assert prevention_system._running is True
+        assert prevention_system._prevention_monitor_task is not None
+        assert not prevention_system._prevention_monitor_task.done()
 
         # Wait a short time to ensure the monitor loop is running
         await asyncio.sleep(0.2)
@@ -264,11 +264,11 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         # Stop monitoring
         await prevention_system.stop_prevention_monitoring()
 
-        assert prevention_system._running is False  # noqa: SLF001
-        assert prevention_system._prevention_monitor_task.cancelled()  # noqa: SLF001
+        assert prevention_system._running is False
+        assert prevention_system._prevention_monitor_task.cancelled()
 
     @pytest.mark.asyncio
-    async def test_analyze_and_prevent_conflicts_no_predictions(  # noqa: PLR6301
+    async def test_analyze_and_prevent_conflicts_no_predictions(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,
@@ -303,7 +303,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         assert result.metadata["significant_predictions"] == 0
 
     @pytest.mark.asyncio
-    async def test_analyze_and_prevent_conflicts_with_predictions(  # noqa: PLR6301
+    async def test_analyze_and_prevent_conflicts_with_predictions(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,
@@ -371,7 +371,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         )
 
         measures = (
-            await prevention_system._generate_dependency_measures(  # noqa: SLF001
+            await prevention_system._generate_dependency_measures(
                 mock_prediction,
             )
         )
@@ -411,7 +411,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         )
 
         measures = (
-            await prevention_system._generate_coordination_measures(  # noqa: SLF001
+            await prevention_system._generate_coordination_measures(
                 mock_prediction,
             )
         )
@@ -452,7 +452,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         measures = await prevention_system._generate_interface_measures(
             mock_prediction
-        )  # noqa: SLF001
+        )
 
         assert len(measures) == 1
         measure = measures[0]
@@ -490,7 +490,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         measures = await prevention_system._generate_temporal_measures(
             mock_prediction
-        )  # noqa: SLF001
+        )
 
         assert len(measures) == 1
         measure = measures[0]
@@ -530,7 +530,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         measures = await prevention_system._generate_generic_measures(
             mock_prediction
-        )  # noqa: SLF001
+        )
 
         assert len(measures) == 1
         measure = measures[0]
@@ -570,16 +570,16 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         measures = await prevention_system._generate_generic_measures(
             mock_prediction
-        )  # noqa: SLF001
+        )
 
         # Should not generate early merge measure due to low likelihood score
         assert len(measures) == 0
 
     @pytest.mark.asyncio
-    async def test_apply_prevention_measure_success(  # noqa: PLR6301
+    async def test_apply_prevention_measure_success(
         self,
         prevention_system: ConflictPreventionSystem,
-        mock_dependencies: dict,  # noqa: ARG002
+        mock_dependencies: dict,
     ) -> None:
         """Test _apply_prevention_measure with successful application."""
         measure = PreventionMeasure(
@@ -601,7 +601,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         ) as mock_handler:
             success = await prevention_system._apply_prevention_measure(
                 measure
-            )  # noqa: SLF001
+            )
 
         assert success is True
         assert measure.status == "applied"
@@ -611,10 +611,10 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         mock_handler.assert_called_once_with(measure)
 
     @pytest.mark.asyncio
-    async def test_apply_prevention_measure_failure(  # noqa: PLR6301
+    async def test_apply_prevention_measure_failure(
         self,
         prevention_system: ConflictPreventionSystem,
-        mock_dependencies: dict,  # noqa: ARG002
+        mock_dependencies: dict,
     ) -> None:
         """Test _apply_prevention_measure with failed application."""
         measure = PreventionMeasure(
@@ -636,7 +636,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         ) as mock_handler:
             success = await prevention_system._apply_prevention_measure(
                 measure
-            )  # noqa: SLF001
+            )
 
         assert success is False
         assert measure.status == "failed"
@@ -645,10 +645,10 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         mock_handler.assert_called_once_with(measure)
 
     @pytest.mark.asyncio
-    async def test_apply_prevention_measure_exception(  # noqa: PLR6301
+    async def test_apply_prevention_measure_exception(
         self,
         prevention_system: ConflictPreventionSystem,
-        mock_dependencies: dict,  # noqa: ARG002
+        mock_dependencies: dict,
     ) -> None:
         """Test _apply_prevention_measure with exception during application."""
         measure = PreventionMeasure(
@@ -670,7 +670,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         ) as mock_handler:
             success = await prevention_system._apply_prevention_measure(
                 measure
-            )  # noqa: SLF001
+            )
 
         assert success is False
         assert measure.status == "failed"
@@ -681,10 +681,10 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         mock_handler.assert_called_once_with(measure)
 
     @pytest.mark.asyncio
-    async def test_apply_prevention_measure_no_handler(  # noqa: PLR6301
+    async def test_apply_prevention_measure_no_handler(
         self,
         prevention_system: ConflictPreventionSystem,
-        mock_dependencies: dict,  # noqa: ARG002
+        mock_dependencies: dict,
     ) -> None:
         """Test _apply_prevention_measure with missing strategy handler."""
         measure = PreventionMeasure(
@@ -706,7 +706,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         try:
             success = await prevention_system._apply_prevention_measure(
                 measure
-            )  # noqa: SLF001
+            )
             assert success is False
         finally:
             # Restore the handler
@@ -738,7 +738,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         success = await prevention_system._apply_work_reallocation(
             measure
-        )  # noqa: SLF001
+        )
 
         assert success is True
 
@@ -786,7 +786,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         success = await prevention_system._apply_dependency_sync(
             measure
-        )  # noqa: SLF001
+        )
 
         assert success is True
 
@@ -832,7 +832,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             return_value=mock_result,
         )
 
-        success = await prevention_system._apply_early_merge(measure)  # noqa: SLF001
+        success = await prevention_system._apply_early_merge(measure)
 
         assert success is True
 
@@ -846,7 +846,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         )
 
     @pytest.mark.asyncio
-    async def test_apply_early_merge_insufficient_branches(  # noqa: PLR6301
+    async def test_apply_early_merge_insufficient_branches(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,
@@ -863,7 +863,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             description="Test early merge with insufficient branches",
         )
 
-        success = await prevention_system._apply_early_merge(measure)  # noqa: SLF001
+        success = await prevention_system._apply_early_merge(measure)
 
         assert success is False
 
@@ -897,7 +897,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         success = await prevention_system._apply_agent_coordination(
             measure
-        )  # noqa: SLF001
+        )
 
         assert success is True
 
@@ -926,7 +926,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             assert content["steps"] == measure.implementation_steps
 
     @pytest.mark.asyncio
-    async def test_apply_temporal_separation(  # noqa: PLR6301
+    async def test_apply_temporal_separation(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,
@@ -950,7 +950,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         success = await prevention_system._apply_temporal_separation(
             measure
-        )  # noqa: SLF001
+        )
 
         assert success is True
 
@@ -979,7 +979,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             assert "temporal separation" in content["reason"]
 
     @pytest.mark.asyncio
-    async def test_apply_semantic_refactoring(  # noqa: PLR6301
+    async def test_apply_semantic_refactoring(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,
@@ -1007,7 +1007,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         success = await prevention_system._apply_semantic_refactoring(
             measure
-        )  # noqa: SLF001
+        )
 
         assert success is True
 
@@ -1130,15 +1130,15 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
     ) -> None:
         """Test _get_active_branches method."""
         # This is a placeholder implementation, so it should return empty list
-        active_branches = await prevention_system._get_active_branches()  # noqa: SLF001
+        active_branches = await prevention_system._get_active_branches()
         assert isinstance(active_branches, list)
         assert active_branches == []
 
     @pytest.mark.asyncio
-    async def test_prevention_monitor_loop_integration(  # noqa: PLR6301
+    async def test_prevention_monitor_loop_integration(
         self,
         prevention_system: ConflictPreventionSystem,
-        mock_dependencies: dict,  # noqa: ARG002
+        mock_dependencies: dict,
     ) -> None:
         """Test prevention monitor loop integration."""
         # Mock _get_active_branches to return test branches
@@ -1172,10 +1172,10 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
                 await prevention_system.stop_prevention_monitoring()
 
         # Verify that monitoring was running
-        assert not prevention_system._running  # noqa: SLF001
+        assert not prevention_system._running
 
     @pytest.mark.asyncio
-    async def test_analyze_and_prevent_conflicts_with_time_horizon(  # noqa: PLR6301
+    async def test_analyze_and_prevent_conflicts_with_time_horizon(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,
@@ -1204,7 +1204,7 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         assert result.metadata["time_horizon"] == str(custom_horizon)
 
     @pytest.mark.asyncio
-    async def test_analyze_and_prevent_conflicts_with_agents_filter(  # noqa: PLR6301
+    async def test_analyze_and_prevent_conflicts_with_agents_filter(
         self,
         prevention_system: ConflictPreventionSystem,
         mock_dependencies: dict,

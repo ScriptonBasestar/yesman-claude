@@ -260,7 +260,7 @@ class AsyncBrowseCommand(AsyncMonitoringCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:  # noqa: ARG002
+    async def execute_async(self, update_interval: float = 2.0, **kwargs) -> dict:
         """Execute the async browse command."""
         try:
             browser = AsyncInteractiveBrowser(self.tmux_manager, self.config, update_interval)
@@ -304,7 +304,7 @@ BrowseCommand = AsyncBrowseCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def browse(update_interval: float, async_mode: bool) -> None:  # noqa: FBT001
+def browse(update_interval: float, async_mode: bool) -> None:
     """Interactive session browser with async performance optimizations."""
     if async_mode:
         command = AsyncBrowseCommand()

@@ -217,8 +217,8 @@ class ConflictPredictor:
         """Calculate multi-dimensional conflict probability vector."""
         try:
             # File overlap analysis
-            files1 = await self.conflict_engine._get_changed_files(branch1)  # noqa: SLF001
-            files2 = await self.conflict_engine._get_changed_files(branch2)  # noqa: SLF001
+            files1 = await self.conflict_engine._get_changed_files(branch1)
+            files2 = await self.conflict_engine._get_changed_files(branch2)
 
             common_files = set(files1.keys()) & set(files2.keys())
             file_overlap_score = len(common_files) / max(
@@ -313,7 +313,7 @@ class ConflictPredictor:
                 timeline_prediction=datetime.now(UTC) + timedelta(days=2),
                 metadata={
                     "import_overlap_count": len(affected_files),
-                    "vector_components": vector._asdict(),  # noqa: SLF001
+                    "vector_components": vector._asdict(),
                 },
             )
 
@@ -447,7 +447,7 @@ class ConflictPredictor:
         self,
         branch1: str,
         branch2: str,
-        vector: ConflictVector,  # noqa: ARG002
+        vector: ConflictVector,
     ) -> PredictionResult | None:
         """Detect potential class hierarchy conflicts."""
         try:
@@ -505,7 +505,7 @@ class ConflictPredictor:
         self,
         branch1: str,
         branch2: str,
-        vector: ConflictVector,  # noqa: ARG002
+        vector: ConflictVector,
     ) -> PredictionResult | None:
         """Detect potential dependency version conflicts."""
         try:
@@ -561,9 +561,9 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_api_changes(
-        branch1: str,  # noqa: ARG004
-        branch2: str,  # noqa: ARG004
-        vector: ConflictVector,  # noqa: ARG002
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> PredictionResult | None:
         """Detect potential API breaking changes."""
         # Implementation would analyze public API changes
@@ -572,9 +572,9 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_resource_conflicts(
-        branch1: str,  # noqa: ARG004
-        branch2: str,  # noqa: ARG004
-        vector: ConflictVector,  # noqa: ARG002
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> PredictionResult | None:
         """Detect potential resource contention conflicts."""
         # Implementation would analyze file locks, database access, etc.
@@ -582,9 +582,9 @@ class ConflictPredictor:
 
     @staticmethod
     async def _detect_context_loss(
-        branch1: str,  # noqa: ARG004
-        branch2: str,  # noqa: ARG004
-        vector: ConflictVector,  # noqa: ARG002
+        branch1: str,
+        branch2: str,
+        vector: ConflictVector,
     ) -> PredictionResult | None:
         """Detect potential merge context loss scenarios."""
         # Implementation would analyze merge complexity
@@ -628,7 +628,7 @@ class ConflictPredictor:
     async def _get_change_frequency(self, branch: str) -> float:
         """Get change frequency for a branch (commits per day)."""
         try:
-            result = await self.conflict_engine._run_git_command(  # noqa: SLF001
+            result = await self.conflict_engine._run_git_command(
                 ["rev-list", "--count", "--since=1 week ago", branch],
             )
             commit_count = int(result.stdout.strip())
@@ -640,7 +640,7 @@ class ConflictPredictor:
         """Calculate complexity score for a branch."""
         try:
             # Simple complexity metric based on lines changed
-            result = await self.conflict_engine._run_git_command(  # noqa: SLF001
+            result = await self.conflict_engine._run_git_command(
                 ["diff", "--stat", f"HEAD..{branch}"],
             )
 
@@ -662,19 +662,19 @@ class ConflictPredictor:
             return 0.0
 
     @staticmethod
-    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
+    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:
         """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
+    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:
         """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
+    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:
         """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5
@@ -683,9 +683,9 @@ class ConflictPredictor:
         """Get Python files and their import statements."""
         files = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+                content = await self.conflict_engine._get_file_content(
                     file_path,
                     branch,
                 )
@@ -751,14 +751,14 @@ class ConflictPredictor:
         """Get all function signatures from a branch."""
         signatures = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+                content = await self.conflict_engine._get_file_content(
                     file_path,
                     branch,
                 )
                 if content:
-                    file_sigs = self.conflict_engine._extract_function_signatures(  # noqa: SLF001
+                    file_sigs = self.conflict_engine._extract_function_signatures(
                         content,
                     )
                     for func_name, signature in file_sigs.items():
@@ -771,9 +771,9 @@ class ConflictPredictor:
         """Extract symbol definitions from a branch."""
         symbols = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+                content = await self.conflict_engine._get_file_content(
                     file_path,
                     branch,
                 )
@@ -796,9 +796,9 @@ class ConflictPredictor:
         """Extract class inheritance hierarchies."""
         hierarchies = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)
             for file_path in python_files:
-                content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+                content = await self.conflict_engine._get_file_content(
                     file_path,
                     branch,
                 )
@@ -825,7 +825,7 @@ class ConflictPredictor:
         versions = {}
         try:
             # Check requirements.txt
-            req_content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+            req_content = await self.conflict_engine._get_file_content(
                 "requirements.txt",
                 branch,
             )
@@ -837,7 +837,7 @@ class ConflictPredictor:
                         versions[pkg.strip()] = ver.strip()
 
             # Check pyproject.toml
-            pyproject_content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+            pyproject_content = await self.conflict_engine._get_file_content(
                 "pyproject.toml",
                 branch,
             )

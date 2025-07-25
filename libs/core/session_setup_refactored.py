@@ -3,7 +3,7 @@
 # Copyright notice.
 
 import os
-import subprocess  # noqa: S404
+import subprocess
 from typing import Any
 
 import click
@@ -17,6 +17,7 @@ from libs.validation import (
 
 from .base_command import CommandError
 from .settings import settings
+import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -63,7 +64,7 @@ class SessionValidator:
         if not start_dir:
             return True
 
-        expanded_dir = os.path.expanduser(start_dir)
+        expanded_dir = pathlib.Path(start_dir).expanduser()
 
         # Use centralized directory validation
         is_valid, error = validate_directory_path(expanded_dir)
@@ -140,18 +141,18 @@ class SessionValidator:
 
     def _validate_window_start_directory(
         self,
-        session_name: str,  # noqa: ARG002
+        session_name: str,
         window_name: str,
         window_start_dir: str,
         config_dict: dict[str, Any],
     ) -> bool:
         """Validate window start directory."""
         # If relative path, make it relative to session start_directory
-        if not os.path.isabs(window_start_dir):
+        if not pathlib.Path(window_start_dir).is_absolute():
             base_dir = config_dict.get("start_directory", os.getcwd())
             window_start_dir = os.path.join(base_dir, window_start_dir)
 
-        expanded_window_dir = os.path.expanduser(window_start_dir)
+        expanded_window_dir = pathlib.Path(window_start_dir).expanduser()
 
         # Use centralized directory validation
         is_valid, error = validate_directory_path(expanded_window_dir)
@@ -234,7 +235,7 @@ class SessionConfigBuilder:
 
         from pathlib import Path
 
-        templates_path = getattr(self.tmux_manager, "templates_path", Path("."))
+        templates_path = getattr(self.tmux_manager, "templates_path", Path())
         template_file = templates_path / f"{template_name}.yaml"
 
         if not template_file.is_file():

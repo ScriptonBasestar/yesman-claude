@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import shutil
-import subprocess  # noqa: S404
+import subprocess
 import time
 import uuid
 from collections.abc import Awaitable, Callable
@@ -87,8 +87,8 @@ class OperationSnapshot:
     def from_dict(cls, data: dict[str, Any]) -> "OperationSnapshot":
         """Create from dictionary."""
         data = dict(data)  # Make a copy to avoid mutating original
-        data["operation_type"] = OperationType(cast(str, data["operation_type"]))
-        data["timestamp"] = datetime.fromisoformat(cast(str, data["timestamp"]))
+        data["operation_type"] = OperationType(cast("str", data["operation_type"]))
+        data["timestamp"] = datetime.fromisoformat(cast("str", data["timestamp"]))
         return cls(**data)
 
 
@@ -331,14 +331,14 @@ class RecoveryEngine:
         try:
             # Snapshot agent states
             if agent_pool:
-                pool = cast(Any, agent_pool)
+                pool = cast("Any", agent_pool)
                 snapshot.agent_states = {agent_id: agent.to_dict() for agent_id, agent in pool.agents.items()}
                 snapshot.task_states = {task_id: task.to_dict() for task_id, task in pool.tasks.items()}
 
             # Snapshot branch state
             if branch_manager:
                 try:
-                    manager = cast(Any, branch_manager)
+                    manager = cast("Any", branch_manager)
                     current_branch = manager._get_current_branch()
                     branch_status = manager.get_branch_status(current_branch)
                     snapshot.branch_state = {
@@ -399,7 +399,7 @@ class RecoveryEngine:
             return str(backup_path)
 
         except Exception:
-            logger.exception(f"Failed to backup file {file_path}")  # noqa: G004
+            logger.exception(f"Failed to backup file {file_path}")
             return None
 
     async def rollback_operation(
@@ -407,7 +407,7 @@ class RecoveryEngine:
         snapshot_id: str,
         agent_pool: object | None = None,
         branch_manager: object | None = None,
-        restore_files: bool = True,  # noqa: FBT001
+        restore_files: bool = True,
     ) -> bool:
         """Rollback to a previous snapshot.
 
@@ -455,7 +455,7 @@ class RecoveryEngine:
             return True
 
         except Exception:
-            logger.exception(f"Failed to rollback to snapshot {snapshot_id}")  # noqa: G004
+            logger.exception(f"Failed to rollback to snapshot {snapshot_id}")
             return False
 
     @staticmethod
@@ -464,13 +464,13 @@ class RecoveryEngine:
         if not agent_pool:
             return
 
-        pool = cast(Any, agent_pool)
+        pool = cast("Any", agent_pool)
         for agent_id, agent_data in agent_states.items():
             try:
                 if agent_id in pool.agents:
                     # Update existing agent
                     agent = pool.agents[agent_id]
-                    agent.state = AgentState(cast(str, agent_data["state"]))
+                    agent.state = AgentState(cast("str", agent_data["state"]))
                     agent.current_task = agent_data.get("current_task")
                     agent.branch_name = agent_data.get("branch_name")
 
@@ -485,7 +485,7 @@ class RecoveryEngine:
                         agent.process = None
                 else:
                     # Recreate agent
-                    agent = Agent.from_dict(cast(dict[str, Any], agent_data))
+                    agent = Agent.from_dict(cast("dict[str, Any]", agent_data))
                     agent.process = None  # Don't restore processes
                     pool.agents[agent_id] = agent
 
@@ -498,13 +498,13 @@ class RecoveryEngine:
         if not agent_pool:
             return
 
-        pool = cast(Any, agent_pool)
+        pool = cast("Any", agent_pool)
         # Clear current tasks and restore from snapshot
         pool.tasks.clear()
 
         for task_id, task_data in task_states.items():
             try:
-                task = Task.from_dict(cast(dict[str, Any], task_data))
+                task = Task.from_dict(cast("dict[str, Any]", task_data))
 
                 # Reset execution state
                 if task.status in {TaskStatus.RUNNING, TaskStatus.ASSIGNED}:
@@ -524,11 +524,11 @@ class RecoveryEngine:
         if not branch_manager:
             return
 
-        manager = cast(Any, branch_manager)
+        manager = cast("Any", branch_manager)
         try:
             current_branch = branch_state.get("current_branch")
             if current_branch:
-                success = manager.switch_branch(cast(str, current_branch))
+                success = manager.switch_branch(cast("str", current_branch))
                 if not success:
                     logger.warning("Failed to switch to branch %s", current_branch)
 
@@ -537,7 +537,7 @@ class RecoveryEngine:
             if isinstance(branches_data, dict):
                 for branch_name, branch_data in branches_data.items():
                     try:
-                        branch_info = BranchInfo.from_dict(cast(dict[str, Any], branch_data))
+                        branch_info = BranchInfo.from_dict(cast("dict[str, Any]", branch_data))
                         manager.branches[branch_name] = branch_info
                     except (KeyError, AttributeError, TypeError, ImportError) as e:
                         logger.warning("Failed to restore branch %s: %s", branch_name, e)
@@ -571,7 +571,7 @@ class RecoveryEngine:
                 command = instruction.get("command", [])
                 if command:
                     result = subprocess.run(
-                        cast(list[str], command),
+                        cast("list[str]", command),
                         check=False,
                         capture_output=True,
                         text=True,
@@ -585,9 +585,9 @@ class RecoveryEngine:
                 file_path = instruction.get("file_path")
 
                 if operation == "delete" and file_path:
-                    Path(cast(str, file_path)).unlink(missing_ok=True)
+                    Path(cast("str", file_path)).unlink(missing_ok=True)
                 elif operation == "create" and file_path:
-                    Path(cast(str, file_path)).touch()
+                    Path(cast("str", file_path)).touch()
 
             # Add more instruction types as needed
 
@@ -670,7 +670,7 @@ class RecoveryEngine:
             return False
 
         except Exception:
-            logger.exception(f"Recovery process failed for {operation_id}")  # noqa: G004
+            logger.exception(f"Recovery process failed for {operation_id}")
             self.recovery_metrics["failed_recoveries"] += 1
             return False
 
@@ -773,7 +773,7 @@ class RecoveryEngine:
             return False
 
         except Exception:
-            logger.exception(f"Failed to execute recovery action {action.value}")  # noqa: G004
+            logger.exception(f"Failed to execute recovery action {action.value}")
             return False
 
     async def _escalate_failure(

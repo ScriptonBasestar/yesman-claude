@@ -53,7 +53,7 @@ class ClaudeStatusManager:
             "content_snippet": content[-200:],  # Last 200 chars for context
         }
         self.response_history.append(record)
-        self.logger.info(f"Auto-response recorded: {prompt_type} -> {response}")  # noqa: G004
+        self.logger.info(f"Auto-response recorded: {prompt_type} -> {response}")
 
         # Keep only last 100 responses
         if len(self.response_history) > 100:
@@ -87,9 +87,9 @@ class ClaudeStatusManager:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-            self.logger.info(f"Saved pane capture to {file_path}")  # noqa: G004
+            self.logger.info(f"Saved pane capture to {file_path}")
             return str(file_path)
 
         except Exception:
-            self.logger.exception("Error saving capture to file")  # noqa: G004
+            self.logger.exception("Error saving capture to file")
             return ""

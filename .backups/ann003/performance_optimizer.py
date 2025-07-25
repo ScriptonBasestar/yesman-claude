@@ -521,7 +521,7 @@ class PerformanceOptimizer:
         logger.debug("Update frequency optimized: %ss interval", new_interval)
 
     @staticmethod
-    def _optimize_caching(strategy: OptimizationStrategy) -> None:  # noqa: ARG002, ARG004
+    def _optimize_caching(strategy: OptimizationStrategy) -> None:
         """Optimize caching behavior."""
         # This would integrate with actual cache systems
         logger.debug("Caching optimization applied")
@@ -533,7 +533,7 @@ class PerformanceOptimizer:
         logger.debug("Widget count limited to: %d", strategy.max_widget_count)
 
     @staticmethod
-    def _optimize_animations(strategy: OptimizationStrategy) -> None:  # noqa: ARG002, ARG004
+    def _optimize_animations(strategy: OptimizationStrategy) -> None:
         """Optimize animations."""
         # This would integrate with animation system
         logger.debug("Animations disabled for performance")

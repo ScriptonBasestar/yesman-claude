@@ -2,7 +2,7 @@
 
 import json
 import logging
-import subprocess  # noqa: S404
+import subprocess
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -185,18 +185,18 @@ class HealthCalculator:
 
     async def calculate_health(
         self, force_refresh: bool = False
-    ) -> ProjectHealth:  # noqa: FBT001
+    ) -> ProjectHealth:
         """Calculate comprehensive project health."""
         cache_key = f"health_{self.project_path}"
 
         if not force_refresh and cache_key in self._cache:
             cached_data = self._cache[cache_key]
-            cached_data_dict = cast(dict[str, Any], cached_data)
+            cached_data_dict = cast("dict[str, Any]", cached_data)
             if (
-                time.time() - cast(float, cached_data_dict["timestamp"])
+                time.time() - cast("float", cached_data_dict["timestamp"])
                 < self._cache_ttl
             ):
-                return ProjectHealth(**cast(dict[str, Any], cached_data_dict["health"]))
+                return ProjectHealth(**cast("dict[str, Any]", cached_data_dict["health"]))
 
         self.logger.info("Calculating health for project: %s", self.project_path)
 

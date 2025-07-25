@@ -25,7 +25,7 @@ class TestRenderer(BaseRenderer):
         widget_type: WidgetType,
         data: dict[str, Any],
         options: dict[str, Any] | None = None,
-    ) -> str:  # noqa: ARG002
+    ) -> str:
         return f"<widget type='{widget_type.value}' data='{data}' />"
 
     def render_layout(

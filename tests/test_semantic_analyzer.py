@@ -221,16 +221,16 @@ another_var = [1, 2, 3]
 
         assert (
             visitor._determine_visibility("public") == SymbolVisibility.PUBLIC
-        )  # noqa: SLF001
+        )
         assert (
             visitor._determine_visibility("_protected") == SymbolVisibility.PROTECTED
-        )  # noqa: SLF001
+        )
         assert (
             visitor._determine_visibility("__private") == SymbolVisibility.PRIVATE
-        )  # noqa: SLF001
+        )
         assert (
             visitor._determine_visibility("__magic__") == SymbolVisibility.MAGIC
-        )  # noqa: SLF001
+        )
 
     @staticmethod
     def test_infer_type() -> None:
@@ -238,15 +238,15 @@ another_var = [1, 2, 3]
         visitor = SemanticVisitor()
 
         # Test constants
-        assert visitor._infer_type(ast.Constant(42)) == "int"  # noqa: SLF001
-        assert visitor._infer_type(ast.Constant("string")) == "str"  # noqa: SLF001
-        assert visitor._infer_type(ast.Constant(True)) == "bool"  # noqa: SLF001
+        assert visitor._infer_type(ast.Constant(42)) == "int"
+        assert visitor._infer_type(ast.Constant("string")) == "str"
+        assert visitor._infer_type(ast.Constant(True)) == "bool"
 
         # Test collections
-        assert visitor._infer_type(ast.List([], ast.Load())) == "list"  # noqa: SLF001
-        assert visitor._infer_type(ast.Dict([], [])) == "dict"  # noqa: SLF001
-        assert visitor._infer_type(ast.Set([])) == "set"  # noqa: SLF001
-        assert visitor._infer_type(ast.Tuple([], ast.Load())) == "tuple"  # noqa: SLF001
+        assert visitor._infer_type(ast.List([], ast.Load())) == "list"
+        assert visitor._infer_type(ast.Dict([], [])) == "dict"
+        assert visitor._infer_type(ast.Set([])) == "set"
+        assert visitor._infer_type(ast.Tuple([], ast.Load())) == "tuple"
 
 
 class TestSemanticAnalyzer:
@@ -304,7 +304,7 @@ class TestClass:
     def method() -> object:
         pass
 """
-        context = analyzer._extract_semantic_context("test.py", code)  # noqa: SLF001
+        context = analyzer._extract_semantic_context("test.py", code)
 
         assert context.file_path == "test.py"
         assert len(context.functions) == 1
@@ -334,7 +334,7 @@ class TestClass:
 
         assert (
             analyzer._functions_have_signature_conflict(func1, func2) is True
-        )  # noqa: SLF001
+        )
 
         # Same signature
         func3 = FunctionSignature(
@@ -346,7 +346,7 @@ class TestClass:
 
         assert (
             analyzer._functions_have_signature_conflict(func1, func3) is False
-        )  # noqa: SLF001
+        )
 
     @staticmethod
     def test_assess_function_conflict_severity(analyzer: SemanticAnalyzer) -> None:
@@ -366,7 +366,7 @@ class TestClass:
 
         severity = analyzer._assess_function_conflict_severity(
             func1, func2
-        )  # noqa: SLF001
+        )
         assert severity == ConflictSeverity.HIGH
 
         # Private function change (less severe)
@@ -384,7 +384,7 @@ class TestClass:
 
         severity = analyzer._assess_function_conflict_severity(
             func3, func4
-        )  # noqa: SLF001
+        )
         assert severity == ConflictSeverity.LOW
 
     @staticmethod
@@ -398,7 +398,7 @@ class TestClass:
             defaults=[],
         )
 
-        impact = analyzer._analyze_function_impact(func1, func2)  # noqa: SLF001
+        impact = analyzer._analyze_function_impact(func1, func2)
 
         assert impact["breaking_change"] is True
         assert len(impact["parameter_changes"]) > 0
@@ -411,14 +411,14 @@ class TestClass:
         func1 = FunctionSignature(name="test", args=["x", "y"])
         func2 = FunctionSignature(name="test", args=["x"])
 
-        strategy = analyzer._suggest_function_resolution(func1, func2)  # noqa: SLF001
+        strategy = analyzer._suggest_function_resolution(func1, func2)
         assert strategy == ResolutionStrategy.HUMAN_REQUIRED
 
         # Decorator change might be auto-resolvable
         func3 = FunctionSignature(name="test", args=["x"], decorators=["@decorator1"])
         func4 = FunctionSignature(name="test", args=["x"], decorators=["@decorator2"])
 
-        strategy = analyzer._suggest_function_resolution(func3, func4)  # noqa: SLF001
+        strategy = analyzer._suggest_function_resolution(func3, func4)
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
     @staticmethod
@@ -433,7 +433,7 @@ class TestClass:
             return_type="bool",
         )
 
-        sig_str = analyzer._signature_to_string(signature)  # noqa: SLF001
+        sig_str = analyzer._signature_to_string(signature)
 
         assert "def test_func(" in sig_str
         assert "y=None" in sig_str
@@ -459,7 +459,7 @@ class TestClass:
             return_type="str",  # Different return type
         )
 
-        conflicts = analyzer._detect_function_conflicts(  # noqa: SLF001
+        conflicts = analyzer._detect_function_conflicts(
             context1,
             context2,
             "branch1",
@@ -488,7 +488,7 @@ class TestClass:
             bases=["DifferentBase"],  # Different inheritance
         )
 
-        conflicts = analyzer._detect_class_conflicts(  # noqa: SLF001
+        conflicts = analyzer._detect_class_conflicts(
             context1,
             context2,
             "branch1",
@@ -515,7 +515,7 @@ class TestClass:
             ),  # Same alias, different module
         ]
 
-        conflicts = analyzer._detect_import_conflicts(  # noqa: SLF001
+        conflicts = analyzer._detect_import_conflicts(
             context1,
             context2,
             "branch1",
@@ -536,7 +536,7 @@ class TestClass:
         context2 = SemanticContext(file_path="test.py")
         context2.global_variables["my_var"] = "str"  # Different type
 
-        conflicts = analyzer._detect_variable_conflicts(  # noqa: SLF001
+        conflicts = analyzer._detect_variable_conflicts(
             context1,
             context2,
             "branch1",
@@ -574,7 +574,7 @@ class TestClass:
             ),
         ]
 
-        ranked = analyzer._rank_conflicts_by_impact(conflicts)  # noqa: SLF001
+        ranked = analyzer._rank_conflicts_by_impact(conflicts)
 
         assert len(ranked) == 2
         assert ranked[0].conflict_id == "high"  # High impact should come first
@@ -597,21 +597,21 @@ class TestClass:
             # First call should fetch and cache
             context1 = await analyzer._get_semantic_context(
                 "test.py", "branch1"
-            )  # noqa: SLF001
+            )
             assert context1 is not None
             assert mock_get.call_count == 1
 
             # Second call should use cache
             context2 = await analyzer._get_semantic_context(
                 "test.py", "branch1"
-            )  # noqa: SLF001
+            )
             assert context2 is context1  # Same object reference
             assert mock_get.call_count == 1  # No additional call
 
             # Different branch should fetch again
             context3 = await analyzer._get_semantic_context(
                 "test.py", "branch2"
-            )  # noqa: SLF001
+            )
             assert context3 is not context1
             assert mock_get.call_count == 2
 
@@ -641,8 +641,8 @@ class TestClass:
         # Mock the required methods
         analyzer._get_changed_python_files = AsyncMock(
             return_value=["test.py"]
-        )  # noqa: SLF001
-        analyzer._analyze_file_semantic_conflicts = AsyncMock(  # noqa: SLF001
+        )
+        analyzer._analyze_file_semantic_conflicts = AsyncMock(
             return_value=[
                 SemanticConflict(
                     conflict_id="test-conflict",

@@ -56,17 +56,17 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         except Exception:
             self.update_status("error")
-            self.logger.exception("Error checking status")  # noqa: G004
+            self.logger.exception("Error checking status")
             raise
 
     def update_status(self, status: str) -> None:
         """Update the current status - implements StatusManagerMixin interface."""
         self._current_status = status
-        self.logger.debug(f"Status updated to: {status}")  # noqa: G004
+        self.logger.debug(f"Status updated to: {status}")
 
     def update_activity(self, activity: str) -> None:
         """Update the current activity - implements StatusManagerMixin interface."""
-        self.logger.debug(f"Activity: {activity}")  # noqa: G004
+        self.logger.debug(f"Activity: {activity}")
 
     def create_layout(self) -> dict[str, object]:
         """Create and return layout configuration - implements LayoutManagerMixin interface.
@@ -79,7 +79,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     def update_layout(self, layout_config: dict[str, object]) -> None:
         """Update layout configuration - implements LayoutManagerMixin interface."""
         self._layout_config.update(layout_config)
-        self.logger.debug(f"Layout updated: {layout_config}")  # noqa: G004
+        self.logger.debug(f"Layout updated: {layout_config}")
 
     def _check_single_session(self, session_name: str) -> dict[str, object]:
         """Check status of a single session.
@@ -167,7 +167,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                     break
 
         except Exception:
-            self.logger.exception("Error getting tmux info for {session_name}")  # noqa: G004
+            self.logger.exception("Error getting tmux info for {session_name}")
             info["status"] = "error"
 
         return info
@@ -305,7 +305,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     default=True,
     help="Show detailed information",
 )
-def status(session_name: str | None, format: str, details: bool) -> None:  # noqa: FBT001
+def status(session_name: str | None, format: str, details: bool) -> None:
     """Show status of all or specific tmux sessions."""
     command = StatusCommand()
 

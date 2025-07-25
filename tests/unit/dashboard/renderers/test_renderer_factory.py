@@ -39,14 +39,14 @@ from libs.dashboard.renderers.widget_models import (
 class MockRenderer(BaseRenderer):
     """Mock renderer for testing."""
 
-    def __init__(self, should_fail: bool = False) -> None:  # noqa: FBT001
+    def __init__(self, should_fail: bool = False) -> None:
         super().__init__(RenderFormat.TUI)
         self.should_fail = should_fail
         self.render_count = 0
 
     def render_widget(
         self, widget_type: WidgetType, data: Any, options: dict[str, Any] | None = None
-    ) -> str:  # noqa: ARG002
+    ) -> str:
         self.render_count += 1
         if self.should_fail:
             msg = "Mock render failure"
@@ -56,13 +56,13 @@ class MockRenderer(BaseRenderer):
     @staticmethod
     def render_layout(
         widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None
-    ) -> str:  # noqa: ARG002, ARG004
+    ) -> str:
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
     def render_container(
         content: str, container_config: dict[str, Any] | None = None
-    ) -> str:  # noqa: ARG002, ARG004
+    ) -> str:
         return f"mock-container-{type(content).__name__}"
 
     @staticmethod
@@ -87,23 +87,23 @@ class TestRendererFactory:
     @staticmethod
     def test_factory_initialization() -> None:
         """Test factory initialization."""
-        assert not cast(bool, cast(Any, RendererFactory)._initialized)  # noqa: SLF001
+        assert not cast("bool", cast("Any", RendererFactory)._initialized)
 
         RendererFactory.initialize()
 
-        assert cast(bool, cast(Any, RendererFactory)._initialized)  # noqa: SLF001
+        assert cast("bool", cast("Any", RendererFactory)._initialized)
         assert (
-            len(cast(dict, cast(Any, RendererFactory)._renderer_classes)) == 3
-        )  # noqa: SLF001
+            len(cast("dict", cast("Any", RendererFactory)._renderer_classes)) == 3
+        )
         assert RenderFormat.TUI in cast(
-            dict, cast(Any, RendererFactory)._renderer_classes
-        )  # noqa: SLF001
+            "dict", cast("Any", RendererFactory)._renderer_classes
+        )
         assert RenderFormat.WEB in cast(
-            dict, cast(Any, RendererFactory)._renderer_classes
-        )  # noqa: SLF001
+            "dict", cast("Any", RendererFactory)._renderer_classes
+        )
         assert RenderFormat.TAURI in cast(
-            dict, cast(Any, RendererFactory)._renderer_classes
-        )  # noqa: SLF001
+            "dict", cast("Any", RendererFactory)._renderer_classes
+        )
 
     @staticmethod
     def test_double_initialization() -> None:
@@ -111,7 +111,7 @@ class TestRendererFactory:
         RendererFactory.initialize()
         RendererFactory.initialize()  # Should not raise
 
-        assert cast(bool, cast(Any, RendererFactory)._initialized)  # noqa: SLF001
+        assert cast("bool", cast("Any", RendererFactory)._initialized)
 
     @staticmethod
     def test_supported_formats() -> None:
@@ -176,7 +176,7 @@ class TestRendererFactory:
 
         RendererFactory.register_renderer(custom_format, MockRenderer)
 
-        assert custom_format in RendererFactory._renderer_classes  # noqa: SLF001
+        assert custom_format in RendererFactory._renderer_classes
         assert RendererFactory.is_format_supported(custom_format)
 
         # Should be able to create instance
@@ -190,7 +190,7 @@ class TestRendererFactory:
 
         result = RendererFactory.render_universal(
             WidgetType.METRIC_CARD,
-            cast(Any, metric),
+            cast("Any", metric),
             RenderFormat.TUI,
         )
 
@@ -204,20 +204,20 @@ class TestRendererFactory:
 
         results = RendererFactory.render_universal(
             WidgetType.METRIC_CARD,
-            cast(Any, metric),
+            cast("Any", metric),
         )
 
         assert isinstance(results, dict)
         assert len(results) == 3
-        assert RenderFormat.TUI in cast(dict[RenderFormat, Any], results)
-        assert RenderFormat.WEB in cast(dict[RenderFormat, Any], results)
-        assert RenderFormat.TAURI in cast(dict[RenderFormat, Any], results)
+        assert RenderFormat.TUI in cast("dict[RenderFormat, Any]", results)
+        assert RenderFormat.WEB in cast("dict[RenderFormat, Any]", results)
+        assert RenderFormat.TAURI in cast("dict[RenderFormat, Any]", results)
 
         # Each should have different format output
-        assert isinstance(cast(dict[RenderFormat, Any], results)[RenderFormat.TUI], str)
-        assert isinstance(cast(dict[RenderFormat, Any], results)[RenderFormat.WEB], str)
+        assert isinstance(cast("dict[RenderFormat, Any]", results)[RenderFormat.TUI], str)
+        assert isinstance(cast("dict[RenderFormat, Any]", results)[RenderFormat.WEB], str)
         assert isinstance(
-            cast(dict[RenderFormat, Any], results)[RenderFormat.TAURI], dict
+            cast("dict[RenderFormat, Any]", results)[RenderFormat.TAURI], dict
         )
 
     @staticmethod
@@ -227,7 +227,7 @@ class TestRendererFactory:
 
         results = RendererFactory.render_parallel(
             WidgetType.METRIC_CARD,
-            cast(Any, metric),
+            cast("Any", metric),
             max_workers=2,
         )
 
@@ -304,13 +304,13 @@ class TestRendererFactory:
     def test_error_handling_all_formats_fail() -> None:
         """Test error handling when all formats fail."""
         # Replace all renderers with failing ones
-        original_classes = RendererFactory._renderer_classes.copy()  # noqa: SLF001
+        original_classes = RendererFactory._renderer_classes.copy()
 
         try:
             RendererFactory._renderer_classes = {
                 fmt: lambda: MockRenderer(should_fail=True)
                 for fmt in original_classes.keys()
-            }  # noqa: SLF001
+            }
             RendererFactory.clear_instances()
 
             with pytest.raises(RendererFactoryError):
@@ -319,16 +319,16 @@ class TestRendererFactory:
                     MetricCardData(title="Test", value=100),
                 )
         finally:
-            RendererFactory._renderer_classes = original_classes  # noqa: SLF001
+            RendererFactory._renderer_classes = original_classes
 
     @staticmethod
     def test_clear_instances() -> None:
         """Test clearing singleton instances."""
         renderer1 = RendererFactory.get_singleton(RenderFormat.TUI)
-        assert len(RendererFactory._instances) == 1  # noqa: SLF001
+        assert len(RendererFactory._instances) == 1
 
         RendererFactory.clear_instances()
-        assert len(RendererFactory._instances) == 0  # noqa: SLF001
+        assert len(RendererFactory._instances) == 0
 
         renderer2 = RendererFactory.get_singleton(RenderFormat.TUI)
         assert renderer1 is not renderer2
@@ -339,13 +339,13 @@ class TestRendererFactory:
         RendererFactory.initialize()
         RendererFactory.get_singleton(RenderFormat.TUI)
 
-        assert RendererFactory._initialized  # noqa: SLF001
-        assert len(RendererFactory._instances) > 0  # noqa: SLF001
+        assert RendererFactory._initialized
+        assert len(RendererFactory._instances) > 0
 
         RendererFactory.reset()
 
-        assert not RendererFactory._initialized  # noqa: SLF001
-        assert len(RendererFactory._instances) == 0  # noqa: SLF001
+        assert not RendererFactory._initialized
+        assert len(RendererFactory._instances) == 0
 
 
 class TestConvenienceFunctions:

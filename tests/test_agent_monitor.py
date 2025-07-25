@@ -149,7 +149,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_update_metrics(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test metrics update from agent pool."""
         monitor.update_metrics()
 
@@ -214,7 +214,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_render_overview(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test overview rendering."""
         monitor.update_metrics()
         panel = monitor.render_overview()
@@ -233,7 +233,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_render_detailed_with_selection(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test detailed rendering with agent selected."""
         monitor.update_metrics()
         monitor.select_agent("agent-1")
@@ -246,7 +246,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_render_tasks(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test task rendering."""
         monitor.update_metrics()
         panel = monitor.render_tasks()
@@ -257,7 +257,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_render_performance(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test performance rendering."""
         monitor.update_metrics()
         panel = monitor.render_performance()
@@ -277,7 +277,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_select_agent(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test agent selection."""
         monitor.update_metrics()
         monitor.select_agent("agent-1")
@@ -364,7 +364,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_performance_history_tracking(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test performance history tracking."""
         # Update metrics multiple times
         for _ in range(5):
@@ -381,7 +381,7 @@ class TestAgentMonitor:
     @staticmethod
     def test_performance_history_limit(
         monitor: AgentMonitor, mock_agent_pool: Mock
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test performance history size limiting."""
         # Add more than 100 data points
         agent_id = "agent-1"

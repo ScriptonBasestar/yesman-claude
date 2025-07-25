@@ -39,12 +39,11 @@ class ASCIIRenderer(BaseRenderer):
         """Render widget as ASCII art."""
         if widget_type == WidgetType.SESSION_BROWSER:
             return self._render_session_browser(data)
-        elif widget_type == WidgetType.PROJECT_HEALTH:
+        if widget_type == WidgetType.PROJECT_HEALTH:
             return self._render_health_chart(data)
-        elif widget_type == WidgetType.ACTIVITY_MONITOR:
+        if widget_type == WidgetType.ACTIVITY_MONITOR:
             return self._render_activity_graph(data)
-        else:
-            return {"content": f"Unsupported widget: {widget_type}", "data": data}
+        return {"content": f"Unsupported widget: {widget_type}", "data": data}
 
     def _render_session_browser(self, sessions: list[SessionData]) -> dict[str, Any]:
         """Render sessions as ASCII table."""
@@ -203,8 +202,7 @@ class ASCIIRenderer(BaseRenderer):
 
         if hours > 0:
             return f"{hours}h{minutes}m"
-        else:
-            return f"{minutes}m"
+        return f"{minutes}m"
 
     def apply_theme(self, theme: dict[str, Any]) -> None:
         """Apply theme to renderer."""
@@ -268,7 +266,7 @@ class JSONRenderer(BaseRenderer):
         if isinstance(data, list):
             return [self._serialize_data(item) for item in data]
 
-        elif hasattr(data, "__dict__"):
+        if hasattr(data, "__dict__"):
             # Handle dataclass or object
             result = {}
             for key, value in data.__dict__.items():
@@ -276,15 +274,14 @@ class JSONRenderer(BaseRenderer):
                     result[key] = self._serialize_data(value)
             return result
 
-        elif isinstance(data, datetime):
+        if isinstance(data, datetime):
             return data.isoformat()
 
-        elif hasattr(data, "value"):
+        if hasattr(data, "value"):
             # Handle enum
             return data.value
 
-        else:
-            return data
+        return data
 
     @staticmethod
     def _summarize_sessions(sessions: list[SessionData]) -> dict[str, Any]:

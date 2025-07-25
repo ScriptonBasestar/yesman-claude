@@ -186,12 +186,12 @@ class BaseCommand(ABC):
         params = ", ".join(f"{k}={v}" for k, v in kwargs.items() if v is not None)
         self.logger.info(f"Starting command: {command_name}" + (f" with {params}" if params else ""))
 
-    def log_command_end(self, command_name: str, success: bool = True) -> None:  # noqa: FBT001
+    def log_command_end(self, command_name: str, success: bool = True) -> None:
         """Log command completion."""
         status = "completed successfully" if success else "failed"
         self.logger.info("Command %s %s", command_name, status)
 
-    def confirm_action(self, message: str, default: bool = False) -> bool:  # noqa: FBT001
+    def confirm_action(self, message: str, default: bool = False) -> bool:
         """Ask for user confirmation."""
         try:
             return click.confirm(message, default=default)

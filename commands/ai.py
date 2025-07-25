@@ -37,7 +37,7 @@ class AIStatusCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401  # noqa: ARG002, ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the status command.
 
         Returns:
@@ -133,7 +133,7 @@ class AIConfigCommand(BaseCommand, ConfigCommandMixin):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -194,7 +194,7 @@ class AIHistoryCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -264,7 +264,7 @@ class AIExportCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -304,7 +304,7 @@ class AICleanupCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -342,7 +342,7 @@ class AIPredictCommand(BaseCommand):
             msg = f"Failed to initialize AI components: {e}"
             raise CommandError(msg) from e
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the command.
 
         Returns:
@@ -416,7 +416,7 @@ def status() -> None:
     help="Enable/disable auto-response",
 )
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
-def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:  # noqa: FBT001
+def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:
     """Configure AI learning system settings."""
     command = AIConfigCommand()
     command.run(threshold=threshold, auto_response=auto_response, learning=learning)

@@ -1,7 +1,7 @@
 # Copyright notice.
 
 import os
-import subprocess  # noqa: S404
+import subprocess
 import sys
 from typing import Any
 
@@ -37,7 +37,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         session_name: str | None = None,
         list_sessions: bool = False,
         **kwargs: Any,
-    ) -> dict:  # noqa: FBT001, ARG002
+    ) -> dict:
         """Execute the enter command.
 
         Returns:
@@ -162,7 +162,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 @click.command()
 @click.argument("session_name", required=False)
 @click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
-def enter(session_name: str | None, list_sessions: bool) -> None:  # noqa: FBT001
+def enter(session_name: str | None, list_sessions: bool) -> None:
     """Enter (attach to) a tmux session."""
     command = EnterCommand()
     command.run(session_name=session_name, list_sessions=list_sessions)

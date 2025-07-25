@@ -82,9 +82,9 @@ class AsyncLoggerConfig:
         max_queue_size: int = 10000,
         batch_size: int = 50,
         flush_interval: float = 2.0,
-        enable_console: bool = True,  # noqa: FBT001
-        enable_file: bool = True,  # noqa: FBT001
-        enable_batch_processor: bool = True,  # noqa: FBT001
+        enable_console: bool = True,
+        enable_file: bool = True,
+        enable_batch_processor: bool = True,
         log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
         output_dir: Path | None = None,
     ) -> None:

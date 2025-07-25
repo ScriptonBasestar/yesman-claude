@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import re
-import subprocess  # noqa: S404
+import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
@@ -315,7 +315,7 @@ class ConflictResolutionEngine:
         """Suggest the best resolution strategy for a conflict."""
         # Check against known patterns
         for pattern_info in self.conflict_patterns.values():
-            pattern = cast(str, pattern_info["pattern"])
+            pattern = cast("str", pattern_info["pattern"])
             if re.search(pattern, content):
                 return ResolutionStrategy(pattern_info["strategy"])
 
@@ -677,7 +677,7 @@ class ConflictResolutionEngine:
             content = conflict.metadata.get("conflict_content", "")
 
             if "import" in str(content).lower():
-                resolved_content = self._resolve_import_conflicts(cast(str, content))
+                resolved_content = self._resolve_import_conflicts(cast("str", content))
                 if resolved_content:
                     return ResolutionResult(
                         conflict_id=conflict.conflict_id,
@@ -721,8 +721,8 @@ class ConflictResolutionEngine:
                 metadata = conflict.metadata
                 if "function_name" in metadata:
                     # Simple heuristic: prefer signature with more parameters (more specific)
-                    sig1 = cast(str, metadata.get("signature1", ""))
-                    sig2 = cast(str, metadata.get("signature2", ""))
+                    sig1 = cast("str", metadata.get("signature1", ""))
+                    sig2 = cast("str", metadata.get("signature2", ""))
 
                     params1 = sig1.count(",") + 1 if "(" in sig1 else 0
                     params2 = sig2.count(",") + 1 if "(" in sig2 else 0

@@ -2,8 +2,9 @@
 
 import logging
 import os
-import subprocess  # noqa: S404
+import subprocess
 from typing import Any
+import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -57,7 +58,7 @@ class ProjectHealth:
             scores["suggestions"] = suggestions
 
         except (OSError, PermissionError, ValueError, TypeError):
-            logger.exception("Error calculating project health")  # noqa: G004
+            logger.exception("Error calculating project health")
             return {
                 "overall_score": 50,
                 "build_score": 50,
@@ -83,7 +84,7 @@ class ProjectHealth:
         try:
             # Check for common build files
             build_files = ["Makefile", "build.py", "setup.py", "pyproject.toml"]
-            has_build_config = any(os.path.exists(f) for f in build_files)
+            has_build_config = any(pathlib.Path(f).exists() for f in build_files)
 
         except (OSError, FileNotFoundError):
             return 50
@@ -102,7 +103,7 @@ class ProjectHealth:
         try:
             # Check for test directories/files
             test_indicators = ["tests/", "test_", "pytest", "unittest"]
-            has_tests = any(os.path.exists(indicator) or any(indicator in f for f in os.listdir(".") if os.path.isfile(f)) for indicator in test_indicators)
+            has_tests = any(pathlib.Path(indicator).exists() or any(indicator in f for f in os.listdir(".") if pathlib.Path(f).is_file()) for indicator in test_indicators)
 
         except (OSError, FileNotFoundError):
             return 50
@@ -121,7 +122,7 @@ class ProjectHealth:
         try:
             # Check for dependency files
             dep_files = ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py"]
-            has_deps = any(os.path.exists(f) for f in dep_files)
+            has_deps = any(pathlib.Path(f).exists() for f in dep_files)
 
         except (OSError, FileNotFoundError):
             return 50
@@ -139,7 +140,7 @@ class ProjectHealth:
         """
         try:
             # Basic security checks
-            has_gitignore = os.path.exists(".gitignore")
+            has_gitignore = pathlib.Path(".gitignore").exists()
             has_secrets = any(
                 keyword in open(f, encoding="utf-8").read().lower() for f in os.listdir(".") if f.endswith((".py", ".yaml", ".yml", ".json")) for keyword in ["password", "secret", "key", "token"]
             )
@@ -179,7 +180,7 @@ class ProjectHealth:
                 "pyproject.toml",
                 ".pre-commit-config.yaml",
             ]
-            has_quality_config = any(os.path.exists(f) for f in quality_files)
+            has_quality_config = any(pathlib.Path(f).exists() for f in quality_files)
 
         except (OSError, FileNotFoundError):
             return 50
@@ -195,7 +196,7 @@ class ProjectHealth:
         int: Description of return value.
         """
         try:
-            if os.path.exists(".git"):
+            if pathlib.Path(".git").exists():
                 # Check for recent commits
                 try:
                     result = subprocess.run(
@@ -209,7 +210,7 @@ class ProjectHealth:
                         return 95
                 except (subprocess.CalledProcessError, OSError, FileNotFoundError) as e:
                     # Log subprocess execution errors if needed
-                    logger.warning(f"Failed to check git log: {e}")  # noqa: G004
+                    logger.warning(f"Failed to check git log: {e}")
                 return 80
 
         except (OSError, subprocess.CalledProcessError):
@@ -227,7 +228,7 @@ class ProjectHealth:
         try:
             # Check for documentation files
             doc_files = ["README.md", "README.rst", "docs/", "CHANGELOG.md"]
-            has_docs = any(os.path.exists(f) for f in doc_files)
+            has_docs = any(pathlib.Path(f).exists() for f in doc_files)
 
         except (OSError, FileNotFoundError):
             return 50

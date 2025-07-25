@@ -78,7 +78,7 @@ class TestDashboardLauncher:
     @staticmethod
     def test_interface_configs_structure(launcher: DashboardLauncher) -> None:
         """Test that interface configurations are properly structured."""
-        configs = launcher._interface_configs  # noqa: SLF001
+        configs = launcher._interface_configs
 
         # Check all expected interfaces exist
         assert "tui" in configs
@@ -101,7 +101,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test GUI detection on macOS."""
         mock_platform.return_value = "Darwin"
-        assert launcher._is_gui_available() is True  # noqa: SLF001
+        assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @staticmethod
@@ -110,7 +110,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test GUI detection on Windows."""
         mock_platform.return_value = "Windows"
-        assert launcher._is_gui_available() is True  # noqa: SLF001
+        assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {"DISPLAY": ":0"})
@@ -120,7 +120,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test GUI detection on Linux with DISPLAY."""
         mock_platform.return_value = "Linux"
-        assert launcher._is_gui_available() is True  # noqa: SLF001
+        assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {"WAYLAND_DISPLAY": "wayland-0"})
@@ -130,7 +130,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test GUI detection on Linux with Wayland."""
         mock_platform.return_value = "Linux"
-        assert launcher._is_gui_available() is True  # noqa: SLF001
+        assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {}, clear=True)
@@ -140,25 +140,25 @@ class TestDashboardLauncher:
     ) -> None:
         """Test GUI detection on Linux without display."""
         mock_platform.return_value = "Linux"
-        assert launcher._is_gui_available() is False  # noqa: SLF001
+        assert launcher._is_gui_available() is False
 
     @patch.dict(os.environ, {"SSH_CLIENT": "192.168.1.1 12345"})
     @staticmethod
     def test_is_ssh_session_with_ssh_client(launcher: DashboardLauncher) -> None:
         """Test SSH detection with SSH_CLIENT."""
-        assert launcher._is_ssh_session() is True  # noqa: SLF001
+        assert launcher._is_ssh_session() is True
 
     @patch.dict(os.environ, {"SSH_TTY": "/dev/pts/0"})
     @staticmethod
     def test_is_ssh_session_with_ssh_tty(launcher: DashboardLauncher) -> None:
         """Test SSH detection with SSH_TTY."""
-        assert launcher._is_ssh_session() is True  # noqa: SLF001
+        assert launcher._is_ssh_session() is True
 
     @patch.dict(os.environ, {}, clear=True)
     @staticmethod
     def test_is_ssh_session_without_ssh(launcher: DashboardLauncher) -> None:
         """Test SSH detection without SSH environment."""
-        assert launcher._is_ssh_session() is False  # noqa: SLF001
+        assert launcher._is_ssh_session() is False
 
     @patch("sys.stdout.isatty")
     @patch.dict(os.environ, {"TERM": "xterm-256color"})
@@ -168,7 +168,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test terminal capability with TTY."""
         mock_isatty.return_value = True
-        assert launcher._is_terminal_capable() is True  # noqa: SLF001
+        assert launcher._is_terminal_capable() is True
 
     @patch("sys.stdout.isatty")
     @patch.dict(os.environ, {"TERM": "dumb"})
@@ -178,7 +178,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test terminal capability with dumb terminal."""
         mock_isatty.return_value = True
-        assert launcher._is_terminal_capable() is False  # noqa: SLF001
+        assert launcher._is_terminal_capable() is False
 
     @patch("sys.stdout.isatty")
     @staticmethod
@@ -187,7 +187,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test terminal capability without TTY."""
         mock_isatty.return_value = False
-        assert launcher._is_terminal_capable() is False  # noqa: SLF001
+        assert launcher._is_terminal_capable() is False
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     @staticmethod
@@ -198,7 +198,7 @@ class TestDashboardLauncher:
         mock_which.side_effect = lambda cmd: (
             "/usr/bin/" + cmd if cmd in {"node", "npm"} else None
         )
-        assert launcher._is_node_available() is True  # noqa: SLF001
+        assert launcher._is_node_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     @staticmethod
@@ -207,7 +207,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test Node.js availability with missing node."""
         mock_which.side_effect = lambda cmd: "/usr/bin/npm" if cmd == "npm" else None
-        assert launcher._is_node_available() is False  # noqa: SLF001
+        assert launcher._is_node_available() is False
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
     @staticmethod
@@ -216,7 +216,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test Node.js availability with missing npm."""
         mock_which.side_effect = lambda cmd: "/usr/bin/node" if cmd == "node" else None
-        assert launcher._is_node_available() is False  # noqa: SLF001
+        assert launcher._is_node_available() is False
 
     @staticmethod
     def test_is_tauri_available_with_complete_setup(
@@ -224,7 +224,7 @@ class TestDashboardLauncher:
     ) -> None:
         """Test Tauri availability with complete setup."""
         with patch.object(launcher, "_is_node_available", return_value=True):
-            assert launcher._is_tauri_available() is True  # noqa: SLF001
+            assert launcher._is_tauri_available() is True
 
     @staticmethod
     def test_is_tauri_available_missing_directory(temp_project_root: Path) -> None:
@@ -233,7 +233,7 @@ class TestDashboardLauncher:
         shutil.rmtree(temp_project_root / "tauri-dashboard")
 
         launcher = DashboardLauncher(project_root=temp_project_root)
-        assert launcher._is_tauri_available() is False  # noqa: SLF001
+        assert launcher._is_tauri_available() is False
 
     @staticmethod
     def test_is_tauri_available_missing_package_json(
@@ -243,25 +243,25 @@ class TestDashboardLauncher:
         # Remove package.json
         (launcher.tauri_path / "package.json").unlink()
 
-        assert launcher._is_tauri_available() is False  # noqa: SLF001
+        assert launcher._is_tauri_available() is False
 
     @staticmethod
     def test_is_tauri_available_missing_node(launcher: DashboardLauncher) -> None:
         """Test Tauri availability with missing Node.js."""
         with patch.object(launcher, "_is_node_available", return_value=False):
-            assert launcher._is_tauri_available() is False  # noqa: SLF001
+            assert launcher._is_tauri_available() is False
 
     @staticmethod
     def test_is_python_package_available_existing(launcher: DashboardLauncher) -> None:
         """Test Python package availability for existing package."""
-        assert launcher._is_python_package_available("sys") is True  # noqa: SLF001
+        assert launcher._is_python_package_available("sys") is True
 
     @staticmethod
     def test_is_python_package_available_missing(launcher: DashboardLauncher) -> None:
         """Test Python package availability for missing package."""
         assert (
             launcher._is_python_package_available("nonexistent_package_12345") is False
-        )  # noqa: SLF001
+        )
 
     @staticmethod
     def test_get_interface_info_valid(launcher: DashboardLauncher) -> None:
@@ -313,7 +313,7 @@ class TestDashboardLauncher:
         mock_gui.return_value = True
 
         # Mock tauri as available
-        launcher._interface_configs["tauri"].available = True  # noqa: SLF001
+        launcher._interface_configs["tauri"].available = True
 
         result = launcher.detect_best_interface()
         assert result == "tauri"
@@ -333,7 +333,7 @@ class TestDashboardLauncher:
         mock_term.return_value = False
 
         # Mock tauri as unavailable
-        launcher._interface_configs["tauri"].available = False  # noqa: SLF001
+        launcher._interface_configs["tauri"].available = False
 
         result = launcher.detect_best_interface()
         assert result == "web"
@@ -393,7 +393,7 @@ class TestDashboardLauncher:
             "libs.dashboard.dashboard_launcher.shutil.which",
             return_value="/usr/bin/node",
         ):
-            status, details = launcher._check_requirement("node")  # noqa: SLF001
+            status, details = launcher._check_requirement("node")
 
             assert status is True
             assert "v18.0.0" in details
@@ -410,7 +410,7 @@ class TestDashboardLauncher:
             "libs.dashboard.dashboard_launcher.shutil.which",
             return_value="/usr/bin/node",
         ):
-            status, details = launcher._check_requirement("node")  # noqa: SLF001
+            status, details = launcher._check_requirement("node")
 
             assert status is False
             assert "not working" in details
@@ -419,7 +419,7 @@ class TestDashboardLauncher:
     def test_check_requirement_node_missing(launcher: DashboardLauncher) -> None:
         """Test checking Node.js requirement when missing."""
         with patch("libs.dashboard.dashboard_launcher.shutil.which", return_value=None):
-            status, details = launcher._check_requirement("node")  # noqa: SLF001
+            status, details = launcher._check_requirement("node")
 
             assert status is False
             assert "not installed" in details
@@ -427,7 +427,7 @@ class TestDashboardLauncher:
     @staticmethod
     def test_check_requirement_python(launcher: DashboardLauncher) -> None:
         """Test checking Python requirement."""
-        status, details = launcher._check_requirement("python")  # noqa: SLF001
+        status, details = launcher._check_requirement("python")
 
         assert status is True
         assert "Python" in details
@@ -438,7 +438,7 @@ class TestDashboardLauncher:
         """Test checking unknown requirement."""
         status, details = launcher._check_requirement(
             "unknown_requirement"
-        )  # noqa: SLF001
+        )
 
         assert status is False
         assert "Unknown requirement" in details

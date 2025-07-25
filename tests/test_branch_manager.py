@@ -292,7 +292,7 @@ class TestBranchManager:
     @staticmethod
     def test_metadata_persistence(
         branch_manager: BranchManager, tmp_path: Path
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test saving and loading branch metadata."""
         # Create test branch info
         branch_info = BranchInfo(

@@ -213,8 +213,8 @@ class TestCollaborationEngine:
         assert isinstance(engine.change_propagation_queue, deque)
         assert engine.enable_auto_sync is True
         assert engine.sync_interval == 60
-        assert engine._running is False  # noqa: SLF001
-        assert engine._tasks == []  # noqa: SLF001
+        assert engine._running is False
+        assert engine._tasks == []
 
     @pytest.mark.asyncio
     @staticmethod
@@ -222,13 +222,13 @@ class TestCollaborationEngine:
         """Test starting and stopping the engine."""
         # Start engine
         await engine.start()
-        assert engine._running is True  # noqa: SLF001
-        assert len(engine._tasks) >= 4  # At least 4 background tasks  # noqa: SLF001
+        assert engine._running is True
+        assert len(engine._tasks) >= 4  # At least 4 background tasks
 
         # Stop engine
         await engine.stop()
-        assert engine._running is False  # noqa: SLF001
-        assert len(engine._tasks) == 0  # noqa: SLF001
+        assert engine._running is False
+        assert len(engine._tasks) == 0
 
     @pytest.mark.asyncio
     @staticmethod
@@ -766,10 +766,10 @@ class TestCollaborationEngine:
         engine.pending_acknowledgments["expired-1"] = expired_msg
 
         # Start engine to run background tasks
-        engine._running = True  # noqa: SLF001
+        engine._running = True
 
         # Run message processor once
-        await engine._message_processor()  # noqa: SLF001
+        await engine._message_processor()
 
         # Check that expired acknowledgment was removed
         assert "expired-1" not in engine.pending_acknowledgments
@@ -785,7 +785,7 @@ class TestCollaborationEngine:
             "k5": Mock(knowledge_type="api_change"),
         }
 
-        counts = engine._count_knowledge_by_type()  # noqa: SLF001
+        counts = engine._count_knowledge_by_type()
 
         assert counts["pattern"] == 2
         assert counts["api_change"] == 2

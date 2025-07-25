@@ -5,6 +5,7 @@ import os
 import pytest
 
 from libs.dashboard.theme_system import SystemThemeDetector
+import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -13,7 +14,7 @@ from libs.dashboard.theme_system import SystemThemeDetector
 class TestLinuxSpecificFeatures:
     """Tests for Linux-specific functionality."""
 
-    @pytest.mark.skipif(not os.path.exists("/proc"), reason="Linux-specific test")
+    @pytest.mark.skipif(not pathlib.Path("/proc").exists(), reason="Linux-specific test")
     @staticmethod
     def test_linux_specific_features() -> None:
         """Test Linux-specific functionality."""

@@ -32,8 +32,8 @@ class StartAgentsCommand(BaseCommand):
         self,
         max_agents: int = 3,
         work_dir: str | None = None,
-        monitor: bool = False,  # noqa: FBT001
-        **kwargs: Any,  # noqa: ARG002, ANN401
+        monitor: bool = False,
+        **kwargs: Any,
     ) -> dict:
         """Execute the start agents command.
 
@@ -94,7 +94,7 @@ class MonitorAgentsCommand(BaseCommand):
         work_dir: str | None = None,
         duration: float | None = None,
         refresh: float = 1.0,
-        **kwargs: Any,  # noqa: ARG002, ANN401
+        **kwargs: Any,
     ) -> dict:
         """Execute the monitor agents command.
 
@@ -134,7 +134,7 @@ class MonitorAgentsCommand(BaseCommand):
                 if duration:
                     self.print_info(f"⏱️  Monitoring for {duration} seconds...")
 
-                    def timeout_handler(signum: int, frame) -> Never:  # noqa: ARG001
+                    def timeout_handler(signum: int, frame) -> Never:
                         raise KeyboardInterrupt
 
                     signal.signal(signal.SIGALRM, timeout_handler)
@@ -156,7 +156,7 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:
         """Execute the status command.
 
         Returns:
@@ -193,9 +193,9 @@ class StatusCommand(BaseCommand):
                         "working": "🟡",
                         "error": "🔴",
                         "terminated": "⚫",
-                    }.get(cast(dict, agent).get("state", "unknown"), "❓")
+                    }.get(cast("dict", agent).get("state", "unknown"), "❓")
 
-                    agent_dict = cast(dict, agent)
+                    agent_dict = cast("dict", agent)
                     self.print_info(f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}")
 
             return {
@@ -214,7 +214,7 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:
         """Execute the stop agents command.
 
         Returns:
@@ -255,7 +255,7 @@ class AddTaskCommand(BaseCommand):
         complexity: int = 5,
         timeout: int = 300,
         description: str | None = None,
-        **kwargs: Any,  # noqa: ARG002, ANN401
+        **kwargs: Any,
     ) -> dict:
         """Execute the add task command.
 
@@ -305,7 +305,7 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs: Any) -> dict:
         """Execute the list tasks command.
 
         Returns:
@@ -342,14 +342,14 @@ class ListTasksCommand(BaseCommand):
                     "completed": "✅",
                     "failed": "❌",
                     "cancelled": "🚫",
-                }.get(cast(dict, task).get("status", "unknown"), "❓")
+                }.get(cast("dict", task).get("status", "unknown"), "❓")
 
-                task_dict = cast(dict, task)
-                self.print_info(f"{status_icon} {cast(str, task_dict['task_id'])[:8]}... - {task_dict['title']}")
-                self.print_info(f"   Status: {cast(str, task_dict['status']).upper()}")
+                task_dict = cast("dict", task)
+                self.print_info(f"{status_icon} {cast('str', task_dict['task_id'])[:8]}... - {task_dict['title']}")
+                self.print_info(f"   Status: {cast('str', task_dict['status']).upper()}")
                 if task_dict.get("assigned_agent"):
                     self.print_info(f"   Agent: {task_dict['assigned_agent']}")
-                self.print_info(f"   Command: {' '.join(cast(list, task_dict['command']))}")
+                self.print_info(f"   Command: {' '.join(cast('list', task_dict['command']))}")
                 self.print_info("")
 
             return {

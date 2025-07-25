@@ -21,7 +21,7 @@ class TestSetupCommand:
     @patch("commands.setup.YesmanConfig")
     def test_setup_creates_all_sessions(
         self, mock_config: object
-    ) -> None:  # noqa: ARG002
+    ) -> None:
         """Test setup command creates all sessions from projects.yaml."""
         projects = {
             "sessions": {
@@ -45,7 +45,7 @@ class TestSetupCommand:
     @patch("commands.setup.YesmanConfig")
     def test_setup_with_specific_project(
         self, mock_config: object
-    ) -> None:  # noqa: ARG002
+    ) -> None:
         """Test setup command with specific project name."""
         projects = {
             "sessions": {
@@ -67,7 +67,7 @@ class TestSetupCommand:
     @patch("commands.setup.YesmanConfig")
     def test_setup_handles_session_creation_failure(
         self, mock_config: object
-    ) -> None:  # noqa: ARG002
+    ) -> None:
         """Test setup handles session creation failure gracefully."""
         projects = {
             "sessions": {
@@ -91,7 +91,7 @@ class TestSetupCommand:
     @patch("commands.setup.YesmanConfig")
     def test_setup_with_nonexistent_project(
         self, mock_config: object
-    ) -> None:  # noqa: ARG002
+    ) -> None:
         """Test setup with nonexistent project name."""
         projects = {
             "sessions": {
@@ -111,7 +111,7 @@ class TestSetupCommand:
             mock_manager.create_session.assert_not_called()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_no_projects_found(self, mock_config: object) -> None:  # noqa: ARG002
+    def test_setup_no_projects_found(self, mock_config: object) -> None:
         """Test setup when no projects are configured."""
         projects = {"sessions": {}}  # Empty sessions
 

@@ -85,7 +85,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     is_flag=True,
     help="Force recreation of existing sessions without prompting",
 )
-def setup(session_name: str | None, dry_run: bool, force: bool) -> None:  # noqa: FBT001
+def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
     """Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
 
     Args:

@@ -97,21 +97,21 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
 
         if original_size > optimized_size:
             bytes_saved = original_size - optimized_size
-            self.parent_stats["bytes_saved"] = cast(float, self.parent_stats["bytes_saved"]) + bytes_saved
+            self.parent_stats["bytes_saved"] = cast("float", self.parent_stats["bytes_saved"]) + bytes_saved
 
             # Update compression ratio
             compression_ratio = optimized_size / original_size if original_size > 0 else 1.0
-            batches_sent = cast(int, self.parent_stats["batches_sent"])
+            batches_sent = cast("int", self.parent_stats["batches_sent"])
             if batches_sent > 0:
-                current_ratio = cast(float, self.parent_stats["compression_ratio"])
+                current_ratio = cast("float", self.parent_stats["compression_ratio"])
                 self.parent_stats["compression_ratio"] = (current_ratio * (batches_sent - 1) + compression_ratio) / batches_sent
 
         # Send optimized batch
         await self.handler(optimized_messages)
 
         # Update parent statistics
-        self.parent_stats["batches_sent"] = cast(int, self.parent_stats["batches_sent"]) + 1
-        self.parent_stats["messages_processed"] = cast(int, self.parent_stats["messages_processed"]) + len(batch.messages)
+        self.parent_stats["batches_sent"] = cast("int", self.parent_stats["batches_sent"]) + 1
+        self.parent_stats["messages_processed"] = cast("int", self.parent_stats["messages_processed"]) + len(batch.messages)
 
         self.logger.debug("Sent batch %s: %d messages", batch.batch_id, len(batch.messages))
 
@@ -177,7 +177,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
             "data": combined_data,
             "batch_info": {
                 "original_count": len(messages),
-                "time_span": (cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0))),
+                "time_span": (cast("float", messages[-1].get("queued_at", 0)) - cast("float", messages[0].get("queued_at", 0))),
                 "combined_at": time.time(),
             },
         }
@@ -204,7 +204,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
             "data": {
                 "entries": log_entries,
                 "count": len(log_entries),
-                "time_span": (cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0))),
+                "time_span": (cast("float", messages[-1].get("queued_at", 0)) - cast("float", messages[0].get("queued_at", 0))),
             },
         }
 
@@ -280,7 +280,7 @@ class WebSocketBatchProcessor:
                 channel=channel,
                 handler=handler,
                 config=self.config,
-                parent_stats=cast(dict[str, object], self.stats),
+                parent_stats=cast("dict[str, object]", self.stats),
             )
             self._channel_processors[channel] = processor
 
@@ -301,7 +301,7 @@ class WebSocketBatchProcessor:
                 await handler([message])
                 self.stats["messages_processed"] += 1
             except Exception:
-                self.logger.exception("Error sending immediate message to {channel}")  # noqa: G004
+                self.logger.exception("Error sending immediate message to {channel}")
         else:
             self.logger.warning("No handler registered for channel: %s", channel)
 
@@ -319,8 +319,8 @@ class WebSocketBatchProcessor:
         for channel, processor in self._channel_processors.items():
             proc_stats = processor.get_statistics()
             channel_stats[channel] = proc_stats
-            total_pending += cast(int, proc_stats["pending_items"]) + cast(int, proc_stats["pending_batches"])
-            if cast(int, proc_stats["pending_items"]) > 0 or cast(int, proc_stats["pending_batches"]) > 0:
+            total_pending += cast("int", proc_stats["pending_items"]) + cast("int", proc_stats["pending_batches"])
+            if cast("int", proc_stats["pending_items"]) > 0 or cast("int", proc_stats["pending_batches"]) > 0:
                 active_channels += 1
 
         # Calculate average batch size

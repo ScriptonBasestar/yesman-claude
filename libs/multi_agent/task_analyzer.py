@@ -57,7 +57,7 @@ class TaskDefinition:
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> "TaskDefinition":
         """Create from dictionary."""
-        return cls(**cast(dict[str, Any], data))
+        return cls(**cast("dict[str, Any]", data))
 
 
 class TaskAnalyzer:
@@ -249,7 +249,7 @@ class TaskAnalyzer:
         title: str,
         file_paths: list[str],
         description: str = "",
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> TaskDefinition:
         """Create a task definition from file paths.
 
@@ -440,7 +440,7 @@ class TaskAnalyzer:
             if len(edge) == 3:
                 source, target, attrs = edge
                 dep = {"source": source, "target": target, "attributes": attrs}
-                cast(list[dict[str, Any]], data["dependencies"]).append(dep)
+                cast("list[dict[str, Any]]", data["dependencies"]).append(dep)
 
         # Write to file
         output_file = Path(output_path)

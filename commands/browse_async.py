@@ -86,8 +86,7 @@ class AsyncInteractiveBrowser:
         try:
             if hasattr(self.tmux_manager, "get_cached_sessions_list"):
                 return await loop.run_in_executor(None, self.tmux_manager.get_cached_sessions_list)
-            else:
-                return []
+            return []
         except AttributeError:
             # Fallback if cached method is not available
             return []
@@ -97,8 +96,7 @@ class AsyncInteractiveBrowser:
         loop = asyncio.get_event_loop()
         if hasattr(self.tmux_manager, "get_session_info"):
             return await loop.run_in_executor(None, self.tmux_manager.get_session_info, session_name)
-        else:
-            return {"session_name": session_name, "exists": False, "windows": []}
+        return {"session_name": session_name, "exists": False, "windows": []}
 
     async def _get_progress_overview_async(self) -> dict[str, Any]:
         """Async wrapper for getting progress overview."""
@@ -338,7 +336,7 @@ BrowseCommand = AsyncBrowseCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def browse(update_interval: float, async_mode: bool) -> None:  # noqa: FBT001
+def browse(update_interval: float, async_mode: bool) -> None:
     """Interactive session browser with async performance optimizations."""
     if async_mode:
         command = AsyncBrowseCommand()

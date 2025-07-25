@@ -128,7 +128,7 @@ class ClaudeContentCollector:
             return True
 
         except Exception:
-            self.logger.exception("Failed to save interaction")  # noqa: G004
+            self.logger.exception("Failed to save interaction")
             return False
 
     def collect_raw_content(self, content: str, metadata: dict | None = None) -> bool:
@@ -173,7 +173,7 @@ class ClaudeContentCollector:
             return True
 
         except Exception:
-            self.logger.exception("Failed to save raw content")  # noqa: G004
+            self.logger.exception("Failed to save raw content")
             return False
 
     def get_collection_stats(self) -> dict:
@@ -201,7 +201,7 @@ class ClaudeContentCollector:
             }
 
         except Exception as e:
-            self.logger.exception("Failed to get collection stats")  # noqa: G004
+            self.logger.exception("Failed to get collection stats")
             return {"error": str(e)}
 
     def cleanup_old_files(self, days_to_keep: int = 7) -> int:
@@ -228,7 +228,7 @@ class ClaudeContentCollector:
             return files_deleted
 
         except Exception:
-            self.logger.exception("Failed to cleanup old files")  # noqa: G004
+            self.logger.exception("Failed to cleanup old files")
             return 0
 
 

@@ -26,8 +26,8 @@ class TodoTask:
     def __init__(
         self,
         content: str,
-        completed: bool = False,  # noqa: FBT001
-        skipped: bool = False,  # noqa: FBT001
+        completed: bool = False,
+        skipped: bool = False,
         line_num: int = 0,
     ) -> None:
         self.content = content.strip()
@@ -285,7 +285,7 @@ class TaskRunner:
 
         return []
 
-    def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:  # noqa: ARG002
+    def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:
         """Commit changes with appropriate message.
 
         Returns:

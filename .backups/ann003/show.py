@@ -10,7 +10,7 @@ from libs.core.base_command import BaseCommand, SessionCommandMixin
 class ShowCommand(BaseCommand, SessionCommandMixin):
     """List all running tmux sessions."""
 
-    def execute(self, **kwargs) -> dict:  # noqa: ARG002
+    def execute(self, **kwargs) -> dict:
         """Execute the show command.
 
         Returns:

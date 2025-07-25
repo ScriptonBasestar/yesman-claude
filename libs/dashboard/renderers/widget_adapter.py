@@ -112,7 +112,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception("Error adapting session data")  # noqa: G004
+            self.logger.exception("Error adapting session data")
             # Return a minimal session object
             return SessionData(
                 name=data.get("name", "unknown"),
@@ -193,7 +193,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception("Error adapting health data")  # noqa: G004
+            self.logger.exception("Error adapting health data")
             return HealthData(
                 overall_score=0,
                 overall_level=HealthLevel.UNKNOWN,
@@ -248,7 +248,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception("Error adapting activity data")  # noqa: G004
+            self.logger.exception("Error adapting activity data")
             return ActivityData(
                 entries=[],
                 total_activities=0,
@@ -300,7 +300,7 @@ class WidgetDataAdapter:
             )
 
         except Exception as e:
-            self.logger.exception("Error adapting progress data")  # noqa: G004
+            self.logger.exception("Error adapting progress data")
             return ProgressData(
                 phase=ProgressPhase.ERROR,
                 phase_progress=0.0,

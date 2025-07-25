@@ -1,4 +1,4 @@
-import subprocess  # noqa: S404
+import subprocess
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -16,7 +16,7 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
 
     def execute(
         self, session_name: str | None = None, **kwargs: Any
-    ) -> dict:  # noqa: ANN401, ARG002
+    ) -> dict:
         """Execute the teardown command.
 
         Returns:

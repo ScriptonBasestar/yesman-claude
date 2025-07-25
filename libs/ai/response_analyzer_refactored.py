@@ -122,7 +122,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 data = json.load(f)
                 return [ResponseRecord(**item) for item in data]
         except Exception:
-            logger.exception("Failed to load response history")  # noqa: G004
+            logger.exception("Failed to load response history")
             return []
 
     def _load_patterns(self) -> dict[str, PromptPattern]:
@@ -139,7 +139,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 data = json.load(f)
                 return {k: PromptPattern(**v) for k, v in data.items()}
         except Exception:
-            logger.exception("Failed to load patterns")  # noqa: G004
+            logger.exception("Failed to load patterns")
             return {}
 
     def save_data(self) -> None:
@@ -158,7 +158,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 )
 
         except Exception:
-            logger.exception("Failed to save data")  # noqa: G004
+            logger.exception("Failed to save data")
 
     def record_response(
         self,
@@ -239,7 +239,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         self,
         prompt_text: str,
         prompt_type: str,
-        context: str = "",  # noqa: ARG002
+        context: str = "",
         project_name: str | None = None,
     ) -> tuple[str | None, float]:
         """Predict the likely user response based on learned patterns.
@@ -345,7 +345,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 "entropy": self._calculate_entropy(responses),
             }
 
-        return cast(dict[str, object], insights)
+        return cast("dict[str, object]", insights)
 
     @staticmethod
     def _calculate_entropy(counter: Counter) -> float:
@@ -379,7 +379,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         removed = original_count - len(self.response_history)
         if removed > 0:
-            logger.info(f"Cleaned up {removed} old response records")  # noqa: G004
+            logger.info(f"Cleaned up {removed} old response records")
             self.save_data()
 
         return removed

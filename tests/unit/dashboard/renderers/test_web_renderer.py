@@ -40,13 +40,13 @@ class TestWebRenderer:
         """Test Web renderer initialization."""
         assert self.renderer.format_type == RenderFormat.WEB
         assert self.renderer.component_id_counter == 0
-        assert "success" in self.renderer._color_classes  # noqa: SLF001
-        assert "active" in self.renderer._status_classes  # noqa: SLF001
+        assert "success" in self.renderer._color_classes
+        assert "active" in self.renderer._status_classes
 
     def test_component_id_generation(self) -> None:
         """Test unique component ID generation."""
-        id1 = self.renderer._generate_component_id()  # noqa: SLF001
-        id2 = self.renderer._generate_component_id()  # noqa: SLF001
+        id1 = self.renderer._generate_component_id()
+        id2 = self.renderer._generate_component_id()
 
         assert id1 != id2
         assert id1.startswith("widget-1-")
@@ -57,19 +57,19 @@ class TestWebRenderer:
         """Test health level to CSS class mapping."""
         assert (
             self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"
-        )  # noqa: SLF001
+        )
         assert (
             self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"
-        )  # noqa: SLF001
+        )
         assert (
             self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"
-        )  # noqa: SLF001
+        )
         assert (
             self.renderer._get_health_color_class(HealthLevel.CRITICAL) == "red-600"
-        )  # noqa: SLF001
+        )
         assert (
             self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"
-        )  # noqa: SLF001
+        )
 
     def test_supports_feature(self) -> None:
         """Test feature support checking."""
@@ -89,7 +89,7 @@ class TestWebRenderer:
 
         result = self.renderer._embed_widget_data(
             component_id, test_data
-        )  # noqa: SLF001
+        )
 
         assert isinstance(result, str)
         assert component_id in result
@@ -441,7 +441,7 @@ class TestWebRenderer:
 
     def test_render_generic_widget(self) -> None:
         """Test generic widget fallback rendering."""
-        result = self.renderer._render_generic_widget(  # noqa: SLF001
+        result = self.renderer._render_generic_widget(
             WidgetType.METRIC_CARD,
             {"test": "data"},
             {},
@@ -456,7 +456,7 @@ class TestWebRenderer:
 
     def test_render_error_widget(self) -> None:
         """Test error widget rendering."""
-        result = self.renderer._render_error_widget(  # noqa: SLF001
+        result = self.renderer._render_error_widget(
             "Test error message",
             "error-component-123",
         )
@@ -641,7 +641,7 @@ class TestWebRenderer:
 
         result = self.renderer._render_activity_heatmap(
             high_activity, {}, "test-1"
-        )  # noqa: SLF001
+        )
         assert "🔥🔥🔥" in result
         assert "text-red-600" in result
 
@@ -656,7 +656,7 @@ class TestWebRenderer:
 
         result = self.renderer._render_activity_heatmap(
             medium_activity, {}, "test-2"
-        )  # noqa: SLF001
+        )
         assert "🔥🔥" in result
         assert "text-orange-600" in result
 
@@ -671,7 +671,7 @@ class TestWebRenderer:
 
         result = self.renderer._render_activity_heatmap(
             low_activity, {}, "test-3"
-        )  # noqa: SLF001
+        )
         assert "🔥" in result
         assert "text-yellow-600" in result
 
@@ -686,7 +686,7 @@ class TestWebRenderer:
 
         result = self.renderer._render_activity_heatmap(
             very_low_activity, {}, "test-4"
-        )  # noqa: SLF001
+        )
         assert "❄️" in result
         assert "text-blue-600" in result
 
@@ -700,7 +700,7 @@ class TestWebRenderer:
         )
         result = self.renderer._render_metric_card(
             positive_metric, {}, "test-1"
-        )  # noqa: SLF001
+        )
         assert "↗️ +5.2" in result
         assert "text-green-600" in result
 
@@ -712,7 +712,7 @@ class TestWebRenderer:
         )
         result = self.renderer._render_metric_card(
             negative_metric, {}, "test-2"
-        )  # noqa: SLF001
+        )
         assert "↘️ -3.1" in result
         assert "text-red-600" in result
 
@@ -724,7 +724,7 @@ class TestWebRenderer:
         )
         result = self.renderer._render_metric_card(
             no_trend_metric, {}, "test-3"
-        )  # noqa: SLF001
+        )
         assert "➡️ 0" in result
         assert "text-gray-600" in result
 
@@ -736,7 +736,7 @@ class TestWebRenderer:
         )
         result = self.renderer._render_metric_card(
             no_trend_data_metric, {}, "test-4"
-        )  # noqa: SLF001
+        )
         assert "↗️" not in result
         assert "↘️" not in result
         assert "➡️" not in result

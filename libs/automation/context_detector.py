@@ -2,7 +2,7 @@
 
 import logging
 import re
-import subprocess  # noqa: S404
+import subprocess
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -190,7 +190,7 @@ class ContextDetector:
                 self._last_git_hash = current_hash
 
         except Exception as e:
-            self.logger.debug(f"Git context detection failed: {e}")  # noqa: G004
+            self.logger.debug(f"Git context detection failed: {e}")
 
         return None
 
@@ -238,7 +238,7 @@ class ContextDetector:
                         self._last_file_mtimes[file_key] = current_mtime
 
             except Exception as e:
-                self.logger.debug(f"File change detection failed for {pattern}: {e}")  # noqa: G004
+                self.logger.debug(f"File change detection failed for {pattern}: {e}")
 
         return detected_changes
 
@@ -295,7 +295,7 @@ class ContextDetector:
                 )
 
         except Exception as e:
-            self.logger.debug(f"Deployment readiness check failed: {e}")  # noqa: G004
+            self.logger.debug(f"Deployment readiness check failed: {e}")
 
         return None
 
@@ -366,7 +366,7 @@ class ContextDetector:
             }
 
         except Exception as e:
-            self.logger.debug(f"Failed to get commit info: {e}")  # noqa: G004
+            self.logger.debug(f"Failed to get commit info: {e}")
             return {}
 
     def _run_quick_test_check(self) -> bool:

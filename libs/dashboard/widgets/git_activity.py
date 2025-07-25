@@ -1,7 +1,7 @@
 # Copyright notice.
 
 import re
-import subprocess  # noqa: S404
+import subprocess
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -298,7 +298,7 @@ class GitActivityWidget:
         )
         info["recent_branches"] = ", ".join(recent_branches.split("\\n")[:5]) if recent_branches else ""
 
-        return cast(dict[str, object], info)
+        return cast("dict[str, object]", info)
 
     def render_activity_overview(self) -> Panel:
         """Render git activity overview.

@@ -108,7 +108,7 @@ class IController(ABC):
 
     @abstractmethod
     @staticmethod
-    def set_auto_next(enabled: bool) -> bool:  # noqa: FBT001
+    def set_auto_next(enabled: bool) -> bool:
         """Set auto next setting."""
 
     @abstractmethod

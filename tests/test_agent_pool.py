@@ -63,7 +63,7 @@ class TestAgentPool:
         assert agent_pool.work_dir == work_dir
         assert agent_pool.agents == {}
         assert agent_pool.tasks == {}
-        assert not agent_pool._running  # noqa: SLF001
+        assert not agent_pool._running
         assert work_dir.exists()
 
     @staticmethod
@@ -95,7 +95,7 @@ class TestAgentPool:
     @staticmethod
     async def test_create_agent(agent_pool: AgentPool) -> None:
         """Test creating a new agent."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001
+        agent = await agent_pool._create_agent()
 
         assert agent.agent_id.startswith("agent-")
         assert agent.state == AgentState.IDLE
@@ -107,25 +107,25 @@ class TestAgentPool:
     async def test_get_available_agent(agent_pool: AgentPool) -> None:
         """Test getting available agent."""
         # No agents initially
-        agent = await agent_pool._get_available_agent()  # noqa: SLF001
+        agent = await agent_pool._get_available_agent()
         assert agent is not None  # Should create new agent
         assert len(agent_pool.agents) == 1
 
         # Agent should be available
-        same_agent = await agent_pool._get_available_agent()  # noqa: SLF001
+        same_agent = await agent_pool._get_available_agent()
         assert same_agent == agent
 
         # Make agent busy
         agent.state = AgentState.WORKING
 
         # Should create new agent
-        new_agent = await agent_pool._get_available_agent()  # noqa: SLF001
+        new_agent = await agent_pool._get_available_agent()
         assert new_agent != agent
         assert len(agent_pool.agents) == 2
 
         # Both agents busy, at max capacity
         new_agent.state = AgentState.WORKING
-        no_agent = await agent_pool._get_available_agent()  # noqa: SLF001
+        no_agent = await agent_pool._get_available_agent()
         assert no_agent is None
 
     @pytest.mark.asyncio
@@ -134,9 +134,9 @@ class TestAgentPool:
         agent_pool: AgentPool, sample_task: Task
     ) -> None:
         """Test assigning a task to an agent."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001
+        agent = await agent_pool._create_agent()
 
-        await agent_pool._assign_task_to_agent(agent, sample_task)  # noqa: SLF001
+        await agent_pool._assign_task_to_agent(agent, sample_task)
 
         # Check task state
         assert sample_task.status == TaskStatus.ASSIGNED
@@ -150,7 +150,7 @@ class TestAgentPool:
     @staticmethod
     async def test_execute_task_success(agent_pool: AgentPool) -> None:
         """Test successful task execution."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001
+        agent = await agent_pool._create_agent()
         task = Task(
             task_id="success-task",
             title="Success Task",
@@ -165,7 +165,7 @@ class TestAgentPool:
         agent_pool.on_task_started(started_callback)
         agent_pool.on_task_completed(completed_callback)
 
-        await agent_pool._execute_task(agent, task)  # noqa: SLF001
+        await agent_pool._execute_task(agent, task)
 
         # Check task completion
         assert task.status == TaskStatus.COMPLETED
@@ -188,7 +188,7 @@ class TestAgentPool:
     @staticmethod
     async def test_execute_task_failure(agent_pool: AgentPool) -> None:
         """Test failed task execution."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001
+        agent = await agent_pool._create_agent()
         task = Task(
             task_id="fail-task",
             title="Fail Task",
@@ -201,7 +201,7 @@ class TestAgentPool:
         failed_callback = AsyncMock()
         agent_pool.on_task_failed(failed_callback)
 
-        await agent_pool._execute_task(agent, task)  # noqa: SLF001
+        await agent_pool._execute_task(agent, task)
 
         # Check task failure
         assert task.status == TaskStatus.FAILED
@@ -220,7 +220,7 @@ class TestAgentPool:
     @staticmethod
     async def test_execute_task_timeout(agent_pool: AgentPool) -> None:
         """Test task timeout handling."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001, SLF001
+        agent = await agent_pool._create_agent()
         task = Task(
             task_id="timeout-task",
             title="Timeout Task",
@@ -230,7 +230,7 @@ class TestAgentPool:
             timeout=1,  # 1 second timeout
         )
 
-        await agent_pool._execute_task(agent, task)  # noqa: SLF001
+        await agent_pool._execute_task(agent, task)
 
         # Check task timeout
         assert task.status == TaskStatus.FAILED
@@ -244,7 +244,7 @@ class TestAgentPool:
     @staticmethod
     async def test_terminate_agent(agent_pool: AgentPool) -> None:
         """Test agent termination."""
-        agent = await agent_pool._create_agent()  # noqa: SLF001, SLF001
+        agent = await agent_pool._create_agent()
 
         # Mock process
         mock_process = MagicMock()
@@ -252,7 +252,7 @@ class TestAgentPool:
         mock_process.wait = AsyncMock()
         agent.process = mock_process
 
-        await agent_pool._terminate_agent(agent.agent_id)  # noqa: SLF001
+        await agent_pool._terminate_agent(agent.agent_id)
 
         assert agent.state == AgentState.TERMINATED
         assert agent.current_task is None
@@ -391,7 +391,7 @@ class TestAgentPool:
         agent_pool.completed_tasks = ["completed-1", "completed-2"]
 
         # Save state
-        agent_pool._save_state()  # noqa: SLF001
+        agent_pool._save_state()
 
         # Create new pool and load
         new_pool = AgentPool(max_agents=2, work_dir=str(work_dir))

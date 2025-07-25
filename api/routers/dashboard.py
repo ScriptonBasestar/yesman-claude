@@ -2,7 +2,7 @@
 
 import logging
 import secrets
-import subprocess  # noqa: S404
+import subprocess
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, TypedDict
@@ -94,7 +94,7 @@ async def get_sessions() -> list[dict[str, Any]]:
 
         return web_sessions
     except Exception as e:
-        logger.exception("Failed to get sessions")  # noqa: G004
+        logger.exception("Failed to get sessions")
         raise HTTPException(status_code=500, detail=f"Failed to get sessions: {e!s}")
 
 
@@ -175,7 +175,7 @@ async def get_project_health() -> dict[str, Any]:
                 "last_updated": datetime.now(UTC).isoformat(),
             }
     except Exception as e:
-        logger.exception("Failed to get health data")  # noqa: G004
+        logger.exception("Failed to get health data")
         raise HTTPException(status_code=500, detail=f"Failed to get health data: {e!s}")
 
 
@@ -257,7 +257,7 @@ async def get_activity_data() -> dict[str, Any]:
                 "avg_activity": (sum(a["activity_count"] for a in activities) / len(activities) if activities else 0),
             }
     except Exception as e:
-        logger.exception("Failed to get activity data")  # noqa: G004
+        logger.exception("Failed to get activity data")
         raise HTTPException(status_code=500, detail=f"Failed to get activity data: {e!s}")
 
 
@@ -267,7 +267,7 @@ async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1
     try:
         return heatmap_generator.generate_heatmap_data([session_name], days=days)
     except Exception as e:
-        logger.exception("Failed to get heatmap data for {session_name}")  # noqa: G004
+        logger.exception("Failed to get heatmap data for {session_name}")
         raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {e!s}")
 
 
@@ -288,5 +288,5 @@ async def get_dashboard_stats() -> dict[str, Any]:
             "last_update": datetime.now(UTC).isoformat(),
         }
     except Exception as e:
-        logger.exception("Failed to get stats")  # noqa: G004
+        logger.exception("Failed to get stats")
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {e!s}")

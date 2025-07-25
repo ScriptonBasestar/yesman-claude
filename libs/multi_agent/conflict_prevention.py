@@ -304,7 +304,7 @@ class ConflictPreventionSystem:
     async def _generate_prevention_measures(
         self,
         prediction: PredictionResult,
-        agents: list[str] | None = None,  # noqa: ARG002
+        agents: list[str] | None = None,
     ) -> list[PreventionMeasure]:
         """Generate appropriate prevention measures for a conflict
         prediction.

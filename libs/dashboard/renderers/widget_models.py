@@ -142,18 +142,18 @@ class SessionData:
         # Parse datetime fields
         created_at = None
         if data.get("created_at"):
-            created_at = datetime.fromisoformat(cast(str, data["created_at"]))
+            created_at = datetime.fromisoformat(cast("str", data["created_at"]))
 
         last_activity = None
         if data.get("last_activity"):
-            last_activity = datetime.fromisoformat(cast(str, data["last_activity"]))
+            last_activity = datetime.fromisoformat(cast("str", data["last_activity"]))
 
         # Parse status
         status = SessionStatus(data.get("status", SessionStatus.IDLE.value))
 
         # Parse windows
         windows = []
-        for window_data in cast(list, data.get("windows", [])):
+        for window_data in cast("list", data.get("windows", [])):
             windows.append(
                 WindowData(
                     id=window_data.get("id", ""),
@@ -166,17 +166,17 @@ class SessionData:
             )
 
         return cls(
-            name=cast(str, data["name"]),
-            id=cast(str, data["id"]),
+            name=cast("str", data["name"]),
+            id=cast("str", data["id"]),
             status=status,
             created_at=created_at,
             last_activity=last_activity,
             windows=windows,
-            panes=cast(int, data.get("panes", 0)),
-            claude_active=cast(bool, data.get("claude_active", False)),
-            metadata=cast(dict[str, object], data.get("metadata", {})),
-            cpu_usage=cast(float, data.get("cpu_usage", 0.0)),
-            memory_usage=cast(float, data.get("memory_usage", 0.0)),
+            panes=cast("int", data.get("panes", 0)),
+            claude_active=cast("bool", data.get("claude_active", False)),
+            metadata=cast("dict[str, object]", data.get("metadata", {})),
+            cpu_usage=cast("float", data.get("cpu_usage", 0.0)),
+            memory_usage=cast("float", data.get("memory_usage", 0.0)),
         )
 
 
@@ -243,39 +243,39 @@ class HealthData:
         # Parse datetime
         last_updated = None
         if data.get("last_updated"):
-            last_updated = datetime.fromisoformat(cast(str, data["last_updated"]))
+            last_updated = datetime.fromisoformat(cast("str", data["last_updated"]))
 
         # Parse overall level
-        overall_level = HealthLevel.from_score(cast(int, data.get("overall_score", 0)))
+        overall_level = HealthLevel.from_score(cast("int", data.get("overall_score", 0)))
 
         # Parse categories
         categories = []
-        for cat_data in cast(list, data.get("categories", [])):
-            cat_dict = cast(dict, cat_data)
+        for cat_data in cast("list", data.get("categories", [])):
+            cat_dict = cast("dict", cat_data)
             last_checked = None
             if cat_dict.get("last_checked"):
-                last_checked = datetime.fromisoformat(cast(str, cat_dict["last_checked"]))
+                last_checked = datetime.fromisoformat(cast("str", cat_dict["last_checked"]))
 
-            level = HealthLevel.from_score(cast(int, cat_dict.get("score", 0)))
+            level = HealthLevel.from_score(cast("int", cat_dict.get("score", 0)))
 
             categories.append(
                 HealthCategoryData(
-                    category=cast(str, cat_dict.get("category", "")),
-                    score=cast(int, cat_dict.get("score", 0)),
+                    category=cast("str", cat_dict.get("category", "")),
+                    score=cast("int", cat_dict.get("score", 0)),
                     level=level,
-                    message=cast(str, cat_dict.get("message", "")),
-                    details=cast(dict, cat_dict.get("details", {})),
+                    message=cast("str", cat_dict.get("message", "")),
+                    details=cast("dict", cat_dict.get("details", {})),
                     last_checked=last_checked,
                 )
             )
 
         return cls(
-            overall_score=cast(int, data.get("overall_score", 0)),
+            overall_score=cast("int", data.get("overall_score", 0)),
             overall_level=overall_level,
             categories=categories,
             last_updated=last_updated,
-            project_path=cast(str, data.get("project_path", "")),
-            metadata=cast(dict, data.get("metadata", {})),
+            project_path=cast("str", data.get("project_path", "")),
+            metadata=cast("dict", data.get("metadata", {})),
         )
 
 
@@ -331,12 +331,12 @@ class ActivityData:
         """
         # Parse entries
         entries = []
-        for entry_data in cast(list, data.get("entries", [])):
-            entry_dict = cast(dict, entry_data)
-            timestamp = datetime.fromisoformat(cast(str, entry_dict["timestamp"]))
+        for entry_data in cast("list", data.get("entries", [])):
+            entry_dict = cast("dict", entry_data)
+            timestamp = datetime.fromisoformat(cast("str", entry_dict["timestamp"]))
             activity_type = ActivityType(
                 cast(
-                    str,
+                    "str",
                     entry_dict.get("activity_type", ActivityType.FILE_MODIFIED.value),
                 )
             )
@@ -345,22 +345,22 @@ class ActivityData:
                 ActivityEntry(
                     timestamp=timestamp,
                     activity_type=activity_type,
-                    description=cast(str, entry_dict.get("description", "")),
-                    details=cast(dict, entry_dict.get("details", {})),
-                    metadata=cast(dict, entry_dict.get("metadata", {})),
+                    description=cast("str", entry_dict.get("description", "")),
+                    details=cast("dict", entry_dict.get("details", {})),
+                    metadata=cast("dict", entry_dict.get("metadata", {})),
                 )
             )
 
         return cls(
             entries=entries,
-            total_activities=cast(int, data.get("total_activities", 0)),
-            active_days=cast(int, data.get("active_days", 0)),
-            activity_rate=cast(float, data.get("activity_rate", 0.0)),
-            current_streak=cast(int, data.get("current_streak", 0)),
-            longest_streak=cast(int, data.get("longest_streak", 0)),
-            avg_per_day=cast(float, data.get("avg_per_day", 0.0)),
-            date_range=cast(dict, data.get("date_range", {})),
-            metadata=cast(dict, data.get("metadata", {})),
+            total_activities=cast("int", data.get("total_activities", 0)),
+            active_days=cast("int", data.get("active_days", 0)),
+            activity_rate=cast("float", data.get("activity_rate", 0.0)),
+            current_streak=cast("int", data.get("current_streak", 0)),
+            longest_streak=cast("int", data.get("longest_streak", 0)),
+            avg_per_day=cast("float", data.get("avg_per_day", 0.0)),
+            date_range=cast("dict", data.get("date_range", {})),
+            metadata=cast("dict", data.get("metadata", {})),
         )
 
 
@@ -417,33 +417,33 @@ class ProgressData:
         # Parse datetime fields
         start_time = None
         if data.get("start_time"):
-            start_time = datetime.fromisoformat(cast(str, data["start_time"]))
+            start_time = datetime.fromisoformat(cast("str", data["start_time"]))
 
         phase_start_time = None
         if data.get("phase_start_time"):
-            phase_start_time = datetime.fromisoformat(cast(str, data["phase_start_time"]))
+            phase_start_time = datetime.fromisoformat(cast("str", data["phase_start_time"]))
 
         # Parse phase
-        phase = ProgressPhase(cast(str, data.get("phase", ProgressPhase.IDLE.value)))
+        phase = ProgressPhase(cast("str", data.get("phase", ProgressPhase.IDLE.value)))
 
         return cls(
             phase=phase,
-            phase_progress=cast(float, data.get("phase_progress", 0.0)),
-            overall_progress=cast(float, data.get("overall_progress", 0.0)),
-            files_created=cast(int, data.get("files_created", 0)),
-            files_modified=cast(int, data.get("files_modified", 0)),
-            lines_added=cast(int, data.get("lines_added", 0)),
-            lines_removed=cast(int, data.get("lines_removed", 0)),
-            commands_executed=cast(int, data.get("commands_executed", 0)),
-            commands_succeeded=cast(int, data.get("commands_succeeded", 0)),
-            commands_failed=cast(int, data.get("commands_failed", 0)),
+            phase_progress=cast("float", data.get("phase_progress", 0.0)),
+            overall_progress=cast("float", data.get("overall_progress", 0.0)),
+            files_created=cast("int", data.get("files_created", 0)),
+            files_modified=cast("int", data.get("files_modified", 0)),
+            lines_added=cast("int", data.get("lines_added", 0)),
+            lines_removed=cast("int", data.get("lines_removed", 0)),
+            commands_executed=cast("int", data.get("commands_executed", 0)),
+            commands_succeeded=cast("int", data.get("commands_succeeded", 0)),
+            commands_failed=cast("int", data.get("commands_failed", 0)),
             start_time=start_time,
             phase_start_time=phase_start_time,
-            active_duration=cast(float, data.get("active_duration", 0.0)),
-            idle_duration=cast(float, data.get("idle_duration", 0.0)),
-            todos_identified=cast(int, data.get("todos_identified", 0)),
-            todos_completed=cast(int, data.get("todos_completed", 0)),
-            metadata=cast(dict, data.get("metadata", {})),
+            active_duration=cast("float", data.get("active_duration", 0.0)),
+            idle_duration=cast("float", data.get("idle_duration", 0.0)),
+            todos_identified=cast("int", data.get("todos_identified", 0)),
+            todos_completed=cast("int", data.get("todos_completed", 0)),
+            metadata=cast("dict", data.get("metadata", {})),
         )
 
 
@@ -476,14 +476,14 @@ class MetricCardData:
         MetricCardData: Description of return value.
         """
         return cls(
-            title=cast(str, data.get("title", "")),
-            value=cast(str, data.get("value", "")),
-            suffix=cast(str, data.get("suffix", "")),
-            trend=(cast(float, data.get("trend")) if data.get("trend") is not None else None),
-            comparison=(cast(str, data.get("comparison")) if data.get("comparison") is not None else None),
-            color=cast(str, data.get("color", "neutral")),
-            icon=cast(str, data.get("icon", "")),
-            metadata=cast(dict, data.get("metadata", {})),
+            title=cast("str", data.get("title", "")),
+            value=cast("str", data.get("value", "")),
+            suffix=cast("str", data.get("suffix", "")),
+            trend=(cast("float", data.get("trend")) if data.get("trend") is not None else None),
+            comparison=(cast("str", data.get("comparison")) if data.get("comparison") is not None else None),
+            color=cast("str", data.get("color", "neutral")),
+            icon=cast("str", data.get("icon", "")),
+            metadata=cast("dict", data.get("metadata", {})),
         )
 
 
@@ -514,12 +514,12 @@ class StatusIndicatorData:
         StatusIndicatorData: Description of return value.
         """
         return cls(
-            status=cast(str, data.get("status", "")),
-            label=cast(str, data.get("label", "")),
-            color=cast(str, data.get("color", "neutral")),
-            icon=cast(str, data.get("icon", "")),
-            pulse=cast(bool, data.get("pulse", False)),
-            metadata=cast(dict, data.get("metadata", {})),
+            status=cast("str", data.get("status", "")),
+            label=cast("str", data.get("label", "")),
+            color=cast("str", data.get("color", "neutral")),
+            icon=cast("str", data.get("icon", "")),
+            pulse=cast("bool", data.get("pulse", False)),
+            metadata=cast("dict", data.get("metadata", {})),
         )
 
 
@@ -572,8 +572,8 @@ class ChartData:
         """
         # Parse data points
         data_points = []
-        for point_data in cast(list, data.get("data_points", [])):
-            point_dict = cast(dict, point_data)
+        for point_data in cast("list", data.get("data_points", [])):
+            point_dict = cast("dict", point_data)
             x_value = point_dict.get("x")
             # Try to parse datetime if it's a string
             if isinstance(x_value, str):
@@ -585,18 +585,18 @@ class ChartData:
             data_points.append(
                 ChartDataPoint(
                     x=x_value,
-                    y=cast(float, point_dict.get("y", 0)),
-                    label=(cast(str, point_dict.get("label")) if point_dict.get("label") is not None else None),
-                    metadata=cast(dict, point_dict.get("metadata", {})),
+                    y=cast("float", point_dict.get("y", 0)),
+                    label=(cast("str", point_dict.get("label")) if point_dict.get("label") is not None else None),
+                    metadata=cast("dict", point_dict.get("metadata", {})),
                 )
             )
 
         return cls(
-            title=cast(str, data.get("title", "")),
-            chart_type=cast(str, data.get("chart_type", "line")),
+            title=cast("str", data.get("title", "")),
+            chart_type=cast("str", data.get("chart_type", "line")),
             data_points=data_points,
-            x_label=cast(str, data.get("x_label", "")),
-            y_label=cast(str, data.get("y_label", "")),
-            colors=cast(list, data.get("colors", [])),
-            metadata=cast(dict, data.get("metadata", {})),
+            x_label=cast("str", data.get("x_label", "")),
+            y_label=cast("str", data.get("y_label", "")),
+            colors=cast("list", data.get("colors", [])),
+            metadata=cast("dict", data.get("metadata", {})),
         )

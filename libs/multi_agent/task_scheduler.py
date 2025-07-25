@@ -47,7 +47,7 @@ class AgentCapability:
 
         # Specialization bonus
         specialization_bonus = 0.0
-        task_tags = cast(list[str], task.metadata.get("tags", []))
+        task_tags = cast("list[str]", task.metadata.get("tags", []))
         if any(spec in task_tags for spec in self.specializations):
             specialization_bonus = 0.3
 
@@ -227,7 +227,7 @@ class TaskScheduler:
         self,
         agent_id: str,
         task: Task,
-        success: bool,  # noqa: FBT001
+        success: bool,
         execution_time: float,
     ) -> None:
         """Update agent performance metrics based on task completion.
@@ -292,7 +292,7 @@ class TaskScheduler:
 
         # Dependency impact (tasks that unblock others get higher priority)
         dependency_score = 0.0
-        blocks_tasks = cast(int, task.metadata.get("blocks_tasks", 0))
+        blocks_tasks = cast("int", task.metadata.get("blocks_tasks", 0))
         if blocks_tasks > 0:
             dependency_score = min(1.0, blocks_tasks / 5.0) * self.dependency_weight
 
@@ -374,7 +374,7 @@ class TaskScheduler:
         agent_multiplier = 1.0 / max(0.1, agent_capability.processing_power)
 
         # Specialization bonus
-        task_tags = cast(list[str], task.metadata.get("tags", []))
+        task_tags = cast("list[str]", task.metadata.get("tags", []))
         if any(spec in task_tags for spec in agent_capability.specializations):
             agent_multiplier *= 0.8  # 20% faster for specialized tasks
 

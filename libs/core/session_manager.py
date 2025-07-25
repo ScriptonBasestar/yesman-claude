@@ -81,7 +81,7 @@ class SessionManager:
 
         try:
             # Load project configurations
-            projects = cast(dict, self.tmux_manager.load_projects().get("sessions", {}))
+            projects = cast("dict", self.tmux_manager.load_projects().get("sessions", {}))
             self.logger.info("Loaded %d projects", len(projects))
 
             for project_name, project_conf in projects.items():
@@ -192,7 +192,7 @@ class SessionManager:
         import libtmux
 
         if hasattr(window, "list_panes"):
-            tmux_window = cast(libtmux.Window, window)
+            tmux_window = cast("libtmux.Window", window)
 
             for pane in tmux_window.list_panes():
                 try:
@@ -219,8 +219,8 @@ class SessionManager:
                         self.logger.debug("Could not get basic pane info: %s", e)
 
         return WindowInfo(
-            name=(getattr(window, "window_name", "unknown") if hasattr(window, "window_name") else cast(dict, window).get("window_name", "unknown")),
-            index=str(getattr(window, "window_index", 0) if hasattr(window, "window_index") else cast(dict, window).get("window_index", 0)),
+            name=(getattr(window, "window_name", "unknown") if hasattr(window, "window_name") else cast("dict", window).get("window_name", "unknown")),
+            index=str(getattr(window, "window_index", 0) if hasattr(window, "window_index") else cast("dict", window).get("window_index", 0)),
             panes=panes,
         )
 

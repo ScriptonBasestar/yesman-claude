@@ -799,7 +799,7 @@ class SemanticAnalyzer:
 
     # Helper methods
 
-    async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:  # noqa: ARG002
+    async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:
         """Get list of Python files changed between branches."""
         try:
             # This would use git to find changed files
@@ -808,7 +808,7 @@ class SemanticAnalyzer:
         except Exception:
             return []
 
-    async def _get_file_content(self, file_path: str, branch: str) -> str | None:  # noqa: ARG002
+    async def _get_file_content(self, file_path: str, branch: str) -> str | None:
         """Get file content from specific branch."""
         try:
             # This would use git to get file content from branch

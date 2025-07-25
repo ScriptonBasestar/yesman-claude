@@ -188,25 +188,25 @@ class TestRendererSystemIntegration:
         widget_tests = [
             (
                 WidgetType.SESSION_BROWSER,
-                [cast(SessionData, self.test_data["session"])],
+                [cast("SessionData", self.test_data["session"])],
             ),
-            (WidgetType.HEALTH_METER, cast(HealthData, self.test_data["health"])),
+            (WidgetType.HEALTH_METER, cast("HealthData", self.test_data["health"])),
             (
                 WidgetType.ACTIVITY_HEATMAP,
-                cast(ActivityData, self.test_data["activity"]),
+                cast("ActivityData", self.test_data["activity"]),
             ),
             (
                 WidgetType.PROGRESS_TRACKER,
-                cast(ProgressData, self.test_data["progress"]),
+                cast("ProgressData", self.test_data["progress"]),
             ),
-            (WidgetType.METRIC_CARD, cast(MetricCardData, self.test_data["metric"])),
+            (WidgetType.METRIC_CARD, cast("MetricCardData", self.test_data["metric"])),
             (
                 WidgetType.STATUS_INDICATOR,
-                cast(StatusIndicatorData, self.test_data["status"]),
+                cast("StatusIndicatorData", self.test_data["status"]),
             ),
-            (WidgetType.CHART, cast(ChartData, self.test_data["chart"])),
-            (WidgetType.LOG_VIEWER, cast(list, self.test_data["logs"])),
-            (WidgetType.TABLE, cast(dict, self.test_data["table"])),
+            (WidgetType.CHART, cast("ChartData", self.test_data["chart"])),
+            (WidgetType.LOG_VIEWER, cast("list", self.test_data["logs"])),
+            (WidgetType.TABLE, cast("dict", self.test_data["table"])),
         ]
 
         formats = [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]
@@ -214,7 +214,7 @@ class TestRendererSystemIntegration:
         for widget_type, data in widget_tests:
             for render_format in formats:
                 try:
-                    result = render_widget(widget_type, cast(Any, data), render_format)
+                    result = render_widget(widget_type, cast("Any", data), render_format)
                     assert result is not None
 
                     # Format-specific validations
@@ -236,9 +236,9 @@ class TestRendererSystemIntegration:
 
     def test_cross_format_consistency(self) -> None:
         """Test that different formats produce consistent data structures."""
-        metric = cast(MetricCardData, self.test_data["metric"])
+        metric = cast("MetricCardData", self.test_data["metric"])
 
-        results = render_all_formats(WidgetType.METRIC_CARD, cast(Any, metric))
+        results = render_all_formats(WidgetType.METRIC_CARD, cast("Any", metric))
 
         assert len(results) == 3
         assert RenderFormat.TUI in results
@@ -252,12 +252,12 @@ class TestRendererSystemIntegration:
 
         assert "System Performance" in tui_result
         assert "System Performance" in web_result
-        assert cast(dict, tauri_result)["data"]["title"] == "System Performance"
+        assert cast("dict", tauri_result)["data"]["title"] == "System Performance"
 
         # All should reflect the value
         assert "92.5" in tui_result or "92.50" in tui_result
         assert "92.5" in web_result or "92.50" in web_result
-        assert cast(dict, tauri_result)["data"]["value"] == 92.5
+        assert cast("dict", tauri_result)["data"]["value"] == 92.5
 
     @staticmethod
     def test_data_transformation_pipeline() -> None:
@@ -274,12 +274,12 @@ class TestRendererSystemIntegration:
         health_data = HealthData.from_dict(raw_health_data)
 
         # Render with all formats
-        results = render_all_formats(WidgetType.HEALTH_METER, cast(Any, health_data))
+        results = render_all_formats(WidgetType.HEALTH_METER, cast("Any", health_data))
 
         # Verify transformation preserved data
         for format_type, result in results.items():
             if format_type == RenderFormat.TAURI:
-                result_dict = cast(dict, result)
+                result_dict = cast("dict", result)
                 assert result_dict["data"]["overall_score"] == 75
                 assert len(result_dict["data"]["categories"]) == 1
                 assert result_dict["data"]["categories"][0]["category"] == "build"
@@ -304,10 +304,10 @@ class TestRendererSystemIntegration:
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
             try:
                 result = render_widget(
-                    WidgetType.HEALTH_METER, cast(Any, "invalid"), render_format
+                    WidgetType.HEALTH_METER, cast("Any", "invalid"), render_format
                 )
                 if render_format == RenderFormat.TAURI:
-                    assert "error" in cast(dict, result).get("data", {})
+                    assert "error" in cast("dict", result).get("data", {})
                 # Other formats should handle gracefully
             except (ValueError, TypeError, AttributeError, KeyError):
                 # Exceptions are acceptable for invalid data
@@ -326,7 +326,7 @@ class TestRendererSystemIntegration:
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
             result = render_widget(
                 WidgetType.SESSION_BROWSER,
-                cast(Any, [incomplete_session]),
+                cast("Any", [incomplete_session]),
                 render_format,
             )
             assert result is not None
@@ -351,7 +351,7 @@ class TestRendererSystemIntegration:
                 RenderFormat.WEB,
                 RenderFormat.TAURI,
             ]:
-                result = render_widget(widget_type, cast(Any, data), render_format)
+                result = render_widget(widget_type, cast("Any", data), render_format)
                 assert result is not None
 
                 if render_format == RenderFormat.TAURI:
@@ -368,12 +368,12 @@ class TestRendererSystemIntegration:
 
         for render_format in [RenderFormat.TUI, RenderFormat.WEB, RenderFormat.TAURI]:
             result = render_widget(
-                WidgetType.METRIC_CARD, cast(Any, extreme_metric), render_format
+                WidgetType.METRIC_CARD, cast("Any", extreme_metric), render_format
             )
             assert result is not None
 
             if render_format == RenderFormat.TAURI:
-                result_dict = cast(dict, result)
+                result_dict = cast("dict", result)
                 assert result_dict["data"]["value"] == 999999.99
                 assert result_dict["data"]["trend"] == -50.0
 
@@ -397,7 +397,7 @@ class TestRendererSystemIntegration:
                     RenderFormat.TAURI,
                 ]:
                     result = render_widget(
-                        WidgetType.METRIC_CARD, cast(Any, metric), render_format
+                        WidgetType.METRIC_CARD, cast("Any", metric), render_format
                     )
                     results.append((worker_id, render_format, result))
 
@@ -433,7 +433,7 @@ class TestRendererSystemIntegration:
             # Check worker ID appears in results
             for render_format, result in format_results.items():
                 if render_format == RenderFormat.TAURI:
-                    result_dict = cast(dict, result)
+                    result_dict = cast("dict", result)
                     assert f"Worker {worker_id}" in result_dict["data"]["title"]
                 else:
                     assert f"Worker {worker_id}" in str(result)
@@ -461,7 +461,7 @@ class TestRendererPerformance:
 
         def render_single() -> object:
             return render_widget(
-                WidgetType.METRIC_CARD, cast(Any, self.metric), RenderFormat.TUI
+                WidgetType.METRIC_CARD, cast("Any", self.metric), RenderFormat.TUI
             )
 
         # Time the operation
@@ -472,7 +472,7 @@ class TestRendererPerformance:
 
         # Verify result
         assert result is not None
-        assert "Performance Test" in cast(str, result)
+        assert "Performance Test" in cast("str", result)
 
         # Performance assertions (50ms threshold)
         assert (
@@ -483,7 +483,7 @@ class TestRendererPerformance:
         """Test multi-format rendering performance."""
 
         def render_all() -> object:
-            return render_all_formats(WidgetType.METRIC_CARD, cast(Any, self.metric))
+            return render_all_formats(WidgetType.METRIC_CARD, cast("Any", self.metric))
 
         # Time the operation
         start_time = time.time()
@@ -492,7 +492,7 @@ class TestRendererPerformance:
         avg_time = (time.time() - start_time) / 5
 
         # Verify results
-        results_dict = cast(dict, results)
+        results_dict = cast("dict", results)
         assert len(results_dict) == 3
         assert all(result is not None for result in results_dict.values())
 
@@ -515,18 +515,18 @@ class TestRendererPerformance:
         start_individual = time.time()
         individual_results = []
         for metric in metrics:
-            result = renderer.render_widget(WidgetType.METRIC_CARD, cast(Any, metric))
+            result = renderer.render_widget(WidgetType.METRIC_CARD, cast("Any", metric))
             individual_results.append(result)
         individual_time = time.time() - start_individual
 
         # Batch rendering (parallel)
         requests = [
-            (WidgetType.METRIC_CARD, cast(Any, metric), cast(dict[str, Any], {}))
+            (WidgetType.METRIC_CARD, cast("Any", metric), cast("dict[str, Any]", {}))
             for metric in metrics
         ]
 
         start_batch = time.time()
-        batch_results = batch_renderer.render_batch(cast(Any, requests), parallel=True)
+        batch_results = batch_renderer.render_batch(cast("Any", requests), parallel=True)
         batch_time = time.time() - start_batch
 
         # Verify results are equivalent
@@ -542,16 +542,16 @@ class TestRendererPerformance:
         # Create renderer with caching
         renderer = TUIRenderer()
         cached_method = cached_render(cache)(renderer.render_widget)
-        cast(Any, renderer).render_widget = cached_method
+        cast("Any", renderer).render_widget = cached_method
 
         # First render (cache miss)
         start1 = time.time()
-        result1 = renderer.render_widget(WidgetType.METRIC_CARD, cast(Any, self.metric))
+        result1 = renderer.render_widget(WidgetType.METRIC_CARD, cast("Any", self.metric))
         time1 = time.time() - start1
 
         # Second render (cache hit)
         start2 = time.time()
-        result2 = renderer.render_widget(WidgetType.METRIC_CARD, cast(Any, self.metric))
+        result2 = renderer.render_widget(WidgetType.METRIC_CARD, cast("Any", self.metric))
         time2 = time.time() - start2
 
         # Results should be identical
@@ -616,19 +616,19 @@ class TestRendererMemoryStability:
         # Render large dataset
         result = render_widget(
             WidgetType.SESSION_BROWSER,
-            cast(Any, large_sessions),
+            cast("Any", large_sessions),
             RenderFormat.TAURI,
         )
 
         # Verify result
         assert result is not None
         assert isinstance(result, dict)
-        result_dict = cast(dict, result)
+        result_dict = cast("dict", result)
         assert len(result_dict["data"]["sessions"]) == 1000
 
         # Check memory usage
         peak_memory = self._get_memory_usage()
-        memory_increase = cast(float, peak_memory) - cast(float, initial_memory)
+        memory_increase = cast("float", peak_memory) - cast("float", initial_memory)
 
         # Memory increase should be reasonable (less than 100MB for this test)
         assert (
@@ -642,7 +642,7 @@ class TestRendererMemoryStability:
 
         # Memory should be released
         final_memory = self._get_memory_usage()
-        memory_after_cleanup = cast(float, final_memory) - cast(float, initial_memory)
+        memory_after_cleanup = cast("float", final_memory) - cast("float", initial_memory)
 
         # Most memory should be released (allow some overhead)
         assert (
@@ -658,8 +658,8 @@ class TestRendererMemoryStability:
         # Fill cache beyond capacity
         for i in range(20):
             metric = MetricCardData(title=f"Cache Test {i}", value=i)
-            cache_key = cast(Any, cache)._generate_cache_key(
-                WidgetType.METRIC_CARD, cast(Any, metric), None, RenderFormat.TUI
+            cache_key = cast("Any", cache)._generate_cache_key(
+                WidgetType.METRIC_CARD, cast("Any", metric), None, RenderFormat.TUI
             )
             cache.set(cache_key, f"result-{i}")
 
@@ -679,11 +679,11 @@ class TestRendererMemoryStability:
             metric = MetricCardData(title=f"Leak Test {i}", value=i)
 
             # Render with all formats
-            results = render_all_formats(WidgetType.METRIC_CARD, cast(Any, metric))
+            results = render_all_formats(WidgetType.METRIC_CARD, cast("Any", metric))
 
             # Create and use lazy renderer
             lazy_renderer = LazyRenderer(
-                TUIRenderer(), WidgetType.METRIC_CARD, cast(Any, metric)
+                TUIRenderer(), WidgetType.METRIC_CARD, cast("Any", metric)
             )
             lazy_result = lazy_renderer.render()
 
@@ -691,12 +691,12 @@ class TestRendererMemoryStability:
             batch_renderer = BatchRenderer(WebRenderer())
             batch_results = batch_renderer.render_batch(
                 cast(
-                    Any,
+                    "Any",
                     [
                         (
                             WidgetType.METRIC_CARD,
-                            cast(Any, metric),
-                            cast(dict[str, Any], {}),
+                            cast("Any", metric),
+                            cast("dict[str, Any]", {}),
                         )
                     ],
                 )
@@ -715,7 +715,7 @@ class TestRendererMemoryStability:
 
         # Check final memory usage
         final_memory = self._get_memory_usage()
-        memory_increase = cast(float, final_memory) - cast(float, initial_memory)
+        memory_increase = cast("float", final_memory) - cast("float", initial_memory)
 
         # Memory increase should be minimal (less than 20MB)
         assert (

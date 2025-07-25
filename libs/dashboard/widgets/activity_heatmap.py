@@ -41,7 +41,7 @@ class ActivityHeatmapGenerator:
                 if not log_file.exists():
                     logger.warning(
                         f"Log file not found for session {session_name}. Returning empty activity."
-                    )  # noqa: G004
+                    )
                     return {}
 
             activity_counts: defaultdict[str, int] = defaultdict(int)
@@ -65,12 +65,12 @@ class ActivityHeatmapGenerator:
                             continue
             logger.info(
                 f"Collected activity for {session_name} in {(datetime.now(UTC) - start_time_collect).total_seconds():.4f} seconds."
-            )  # noqa: G004
+            )
             return activity_counts
         except Exception:
             logger.exception(
                 "Error collecting session activity for {session_name}"
-            )  # noqa: G004
+            )
             return {}
 
     def generate_heatmap_data(
@@ -97,7 +97,7 @@ class ActivityHeatmapGenerator:
                 heatmap_data[day_of_week][hour] += count
         logger.info(
             f"Generated heatmap data for sessions {sessions} in {(datetime.now(UTC) - start_time_generate).total_seconds():.4f} seconds."
-        )  # noqa: G004
+        )
         return {
             "heatmap": heatmap_data,
             "sessions": sessions,

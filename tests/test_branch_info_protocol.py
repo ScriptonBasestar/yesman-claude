@@ -121,8 +121,8 @@ class TestBranchInfoProtocol:
         assert protocol.sync_history == []
         assert len(protocol.branch_subscriptions) == 0
         assert protocol.sync_interval == 300
-        assert protocol._running is False  # noqa: SLF001
-        assert protocol._sync_task is None  # noqa: SLF001
+        assert protocol._running is False
+        assert protocol._sync_task is None
 
     @pytest.mark.asyncio
     @staticmethod
@@ -130,12 +130,12 @@ class TestBranchInfoProtocol:
         """Test starting and stopping the protocol."""
         # Start protocol
         await protocol.start()
-        assert protocol._running is True  # noqa: SLF001
-        assert protocol._sync_task is not None  # noqa: SLF001
+        assert protocol._running is True
+        assert protocol._sync_task is not None
 
         # Stop protocol
         await protocol.stop()
-        assert protocol._running is False  # noqa: SLF001
+        assert protocol._running is False
 
     @pytest.mark.asyncio
     @staticmethod
@@ -516,32 +516,32 @@ class TestBranchInfoProtocol:
         assert (
             protocol._determine_priority(BranchInfoType.CONFLICT_INFO)
             == MessagePriority.HIGH
-        )  # noqa: SLF001
+        )
         assert (
             protocol._determine_priority(BranchInfoType.API_CHANGES)
             == MessagePriority.HIGH
-        )  # noqa: SLF001
+        )
         assert (
             protocol._determine_priority(BranchInfoType.BUILD_STATUS)
             == MessagePriority.NORMAL
-        )  # noqa: SLF001
+        )
         assert (
             protocol._determine_priority(BranchInfoType.FILE_CHANGES)
             == MessagePriority.LOW
-        )  # noqa: SLF001
+        )
 
     @staticmethod
     def test_calculate_relevance(protocol: BranchInfoProtocol) -> None:
         """Test relevance score calculation."""
         assert (
             protocol._calculate_relevance(BranchInfoType.CONFLICT_INFO) == 1.0
-        )  # noqa: SLF001
+        )
         assert (
             protocol._calculate_relevance(BranchInfoType.API_CHANGES) == 0.9
-        )  # noqa: SLF001
+        )
         assert (
             protocol._calculate_relevance(BranchInfoType.BRANCH_STATE) == 0.3
-        )  # noqa: SLF001
+        )
 
     @staticmethod
     def test_get_protocol_summary(protocol: BranchInfoProtocol) -> None:

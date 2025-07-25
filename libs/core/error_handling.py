@@ -114,7 +114,7 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, config_file: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, message: str, config_file: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -139,7 +139,7 @@ class ConfigurationError(YesmanError):
 class ValidationError(YesmanError):
     """Validation-related errors."""
 
-    def __init__(self, message: str, field_name: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, message: str, field_name: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -164,7 +164,7 @@ class ValidationError(YesmanError):
 class SessionError(YesmanError):
     """Session management related errors."""
 
-    def __init__(self, message: str, session_name: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, message: str, session_name: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -189,7 +189,7 @@ class SessionError(YesmanError):
 class NetworkError(YesmanError):
     """Network-related errors."""
 
-    def __init__(self, message: str, endpoint: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, message: str, endpoint: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -206,7 +206,7 @@ class NetworkError(YesmanError):
 class PermissionError(YesmanError):
     """Permission-related errors."""
 
-    def __init__(self, message: str, resource_path: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, message: str, resource_path: str | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -223,7 +223,7 @@ class PermissionError(YesmanError):
 class TimeoutError(YesmanError):
     """Timeout-related errors."""
 
-    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: Any) -> None:
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
@@ -253,8 +253,8 @@ class ErrorHandler:
         self,
         error: YesmanError | Exception,
         context: ErrorContext | None = None,
-        log_traceback: bool = True,  # noqa: FBT001
-        exit_on_critical: bool = True,  # noqa: FBT001
+        log_traceback: bool = True,
+        exit_on_critical: bool = True,
     ) -> None:
         """Handle an error with logging and optional exit.
 
@@ -294,7 +294,7 @@ class ErrorHandler:
             component = error.context.component
             self.error_stats["by_component"][component] = self.error_stats["by_component"].get(component, 0) + 1
 
-    def _log_error(self, error: YesmanError, log_traceback: bool) -> None:  # noqa: FBT001
+    def _log_error(self, error: YesmanError, log_traceback: bool) -> None:
         """Log error with appropriate level."""
         # Determine log level
         level_map = {
@@ -336,7 +336,7 @@ class ErrorHandler:
 
     def _handle_critical_error(self, error: YesmanError) -> None:
         """Handle critical errors."""
-        self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")  # noqa: G004
+        self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")
 
         # Print user-friendly error message
         if error.context and error.context.operation:
@@ -365,7 +365,7 @@ error_handler = ErrorHandler()
 def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
     """Decorator for automatic exception handling."""
 
-    def wrapper(*args: Any, **kwargs: Any) -> object:  # noqa: ANN401
+    def wrapper(*args: Any, **kwargs: Any) -> object:
         try:
             return func(*args, **kwargs)
         except YesmanError as e:
@@ -387,9 +387,9 @@ def safe_execute(
     operation: str,
     component: str,
     func: Callable[..., object],
-    *args: Any,  # noqa: ANN401
+    *args: Any,
     error_category: ErrorCategory = ErrorCategory.UNKNOWN,
-    **kwargs: Any,  # noqa: ANN401
+    **kwargs: Any,
 ) -> object:
     """Safely execute a function with error handling.
 

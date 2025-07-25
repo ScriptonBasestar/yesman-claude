@@ -17,7 +17,7 @@ from .base_command import BaseCommand, CommandError
 class AsyncBaseCommand(BaseCommand, ABC):
     """Async-capable base class for commands with long-running operations."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._running = False
         self._loop = None
@@ -26,7 +26,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
     async def execute_async(self, **kwargs: dict[str, object]) -> dict:
         """Async version of execute method - must be implemented by subclasses."""
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Sync wrapper that runs the async execute method."""
         try:
             # Use existing event loop if available, otherwise create new one
@@ -75,7 +75,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
             self._running = False
             raise
         except Exception as e:
-            self.logger.exception("Error in async loop")  # noqa: G004
+            self.logger.exception("Error in async loop")
             self._running = False
             msg = f"Async operation failed: {e}"
             raise CommandError(msg) from e
@@ -93,7 +93,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
 class AsyncMonitoringMixin:
     """Mixin for commands that need monitoring capabilities."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.update_interval = 1.0  # Default 1 second
         self._monitor_data: dict[str, Any] = {}
@@ -135,7 +135,7 @@ class AsyncMonitoringMixin:
 class AsyncProgressMixin:
     """Mixin for commands that need progress reporting."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._progress_total = 0
         self._progress_current = 0
@@ -185,7 +185,7 @@ class AsyncProgressMixin:
 class AsyncRetryMixin:
     """Mixin for commands that need retry capabilities."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.max_retries = 3
         self.retry_delay = 1.0

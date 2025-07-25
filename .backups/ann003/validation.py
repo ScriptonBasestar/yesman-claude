@@ -162,7 +162,7 @@ def validate_template_exists(template_name: str, templates_dir: str | None = Non
     return True, None
 
 
-def validate_directory_path(path: str, must_exist: bool = True, create_if_missing: bool = False) -> tuple[bool, str | None]:  # noqa: FBT001
+def validate_directory_path(path: str, must_exist: bool = True, create_if_missing: bool = False) -> tuple[bool, str | None]:
     """Validate directory path.
 
     Args:
@@ -177,7 +177,7 @@ def validate_directory_path(path: str, must_exist: bool = True, create_if_missin
         return False, "Directory path cannot be empty"
 
     # Expand user home directory
-    expanded_path = os.path.expanduser(path)
+    expanded_path = Path(path).expanduser()
     path_obj = Path(expanded_path)
 
     # Check if it's an absolute path or can be resolved

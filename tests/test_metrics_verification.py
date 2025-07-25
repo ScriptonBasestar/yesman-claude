@@ -333,7 +333,7 @@ class TestComprehensiveVerification:
     @staticmethod
     async def test_comprehensive_verification_flow(
         mock_agent_pool: Mock,
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test complete verification flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Mock time.time to return predictable results

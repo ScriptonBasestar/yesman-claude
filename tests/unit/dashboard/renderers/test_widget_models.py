@@ -67,13 +67,13 @@ class TestWidgetModels:
             windows=[window],
         )
 
-        data = cast(dict[str, Any], session.to_dict())
+        data = cast("dict[str, Any]", session.to_dict())
 
         assert data["name"] == "test-session"
         assert data["status"] == "active"
         assert data["created_at"] == now.isoformat()
-        assert len(cast(list[Any], data["windows"])) == 1
-        assert cast(list[dict[str, Any]], data["windows"])[0]["name"] == "test-window"
+        assert len(cast("list[Any]", data["windows"])) == 1
+        assert cast("list[dict[str, Any]]", data["windows"])[0]["name"] == "test-window"
 
     @staticmethod
     def test_session_data_from_dict() -> None:
@@ -440,19 +440,19 @@ class TestWidgetDataAdapter:
 
         # Test datetime object
         now = datetime.now(UTC)
-        assert adapter._parse_timestamp(now) == now  # noqa: SLF001
+        assert adapter._parse_timestamp(now) == now
 
         # Test None
-        assert adapter._parse_timestamp(None) is None  # noqa: SLF001
+        assert adapter._parse_timestamp(None) is None
 
         # Test integer timestamp
         timestamp = 1672574400  # 2023-01-01 10:00:00 UTC
-        result = adapter._parse_timestamp(timestamp)  # noqa: SLF001
+        result = adapter._parse_timestamp(timestamp)
         assert isinstance(result, datetime)
 
         # Test ISO format string
         iso_string = "2023-01-01T10:00:00"
-        result = adapter._parse_timestamp(iso_string)  # noqa: SLF001
+        result = adapter._parse_timestamp(iso_string)
         assert isinstance(result, datetime)
         assert result.year == 2023
         assert result.month == 1
@@ -460,16 +460,16 @@ class TestWidgetDataAdapter:
 
         # Test ISO format with timezone
         iso_string_tz = "2023-01-01T10:00:00Z"
-        result = adapter._parse_timestamp(iso_string_tz)  # noqa: SLF001
+        result = adapter._parse_timestamp(iso_string_tz)
         assert isinstance(result, datetime)
 
         # Test date only
         date_string = "2023-01-01"
-        result = adapter._parse_timestamp(date_string)  # noqa: SLF001
+        result = adapter._parse_timestamp(date_string)
         assert isinstance(result, datetime)
 
         # Test invalid string
-        assert adapter._parse_timestamp("invalid") is None  # noqa: SLF001
+        assert adapter._parse_timestamp("invalid") is None
 
     def test_parse_enums(self) -> None:
         """Test enum parsing methods."""
@@ -478,41 +478,41 @@ class TestWidgetDataAdapter:
         # Test session status parsing
         assert (
             adapter._parse_session_status("active") == SessionStatus.ACTIVE
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_session_status("RUNNING") == SessionStatus.ACTIVE
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_session_status("idle") == SessionStatus.IDLE
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_session_status("invalid") == SessionStatus.IDLE
-        )  # noqa: SLF001
+        )
 
         # Test activity type parsing
         assert (
             adapter._parse_activity_type("file_created") == ActivityType.FILE_CREATED
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_activity_type("CREATED") == ActivityType.FILE_CREATED
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_activity_type("commit") == ActivityType.COMMIT
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_activity_type("invalid") == ActivityType.FILE_MODIFIED
-        )  # noqa: SLF001
+        )
 
         # Test progress phase parsing
         assert (
             adapter._parse_progress_phase("implementing") == ProgressPhase.IMPLEMENTING
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_progress_phase("TESTING") == ProgressPhase.TESTING
-        )  # noqa: SLF001
+        )
         assert (
             adapter._parse_progress_phase("invalid") == ProgressPhase.IDLE
-        )  # noqa: SLF001
+        )
 
 
 class TestModelSerialization:

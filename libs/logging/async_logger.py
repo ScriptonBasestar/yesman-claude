@@ -81,9 +81,9 @@ class AsyncLoggerConfig:
         max_queue_size: int = 10000,
         batch_size: int = 50,
         flush_interval: float = 2.0,
-        enable_console: bool = True,  # noqa: FBT001
-        enable_file: bool = True,  # noqa: FBT001
-        enable_batch_processor: bool = True,  # noqa: FBT001
+        enable_console: bool = True,
+        enable_file: bool = True,
+        enable_batch_processor: bool = True,
         log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
         output_dir: Path | None = None,
     ) -> None:
@@ -294,7 +294,7 @@ class AsyncLogger:
             # Fallback to standard logging
             self.standard_logger.exception("Failed to queue log entry")
 
-    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
         """Log a message at specified level."""
         # Extract caller information
         frame = None
@@ -334,27 +334,27 @@ class AsyncLogger:
         self._queue_entry(entry)
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def trace(self, message: str, **kwargs: Any) -> None:
         """Log a trace message."""
         self.log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def debug(self, message: str, **kwargs: Any) -> None:
         """Log a debug message."""
         self.log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def info(self, message: str, **kwargs: Any) -> None:
         """Log an info message."""
         self.log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def warning(self, message: str, **kwargs: Any) -> None:
         """Log a warning message."""
         self.log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def error(self, message: str, **kwargs: Any) -> None:
         """Log an error message."""
         self.log(LogLevel.ERROR, message, **kwargs)
 
-    def critical(self, message: str, **kwargs: Any) -> None:  # noqa: ANN401
+    def critical(self, message: str, **kwargs: Any) -> None:
         """Log a critical message."""
         self.log(LogLevel.CRITICAL, message, **kwargs)
 

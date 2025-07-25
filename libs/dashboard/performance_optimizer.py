@@ -417,8 +417,8 @@ class PerformanceOptimizer:
                 render_time=render_stats.get("avg", 0.0),
                 widget_count=self._get_widget_count(),
                 active_connections=self._get_active_connections(),
-                cache_hit_rate=float(cast(float, cache_stats.get("hit_rate", 0.0))),
-                cache_size=int(cast(int, cache_stats.get("size", 0))),
+                cache_hit_rate=float(cast("float", cache_stats.get("hit_rate", 0.0))),
+                cache_size=int(cast("int", cache_stats.get("size", 0))),
                 fps=1.0 / max(render_stats.get("avg", 0.001), 0.001),
                 response_time=render_stats.get("avg", 0.0),
                 update_frequency=1.0 / self.monitoring_interval,
@@ -522,7 +522,7 @@ class PerformanceOptimizer:
     @staticmethod
     def _optimize_caching(
         strategy: OptimizationStrategy,
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Optimize caching behavior."""
         # This would integrate with actual cache systems
         logger.debug("Caching optimization applied")
@@ -536,7 +536,7 @@ class PerformanceOptimizer:
     @staticmethod
     def _optimize_animations(
         strategy: OptimizationStrategy,
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Optimize animations."""
         # This would integrate with animation system
         logger.debug("Animations disabled for performance")

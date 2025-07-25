@@ -80,23 +80,23 @@ class WebRenderer(BaseRenderer):
 
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
-            return self._render_session_browser(cast(SessionData | list[SessionData], data), options, component_id)
+            return self._render_session_browser(cast("SessionData | list[SessionData]", data), options, component_id)
         if widget_type == WidgetType.HEALTH_METER:
-            return self._render_health_meter(cast(HealthData, data), options, component_id)
+            return self._render_health_meter(cast("HealthData", data), options, component_id)
         if widget_type == WidgetType.ACTIVITY_HEATMAP:
-            return self._render_activity_heatmap(cast(ActivityData, data), options, component_id)
+            return self._render_activity_heatmap(cast("ActivityData", data), options, component_id)
         if widget_type == WidgetType.PROGRESS_TRACKER:
-            return self._render_progress_tracker(cast(ProgressData, data), options, component_id)
+            return self._render_progress_tracker(cast("ProgressData", data), options, component_id)
         if widget_type == WidgetType.LOG_VIEWER:
-            return self._render_log_viewer(cast(dict[str, Any], data), options, component_id)
+            return self._render_log_viewer(cast("dict[str, Any]", data), options, component_id)
         if widget_type == WidgetType.METRIC_CARD:
-            return self._render_metric_card(cast(MetricCardData, data), options, component_id)
+            return self._render_metric_card(cast("MetricCardData", data), options, component_id)
         if widget_type == WidgetType.STATUS_INDICATOR:
-            return self._render_status_indicator(cast(StatusIndicatorData, data), options, component_id)
+            return self._render_status_indicator(cast("StatusIndicatorData", data), options, component_id)
         if widget_type == WidgetType.CHART:
-            return self._render_chart(cast(ChartData, data), options, component_id)
+            return self._render_chart(cast("ChartData", data), options, component_id)
         if widget_type == WidgetType.TABLE:
-            return self._render_table(cast(dict[str, Any], data), options, component_id)
+            return self._render_table(cast("dict[str, Any]", data), options, component_id)
         return WebRenderer._render_generic_widget(widget_type, data, options, component_id)
 
     def render_layout(
@@ -198,7 +198,7 @@ class WebRenderer(BaseRenderer):
             return self._render_session_list(sessions, options, component_id)
         return self._render_session_table(sessions, options, component_id)
 
-    def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
         """Render sessions as table."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-table overflow-hidden">',
@@ -284,7 +284,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
         """Render sessions as cards."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-cards">',
@@ -348,7 +348,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_session_list(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_session_list(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:
         """Render sessions as list."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-list">',
@@ -408,7 +408,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_health_meter(self, data: HealthData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_health_meter(self, data: HealthData, options: dict[str, Any], component_id: str) -> str:
         """Render health meter widget."""
         if not isinstance(data, HealthData):
             return self._render_error_widget("Invalid health data", component_id)
@@ -469,7 +469,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any], component_id: str) -> str:
         """Render activity heatmap widget."""
         if not isinstance(data, ActivityData):
             return self._render_error_widget("Invalid activity data", component_id)
@@ -523,7 +523,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any], component_id: str) -> str:
         """Render progress tracker widget."""
         if not isinstance(data, ProgressData):
             return self._render_error_widget("Invalid progress data", component_id)
@@ -655,7 +655,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_metric_card(self, data: MetricCardData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_metric_card(self, data: MetricCardData, options: dict[str, Any], component_id: str) -> str:
         """Render metric card widget."""
         if not isinstance(data, MetricCardData):
             return self._render_error_widget("Invalid metric data", component_id)
@@ -743,7 +743,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str, Any], component_id: str) -> str:
         """Render status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             return self._render_error_widget("Invalid status data", component_id)
@@ -784,7 +784,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_chart(self, data: ChartData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_chart(self, data: ChartData, options: dict[str, Any], component_id: str) -> str:
         """Render chart widget."""
         if not isinstance(data, ChartData):
             return self._render_error_widget("Invalid chart data", component_id)
@@ -813,7 +813,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_table(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
+    def _render_table(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:
         """Render generic table."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -885,7 +885,7 @@ class WebRenderer(BaseRenderer):
     def _render_generic_widget(
         widget_type: WidgetType,
         data: object,
-        options: dict[str, Any],  # noqa: ARG002
+        options: dict[str, Any],
         component_id: str,
     ) -> str:
         """Render generic widget fallback."""

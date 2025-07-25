@@ -71,7 +71,7 @@ class AsyncBaseCommand(BaseCommand, ABC):
             self._running = False
             raise
         except Exception as e:
-            self.logger.exception("Error in async loop")  # noqa: G004
+            self.logger.exception("Error in async loop")
             self._running = False
             msg = f"Async operation failed: {e}"
             raise CommandError(msg) from e

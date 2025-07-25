@@ -21,7 +21,7 @@ from libs.core.session_setup import SessionSetupService
 class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     """Create all tmux sessions defined in projects.yaml."""
 
-    def execute(self, **kwargs: Any) -> dict:  # noqa: ANN401
+    def execute(self, **kwargs: Any) -> dict:
         """Execute the setup command.
 
         Args:
@@ -86,7 +86,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     is_flag=True,
     help="Force recreation of existing sessions without prompting",
 )
-def setup(session_name: str | None, dry_run: bool, force: bool) -> None:  # noqa: FBT001
+def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
     """Create all tmux sessions defined in projects.yaml; or only a specified
     session if provided.
 

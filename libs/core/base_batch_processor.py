@@ -153,7 +153,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         self._stats.total_batches += 1
         self._last_flush_time = time.time()
 
-        self.logger.debug(f"Created batch with {len(items)} items")  # noqa: G004
+        self.logger.debug(f"Created batch with {len(items)} items")
 
     async def start(self) -> None:
         """Start the batch processor."""
@@ -182,7 +182,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
             try:
                 await self.process_batch(batch)
             except Exception:
-                self.logger.exception("Error processing final batch")  # noqa: G004
+                self.logger.exception("Error processing final batch")
                 self._stats.failed_batches += 1
 
         # Wait for processing task to complete
@@ -224,14 +224,14 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
                             self._stats.average_batch_size = self._stats.total_items / self._stats.total_batches
 
                     except Exception as e:
-                        self.logger.error(f"Error processing batch: {e}", exc_info=True)  # noqa: G004
+                        self.logger.error(f"Error processing batch: {e}", exc_info=True)
                         self._stats.failed_batches += 1
 
                 # Small sleep to prevent busy waiting
                 await asyncio.sleep(0.1)
 
             except Exception as e:
-                self.logger.error(f"Error in processing loop: {e}", exc_info=True)  # noqa: G004
+                self.logger.error(f"Error in processing loop: {e}", exc_info=True)
                 await asyncio.sleep(1.0)  # Back off on error
 
     def get_statistics(self) -> dict[str, object]:

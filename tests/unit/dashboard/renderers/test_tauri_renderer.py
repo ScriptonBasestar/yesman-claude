@@ -39,13 +39,13 @@ class TestTauriRenderer:
         """Test Tauri renderer initialization."""
         assert self.renderer.format_type == RenderFormat.TAURI
         assert self.renderer.widget_id_counter == 0
-        assert "success" in self.renderer._style_classes  # noqa: SLF001
-        assert isinstance(self.renderer._style_classes["success"], dict)  # noqa: SLF001
+        assert "success" in self.renderer._style_classes
+        assert isinstance(self.renderer._style_classes["success"], dict)
 
     def test_widget_id_generation(self) -> None:
         """Test unique widget ID generation."""
-        id1 = self.renderer._generate_widget_id()  # noqa: SLF001
-        id2 = self.renderer._generate_widget_id()  # noqa: SLF001
+        id1 = self.renderer._generate_widget_id()
+        id2 = self.renderer._generate_widget_id()
 
         assert id1 != id2
         assert id1.startswith("tauri-widget-1-")
@@ -54,7 +54,7 @@ class TestTauriRenderer:
 
     def test_default_style(self) -> None:
         """Test default style generation."""
-        style = self.renderer._get_default_style()  # noqa: SLF001
+        style = self.renderer._get_default_style()
 
         assert isinstance(style, dict)
         assert style["background"] == "surface"
@@ -580,22 +580,22 @@ class TestTauriRenderer:
         # Test health color mapping
         assert (
             self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"
-        )  # noqa: SLF001
+        )
         assert (
             self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"
-        )  # noqa: SLF001
+        )
 
         # Test phase emoji mapping
         assert (
             self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"
-        )  # noqa: SLF001
+        )
         assert (
             self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"
-        )  # noqa: SLF001
+        )
 
         # Test log level color mapping
-        assert self.renderer._get_log_level_color("ERROR") == "#ef4444"  # noqa: SLF001
-        assert self.renderer._get_log_level_color("INFO") == "#3b82f6"  # noqa: SLF001
+        assert self.renderer._get_log_level_color("ERROR") == "#ef4444"
+        assert self.renderer._get_log_level_color("INFO") == "#3b82f6"
 
         # Test log level counting
         logs = [
@@ -604,7 +604,7 @@ class TestTauriRenderer:
             {"level": "INFO"},
             {"level": "WARNING"},
         ]
-        counts = self.renderer._count_log_levels(logs)  # noqa: SLF001
+        counts = self.renderer._count_log_levels(logs)
         assert counts["ERROR"] == 2
         assert counts["INFO"] == 1
         assert counts["WARNING"] == 1

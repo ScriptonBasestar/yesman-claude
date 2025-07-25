@@ -236,10 +236,10 @@ class TestRefactoringBenefits:
     def test_reduced_file_sizes() -> None:
         """Test that individual files are much smaller than original."""
         # Original backup file
-        backup_size = os.path.getsize("commands/multi_agent_backup.py")
+        backup_size = Path("commands/multi_agent_backup.py").stat().st_size
 
         # New main file
-        main_size = os.path.getsize("commands/multi_agent.py")
+        main_size = Path("commands/multi_agent.py").stat().st_size
 
         # Individual module files
         multi_agent_dir = Path("commands/multi_agent")
@@ -254,7 +254,7 @@ class TestRefactoringBenefits:
         for file_name in module_files:
             file_path = multi_agent_dir / file_name
             if file_path.exists():
-                module_size = os.path.getsize(file_path)
+                module_size = Path(file_path).stat().st_size
                 # Each module should be significantly smaller than original
                 assert (
                     module_size < backup_size / 4

@@ -85,11 +85,11 @@ class Task:
             data["status"] = TaskStatus(data["status"])
         # Convert datetime strings back
         if data.get("start_time"):
-            data["start_time"] = datetime.fromisoformat(cast(str, data["start_time"]))
+            data["start_time"] = datetime.fromisoformat(cast("str", data["start_time"]))
         if data.get("end_time"):
-            data["end_time"] = datetime.fromisoformat(cast(str, data["end_time"]))
+            data["end_time"] = datetime.fromisoformat(cast("str", data["end_time"]))
         # Type cast to handle mypy concerns about **dict[str, object]
-        task_data = cast(dict[str, Any], data)
+        task_data = cast("dict[str, Any]", data)
         return cls(**task_data)
 
 
@@ -137,9 +137,9 @@ class Agent:
             data["state"] = AgentState(data["state"])
         # Convert datetime strings
         if "created_at" in data:
-            data["created_at"] = datetime.fromisoformat(cast(str, data["created_at"]))
+            data["created_at"] = datetime.fromisoformat(cast("str", data["created_at"]))
         if "last_heartbeat" in data:
-            data["last_heartbeat"] = datetime.fromisoformat(cast(str, data["last_heartbeat"]))
+            data["last_heartbeat"] = datetime.fromisoformat(cast("str", data["last_heartbeat"]))
         # Type cast to handle mypy concerns about **dict[str, object]
-        agent_data = cast(dict[str, Any], data)
+        agent_data = cast("dict[str, Any]", data)
         return cls(**agent_data)

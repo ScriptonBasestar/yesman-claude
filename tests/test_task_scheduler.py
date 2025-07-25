@@ -232,7 +232,7 @@ class TestTaskScheduler:
             metadata={"blocks_tasks": 3},  # Blocks other tasks
         )
 
-        score = scheduler._calculate_priority_score(task)  # noqa: SLF001
+        score = scheduler._calculate_priority_score(task)
         assert score > 0.0
         assert score <= 1.0  # Should be normalized
 
@@ -394,11 +394,11 @@ class TestTaskScheduler:
             metadata={"tags": ["python"]},
         )
 
-        estimated_time = scheduler._estimate_task_time(task, capability)  # noqa: SLF001
+        estimated_time = scheduler._estimate_task_time(task, capability)
         assert estimated_time > 0
 
         # Should be faster due to high processing power and specialization
-        base_time = scheduler._estimate_base_task_time(task)  # noqa: SLF001
+        base_time = scheduler._estimate_base_task_time(task)
         assert estimated_time < base_time
 
     @staticmethod
@@ -413,7 +413,7 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-        test_time = scheduler._estimate_base_task_time(test_task)  # noqa: SLF001
+        test_time = scheduler._estimate_base_task_time(test_task)
 
         # Build task
         build_task = Task(
@@ -424,7 +424,7 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-        build_time = scheduler._estimate_base_task_time(build_task)  # noqa: SLF001
+        build_time = scheduler._estimate_base_task_time(build_task)
 
         # Lint task
         lint_task = Task(
@@ -435,7 +435,7 @@ class TestTaskScheduler:
             complexity=5,
         )
 
-        lint_time = scheduler._estimate_base_task_time(lint_task)  # noqa: SLF001
+        lint_time = scheduler._estimate_base_task_time(lint_task)
 
         # Test tasks should take longer than lint tasks
         assert test_time > lint_time
@@ -517,7 +517,7 @@ class TestTaskScheduler:
             working_directory="/tmp",
         )
 
-        assert scheduler._are_dependencies_met(task_no_deps) is True  # noqa: SLF001
+        assert scheduler._are_dependencies_met(task_no_deps) is True
 
         # Task with dependencies (should fail for now)
         task_with_deps = Task(
@@ -528,7 +528,7 @@ class TestTaskScheduler:
             dependencies=["other-task"],
         )
 
-        assert scheduler._are_dependencies_met(task_with_deps) is False  # noqa: SLF001
+        assert scheduler._are_dependencies_met(task_with_deps) is False
 
     @staticmethod
     def test_task_history_limit(scheduler: TaskScheduler, sample_agent: Agent) -> None:

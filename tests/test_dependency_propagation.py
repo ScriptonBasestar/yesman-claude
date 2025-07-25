@@ -228,7 +228,7 @@ def test_processor() -> object:
         assert len(propagation_system.change_history) == 0
         assert propagation_system.batch_size == 10
         assert propagation_system.batch_timeout == 300
-        assert propagation_system._running is False  # noqa: SLF001
+        assert propagation_system._running is False
 
     @pytest.mark.asyncio
     @staticmethod
@@ -236,13 +236,13 @@ def test_processor() -> object:
         """Test starting and stopping the system."""
         # Start system
         await propagation_system.start()
-        assert propagation_system._running is True  # noqa: SLF001
-        assert propagation_system._propagation_task is not None  # noqa: SLF001
-        assert propagation_system._analysis_task is not None  # noqa: SLF001
+        assert propagation_system._running is True
+        assert propagation_system._propagation_task is not None
+        assert propagation_system._analysis_task is not None
 
         # Stop system
         await propagation_system.stop()
-        assert propagation_system._running is False  # noqa: SLF001
+        assert propagation_system._running is False
 
     @pytest.mark.asyncio
     @staticmethod
@@ -452,7 +452,7 @@ def test_processor() -> object:
     ) -> None:
         """Test impact level detection logic."""
         # Test breaking change detection
-        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
+        impact = await propagation_system._analyze_change_impact(
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"description": "remove old function"},
@@ -460,7 +460,7 @@ def test_processor() -> object:
         assert impact == ChangeImpact.BREAKING
 
         # Test security change detection
-        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
+        impact = await propagation_system._analyze_change_impact(
             "src/auth.py",
             DependencyType.API_USAGE,
             {"description": "update authentication logic"},
@@ -468,7 +468,7 @@ def test_processor() -> object:
         assert impact == ChangeImpact.SECURITY
 
         # Test function signature changes
-        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
+        impact = await propagation_system._analyze_change_impact(
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"signature": "changed", "parameters": ["new_param"]},
@@ -476,7 +476,7 @@ def test_processor() -> object:
         assert impact == ChangeImpact.BREAKING
 
         # Test class inheritance changes
-        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
+        impact = await propagation_system._analyze_change_impact(
             "src/main.py",
             DependencyType.CLASS_INHERITANCE,
             {"base_class": "changed"},
@@ -484,7 +484,7 @@ def test_processor() -> object:
         assert impact == ChangeImpact.BREAKING
 
         # Test enhancement detection
-        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
+        impact = await propagation_system._analyze_change_impact(
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"description": "add new functionality"},
@@ -492,7 +492,7 @@ def test_processor() -> object:
         assert impact == ChangeImpact.ENHANCEMENT
 
         # Test default compatible
-        impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
+        impact = await propagation_system._analyze_change_impact(
             "src/utils.py",
             DependencyType.IMPORT,
             {"description": "update import statement"},
@@ -509,7 +509,7 @@ def test_processor() -> object:
         await propagation_system.build_dependency_graph()
 
         # Test finding affected files
-        affected = await propagation_system._find_affected_files(  # noqa: SLF001
+        affected = await propagation_system._find_affected_files(
             "src/utils.py",
             DependencyType.FUNCTION_CALL,
             {"function": "process_data"},
@@ -527,7 +527,7 @@ def test_processor() -> object:
         affected_files = ["src/main.py", "src/utils.py"]
 
         affected_branches = (
-            await propagation_system._find_affected_branches(  # noqa: SLF001
+            await propagation_system._find_affected_branches(
                 affected_files,
             )
         )
@@ -546,7 +546,7 @@ def test_processor() -> object:
 
         if "src/utils.py" in propagation_system.dependency_graph:
             count = (
-                await propagation_system._calculate_indirect_dependents(  # noqa: SLF001
+                await propagation_system._calculate_indirect_dependents(
                     "src/utils.py",
                 )
             )
@@ -566,7 +566,7 @@ def test_processor() -> object:
             exports={"func1": {}, "func2": {}, "class1": {}},  # 3 exports
         )
 
-        score = propagation_system._calculate_complexity_score(node)  # noqa: SLF001
+        score = propagation_system._calculate_complexity_score(node)
         expected = (3 * 0.3) + (2 * 0.5) + (3 * 0.2)  # 0.9 + 1.0 + 0.6 = 2.5
         assert score == expected
 
@@ -580,7 +580,7 @@ def test_processor() -> object:
 
         score = propagation_system._calculate_complexity_score(
             large_node
-        )  # noqa: SLF001
+        )
         assert score == 10.0  # Should be capped
 
     @staticmethod
@@ -591,21 +591,21 @@ def test_processor() -> object:
         # High risk: high complexity or high impact
         assert (
             propagation_system._calculate_risk_level(8.0, 5) == "high"
-        )  # noqa: SLF001
+        )
         assert (
             propagation_system._calculate_risk_level(5.0, 15) == "high"
-        )  # noqa: SLF001
+        )
 
         # Medium risk: medium complexity or medium impact
         assert (
             propagation_system._calculate_risk_level(6.0, 3) == "medium"
-        )  # noqa: SLF001
+        )
         assert (
             propagation_system._calculate_risk_level(3.0, 8) == "medium"
-        )  # noqa: SLF001
+        )
 
         # Low risk: low complexity and low impact
-        assert propagation_system._calculate_risk_level(2.0, 2) == "low"  # noqa: SLF001
+        assert propagation_system._calculate_risk_level(2.0, 2) == "low"
 
     @staticmethod
     def test_get_propagation_summary(

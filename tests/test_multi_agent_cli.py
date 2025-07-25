@@ -107,7 +107,7 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_start_agents_with_options(
-        mock_asyncio_run: Mock,  # noqa: ARG002
+        mock_asyncio_run: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
         mock_agent_pool: Mock,
@@ -131,7 +131,7 @@ class TestMultiAgentCLI:
     @patch("commands.multi_agent.asyncio.run")
     @staticmethod
     def test_start_agents_with_monitor(
-        mock_asyncio_run: Mock,  # noqa: ARG002
+        mock_asyncio_run: Mock,
         mock_run_monitor: Mock,
         mock_agent_pool_class: Mock,
         runner: CliRunner,
@@ -407,7 +407,7 @@ class TestMultiAgentCLI:
     @staticmethod
     def test_monitor_no_active_pool(
         mock_agent_pool_class: Mock, runner: CliRunner
-    ) -> None:  # noqa: ARG002, ARG004
+    ) -> None:
         """Test monitor command when no active pool exists."""
         # Simulate no existing pool directory
         with patch("pathlib.Path.exists", return_value=False):

@@ -82,7 +82,7 @@ Regular text here.
                 assert not todo_file.tasks[4].completed
 
             finally:
-                os.unlink(f.name)
+                Path(f.name).unlink()
 
     @staticmethod
     def test_get_next_incomplete_task() -> None:
@@ -107,7 +107,7 @@ Regular text here.
                 assert next_task.content == "Next task"
 
             finally:
-                os.unlink(f.name)
+                Path(f.name).unlink()
 
     @staticmethod
     def test_all_completed_check() -> None:
@@ -135,7 +135,7 @@ Regular text here.
                 todo_file = TodoFile(f.name)
                 assert todo_file.is_all_completed()
             finally:
-                os.unlink(f.name)
+                Path(f.name).unlink()
 
         # Test incomplete
         with tempfile.NamedTemporaryFile(
@@ -148,7 +148,7 @@ Regular text here.
                 todo_file = TodoFile(f.name)
                 assert not todo_file.is_all_completed()
             finally:
-                os.unlink(f.name)
+                Path(f.name).unlink()
 
 
 class TestTaskRunner:

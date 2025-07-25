@@ -201,7 +201,7 @@ class BranchInfoProtocol:
         branch_name: str,
         info_type: BranchInfoType,
         update_data: dict[str, Any],
-        requires_immediate_sync: bool = False,  # noqa: FBT001
+        requires_immediate_sync: bool = False,
     ) -> None:
         """Update branch information and potentially trigger sync.
 

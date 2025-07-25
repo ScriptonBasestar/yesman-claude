@@ -168,7 +168,7 @@ class ConfigLoader:
         # Invalidate cache when source is added
         self._cached_config = None
 
-    def load(self, validate: bool = True) -> YesmanConfigSchema:  # noqa: FBT001
+    def load(self, validate: bool = True) -> YesmanConfigSchema:
         """Load and merge configurations from all sources."""
         if self._cached_config is not None:
             return self._cached_config

@@ -153,20 +153,20 @@ class AgentMonitor:
 
         try:
             # Update agent metrics
-            agents = cast(list, self.agent_pool.list_agents())
+            agents = cast("list", self.agent_pool.list_agents())
             for agent_data in agents:
-                agent_id = cast(str, cast(dict, agent_data)["agent_id"])
+                agent_id = cast("str", cast("dict", agent_data)["agent_id"])
 
                 if agent_id not in self.agent_metrics:
                     self.agent_metrics[agent_id] = AgentMetrics(agent_id=agent_id)
 
                 metrics = self.agent_metrics[agent_id]
-                metrics.current_task = cast(str, cast(dict, agent_data).get("current_task"))
-                metrics.tasks_completed = cast(int, cast(dict, agent_data).get("completed_tasks", 0))
-                metrics.tasks_failed = cast(int, cast(dict, agent_data).get("failed_tasks", 0))
+                metrics.current_task = cast("str", cast("dict", agent_data).get("current_task"))
+                metrics.tasks_completed = cast("int", cast("dict", agent_data).get("completed_tasks", 0))
+                metrics.tasks_failed = cast("int", cast("dict", agent_data).get("failed_tasks", 0))
                 metrics.total_execution_time = cast(
-                    float,
-                    cast(dict, agent_data).get(
+                    "float",
+                    cast("dict", agent_data).get(
                         "total_execution_time",
                         0.0,
                     ),
@@ -189,36 +189,36 @@ class AgentMonitor:
                     self.performance_history[agent_id] = self.performance_history[agent_id][-100:]
 
             # Update task metrics
-            tasks = cast(list, self.agent_pool.list_tasks())
+            tasks = cast("list", self.agent_pool.list_tasks())
             for task_data in tasks:
-                task_id = cast(str, cast(dict, task_data)["task_id"])
+                task_id = cast("str", cast("dict", task_data)["task_id"])
 
                 self.task_metrics[task_id] = TaskMetrics(
                     task_id=task_id,
-                    title=cast(str, cast(dict, task_data)["title"]),
-                    status=TaskStatus(cast(str, cast(dict, task_data)["status"])),
-                    assigned_agent=cast(str, cast(dict, task_data).get("assigned_agent")),
-                    start_time=(datetime.fromisoformat(cast(str, cast(dict, task_data)["start_time"])) if cast(dict, task_data).get("start_time") else None),
-                    progress=self._calculate_task_progress(cast(dict, task_data)),
+                    title=cast("str", cast("dict", task_data)["title"]),
+                    status=TaskStatus(cast("str", cast("dict", task_data)["status"])),
+                    assigned_agent=cast("str", cast("dict", task_data).get("assigned_agent")),
+                    start_time=(datetime.fromisoformat(cast("str", cast("dict", task_data)["start_time"])) if cast("dict", task_data).get("start_time") else None),
+                    progress=self._calculate_task_progress(cast("dict", task_data)),
                 )
 
             # Update system metrics
-            stats = cast(dict, self.agent_pool.get_pool_statistics())
+            stats = cast("dict", self.agent_pool.get_pool_statistics())
             self.system_metrics.update(
                 {
                     "total_agents": len(agents),
-                    "active_agents": cast(int, stats.get("active_agents", 0)),
-                    "idle_agents": cast(int, stats.get("idle_agents", 0)),
-                    "total_tasks": cast(int, stats.get("total_tasks", 0)),
-                    "completed_tasks": cast(int, stats.get("completed_tasks", 0)),
-                    "failed_tasks": cast(int, stats.get("failed_tasks", 0)),
-                    "queue_size": cast(int, stats.get("queue_size", 0)),
+                    "active_agents": cast("int", stats.get("active_agents", 0)),
+                    "idle_agents": cast("int", stats.get("idle_agents", 0)),
+                    "total_tasks": cast("int", stats.get("total_tasks", 0)),
+                    "completed_tasks": cast("int", stats.get("completed_tasks", 0)),
+                    "failed_tasks": cast("int", stats.get("failed_tasks", 0)),
+                    "queue_size": cast("int", stats.get("queue_size", 0)),
                     "average_efficiency": (sum(m.efficiency_score for m in self.agent_metrics.values()) / max(len(self.agent_metrics), 1)),
                 },
             )
 
         except Exception:
-            self.logger.exception("Error updating metrics")  # noqa: G004
+            self.logger.exception("Error updating metrics")
 
     @staticmethod
     def _calculate_task_progress(task_data: dict[str, object]) -> float:
@@ -232,7 +232,7 @@ class AgentMonitor:
             return 0.0
         if status == "running" and start_time:
             # Estimate progress based on elapsed time and timeout
-            start = datetime.fromisoformat(cast(str, start_time))
+            start = datetime.fromisoformat(cast("str", start_time))
             elapsed = (datetime.now(UTC) - start).total_seconds()
             timeout_val = task_data.get("timeout", 300)
             timeout: float = float(timeout_val) if isinstance(timeout_val, (int, float, str)) else 300.0
@@ -454,7 +454,7 @@ class AgentMonitor:
     def set_display_mode(self, mode: MonitorDisplayMode) -> None:
         """Change display mode."""
         self.display_mode = mode
-        self.logger.info(f"Display mode changed to: {mode.value}")  # noqa: G004
+        self.logger.info(f"Display mode changed to: {mode.value}")
 
     def select_agent(self, agent_id: str) -> None:
         """Select an agent for detailed view."""
@@ -492,7 +492,7 @@ Keyboard Shortcuts:
         except KeyboardInterrupt:
             self.logger.info("Monitoring stopped by user")
         except Exception:
-            self.logger.exception("Error in monitoring loop")  # noqa: G004
+            self.logger.exception("Error in monitoring loop")
             raise
 
 

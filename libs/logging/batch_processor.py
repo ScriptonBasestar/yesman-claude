@@ -37,7 +37,7 @@ class BatchProcessor:
         max_batch_size: int = 100,
         max_batch_time: float = 5.0,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB
-        compression_enabled: bool = True,  # noqa: FBT001
+        compression_enabled: bool = True,
         output_dir: Path | None = None,
     ) -> None:
         self.max_batch_size = max_batch_size
@@ -158,7 +158,7 @@ class BatchProcessor:
             self.batch_counter += 1
 
         except Exception:
-            self.logger.exception("Failed to write batch {batch.batch_id}")  # noqa: G004
+            self.logger.exception("Failed to write batch {batch.batch_id}")
             # Re-queue entries for retry
             self.pending_entries.extendleft(reversed(entries))
 
@@ -251,7 +251,7 @@ class BatchProcessor:
                 self.logger.info("Cleaned up %d old log files", removed_count)
 
         except Exception:
-            self.logger.exception("Error cleaning up old log files")  # noqa: G004
+            self.logger.exception("Error cleaning up old log files")
 
         return removed_count
 
@@ -280,7 +280,7 @@ class BatchProcessor:
                     batches.append(batch)
 
         except Exception:
-            self.logger.exception("Error reading batch file {file_path}")  # noqa: G004
+            self.logger.exception("Error reading batch file {file_path}")
 
         return batches
 

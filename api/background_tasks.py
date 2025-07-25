@@ -4,7 +4,7 @@ import asyncio
 import hashlib
 import json
 import logging
-import subprocess  # noqa: S404
+import subprocess
 import traceback
 from collections import defaultdict
 from collections.abc import Callable
@@ -163,7 +163,7 @@ class BackgroundTaskRunner:
                 # Load projects using tmux_manager
 
                 tmux_manager = TmuxManager(config)
-                project_sessions = cast(dict[str, Any], tmux_manager.load_projects().get("sessions", {}))
+                project_sessions = cast("dict[str, Any]", tmux_manager.load_projects().get("sessions", {}))
 
                 # Format session data
                 formatted_sessions = []

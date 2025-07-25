@@ -30,13 +30,9 @@ def main() -> None:
                 or "press enter" in content.lower()
             ):
                 pass
-            else:
-                pass
 
         except KeyboardInterrupt:
             pass
         finally:
             controller.stop()
 
-    else:
-        pass

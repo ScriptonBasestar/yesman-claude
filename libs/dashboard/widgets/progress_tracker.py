@@ -80,7 +80,7 @@ class ProgressTracker:
         except Exception:
             return False
 
-    def load_todos_from_api(self, api_endpoint: str) -> bool:  # noqa: ARG002
+    def load_todos_from_api(self, api_endpoint: str) -> bool:
         """Load TODO items from API (placeholder for future implementation).
 
         Returns:

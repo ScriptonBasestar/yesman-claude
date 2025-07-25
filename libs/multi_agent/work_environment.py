@@ -49,9 +49,9 @@ class WorkEnvironment:
         Returns:
         WorkEnvironment: Description of return value.
         """
-        data["worktree_path"] = Path(cast(str, data["worktree_path"]))
-        data["venv_path"] = Path(cast(str, data["venv_path"]))
-        return cls(**cast(dict[str, Any], data))
+        data["worktree_path"] = Path(cast("str", data["worktree_path"]))
+        data["venv_path"] = Path(cast("str", data["venv_path"]))
+        return cls(**cast("dict[str, Any]", data))
 
 
 class WorkEnvironmentManager:
@@ -337,7 +337,7 @@ class WorkEnvironmentManager:
             f.write(f"export YESMAN_BRANCH={env.branch_name}\n")
             f.write(f"export YESMAN_WORKTREE={env.worktree_path}\n")
 
-            env_vars = cast(dict[str, str], env.config.get("env_vars", {}))
+            env_vars = cast("dict[str, str]", env.config.get("env_vars", {}))
             f.writelines(f"export {key}={value}\n" for key, value in env_vars.items())
 
             f.write("\n# Change to worktree directory\n")
@@ -348,7 +348,7 @@ class WorkEnvironmentManager:
 
     def _run_project_setup(self, env: WorkEnvironment) -> None:
         """Run any project-specific setup commands."""
-        setup_commands = cast(list[str], env.config.get("setup_commands", []))
+        setup_commands = cast("list[str]", env.config.get("setup_commands", []))
 
         for cmd in setup_commands:
             logger.info("Running setup command: {cmd}")
@@ -388,7 +388,7 @@ class WorkEnvironmentManager:
         )
 
         # Add custom env vars
-        custom_env_vars = cast(dict[str, str], env.config.get("env_vars", {}))
+        custom_env_vars = cast("dict[str, str]", env.config.get("env_vars", {}))
         env_vars.update(custom_env_vars)
 
         # Update status
@@ -432,7 +432,7 @@ class WorkEnvironmentManager:
     def terminate_environment(
         self,
         branch_name: str,
-        remove_files: bool = False,  # noqa: FBT001
+        remove_files: bool = False,
     ) -> None:
         """Terminate a work environment."""
         env = self.get_environment(branch_name)

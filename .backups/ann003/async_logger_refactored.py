@@ -80,7 +80,7 @@ class AsyncLogger(StatisticsProviderMixin):
         self,
         name: str = "async_logger",
         min_level: LogLevel = LogLevel.INFO,
-        enable_batch_processing: bool = True,  # noqa: FBT001
+        enable_batch_processing: bool = True,
         batch_size: int = 100,
         batch_timeout: float = 5.0,
         output_dir: Path | None = None,
@@ -205,7 +205,7 @@ class AsyncLogger(StatisticsProviderMixin):
         self.thread_pool.shutdown(wait=True)
 
         # Log shutdown
-        self.fallback_logger.info(f"AsyncLogger '{self.name}' stopped")  # noqa: G004
+        self.fallback_logger.info(f"AsyncLogger '{self.name}' stopped")
 
     async def _processing_loop(self) -> None:
         """Main processing loop for log entries."""
@@ -229,12 +229,12 @@ class AsyncLogger(StatisticsProviderMixin):
                 except TimeoutError:
                     continue
                 except Exception:
-                    self.fallback_logger.exception("Error processing log entry")  # noqa: G004
+                    self.fallback_logger.exception("Error processing log entry")
                     with self._stats_lock:
                         self.stats["errors"] += 1
 
         except Exception:
-            self.fallback_logger.exception("Fatal error in processing loop")  # noqa: G004
+            self.fallback_logger.exception("Fatal error in processing loop")
 
     async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
@@ -257,7 +257,7 @@ class AsyncLogger(StatisticsProviderMixin):
                 self.stats["processing_time_ms"] += processing_time
 
         except Exception:
-            self.fallback_logger.exception("Error processing entry")  # noqa: G004
+            self.fallback_logger.exception("Error processing entry")
             with self._stats_lock:
                 self.stats["errors"] += 1
 
@@ -293,7 +293,7 @@ class AsyncLogger(StatisticsProviderMixin):
         frame = inspect.currentframe()
         if frame and frame.f_back and frame.f_back.f_back:
             caller_frame = frame.f_back.f_back
-            module = os.path.basename(caller_frame.f_code.co_filename)
+            module = Path(caller_frame.f_code.co_filename).name
             function = caller_frame.f_code.co_name
             line_number = caller_frame.f_lineno
         else:
@@ -327,7 +327,7 @@ class AsyncLogger(StatisticsProviderMixin):
                 self.stats["queue_full_count"] += 1
 
             # Fallback to standard logger
-            self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")  # noqa: G004
+            self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")
 
     # Convenience methods for different log levels
     async def trace(self, message: str, **kwargs) -> None:

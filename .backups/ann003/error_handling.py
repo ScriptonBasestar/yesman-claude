@@ -250,8 +250,8 @@ class ErrorHandler:
         self,
         error: YesmanError | Exception,
         context: ErrorContext | None = None,
-        log_traceback: bool = True,  # noqa: FBT001
-        exit_on_critical: bool = True,  # noqa: FBT001
+        log_traceback: bool = True,
+        exit_on_critical: bool = True,
     ) -> None:
         """Handle an error with logging and optional exit.
 
@@ -291,7 +291,7 @@ class ErrorHandler:
             component = error.context.component
             self.error_stats["by_component"][component] = self.error_stats["by_component"].get(component, 0) + 1
 
-    def _log_error(self, error: YesmanError, log_traceback: bool) -> None:  # noqa: FBT001
+    def _log_error(self, error: YesmanError, log_traceback: bool) -> None:
         """Log error with appropriate level."""
         # Determine log level
         level_map = {
@@ -333,7 +333,7 @@ class ErrorHandler:
 
     def _handle_critical_error(self, error: YesmanError) -> None:
         """Handle critical errors."""
-        self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")  # noqa: G004
+        self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")
 
         # Print user-friendly error message
         if error.context and error.context.operation:

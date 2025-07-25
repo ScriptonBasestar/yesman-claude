@@ -226,7 +226,7 @@ class CollaborationEngine:
         content: dict[str, object],
         priority: MessagePriority = MessagePriority.NORMAL,
         expires_in: timedelta | None = None,
-        requires_ack: bool = False,  # noqa: FBT001
+        requires_ack: bool = False,
     ) -> str:
         """Send a message between agents.
 
@@ -383,7 +383,7 @@ class CollaborationEngine:
 
     async def access_knowledge(
         self,
-        agent_id: str,  # noqa: ARG002
+        agent_id: str,
         knowledge_id: str | None = None,
         tags: list[str] | None = None,
         knowledge_type: str | None = None,
@@ -567,7 +567,7 @@ class CollaborationEngine:
             "timestamp": datetime.now(UTC).isoformat(),
             "decision": decision,
         }
-        session.decisions.append(cast(dict[str, object], decision_record))
+        session.decisions.append(cast("dict[str, object]", decision_record))
 
     async def end_collaboration_session(
         self,
@@ -647,7 +647,7 @@ class CollaborationEngine:
                     recipient_id=agent_id,
                     message_type=MessageType.DEPENDENCY_CHANGE,
                     subject=f"Dependency change in {file_path}",
-                    content=cast(dict[str, object], change_info),
+                    content=cast("dict[str, object]", change_info),
                     priority=MessagePriority.HIGH,
                 )
 
@@ -845,7 +845,7 @@ class CollaborationEngine:
                 await self.update_session_context(
                     session_id,
                     agents_branch1[0],
-                    cast(dict[str, object], resolution_context),
+                    cast("dict[str, object]", resolution_context),
                 )
 
                 # If agents agree on resolution, count as prevented
