@@ -17,7 +17,6 @@ from libs.core.mixins import StatisticsProviderMixin
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Generic base batch processor for handling items in batches.
 
 This module provides a thread-safe, async-compatible base class for
@@ -91,9 +90,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         self._last_flush_time = time.time()
 
         # Logger
-        self.logger = logging.getLogger(
-            f"{self.__class__.__module__}.{self.__class__.__name__}"
-        )
+        self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
 
     @abstractmethod
     @staticmethod
@@ -130,7 +127,6 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
 
         Args:
             item: Item to add to the batch
-
         """
         with self._lock:
             self._pending_items.append(item)
@@ -144,7 +140,6 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
         """Flush pending items to a batch.
 
         Must be called while holding the lock.
-
         """
         if not self._pending_items:
             return
@@ -207,10 +202,7 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
                 time_since_last_flush = current_time - self._last_flush_time
 
                 with self._lock:
-                    if (
-                        self._pending_items
-                        and time_since_last_flush >= self.flush_interval
-                    ):
+                    if self._pending_items and time_since_last_flush >= self.flush_interval:
                         self._flush_pending_items()
 
                 # Process pending batches
@@ -228,27 +220,18 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
 
                         # Calculate averages
                         if self._stats.total_batches > 0:
-                            self._stats.average_processing_time_ms = (
-                                self._stats.processing_time_ms
-                                / self._stats.total_batches
-                            )
-                            self._stats.average_batch_size = (
-                                self._stats.total_items / self._stats.total_batches
-                            )
+                            self._stats.average_processing_time_ms = self._stats.processing_time_ms / self._stats.total_batches
+                            self._stats.average_batch_size = self._stats.total_items / self._stats.total_batches
 
                     except Exception as e:
-                        self.logger.error(
-                            f"Error processing batch: {e}", exc_info=True
-                        )  # noqa: G004
+                        self.logger.error(f"Error processing batch: {e}", exc_info=True)  # noqa: G004
                         self._stats.failed_batches += 1
 
                 # Small sleep to prevent busy waiting
                 await asyncio.sleep(0.1)
 
             except Exception as e:
-                self.logger.error(
-                    f"Error in processing loop: {e}", exc_info=True
-                )  # noqa: G004
+                self.logger.error(f"Error in processing loop: {e}", exc_info=True)  # noqa: G004
                 await asyncio.sleep(1.0)  # Back off on error
 
     def get_statistics(self) -> dict[str, object]:
@@ -265,24 +248,12 @@ class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
             "total_batches": self._stats.total_batches,
             "total_items": self._stats.total_items,
             "failed_batches": self._stats.failed_batches,
-            "success_rate": (
-                (self._stats.total_batches - self._stats.failed_batches)
-                / self._stats.total_batches
-                * 100
-                if self._stats.total_batches > 0
-                else 0.0
-            ),
+            "success_rate": ((self._stats.total_batches - self._stats.failed_batches) / self._stats.total_batches * 100 if self._stats.total_batches > 0 else 0.0),
             "average_batch_size": round(self._stats.average_batch_size, 2),
-            "average_processing_time_ms": round(
-                self._stats.average_processing_time_ms, 2
-            ),
+            "average_processing_time_ms": round(self._stats.average_processing_time_ms, 2),
             "pending_items": pending_items,
             "pending_batches": pending_batches,
-            "last_batch_time": (
-                self._stats.last_batch_time.isoformat()
-                if self._stats.last_batch_time
-                else None
-            ),
+            "last_batch_time": (self._stats.last_batch_time.isoformat() if self._stats.last_batch_time else None),
             "is_running": self._running,
             "config": {
                 "batch_size": self.batch_size,

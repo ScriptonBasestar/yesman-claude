@@ -2,7 +2,6 @@
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Base command class with common functionality."""
 
 import json
@@ -121,7 +120,8 @@ class BaseCommand(ABC):
             raise CommandError(msg) from e
 
     def _create_config(self) -> YesmanConfig:
-        """Create YesmanConfig instance with error handling (fallback method)."""
+        """Create YesmanConfig instance with error handling (fallback
+        method)."""
         try:
             return YesmanConfig()
         except Exception as e:
@@ -130,7 +130,8 @@ class BaseCommand(ABC):
             raise CommandError(msg) from e
 
     def _create_tmux_manager(self) -> TmuxManager:
-        """Create TmuxManager instance with error handling (fallback method)."""
+        """Create TmuxManager instance with error handling (fallback
+        method)."""
         try:
             return TmuxManager(self.config)
         except Exception as e:
@@ -181,20 +182,14 @@ class BaseCommand(ABC):
     def log_command_start(self, command_name: str, **kwargs) -> None:
         """Log command start with parameters."""
         params = ", ".join(f"{k}={v}" for k, v in kwargs.items() if v is not None)
-        self.logger.info(
-            f"Starting command: {command_name}" + (f" with {params}" if params else "")
-        )
+        self.logger.info(f"Starting command: {command_name}" + (f" with {params}" if params else ""))
 
-    def log_command_end(
-        self, command_name: str, success: bool = True
-    ) -> None:  # noqa: FBT001
+    def log_command_end(self, command_name: str, success: bool = True) -> None:  # noqa: FBT001
         """Log command completion."""
         status = "completed successfully" if success else "failed"
         self.logger.info("Command %s %s", command_name, status)
 
-    def confirm_action(
-        self, message: str, default: bool = False
-    ) -> bool:  # noqa: FBT001
+    def confirm_action(self, message: str, default: bool = False) -> bool:  # noqa: FBT001
         """Ask for user confirmation."""
         try:
             return click.confirm(message, default=default)
@@ -329,9 +324,7 @@ class ConfigCommandMixin:
             with open(settings.paths.projects_file, encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         except FileNotFoundError:
-            self.logger.warning(
-                "Projects file not found: %s", settings.paths.projects_file
-            )
+            self.logger.warning("Projects file not found: %s", settings.paths.projects_file)
             return {}
         except Exception as e:
             msg = f"Failed to load projects configuration: {e}"
@@ -349,9 +342,7 @@ class ConfigCommandMixin:
 
     def backup_config(self, config_path: str) -> str:
         """Create backup of configuration file."""
-        backup_path = (
-            f"{config_path}.backup.{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
-        )
+        backup_path = f"{config_path}.backup.{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         try:
             shutil.copy2(config_path, backup_path)
             self.logger.info("Configuration backed up to: %s", backup_path)
@@ -388,9 +379,7 @@ class OutputFormatterMixin:
 
         # Data rows
         for row in data:
-            row_line = " | ".join(
-                str(row.get(header, "")).ljust(widths[header]) for header in headers
-            )
+            row_line = " | ".join(str(row.get(header, "")).ljust(widths[header]) for header in headers)
             lines.append(row_line)
 
         return "\n".join(lines)

@@ -11,7 +11,6 @@ from .base_command import BaseCommand, CommandError
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Async-capable base command class for long-running operations."""
 
 
@@ -107,9 +106,7 @@ class AsyncMonitoringMixin:
     stop: Callable[[], None]
     run_with_interval: Callable
 
-    async def start_monitoring(
-        self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None
-    ) -> None:
+    async def start_monitoring(self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None) -> None:
         """Start monitoring with regular updates."""
         if not isinstance(self, AsyncBaseCommand):
             msg = "AsyncMonitoringMixin requires AsyncBaseCommand"
@@ -220,9 +217,7 @@ class AsyncRetryMixin:
                 last_exception = e
 
                 if attempt < max_retries:
-                    self.print_warning(
-                        f"⚠️  Attempt {attempt + 1} failed: {e}. Retrying in {current_delay:.1f}s..."
-                    )
+                    self.print_warning(f"⚠️  Attempt {attempt + 1} failed: {e}. Retrying in {current_delay:.1f}s...")
                     await asyncio.sleep(current_delay)
                     current_delay *= backoff_multiplier
                 else:
@@ -263,7 +258,5 @@ class AsyncRetryCommand(AsyncBaseCommand, AsyncRetryMixin):
     """Base class for async commands with retry capabilities."""
 
 
-class AsyncFullFeaturedCommand(
-    AsyncBaseCommand, AsyncMonitoringMixin, AsyncProgressMixin, AsyncRetryMixin
-):
+class AsyncFullFeaturedCommand(AsyncBaseCommand, AsyncMonitoringMixin, AsyncProgressMixin, AsyncRetryMixin):
     """Base class for async commands with all features."""

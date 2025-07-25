@@ -21,7 +21,7 @@ stop: ## stop running yesman processes
 
 restart: stop start ## restart yesman
 
-status: ## check yesman status
+yesman-status: ## check yesman status
 	@echo -e "$(CYAN)Checking for running yesman processes...$(RESET)"
 	@pgrep -f "yesman" > /dev/null && echo "$(GREEN)✅ yesman is running$(RESET)" || echo "$(RED)❌ yesman is not running$(RESET)"
 
@@ -69,7 +69,7 @@ pr-check: lint test cover-report ## pre-PR submission check
 # Development Tools
 # ==============================================================================
 
-.PHONY: shell console format-imports type-check security-check profile
+.PHONY: shell console format-imports type-check security-check profile commit-helper
 
 shell: ## start Python shell with project context
 	@echo -e "$(CYAN)Starting Python shell...$(RESET)"
@@ -90,6 +90,14 @@ profile: ## profile the application
 	@echo -e "$(CYAN)Starting profiler...$(RESET)"
 	@echo -e "$(YELLOW)Run: python -m cProfile -o profile.stats yesman.py$(RESET)"
 	@echo -e "$(YELLOW)Then: python -m pstats profile.stats$(RESET)"
+
+commit-helper: ## run commit organization helper script
+	@echo -e "$(CYAN)Running commit organization helper...$(RESET)"
+	@if [ -f "scripts/commit_helper.sh" ]; then \
+		chmod +x scripts/commit_helper.sh && ./scripts/commit_helper.sh; \
+	else \
+		echo -e "$(RED)❌ Commit helper script not found$(RESET)"; \
+	fi
 
 
 # ==============================================================================

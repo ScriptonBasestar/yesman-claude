@@ -35,7 +35,6 @@ from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dashboard modules for project status visualization."""
 
 __all__ = [

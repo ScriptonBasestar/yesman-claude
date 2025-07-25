@@ -21,7 +21,6 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
-
 """Tests for Widget Models and Data Adapter."""
 
 

@@ -6,7 +6,6 @@ from enum import Enum
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Data models for dashboard."""
 
 
@@ -129,8 +128,6 @@ class SessionProgress:
 
         Returns:
             Taskprogress | None object the requested data.
-
-
         """
         if 0 <= self.current_task_index < len(self.tasks):
             return self.tasks[self.current_task_index]
@@ -164,9 +161,7 @@ class SessionProgress:
 
     def update_aggregates(self) -> None:
         """Update aggregate metrics from all tasks."""
-        self.total_files_changed = sum(
-            task.files_created + task.files_modified for task in self.tasks
-        )
+        self.total_files_changed = sum(task.files_created + task.files_modified for task in self.tasks)
         self.total_commands = sum(task.commands_executed for task in self.tasks)
         self.total_todos_completed = sum(task.todos_completed for task in self.tasks)
         self.last_update_time = datetime.now(UTC)
@@ -185,12 +180,8 @@ class SessionProgress:
             "total_files_changed": self.total_files_changed,
             "total_commands": self.total_commands,
             "total_todos_completed": self.total_todos_completed,
-            "session_start_time": (
-                self.session_start_time.isoformat() if self.session_start_time else None
-            ),
-            "last_update_time": (
-                self.last_update_time.isoformat() if self.last_update_time else None
-            ),
+            "session_start_time": (self.session_start_time.isoformat() if self.session_start_time else None),
+            "last_update_time": (self.last_update_time.isoformat() if self.last_update_time else None),
         }
 
 
@@ -287,9 +278,7 @@ class SessionInfo:
                             "is_controller": p.is_controller,
                             "current_task": p.current_task,
                             "idle_time": p.idle_time,
-                            "last_activity": (
-                                p.last_activity.isoformat() if p.last_activity else None
-                            ),
+                            "last_activity": (p.last_activity.isoformat() if p.last_activity else None),
                             "cpu_usage": p.cpu_usage,
                             "memory_usage": p.memory_usage,
                             "pid": p.pid,

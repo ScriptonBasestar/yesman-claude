@@ -10,12 +10,12 @@ from .prompt_detector import PromptInfo
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Claude manager for dashboard integration - Refactored.""" ""
 
 
 class DashboardController:  # noqa: PLR0904
-    """Main controller that orchestrates Claude session management, process control, and monitoring."""
+    """Main controller that orchestrates Claude session management, process
+    control, and monitoring."""
 
     def __init__(self, session_name: str, pane_id: str | None = None) -> None:
         """Initialize the dashboard controller."""
@@ -95,9 +95,7 @@ class DashboardController:  # noqa: PLR0904
         """
         # Re-initialize in case session was created after initialization
         if not self.claude_pane and not self.session_manager.initialize_session():
-            self.logger.error(
-                f"Failed to initialize session '{self.session_name}'"
-            )  # noqa: G004
+            self.logger.error(f"Failed to initialize session '{self.session_name}'")  # noqa: G004
             return False
 
         if not self.claude_pane:
@@ -285,9 +283,7 @@ class DashboardController:  # noqa: PLR0904
         self.monitor.load_automation_config()
 
     # Project health monitoring methods
-    async def calculate_project_health(
-        self, force_refresh: bool = False
-    ) -> dict:  # noqa: FBT001
+    async def calculate_project_health(self, force_refresh: bool = False) -> dict:  # noqa: FBT001
         """Calculate comprehensive project health."""
         return await self.monitor.calculate_project_health(force_refresh)
 
@@ -375,8 +371,6 @@ class ClaudeManager:
 
         Returns:
             Dashboardcontroller object the requested data.
-
-
         """
         if session_name not in self.controllers:
             self.controllers[session_name] = DashboardController(session_name, pane_id)

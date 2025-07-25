@@ -28,7 +28,6 @@ from libs.multi_agent.semantic_merger import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for SemanticMerger automatic conflict resolution."""
 
 

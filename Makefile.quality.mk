@@ -40,9 +40,9 @@ format-all: ## run all formatters including advanced ones
 	@echo "2. Running isort (import organization)..."
 	@isort $(PYTHON_DIRS) --profile black --float-to-top
 	@echo "3. Running autoflake (remove unused imports)..."
-	@autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive $(PYTHON_DIRS)
+	@autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive $(PYTHON_DIRS) || true
 	@echo "4. Running docformatter (format docstrings)..."
-	@docformatter --in-place --recursive $(PYTHON_DIRS)
+	@docformatter --in-place --recursive $(PYTHON_DIRS) || true
 	@echo -e "$(GREEN)✅ All formatting complete!$(RESET)"
 
 format-check: ## check code formatting without fixing

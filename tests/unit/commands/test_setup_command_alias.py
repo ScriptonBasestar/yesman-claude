@@ -9,7 +9,6 @@ from commands.setup import up
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test for setup alias (up command)."""
 
 
@@ -21,7 +20,8 @@ class TestSetupAliasCommand(unittest.TestCase):
     def test_setup_alias_creates_all_sessions(
         self, mock_session_manager: object
     ) -> None:
-        """Test setup alias (up) command creates all sessions from projects.yaml."""
+        """Test setup alias (up) command creates all sessions from
+        projects.yaml."""
         # Setup mock
         mock_manager_instance = MagicMock()
         mock_manager_instance.get_all_projects.return_value = [

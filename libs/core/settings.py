@@ -8,7 +8,6 @@ from pathlib import Path
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Central settings and configuration management."""
 
 
@@ -112,26 +111,18 @@ class AppSettings:
         """Load settings from environment variables."""
         # Cache settings
         self.cache.ttl = float(os.getenv("YESMAN_CACHE_TTL", self.cache.ttl))
-        self.cache.max_entries = int(
-            os.getenv("YESMAN_CACHE_MAX_ENTRIES", self.cache.max_entries)
-        )
+        self.cache.max_entries = int(os.getenv("YESMAN_CACHE_MAX_ENTRIES", self.cache.max_entries))
 
         # Logging settings
         self.logging.level = os.getenv("YESMAN_LOG_LEVEL", self.logging.level)
-        self.logging.default_path = os.getenv(
-            "YESMAN_LOG_PATH", self.logging.default_path
-        )
+        self.logging.default_path = os.getenv("YESMAN_LOG_PATH", self.logging.default_path)
 
         # Path settings
         self.paths.home_dir = os.getenv("YESMAN_HOME_DIR", self.paths.home_dir)
-        self.paths.templates_dir = os.getenv(
-            "YESMAN_TEMPLATES_DIR", self.paths.templates_dir
-        )
+        self.paths.templates_dir = os.getenv("YESMAN_TEMPLATES_DIR", self.paths.templates_dir)
 
         # Session settings
-        self.sessions.default_timeout = int(
-            os.getenv("YESMAN_SESSION_TIMEOUT", self.sessions.default_timeout)
-        )
+        self.sessions.default_timeout = int(os.getenv("YESMAN_SESSION_TIMEOUT", self.sessions.default_timeout))
 
         # API settings
         self.api.host = os.getenv("YESMAN_API_HOST", self.api.host)

@@ -10,7 +10,6 @@ from libs.multi_agent.types import TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for multi-agent CLI commands."""
 
 

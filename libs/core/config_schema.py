@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field, field_validator
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Configuration schemas using Pydantic for type safety and validation."""
 
 

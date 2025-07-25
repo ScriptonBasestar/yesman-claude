@@ -26,7 +26,6 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Async comprehensive project status dashboard command with performance optimizations."""
 
 
@@ -86,9 +85,7 @@ class AsyncStatusDashboard:
         ]
 
         for todo_file in todo_files:
-            if todo_file.exists() and self.progress_tracker.load_todos_from_file(
-                str(todo_file)
-            ):
+            if todo_file.exists() and self.progress_tracker.load_todos_from_file(str(todo_file)):
                 break
 
     async def update_data(self) -> None:
@@ -97,10 +94,7 @@ class AsyncStatusDashboard:
 
         # Check if cache is still valid
         last_update = self._data_cache.get("last_update", 0)
-        if (
-            isinstance(last_update, int | float)
-            and current_time - last_update < self._cache_ttl
-        ):
+        if isinstance(last_update, int | float) and current_time - last_update < self._cache_ttl:
             return
 
         try:
@@ -140,15 +134,11 @@ class AsyncStatusDashboard:
                 session_tasks.append(task)
 
         if session_tasks:
-            session_details = await asyncio.gather(
-                *session_tasks, return_exceptions=True
-            )
+            session_details = await asyncio.gather(*session_tasks, return_exceptions=True)
 
             for session_detail in session_details:
                 if isinstance(session_detail, Exception):
-                    self.console.print(
-                        f"[yellow]Warning: Session detail error: {session_detail}[/]"
-                    )
+                    self.console.print(f"[yellow]Warning: Session detail error: {session_detail}[/]")
                     continue
                 if isinstance(session_detail, dict):
                     detailed_sessions.append(session_detail)
@@ -186,9 +176,7 @@ class AsyncStatusDashboard:
     async def _update_progress_data(self) -> None:
         """Async update of progress data."""
         loop = asyncio.get_event_loop()
-        progress_data = await loop.run_in_executor(
-            None, self.session_manager.get_progress_overview
-        )
+        progress_data = await loop.run_in_executor(None, self.session_manager.get_progress_overview)
         self._data_cache["progress_data"] = progress_data
 
     @staticmethod
@@ -259,9 +247,7 @@ class AsyncStatusDashboard:
             cache_stats = {"hit_rate": 0.0}
 
         last_update = self._data_cache.get("last_update", time.time())
-        cache_age = (
-            time.time() - last_update if isinstance(last_update, int | float) else 0.0
-        )
+        cache_age = time.time() - last_update if isinstance(last_update, int | float) else 0.0
         hit_rate = cache_stats.get("hit_rate", 0)
         hit_rate_pct = float(hit_rate) if hit_rate is not None else 0.0
         header_text = f"🚀 Yesman Dashboard (Async) - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache: {hit_rate_pct:.1%} | Data Age: {cache_age:.1f}s"
@@ -269,48 +255,30 @@ class AsyncStatusDashboard:
 
         # Sessions panel
         sessions_content, _ = self.session_browser.render()
-        layout["sessions"].update(
-            Panel(sessions_content, title="📋 Active Sessions", border_style="blue")
-        )
+        layout["sessions"].update(Panel(sessions_content, title="📋 Active Sessions", border_style="blue"))
 
         # Project health panel
         health_data = self.project_health.calculate_health()
         health_content = self._render_health_summary(health_data)
-        layout["health"].update(
-            Panel(health_content, title="🏥 Project Health", border_style="green")
-        )
+        layout["health"].update(Panel(health_content, title="🏥 Project Health", border_style="green"))
 
         # Activity heatmap panel
         # Generate heatmap data from collected sessions
         sessions_data = self._data_cache.get("sessions", [])
-        session_names = (
-            [
-                s.get("session_name", "unknown")
-                for s in sessions_data
-                if isinstance(s, dict)
-            ]
-            if isinstance(sessions_data, list)
-            else []
-        )
+        session_names = [s.get("session_name", "unknown") for s in sessions_data if isinstance(s, dict)] if isinstance(sessions_data, list) else []
         heatmap_data = self.activity_heatmap.generate_heatmap_data(session_names)
         activity_content = self._render_heatmap(heatmap_data)
-        layout["activity"].update(
-            Panel(activity_content, title="🔥 Activity Heatmap", border_style="red")
-        )
+        layout["activity"].update(Panel(activity_content, title="🔥 Activity Heatmap", border_style="red"))
 
         # Progress tracker panel
         progress_stats = self._calculate_progress_stats()
         progress_content = self._render_progress_summary(progress_stats)
-        layout["progress"].update(
-            Panel(progress_content, title="📈 TODO Progress", border_style="yellow")
-        )
+        layout["progress"].update(Panel(progress_content, title="📈 TODO Progress", border_style="yellow"))
 
         # Session progress panel
         progress_data = self._data_cache.get("progress_data")
         if progress_data and isinstance(progress_data, dict):
-            session_progress_content = self.session_progress.render_progress_overview(
-                progress_data
-            )
+            session_progress_content = self.session_progress.render_progress_overview(progress_data)
             layout["session_progress"].update(
                 Panel(
                     session_progress_content,
@@ -428,19 +396,9 @@ class AsyncStatusDashboard:
                 "completion_rate": 0.0,
             }
 
-        completed = sum(
-            1
-            for todo in self.progress_tracker.todos
-            if todo.status.value == "completed"
-        )
-        in_progress = sum(
-            1
-            for todo in self.progress_tracker.todos
-            if todo.status.value == "in_progress"
-        )
-        pending = sum(
-            1 for todo in self.progress_tracker.todos if todo.status.value == "pending"
-        )
+        completed = sum(1 for todo in self.progress_tracker.todos if todo.status.value == "completed")
+        in_progress = sum(1 for todo in self.progress_tracker.todos if todo.status.value == "in_progress")
+        pending = sum(1 for todo in self.progress_tracker.todos if todo.status.value == "pending")
 
         return {
             "total": total,
@@ -548,9 +506,7 @@ StatusCommand = AsyncStatusCommand
     default=True,
     help="Use async mode for better performance (default: enabled)",
 )
-def status(
-    project_path: str, update_interval: float, interactive: bool, async_mode: bool
-) -> None:  # noqa: FBT001
+def status(project_path: str, update_interval: float, interactive: bool, async_mode: bool) -> None:  # noqa: FBT001
     """Comprehensive project status dashboard with async optimizations."""
     if async_mode:
         command = AsyncStatusCommand()
@@ -588,10 +544,9 @@ def status(
     default=True,
     help="Run in interactive mode with live updates (default: interactive)",
 )
-def status_async(
-    project_path: str, update_interval: float, interactive: bool
-) -> None:  # noqa: FBT001
-    """Async comprehensive project status dashboard (explicit async version)."""
+def status_async(project_path: str, update_interval: float, interactive: bool) -> None:  # noqa: FBT001
+    """Async comprehensive project status dashboard (explicit async
+    version)."""
     command = AsyncStatusCommand()
     command.run(
         project_path=project_path,

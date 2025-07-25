@@ -9,14 +9,14 @@ import pytest
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test stub for Tauri IPC communication
 NOTE: These are placeholder tests that require Tauri test environment setup.
 """
 
 
 class TestTauriIPCCommunication(unittest.TestCase):
-    """Test Tauri IPC (Inter-Process Communication) between frontend and backend.
+    """Test Tauri IPC (Inter-Process Communication) between frontend and
+    backend.
 
     These tests require:
     1. Tauri test harness setup

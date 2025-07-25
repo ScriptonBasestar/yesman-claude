@@ -9,7 +9,6 @@ import websockets
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """WebSocket connection test script."""
 
 

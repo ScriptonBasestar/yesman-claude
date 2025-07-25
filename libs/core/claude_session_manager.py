@@ -8,7 +8,6 @@ from libs.utils import ensure_log_directory, get_default_log_path
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Claude session and pane management."""
 
 
@@ -39,9 +38,7 @@ class ClaudeSessionManager:
         if not logger.handlers:
             file_handler = logging.FileHandler(log_file)
             file_handler.setLevel(logging.INFO)
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
 
@@ -62,9 +59,7 @@ class ClaudeSessionManager:
             # Find Claude pane
             self.claude_pane = self._find_claude_pane()
             if not self.claude_pane:
-                self.logger.warning(
-                    "No Claude pane found in session '%s'", self.session_name
-                )
+                self.logger.warning("No Claude pane found in session '%s'", self.session_name)
                 return False
 
             self.logger.info("Successfully initialized session '%s'", self.session_name)
@@ -79,8 +74,6 @@ class ClaudeSessionManager:
 
         Returns:
             Object object.
-
-
         """
         if not self.session:
             return None
@@ -89,17 +82,11 @@ class ClaudeSessionManager:
             for pane in window.list_panes():
                 try:
                     # Check both command and pane content
-                    cmd = pane.cmd(
-                        "display-message", "-p", "#{pane_current_command}"
-                    ).stdout[0]
+                    cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
 
                     # Capture pane content to check for Claude indicators
                     capture_result = pane.cmd("capture-pane", "-p")
-                    content = (
-                        "\n".join(capture_result.stdout)
-                        if capture_result.stdout
-                        else ""
-                    )
+                    content = "\n".join(capture_result.stdout) if capture_result.stdout else ""
 
                     # Enhanced Claude detection patterns
                     claude_indicators = [
@@ -112,15 +99,11 @@ class ClaudeSessionManager:
                     ]
 
                     if any(claude_indicators):
-                        self.logger.info(
-                            "Found Claude pane: %s:%s", window.name, pane.index
-                        )
+                        self.logger.info("Found Claude pane: %s:%s", window.name, pane.index)
                         return pane
 
                 except Exception as e:
-                    self.logger.debug(
-                        "Error checking pane %s:%s: %s", window.name, pane.index, e
-                    )
+                    self.logger.debug("Error checking pane %s:%s: %s", window.name, pane.index, e)
                     continue
 
         self.logger.warning("No Claude pane found in any window")
@@ -174,9 +157,7 @@ class ClaudeSessionManager:
             return ""
 
         try:
-            cmd = self.claude_pane.cmd(
-                "display-message", "-p", "#{pane_current_command}"
-            ).stdout[0]
+            cmd = self.claude_pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]
             return str(cmd) if cmd else ""
         except Exception:
             self.logger.exception("Error getting current command")

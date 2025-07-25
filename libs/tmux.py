@@ -7,7 +7,6 @@ from jinja2 import Template
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tmux session template generation utilities.
 
 This module provides utilities for generating tmux session configurations

@@ -14,7 +14,6 @@ from rich.text import Text
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """TODO progress tracking and visualization widget."""
 
 
@@ -127,23 +126,13 @@ class ProgressTracker:
 
                     # Extract priority (if specified)
                     priority = "medium"
-                    if (
-                        "!!!" in todo_text
-                        or "urgent" in todo_text.lower()
-                        or "!" in todo_text
-                        or "important" in todo_text.lower()
-                    ):
+                    if "!!!" in todo_text or "urgent" in todo_text.lower() or "!" in todo_text or "important" in todo_text.lower():
                         priority = "high"
-                    elif (
-                        "low" in todo_text.lower()
-                        or "nice to have" in todo_text.lower()
-                    ):
+                    elif "low" in todo_text.lower() or "nice to have" in todo_text.lower():
                         priority = "low"
 
                     # Clean up todo text
-                    clean_text = re.sub(
-                        r"[!]+|\\(urgent\\)|\\(important\\)", "", todo_text
-                    ).strip()
+                    clean_text = re.sub(r"[!]+|\\(urgent\\)|\\(important\\)", "", todo_text).strip()
 
                     todo = TodoItem(
                         id=f"todo_{todo_counter}",
@@ -231,9 +220,7 @@ class ProgressTracker:
             oldest_completion = min(t.updated_at for t in completed_todos)
             newest_completion = max(t.updated_at for t in completed_todos)
 
-            days_span = max(
-                1, (newest_completion - oldest_completion) / 86400
-            )  # Convert to days
+            days_span = max(1, (newest_completion - oldest_completion) / 86400)  # Convert to days
             velocity = len(completed_todos) / days_span
         else:
             velocity = 0.0
@@ -286,9 +273,7 @@ class ProgressTracker:
         # Status breakdown
         content.append("📋 Status Breakdown\\n", style="bold yellow")
         content.append(f"  ✅ Completed: {stats.completed_items}\\n", style="green")
-        content.append(
-            f"  🔄 In Progress: {stats.in_progress_items}\\n", style="yellow"
-        )
+        content.append(f"  🔄 In Progress: {stats.in_progress_items}\\n", style="yellow")
         content.append(f"  ⏳ Pending: {stats.pending_items}\\n\\n", style="blue")
 
         # Velocity and estimates
@@ -303,9 +288,7 @@ class ProgressTracker:
 
         return Panel(content, title="📊 Progress Overview", border_style="green")
 
-    def render_todo_list(
-        self, status_filter: TodoStatus | None = None, limit: int = 10
-    ) -> Panel:
+    def render_todo_list(self, status_filter: TodoStatus | None = None, limit: int = 10) -> Panel:
         """Render TODO list with optional filtering.
 
         Returns:
@@ -355,9 +338,7 @@ class ProgressTracker:
             }.get(todo.status, "❓")
 
             # Truncate content
-            content = (
-                todo.content[:47] + "..." if len(todo.content) > 50 else todo.content
-            )
+            content = todo.content[:47] + "..." if len(todo.content) > 50 else todo.content
 
             table.add_row(
                 priority_emoji,
@@ -375,9 +356,7 @@ class ProgressTracker:
         Panel object.
         """
         if not self.todos:
-            return Panel(
-                Text("No data available", style="dim"), title="📊 Category Breakdown"
-            )
+            return Panel(Text("No data available", style="dim"), title="📊 Category Breakdown")
 
         # Group by category
         categories = {}
@@ -471,8 +450,6 @@ class ProgressTracker:
                     "priority": todo.priority,
                     "project": todo.project,
                 }
-                for todo in sorted(
-                    self.todos, key=lambda t: t.updated_at, reverse=True
-                )[:5]
+                for todo in sorted(self.todos, key=lambda t: t.updated_at, reverse=True)[:5]
             ],
         }

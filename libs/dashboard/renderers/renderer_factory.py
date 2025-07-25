@@ -11,7 +11,6 @@ from .web_renderer import WebRenderer
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Renderer Factory
 Factory pattern for creating and managing dashboard renderers.
 """
@@ -32,8 +31,9 @@ class RendererInitializationError(RendererFactoryError):
 class RendererFactory:
     """Factory for creating and managing dashboard renderers.
 
-    Provides centralized creation, registration, and management of renderers
-    with support for multiple output formats and thread-safe operations.
+    Provides centralized creation, registration, and management of
+    renderers with support for multiple output formats and thread-safe
+    operations.
     """
 
     # Registered renderer classes
@@ -78,9 +78,7 @@ class RendererFactory:
                 ) from e
 
     @classmethod
-    def register_renderer(
-        cls, render_format: RenderFormat, renderer_class: type[BaseRenderer]
-    ) -> None:
+    def register_renderer(cls, render_format: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
         """Register a new renderer class.
 
         Args:
@@ -154,14 +152,7 @@ class RendererFactory:
     def render_universal(
         cls,
         widget_type: WidgetType,
-        data: (
-            dict[str, str | int | float | bool | list[str]]
-            | list[str | int | float | bool]
-            | str
-            | int
-            | float
-            | bool
-        ),  # noqa: FBT001
+        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
         render_format: RenderFormat | None = None,
         options: dict[str, str | int | float | bool] | None = None,
     ) -> (
@@ -221,14 +212,7 @@ class RendererFactory:
     def render_parallel(
         cls,
         widget_type: WidgetType,
-        data: (
-            dict[str, str | int | float | bool | list[str]]
-            | list[str | int | float | bool]
-            | str
-            | int
-            | float
-            | bool
-        ),  # noqa: FBT001
+        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
         formats: list[RenderFormat] | None = None,
         options: dict[str, str | int | float | bool] | None = None,
         max_workers: int = 3,
@@ -260,10 +244,7 @@ class RendererFactory:
             fmt: RenderFormat,
         ) -> tuple[
             RenderFormat,
-            str
-            | dict[str, str | int | float | bool]
-            | list[str | int | float | bool]
-            | None,
+            str | dict[str, str | int | float | bool] | list[str | int | float | bool] | None,
             str | None,
         ]:
             try:
@@ -274,9 +255,7 @@ class RendererFactory:
                 return fmt, None, str(e)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_format = {
-                executor.submit(render_format, fmt): fmt for fmt in formats
-            }
+            future_to_format = {executor.submit(render_format, fmt): fmt for fmt in formats}
 
             for future in as_completed(future_to_format):
                 fmt, result, error = future.result()
@@ -320,14 +299,7 @@ class RendererFactory:
 
 def render_widget(
     widget_type: WidgetType,
-    data: (
-        dict[str, str | int | float | bool | list[str]]
-        | list[str | int | float | bool]
-        | str
-        | int
-        | float
-        | bool
-    ),  # noqa: FBT001
+    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
     render_format: RenderFormat,
     options: dict[str, str | int | float | bool] | None = None,
 ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool]:
@@ -353,14 +325,7 @@ def render_widget(
 
 def render_all_formats(
     widget_type: WidgetType,
-    data: (
-        dict[str, str | int | float | bool | list[str]]
-        | list[str | int | float | bool]
-        | str
-        | int
-        | float
-        | bool
-    ),  # noqa: FBT001
+    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
     options: dict[str, str | int | float | bool] | None = None,
 ) -> dict[
     RenderFormat,
@@ -379,23 +344,14 @@ def render_all_formats(
     msg = "Bad dict"
     result = RendererFactory.render_universal(widget_type, data, None, options)
     # Type narrowing: when no format is specified, result should be multi-format dict
-    if not isinstance(result, dict) or not all(
-        isinstance(k, RenderFormat) for k in result
-    ):
+    if not isinstance(result, dict) or not all(isinstance(k, RenderFormat) for k in result):
         raise ValueError(msg)
     return result  # type: ignore[return-value]
 
 
 def render_formats(
     widget_type: WidgetType,
-    data: (
-        dict[str, str | int | float | bool | list[str]]
-        | list[str | int | float | bool]
-        | str
-        | int
-        | float
-        | bool
-    ),  # noqa: FBT001
+    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),  # noqa: FBT001
     formats: list[RenderFormat],
     options: dict[str, str | int | float | bool] | None = None,
     parallel: bool = False,  # noqa: FBT001

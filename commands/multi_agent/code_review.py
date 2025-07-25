@@ -5,7 +5,6 @@ from libs.core.base_command import BaseCommand
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Code review system commands."""
 
 

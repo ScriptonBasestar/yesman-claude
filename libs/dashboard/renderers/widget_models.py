@@ -7,7 +7,6 @@ from typing import cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Widget Data Models
 Common data models used across all renderers for consistent data representation.
 """
@@ -120,9 +119,7 @@ class SessionData:
         data = asdict(self)
         data["status"] = self.status.value
         data["created_at"] = self.created_at.isoformat() if self.created_at else None
-        data["last_activity"] = (
-            self.last_activity.isoformat() if self.last_activity else None
-        )
+        data["last_activity"] = self.last_activity.isoformat() if self.last_activity else None
 
         # Convert windows
         data["windows"] = [
@@ -219,9 +216,7 @@ class HealthData:
             "min_score": self.overall_level.min_score,
             "max_score": self.overall_level.max_score,
         }
-        data["last_updated"] = (
-            self.last_updated.isoformat() if self.last_updated else None
-        )
+        data["last_updated"] = self.last_updated.isoformat() if self.last_updated else None
 
         # Convert categories
         data["categories"] = []
@@ -233,9 +228,7 @@ class HealthData:
                 "min_score": cat.level.min_score,
                 "max_score": cat.level.max_score,
             }
-            cat_data["last_checked"] = (
-                cat.last_checked.isoformat() if cat.last_checked else None
-            )
+            cat_data["last_checked"] = cat.last_checked.isoformat() if cat.last_checked else None
             data["categories"].append(cat_data)
 
         return data
@@ -261,9 +254,7 @@ class HealthData:
             cat_dict = cast(dict, cat_data)
             last_checked = None
             if cat_dict.get("last_checked"):
-                last_checked = datetime.fromisoformat(
-                    cast(str, cat_dict["last_checked"])
-                )
+                last_checked = datetime.fromisoformat(cast(str, cat_dict["last_checked"]))
 
             level = HealthLevel.from_score(cast(int, cat_dict.get("score", 0)))
 
@@ -413,9 +404,7 @@ class ProgressData:
         data = asdict(self)
         data["phase"] = self.phase.value
         data["start_time"] = self.start_time.isoformat() if self.start_time else None
-        data["phase_start_time"] = (
-            self.phase_start_time.isoformat() if self.phase_start_time else None
-        )
+        data["phase_start_time"] = self.phase_start_time.isoformat() if self.phase_start_time else None
         return data
 
     @classmethod
@@ -432,9 +421,7 @@ class ProgressData:
 
         phase_start_time = None
         if data.get("phase_start_time"):
-            phase_start_time = datetime.fromisoformat(
-                cast(str, data["phase_start_time"])
-            )
+            phase_start_time = datetime.fromisoformat(cast(str, data["phase_start_time"]))
 
         # Parse phase
         phase = ProgressPhase(cast(str, data.get("phase", ProgressPhase.IDLE.value)))
@@ -492,16 +479,8 @@ class MetricCardData:
             title=cast(str, data.get("title", "")),
             value=cast(str, data.get("value", "")),
             suffix=cast(str, data.get("suffix", "")),
-            trend=(
-                cast(float, data.get("trend"))
-                if data.get("trend") is not None
-                else None
-            ),
-            comparison=(
-                cast(str, data.get("comparison"))
-                if data.get("comparison") is not None
-                else None
-            ),
+            trend=(cast(float, data.get("trend")) if data.get("trend") is not None else None),
+            comparison=(cast(str, data.get("comparison")) if data.get("comparison") is not None else None),
             color=cast(str, data.get("color", "neutral")),
             icon=cast(str, data.get("icon", "")),
             metadata=cast(dict, data.get("metadata", {})),
@@ -607,11 +586,7 @@ class ChartData:
                 ChartDataPoint(
                     x=x_value,
                     y=cast(float, point_dict.get("y", 0)),
-                    label=(
-                        cast(str, point_dict.get("label"))
-                        if point_dict.get("label") is not None
-                        else None
-                    ),
+                    label=(cast(str, point_dict.get("label")) if point_dict.get("label") is not None else None),
                     metadata=cast(dict, point_dict.get("metadata", {})),
                 )
             )

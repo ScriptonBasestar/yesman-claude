@@ -12,7 +12,6 @@ from typing_extensions import TypedDict
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Type definitions and type hints for Yesman-Claude."""
 
 

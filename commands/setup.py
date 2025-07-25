@@ -2,7 +2,6 @@
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Improved setup command using refactored session setup logic."""
 
 from typing import Any
@@ -46,11 +45,7 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
             "successful_sessions": successful_count,
             "failed_sessions": failed_count,
             "total_sessions": successful_count + failed_count,
-            "success_rate": (
-                (successful_count / (successful_count + failed_count) * 100)
-                if (successful_count + failed_count) > 0
-                else 0
-            ),
+            "success_rate": ((successful_count / (successful_count + failed_count) * 100) if (successful_count + failed_count) > 0 else 0),
         }
 
         # Log results
@@ -92,7 +87,8 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
     help="Force recreation of existing sessions without prompting",
 )
 def setup(session_name: str | None, dry_run: bool, force: bool) -> None:  # noqa: FBT001
-    """Create all tmux sessions defined in projects.yaml; or only a specified session if provided.
+    """Create all tmux sessions defined in projects.yaml; or only a specified
+    session if provided.
 
     Args:
         session_name: Optional session name to set up only that session
@@ -107,9 +103,7 @@ def setup(session_name: str | None, dry_run: bool, force: bool) -> None:  # noqa
         return
 
     if force:
-        command.print_warning(
-            "Force mode: existing sessions will be recreated without prompting"
-        )
+        command.print_warning("Force mode: existing sessions will be recreated without prompting")
         # TODO: Pass force flag to setup service
 
     command.run(session_name=session_name)

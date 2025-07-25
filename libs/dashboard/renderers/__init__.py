@@ -2,10 +2,8 @@
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
-"""Dashboard Renderers Package
-Multi-format rendering system for Yesman Claude dashboard.
-"""
+"""Dashboard Renderers Package Multi-format rendering system for Yesman Claude
+dashboard."""
 
 from .base_renderer import BaseRenderer, RenderFormat, ThemeColor, WidgetType
 from .optimizations import (

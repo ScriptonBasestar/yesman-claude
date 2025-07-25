@@ -18,7 +18,6 @@ from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Interactive session browser command."""
 
 
@@ -147,9 +146,7 @@ class InteractiveBrowser:
 
         # Progress overview
         if self.progress_data:
-            progress_panel = self.progress_widget.render_progress_overview(
-                self.progress_data
-            )
+            progress_panel = self.progress_widget.render_progress_overview(self.progress_data)
             layout["progress"].update(progress_panel)
         else:
             layout["progress"].update("[dim]Loading progress data...[/dim]")
@@ -177,9 +174,7 @@ class InteractiveBrowser:
         self.update_data()
 
         # Start background update thread
-        self.update_thread = threading.Thread(
-            target=self.background_updater, daemon=True
-        )
+        self.update_thread = threading.Thread(target=self.background_updater, daemon=True)
         self.update_thread.start()
 
         # Create layout
@@ -236,9 +231,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
             msg = "tmux is not available or not properly installed"
             raise CommandError(msg)
 
-    def execute(
-        self, update_interval: float = 2.0, **kwargs: Any
-    ) -> dict:  # noqa: ANN401, ARG002
+    def execute(self, update_interval: float = 2.0, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
         """Execute the browse command.
 
         Returns:
@@ -247,9 +240,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
         try:
             with with_startup_progress("🔧 Initializing session browser...") as update:  # type: ignore
                 update("📊 Loading session data...")
-                browser = InteractiveBrowser(
-                    self.tmux_manager, self.config, update_interval
-                )
+                browser = InteractiveBrowser(self.tmux_manager, self.config, update_interval)
                 update("🚀 Starting interactive browser...")
 
             self.print_info("Press Ctrl+C to exit")

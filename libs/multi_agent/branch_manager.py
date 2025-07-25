@@ -11,7 +11,6 @@ from typing import Any, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Branch management system for multi-agent parallel development."""
 
 
@@ -49,9 +48,7 @@ class BranchInfo:
 class BranchManager:
     """Manages git branches for multi-agent parallel development."""
 
-    def __init__(
-        self, repo_path: str = ".", branch_prefix: str = "feat/multi-agent"
-    ) -> None:
+    def __init__(self, repo_path: str = ".", branch_prefix: str = "feat/multi-agent") -> None:
         """Initialize branch manager.
 
         Args:
@@ -110,9 +107,7 @@ class BranchManager:
             try:
                 with open(metadata_file, encoding="utf-8") as f:
                     data = json.load(f)
-                    self.branches = {
-                        name: BranchInfo.from_dict(info) for name, info in data.items()
-                    }
+                    self.branches = {name: BranchInfo.from_dict(info) for name, info in data.items()}
                 logger.info("Loaded %d branch metadata entries", len(self.branches))
             except Exception:
                 logger.exception("Failed to load branch metadata")
@@ -193,11 +188,7 @@ class BranchManager:
 
         # Get all branches
         result = self._run_git_command(["branch", "-a"])
-        all_branches = [
-            line.strip().replace("* ", "")
-            for line in result.stdout.strip().split("\n")
-            if line.strip()
-        ]
+        all_branches = [line.strip().replace("* ", "") for line in result.stdout.strip().split("\n") if line.strip()]
 
         # Filter for our multi-agent branches
         for branch in all_branches:
@@ -321,9 +312,7 @@ class BranchManager:
             self._save_branch_metadata()
             logger.info("Marked branch '%s' as merged", branch_name)
 
-    def cleanup_merged_branches(
-        self, dry_run: bool = True
-    ) -> list[str]:  # noqa: FBT001
+    def cleanup_merged_branches(self, dry_run: bool = True) -> list[str]:  # noqa: FBT001
         """Clean up merged branches."""
         cleaned = []
 

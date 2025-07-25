@@ -18,7 +18,6 @@ from .test_framework import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Cross-Module Integration Tests.
 
 Tests integration across all major system modules including CLI, automation,

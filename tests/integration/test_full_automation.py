@@ -8,7 +8,6 @@ from libs.core.claude_manager import ClaudeManager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test full automation workflow."""
 
 

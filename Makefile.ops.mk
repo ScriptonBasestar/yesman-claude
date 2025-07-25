@@ -164,9 +164,9 @@ docker-status: ## show Docker container status
 # Information and Status
 # ==============================================================================
 
-.PHONY: info version status system-info project-status
+.PHONY: ops-info ops-version status system-info project-status
 
-info: ## show project information and current configuration
+ops-info: ## show project information and current configuration
 	@echo -e "$(CYAN)"
 	@echo -e "╔══════════════════════════════════════════════════════════════════════════════╗"
 	@echo -e "║                         $(MAGENTA)yesman-claude Project Information$(CYAN)                   ║"
@@ -189,7 +189,7 @@ info: ## show project information and current configuration
 	@echo "  • Web and Tauri dashboard interfaces"
 	@echo "  • Rich CLI interface with Textual"
 
-version: ## show version
+ops-version: ## show version
 	@echo "$(PROJECT_NAME) version: $(VERSION)"
 
 status: ## check system and project status
@@ -291,9 +291,9 @@ check-health: ## perform health check
 # Operations Information
 # ==============================================================================
 
-.PHONY: ops-info
+.PHONY: ops-tools-info
 
-ops-info: ## show operations information
+ops-tools-info: ## show operations information
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
 	@echo "║                         $(YELLOW)Operations Information$(CYAN)                           ║"

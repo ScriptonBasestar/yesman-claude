@@ -3,7 +3,6 @@
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Simple test application for yesman-claude integration testing."""
 
 

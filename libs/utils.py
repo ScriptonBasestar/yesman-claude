@@ -6,7 +6,6 @@ from pathlib import Path
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Utility functions for yesman."""
 
 

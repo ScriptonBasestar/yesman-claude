@@ -9,6 +9,7 @@ import tempfile
 import time
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -20,14 +21,11 @@ from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Integration Test Framework for Yesman-Claude.
 
 Provides base classes, utilities, and fixtures for comprehensive integration testing
 across CLI, API, dashboard, and multi-agent components.
 """
-
-from typing import Any
 
 
 class IntegrationTestBase:

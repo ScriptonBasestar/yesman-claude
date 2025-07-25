@@ -12,7 +12,6 @@ from libs.core.services import register_test_services
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Integration tests for API endpoints."""
 
 

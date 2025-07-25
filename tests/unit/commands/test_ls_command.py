@@ -9,7 +9,6 @@ from commands.ls import ls
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test for ls command."""
 
 

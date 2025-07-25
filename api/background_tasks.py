@@ -20,7 +20,6 @@ from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Background task system for real-time updates."""
 
 
@@ -164,9 +163,7 @@ class BackgroundTaskRunner:
                 # Load projects using tmux_manager
 
                 tmux_manager = TmuxManager(config)
-                project_sessions = cast(
-                    dict[str, Any], tmux_manager.load_projects().get("sessions", {})
-                )
+                project_sessions = cast(dict[str, Any], tmux_manager.load_projects().get("sessions", {}))
 
                 # Format session data
                 formatted_sessions = []
@@ -175,16 +172,8 @@ class BackgroundTaskRunner:
                         "session_name",
                         project_name,
                     )
-                    session_exists = any(
-                        s.session_name == session_name for s in sessions
-                    )
-                    session_detail = (
-                        self.session_manager._get_session_info(
-                            project_name, project_config
-                        )
-                        if session_exists
-                        else None
-                    )
+                    session_exists = any(s.session_name == session_name for s in sessions)
+                    session_detail = self.session_manager._get_session_info(project_name, project_config) if session_exists else None
 
                     formatted_sessions.append(
                         {
@@ -193,23 +182,9 @@ class BackgroundTaskRunner:
                             "template": project_config.get("template_name", "default"),
                             "status": "active" if session_exists else "stopped",
                             "exists": session_exists,
-                            "windows": (
-                                len(session_detail.windows) if session_detail else 0
-                            ),
-                            "panes": (
-                                sum(len(w.panes) for w in session_detail.windows)
-                                if session_detail
-                                else 0
-                            ),
-                            "claude_active": (
-                                any(
-                                    p.is_claude
-                                    for w in session_detail.windows
-                                    for p in w.panes
-                                )
-                                if session_detail
-                                else False
-                            ),
+                            "windows": (len(session_detail.windows) if session_detail else 0),
+                            "panes": (sum(len(w.panes) for w in session_detail.windows) if session_detail else 0),
+                            "claude_active": (any(p.is_claude for w in session_detail.windows for p in w.panes) if session_detail else False),
                         },
                     )
 
@@ -221,9 +196,7 @@ class BackgroundTaskRunner:
                     self.last_data["sessions"] = data_hash  # type: ignore[assignment]
 
                     # Broadcast update via WebSocket
-                    await manager.broadcast_session_update(
-                        {"sessions": formatted_sessions}
-                    )
+                    await manager.broadcast_session_update({"sessions": formatted_sessions})
 
                     logger.debug(
                         "Session data updated and broadcast (%d sessions)",
@@ -302,11 +275,7 @@ class BackgroundTaskRunner:
                             ),
                         },
                     },
-                    "suggestions": [
-                        metric.description
-                        for metric in health_data.metrics
-                        if metric.description
-                    ],
+                    "suggestions": [metric.description for metric in health_data.metrics if metric.description],
                     "last_updated": datetime.now(UTC).isoformat(),
                 }
 
@@ -382,11 +351,7 @@ class BackgroundTaskRunner:
                 activity_counts_list = [int(a["activity_count"]) for a in activities]
                 active_days = sum(1 for count in activity_counts_list if count > 0)
                 max_activity = max(activity_counts_list, default=0)
-                avg_activity = (
-                    sum(activity_counts_list) / len(activity_counts_list)
-                    if activity_counts_list
-                    else 0
-                )
+                avg_activity = sum(activity_counts_list) / len(activity_counts_list) if activity_counts_list else 0
 
                 formatted_activity = {
                     "activities": activities,

@@ -22,7 +22,6 @@ from .test_framework import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Automation Workflows Integration Tests.
 
 Tests the complete automation system including context detection,

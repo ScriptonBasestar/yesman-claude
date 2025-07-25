@@ -16,7 +16,6 @@ from .config_schema import YesmanConfigSchema
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Centralized configuration loader with multiple source support and caching."""
 
 
@@ -122,11 +121,7 @@ class EnvironmentSource(ConfigSource):
 
     def get_cache_key(self) -> str:
         """Generate cache key based on relevant environment variables."""
-        env_vars = {
-            key: value
-            for key, value in os.environ.items()
-            if key.startswith(self.prefix)
-        }
+        env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)
         env_hash = hashlib.sha256(env_json.encode()).hexdigest()[:16]
@@ -208,27 +203,19 @@ class ConfigLoader:
                 msg = error["msg"]
                 errors.append(f"  - {loc}: {msg}")
 
-            raise ValueError(
-                "Configuration validation failed:\n" + "\n".join(errors)
-            ) from e
+            raise ValueError("Configuration validation failed:\n" + "\n".join(errors)) from e
 
     def reload(self) -> YesmanConfigSchema:
         """Force reload configuration from all sources."""
         self._cached_config = None
         return self.load()
 
-    def _deep_merge(
-        self, dict1: dict[str, Any], dict2: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _deep_merge(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> dict[str, Any]:
         """Deep merge two dictionaries."""
         result = dict1.copy()
 
         for key, value in dict2.items():
-            if (
-                key in result
-                and isinstance(result[key], dict)
-                and isinstance(value, dict)
-            ):
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                 result[key] = self._deep_merge(result[key], value)
             else:
                 result[key] = value
@@ -261,9 +248,7 @@ def create_default_loader() -> ConfigLoader:
 
     # Add default configuration sources in priority order
     # 1. Default config
-    default_config_path = (
-        Path(__file__).parent.parent.parent / "config" / "default.yaml"
-    )
+    default_config_path = Path(__file__).parent.parent.parent / "config" / "default.yaml"
     if default_config_path.exists():
         loader.add_source(YamlFileSource(default_config_path))
 

@@ -54,7 +54,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             self.update_status("idle")
             return result
 
-        except Exception as e:
+        except Exception:
             self.update_status("error")
             self.logger.exception("Error checking status")  # noqa: G004
             raise
@@ -166,7 +166,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                     info["panes"] = sum(len(w.get("panes", [])) for w in windows)
                     break
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error getting tmux info for {session_name}")  # noqa: G004
             info["status"] = "error"
 

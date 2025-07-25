@@ -11,7 +11,6 @@ import websockets
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test background tasks and WebSocket updates."""
 
 

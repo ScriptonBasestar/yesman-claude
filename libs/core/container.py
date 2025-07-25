@@ -5,7 +5,6 @@ from typing import TypeVar, cast
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dependency Injection Container for managing service instances and dependencies."""
 
 
@@ -52,9 +51,7 @@ class DIContainer:
         self._singletons.pop(service_type, None)
         self._services.pop(service_type, None)
 
-    def register_transient(
-        self, service_type: type[T], factory: Callable[[], T]
-    ) -> None:
+    def register_transient(self, service_type: type[T], factory: Callable[[], T]) -> None:
         """Register a transient service (new instance each time).
 
         Args:
@@ -118,11 +115,7 @@ class DIContainer:
         Returns:
             True if service is registered, False otherwise
         """
-        return (
-            service_type in self._singletons
-            or service_type in self._factories
-            or service_type in self._services
-        )
+        return service_type in self._singletons or service_type in self._factories or service_type in self._services
 
     def clear(self) -> None:
         """Clear all registrations and reset the container."""

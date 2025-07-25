@@ -4,7 +4,6 @@
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Yesman configuration management using centralized config loader."""
 
 import logging

@@ -9,7 +9,6 @@ from .session_browser import SessionBrowser
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dashboard widgets for session visualization and interaction."""
 
 

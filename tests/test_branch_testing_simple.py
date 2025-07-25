@@ -10,7 +10,6 @@ from libs.multi_agent.branch_test_manager import BranchTestManager, TestSuite, T
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Simple test for branch testing integration without git dependency."""
 
 

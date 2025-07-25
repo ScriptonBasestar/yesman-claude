@@ -13,16 +13,16 @@ repos:
       # Step 1: Format code first (this fixes many issues)
       - id: ruff-format
         args: [--target-version=py311]
-        exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
+        exclude: ^(migrations/|node_modules/|tests/|docs/examples/|\.backups/)
       # Step 2: Apply safe fixes after formatting (essential rules only)
       - id: ruff
-        args: [--fix, --target-version=py311, --select=E,W,F,I]  # E/W/F errors + import sorting
-        exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
+        args: ["--fix", "--target-version=py311", "--select", "E,W,F,I"]  # E/W/F errors + import sorting
+        exclude: ^(migrations/|node_modules/|tests/|docs/examples/|\.backups/)
       # Step 3: Final validation (ensure fixes worked)
       - id: ruff
         name: ruff-final-check
-        args: [--target-version=py311, --select=E,W,F,I]  # Same rules as step 2
-        exclude: ^(migrations/|node_modules/|tests/|docs/examples/)
+        args: ["--target-version=py311", "--select", "E,W,F,I"]  # Same rules as step 2
+        exclude: ^(migrations/|node_modules/|tests/|docs/examples/|\.backups/)
 
   # Essential file checks (ultra-lightweight for pre-commit)
   - repo: https://github.com/pre-commit/pre-commit-hooks

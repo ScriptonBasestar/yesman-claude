@@ -24,7 +24,6 @@ from .progress_tracker import ProgressAnalyzer
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Session management for dashboard."""
 
 
@@ -66,9 +65,7 @@ class SessionManager:
         log_file = log_path / "session_manager.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
@@ -97,9 +94,7 @@ class SessionManager:
             self.logger.error("Error getting sessions", exc_info=True)
             return []
 
-    def _get_session_info(
-        self, project_name: str, project_conf: dict[str, Any]
-    ) -> SessionInfo:
+    def _get_session_info(self, project_name: str, project_conf: dict[str, Any]) -> SessionInfo:
         """Get information for a single session with mode-aware caching.
 
         Returns:
@@ -137,9 +132,7 @@ class SessionManager:
                 template_display = "none"
             else:
                 # Check if template file actually exists
-                template_path = (
-                    self.config.get_templates_dir() / f"{template_name}.yaml"
-                )
+                template_path = self.config.get_templates_dir() / f"{template_name}.yaml"
                 if template_path.exists():
                     template_display = template_name
                 else:
@@ -156,15 +149,10 @@ class SessionManager:
                             # Get full pane content for better analysis
                             try:
                                 if hasattr(session, "find_where"):
-                                    tmux_pane = session.find_where(
-                                        {"pane_id": pane_info.id}
-                                    )
+                                    tmux_pane = session.find_where({"pane_id": pane_info.id})
                                     if tmux_pane and hasattr(tmux_pane, "cmd"):
                                         cmd_result = tmux_pane.cmd("capture-pane", "-p")
-                                        if (
-                                            hasattr(cmd_result, "stdout")
-                                            and cmd_result.stdout
-                                        ):
+                                        if hasattr(cmd_result, "stdout") and cmd_result.stdout:
                                             claude_output.extend(cmd_result.stdout)
                             except Exception as e:
                                 self.logger.warning(
@@ -175,9 +163,7 @@ class SessionManager:
 
                 # Analyze progress
                 if claude_output:
-                    progress = self.progress_analyzer.analyze_pane_output(
-                        session_name, claude_output
-                    )
+                    progress = self.progress_analyzer.analyze_pane_output(session_name, claude_output)
 
             return SessionInfo(
                 project_name=project_name,
@@ -217,43 +203,24 @@ class SessionManager:
                     # Fallback to basic pane info
                     try:
                         if hasattr(pane, "cmd"):
-                            cmd_result = pane.cmd(
-                                "display-message", "-p", "#{pane_current_command}"
-                            )
-                            cmd = (
-                                cmd_result.stdout[0]
-                                if hasattr(cmd_result, "stdout") and cmd_result.stdout
-                                else ""
-                            )
+                            cmd_result = pane.cmd("display-message", "-p", "#{pane_current_command}")
+                            cmd = cmd_result.stdout[0] if hasattr(cmd_result, "stdout") and cmd_result.stdout else ""
                         else:
                             cmd = ""
 
                         basic_pane = PaneInfo(
-                            id=(
-                                getattr(pane, "pane_id", "unknown")
-                                if hasattr(pane, "pane_id")
-                                else pane.get("pane_id", "unknown")
-                            ),
+                            id=(getattr(pane, "pane_id", "unknown") if hasattr(pane, "pane_id") else pane.get("pane_id", "unknown")),
                             command=cmd,
                             is_claude="claude" in cmd.lower(),
-                            is_controller="controller" in cmd.lower()
-                            or "yesman" in cmd.lower(),
+                            is_controller="controller" in cmd.lower() or "yesman" in cmd.lower(),
                         )
                         panes.append(basic_pane)
                     except Exception as e:
                         self.logger.debug("Could not get basic pane info: %s", e)
 
         return WindowInfo(
-            name=(
-                getattr(window, "window_name", "unknown")
-                if hasattr(window, "window_name")
-                else cast(dict, window).get("window_name", "unknown")
-            ),
-            index=str(
-                getattr(window, "window_index", 0)
-                if hasattr(window, "window_index")
-                else cast(dict, window).get("window_index", 0)
-            ),
+            name=(getattr(window, "window_name", "unknown") if hasattr(window, "window_name") else cast(dict, window).get("window_name", "unknown")),
+            index=str(getattr(window, "window_index", 0) if hasattr(window, "window_index") else cast(dict, window).get("window_index", 0)),
             panes=panes,
         )
 
@@ -315,23 +282,15 @@ class SessionManager:
             # Get pane activity information
             try:
                 # Get last pane activity time (approximation)
-                pane_activity = pane.cmd(
-                    "display-message", "-p", "#{pane_activity}"
-                ).stdout[0]
-                activity_timestamp = (
-                    int(pane_activity) if pane_activity.isdigit() else 0
-                )
+                pane_activity = pane.cmd("display-message", "-p", "#{pane_activity}").stdout[0]
+                activity_timestamp = int(pane_activity) if pane_activity.isdigit() else 0
 
                 # Calculate idle time and activity score
                 current_time = datetime.now(UTC).timestamp()
-                idle_time = (
-                    current_time - activity_timestamp if activity_timestamp > 0 else 0
-                )
+                idle_time = current_time - activity_timestamp if activity_timestamp > 0 else 0
 
                 # Activity score: higher for recent activity, lower for idle panes
-                activity_score = max(
-                    0, 100 - (idle_time / 60)
-                )  # Decreases over minutes
+                activity_score = max(0, 100 - (idle_time / 60))  # Decreases over minutes
 
             except Exception:
                 idle_time = 0.0
@@ -359,11 +318,7 @@ class SessionManager:
                 is_controller="controller" in cmd.lower() or "yesman" in cmd.lower(),
                 current_task=current_task,
                 idle_time=idle_time,
-                last_activity=(
-                    datetime.fromtimestamp(activity_timestamp, UTC)
-                    if activity_timestamp > 0
-                    else datetime.now(UTC)
-                ),
+                last_activity=(datetime.fromtimestamp(activity_timestamp, UTC) if activity_timestamp > 0 else datetime.now(UTC)),
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
                 pid=pid,
@@ -434,9 +389,7 @@ class SessionManager:
         main_cmd = cmdline[0].split("/")[-1] if cmdline else command
         return f"Running {main_cmd}"
 
-    def attach_to_pane(
-        self, session_name: str, window_index: str, pane_id: str
-    ) -> dict[str, Any]:
+    def attach_to_pane(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """Attach to a specific tmux pane.
 
         Args:
@@ -462,9 +415,7 @@ class SessionManager:
             if not window or not hasattr(window, "find_where"):
                 return {
                     "success": False,
-                    "error": (
-                        f"Window {window_index} not found in session '{session_name}'"
-                    ),
+                    "error": (f"Window {window_index} not found in session '{session_name}'"),
                     "action": "none",
                 }
 
@@ -487,9 +438,7 @@ class SessionManager:
                 "pane_id": pane_id,
                 "attach_command": attach_cmd,
                 "action": "attach",
-                "message": (
-                    f"Ready to attach to pane {pane_id} in {session_name}:{window_index}"
-                ),
+                "message": (f"Ready to attach to pane {pane_id} in {session_name}:{window_index}"),
             }
 
         except Exception as e:
@@ -542,11 +491,7 @@ class SessionManager:
                         "session_name": session.session_name,
                         "project_name": session.project_name,
                         "overall_progress": progress.calculate_overall_progress(),
-                        "current_phase": (
-                            progress.get_current_task().phase.value
-                            if progress.get_current_task()
-                            else "idle"
-                        ),
+                        "current_phase": (progress.get_current_task().phase.value if progress.get_current_task() else "idle"),
                         "tasks_count": len(progress.tasks),
                         "files_changed": progress.total_files_changed,
                         "commands_executed": progress.total_commands,
@@ -554,11 +499,7 @@ class SessionManager:
                 )
 
         # Calculate averages
-        avg_progress = (
-            overall_progress / sessions_with_progress
-            if sessions_with_progress > 0
-            else 0.0
-        )
+        avg_progress = overall_progress / sessions_with_progress if sessions_with_progress > 0 else 0.0
 
         return {
             "total_sessions": total_sessions,
@@ -571,9 +512,7 @@ class SessionManager:
             "sessions": session_progress_list,
         }
 
-    def create_terminal_script(
-        self, attach_command: str, script_path: str | None = None
-    ) -> str:
+    def create_terminal_script(self, attach_command: str, script_path: str | None = None) -> str:
         """Create a terminal script for pane attachment.
 
         Args:
@@ -615,9 +554,7 @@ echo "Attaching to tmux pane..."
             self.logger.exception("Error creating attachment script")
             raise
 
-    def execute_pane_attachment(
-        self, session_name: str, window_index: str, pane_id: str
-    ) -> dict[str, Any]:
+    def execute_pane_attachment(self, session_name: str, window_index: str, pane_id: str) -> dict[str, Any]:
         """Execute pane attachment with error handling.
 
         Args:

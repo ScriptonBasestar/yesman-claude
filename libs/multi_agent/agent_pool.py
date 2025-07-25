@@ -21,7 +21,6 @@ from .types import Agent, AgentState, Task, TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Agent pool management for multi-agent development system."""
 
 
@@ -59,9 +58,7 @@ class AgentPool:  # noqa: PLR0904
         self.task_started_callbacks: list[Callable[[Task], Awaitable[None]]] = []
         self.task_completed_callbacks: list[Callable[[Task], Awaitable[None]]] = []
         self.task_failed_callbacks: list[Callable[[Task], Awaitable[None]]] = []
-        self.agent_error_callbacks: list[
-            Callable[[Agent, Exception], Awaitable[None]]
-        ] = []
+        self.agent_error_callbacks: list[Callable[[Agent, Exception], Awaitable[None]]] = []
 
         # Control
         self._running = False
@@ -238,15 +235,10 @@ class AgentPool:  # noqa: PLR0904
     async def _intelligent_dispatch(self) -> None:
         """Intelligent task dispatching using the scheduler."""
         # Get all available agents
-        available_agents = [
-            agent for agent in self.agents.values() if agent.state == AgentState.IDLE
-        ]
+        available_agents = [agent for agent in self.agents.values() if agent.state == AgentState.IDLE]
 
         # Create new agents if needed and under limit
-        while (
-            len(available_agents) < self.max_agents
-            and len(self.agents) < self.max_agents
-        ):
+        while len(available_agents) < self.max_agents and len(self.agents) < self.max_agents:
             new_agent = await self._create_agent()
             available_agents.append(new_agent)
 
@@ -656,9 +648,7 @@ class AgentPool:  # noqa: PLR0904
                 if from_cap and to_cap:
                     # Redistribute load (move 10% from overloaded to underloaded)
                     load_transfer = min(0.1, from_cap.current_load * 0.2)
-                    from_cap.current_load = max(
-                        0.0, from_cap.current_load - load_transfer
-                    )
+                    from_cap.current_load = max(0.0, from_cap.current_load - load_transfer)
                     to_cap.current_load = min(1.0, to_cap.current_load + load_transfer)
 
                     logger.info(
@@ -675,9 +665,7 @@ class AgentPool:  # noqa: PLR0904
     def enable_auto_rebalancing(self, interval_seconds: int = 300) -> None:
         """Enable automatic workload rebalancing."""
         if not self.intelligent_scheduling:
-            logger.warning(
-                "Cannot enable auto-rebalancing without intelligent scheduling"
-            )
+            logger.warning("Cannot enable auto-rebalancing without intelligent scheduling")
             return
 
         self._auto_rebalancing_enabled = True
@@ -704,9 +692,7 @@ class AgentPool:  # noqa: PLR0904
                     rebalancing_actions = self.rebalance_workload()
 
                     if rebalancing_actions:
-                        logger.info(
-                            "Executed %d rebalancing actions", len(rebalancing_actions)
-                        )
+                        logger.info("Executed %d rebalancing actions", len(rebalancing_actions))
 
                 await asyncio.sleep(getattr(self, "_auto_rebalancing_interval", 300))
 
@@ -714,9 +700,7 @@ class AgentPool:  # noqa: PLR0904
                 logger.exception("Error in auto-rebalancing loop:")
                 await asyncio.sleep(60)  # Wait before retrying
 
-    def enable_branch_testing(
-        self, repo_path: str | None = None, results_dir: str | None = None
-    ) -> None:
+    def enable_branch_testing(self, repo_path: str | None = None, results_dir: str | None = None) -> None:
         """Enable automatic branch testing integration."""
         try:
             repo_path = repo_path or "."
@@ -817,11 +801,7 @@ class AgentPool:  # noqa: PLR0904
 
         try:
             # Get critical test suites first
-            critical_suites = [
-                name
-                for name, suite in self.branch_test_manager.test_suites.items()
-                if suite.critical
-            ]
+            critical_suites = [name for name, suite in self.branch_test_manager.test_suites.items() if suite.critical]
 
             # Create tasks for critical tests (higher priority)
             for suite_name in critical_suites:
@@ -834,11 +814,7 @@ class AgentPool:  # noqa: PLR0904
                 task_ids.append(task.task_id)
 
             # Create task for non-critical tests (combined)
-            non_critical_suites = [
-                name
-                for name, suite in self.branch_test_manager.test_suites.items()
-                if not suite.critical
-            ]
+            non_critical_suites = [name for name, suite in self.branch_test_manager.test_suites.items() if not suite.critical]
 
             if non_critical_suites:
                 # Create a single task for all non-critical tests
@@ -850,9 +826,7 @@ class AgentPool:  # noqa: PLR0904
                 self.add_task(task)
                 task_ids.append(task.task_id)
 
-            logger.info(
-                "Created %d test tasks for branch %s", len(task_ids), branch_name
-            )
+            logger.info("Created %d test tasks for branch %s", len(task_ids), branch_name)
 
         except Exception:
             logger.exception("Error creating test tasks for %s:", branch_name)
@@ -881,9 +855,7 @@ class AgentPool:  # noqa: PLR0904
             logger.exception("Error getting all branch test status:")
             return {"error": str(e)}
 
-    def enable_recovery_system(
-        self, work_dir: str | None = None, max_snapshots: int = 50
-    ) -> None:
+    def enable_recovery_system(self, work_dir: str | None = None, max_snapshots: int = 50) -> None:
         """Enable automatic rollback and error recovery system."""
         try:
             work_dir = work_dir or ".scripton/yesman"
@@ -920,9 +892,7 @@ class AgentPool:  # noqa: PLR0904
                 }
 
                 # Create exception from task error
-                exception = Exception(
-                    task.error or f"Task failed with exit code {task.exit_code}"
-                )
+                exception = Exception(task.error or f"Task failed with exit code {task.exit_code}")
 
                 await self.recovery_engine.handle_operation_failure(
                     operation_id=operation_id,
@@ -1119,9 +1089,7 @@ class AgentPool:  # noqa: PLR0904
         )
 
         if not snapshot_id:
-            logger.warning(
-                "Failed to create snapshot, proceeding without recovery protection"
-            )
+            logger.warning("Failed to create snapshot, proceeding without recovery protection")
 
         operation_id = f"op-{int(time.time())}-{str(uuid.uuid4())[:8]}"
 
@@ -1147,18 +1115,16 @@ class AgentPool:  # noqa: PLR0904
                 if retry_count < max_retries:
                     # Attempt recovery
                     if self.recovery_engine:
-                        recovery_success = (
-                            await self.recovery_engine.handle_operation_failure(
-                                operation_id=operation_id,
-                                exception=e,
-                                context={
-                                    **(context or {}),
-                                    "operation_type": operation_type,
-                                    "retry_count": retry_count,
-                                },
-                                agent_pool=self,
-                                branch_manager=getattr(self, "branch_manager", None),
-                            )
+                        recovery_success = await self.recovery_engine.handle_operation_failure(
+                            operation_id=operation_id,
+                            exception=e,
+                            context={
+                                **(context or {}),
+                                "operation_type": operation_type,
+                                "retry_count": retry_count,
+                            },
+                            agent_pool=self,
+                            branch_manager=getattr(self, "branch_manager", None),
                         )
 
                         if recovery_success:
@@ -1185,11 +1151,7 @@ class AgentPool:  # noqa: PLR0904
         if not self.tasks:
             return True
 
-        incomplete_tasks = [
-            task
-            for task in self.tasks.values()
-            if task.status not in {TaskStatus.COMPLETED, TaskStatus.FAILED}
-        ]
+        incomplete_tasks = [task for task in self.tasks.values() if task.status not in {TaskStatus.COMPLETED, TaskStatus.FAILED}]
         return len(incomplete_tasks) == 0
 
     def reset(self) -> None:

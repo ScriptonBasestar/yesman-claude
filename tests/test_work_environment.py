@@ -11,7 +11,6 @@ from libs.multi_agent.work_environment import WorkEnvironment, WorkEnvironmentMa
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for WorkEnvironmentManager."""
 
 

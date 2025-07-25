@@ -11,7 +11,6 @@ from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for AgentPool class."""
 
 

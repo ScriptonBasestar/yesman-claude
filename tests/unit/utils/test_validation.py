@@ -4,10 +4,6 @@
 
 import pytest
 
-# Licensed under the MIT License
-
-"""Tests for validation utilities."""
-
 from libs.validation import (
     ValidationError,
     validate_input,
@@ -17,6 +13,9 @@ from libs.validation import (
     validate_session_name,
     validate_window_name,
 )
+
+# Licensed under the MIT License
+"""Tests for validation utilities."""
 
 
 class TestValidationFunctions:

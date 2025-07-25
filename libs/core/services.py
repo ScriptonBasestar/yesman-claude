@@ -9,7 +9,6 @@ from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Service registration and DI container setup."""
 
 
@@ -19,17 +18,13 @@ def register_core_services() -> None:
     container.register_factory(YesmanConfig, YesmanConfig)
 
     # Register TmuxManager as a singleton factory that depends on YesmanConfig
-    container.register_factory(
-        TmuxManager, lambda: TmuxManager(container.resolve(YesmanConfig))
-    )
+    container.register_factory(TmuxManager, lambda: TmuxManager(container.resolve(YesmanConfig)))
 
     # Register SessionManager as a singleton factory
     container.register_factory(SessionManager, SessionManager)
 
 
-def register_test_services(
-    config: YesmanConfig | None = None, tmux_manager: TmuxManager | None = None
-) -> None:
+def register_test_services(config: YesmanConfig | None = None, tmux_manager: TmuxManager | None = None) -> None:
     """Register mock services for testing.
 
     Args:
@@ -48,9 +43,7 @@ def register_test_services(
     if tmux_manager is not None:
         container.register_singleton(TmuxManager, tmux_manager)
     else:
-        container.register_factory(
-            TmuxManager, lambda: TmuxManager(container.resolve(YesmanConfig))
-        )
+        container.register_factory(TmuxManager, lambda: TmuxManager(container.resolve(YesmanConfig)))
 
     # Always register SessionManager for tests
     container.register_factory(SessionManager, SessionManager)
@@ -89,11 +82,7 @@ def is_container_initialized() -> bool:
     Returns:
         bool: Description of return value.
     """
-    return (
-        container.is_registered(YesmanConfig)
-        and container.is_registered(TmuxManager)
-        and container.is_registered(SessionManager)
-    )
+    return container.is_registered(YesmanConfig) and container.is_registered(TmuxManager) and container.is_registered(SessionManager)
 
 
 def initialize_services() -> None:

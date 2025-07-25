@@ -12,7 +12,6 @@ from .workflow_engine import WorkflowChain, WorkflowEngine
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Automation manager that integrates context detection and workflow execution."""
 
 
@@ -88,9 +87,7 @@ class AutomationManager:
 
     async def _monitoring_loop(self, interval: int) -> None:
         """Main monitoring loop for context detection."""
-        self.logger.info(
-            "Starting automation monitoring loop (interval: %ss)", interval
-        )
+        self.logger.info("Starting automation monitoring loop (interval: %ss)", interval)
 
         try:
             while self.is_monitoring:
@@ -167,9 +164,7 @@ class AutomationManager:
                 except Exception:
                     self.logger.exception("Workflow trigger callback error")
 
-    def analyze_content_for_context(
-        self, content: str, session_name: str | None = None
-    ) -> list[ContextInfo]:
+    def analyze_content_for_context(self, content: str, session_name: str | None = None) -> list[ContextInfo]:
         """Analyze content (e.g., tmux pane output) for context clues.
 
         Returns:
@@ -177,17 +172,13 @@ class AutomationManager:
         """
         return self.context_detector.detect_context_from_content(content, session_name)
 
-    def analyze_claude_idle(
-        self, last_activity_time: float, idle_threshold: int = 30
-    ) -> ContextInfo | None:
+    def analyze_claude_idle(self, last_activity_time: float, idle_threshold: int = 30) -> ContextInfo | None:
         """Analyze Claude idle state for potential automation.
 
         Returns:
         object: Description of return value.
         """
-        return self.context_detector.detect_claude_idle_context(
-            last_activity_time, idle_threshold
-        )
+        return self.context_detector.detect_claude_idle_context(last_activity_time, idle_threshold)
 
     def register_custom_workflow(self, workflow: WorkflowChain) -> None:
         """Register a custom workflow chain."""
@@ -205,9 +196,7 @@ class AutomationManager:
         return {
             "monitoring": {
                 "is_monitoring": self.is_monitoring,
-                "uptime": (
-                    time.time() - self.stats["start_time"] if self.is_monitoring else 0
-                ),
+                "uptime": (time.time() - self.stats["start_time"] if self.is_monitoring else 0),
             },
             "statistics": self.stats.copy(),
             "workflows": workflow_status,
@@ -215,9 +204,7 @@ class AutomationManager:
             "project_path": str(self.project_path),
         }
 
-    async def manual_trigger_workflow(
-        self, workflow_name: str, context_info: ContextInfo
-    ) -> str | None:
+    async def manual_trigger_workflow(self, workflow_name: str, context_info: ContextInfo) -> str | None:
         """Manually trigger a specific workflow."""
         if workflow_name not in self.workflow_engine.workflows:
             self.logger.error("Workflow not found: %s", workflow_name)
@@ -235,9 +222,7 @@ class AutomationManager:
     def save_automation_config(self, config_path: Path | None = None) -> None:
         """Save automation configuration to file."""
         if not config_path:
-            config_path = (
-                Path.home() / ".scripton" / "yesman" / "automation_config.json"
-            )
+            config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
         config_path.parent.mkdir(parents=True, exist_ok=True)
         self.workflow_engine.save_workflows_config(config_path)
@@ -247,9 +232,7 @@ class AutomationManager:
     def load_automation_config(self, config_path: Path | None = None) -> None:
         """Load automation configuration from file."""
         if not config_path:
-            config_path = (
-                Path.home() / ".scripton" / "yesman" / "automation_config.json"
-            )
+            config_path = Path.home() / ".scripton" / "yesman" / "automation_config.json"
 
         if config_path.exists():
             self.workflow_engine.load_workflows_config(config_path)
@@ -266,9 +249,7 @@ class AutomationManager:
         history = self.workflow_engine.execution_history[-limit:]
         return [execution.to_dict() for execution in history]
 
-    async def test_automation_chain(
-        self, context_type: ContextType, test_details: dict[str, object] | None = None
-    ) -> dict[str, object]:
+    async def test_automation_chain(self, context_type: ContextType, test_details: dict[str, object] | None = None) -> dict[str, object]:
         """Test automation chain with simulated context."""
         test_context = ContextInfo(
             context_type=context_type,

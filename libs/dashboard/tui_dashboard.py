@@ -33,7 +33,6 @@ from .renderers.widget_models import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """TUI Dashboard.
 
 Textual-based terminal user interface dashboard for Yesman-Claude
@@ -47,8 +46,8 @@ if TYPE_CHECKING:
 class DashboardWidget(Static):
     """Base dashboard widget component for Textual UI.
 
-    Integrates with TUIRenderer to display various widget types
-    with real-time data updates and rich formatting.
+    Integrates with TUIRenderer to display various widget types with
+    real-time data updates and rich formatting.
     """
 
     def __init__(
@@ -104,20 +103,12 @@ class DashboardWidget(Static):
             # Update the content container
             content_container = self.query_one("#widget-content", Container)
             if hasattr(content_container, "update"):
-                content_text = (
-                    rendered_content.get("content", "")
-                    if isinstance(rendered_content, dict)
-                    else str(rendered_content)
-                )
+                content_text = rendered_content.get("content", "") if isinstance(rendered_content, dict) else str(rendered_content)
                 await content_container.update(content_text)
             else:
                 # Fallback for containers without update method
                 content_container.remove_children()
-                content_text = (
-                    rendered_content.get("content", "")
-                    if isinstance(rendered_content, dict)
-                    else str(rendered_content)
-                )
+                content_text = rendered_content.get("content", "") if isinstance(rendered_content, dict) else str(rendered_content)
                 content_container.mount(Static(content_text))
 
         except Exception as e:
@@ -189,20 +180,12 @@ class HealthView(DashboardWidget):
         mock_categories = [
             HealthCategoryData(category="build", score=90, level=HealthLevel.EXCELLENT),
             HealthCategoryData(category="tests", score=85, level=HealthLevel.GOOD),
-            HealthCategoryData(
-                category="dependencies", score=95, level=HealthLevel.EXCELLENT
-            ),
+            HealthCategoryData(category="dependencies", score=95, level=HealthLevel.EXCELLENT),
             HealthCategoryData(category="security", score=80, level=HealthLevel.GOOD),
-            HealthCategoryData(
-                category="performance", score=85, level=HealthLevel.GOOD
-            ),
-            HealthCategoryData(
-                category="code_quality", score=75, level=HealthLevel.GOOD
-            ),
+            HealthCategoryData(category="performance", score=85, level=HealthLevel.GOOD),
+            HealthCategoryData(category="code_quality", score=75, level=HealthLevel.GOOD),
             HealthCategoryData(category="git", score=88, level=HealthLevel.GOOD),
-            HealthCategoryData(
-                category="documentation", score=70, level=HealthLevel.GOOD
-            ),
+            HealthCategoryData(category="documentation", score=70, level=HealthLevel.GOOD),
         ]
         mock_health = HealthData(
             overall_score=85,
@@ -302,9 +285,7 @@ class SettingsView(Static):
         yield Vertical(
             Horizontal(
                 Label("Auto Refresh: "),
-                Switch(
-                    value=bool(self.settings["auto_refresh"]), id="auto-refresh-switch"
-                ),
+                Switch(value=bool(self.settings["auto_refresh"]), id="auto-refresh-switch"),
                 classes="setting-row",
             ),
             Horizontal(
@@ -314,9 +295,7 @@ class SettingsView(Static):
             ),
             Horizontal(
                 Label("Show Timestamps: "),
-                Switch(
-                    value=bool(self.settings["show_timestamps"]), id="timestamps-switch"
-                ),
+                Switch(value=bool(self.settings["show_timestamps"]), id="timestamps-switch"),
                 classes="setting-row",
             ),
             classes="settings-container",
@@ -471,9 +450,7 @@ class TUIDashboard(App):
                 await self.sessions_view.auto_update()
             elif current_tab and current_tab.id == "health-tab" and self.health_view:
                 await self.health_view.auto_update()
-            elif (
-                current_tab and current_tab.id == "activity-tab" and self.activity_view
-            ):
+            elif current_tab and current_tab.id == "activity-tab" and self.activity_view:
                 await self.activity_view.auto_update()
 
             if self.logs_view:
@@ -536,9 +513,7 @@ class TUIDashboard(App):
         tabs.active = "settings-tab"
         self.current_view = "settings"
 
-    def on_settings_view_setting_changed(
-        self, message: SettingsView.SettingChanged
-    ) -> None:
+    def on_settings_view_setting_changed(self, message: SettingsView.SettingChanged) -> None:
         """Handle settings changes."""
         if message.setting == "auto_refresh":
             self.auto_refresh_enabled = bool(message.value)
@@ -550,9 +525,7 @@ class TUIDashboard(App):
             self.dark = bool(message.value)
 
         if self.logs_view:
-            self.logs_view.add_log(
-                "INFO", f"Setting changed: {message.setting} = {message.value}"
-            )
+            self.logs_view.add_log("INFO", f"Setting changed: {message.setting} = {message.value}")
 
 
 def run_tui_dashboard() -> None:

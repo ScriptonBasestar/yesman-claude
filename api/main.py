@@ -120,16 +120,11 @@ if os.path.exists(sveltekit_build_path):
             if hasattr(response, "headers"):
                 # Add cache-busting headers for JavaScript files
                 if path.endswith(".js"):
-                    response.headers["Cache-Control"] = (
-                        "no-cache, no-store, must-revalidate"
-                    )
+                    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
                     response.headers["Pragma"] = "no-cache"
                     response.headers["Expires"] = "0"
                 # Cache assets with hash in filename for longer
-                elif any(
-                    path.endswith(ext)
-                    for ext in [".css", ".png", ".jpg", ".svg", ".woff", ".woff2"]
-                ):
+                elif any(path.endswith(ext) for ext in [".css", ".png", ".jpg", ".svg", ".woff", ".woff2"]):
                     response.headers["Cache-Control"] = "public, max-age=31536000"
             return response
 
@@ -184,9 +179,7 @@ if os.path.exists(sveltekit_build_path):
     async def serve_dashboard(path: str = "") -> FileResponse:
         """Serve SvelteKit dashboard at root."""
         # Skip API routes and specific endpoints
-        if path.startswith(
-            ("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")
-        ):
+        if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
             raise HTTPException(status_code=404, detail="Not found")
 
         # For SPA, always serve index.html with cache-busting headers
@@ -200,7 +193,8 @@ else:
     # Development mode: provide a basic dashboard page when Tauri build is not available
     @app.get("/")
     async def serve_dev_dashboard() -> Response:
-        """Serve development dashboard when SvelteKit build is not available."""
+        """Serve development dashboard when SvelteKit build is not
+        available."""
         html_content = """
         <!DOCTYPE html>
         <html lang="en">

@@ -18,7 +18,6 @@ from .conflict_resolution import ConflictSeverity, ResolutionStrategy
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """AST-based semantic conflict analysis engine for multi-agent development."""
 
 
@@ -130,15 +129,12 @@ class SemanticConflict:
 class SemanticAnalyzer:
     """Advanced AST-based semantic conflict analysis engine."""
 
-    def __init__(
-        self, branch_manager: BranchManager, repo_path: str | None = None
-    ) -> None:
+    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None) -> None:
         """Initialize the semantic analyzer.
 
         Args:
             branch_manager: BranchManager for branch operations
             repo_path: Path to git repository
-
         """
         self.branch_manager = branch_manager
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
@@ -203,9 +199,7 @@ class SemanticAnalyzer:
             conflicts = self._merge_related_conflicts(conflicts)
 
             self.analysis_stats["conflicts_detected"] += len(conflicts)
-            self.analysis_stats["analysis_time"] += (
-                datetime.now(UTC) - start_time
-            ).total_seconds()
+            self.analysis_stats["analysis_time"] += (datetime.now(UTC) - start_time).total_seconds()
 
             logger.info("Found %d semantic conflicts", len(conflicts))
 
@@ -484,14 +478,8 @@ class SemanticAnalyzer:
         {(imp.module, imp.name, imp.alias) for imp in context1.imports}
         {(imp.module, imp.name, imp.alias) for imp in context2.imports}
 
-        names1 = {
-            imp.alias or imp.name or imp.module.split(".")[-1]: imp
-            for imp in context1.imports
-        }
-        names2 = {
-            imp.alias or imp.name or imp.module.split(".")[-1]: imp
-            for imp in context2.imports
-        }
+        names1 = {imp.alias or imp.name or imp.module.split(".")[-1]: imp for imp in context1.imports}
+        names2 = {imp.alias or imp.name or imp.module.split(".")[-1]: imp for imp in context2.imports}
 
         common_names = set(names1.keys()) & set(names2.keys())
 
@@ -509,10 +497,8 @@ class SemanticAnalyzer:
                     branch1=branch1,
                     branch2=branch2,
                     description=f"Import name conflict for {name}",
-                    old_definition=f"from {imp1.module} import {imp1.name or '*'}"
-                    + (f" as {imp1.alias}" if imp1.alias else ""),
-                    new_definition=f"from {imp2.module} import {imp2.name or '*'}"
-                    + (f" as {imp2.alias}" if imp2.alias else ""),
+                    old_definition=f"from {imp1.module} import {imp1.name or '*'}" + (f" as {imp1.alias}" if imp1.alias else ""),
+                    new_definition=f"from {imp2.module} import {imp2.name or '*'}" + (f" as {imp2.alias}" if imp2.alias else ""),
                     suggested_resolution=ResolutionStrategy.CUSTOM_MERGE,
                 )
                 conflicts.append(conflict)
@@ -813,9 +799,7 @@ class SemanticAnalyzer:
 
     # Helper methods
 
-    async def _get_changed_python_files(
-        self, branch1: str, branch2: str
-    ) -> list[str]:  # noqa: ARG002
+    async def _get_changed_python_files(self, branch1: str, branch2: str) -> list[str]:  # noqa: ARG002
         """Get list of Python files changed between branches."""
         try:
             # This would use git to find changed files
@@ -824,9 +808,7 @@ class SemanticAnalyzer:
         except Exception:
             return []
 
-    async def _get_file_content(
-        self, file_path: str, branch: str
-    ) -> str | None:  # noqa: ARG002
+    async def _get_file_content(self, file_path: str, branch: str) -> str | None:  # noqa: ARG002
         """Get file content from specific branch."""
         try:
             # This would use git to get file content from branch
@@ -996,8 +978,6 @@ class SemanticVisitor(ast.NodeVisitor):
 
         Returns:
             Functionsignature object.
-
-
         """
         args = []
         defaults = []

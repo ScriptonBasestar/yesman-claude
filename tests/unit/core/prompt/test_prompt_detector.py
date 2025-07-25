@@ -6,7 +6,6 @@ from libs.core.prompt_detector import ClaudePromptDetector, PromptType
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test prompt detection functionality."""
 
 
@@ -16,10 +15,8 @@ class TestClaudePromptDetector:
         self.detector = ClaudePromptDetector()
 
     def test_detect_numbered_selection_prompt_should_return_correct_type(self) -> None:
-        """Test that numbered selection prompts are correctly detected
-        and return PromptType.NUMBERED_SELECTION.
-
-        """
+        """Test that numbered selection prompts are correctly detected and
+        return PromptType.NUMBERED_SELECTION."""
         content = """
 Do you want to make this edit to VideoProcessingService.kt?
 ❯ 1. Yes
@@ -36,10 +33,8 @@ Do you want to make this edit to VideoProcessingService.kt?
     def test_detect_binary_choice_yn_prompt_should_return_binary_choice_type(
         self,
     ) -> None:
-        """Test that y/n binary choice prompts are correctly detected
-        and return PromptType.BINARY_CHOICE.
-
-        """
+        """Test that y/n binary choice prompts are correctly detected and
+        return PromptType.BINARY_CHOICE."""
         content = "Do you want to continue? (y/n)"
 
         prompt_info = self.detector.detect_prompt(content)
@@ -48,10 +43,8 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert len(prompt_info.options) == 2
 
     def test_detect_true_false_prompt_should_return_true_false_type(self) -> None:
-        """Test that true/false prompts are correctly detected
-        and return PromptType.TRUE_FALSE.
-
-        """
+        """Test that true/false prompts are correctly detected and return
+        PromptType.TRUE_FALSE."""
         content = "Enable advanced features? (true/false)"
 
         prompt_info = self.detector.detect_prompt(content)

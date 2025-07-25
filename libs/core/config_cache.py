@@ -17,7 +17,6 @@ from .config_schema import YesmanConfigSchema
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Configuration caching system for improved performance."""
 
 
@@ -40,7 +39,8 @@ class ConfigCache:
 
     @staticmethod
     def _generate_cache_key(config_sources: list, env_vars: dict | None = None) -> str:
-        """Generate a unique cache key based on configuration sources and environment.
+        """Generate a unique cache key based on configuration sources and
+        environment.
 
         Returns:
         String containing.
@@ -158,10 +158,7 @@ class ConfigCache:
                 "cache_size": len(self._cache),
                 "max_cache_size": self.max_cache_size,
                 "cache_ttl": self.cache_ttl,
-                "hit_rate": (
-                    getattr(self, "_hit_count", 0)
-                    / max(getattr(self, "_total_requests", 1), 1)
-                ),
+                "hit_rate": (getattr(self, "_hit_count", 0) / max(getattr(self, "_total_requests", 1), 1)),
             }
 
     def cleanup_expired(self) -> int:
@@ -184,9 +181,7 @@ class ConfigCache:
                     del self._access_times[key]
 
             if expired_keys:
-                self._logger.debug(
-                    "Cleaned up %d expired cache entries", len(expired_keys)
-                )
+                self._logger.debug("Cleaned up %d expired cache entries", len(expired_keys))
 
             return len(expired_keys)
 
@@ -299,9 +294,7 @@ class CachedConfigLoader:
         String containing.
         """
         # Get environment variables that affect configuration
-        env_vars = {
-            key: value for key, value in os.environ.items() if key.startswith("YESMAN_")
-        }
+        env_vars = {key: value for key, value in os.environ.items() if key.startswith("YESMAN_")}
 
         return self.cache._generate_cache_key(self.base_loader.sources, env_vars)
 
@@ -430,11 +423,7 @@ class CacheableEnvironmentSource:
         Returns:
         String containing the requested data.
         """
-        env_vars = {
-            key: value
-            for key, value in os.environ.items()
-            if key.startswith(self.prefix)
-        }
+        env_vars = {key: value for key, value in os.environ.items() if key.startswith(self.prefix)}
 
         env_json = json.dumps(env_vars, sort_keys=True)
         env_hash = hashlib.sha256(env_json.encode()).hexdigest()[:16]

@@ -10,7 +10,6 @@ from libs.multi_agent.task_analyzer import TaskAnalyzer, TaskDefinition
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for TaskAnalyzer class."""
 
 

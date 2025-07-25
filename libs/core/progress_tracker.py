@@ -6,7 +6,6 @@ from .models import SessionProgress, TaskPhase, TaskProgress
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Progress tracking for Claude sessions."""
 
 
@@ -63,24 +62,18 @@ class ProgressAnalyzer:
     def __init__(self) -> None:
         self.session_progress: dict[str, SessionProgress] = {}
 
-    def analyze_pane_output(
-        self, session_name: str, pane_output: list[str]
-    ) -> SessionProgress | None:
+    def analyze_pane_output(self, session_name: str, pane_output: list[str]) -> SessionProgress | None:
         """Analyze pane output to determine progress.
 
         Returns:
             Sessionprogress | None object.
-
-
         """
         if not pane_output:
             return None
 
         # Get or create session progress
         if session_name not in self.session_progress:
-            self.session_progress[session_name] = SessionProgress(
-                session_name=session_name
-            )
+            self.session_progress[session_name] = SessionProgress(session_name=session_name)
 
         progress = self.session_progress[session_name]
 
@@ -130,29 +123,21 @@ class ProgressAnalyzer:
 
         return current_phase
 
-    def _analyze_file_activity(
-        self, output_lines: list[str], task: TaskProgress
-    ) -> None:
+    def _analyze_file_activity(self, output_lines: list[str], task: TaskProgress) -> None:
         """Analyze file-related activity."""
         for line in output_lines:
             # Check for file creation
-            match = re.search(
-                self.FILE_ACTIVITY_PATTERNS["created"], line, re.IGNORECASE
-            )
+            match = re.search(self.FILE_ACTIVITY_PATTERNS["created"], line, re.IGNORECASE)
             if match:
                 task.files_created += 1
                 continue
 
             # Check for file modification
-            match = re.search(
-                self.FILE_ACTIVITY_PATTERNS["modified"], line, re.IGNORECASE
-            )
+            match = re.search(self.FILE_ACTIVITY_PATTERNS["modified"], line, re.IGNORECASE)
             if match:
                 task.files_modified += 1
 
-    def _analyze_command_activity(
-        self, output_lines: list[str], task: TaskProgress
-    ) -> None:
+    def _analyze_command_activity(self, output_lines: list[str], task: TaskProgress) -> None:
         """Analyze command execution activity."""
         for i, line in enumerate(output_lines):
             # Check for command execution
@@ -168,9 +153,7 @@ class ProgressAnalyzer:
                         task.commands_failed += 1
                         break
 
-    def _analyze_todo_activity(
-        self, output_lines: list[str], task: TaskProgress
-    ) -> None:
+    def _analyze_todo_activity(self, output_lines: list[str], task: TaskProgress) -> None:
         """Analyze TODO-related activity."""
         for line in output_lines:
             # Check for TODO identification
@@ -195,9 +178,7 @@ class ProgressAnalyzer:
 
         elif task.phase == TaskPhase.IMPLEMENTING:
             # Progress based on file changes and commands
-            activity_score = (
-                task.files_created + task.files_modified
-            ) * 10 + task.commands_executed * 5
+            activity_score = (task.files_created + task.files_modified) * 10 + task.commands_executed * 5
             task.phase_progress = min(100.0, activity_score)
 
         elif task.phase == TaskPhase.TESTING:

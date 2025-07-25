@@ -9,7 +9,6 @@ from tests.fixtures.mock_factories import PatchContextFactory
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test for setup command - Migrated to use centralized mock factories."""
 
 

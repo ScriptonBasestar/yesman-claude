@@ -18,7 +18,6 @@ from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test for error handling and edge cases."""
 
 

@@ -8,7 +8,6 @@ from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Base Renderer Interface
 Abstract base class for all dashboard renderers.
 """
@@ -64,15 +63,12 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(
-        self, format_type: RenderFormat, theme: dict[str, Any] | None = None
-    ) -> None:
+    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None) -> None:
         """Initialize base renderer.
 
         Args:
             format_type: The rendering format this renderer supports
             theme: Optional theme configuration
-
         """
         self.format_type = format_type
         self.theme = theme or self._get_default_theme()
@@ -91,7 +87,6 @@ class BaseRenderer(ABC):
             widget_type: Type of widget to render
             data: Data to display in the widget
             options: Optional rendering options
-
         """
 
     @abstractmethod
@@ -111,9 +106,7 @@ class BaseRenderer(ABC):
         """
 
     @abstractmethod
-    def render_container(
-        self, content: str, container_config: dict[str, Any] | None = None
-    ) -> str:
+    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """Render a container wrapping content.
 
         Args:
@@ -423,7 +416,6 @@ class BaseRenderer(ABC):
 
         Args:
             theme: New theme configuration
-
         """
         self.theme = theme
         self.clear_cache()

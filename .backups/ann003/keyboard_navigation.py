@@ -434,7 +434,7 @@ class KeyboardNavigationManager:
             logger.debug("Executed action: %s", action_name)
             return True
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error executing action %s")
             return False
 

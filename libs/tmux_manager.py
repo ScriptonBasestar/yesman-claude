@@ -41,9 +41,7 @@ class TmuxManager:
             session_name_from_config = config_dict.get("session_name", session_name)
 
             if server.find_where({"session_name": session_name_from_config}):
-                self.logger.warning(
-                    "Session {session_name_from_config} already exists."
-                )
+                self.logger.warning("Session {session_name_from_config} already exists.")
                 return False
 
             # print("--------------------------------")
@@ -73,7 +71,8 @@ class TmuxManager:
         return [f.stem for f in self.templates_path.glob("*.yaml")]
 
     def load_projects(self) -> dict[str, object]:
-        """Load project sessions from individual session files in sessions/ directory.
+        """Load project sessions from individual session files in sessions/
+        directory.
 
         Returns:
         Dict containing.
@@ -110,9 +109,7 @@ class TmuxManager:
 
         return projects
 
-    def save_session_config(
-        self, session_name: str, session_config: dict[str, object]
-    ) -> bool:
+    def save_session_config(self, session_name: str, session_config: dict[str, object]) -> bool:
         """Save a session configuration to an individual file.
 
         Returns:
@@ -121,9 +118,7 @@ class TmuxManager:
         try:
             session_file = self.sessions_path / f"{session_name}.yaml"
             with session_file.open("w", encoding="utf-8") as f:
-                yaml.dump(
-                    session_config, f, default_flow_style=False, allow_unicode=True
-                )
+                yaml.dump(session_config, f, default_flow_style=False, allow_unicode=True)
             self.logger.info("Saved session config: {session_name}")
 
         except (OSError, PermissionError, yaml.YAMLError):
@@ -207,10 +202,9 @@ class TmuxManager:
         with template_path.open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
-    def get_session_config(
-        self, session_name: str, session_config: dict[str, object]
-    ) -> dict[str, object]:
-        """Get final session configuration after applying template and overrides.
+    def get_session_config(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
+        """Get final session configuration after applying template and
+        overrides.
 
         Returns:
         Configuration object or settings.
@@ -225,17 +219,13 @@ class TmuxManager:
                 template_config = self.load_template(cast(str, template_name))
                 final_config = template_config.copy()
             except FileNotFoundError:
-                self.logger.warning(
-                    "Template {template_name} not found for session {session_name}"
-                )
+                self.logger.warning("Template {template_name} not found for session {session_name}")
 
         # Apply override configuration
         override_config = session_config.get("override", {})
         if override_config:
             # Deep merge override config
-            final_config = self._deep_merge_dicts(
-                final_config, cast(dict[str, object], override_config)
-            )
+            final_config = self._deep_merge_dicts(final_config, cast(dict[str, object], override_config))
 
         # Ensure session_name is set
         if "session_name" not in final_config:
@@ -243,9 +233,7 @@ class TmuxManager:
 
         return final_config
 
-    def _deep_merge_dicts(
-        self, base: dict[str, object], override: dict[str, object]
-    ) -> dict[str, object]:
+    def _deep_merge_dicts(self, base: dict[str, object], override: dict[str, object]) -> dict[str, object]:
         """Deep merge two dictionaries, with override taking precedence.
 
         Returns:
@@ -254,14 +242,8 @@ class TmuxManager:
         result = base.copy()
 
         for key, value in override.items():
-            if (
-                key in result
-                and isinstance(result[key], dict)
-                and isinstance(value, dict)
-            ):
-                result[key] = self._deep_merge_dicts(
-                    cast(dict[str, object], result[key]), cast(dict[str, object], value)
-                )
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = self._deep_merge_dicts(cast(dict[str, object], result[key]), cast(dict[str, object], value))
             else:
                 result[key] = value
 
@@ -308,49 +290,19 @@ class TmuxManager:
                             for pane in window.list_panes():
                                 panes.append(
                                     {
-                                        "pane_id": (
-                                            getattr(pane, "pane_id", None)
-                                            or pane.get("pane_id", "unknown")
-                                        ),
-                                        "pane_current_command": (
-                                            getattr(pane, "pane_current_command", "")
-                                            or pane.get("pane_current_command", "")
-                                        ),
-                                        "pane_active": (
-                                            (
-                                                getattr(pane, "pane_active", "0")
-                                                or pane.get("pane_active", "0")
-                                            )
-                                            == "1"
-                                        ),
-                                        "pane_width": (
-                                            getattr(pane, "pane_width", 0)
-                                            or pane.get("pane_width", 0)
-                                        ),
-                                        "pane_height": (
-                                            getattr(pane, "pane_height", 0)
-                                            or pane.get("pane_height", 0)
-                                        ),
+                                        "pane_id": (getattr(pane, "pane_id", None) or pane.get("pane_id", "unknown")),
+                                        "pane_current_command": (getattr(pane, "pane_current_command", "") or pane.get("pane_current_command", "")),
+                                        "pane_active": ((getattr(pane, "pane_active", "0") or pane.get("pane_active", "0")) == "1"),
+                                        "pane_width": (getattr(pane, "pane_width", 0) or pane.get("pane_width", 0)),
+                                        "pane_height": (getattr(pane, "pane_height", 0) or pane.get("pane_height", 0)),
                                     }
                                 )
 
                         windows.append(
                             {
-                                "window_id": (
-                                    getattr(window, "window_id", None)
-                                    or window.get("window_id", "unknown")
-                                ),
-                                "window_name": (
-                                    getattr(window, "window_name", None)
-                                    or window.get("window_name", "unknown")
-                                ),
-                                "window_active": (
-                                    (
-                                        getattr(window, "window_active", "0")
-                                        or window.get("window_active", "0")
-                                    )
-                                    == "1"
-                                ),
+                                "window_id": (getattr(window, "window_id", None) or window.get("window_id", "unknown")),
+                                "window_name": (getattr(window, "window_name", None) or window.get("window_name", "unknown")),
+                                "window_active": ((getattr(window, "window_active", "0") or window.get("window_active", "0")) == "1"),
                                 "panes": panes,
                             }
                         )
@@ -358,14 +310,8 @@ class TmuxManager:
                 return {
                     "exists": True,
                     "session_name": session_name,
-                    "session_id": (
-                        getattr(session, "session_id", None)
-                        or session.get("session_id", "unknown")
-                    ),
-                    "session_created": (
-                        getattr(session, "session_created", None)
-                        or session.get("session_created", None)
-                    ),
+                    "session_id": (getattr(session, "session_id", None) or session.get("session_id", "unknown")),
+                    "session_created": (getattr(session, "session_created", None) or session.get("session_created", None)),
                     "windows": windows,
                 }
             except Exception as e:
@@ -385,22 +331,10 @@ class TmuxManager:
             sessions = server.list_sessions()
             return [
                 {
-                    "session_name": (
-                        getattr(sess, "session_name", None)
-                        or sess.get("session_name", "unknown")
-                    ),
-                    "session_id": (
-                        getattr(sess, "session_id", None)
-                        or sess.get("session_id", "unknown")
-                    ),
-                    "session_created": (
-                        getattr(sess, "session_created", None)
-                        or sess.get("session_created", None)
-                    ),
-                    "session_windows": (
-                        getattr(sess, "session_windows", 0)
-                        or sess.get("session_windows", 0)
-                    ),
+                    "session_name": (getattr(sess, "session_name", None) or sess.get("session_name", "unknown")),
+                    "session_id": (getattr(sess, "session_id", None) or sess.get("session_id", "unknown")),
+                    "session_created": (getattr(sess, "session_created", None) or sess.get("session_created", None)),
+                    "session_windows": (getattr(sess, "session_windows", 0) or sess.get("session_windows", 0)),
                 }
                 for sess in sessions
             ]
@@ -472,9 +406,7 @@ class TmuxManager:
         """
         try:
             log_path_str = self.config.get("log_path", "~/.scripton/yesman/logs/")
-            safe_session_name = "".join(
-                c for c in session_name if c.isalnum() or c in {"-", "_"}
-            ).rstrip()
+            safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
             log_file = Path(str(log_path_str)).expanduser() / f"{safe_session_name}.log"
 
             if not log_file.exists():
@@ -495,13 +427,9 @@ class TmuxManager:
                     # Example log format: [2025-07-10 14:22:01,161] [INFO] [session:my-session] Log message
                     match = re.match(r"\[(.*?)\]", line)
                     if match:
-                        timestamp_str = match.group(1).split(",")[
-                            0
-                        ]  # Get 'YYYY-MM-DD HH:MM:SS'
+                        timestamp_str = match.group(1).split(",")[0]  # Get 'YYYY-MM-DD HH:MM:SS'
                         try:
-                            log_time = datetime.strptime(
-                                timestamp_str, "%Y-%m-%d %H:%M:%S"
-                            )
+                            log_time = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
                             if log_time > seven_days_ago:
                                 # Round down to the hour
                                 hour_timestamp = log_time.strftime("%Y-%m-%dT%H:00:00")
@@ -510,10 +438,7 @@ class TmuxManager:
                             continue
 
             # Format data for heatmap
-            activity_data = [
-                {"timestamp": ts, "activity": count}
-                for ts, count in activity_counts.items()
-            ]
+            activity_data = [{"timestamp": ts, "activity": count} for ts, count in activity_counts.items()]
 
         except (OSError, PermissionError, ValueError):
             self.logger.exception("Failed to get session activity for %s")

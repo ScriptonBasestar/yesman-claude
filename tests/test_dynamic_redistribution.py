@@ -11,7 +11,6 @@ from libs.multi_agent.types import Agent, Task
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test dynamic work redistribution algorithm."""
 
 

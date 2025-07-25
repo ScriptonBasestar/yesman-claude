@@ -7,7 +7,6 @@ from typing import Any
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Common mixin classes for shared functionality across the Yesman-Claude project.
 
 These mixins provide standardized interfaces for common patterns:
@@ -54,7 +53,6 @@ class StatusManagerMixin(ABC):
 
         Raises:
             ValueError: If the status value is invalid
-
         """
         msg = "Subclasses must implement update_status()"
         raise NotImplementedError(msg)
@@ -70,7 +68,6 @@ class StatusManagerMixin(ABC):
         Example:
             update_activity("Processing batch 5 of 10")
             update_activity("Waiting for user input")
-
         """
         msg = "Subclasses must implement update_activity()"
         raise NotImplementedError(msg)
@@ -102,7 +99,6 @@ class LayoutManagerMixin(ABC):
         Raises:
             TypeError: If the layout type doesn't match expected type
             ValueError: If the layout configuration is invalid
-
         """
         msg = "Subclasses must implement update_layout()"
         raise NotImplementedError(msg)
@@ -110,7 +106,8 @@ class LayoutManagerMixin(ABC):
 
 # Optional: Concrete mixin implementations with default behavior
 class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
-    """Default implementation of StatisticsProviderMixin with basic functionality."""
+    """Default implementation of StatisticsProviderMixin with basic
+    functionality."""
 
     def __init__(self) -> None:
         self._statistics = {
@@ -140,7 +137,8 @@ class DefaultStatisticsProviderMixin(StatisticsProviderMixin):
 
 
 class DefaultStatusManagerMixin(StatusManagerMixin):
-    """Default implementation of StatusManagerMixin with basic functionality."""
+    """Default implementation of StatusManagerMixin with basic
+    functionality."""
 
     VALID_STATUSES = {"running", "stopped", "paused", "error", "initializing", "idle"}
 

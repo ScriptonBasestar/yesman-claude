@@ -18,7 +18,6 @@ from .branch_manager import BranchManager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Branch-specific test execution and result integration system."""
 
 logger = logging.getLogger(__name__)
@@ -111,7 +110,8 @@ class TestSuite:
 
 
 class BranchTestManager:
-    """Manages automatic testing execution per branch with result integration."""
+    """Manages automatic testing execution per branch with result
+    integration."""
 
     def __init__(
         self,
@@ -279,13 +279,9 @@ class BranchTestManager:
                         self.branch_results[branch_info.name] = results
 
                     except Exception:
-                        logger.exception(
-                            "Failed to load results for %s", branch_info.name
-                        )
+                        logger.exception("Failed to load results for %s", branch_info.name)
         except Exception as e:
-            logger.warning(
-                "Failed to list active branches for test results loading: %s", e
-            )
+            logger.warning("Failed to list active branches for test results loading: %s", e)
             # Continue without loading existing results
 
     def _save_test_results(self, branch_name: str) -> None:
@@ -372,9 +368,7 @@ class BranchTestManager:
             )
 
             # Run command
-            logger.info(
-                "Running %s on %s: %s", suite_name, branch_name, " ".join(suite.command)
-            )
+            logger.info("Running %s on %s: %s", suite_name, branch_name, " ".join(suite.command))
 
             start_time = time.time()
             process = await asyncio.create_subprocess_exec(
@@ -468,12 +462,8 @@ class BranchTestManager:
         results = []
 
         # Separate critical and non-critical tests
-        critical_suites = [
-            name for name, suite in self.test_suites.items() if suite.critical
-        ]
-        non_critical_suites = [
-            name for name, suite in self.test_suites.items() if not suite.critical
-        ]
+        critical_suites = [name for name, suite in self.test_suites.items() if suite.critical]
+        non_critical_suites = [name for name, suite in self.test_suites.items() if not suite.critical]
 
         # Run critical tests first (sequentially)
         for suite_name in critical_suites:
@@ -482,27 +472,18 @@ class BranchTestManager:
 
             # Stop if critical test fails
             if result.status == TestStatus.FAILED:
-                logger.warning(
-                    "Critical test %s failed, skipping remaining tests", suite_name
-                )
+                logger.warning("Critical test %s failed, skipping remaining tests", suite_name)
                 return results
 
         # Run non-critical tests
         if parallel and len(non_critical_suites) > 1:
             # Run in parallel
-            parallel_suites = [
-                s for s in non_critical_suites if self.test_suites[s].parallel
-            ]
-            sequential_suites = [
-                s for s in non_critical_suites if not self.test_suites[s].parallel
-            ]
+            parallel_suites = [s for s in non_critical_suites if self.test_suites[s].parallel]
+            sequential_suites = [s for s in non_critical_suites if not self.test_suites[s].parallel]
 
             # Run parallel tests
             if parallel_suites:
-                tasks = [
-                    self.run_test_suite(branch_name, suite_name)
-                    for suite_name in parallel_suites
-                ]
+                tasks = [self.run_test_suite(branch_name, suite_name) for suite_name in parallel_suites]
                 parallel_results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 for result in parallel_results:  # type: ignore[assignment]
@@ -593,23 +574,14 @@ class BranchTestManager:
         latest_results: dict[str, Any] = {}
         for result in results:
             key = f"{result.test_type.value}"
-            if (
-                key not in latest_results
-                or result.start_time > latest_results[key].start_time
-            ):
+            if key not in latest_results or result.start_time > latest_results[key].start_time:
                 latest_results[key] = result
 
         # Calculate summary
         total_tests = len(latest_results)
-        passed = len(
-            [r for r in latest_results.values() if r.status == TestStatus.PASSED]
-        )
-        failed = len(
-            [r for r in latest_results.values() if r.status == TestStatus.FAILED]
-        )
-        errors = len(
-            [r for r in latest_results.values() if r.status == TestStatus.ERROR]
-        )
+        passed = len([r for r in latest_results.values() if r.status == TestStatus.PASSED])
+        failed = len([r for r in latest_results.values() if r.status == TestStatus.FAILED])
+        errors = len([r for r in latest_results.values() if r.status == TestStatus.ERROR])
 
         # Overall status
         if errors > 0:
@@ -638,9 +610,7 @@ class BranchTestManager:
 
         try:
             for branch_info in self.branch_manager.list_active_branches():
-                summaries[branch_info.name] = self.get_branch_test_summary(
-                    branch_info.name
-                )
+                summaries[branch_info.name] = self.get_branch_test_summary(branch_info.name)
         except Exception as e:
             logger.warning("Failed to get active branches for summaries: %s", e)
             # Return summaries for branches we have results for
@@ -696,9 +666,7 @@ class BranchTestManager:
                 try:
                     active_branches = self.branch_manager.list_active_branches()
                 except Exception as e:
-                    logger.warning(
-                        "Failed to get active branches for monitoring: %s", e
-                    )
+                    logger.warning("Failed to get active branches for monitoring: %s", e)
                     await asyncio.sleep(60)
                     continue
 
@@ -724,9 +692,7 @@ class BranchTestManager:
                         )
 
                         if result.returncode == 0 and result.stdout.strip():
-                            last_commit_time = datetime.fromtimestamp(
-                                int(result.stdout.strip()), tz=UTC
-                            )
+                            last_commit_time = datetime.fromtimestamp(int(result.stdout.strip()), tz=UTC)
 
                             # Run tests if there are new commits
                             if last_commit_time > last_test_time:
@@ -737,9 +703,7 @@ class BranchTestManager:
                                 await self.auto_test_on_commit(branch_info.name)
 
                     except Exception as e:
-                        logger.debug(
-                            "Error checking commits for %s: %s", branch_info.name, e
-                        )
+                        logger.debug("Error checking commits for %s: %s", branch_info.name, e)
 
                 # Wait before next check
                 await asyncio.sleep(60)  # Check every minute
@@ -750,10 +714,7 @@ class BranchTestManager:
 
     def _get_last_test_time(self, branch_name: str) -> datetime:
         """Get the time of the last test run for a branch."""
-        if (
-            branch_name not in self.branch_results
-            or not self.branch_results[branch_name]
-        ):
+        if branch_name not in self.branch_results or not self.branch_results[branch_name]:
             return datetime.min.replace(tzinfo=UTC)
 
         return max(result.start_time for result in self.branch_results[branch_name])

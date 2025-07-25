@@ -19,7 +19,6 @@ from ..shared import claude_manager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Web dashboard router for FastAPI."""
 
 
@@ -57,9 +56,7 @@ async def get_sessions() -> list[dict[str, Any]]:
             # (same as individual controller status API)
             try:
                 controller = claude_manager.get_controller(session.session_name)
-                actual_controller_status = (
-                    "running" if controller.is_running else "stopped"
-                )
+                actual_controller_status = "running" if controller.is_running else "stopped"
             except Exception:
                 # Fallback to original status if controller lookup fails
                 actual_controller_status = session.controller_status
@@ -91,9 +88,7 @@ async def get_sessions() -> list[dict[str, Any]]:
                         for w in session.windows
                     ],
                     "panes": sum(len(w.panes) for w in session.windows),
-                    "claude_active": any(
-                        p.is_claude for w in session.windows for p in w.panes
-                    ),
+                    "claude_active": any(p.is_claude for w in session.windows for p in w.panes),
                 }
             )
 
@@ -230,14 +225,8 @@ async def get_activity_data() -> dict[str, Any]:
                 "activities": activities,
                 "total_days": len(activities),
                 "active_days": active_days,
-                "max_activity": max(
-                    (a["activity_count"] for a in activities), default=0
-                ),
-                "avg_activity": (
-                    sum(a["activity_count"] for a in activities) / len(activities)
-                    if activities
-                    else 0
-                ),
+                "max_activity": max((a["activity_count"] for a in activities), default=0),
+                "avg_activity": (sum(a["activity_count"] for a in activities) / len(activities) if activities else 0),
             }
         except (subprocess.CalledProcessError, ImportError, AttributeError):
             # Fallback with mock data for last 90 days
@@ -249,9 +238,7 @@ async def get_activity_data() -> dict[str, Any]:
             current_date = start_date
             while current_date <= end_date:
                 # Generate mock activity data
-                activity_count = (
-                    secrets.randbelow(16) if secrets.randbelow(10) > 3 else 0
-                )
+                activity_count = secrets.randbelow(16) if secrets.randbelow(10) > 3 else 0
                 activities.append(
                     ActivityData(
                         date=current_date.isoformat(),
@@ -266,34 +253,22 @@ async def get_activity_data() -> dict[str, Any]:
                 "activities": activities,
                 "total_days": len(activities),
                 "active_days": active_days,
-                "max_activity": max(
-                    (a["activity_count"] for a in activities), default=0
-                ),
-                "avg_activity": (
-                    sum(a["activity_count"] for a in activities) / len(activities)
-                    if activities
-                    else 0
-                ),
+                "max_activity": max((a["activity_count"] for a in activities), default=0),
+                "avg_activity": (sum(a["activity_count"] for a in activities) / len(activities) if activities else 0),
             }
     except Exception as e:
         logger.exception("Failed to get activity data")  # noqa: G004
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get activity data: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get activity data: {e!s}")
 
 
 @router.get("/api/dashboard/heatmap/{session_name}")
-async def get_session_heatmap(
-    session_name: str, days: Annotated[int, Query(ge=1, le=30)] = 7
-) -> dict[str, Any]:
+async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1, le=30)] = 7) -> dict[str, Any]:
     """세션별 히트맵 데이터 반환."""
     try:
         return heatmap_generator.generate_heatmap_data([session_name], days=days)
     except Exception as e:
         logger.exception("Failed to get heatmap data for {session_name}")  # noqa: G004
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get heatmap data: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get heatmap data: {e!s}")
 
 
 @router.get("/api/dashboard/stats")
@@ -306,9 +281,7 @@ async def get_dashboard_stats() -> dict[str, Any]:
         activity_data = await get_activity_data()
 
         return {
-            "active_sessions": len(
-                [s for s in sessions_data if s.get("status") == "active"]
-            ),
+            "active_sessions": len([s for s in sessions_data if s.get("status") == "active"]),
             "total_projects": 1,  # Current project count
             "health_score": health_data["overall_score"],
             "activity_streak": activity_data["active_days"],

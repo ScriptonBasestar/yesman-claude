@@ -11,7 +11,6 @@ from libs.multi_agent.conflict_resolution import ConflictResolutionEngine
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Conflict prediction and analysis commands."""
 
 logger = logging.getLogger(__name__)
@@ -40,9 +39,7 @@ class PredictConflictsCommand(BaseCommand):
                 msg = "Branches list is required for conflict prediction"
                 raise CommandError(msg)
 
-            self.print_info(
-                f"🔮 Predicting conflicts for branches: {', '.join(branches)}"
-            )
+            self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
             self.print_info(f"   Time horizon: {time_horizon} days")
             self.print_info(f"   Confidence threshold: {min_confidence}")
 
@@ -74,14 +71,10 @@ class PredictConflictsCommand(BaseCommand):
                     }
 
                 # Filter and limit results
-                filtered_predictions = [
-                    p for p in predictions if p.likelihood_score >= min_confidence
-                ]
+                filtered_predictions = [p for p in predictions if p.likelihood_score >= min_confidence]
                 filtered_predictions = filtered_predictions[:limit]
 
-                self.print_info(
-                    f"⚠️  Found {len(filtered_predictions)} potential conflicts:"
-                )
+                self.print_info(f"⚠️  Found {len(filtered_predictions)} potential conflicts:")
                 self.print_info("=" * 80)
 
                 for i, prediction in enumerate(filtered_predictions, 1):
@@ -92,24 +85,14 @@ class PredictConflictsCommand(BaseCommand):
                         "critical": "💀",
                     }.get(prediction.confidence.value, "❓")
 
-                    self.print_info(
-                        f"{i}. {confidence_icon} {prediction.prediction_id}"
-                    )
-                    self.print_info(
-                        f"   Confidence: {prediction.confidence.value} ({prediction.likelihood_score:.2f})"
-                    )
-                    self.print_info(
-                        f"   Branches: {', '.join(prediction.affected_branches)}"
-                    )
-                    self.print_info(
-                        f"   Predicted files: {', '.join(prediction.affected_files)}"
-                    )
+                    self.print_info(f"{i}. {confidence_icon} {prediction.prediction_id}")
+                    self.print_info(f"   Confidence: {prediction.confidence.value} ({prediction.likelihood_score:.2f})")
+                    self.print_info(f"   Branches: {', '.join(prediction.affected_branches)}")
+                    self.print_info(f"   Predicted files: {', '.join(prediction.affected_files)}")
                     self.print_info(f"   Description: {prediction.description}")
                     if prediction.prevention_suggestions:
                         self.print_info("   Prevention strategies:")
-                        for suggestion in prediction.prevention_suggestions[
-                            :2
-                        ]:  # Show first 2 suggestions
+                        for suggestion in prediction.prevention_suggestions[:2]:  # Show first 2 suggestions
                             self.print_info(f"      - {suggestion}")
                     self.print_info("")
 
@@ -136,9 +119,7 @@ class PredictConflictsCommand(BaseCommand):
 class PredictionSummaryCommand(BaseCommand):
     """Show prediction summary and statistics."""
 
-    def execute(
-        self, repo_path: str | None = None, **kwargs: Any
-    ) -> dict:  # noqa: ANN401, ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
         """Execute the prediction summary command.
 
         Returns:
@@ -159,9 +140,7 @@ class PredictionSummaryCommand(BaseCommand):
             self.print_info(f"Total Predictions: {summary['total_predictions']}")
             if "accuracy_metrics" in summary:
                 metrics = cast(dict, summary["accuracy_metrics"])
-                self.print_info(
-                    f"Accurate Predictions: {metrics.get('accurate_predictions', 0)}"
-                )
+                self.print_info(f"Accurate Predictions: {metrics.get('accurate_predictions', 0)}")
                 self.print_info(f"False Positives: {metrics.get('false_positives', 0)}")
                 self.print_info(f"Accuracy Rate: {metrics.get('accuracy_rate', 0):.1%}")
 
@@ -182,9 +161,7 @@ class PredictionSummaryCommand(BaseCommand):
 class AnalyzeConflictPatternsCommand(BaseCommand):
     """Analyze detailed conflict patterns and trends."""
 
-    def execute(
-        self, repo_path: str | None = None, **kwargs: Any
-    ) -> dict:  # noqa: ANN401, ARG002
+    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ANN401, ARG002
         """Execute the analyze conflict patterns command.
 
         Returns:
@@ -207,16 +184,12 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
             if analysis.get("frequent_conflict_files"):
                 self.print_info("\n🎯 Most Conflict-Prone Files:")
                 for file_info in cast(list, analysis["frequent_conflict_files"])[:5]:
-                    self.print_info(
-                        f"  📄 {file_info['file']}: {file_info['conflict_count']} conflicts"
-                    )
+                    self.print_info(f"  📄 {file_info['file']}: {file_info['conflict_count']} conflicts")
 
             if analysis.get("conflict_hotspots"):
                 self.print_info("\n🔥 Conflict Hotspots:")
                 for hotspot in cast(list, analysis["conflict_hotspots"])[:3]:
-                    self.print_info(
-                        f"  📍 {hotspot['location']}: {hotspot['severity']}"
-                    )
+                    self.print_info(f"  📍 {hotspot['location']}: {hotspot['severity']}")
 
             return {"success": True, "repo_path": repo_path, "analysis": analysis}
 

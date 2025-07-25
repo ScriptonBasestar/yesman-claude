@@ -14,7 +14,6 @@ from libs.dashboard.renderers.base_renderer import (
 from libs.dashboard.renderers.registry import RendererRegistry
 
 # Licensed under the MIT License
-
 """Tests for BaseRenderer and related components."""
 
 

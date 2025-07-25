@@ -8,7 +8,6 @@ from ..shared import claude_manager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Controller management API endpoints."""
 
 
@@ -46,25 +45,19 @@ def start_controller(session_name: str) -> None:  # noqa: PLR1702
         session_manager = SessionManager()
         sessions = session_manager.get_all_sessions()
 
-        session_exists = any(
-            s.session_name == session_name and s.status == "running" for s in sessions
-        )
+        session_exists = any(s.session_name == session_name and s.status == "running" for s in sessions)
 
         if not session_exists:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"❌ Session '{session_name}' is not running. Please start the session first using 'yesman up' or the dashboard."
-                ),
+                detail=(f"❌ Session '{session_name}' is not running. Please start the session first using 'yesman up' or the dashboard."),
             )
 
         # Check if controller is already running
         if controller.is_running:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"✅ Controller for session '{session_name}' is already running."
-                ),
+                detail=(f"✅ Controller for session '{session_name}' is already running."),
             )
 
         # Check if Claude pane exists before attempting to start
@@ -355,30 +348,22 @@ def start_all_controllers() -> object:
                     if success:
                         started_count += 1
                     else:
-                        errors.append(
-                            f"Failed to start controller for session '{session.session_name}'"
-                        )
+                        errors.append(f"Failed to start controller for session '{session.session_name}'")
                 else:
                     # 이미 실행 중인 경우도 성공으로 카운트
                     started_count += 1
             except (RuntimeError, OSError, AttributeError) as e:
-                errors.append(
-                    f"Error starting controller for session '{session.session_name}': {e!s}"
-                )
+                errors.append(f"Error starting controller for session '{session.session_name}': {e!s}")
 
         if errors and started_count == 0:
             # 모든 요청이 실패한 경우
             raise HTTPException(
                 status_code=500,
-                detail=(
-                    f"Failed to start any controllers. Errors: {'; '.join(errors)}"
-                ),
+                detail=(f"Failed to start any controllers. Errors: {'; '.join(errors)}"),
             )
 
         return {
-            "message": (
-                f"Started {started_count} controller(s) out of {len(running_sessions)} session(s)."
-            ),
+            "message": (f"Started {started_count} controller(s) out of {len(running_sessions)} session(s)."),
             "started": started_count,
             "total_sessions": len(running_sessions),
             "errors": errors,
@@ -387,9 +372,7 @@ def start_all_controllers() -> object:
     except HTTPException:
         raise
     except (ImportError, AttributeError, RuntimeError) as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to start all controllers: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to start all controllers: {e!s}")
 
 
 @router.post("/controllers/stop-all", status_code=200)
@@ -427,16 +410,12 @@ def stop_all_controllers() -> object:
                     elif not controller.is_running:
                         stopped_count += 1  # 실제로는 중지됨
                     else:
-                        errors.append(
-                            f"Failed to stop controller for session '{session.session_name}'"
-                        )
+                        errors.append(f"Failed to stop controller for session '{session.session_name}'")
                 else:
                     # 이미 중지된 경우도 성공으로 카운트
                     stopped_count += 1
             except (RuntimeError, OSError, AttributeError) as e:
-                errors.append(
-                    f"Error stopping controller for session '{session.session_name}': {e!s}"
-                )
+                errors.append(f"Error stopping controller for session '{session.session_name}': {e!s}")
 
         if errors and stopped_count == 0:
             # 모든 요청이 실패한 경우
@@ -446,9 +425,7 @@ def stop_all_controllers() -> object:
             )
 
         return {
-            "message": (
-                f"Stopped {stopped_count} controller(s) out of {len(running_sessions)} session(s)."
-            ),
+            "message": (f"Stopped {stopped_count} controller(s) out of {len(running_sessions)} session(s)."),
             "stopped": stopped_count,
             "total_sessions": len(running_sessions),
             "errors": errors,
@@ -457,6 +434,4 @@ def stop_all_controllers() -> object:
     except HTTPException:
         raise
     except (ImportError, AttributeError, RuntimeError) as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to stop all controllers: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to stop all controllers: {e!s}")

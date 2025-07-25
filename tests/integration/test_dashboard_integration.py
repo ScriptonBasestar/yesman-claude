@@ -22,7 +22,6 @@ from .test_framework import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dashboard Integration Tests.
 
 Tests the real-time dashboard integration with CLI, API, and automation systems.

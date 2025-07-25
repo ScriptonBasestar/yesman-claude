@@ -5,7 +5,6 @@ import time
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Claude process control and lifecycle management."""
 
 
@@ -16,9 +15,7 @@ class ClaudeProcessController:
         self.session_manager = session_manager
         self.status_manager = status_manager
         self.selected_model = "default"
-        self.logger = logging.getLogger(
-            f"yesman.claude_process.{session_manager.session_name}"
-        )
+        self.logger = logging.getLogger(f"yesman.claude_process.{session_manager.session_name}")
 
     def set_model(self, model: str) -> None:
         """Set the selected model."""
@@ -32,9 +29,7 @@ class ClaudeProcessController:
         Boolean indicating.
         """
         if not self.session_manager.get_claude_pane():
-            self.status_manager.update_status(
-                "[red]Cannot restart: No Claude pane in session[/]"
-            )
+            self.status_manager.update_status("[red]Cannot restart: No Claude pane in session[/]")
             return False
 
         try:
@@ -47,15 +42,11 @@ class ClaudeProcessController:
             claude_cmd = self._get_claude_command()
             self.session_manager.send_keys(claude_cmd)
 
-            self.status_manager.update_status(
-                f"[green]Claude pane restarted with {self.selected_model} model[/]"
-            )
+            self.status_manager.update_status(f"[green]Claude pane restarted with {self.selected_model} model[/]")
             return True
 
         except Exception as e:
-            self.status_manager.update_status(
-                f"[red]Failed to restart Claude pane: {e}[/]"
-            )
+            self.status_manager.update_status(f"[red]Failed to restart Claude pane: {e}[/]")
             self.logger.exception("Failed to restart Claude pane")  # noqa: G004
             return False
 
@@ -83,9 +74,7 @@ class ClaudeProcessController:
                     # Check if claude is still running by checking the command
                     cmd = self.session_manager.get_current_command()
                     if "claude" not in cmd.lower():
-                        self.logger.info(
-                            f"Claude process terminated after {attempt + 1} attempts"
-                        )  # noqa: G004
+                        self.logger.info(f"Claude process terminated after {attempt + 1} attempts")  # noqa: G004
                         break
                 except Exception:
                     # If we can't get the command, assume it's terminated
@@ -100,9 +89,7 @@ class ClaudeProcessController:
             time.sleep(0.2)
 
         except Exception as e:
-            self.logger.warning(
-                f"Error during claude process termination: {e}"
-            )  # noqa: G004
+            self.logger.warning(f"Error during claude process termination: {e}")  # noqa: G004
 
     def _get_claude_command(self) -> str:
         """Get claude command based on selected model.

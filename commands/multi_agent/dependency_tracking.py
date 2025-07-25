@@ -5,7 +5,6 @@ from libs.core.base_command import BaseCommand
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dependency management and tracking commands."""
 
 
@@ -72,7 +71,5 @@ class DependencyPropagateCommand(BaseCommand):
         """
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Propagating dependency changes...")
-        msg = (
-            "Dependency propagate implementation pending extraction from original file"
-        )
+        msg = "Dependency propagate implementation pending extraction from original file"
         raise NotImplementedError(msg)

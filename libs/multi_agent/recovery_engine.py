@@ -21,7 +21,6 @@ from .types import Agent, AgentState, Task, TaskStatus
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Rollback mechanism and error recovery system for multi-agent operations."""
 
 
@@ -62,9 +61,7 @@ class OperationSnapshot:
     # System state snapshots
     agent_states: dict[str, Any] = field(default_factory=dict)
     task_states: dict[str, Any] = field(default_factory=dict)
-    file_states: dict[str, str] = field(
-        default_factory=dict
-    )  # file_path -> backup_path
+    file_states: dict[str, str] = field(default_factory=dict)  # file_path -> backup_path
     branch_state: dict[str, Any] | None = None
 
     # Operation context
@@ -145,9 +142,7 @@ class RecoveryEngine:
         # State management
         self.snapshots: dict[str, OperationSnapshot] = {}
         self.recovery_strategies: dict[str, RecoveryStrategy] = {}
-        self.operation_history: list[
-            dict[str, str | bool | dict[str, str | int | bool | float | list[str]]]
-        ] = []
+        self.operation_history: list[dict[str, str | bool | dict[str, str | int | bool | float | list[str]]]] = []
         self.failure_counts: dict[str, int] = {}
 
         # Monitoring
@@ -184,9 +179,7 @@ class RecoveryEngine:
 
                 self.operation_history = data.get("operation_history", [])
                 self.failure_counts = data.get("failure_counts", {})
-                self.recovery_metrics = data.get(
-                    "recovery_metrics", self.recovery_metrics
-                )
+                self.recovery_metrics = data.get("recovery_metrics", self.recovery_metrics)
 
                 logger.info("Loaded {len(self.snapshots)} recovery snapshots")
 
@@ -203,9 +196,7 @@ class RecoveryEngine:
                         snapshot = OperationSnapshot.from_dict(snapshot_data)
                         self.snapshots[snapshot.snapshot_id] = snapshot
                     except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
-                        logger.warning(
-                            "Failed to load snapshot file %s: %s", snapshot_file, e
-                        )
+                        logger.warning("Failed to load snapshot file %s: %s", snapshot_file, e)
         except (OSError, PermissionError) as e:
             logger.warning("Failed to load snapshot files: %s", e)
 
@@ -312,9 +303,7 @@ class RecoveryEngine:
         agent_pool: object | None = None,
         branch_manager: object | None = None,
         files_to_backup: list[str] | None = None,
-        operation_context: (
-            dict[str, str | int | bool | float | list[str]] | None
-        ) = None,
+        operation_context: (dict[str, str | int | bool | float | list[str]] | None) = None,
     ) -> str:
         """Create a snapshot before a critical operation.
 
@@ -343,12 +332,8 @@ class RecoveryEngine:
             # Snapshot agent states
             if agent_pool:
                 pool = cast(Any, agent_pool)
-                snapshot.agent_states = {
-                    agent_id: agent.to_dict() for agent_id, agent in pool.agents.items()
-                }
-                snapshot.task_states = {
-                    task_id: task.to_dict() for task_id, task in pool.tasks.items()
-                }
+                snapshot.agent_states = {agent_id: agent.to_dict() for agent_id, agent in pool.agents.items()}
+                snapshot.task_states = {task_id: task.to_dict() for task_id, task in pool.tasks.items()}
 
             # Snapshot branch state
             if branch_manager:
@@ -359,10 +344,7 @@ class RecoveryEngine:
                     snapshot.branch_state = {
                         "current_branch": current_branch,
                         "status": branch_status,
-                        "branches": {
-                            name: info.to_dict()
-                            for name, info in manager.branches.items()
-                        },
+                        "branches": {name: info.to_dict() for name, info in manager.branches.items()},
                     }
                 except (AttributeError, KeyError, TypeError) as e:
                     logger.warning("Failed to snapshot branch state: %s", e)
@@ -445,9 +427,7 @@ class RecoveryEngine:
         snapshot = self.snapshots[snapshot_id]
 
         try:
-            logger.info(
-                "Rolling back to snapshot {snapshot_id}: {snapshot.description}"
-            )
+            logger.info("Rolling back to snapshot {snapshot_id}: {snapshot.description}")
 
             # Restore agent states
             if agent_pool and snapshot.agent_states:
@@ -475,15 +455,11 @@ class RecoveryEngine:
             return True
 
         except Exception:
-            logger.exception(
-                f"Failed to rollback to snapshot {snapshot_id}"
-            )  # noqa: G004
+            logger.exception(f"Failed to rollback to snapshot {snapshot_id}")  # noqa: G004
             return False
 
     @staticmethod
-    async def _restore_agent_states(
-        agent_pool: object | None, agent_states: dict[str, Any]
-    ) -> None:
+    async def _restore_agent_states(agent_pool: object | None, agent_states: dict[str, Any]) -> None:
         """Restore agent states from snapshot."""
         if not agent_pool:
             return
@@ -517,9 +493,7 @@ class RecoveryEngine:
                 logger.warning("Failed to restore agent %s: %s", agent_id, e)
 
     @staticmethod
-    async def _restore_task_states(
-        agent_pool: object | None, task_states: dict[str, Any]
-    ) -> None:
+    async def _restore_task_states(agent_pool: object | None, task_states: dict[str, Any]) -> None:
         """Restore task states from snapshot."""
         if not agent_pool:
             return
@@ -545,9 +519,7 @@ class RecoveryEngine:
                 logger.warning("Failed to restore task %s: %s", task_id, e)
 
     @staticmethod
-    async def _restore_branch_state(
-        branch_manager: object | None, branch_state: dict[str, Any]
-    ) -> None:
+    async def _restore_branch_state(branch_manager: object | None, branch_state: dict[str, Any]) -> None:
         """Restore branch state from snapshot."""
         if not branch_manager:
             return
@@ -565,14 +537,10 @@ class RecoveryEngine:
             if isinstance(branches_data, dict):
                 for branch_name, branch_data in branches_data.items():
                     try:
-                        branch_info = BranchInfo.from_dict(
-                            cast(dict[str, Any], branch_data)
-                        )
+                        branch_info = BranchInfo.from_dict(cast(dict[str, Any], branch_data))
                         manager.branches[branch_name] = branch_info
                     except (KeyError, AttributeError, TypeError, ImportError) as e:
-                        logger.warning(
-                            "Failed to restore branch %s: %s", branch_name, e
-                        )
+                        logger.warning("Failed to restore branch %s: %s", branch_name, e)
 
             # Save restored branch metadata
             manager._save_branch_metadata()
@@ -624,9 +592,7 @@ class RecoveryEngine:
             # Add more instruction types as needed
 
         except (OSError, subprocess.CalledProcessError, KeyError, TypeError) as e:
-            logger.warning(
-                "Failed to execute rollback instruction %s: %s", instruction, e
-            )
+            logger.warning("Failed to execute rollback instruction %s: %s", instruction, e)
 
     async def handle_operation_failure(
         self,
@@ -651,14 +617,10 @@ class RecoveryEngine:
         self.recovery_metrics["failed_operations"] += 1
 
         error_message = str(exception)
-        operation_key = (
-            str(context.get("operation_type", "unknown")) if context else "unknown"
-        )
+        operation_key = str(context.get("operation_type", "unknown")) if context else "unknown"
 
         # Track failure count
-        self.failure_counts[operation_key] = (
-            self.failure_counts.get(operation_key, 0) + 1
-        )
+        self.failure_counts[operation_key] = self.failure_counts.get(operation_key, 0) + 1
 
         logger.error("Operation {operation_id} failed: {error_message}")
 
@@ -694,9 +656,7 @@ class RecoveryEngine:
 
                 if success:
                     self.recovery_metrics["successful_recoveries"] += 1
-                    logger.info(
-                        "Recovery action {action.value} succeeded for {operation_id}"
-                    )
+                    logger.info("Recovery action {action.value} succeeded for {operation_id}")
                     return True
 
             # If all recovery actions failed
@@ -710,9 +670,7 @@ class RecoveryEngine:
             return False
 
         except Exception:
-            logger.exception(
-                f"Recovery process failed for {operation_id}"
-            )  # noqa: G004
+            logger.exception(f"Recovery process failed for {operation_id}")  # noqa: G004
             self.recovery_metrics["failed_recoveries"] += 1
             return False
 
@@ -738,9 +696,7 @@ class RecoveryEngine:
         """Find the best matching recovery strategy for an error."""
         # Try to find a specific match first
         for name, strategy in self.recovery_strategies.items():
-            if name != "generic_failure" and re.search(
-                strategy.error_pattern, error_message, re.IGNORECASE
-            ):
+            if name != "generic_failure" and re.search(strategy.error_pattern, error_message, re.IGNORECASE):
                 return strategy
 
         # Fall back to generic strategy
@@ -774,9 +730,7 @@ class RecoveryEngine:
             if action == RecoveryAction.RESET_AGENT:
                 if agent_pool and context.get("agent_id"):
                     agent_id = context["agent_id"]
-                    if hasattr(agent_pool, "agents") and agent_id in getattr(
-                        agent_pool, "agents", {}
-                    ):
+                    if hasattr(agent_pool, "agents") and agent_id in getattr(agent_pool, "agents", {}):
                         agent = agent_pool.agents[agent_id]
 
                         # Terminate any running process
@@ -813,17 +767,13 @@ class RecoveryEngine:
                 return True
 
             if action == RecoveryAction.ESCALATE:
-                await self._escalate_failure(
-                    str(context.get("operation_id", "unknown")), exception, context
-                )
+                await self._escalate_failure(str(context.get("operation_id", "unknown")), exception, context)
                 return False
 
             return False
 
         except Exception:
-            logger.exception(
-                f"Failed to execute recovery action {action.value}"
-            )  # noqa: G004
+            logger.exception(f"Failed to execute recovery action {action.value}")  # noqa: G004
             return False
 
     async def _escalate_failure(
@@ -949,22 +899,16 @@ class RecoveryEngine:
         except (OSError, PermissionError):
             return 0.0
 
-    def get_recent_operations(
-        self, limit: int = 20
-    ) -> list[dict[str, str | bool | dict[str, str | int | bool | float | list[str]]]]:
+    def get_recent_operations(self, limit: int = 20) -> list[dict[str, str | bool | dict[str, str | int | bool | float | list[str]]]]:
         """Get recent operation history."""
         return self.operation_history[-limit:]
 
-    def get_snapshot_info(self, snapshot_id: str) -> (
+    def get_snapshot_info(
+        self, snapshot_id: str
+    ) -> (
         dict[
             str,
-            str
-            | int
-            | bool
-            | float
-            | list[str]
-            | dict[str, str | int | bool | float | list[str]]
-            | dict[str, str | int | bool | list[str]],
+            str | int | bool | float | list[str] | dict[str, str | int | bool | float | list[str]] | dict[str, str | int | bool | list[str]],
         ]
         | None
     ):

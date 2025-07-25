@@ -12,7 +12,6 @@ from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Claude status and callback management."""
 
 
@@ -54,9 +53,7 @@ class ClaudeStatusManager:
             "content_snippet": content[-200:],  # Last 200 chars for context
         }
         self.response_history.append(record)
-        self.logger.info(
-            f"Auto-response recorded: {prompt_type} -> {response}"
-        )  # noqa: G004
+        self.logger.info(f"Auto-response recorded: {prompt_type} -> {response}")  # noqa: G004
 
         # Keep only last 100 responses
         if len(self.response_history) > 100:

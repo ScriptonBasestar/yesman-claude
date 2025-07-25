@@ -53,7 +53,6 @@ from .semantic_analysis import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Multi-agent system commands package.
 
 This package contains modular multi-agent commands split from the original

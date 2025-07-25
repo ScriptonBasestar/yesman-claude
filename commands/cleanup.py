@@ -13,7 +13,6 @@ from libs.core.base_command import BaseCommand, ConfigCommandMixin
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Cache cleanup command for removing excessive cache files."""
 
 
@@ -35,8 +34,6 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 
         Returns:
             Dict containing.
-
-
         """
         # Find cache files to clean
         cache_paths = self._find_cache_files(cleanup_all)
@@ -58,9 +55,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             }
 
         # Confirm cleanup
-        if not force and not self.confirm_action(
-            f"Delete {len(cache_paths)} cache items ({self._human_readable_size(total_size)})?"
-        ):
+        if not force and not self.confirm_action(f"Delete {len(cache_paths)} cache items ({self._human_readable_size(total_size)})?"):
             self.print_warning("Cleanup cancelled")
             return {"cancelled": True}
 
@@ -77,9 +72,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             "success": len(errors) == 0,
         }
 
-    def _find_cache_files(
-        self, cleanup_all: bool
-    ) -> list[tuple[str, Path, int]]:  # noqa: FBT001
+    def _find_cache_files(self, cleanup_all: bool) -> list[tuple[str, Path, int]]:  # noqa: FBT001
         """Find cache files to clean.
 
         Returns:
@@ -97,9 +90,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             if "__pycache__" in dirs:
                 pycache_path = Path(root) / "__pycache__"
                 if pycache_path.exists():
-                    size = sum(
-                        f.stat().st_size for f in pycache_path.rglob("*") if f.is_file()
-                    )
+                    size = sum(f.stat().st_size for f in pycache_path.rglob("*") if f.is_file())
                     cache_paths.append(("__pycache__", pycache_path, size))
 
             # Find .pyc files
@@ -130,34 +121,18 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
                         )
                     )
                 ).expanduser(),
-                Path(
-                    str(
-                        logging_dict.get(
-                            "claude_log_file", "~/.scripton/yesman/logs/claude.log"
-                        )
-                    )
-                ).expanduser(),
-                Path(
-                    str(
-                        logging_dict.get(
-                            "session_log_file", "~/.scripton/yesman/logs/session.log"
-                        )
-                    )
-                ).expanduser(),
+                Path(str(logging_dict.get("claude_log_file", "~/.scripton/yesman/logs/claude.log"))).expanduser(),
+                Path(str(logging_dict.get("session_log_file", "~/.scripton/yesman/logs/session.log"))).expanduser(),
             ]
 
             for log_path in log_paths:
-                if (
-                    log_path.exists() and log_path.stat().st_size > 10 * 1024 * 1024
-                ):  # > 10MB
+                if log_path.exists() and log_path.stat().st_size > 10 * 1024 * 1024:  # > 10MB
                     size = log_path.stat().st_size
                     cache_paths.append(("log", log_path, size))
 
         return cache_paths
 
-    def _display_summary(
-        self, cache_paths: list[tuple[str, Path, int]], total_size: int
-    ) -> None:
+    def _display_summary(self, cache_paths: list[tuple[str, Path, int]], total_size: int) -> None:
         """Display cache cleanup summary."""
         table = Table(title="Cache Cleanup Summary")
         table.add_column("Type", style="cyan")
@@ -169,13 +144,9 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
             table.add_row(cache_type, str(path), human_size)
 
         self.console.print(table)
-        self.console.print(
-            f"\n[bold]Total cache size:[/bold] {self._human_readable_size(total_size)}"
-        )
+        self.console.print(f"\n[bold]Total cache size:[/bold] {self._human_readable_size(total_size)}")
 
-    def _perform_cleanup(
-        self, cache_paths: list[tuple[str, Path, int]]
-    ) -> tuple[int, int, list[str]]:
+    def _perform_cleanup(self, cache_paths: list[tuple[str, Path, int]]) -> tuple[int, int, list[str]]:
         """Perform the actual cleanup.
 
         Returns:
@@ -187,9 +158,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
         cleaned_size = 0
         errors = []
 
-        for _cache_type, path, size in track(
-            cache_paths, description="Cleaning...", console=self.console
-        ):
+        for _cache_type, path, size in track(cache_paths, description="Cleaning...", console=self.console):
             try:
                 if path.is_dir():
                     shutil.rmtree(path)
@@ -202,14 +171,10 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
 
         return cleaned_count, cleaned_size, errors
 
-    def _display_results(
-        self, cleaned_count: int, cleaned_size: int, errors: list[str]
-    ) -> None:
+    def _display_results(self, cleaned_count: int, cleaned_size: int, errors: list[str]) -> None:
         """Display cleanup results."""
         if cleaned_count > 0:
-            self.print_success(
-                f"Cleaned {cleaned_count} items ({self._human_readable_size(cleaned_size)})"
-            )
+            self.print_success(f"Cleaned {cleaned_count} items ({self._human_readable_size(cleaned_size)})")
 
         if errors:
             self.print_error(f"{len(errors)} errors occurred:")
@@ -244,9 +209,7 @@ class CleanupCommand(BaseCommand, ConfigCommandMixin):
     help="Show what would be cleaned without actually deleting",
 )
 @click.option("--force", "-f", is_flag=True, help="Force cleanup without confirmation")
-@click.option(
-    "--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs"
-)
+@click.option("--all", "cleanup_all", is_flag=True, help="Clean all cache types including logs")
 def cleanup(dry_run: bool, force: bool, cleanup_all: bool) -> None:  # noqa: FBT001
     """Clean up excessive cache files and temporary data."""
     command = CleanupCommand()

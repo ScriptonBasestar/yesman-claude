@@ -10,7 +10,6 @@ from libs.core.settings import ContentLimits, ValidationPatterns
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Centralized validation utilities for the Yesman-Claude project.
 
 This module provides common validation functions used throughout the project
@@ -28,9 +27,7 @@ class ValidationError(Exception):
         super().__init__(f"Validation failed for {field}: {reason}")
 
 
-def validate_session_name(
-    name: str, max_length: int | None = None
-) -> tuple[bool, str | None]:
+def validate_session_name(name: str, max_length: int | None = None) -> tuple[bool, str | None]:
     """Validate tmux session name.
 
     Args:
@@ -56,9 +53,7 @@ def validate_session_name(
 
     # Check pattern
     if not re.match(ValidationPatterns.SESSION_NAME, name):
-        return False, (
-            "Session name contains invalid characters. Only letters, numbers, underscores, and hyphens are allowed"
-        )
+        return False, ("Session name contains invalid characters. Only letters, numbers, underscores, and hyphens are allowed")
 
     # Check if it starts with a number (tmux restriction)
     if name[0].isdigit():
@@ -81,9 +76,7 @@ def validate_project_name(name: str) -> tuple[bool, str | None]:
     return validate_session_name(name)
 
 
-def validate_window_name(
-    name: str, max_length: int | None = None
-) -> tuple[bool, str | None]:
+def validate_window_name(name: str, max_length: int | None = None) -> tuple[bool, str | None]:
     """Validate tmux window name.
 
     Args:
@@ -103,16 +96,12 @@ def validate_window_name(
 
     # Check pattern (windows allow spaces)
     if not re.match(ValidationPatterns.WINDOW_NAME, name):
-        return False, (
-            "Window name contains invalid characters. Only letters, numbers, underscores, hyphens, and spaces are allowed"
-        )
+        return False, ("Window name contains invalid characters. Only letters, numbers, underscores, hyphens, and spaces are allowed")
 
     return True, None
 
 
-def validate_pane_command(
-    command: str, max_length: int | None = None
-) -> tuple[bool, str | None]:
+def validate_pane_command(command: str, max_length: int | None = None) -> tuple[bool, str | None]:
     """Validate pane command.
 
     Args:
@@ -145,9 +134,7 @@ def validate_pane_command(
     return True, None
 
 
-def validate_template_exists(
-    template_name: str, templates_dir: str | None = None
-) -> tuple[bool, str | None]:
+def validate_template_exists(template_name: str, templates_dir: str | None = None) -> tuple[bool, str | None]:
     """Check if template exists.
 
     Args:
@@ -175,9 +162,7 @@ def validate_template_exists(
     return True, None
 
 
-def validate_directory_path(
-    path: str, must_exist: bool = True, create_if_missing: bool = False
-) -> tuple[bool, str | None]:  # noqa: FBT001
+def validate_directory_path(path: str, must_exist: bool = True, create_if_missing: bool = False) -> tuple[bool, str | None]:  # noqa: FBT001
     """Validate directory path.
 
     Args:
@@ -291,9 +276,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
     if not windows:
         errors.append("Session must have at least one window")
     elif len(windows) > ContentLimits.MAX_WINDOWS_PER_SESSION:
-        errors.append(
-            f"Too many windows (max: {ContentLimits.MAX_WINDOWS_PER_SESSION})"
-        )
+        errors.append(f"Too many windows (max: {ContentLimits.MAX_WINDOWS_PER_SESSION})")
     else:
         # Validate each window
         for i, window in enumerate(windows):
@@ -305,9 +288,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
             # Validate panes
             panes = window.get("panes", [])
             if len(panes) > ContentLimits.MAX_PANES_PER_WINDOW:
-                errors.append(
-                    f"Window '{window_name}': Too many panes (max: {ContentLimits.MAX_PANES_PER_WINDOW})"
-                )
+                errors.append(f"Window '{window_name}': Too many panes (max: {ContentLimits.MAX_PANES_PER_WINDOW})")
 
     # Validate start directory
     start_dir = config.get("start_directory", "")
@@ -320,9 +301,7 @@ def validate_session_config(config: dict) -> tuple[bool, list[str]]:
 
 
 # Validation decorators for common use cases
-def validate_input(
-    validation_func: Callable[[Any], tuple[bool, str]], field_name: str
-) -> object:
+def validate_input(validation_func: Callable[[Any], tuple[bool, str]], field_name: str) -> object:
     """Decorator to validate function inputs.
 
     Args:

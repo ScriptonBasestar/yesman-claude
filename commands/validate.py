@@ -18,11 +18,10 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 
 
 class ValidateCommand(BaseCommand, SessionCommandMixin):
-    """Check if all directories in projects.yaml exist (or only for a specific session)."""
+    """Check if all directories in projects.yaml exist (or only for a specific
+    session)."""
 
-    def execute(
-        self, session_name: str | None = None, format: str = "table", **kwargs: Any
-    ) -> dict:  # noqa: ARG002
+    def execute(self, session_name: str | None = None, format: str = "table", **kwargs: Any) -> dict:  # noqa: ARG002
         """Execute the validate command.
 
         Returns:
@@ -38,44 +37,32 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
 
             if session_name:
                 if session_name not in sessions:
-                    console.print(
-                        f"[red]❌ Session '{session_name}' not defined in projects.yaml[/red]"
-                    )
+                    console.print(f"[red]❌ Session '{session_name}' not defined in projects.yaml[/red]")
                     return {"success": False, "error": "session_not_defined"}
                 sessions = {session_name: sessions[session_name]}
 
             # Show progress for multiple sessions
             if len(sessions) > 1:
-                console.print(
-                    f"[blue]🔍 Validating {len(sessions)} sessions...[/blue]\n"
-                )
+                console.print(f"[blue]🔍 Validating {len(sessions)} sessions...[/blue]\n")
 
             missing = []
             valid_count = 0
 
             # Process sessions with progress tracking for multiple sessions
             sessions_to_process = list(sessions.items())
-            iterator = (
-                track(sessions_to_process, description="Validating sessions...")
-                if len(sessions) > 3
-                else sessions_to_process
-            )
+            iterator = track(sessions_to_process, description="Validating sessions...") if len(sessions) > 3 else sessions_to_process
 
             for s_name, sess_conf in iterator:
                 try:
                     # 템플릿이 적용된 최종 설정을 가져오기
-                    final_config = self.tmux_manager.get_session_config(
-                        s_name, sess_conf
-                    )
+                    final_config = self.tmux_manager.get_session_config(s_name, sess_conf)
                     session_missing = []
 
                     # 세션 시작 디렉토리 검사
                     start_dir = final_config.get("start_directory", os.getcwd())
                     expanded_dir = os.path.expanduser(str(start_dir))
                     if not os.path.exists(expanded_dir):
-                        session_missing.append(
-                            ("session", "Session Root", expanded_dir)
-                        )
+                        session_missing.append(("session", "Session Root", expanded_dir))
 
                     # 윈도우별 start_directory 검사
                     windows = cast(list, final_config.get("windows", []))
@@ -86,15 +73,11 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
                             if not os.path.isabs(window_start_dir):
                                 # 상대 경로인 경우 세션의 시작 디렉토리를 기준으로 함
                                 base_dir = expanded_dir
-                                window_start_dir = os.path.join(
-                                    base_dir, window_start_dir
-                                )
+                                window_start_dir = os.path.join(base_dir, window_start_dir)
                             expanded_window_dir = os.path.expanduser(window_start_dir)
                             if not os.path.exists(expanded_window_dir):
                                 window_name = window.get("window_name", f"window_{i}")
-                                session_missing.append(
-                                    ("window", window_name, expanded_window_dir)
-                                )
+                                session_missing.append(("window", window_name, expanded_window_dir))
 
                         # 팬별 start_directory 검사 (팬이 있는 경우)
                         panes = window.get("panes", [])
@@ -103,14 +86,10 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
                                 pane_start_dir = pane["start_directory"]
                                 if not os.path.isabs(pane_start_dir):
                                     base_dir = expanded_dir
-                                    pane_start_dir = os.path.join(
-                                        base_dir, pane_start_dir
-                                    )
+                                    pane_start_dir = os.path.join(base_dir, pane_start_dir)
                                 expanded_pane_dir = os.path.expanduser(pane_start_dir)
                                 if not os.path.exists(expanded_pane_dir):
-                                    window_name = window.get(
-                                        "window_name", f"window_{i}"
-                                    )
+                                    window_name = window.get("window_name", f"window_{i}")
                                     session_missing.append(
                                         (
                                             "pane",
@@ -126,9 +105,7 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
                         valid_count += 1
 
                 except Exception as e:
-                    console.print(
-                        f"[yellow]⚠️  Error processing session '{s_name}': {e}[/yellow]"
-                    )
+                    console.print(f"[yellow]⚠️  Error processing session '{s_name}': {e}[/yellow]")
                     continue
 
             # Display results based on format
@@ -164,7 +141,8 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
     help="Output format",
 )
 def validate(session_name: str | None, format: str) -> None:
-    """Check if all directories in projects.yaml exist (or only for a specific session)."""
+    """Check if all directories in projects.yaml exist (or only for a specific
+    session)."""
     command = ValidateCommand()
     command.run(session_name=session_name, format=format)
 
@@ -181,9 +159,7 @@ def _display_success(console: Console, valid_count: int, total_count: int) -> No
     console.print(success_panel)
 
 
-def _display_table_format(
-    console: Console, missing: list, valid_count: int, total_count: int
-) -> None:  # noqa: ARG001
+def _display_table_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
     """Display results in table format."""
     table = Table(
         title="[red]Directory Validation Results[/red]",
@@ -223,14 +199,10 @@ def _display_table_format(
     console.print(table)
 
 
-def _display_tree_format(
-    console: Console, missing: list, valid_count: int, total_count: int
-) -> None:  # noqa: ARG001
+def _display_tree_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
     """Display results in tree format."""
     console.print("\n[red bold]❌ Directory Validation Issues[/red bold]")
-    console.print(
-        f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n"
-    )
+    console.print(f"[dim]{len(missing)} sessions with issues, {valid_count} sessions valid[/dim]\n")
 
     tree = Tree("[red]📁 Missing Directories[/red]", style="red")
 
@@ -262,16 +234,12 @@ def _display_tree_format(
 
                 for target_name, path in items:
                     display_path = _shorten_path(path)
-                    type_branch.add(
-                        f"[magenta]{target_name}[/magenta] → [red]{display_path}[/red]"
-                    )
+                    type_branch.add(f"[magenta]{target_name}[/magenta] → [red]{display_path}[/red]")
 
     console.print(tree)
 
 
-def _display_simple_format(
-    console: Console, missing: list, valid_count: int, total_count: int
-) -> None:  # noqa: ARG001
+def _display_simple_format(console: Console, missing: list, valid_count: int, total_count: int) -> None:  # noqa: ARG001
     """Display results in simple format."""
     console.print("[red bold]❌ Missing Directories Found[/red bold]\n")
 
@@ -287,15 +255,11 @@ def _display_simple_format(
                 icon = "📄"
 
             display_path = _shorten_path(path)
-            console.print(
-                f"  {icon} [magenta]{target_name}[/magenta] → [red]{display_path}[/red]"
-            )
+            console.print(f"  {icon} [magenta]{target_name}[/magenta] → [red]{display_path}[/red]")
 
         console.print()  # Empty line between sessions
 
-    console.print(
-        f"[dim]Summary: {len(missing)} sessions with issues, {valid_count} sessions valid[/dim]"
-    )
+    console.print(f"[dim]Summary: {len(missing)} sessions with issues, {valid_count} sessions valid[/dim]")
 
 
 def _shorten_path(path: str, max_length: int = 60) -> str:

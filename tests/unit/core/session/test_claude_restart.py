@@ -7,7 +7,6 @@ from libs.core.claude_manager import DashboardController
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test claude restart functionality."""
 
 

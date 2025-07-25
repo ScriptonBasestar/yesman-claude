@@ -24,7 +24,6 @@ from libs.dashboard.renderers.widget_models import (
     StatusIndicatorData,
     WindowData,
 )
-
 """Tests for Tauri Renderer."""
 
 

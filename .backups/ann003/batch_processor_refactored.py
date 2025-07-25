@@ -295,7 +295,7 @@ class WebSocketBatchProcessor:
             try:
                 await handler([message])
                 self.stats["messages_processed"] += 1
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error sending immediate message to {channel}")  # noqa: G004
         else:
             self.logger.warning("No handler registered for channel: %s", channel)

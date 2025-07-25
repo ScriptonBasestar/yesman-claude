@@ -5,7 +5,6 @@ from libs.core.progress_tracker import ProgressAnalyzer
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test progress tracking functionality."""
 
 

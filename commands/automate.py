@@ -18,7 +18,6 @@ from libs.core.base_command import BaseCommand, CommandError, ConfigCommandMixin
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Context-aware automation and workflow management commands."""
 
 
@@ -29,9 +28,7 @@ class AutomateStatusCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(
-        self, project_path: str = ".", **kwargs: Any
-    ) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the status command.
 
         Returns:
@@ -58,9 +55,7 @@ class AutomateStatusCommand(BaseCommand):
             self.console.print(overview)
 
             # Show available context types
-            context_table = Table(
-                title="📊 Context Detection Capabilities", show_header=True
-            )
+            context_table = Table(title="📊 Context Detection Capabilities", show_header=True)
             context_table.add_column("Context Type", style="cyan")
             context_table.add_column("Description", style="white")
             context_table.add_column("Triggers", style="yellow")
@@ -151,9 +146,7 @@ class AutomateMonitorCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(
-        self, project_path: str = ".", interval: int = 10, **kwargs: Any
-    ) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", interval: int = 10, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the monitor command.
 
         Returns:
@@ -163,9 +156,7 @@ class AutomateMonitorCommand(BaseCommand):
             project_path_obj = Path(project_path).resolve()
             automation_manager = AutomationManager(project_path_obj)
 
-            self.console.print(
-                f"🚀 Starting automation monitoring for {project_path_obj.name}"
-            )
+            self.console.print(f"🚀 Starting automation monitoring for {project_path_obj.name}")
             self.console.print(f"Detection interval: {interval} seconds")
             self.console.print("Press Ctrl+C to stop monitoring")
             self.console.print("=" * 60)
@@ -173,30 +164,18 @@ class AutomateMonitorCommand(BaseCommand):
             # Add callback for events
             def on_context_detected(context_info: object) -> None:
                 context_type = getattr(context_info, "context_type", None)
-                context_type_val = (
-                    getattr(context_type, "value", "unknown")
-                    if context_type
-                    else "unknown"
-                )
+                context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
                 description = getattr(context_info, "description", "No description")
-                self.console.print(
-                    f"[yellow]🔍 Context detected: {context_type_val}[/]"
-                )
+                self.console.print(f"[yellow]🔍 Context detected: {context_type_val}[/]")
                 self.console.print(f"   Details: {description}")
 
             def on_workflow_triggered(workflow_name: str, context: object) -> None:
                 self.console.print(f"[cyan]⚡ Workflow triggered: {workflow_name}[/]")
                 context_type = getattr(context, "context_type", None)
-                context_type_val = (
-                    getattr(context_type, "value", "unknown")
-                    if context_type
-                    else "unknown"
-                )
+                context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
                 self.console.print(f"   Context: {context_type_val}")
 
-            def on_workflow_completed(
-                workflow_name: str, success: bool, results: object
-            ) -> None:  # noqa: FBT001
+            def on_workflow_completed(workflow_name: str, success: bool, results: object) -> None:  # noqa: FBT001
                 status = "✅ Success" if success else "❌ Failed"
                 self.console.print(f"[green]{status}: {workflow_name}[/]")
                 if results:
@@ -251,9 +230,7 @@ class AutomateTriggerCommand(BaseCommand):
             # Convert string to enum
             context_enum = ContextType(context_type)
 
-            self.console.print(
-                f"🎯 Manually triggering automation for context: {context_type}"
-            )
+            self.console.print(f"🎯 Manually triggering automation for context: {context_type}")
             self.console.print(f"Description: {description}")
 
             # Simulate context detection
@@ -267,9 +244,7 @@ class AutomateTriggerCommand(BaseCommand):
                 )
 
                 # Trigger workflows for this context
-                triggered_workflows = (
-                    automation_manager.workflow_engine.trigger_workflows(context_info)
-                )
+                triggered_workflows = automation_manager.workflow_engine.trigger_workflows(context_info)
                 return {"triggered_workflows": triggered_workflows}
 
             result = asyncio.run(trigger_automation())
@@ -297,9 +272,7 @@ class AutomateExecuteCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(
-        self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any
-    ) -> dict[str, Any]:  # noqa: ANN401
+    def execute(self, workflow_name: str | None = None, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
         """Execute the workflow command.
 
         Returns:
@@ -329,9 +302,7 @@ class AutomateExecuteCommand(BaseCommand):
                 )
 
                 # Use manual trigger workflow
-                execution_id = await automation_manager.manual_trigger_workflow(
-                    workflow_name, context_info
-                )
+                execution_id = await automation_manager.manual_trigger_workflow(workflow_name, context_info)
 
                 if execution_id:
                     return True, {"execution_id": execution_id}
@@ -363,9 +334,7 @@ class AutomateDetectCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(
-        self, project_path: str = ".", **kwargs: Any
-    ) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the detect command.
 
         Returns:
@@ -391,9 +360,7 @@ class AutomateDetectCommand(BaseCommand):
                     return await automation_manager._detect_all_contexts()
 
                 contexts = asyncio.run(run_detection())
-                progress.update(
-                    detection_task, description="✅ Context detection completed"
-                )
+                progress.update(detection_task, description="✅ Context detection completed")
 
             if not contexts:
                 self.print_info("No contexts detected")
@@ -409,17 +376,9 @@ class AutomateDetectCommand(BaseCommand):
             for context in contexts:
                 details = getattr(context, "details", {})
                 details_dict = details if isinstance(details, dict) else {}
-                data_summary = (
-                    str(details)[:50] + "..."
-                    if len(str(details)) > 50
-                    else str(details)
-                )
+                data_summary = str(details)[:50] + "..." if len(str(details)) > 50 else str(details)
                 context_type = getattr(context, "context_type", None)
-                context_type_val = (
-                    getattr(context_type, "value", "unknown")
-                    if context_type
-                    else "unknown"
-                )
+                context_type_val = getattr(context_type, "value", "unknown") if context_type else "unknown"
                 confidence = getattr(context, "confidence", 0.0)
                 table.add_row(
                     context_type_val,
@@ -443,13 +402,9 @@ class AutomateDetectCommand(BaseCommand):
                         matching_workflows.append(workflow_name)
 
                 if matching_workflows:
-                    self.console.print(
-                        f"  {context.context_type.value}: {', '.join(matching_workflows)}"
-                    )
+                    self.console.print(f"  {context.context_type.value}: {', '.join(matching_workflows)}")
                 else:
-                    self.console.print(
-                        f"  {context.context_type.value}: No workflows configured"
-                    )
+                    self.console.print(f"  {context.context_type.value}: No workflows configured")
 
             return {"contexts": contexts}
 
@@ -465,9 +420,7 @@ class AutomateConfigCommand(BaseCommand, ConfigCommandMixin):
         super().__init__()
         self.console = Console()
 
-    def execute(
-        self, project_path: str = ".", output: str | None = None, **kwargs: Any
-    ) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(self, project_path: str = ".", output: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the config command.
 
         Returns:
@@ -564,9 +517,7 @@ def status(project_path: str) -> None:
 
 @automate.command()
 @click.option("--project-path", "-p", default=".", help="Project directory path")
-@click.option(
-    "--interval", "-i", default=10, type=int, help="Detection interval in seconds"
-)
+@click.option("--interval", "-i", default=10, type=int, help="Detection interval in seconds")
 def monitor(project_path: str, interval: int) -> None:
     """Start context monitoring and automation."""
     command = AutomateMonitorCommand()
@@ -582,15 +533,11 @@ def monitor(project_path: str, interval: int) -> None:
     type=click.Choice([ct.value for ct in ContextType]),
     help="Context type to simulate",
 )
-@click.option(
-    "--description", "-d", default="Manual trigger", help="Context description"
-)
+@click.option("--description", "-d", default="Manual trigger", help="Context description")
 def trigger(project_path: str, context_type: str, description: str) -> None:
     """Manually trigger automation for a specific context."""
     command = AutomateTriggerCommand()
-    command.run(
-        project_path=project_path, context_type=context_type, description=description
-    )
+    command.run(project_path=project_path, context_type=context_type, description=description)
 
 
 @automate.command()

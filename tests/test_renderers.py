@@ -43,7 +43,6 @@ from libs.dashboard.renderers.widget_models import (
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Comprehensive Renderer System Integration Tests
 Testing the complete renderer ecosystem with cross-format compatibility,
 performance benchmarks, and memory stability.

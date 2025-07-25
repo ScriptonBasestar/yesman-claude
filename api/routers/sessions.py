@@ -15,7 +15,6 @@ from libs.tmux_manager import TmuxManager
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Improved sessions router with dependency injection and proper error handling."""
 
 
@@ -403,7 +402,10 @@ class SessionService:
                 except YesmanError as setup_error:
                     if "already exists" in str(setup_error.message):
                         # Session was created in between checks, try to attach
-                        subprocess.run(["tmux", "attach-session", "-d", "-t", session_name], check=False)
+                        subprocess.run(
+                            ["tmux", "attach-session", "-d", "-t", session_name],
+                            check=False,
+                        )
                         return {
                             "session_name": session_name,
                             "status": "started",
@@ -474,7 +476,13 @@ class SessionService:
 
                 session_status = session_info.status
                 # Ensure status is a valid SessionStatusType
-                if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                if session_status not in {
+                    "running",
+                    "stopped",
+                    "unknown",
+                    "starting",
+                    "stopping",
+                }:
                     session_status = "unknown"
 
                 return {
@@ -501,7 +509,13 @@ class SessionService:
             else:
                 # Fallback for dict-like objects
                 session_status = getattr(session_data, "status", "unknown")
-                if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                if session_status not in {
+                    "running",
+                    "stopped",
+                    "unknown",
+                    "starting",
+                    "stopping",
+                }:
                     session_status = "unknown"
 
                 return {
@@ -527,31 +541,23 @@ class SessionService:
         Boolean indicating.
         """
         try:
-<<<<<<< HEAD
-            # Check directly with tmux (this is the ground truth)
-=======
             # First check with session manager
             sessions = self.session_manager.get_all_sessions()
             session_manager_result = any(getattr(session, "session_name", None) == session_name for session in sessions)
 
             # Also check directly with tmux
->>>>>>> 1a60727 (fix: lint)
             try:
                 result = subprocess.run(
                     ["tmux", "has-session", "-t", session_name],
                     check=False,
                     capture_output=True,
                 )
-                return result.returncode == 0
+                tmux_result = result.returncode == 0
             except Exception:
-<<<<<<< HEAD
-                return False
-=======
                 tmux_result = False
 
             # Return True if either method confirms the session exists
             return session_manager_result or tmux_result
->>>>>>> 1a60727 (fix: lint)
         except Exception:
             return False
 
@@ -566,25 +572,17 @@ class SessionService:
             template = str(session_config.get("template_name", "default"))
             override_config = cast(dict, session_config.get("override", {}))
 
-<<<<<<< HEAD
             # Use override session name if provided, otherwise use session_name
             actual_session_name = str(override_config.get("session_name", session_name))
 
             # Get start directory from override config
             start_directory = str(override_config.get("start_directory", "."))
             project_path = start_directory
-
-=======
-            # Use override session name if provided
-            actual_session_name = str(override_config.get("session_name", session_name))
-
->>>>>>> 1a60727 (fix: lint)
             # Create tmux session
             create_cmd = ["tmux", "new-session", "-d", "-s", actual_session_name]
 
             # Set working directory if specified
             if project_path and project_path != ".":
-<<<<<<< HEAD
                 # Expand ~ to home directory
                 import os
 
@@ -594,13 +592,6 @@ class SessionService:
             # Create the session
             self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
             result = subprocess.run(create_cmd, check=False, capture_output=True, text=True)
-=======
-                create_cmd.extend(["-c", project_path])
-
-            # Create the session
-            self.logger.info(f"Running tmux command: {' '.join(create_cmd)}")
-            result = subprocess.run(create_cmd, capture_output=True, text=True)
->>>>>>> 1a60727 (fix: lint)
 
             self.logger.info(f"tmux command result: returncode={result.returncode}, stdout={result.stdout}, stderr={result.stderr}")
 
@@ -614,7 +605,6 @@ class SessionService:
 
             self.logger.info(f"Created tmux session '{actual_session_name}'")
 
-<<<<<<< HEAD
             # Setup windows based on override configuration
             windows_config = override_config.get("windows", [])
             if isinstance(windows_config, list) and windows_config:
@@ -623,20 +613,38 @@ class SessionService:
                         window_name = window_config.get("window_name", f"window{window_idx}")
                         # Create new window (except for the first one which already exists)
                         if window_idx > 0:
-                            subprocess.run(["tmux", "new-window", "-t", actual_session_name, "-n", window_name], check=False, capture_output=True)
+                            subprocess.run(
+                                [
+                                    "tmux",
+                                    "new-window",
+                                    "-t",
+                                    actual_session_name,
+                                    "-n",
+                                    window_name,
+                                ],
+                                check=False,
+                                capture_output=True,
+                            )
                         else:
                             # Rename the first window
-                            subprocess.run(["tmux", "rename-window", "-t", f"{actual_session_name}:0", window_name], check=False, capture_output=True)
-=======
-            # Setup windows based on template
-            # For now, just create a basic window structure
-            if template != "default":
-                # Create additional windows based on template
-                # This would integrate with template system
-                pass
->>>>>>> 1a60727 (fix: lint)
+                            subprocess.run(
+                                [
+                                    "tmux",
+                                    "rename-window",
+                                    "-t",
+                                    f"{actual_session_name}:0",
+                                    window_name,
+                                ],
+                                check=False,
+                                capture_output=True,
+                            )
 
-            return {"message": "Session setup completed", "session_name": actual_session_name, "template": template, "project_path": project_path}
+            return {
+                "message": "Session setup completed",
+                "session_name": actual_session_name,
+                "template": template,
+                "project_path": project_path,
+            }
 
         except subprocess.CalledProcessError as e:
             msg = f"Failed to create tmux session: {e}"
@@ -708,15 +716,21 @@ def get_all_sessions() -> object:
 
                 # Ensure status is valid
                 session_status = str(session.get("status", "unknown"))
-                if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+                if session_status not in {
+                    "running",
+                    "stopped",
+                    "unknown",
+                    "starting",
+                    "stopping",
+                }:
                     session_status = "unknown"
 
                 result.append(
                     models.SessionInfo(
                         session_name=str(session.get("session_name", "")),
-                        project_name=str(session.get("project_name", "")) if session.get("project_name") else None,
+                        project_name=(str(session.get("project_name", "")) if session.get("project_name") else None),
                         status=session_status,
-                        template=str(session.get("template", "")) if session.get("template") else None,
+                        template=(str(session.get("template", "")) if session.get("template") else None),
                         windows=windows,
                     )
                 )
@@ -785,14 +799,20 @@ def get_session(session_name: str) -> object:
 
             # Ensure status is valid
             session_status = str(session_data.get("status", "unknown"))
-            if session_status not in {"running", "stopped", "unknown", "starting", "stopping"}:
+            if session_status not in {
+                "running",
+                "stopped",
+                "unknown",
+                "starting",
+                "stopping",
+            }:
                 session_status = "unknown"
 
             return models.SessionInfo(
                 session_name=str(session_data.get("session_name", "")),
-                project_name=str(session_data.get("project_name", "")) if session_data.get("project_name") else None,
+                project_name=(str(session_data.get("project_name", "")) if session_data.get("project_name") else None),
                 status=session_status,
-                template=str(session_data.get("template", "")) if session_data.get("template") else None,
+                template=(str(session_data.get("template", "")) if session_data.get("template") else None),
                 windows=windows,
             )
         else:

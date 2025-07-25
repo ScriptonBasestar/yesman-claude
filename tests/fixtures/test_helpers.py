@@ -16,7 +16,6 @@ from .mock_data import MockTmuxPane, MockTmuxSession
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """테스트 헬퍼 함수 및 유틸리티
 테스트에서 자주 사용되는 공통 함수들을 제공.
 """
@@ -101,7 +100,7 @@ def create_test_project_structure(base_dir: str) -> None:
 
 
 class CaptureOutput:
-    """stdout/stderr 캡처 헬퍼 클래스."""
+    """Stdout/stderr 캡처 헬퍼 클래스."""
 
     def __init__(self) -> None:
         self.stdout: list[str] = []

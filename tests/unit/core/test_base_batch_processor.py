@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -9,10 +10,7 @@ from libs.core.base_batch_processor import BaseBatchProcessor
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for the base batch processor."""
-
-from typing import Any
 
 
 @dataclass

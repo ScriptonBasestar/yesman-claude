@@ -5,7 +5,6 @@ from .base_renderer import BaseRenderer, RenderFormat
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Renderer Registry
 Central registry for managing renderer instances and types.
 """
@@ -24,9 +23,7 @@ class RendererRegistry:
         self._instances: dict[RenderFormat, BaseRenderer] = {}
         self._default_format: RenderFormat | None = None
 
-    def register(
-        self, format_type: RenderFormat, renderer_class: type[BaseRenderer]
-    ) -> None:
+    def register(self, format_type: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
         """Register a renderer class for a specific format.
 
         Args:
@@ -60,13 +57,9 @@ class RendererRegistry:
 
         # Update default if necessary
         if self._default_format == format_type:
-            self._default_format = (
-                next(iter(self._renderers.keys())) if self._renderers else None
-            )
+            self._default_format = next(iter(self._renderers.keys())) if self._renderers else None
 
-    def get_renderer_class(
-        self, format_type: RenderFormat
-    ) -> type[BaseRenderer] | None:
+    def get_renderer_class(self, format_type: RenderFormat) -> type[BaseRenderer] | None:
         """Get the renderer class for a specific format.
 
         Args:
@@ -77,9 +70,7 @@ class RendererRegistry:
         """
         return self._renderers.get(format_type)
 
-    def get_renderer(
-        self, format_type: RenderFormat, **kwargs: Any
-    ) -> BaseRenderer | None:
+    def get_renderer(self, format_type: RenderFormat, **kwargs: Any) -> BaseRenderer | None:
         """Get a renderer instance for a specific format.
 
         Args:
@@ -187,9 +178,7 @@ class RendererRegistry:
 registry = RendererRegistry()
 
 
-def register_renderer(
-    format_type: RenderFormat, renderer_class: type[BaseRenderer]
-) -> None:
+def register_renderer(format_type: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
     """Convenience function to register a renderer globally.
 
     Args:

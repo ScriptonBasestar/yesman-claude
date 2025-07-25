@@ -7,7 +7,6 @@ from libs.ui.session_selector import SessionSelector
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test for session selector UI."""
 
 

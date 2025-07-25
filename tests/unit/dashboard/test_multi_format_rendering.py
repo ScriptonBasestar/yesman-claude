@@ -1,9 +1,7 @@
 # Copyright notice.
 
 from libs.dashboard.renderers import RendererFactory, RenderFormat, WidgetType
-from libs.dashboard.renderers.widget_models import (
-    # Copyright (c) 2024 Yesman Claude Project
-    # Licensed under the MIT License
+from libs.dashboard.renderers.widget_models import (  # Copyright (c) 2024 Yesman Claude Project; Licensed under the MIT License
     HealthData,
     SessionData,
     SessionStatus,

@@ -8,7 +8,6 @@ from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Centralized Mock Factory System
 Provides standardized mock objects to reduce duplication across test files.
 """

@@ -15,7 +15,6 @@ from libs.dashboard.dashboard_launcher import DashboardLauncher, InterfaceInfo
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for DashboardLauncher.
 
 Comprehensive testing of dashboard interface detection, dependency checking,
@@ -326,7 +325,8 @@ class TestDashboardLauncher:
     def test_detect_best_interface_gui_without_tauri_no_terminal(
         mock_term: Mock, mock_gui: Mock, mock_ssh: Mock, launcher: DashboardLauncher
     ) -> None:
-        """Test interface detection with GUI but no Tauri and no terminal capability."""
+        """Test interface detection with GUI but no Tauri and no terminal
+        capability."""
         mock_ssh.return_value = False
         mock_gui.return_value = True
         mock_term.return_value = False

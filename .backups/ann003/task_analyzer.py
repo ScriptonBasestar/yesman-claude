@@ -124,7 +124,7 @@ class TaskAnalyzer:
             # Cache results
             self.file_dependencies[file_path] = dependencies
 
-        except Exception as e:
+        except Exception:
             logger.exception("Failed to analyze %s")
 
         return dependencies

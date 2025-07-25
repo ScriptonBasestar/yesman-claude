@@ -1,13 +1,13 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
+from typing import Any
 
 # Import here to avoid circular imports
 from .mock_factories import ComponentMockFactory, ManagerMockFactory
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """공통 Mock 데이터 정의
 테스트에서 재사용 가능한 mock 객체들을 중앙화.
 
@@ -16,8 +16,6 @@ Updated: Enhanced with factory system integration for better mock management
 
 
 # Tmux 관련 Mock
-
-from typing import Any
 
 
 class MockTmuxSession:
@@ -125,8 +123,8 @@ MOCK_API_RESPONSES = {
 
 # Factory Integration - Bridge between old and new systems
 def get_factory_mock(mock_type: str, **kwargs: Any) -> object:
-    """Bridge function to get factory-created mocks
-    Provides backward compatibility while encouraging factory usage.
+    """Bridge function to get factory-created mocks Provides backward
+    compatibility while encouraging factory usage.
 
     Args:
         mock_type: Type of mock to create ('session_manager', 'claude_manager', etc.)

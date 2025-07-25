@@ -11,7 +11,6 @@ from libs.multi_agent.branch_manager import BranchInfo, BranchManager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for BranchManager class."""
 
 

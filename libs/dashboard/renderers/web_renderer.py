@@ -2,10 +2,7 @@
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
-"""Web Renderer
-HTML/JavaScript generator for dashboard widgets.
-"""
+"""Web Renderer HTML/JavaScript generator for dashboard widgets."""
 
 import html
 import json
@@ -30,8 +27,8 @@ from .widget_models import (
 class WebRenderer(BaseRenderer):
     """Web renderer for generating HTML/CSS/JavaScript output.
 
-    Generates responsive HTML components with Tailwind CSS classes
-    and JavaScript data binding for interactive dashboard widgets.
+    Generates responsive HTML components with Tailwind CSS classes and
+    JavaScript data binding for interactive dashboard widgets.
     """
 
     def __init__(self, theme: dict[str, Any] | None = None) -> None:
@@ -83,40 +80,24 @@ class WebRenderer(BaseRenderer):
 
         # Route to specific widget renderer
         if widget_type == WidgetType.SESSION_BROWSER:
-            return self._render_session_browser(
-                cast(SessionData | list[SessionData], data), options, component_id
-            )
+            return self._render_session_browser(cast(SessionData | list[SessionData], data), options, component_id)
         if widget_type == WidgetType.HEALTH_METER:
-            return self._render_health_meter(
-                cast(HealthData, data), options, component_id
-            )
+            return self._render_health_meter(cast(HealthData, data), options, component_id)
         if widget_type == WidgetType.ACTIVITY_HEATMAP:
-            return self._render_activity_heatmap(
-                cast(ActivityData, data), options, component_id
-            )
+            return self._render_activity_heatmap(cast(ActivityData, data), options, component_id)
         if widget_type == WidgetType.PROGRESS_TRACKER:
-            return self._render_progress_tracker(
-                cast(ProgressData, data), options, component_id
-            )
+            return self._render_progress_tracker(cast(ProgressData, data), options, component_id)
         if widget_type == WidgetType.LOG_VIEWER:
-            return self._render_log_viewer(
-                cast(dict[str, Any], data), options, component_id
-            )
+            return self._render_log_viewer(cast(dict[str, Any], data), options, component_id)
         if widget_type == WidgetType.METRIC_CARD:
-            return self._render_metric_card(
-                cast(MetricCardData, data), options, component_id
-            )
+            return self._render_metric_card(cast(MetricCardData, data), options, component_id)
         if widget_type == WidgetType.STATUS_INDICATOR:
-            return self._render_status_indicator(
-                cast(StatusIndicatorData, data), options, component_id
-            )
+            return self._render_status_indicator(cast(StatusIndicatorData, data), options, component_id)
         if widget_type == WidgetType.CHART:
             return self._render_chart(cast(ChartData, data), options, component_id)
         if widget_type == WidgetType.TABLE:
             return self._render_table(cast(dict[str, Any], data), options, component_id)
-        return WebRenderer._render_generic_widget(
-            widget_type, data, options, component_id
-        )
+        return WebRenderer._render_generic_widget(widget_type, data, options, component_id)
 
     def render_layout(
         self,
@@ -152,9 +133,7 @@ class WebRenderer(BaseRenderer):
             return self._render_flex_layout(rendered_widgets, layout_config)
         return self._render_vertical_layout(rendered_widgets, layout_config)
 
-    def render_container(
-        self, content: str, container_config: dict[str, Any] | None = None
-    ) -> str:
+    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
         """Render a container wrapping content.
 
         Args:
@@ -187,9 +166,7 @@ class WebRenderer(BaseRenderer):
         html_parts = [f'<div class="{" ".join(css_classes)}">']
 
         if title:
-            html_parts.append(
-                f'<h3 class="text-lg font-semibold mb-3 text-gray-800">{html.escape(title)}</h3>'
-            )
+            html_parts.append(f'<h3 class="text-lg font-semibold mb-3 text-gray-800">{html.escape(title)}</h3>')
 
         html_parts.append(content)
         html_parts.append("</div>")
@@ -221,9 +198,7 @@ class WebRenderer(BaseRenderer):
             return self._render_session_list(sessions, options, component_id)
         return self._render_session_table(sessions, options, component_id)
 
-    def _render_session_table(
-        self, sessions: list[SessionData], options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_session_table(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render sessions as table."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-table overflow-hidden">',
@@ -250,15 +225,11 @@ class WebRenderer(BaseRenderer):
                 continue
 
             # Status badge
-            status_class = self._status_classes.get(
-                session.status.value, "bg-gray-100 text-gray-800"
-            )
+            status_class = self._status_classes.get(session.status.value, "bg-gray-100 text-gray-800")
 
             # Claude status
             claude_status = "🤖 Active" if session.claude_active else "💤 Inactive"
-            claude_class = (
-                "text-green-600" if session.claude_active else "text-gray-400"
-            )
+            claude_class = "text-green-600" if session.claude_active else "text-gray-400"
 
             # Activity time
             if session.last_activity:
@@ -305,9 +276,7 @@ class WebRenderer(BaseRenderer):
                 component_id,
                 {
                     "type": "session_browser",
-                    "sessions": [
-                        s.to_dict() if hasattr(s, "to_dict") else s for s in sessions
-                    ],
+                    "sessions": [s.to_dict() if hasattr(s, "to_dict") else s for s in sessions],
                     "view_mode": "table",
                 },
             )
@@ -315,9 +284,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_session_cards(
-        self, sessions: list[SessionData], options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_session_cards(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render sessions as cards."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-cards">',
@@ -328,9 +295,7 @@ class WebRenderer(BaseRenderer):
             if not isinstance(session, SessionData):
                 continue
 
-            status_class = self._status_classes.get(
-                session.status.value, "bg-gray-100 text-gray-800"
-            )
+            status_class = self._status_classes.get(session.status.value, "bg-gray-100 text-gray-800")
 
             html_parts.extend(
                 [
@@ -375,9 +340,7 @@ class WebRenderer(BaseRenderer):
                 component_id,
                 {
                     "type": "session_browser",
-                    "sessions": [
-                        s.to_dict() if hasattr(s, "to_dict") else s for s in sessions
-                    ],
+                    "sessions": [s.to_dict() if hasattr(s, "to_dict") else s for s in sessions],
                     "view_mode": "cards",
                 },
             )
@@ -385,9 +348,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_session_list(
-        self, sessions: list[SessionData], options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_session_list(self, sessions: list[SessionData], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render sessions as list."""
         html_parts = [
             f'<div id="{component_id}" class="session-browser-list">',
@@ -399,9 +360,7 @@ class WebRenderer(BaseRenderer):
             if not isinstance(session, SessionData):
                 continue
 
-            status_class = self._status_classes.get(
-                session.status.value, "bg-gray-100 text-gray-800"
-            )
+            status_class = self._status_classes.get(session.status.value, "bg-gray-100 text-gray-800")
 
             html_parts.extend(
                 [
@@ -441,9 +400,7 @@ class WebRenderer(BaseRenderer):
                 component_id,
                 {
                     "type": "session_browser",
-                    "sessions": [
-                        s.to_dict() if hasattr(s, "to_dict") else s for s in sessions
-                    ],
+                    "sessions": [s.to_dict() if hasattr(s, "to_dict") else s for s in sessions],
                     "view_mode": "list",
                 },
             )
@@ -451,9 +408,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_health_meter(
-        self, data: HealthData, options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_health_meter(self, data: HealthData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render health meter widget."""
         if not isinstance(data, HealthData):
             return self._render_error_widget("Invalid health data", component_id)
@@ -514,9 +469,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_activity_heatmap(
-        self, data: ActivityData, options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_activity_heatmap(self, data: ActivityData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render activity heatmap widget."""
         if not isinstance(data, ActivityData):
             return self._render_error_widget("Invalid activity data", component_id)
@@ -570,9 +523,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_progress_tracker(
-        self, data: ProgressData, options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_progress_tracker(self, data: ProgressData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render progress tracker widget."""
         if not isinstance(data, ProgressData):
             return self._render_error_widget("Invalid progress data", component_id)
@@ -640,9 +591,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_log_viewer(
-        self, data: dict[str, Any], options: dict[str, Any], component_id: str
-    ) -> str:
+    def _render_log_viewer(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:
         """Render log viewer widget."""
         logs = data.get("logs", []) if isinstance(data, dict) else []
         max_lines = options.get("max_lines", 10)
@@ -669,9 +618,7 @@ class WebRenderer(BaseRenderer):
                 level = log_entry.get("level", "INFO")
                 message = log_entry.get("message", str(log_entry))
 
-                level_class = level_colors.get(
-                    level.upper(), "text-gray-600 bg-gray-50"
-                )
+                level_class = level_colors.get(level.upper(), "text-gray-600 bg-gray-50")
 
                 html_parts.extend(
                     [
@@ -683,9 +630,7 @@ class WebRenderer(BaseRenderer):
                     ]
                 )
             else:
-                html_parts.append(
-                    f'<div class="text-gray-900">{html.escape(str(log_entry))}</div>'
-                )
+                html_parts.append(f'<div class="text-gray-900">{html.escape(str(log_entry))}</div>')
 
         html_parts.extend(
             [
@@ -710,19 +655,13 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_metric_card(
-        self, data: MetricCardData, options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_metric_card(self, data: MetricCardData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render metric card widget."""
         if not isinstance(data, MetricCardData):
             return self._render_error_widget("Invalid metric data", component_id)
 
         # Format value
-        formatted_value = (
-            self.format_number(data.value) + data.suffix
-            if isinstance(data.value, int | float)
-            else str(data.value) + data.suffix
-        )
+        formatted_value = self.format_number(data.value) + data.suffix if isinstance(data.value, int | float) else str(data.value) + data.suffix
 
         # Trend indicator
         trend_html = ""
@@ -734,9 +673,7 @@ class WebRenderer(BaseRenderer):
             else:
                 trend_html = '<span class="text-gray-600">➡️ 0</span>'
 
-        color_class = self._color_classes.get(
-            data.color, "text-gray-600 bg-gray-50 border-gray-200"
-        )
+        color_class = self._color_classes.get(data.color, "text-gray-600 bg-gray-50 border-gray-200")
 
         html_parts = [
             f'<div id="{component_id}" class="metric-card bg-white shadow rounded-lg border {color_class}">',
@@ -774,9 +711,7 @@ class WebRenderer(BaseRenderer):
             )
 
             if data.comparison:
-                html_parts.append(
-                    f'<span class="text-gray-500">{html.escape(data.comparison)}</span>'
-                )
+                html_parts.append(f'<span class="text-gray-500">{html.escape(data.comparison)}</span>')
 
             if trend_html:
                 html_parts.append(trend_html)
@@ -808,16 +743,12 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_status_indicator(
-        self, data: StatusIndicatorData, options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_status_indicator(self, data: StatusIndicatorData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render status indicator widget."""
         if not isinstance(data, StatusIndicatorData):
             return self._render_error_widget("Invalid status data", component_id)
 
-        color_class = self._color_classes.get(
-            data.color, "text-gray-600 bg-gray-50 border-gray-200"
-        )
+        color_class = self._color_classes.get(data.color, "text-gray-600 bg-gray-50 border-gray-200")
         pulse_class = "animate-pulse" if data.pulse else ""
 
         html_parts = [
@@ -836,9 +767,7 @@ class WebRenderer(BaseRenderer):
         )
 
         if data.label:
-            html_parts.append(
-                f'<div class="mt-1 text-xs text-gray-500 text-center">{html.escape(data.label)}</div>'
-            )
+            html_parts.append(f'<div class="mt-1 text-xs text-gray-500 text-center">{html.escape(data.label)}</div>')
 
         html_parts.append("</div>")
 
@@ -855,9 +784,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_chart(
-        self, data: ChartData, options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_chart(self, data: ChartData, options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render chart widget."""
         if not isinstance(data, ChartData):
             return self._render_error_widget("Invalid chart data", component_id)
@@ -886,9 +813,7 @@ class WebRenderer(BaseRenderer):
 
         return "\\n".join(html_parts)
 
-    def _render_table(
-        self, data: dict[str, Any], options: dict[str, Any], component_id: str
-    ) -> str:  # noqa: ARG002
+    def _render_table(self, data: dict[str, Any], options: dict[str, Any], component_id: str) -> str:  # noqa: ARG002
         """Render generic table."""
         rows = data.get("rows", []) if isinstance(data, dict) else []
         headers = data.get("headers", []) if isinstance(data, dict) else []
@@ -909,9 +834,7 @@ class WebRenderer(BaseRenderer):
             )
 
             for header in headers:
-                html_parts.append(
-                    f'<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{html.escape(str(header))}</th>'
-                )
+                html_parts.append(f'<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{html.escape(str(header))}</th>')
 
             html_parts.extend(
                 [
@@ -928,15 +851,11 @@ class WebRenderer(BaseRenderer):
 
             if isinstance(row, list | tuple):
                 for cell in row:
-                    html_parts.append(
-                        f'<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{html.escape(str(cell))}</td>'
-                    )
+                    html_parts.append(f'<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{html.escape(str(cell))}</td>')
             elif isinstance(row, dict):
                 for header in headers:
                     cell_value = row.get(header, "")
-                    html_parts.append(
-                        f'<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{html.escape(str(cell_value))}</td>'
-                    )
+                    html_parts.append(f'<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{html.escape(str(cell_value))}</td>')
 
             html_parts.append("</tr>")
 

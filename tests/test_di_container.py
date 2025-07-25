@@ -13,7 +13,6 @@ from libs.yesman_config import YesmanConfig
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for the Dependency Injection Container."""
 
 

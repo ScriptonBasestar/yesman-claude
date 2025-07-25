@@ -26,7 +26,6 @@ from libs.core.base_command import BaseCommand, CommandError
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dashboard interface management commands."""
 
 try:
@@ -98,11 +97,7 @@ def check_dependencies(interface: str) -> dict[str, bool]:
 
     if interface == "tauri":
         dashboard_path = Path(__file__).parent.parent / "tauri-dashboard"
-        deps["tauri"] = (
-            dashboard_path.exists()
-            and (dashboard_path / "package.json").exists()
-            and shutil.which("npm") is not None
-        )
+        deps["tauri"] = dashboard_path.exists() and (dashboard_path / "package.json").exists() and shutil.which("npm") is not None
 
     return deps
 
@@ -178,9 +173,7 @@ class DashboardRunCommand(BaseCommand):
             msg = f"Dashboard error: {e}"
             raise CommandError(msg) from e
 
-    def _launch_tui_dashboard(
-        self, theme: str | None = None, dev: bool = False
-    ) -> None:  # noqa: FBT001, ARG002
+    def _launch_tui_dashboard(self, theme: str | None = None, dev: bool = False) -> None:  # noqa: FBT001, ARG002
         """Launch TUI-based dashboard interface.
 
         Returns:
@@ -265,14 +258,10 @@ class DashboardRunCommand(BaseCommand):
             # Start FastAPI server
             api_path = Path(__file__).parent.parent / "api"
             if not api_path.exists():
-                self.print_warning(
-                    "Web dashboard API not found. Creating simple HTML interface..."
-                )
+                self.print_warning("Web dashboard API not found. Creating simple HTML interface...")
 
                 # Create simple HTML dashboard
-                template_path = os.path.join(
-                    os.path.dirname(__file__), "..", "templates", "web_dashboard.html"
-                )
+                template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "web_dashboard.html")
                 with open(template_path, encoding="utf-8") as f:
                     html_template = f.read()
                 html_content = html_template.format(
@@ -291,18 +280,14 @@ class DashboardRunCommand(BaseCommand):
                         self.wfile.write(html_content.encode())
 
                 def run_server() -> None:
-                    with socketserver.TCPServer(
-                        (host, port), DashboardHandler
-                    ) as httpd:
+                    with socketserver.TCPServer((host, port), DashboardHandler) as httpd:
                         httpd.serve_forever()
 
                 if detach:
                     # Run in background
                     server_thread = threading.Thread(target=run_server, daemon=True)
                     server_thread.start()
-                    self.print_info(
-                        f"Web dashboard started in background at http://{host}:{port}"
-                    )
+                    self.print_info(f"Web dashboard started in background at http://{host}:{port}")
 
                     # Open browser
                     webbrowser.open(f"http://{host}:{port}")
@@ -338,9 +323,7 @@ class DashboardRunCommand(BaseCommand):
 
                     if dev:
                         # 개발 모드에서는 Vite 개발 서버도 함께 실행
-                        self.print_info(
-                            "🚀 Starting Vite dev server for hot module replacement..."
-                        )
+                        self.print_info("🚀 Starting Vite dev server for hot module replacement...")
 
                         # Check if port 5173 is available first
                         vite_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -350,9 +333,7 @@ class DashboardRunCommand(BaseCommand):
                             vite_sock.close()
                         except OSError:
                             vite_sock.close()
-                            self.print_warning(
-                                "Port 5173 is already in use. Vite server may not start properly."
-                            )
+                            self.print_warning("Port 5173 is already in use. Vite server may not start properly.")
 
                         vite_process = subprocess.Popen(
                             ["npm", "run", "dev"],
@@ -372,9 +353,7 @@ class DashboardRunCommand(BaseCommand):
                         def wait_for_vite_server() -> bool:
                             for i in range(20):  # 최대 20초 대기
                                 try:
-                                    sock = socket.socket(
-                                        socket.AF_INET, socket.SOCK_STREAM
-                                    )
+                                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                                     result = sock.connect_ex(("localhost", 5173))
                                     sock.close()
                                     if result == 0:  # 포트가 열려있음
@@ -398,23 +377,15 @@ class DashboardRunCommand(BaseCommand):
                         if not detach:
                             # 개발 모드에서는 Vite 서버로 연결 (서버가 준비된 후)
                             if vite_ready:
-                                self.print_info(
-                                    "🔗 Opening browser to Vite dev server..."
-                                )
+                                self.print_info("🔗 Opening browser to Vite dev server...")
                                 webbrowser.open("http://localhost:5173")
                             else:
                                 self.print_info("")
                                 self.print_info("=" * 60)
-                                self.print_warning(
-                                    "VITE SERVER NOT READY - MANUAL ACTION REQUIRED"
-                                )
+                                self.print_warning("VITE SERVER NOT READY - MANUAL ACTION REQUIRED")
                                 self.print_info("=" * 60)
-                                self.print_info(
-                                    "🔗 Please manually open: http://localhost:5173"
-                                )
-                                self.print_info(
-                                    "   (Wait a few seconds if the page doesn't load)"
-                                )
+                                self.print_info("🔗 Please manually open: http://localhost:5173")
+                                self.print_info("   (Wait a few seconds if the page doesn't load)")
                                 self.print_info("=" * 60)
                                 self.print_info("")
 
@@ -424,16 +395,10 @@ class DashboardRunCommand(BaseCommand):
                             time.sleep(2)  # Wait for server to start
                             try:
                                 webbrowser.open(dashboard_url)
-                                self.print_info(
-                                    f"🔗 Opening browser to {dashboard_url}"
-                                )
+                                self.print_info(f"🔗 Opening browser to {dashboard_url}")
                             except Exception as e:
-                                self.print_warning(
-                                    f"Could not open browser automatically: {e}"
-                                )
-                                self.print_info(
-                                    f"Please open {dashboard_url} manually in your browser"
-                                )
+                                self.print_warning(f"Could not open browser automatically: {e}")
+                                self.print_info(f"Please open {dashboard_url} manually in your browser")
 
                         threading.Thread(target=open_browser, daemon=True).start()
 
@@ -493,19 +458,13 @@ class DashboardRunCommand(BaseCommand):
                 build_dir = dashboard_path / "src-tauri" / "target" / "release"
 
                 if not build_dir.exists():
-                    self.print_warning(
-                        "Release build not found. Switching to development mode..."
-                    )
+                    self.print_warning("Release build not found. Switching to development mode...")
                     self.print_info("Starting Tauri dashboard in development mode...")
                     cmd = ["npm", "run", "tauri", "dev"]
                 # Find the executable (platform dependent)
                 elif sys.platform == "darwin":  # macOS
                     app_bundle = build_dir / "bundle" / "macos" / "Yesman Dashboard.app"
-                    cmd = (
-                        ["open", str(app_bundle)]
-                        if app_bundle.exists()
-                        else [str(build_dir / "Yesman Dashboard")]
-                    )
+                    cmd = ["open", str(app_bundle)] if app_bundle.exists() else [str(build_dir / "Yesman Dashboard")]
                 elif sys.platform == "win32":  # Windows
                     cmd = [str(build_dir / "Yesman Dashboard.exe")]
                 else:  # Linux
@@ -520,9 +479,7 @@ class DashboardRunCommand(BaseCommand):
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                 )
-                self.print_info(
-                    f"Tauri dashboard started in background (PID: {process.pid})"
-                )
+                self.print_info(f"Tauri dashboard started in background (PID: {process.pid})")
                 return
             with open(os.devnull, "w", encoding="utf-8"):
                 subprocess.run(  # nosec
@@ -571,25 +528,15 @@ class DashboardListCommand(BaseCommand):
 
         for iface, name, description, available in interfaces:
             status = "✅ Available" if available else "❌ Not Available"
-            self.print_info(
-                f"  {iface.upper():<6} | {name:<20} | {description:<40} | {status}"
-            )
+            self.print_info(f"  {iface.upper():<6} | {name:<20} | {description:<40} | {status}")
 
-        self.print_info(
-            f"\n🔍 Recommended interface: {self.env.get_recommended_interface()}"
-        )
+        self.print_info(f"\n🔍 Recommended interface: {self.env.get_recommended_interface()}")
 
         # Environment info
         self.print_info("\n🖥️  Environment Detection:")
-        self.print_info(
-            f"  GUI Available:     {'Yes' if self.env.is_gui_available() else 'No'}"
-        )
-        self.print_info(
-            f"  SSH Session:       {'Yes' if self.env.is_ssh_session() else 'No'}"
-        )
-        self.print_info(
-            f"  Terminal Capable:  {'Yes' if self.env.is_terminal_capable() else 'No'}"
-        )
+        self.print_info(f"  GUI Available:     {'Yes' if self.env.is_gui_available() else 'No'}")
+        self.print_info(f"  SSH Session:       {'Yes' if self.env.is_ssh_session() else 'No'}")
+        self.print_info(f"  Terminal Capable:  {'Yes' if self.env.is_terminal_capable() else 'No'}")
 
         return {
             "interfaces": interfaces,
@@ -605,9 +552,7 @@ class DashboardListCommand(BaseCommand):
 class DashboardBuildCommand(BaseCommand):
     """Build dashboard for production deployment."""
 
-    def execute(
-        self, interface: str = "tauri", **kwargs: Any
-    ) -> dict:  # noqa: ARG002, ANN401
+    def execute(self, interface: str = "tauri", **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
         """Execute the build command.
 
         Returns:
@@ -677,14 +622,10 @@ def dashboard_group() -> None:
 @click.option("--theme", "-t", help="Dashboard theme")
 @click.option("--dev", is_flag=True, default=False, help="Run in development mode")
 @click.option("--detach", "-d", is_flag=True, default=False, help="Run in background")
-def run(
-    interface: str, host: str, port: int, theme: str | None, dev: bool, detach: bool
-) -> None:  # noqa: FBT001
+def run(interface: str, host: str, port: int, theme: str | None, dev: bool, detach: bool) -> None:  # noqa: FBT001
     """Run the dashboard with specified interface."""
     command = DashboardRunCommand()
-    command.run(
-        interface=interface, host=host, port=port, theme=theme, dev=dev, detach=detach
-    )
+    command.run(interface=interface, host=host, port=port, theme=theme, dev=dev, detach=detach)
 
 
 @dashboard_group.command()
@@ -722,9 +663,7 @@ def build(interface: str) -> None:
 @click.option("--dev", is_flag=True, default=False, help="Run in development mode")
 def dashboard(port: int, dev: bool) -> None:  # noqa: FBT001
     """Legacy dashboard command (launches Tauri interface)."""
-    click.echo(
-        "⚠️  Using legacy dashboard command. Consider using 'yesman dashboard run' for more options."
-    )
+    click.echo("⚠️  Using legacy dashboard command. Consider using 'yesman dashboard run' for more options.")
     command = DashboardRunCommand()
     command.run(interface="tauri", port=port, dev=dev)
 

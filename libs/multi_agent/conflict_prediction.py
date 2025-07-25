@@ -2,7 +2,6 @@
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Advanced conflict prediction system for multi-agent branch development."""
 
 import ast
@@ -131,16 +130,12 @@ class ConflictPredictor:
             ConflictPattern.CLASS_HIERARCHY_CHANGE: self._detect_hierarchy_changes,
             ConflictPattern.DEPENDENCY_VERSION_MISMATCH: self._detect_version_conflicts,
             ConflictPattern.API_BREAKING_CHANGE: ConflictPredictor._detect_api_changes,
-            ConflictPattern.RESOURCE_CONTENTION: (
-                ConflictPredictor._detect_resource_conflicts
-            ),
+            ConflictPattern.RESOURCE_CONTENTION: (ConflictPredictor._detect_resource_conflicts),
             ConflictPattern.MERGE_CONTEXT_LOSS: ConflictPredictor._detect_context_loss,
         }
 
         # Machine learning components (simplified heuristics for now)
-        self.historical_patterns: defaultdict[str, list[dict[str, object]]] = (
-            defaultdict(list)
-        )
+        self.historical_patterns: defaultdict[str, list[dict[str, object]]] = defaultdict(list)
         self.conflict_vectors: dict[str, ConflictVector] = {}
 
         # Configuration
@@ -186,11 +181,7 @@ class ConflictPredictor:
                     # Run pattern detection
                     for detector in self.pattern_detectors.values():
                         prediction = await detector(branch1, branch2, vector)
-                        if (
-                            prediction
-                            and prediction.likelihood_score
-                            >= self.min_confidence_threshold
-                        ):
+                        if prediction and prediction.likelihood_score >= self.min_confidence_threshold:
                             predictions.append(prediction)
 
             # Apply machine learning scoring
@@ -226,12 +217,8 @@ class ConflictPredictor:
         """Calculate multi-dimensional conflict probability vector."""
         try:
             # File overlap analysis
-            files1 = await self.conflict_engine._get_changed_files(
-                branch1
-            )  # noqa: SLF001
-            files2 = await self.conflict_engine._get_changed_files(
-                branch2
-            )  # noqa: SLF001
+            files1 = await self.conflict_engine._get_changed_files(branch1)  # noqa: SLF001
+            files2 = await self.conflict_engine._get_changed_files(branch2)  # noqa: SLF001
 
             common_files = set(files1.keys()) & set(files2.keys())
             file_overlap_score = len(common_files) / max(
@@ -372,11 +359,7 @@ class ConflictPredictor:
             drift_score = min(drift_score, 1.0)
 
             confidence = self._likelihood_to_confidence(drift_score)
-            severity = (
-                ConflictSeverity.HIGH
-                if len(affected_functions) > HIGH_OVERLAP_THRESHOLD
-                else ConflictSeverity.MEDIUM
-            )
+            severity = ConflictSeverity.HIGH if len(affected_functions) > HIGH_OVERLAP_THRESHOLD else ConflictSeverity.MEDIUM
 
             return PredictionResult(
                 prediction_id=f"signature_drift_{branch1}_{branch2}_{len(affected_functions)}",
@@ -619,9 +602,7 @@ class ConflictPredictor:
             # Adjust confidence based on historical accuracy
             pattern_history = self.historical_patterns.get(prediction.pattern.value, [])
             if pattern_history:
-                avg_accuracy = sum(
-                    bool(p.get("accurate", 0)) for p in pattern_history
-                ) / len(
+                avg_accuracy = sum(bool(p.get("accurate", 0)) for p in pattern_history) / len(
                     pattern_history,
                 )
                 prediction.likelihood_score *= 0.5 + avg_accuracy * 0.5
@@ -681,25 +662,19 @@ class ConflictPredictor:
             return 0.0
 
     @staticmethod
-    async def _calculate_dependency_coupling(
-        branch1: str, branch2: str
-    ) -> float:  # noqa: ARG004, ARG004
+    async def _calculate_dependency_coupling(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
         """Calculate dependency coupling between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_semantic_distance(
-        branch1: str, branch2: str
-    ) -> float:  # noqa: ARG004, ARG004
+    async def _calculate_semantic_distance(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
         """Calculate semantic distance between branches."""
         # Simplified implementation
         return 0.5
 
     @staticmethod
-    async def _calculate_temporal_proximity(
-        branch1: str, branch2: str
-    ) -> float:  # noqa: ARG004, ARG004
+    async def _calculate_temporal_proximity(branch1: str, branch2: str) -> float:  # noqa: ARG004, ARG004
         """Calculate temporal proximity of changes."""
         # Simplified implementation
         return 0.5
@@ -708,9 +683,7 @@ class ConflictPredictor:
         """Get Python files and their import statements."""
         files = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(
-                branch
-            )  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
@@ -764,19 +737,12 @@ class ConflictPredictor:
         different = (set1 - set2) | (set2 - set1)
 
         # Heuristic: high overlap + significant differences = likely conflict
-        if (
-            len(overlap) > HIGH_OVERLAP_THRESHOLD
-            and len(different) > SIGNIFICANT_DIFFERENCES_THRESHOLD
-        ):
+        if len(overlap) > HIGH_OVERLAP_THRESHOLD and len(different) > SIGNIFICANT_DIFFERENCES_THRESHOLD:
             return True
 
         for imp1 in imports1:
             for imp2 in imports2:
-                if (
-                    imp1 != imp2
-                    and difflib.SequenceMatcher(None, imp1, imp2).ratio()
-                    > SIMILARITY_THRESHOLD_MEDIUM
-                ):
+                if imp1 != imp2 and difflib.SequenceMatcher(None, imp1, imp2).ratio() > SIMILARITY_THRESHOLD_MEDIUM:
                     return True
 
         return False
@@ -785,9 +751,7 @@ class ConflictPredictor:
         """Get all function signatures from a branch."""
         signatures = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(
-                branch
-            )  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
@@ -807,9 +771,7 @@ class ConflictPredictor:
         """Extract symbol definitions from a branch."""
         symbols = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(
-                branch
-            )  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
@@ -834,9 +796,7 @@ class ConflictPredictor:
         """Extract class inheritance hierarchies."""
         hierarchies = {}
         try:
-            python_files = await self.conflict_engine._get_python_files_changed(
-                branch
-            )  # noqa: SLF001
+            python_files = await self.conflict_engine._get_python_files_changed(branch)  # noqa: SLF001
             for file_path in python_files:
                 content = await self.conflict_engine._get_file_content(  # noqa: SLF001
                     file_path,
@@ -877,11 +837,9 @@ class ConflictPredictor:
                         versions[pkg.strip()] = ver.strip()
 
             # Check pyproject.toml
-            pyproject_content = (
-                await self.conflict_engine._get_file_content(  # noqa: SLF001
-                    "pyproject.toml",
-                    branch,
-                )
+            pyproject_content = await self.conflict_engine._get_file_content(  # noqa: SLF001
+                "pyproject.toml",
+                branch,
             )
             if pyproject_content:
                 # Simple parsing for dependencies
@@ -940,20 +898,13 @@ class ConflictPredictor:
                 "accuracy_metrics": self.prediction_stats.copy(),
             }
 
-        confidence_counts = Counter(
-            p.confidence.value for p in self.predictions.values()
-        )
+        confidence_counts = Counter(p.confidence.value for p in self.predictions.values())
         pattern_counts = Counter(p.pattern.value for p in self.predictions.values())
 
         return {
             "total_predictions": len(self.predictions),
             "active_predictions": len(
-                [
-                    p
-                    for p in self.predictions.values()
-                    if p.timeline_prediction
-                    and p.timeline_prediction > datetime.now(UTC)
-                ],
+                [p for p in self.predictions.values() if p.timeline_prediction and p.timeline_prediction > datetime.now(UTC)],
             ),
             "by_confidence": dict(confidence_counts),
             "by_pattern": dict(pattern_counts),
@@ -995,27 +946,18 @@ class ConflictPredictor:
             for file_path in prediction.affected_files:
                 file_conflicts[file_path] += 1
 
-        frequent_files = [
-            {"file": file_path, "conflict_count": count}
-            for file_path, count in file_conflicts.most_common(10)
-        ]
+        frequent_files = [{"file": file_path, "conflict_count": count} for file_path, count in file_conflicts.most_common(10)]
 
         # Analyze conflict hotspots
         branch_conflicts: Counter[str] = Counter()
         for prediction in self.predictions.values():
             for branch in prediction.affected_branches:
-                branch_conflicts[branch] += int(
-                    prediction.likelihood_score * 10
-                )  # Scale to avoid losing precision
+                branch_conflicts[branch] += int(prediction.likelihood_score * 10)  # Scale to avoid losing precision
 
         hotspots = [
             {
                 "location": branch,
-                "severity": (
-                    "high"
-                    if score > HIGH_SCORE_THRESHOLD
-                    else "medium" if score > MEDIUM_SCORE_THRESHOLD else "low"
-                ),
+                "severity": ("high" if score > HIGH_SCORE_THRESHOLD else "medium" if score > MEDIUM_SCORE_THRESHOLD else "low"),
                 "score": score,
             }
             for branch, score in branch_conflicts.most_common(5)
@@ -1036,8 +978,5 @@ class ConflictPredictor:
             "pattern_distribution": dict(pattern_dist),
             "temporal_trends": dict(temporal_trends),
             "total_predictions": len(self.predictions),
-            "average_confidence": (
-                sum(p.likelihood_score for p in self.predictions.values())
-                / max(len(self.predictions), 1)
-            ),
+            "average_confidence": (sum(p.likelihood_score for p in self.predictions.values()) / max(len(self.predictions), 1)),
         }

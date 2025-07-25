@@ -31,7 +31,6 @@ from libs.multi_agent.conflict_resolution import ConflictSeverity, ConflictType
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for ConflictPreventionSystem."""
 
 
@@ -172,7 +171,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
     @pytest.fixture
     @staticmethod
     def prevention_system(mock_dependencies: dict) -> ConflictPreventionSystem:
-        """Create ConflictPreventionSystem instance with mocked dependencies."""
+        """Create ConflictPreventionSystem instance with mocked
+        dependencies."""
         return ConflictPreventionSystem(
             conflict_predictor=mock_dependencies["conflict_predictor"],
             auto_resolver=mock_dependencies["auto_resolver"],
@@ -511,7 +511,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
     async def test_generate_generic_measures_early_merge(
         prevention_system: ConflictPreventionSystem,
     ) -> None:
-        """Test _generate_generic_measures with high confidence for early merge."""
+        """Test _generate_generic_measures with high confidence for early
+        merge."""
         mock_prediction = PredictionResult(
             prediction_id="generic_pred_001",
             confidence=PredictionConfidence.CRITICAL,
@@ -549,7 +550,8 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
     async def test_generate_generic_measures_low_confidence(
         prevention_system: ConflictPreventionSystem,
     ) -> None:
-        """Test _generate_generic_measures with low confidence (no early merge)."""
+        """Test _generate_generic_measures with low confidence (no early
+        merge)."""
         mock_prediction = PredictionResult(
             prediction_id="generic_pred_002",
             confidence=PredictionConfidence.LOW,

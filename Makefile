@@ -149,6 +149,7 @@ help-dev: ## show development workflow help
 	@echo -e "  $(CYAN)verify$(RESET)             Complete verification before PR"
 	@echo -e "  $(CYAN)debug-api$(RESET)          Debug API server"
 	@echo -e "  $(CYAN)logs$(RESET)               Show service logs"
+	@echo -e "  $(CYAN)commit-helper$(RESET)      Run commit organization helper"
 	@echo -e "  $(CYAN)dev-info$(RESET)           Show development environment info"
 
 help-ops: ## show operations help

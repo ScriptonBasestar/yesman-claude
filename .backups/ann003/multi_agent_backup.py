@@ -1703,7 +1703,7 @@ def batch_merge(
                         branch1,
                         branch2,
                     )
-                except (OSError, subprocess.CalledProcessError, RuntimeError, AttributeError) as e:
+                except (OSError, subprocess.CalledProcessError, RuntimeError, AttributeError):
                     click.echo(
                         "❌ Could not determine changed files. Please specify --files",
                     )
@@ -2794,7 +2794,7 @@ def dependency_track(
 
         try:
             asyncio.run(track_change())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             mock_change_id = f"dep_change_{agent}_{file.replace('/', '_')}"
             click.echo("\n✅ Change tracked successfully")
@@ -2935,7 +2935,7 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
 
         try:
             asyncio.run(analyze_impact())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {file_path}")
@@ -3044,7 +3044,7 @@ def dependency_propagate(
 
         try:
             asyncio.run(propagate_changes())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("\n📊 Propagation Results:")
             for change_id in change_ids:
@@ -3181,7 +3181,7 @@ def review_initiate(
 
         try:
             asyncio.run(run_review())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             mock_review_id = f"review_{branch_name}_{agent}"
             click.echo("\n✅ Review initiated successfully")
@@ -3247,7 +3247,7 @@ def review_approve(
 
         try:
             asyncio.run(run_approval())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             click.echo("\n✅ Review approved successfully")
             if comments:
@@ -3330,7 +3330,7 @@ def review_reject(
 
         try:
             asyncio.run(run_rejection())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             click.echo("\n❌ Review rejected")
             click.echo("   Reasons:")
@@ -3451,7 +3451,7 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
 
         try:
             asyncio.run(get_status())
-        except (TimeoutError, RuntimeError, OSError, AttributeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError):
             # Fallback to demo output
             if review_id:
                 click.echo("\n📋 Review Details:")
@@ -3587,7 +3587,7 @@ def quality_check(
 
         try:
             asyncio.run(run_quality_check())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("\n📊 Quality Check Results:")
             for i, file in enumerate(files, 1):
@@ -3697,7 +3697,7 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
         try:
             asyncio.run(get_summary())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError) as e:
+        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
             # Fallback to demo output
             click.echo("Engine Status: Running")
             click.echo("Active reviews: 0")

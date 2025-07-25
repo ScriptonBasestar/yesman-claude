@@ -17,12 +17,8 @@ from libs.core.error_handling import (
     ValidationError,
     YesmanError,
 )
-from libs.core.error_handling import (
-    PermissionError as YesmanPermissionError,
-)
-from libs.core.error_handling import (
-    TimeoutError as YesmanTimeoutError,
-)
+from libs.core.error_handling import PermissionError as YesmanPermissionError
+from libs.core.error_handling import TimeoutError as YesmanTimeoutError
 
 
 def error_to_status_code(error: YesmanError) -> int:
@@ -91,9 +87,7 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
         errors = []
         for error in exc.errors():
             field = ".".join(str(x) for x in error["loc"])
-            errors.append(
-                {"field": field, "message": error["msg"], "type": error["type"]}
-            )
+            errors.append({"field": field, "message": error["msg"], "type": error["type"]})
 
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -123,9 +117,7 @@ async def global_error_handler(request: Request, exc: Exception) -> JSONResponse
                 "message": "An unexpected error occurred",
                 "category": "system",
                 "severity": "high",
-                "recovery_hint": (
-                    "Please try again later or contact support if the problem persists"
-                ),
+                "recovery_hint": ("Please try again later or contact support if the problem persists"),
                 "request_id": request_id,
             }
         },

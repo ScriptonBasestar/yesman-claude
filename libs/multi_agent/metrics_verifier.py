@@ -15,7 +15,6 @@ from .types import Task
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Success metrics verification system for multi-agent operations."""
 
 
@@ -86,18 +85,10 @@ class SuccessCriteria:
     def check_compliance(self, metrics: PerformanceMetrics) -> dict[str, bool]:
         """Check if metrics meet success criteria."""
         results = {
-            "speed_improvement": (
-                self.min_speed_improvement
-                <= metrics.speed_improvement_ratio
-                <= self.max_speed_improvement
-            ),
-            "conflict_resolution": (
-                metrics.conflict_resolution_rate >= self.min_conflict_resolution_rate
-            ),
+            "speed_improvement": (self.min_speed_improvement <= metrics.speed_improvement_ratio <= self.max_speed_improvement),
+            "conflict_resolution": (metrics.conflict_resolution_rate >= self.min_conflict_resolution_rate),
             "merge_success": metrics.merge_success_rate >= self.min_merge_success_rate,
-            "quality_maintenance": (
-                metrics.quality_improvement >= self.min_quality_maintenance
-            ),
+            "quality_maintenance": (metrics.quality_improvement >= self.min_quality_maintenance),
         }
 
         results["overall_success"] = all(results.values())
@@ -186,16 +177,12 @@ class MetricsVerifier:
         Returns:
             Average execution time for single agent
         """
-        logger.info(
-            "Measuring single-agent performance with %s tasks", len(benchmark_tasks)
-        )
+        logger.info("Measuring single-agent performance with %s tasks", len(benchmark_tasks))
 
         execution_times = []
 
         for iteration in range(iterations):
-            logger.info(
-                "Single-agent benchmark iteration %s/%s", iteration + 1, iterations
-            )
+            logger.info("Single-agent benchmark iteration %s/%s", iteration + 1, iterations)
 
             # Temporarily limit to single agent
             original_max_agents = agent_pool.max_agents
@@ -266,16 +253,12 @@ class MetricsVerifier:
         Returns:
             Average execution time for multi-agent system
         """
-        logger.info(
-            "Measuring multi-agent performance with %s agents", agent_pool.max_agents
-        )
+        logger.info("Measuring multi-agent performance with %s agents", agent_pool.max_agents)
 
         execution_times = []
 
         for iteration in range(iterations):
-            logger.info(
-                "Multi-agent benchmark iteration %s/%s", iteration + 1, iterations
-            )
+            logger.info("Multi-agent benchmark iteration %s/%s", iteration + 1, iterations)
 
             start_time = time.time()
 
@@ -318,10 +301,7 @@ class MetricsVerifier:
 
         # Calculate speed improvement
         if self.current_metrics.single_agent_time > 0:
-            self.current_metrics.speed_improvement_ratio = (
-                self.current_metrics.single_agent_time
-                / self.current_metrics.multi_agent_time
-            )
+            self.current_metrics.speed_improvement_ratio = self.current_metrics.single_agent_time / self.current_metrics.multi_agent_time
 
         logger.info("Multi-agent average performance: %.2fs", average_time)
         logger.info(
@@ -342,10 +322,7 @@ class MetricsVerifier:
         self.current_metrics.auto_resolved_conflicts += auto_resolved
 
         if self.current_metrics.total_conflicts > 0:
-            self.current_metrics.conflict_resolution_rate = (
-                self.current_metrics.auto_resolved_conflicts
-                / self.current_metrics.total_conflicts
-            )
+            self.current_metrics.conflict_resolution_rate = self.current_metrics.auto_resolved_conflicts / self.current_metrics.total_conflicts
 
         logger.info(
             "Conflict resolution: %s/%s (rate: %.2%%)",
@@ -365,10 +342,7 @@ class MetricsVerifier:
         self.current_metrics.successful_merges += successful
 
         if self.current_metrics.total_merge_attempts > 0:
-            self.current_metrics.merge_success_rate = (
-                self.current_metrics.successful_merges
-                / self.current_metrics.total_merge_attempts
-            )
+            self.current_metrics.merge_success_rate = self.current_metrics.successful_merges / self.current_metrics.total_merge_attempts
 
         logger.info(
             "Merge success: %s/%s (rate: %.2%%)",
@@ -405,13 +379,9 @@ class MetricsVerifier:
             "criteria": {
                 "min_speed_improvement": self.success_criteria.min_speed_improvement,
                 "max_speed_improvement": self.success_criteria.max_speed_improvement,
-                "min_conflict_resolution_rate": (
-                    self.success_criteria.min_conflict_resolution_rate
-                ),
+                "min_conflict_resolution_rate": (self.success_criteria.min_conflict_resolution_rate),
                 "min_merge_success_rate": self.success_criteria.min_merge_success_rate,
-                "min_quality_maintenance": (
-                    self.success_criteria.min_quality_maintenance
-                ),
+                "min_quality_maintenance": (self.success_criteria.min_quality_maintenance),
             },
             "compliance": compliance,
             "overall_success": compliance["overall_success"],

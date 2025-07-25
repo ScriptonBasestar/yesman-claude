@@ -16,13 +16,10 @@ from libs.core.base_command import (
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Improved ls command using base command class."""
 
 
-class LsCommand(
-    BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin
-):
+class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCommandMixin):
     """List all available projects and templates."""
 
     def execute(self, **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
@@ -136,9 +133,7 @@ class LsCommand(
         # Display templates
         click.echo("Available session templates:")
         if not templates:
-            self.print_warning(
-                "No session templates found in ~/.scripton/yesman/templates/"
-            )
+            self.print_warning("No session templates found in ~/.scripton/yesman/templates/")
         else:
             for template_name in templates:
                 click.echo(f"  - {template_name}")
@@ -148,9 +143,7 @@ class LsCommand(
         # Display projects
         click.echo("Configured projects:")
         if not projects:
-            self.print_warning(
-                "No projects configured in ~/.scripton/yesman/projects.yaml"
-            )
+            self.print_warning("No projects configured in ~/.scripton/yesman/projects.yaml")
         else:
             headers = ["name", "template", "session", "windows", "status"]
             table = self.format_table(projects, headers)

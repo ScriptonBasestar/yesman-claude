@@ -13,7 +13,6 @@ from libs.ui.session_selector import show_session_selector
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Enter (attach to) a tmux session command."""
 
 
@@ -110,9 +109,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             self.print_warning("TUI unavailable, falling back to text selection...")
             self.print_info("Available sessions:")
             for i, sess in enumerate(running_sessions, 1):
-                self.print_info(
-                    f"  [{i}] {sess['project']} (session: {sess['session']})"
-                )
+                self.print_info(f"  [{i}] {sess['project']} (session: {sess['session']})")
 
             # Prompt for selection
             try:
@@ -164,9 +161,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 
 @click.command()
 @click.argument("session_name", required=False)
-@click.option(
-    "--list", "-l", "list_sessions", is_flag=True, help="List available sessions"
-)
+@click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
 def enter(session_name: str | None, list_sessions: bool) -> None:  # noqa: FBT001
     """Enter (attach to) a tmux session."""
     command = EnterCommand()

@@ -11,7 +11,6 @@ from libs.task_runner import TaskRunner, TodoFile, TodoTask
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for task runner functionality."""
 
 

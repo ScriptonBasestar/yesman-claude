@@ -11,7 +11,6 @@ from api.utils import BatchConfig, WebSocketBatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Tests for WebSocket batch processor functionality."""
 
 
@@ -75,15 +74,11 @@ class TestWebSocketBatchProcessor:
         assert processor.stats["messages_processed"] == 0
 
     @staticmethod
-    def test_register_handler(
-        processor: WebSocketBatchProcessor, mock_handler: AsyncMock
-    ) -> None:
+    def test_register_handler(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test message handler registration."""
         processor.register_message_handler("test_channel", mock_handler)
         assert "test_channel" in processor._message_handlers  # noqa: SLF001
-        assert (
-            processor._message_handlers["test_channel"] == mock_handler
-        )  # noqa: SLF001
+        assert processor._message_handlers["test_channel"] == mock_handler  # noqa: SLF001
 
     @staticmethod
     def test_queue_message(processor: WebSocketBatchProcessor) -> None:
@@ -100,25 +95,19 @@ class TestWebSocketBatchProcessor:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_send_immediate(
-        processor: WebSocketBatchProcessor, mock_handler: AsyncMock
-    ) -> None:
+    async def test_send_immediate(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test immediate message sending."""
         processor.register_message_handler("test_channel", mock_handler)
 
         test_message = {"type": "urgent", "data": "immediate"}
-        await processor.send_immediate(
-            "test_channel", cast(dict[str, object], test_message)
-        )
+        await processor.send_immediate("test_channel", cast(dict[str, object], test_message))
 
         mock_handler.assert_called_once_with([test_message])
         assert processor.stats["messages_processed"] == 1
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_batch_processing_by_size(
-        processor: WebSocketBatchProcessor, mock_handler: AsyncMock
-    ) -> None:
+    async def test_batch_processing_by_size(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test batch processing triggered by size limit."""
         processor.register_message_handler("test_channel", mock_handler)
         await processor.start()
@@ -141,9 +130,7 @@ class TestWebSocketBatchProcessor:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_batch_processing_by_time(
-        processor: WebSocketBatchProcessor, mock_handler: AsyncMock
-    ) -> None:
+    async def test_batch_processing_by_time(processor: WebSocketBatchProcessor, mock_handler: AsyncMock) -> None:
         """Test batch processing triggered by time limit."""
         processor.register_message_handler("test_channel", mock_handler)
         await processor.start()

@@ -228,12 +228,12 @@ class AsyncLogger(StatisticsProviderMixin):
 
                 except TimeoutError:
                     continue
-                except Exception as e:
+                except Exception:
                     self.fallback_logger.exception("Error processing log entry")  # noqa: G004
                     with self._stats_lock:
                         self.stats["errors"] += 1
 
-        except Exception as e:
+        except Exception:
             self.fallback_logger.exception("Fatal error in processing loop")  # noqa: G004
 
     async def _process_entry(self, entry: LogEntry) -> None:
@@ -256,7 +256,7 @@ class AsyncLogger(StatisticsProviderMixin):
             with self._stats_lock:
                 self.stats["processing_time_ms"] += processing_time
 
-        except Exception as e:
+        except Exception:
             self.fallback_logger.exception("Error processing entry")  # noqa: G004
             with self._stats_lock:
                 self.stats["errors"] += 1

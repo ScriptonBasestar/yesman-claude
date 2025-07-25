@@ -11,7 +11,6 @@ from .prompt_detector import PromptInfo
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Abstract base classes and interfaces for the yesman-claude system."""
 
 
@@ -215,9 +214,7 @@ class IPromptDetector(ABC):
 
     @abstractmethod
     @staticmethod
-    def detect_prompts(
-        content: str, context: dict[str, Any] | None = None
-    ) -> list[PromptInfo]:
+    def detect_prompts(content: str, context: dict[str, Any] | None = None) -> list[PromptInfo]:
         """Detect prompts in content."""
 
     @abstractmethod

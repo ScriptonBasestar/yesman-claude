@@ -14,7 +14,6 @@ from .context_detector import ContextInfo, ContextType
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Workflow engine for executing automation chains."""
 
 
@@ -55,9 +54,7 @@ class WorkflowAction:
 
     action_type: ActionType
     command: str
-    parameters: dict[str, str | int | float | bool | list[str] | dict[str, str]] = (
-        field(default_factory=dict)
-    )
+    parameters: dict[str, str | int | float | bool | list[str] | dict[str, str]] = field(default_factory=dict)
     timeout: int = 60
     retry_count: int = 0
     retry_delay: int = 5
@@ -68,10 +65,7 @@ class WorkflowAction:
         self,
     ) -> dict[
         str,
-        str
-        | int
-        | bool
-        | dict[str, str | int | float | bool | list[str] | dict[str, str]],
+        str | int | bool | dict[str, str | int | float | bool | list[str] | dict[str, str]],
     ]:
         """Convert to dictionary for serialization.
 
@@ -112,10 +106,7 @@ class WorkflowChain:
         | list[
             dict[
                 str,
-                str
-                | int
-                | bool
-                | dict[str, str | int | float | bool | list[str] | dict[str, str]],
+                str | int | bool | dict[str, str | int | float | bool | list[str] | dict[str, str]],
             ]
         ],
     ]:
@@ -166,16 +157,15 @@ class WorkflowExecution:
 
 
 class ConditionEvaluator:
-    """Safe condition evaluator that replaces eval() with regex-based parsing."""
+    """Safe condition evaluator that replaces eval() with regex-based
+    parsing."""
 
     def __init__(self, context_info: ContextInfo) -> None:
         self.context = {
             "context_type": context_info.context_type.value,
             "confidence": context_info.confidence,
             "details": context_info.details,
-            "project_path": (
-                str(context_info.project_path) if context_info.project_path else None
-            ),
+            "project_path": (str(context_info.project_path) if context_info.project_path else None),
             "session_name": context_info.session_name,
             "timestamp": context_info.timestamp,
         }
@@ -193,9 +183,7 @@ class ConditionEvaluator:
         }
 
         # Condition pattern: variable operator value
-        self.condition_pattern = re.compile(
-            r"^\s*(\w+)\s+(==|!=|>=|<=|>|<|not\s+in|in)\s+(.+?)\s*$"
-        )
+        self.condition_pattern = re.compile(r"^\s*(\w+)\s+(==|!=|>=|<=|>|<|not\s+in|in)\s+(.+?)\s*$")
 
     def evaluate(self, condition: str) -> bool:
         """Evaluate a condition string safely.
@@ -246,9 +234,7 @@ class ConditionEvaluator:
         value_str = value_str.strip()
 
         # String literal (quoted)
-        if (value_str.startswith('"') and value_str.endswith('"')) or (
-            value_str.startswith("'") and value_str.endswith("'")
-        ):
+        if (value_str.startswith('"') and value_str.endswith('"')) or (value_str.startswith("'") and value_str.endswith("'")):
             return value_str[1:-1]  # Remove quotes
 
         # Boolean
@@ -273,9 +259,7 @@ class ConditionEvaluator:
         return value_str
 
     @staticmethod
-    def _equals(
-        left: str | int | float | bool | None, right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Equality comparison.
 
         Returns:
@@ -284,9 +268,7 @@ class ConditionEvaluator:
         return bool(left == right)
 
     @staticmethod
-    def _not_equals(
-        left: str | int | float | bool | None, right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _not_equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Inequality comparison.
 
         Returns:
@@ -295,9 +277,7 @@ class ConditionEvaluator:
         return bool(left != right)
 
     @staticmethod
-    def _greater_than(
-        left: str | int | float | bool | None, right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _greater_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Greater than comparison.
 
         Returns:
@@ -309,9 +289,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _less_than(
-        left: str | int | float | bool | None, right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _less_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Less than comparison.
 
         Returns:
@@ -323,9 +301,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _greater_equal(
-        left: str | int | float | bool | None, right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _greater_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Greater than or equal comparison.
 
         Returns:
@@ -337,9 +313,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _less_equal(
-        left: str | int | float | bool | None, right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _less_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Less than or equal comparison.
 
         Returns:
@@ -351,9 +325,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _contains(
-        left: str | list[str] | dict[str, str], right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Containment check.
 
         Returns:
@@ -365,9 +337,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _not_contains(
-        left: str | list[str] | dict[str, str], right: str | int | float | bool | None
-    ) -> bool:  # noqa: FBT001
+    def _not_contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:  # noqa: FBT001
         """Not containment check.
 
         Returns:
@@ -428,9 +398,7 @@ class WorkflowEngine:
 
         return triggered_workflows
 
-    async def _execute_workflow(
-        self, execution_id: str, workflow: WorkflowChain
-    ) -> None:
+    async def _execute_workflow(self, execution_id: str, workflow: WorkflowChain) -> None:
         """Execute a workflow chain."""
         execution = self.active_executions[execution_id]
         execution.status = WorkflowStatus.RUNNING
@@ -442,12 +410,8 @@ class WorkflowEngine:
                 execution.current_action = i
 
                 # Check condition if specified
-                if action.condition and not self._evaluate_condition(
-                    action.condition, execution.context_info
-                ):
-                    self.logger.debug(
-                        "Skipping action %s due to condition: %s", i, action.condition
-                    )
+                if action.condition and not self._evaluate_condition(action.condition, execution.context_info):
+                    self.logger.debug("Skipping action %s due to condition: %s", i, action.condition)
                     continue
 
                 # Execute action with retries
@@ -455,9 +419,7 @@ class WorkflowEngine:
 
                 if not success and not action.continue_on_failure:
                     execution.status = WorkflowStatus.FAILED
-                    execution.error_message = (
-                        f"Action {i} failed and continue_on_failure is False"
-                    )
+                    execution.error_message = f"Action {i} failed and continue_on_failure is False"
                     break
 
             else:
@@ -486,9 +448,7 @@ class WorkflowEngine:
                 execution.status.value,
             )
 
-    async def _execute_action_with_retry(
-        self, action: WorkflowAction, execution: WorkflowExecution
-    ) -> bool:
+    async def _execute_action_with_retry(self, action: WorkflowAction, execution: WorkflowExecution) -> bool:
         """Execute an action with retry logic."""
         for attempt in range(action.retry_count + 1):
             try:
@@ -533,13 +493,9 @@ class WorkflowEngine:
 
         return False
 
-    async def _execute_single_action(
-        self, action: WorkflowAction, execution: WorkflowExecution
-    ) -> dict[str, str | int | bool | list[str | Exception]]:
+    async def _execute_single_action(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str | int | bool | list[str | Exception]]:
         """Execute a single action."""
-        self.logger.debug(
-            "Executing action: %s - %s", action.action_type.value, action.command
-        )
+        self.logger.debug("Executing action: %s - %s", action.action_type.value, action.command)
 
         if action.action_type == ActionType.SHELL_COMMAND:
             return cast(
@@ -592,9 +548,7 @@ class WorkflowEngine:
         msg = f"Unsupported action type: {action.action_type}"
         raise ValueError(msg)
 
-    async def _execute_shell_command(
-        self, action: WorkflowAction
-    ) -> dict[str, int | str]:
+    async def _execute_shell_command(self, action: WorkflowAction) -> dict[str, int | str]:
         """Execute shell command."""
         process = await asyncio.create_subprocess_shell(
             action.command,
@@ -621,13 +575,9 @@ class WorkflowEngine:
             raise TimeoutError(msg) from e
 
     @staticmethod
-    async def _execute_tmux_command(
-        action: WorkflowAction, execution: WorkflowExecution
-    ) -> dict[str, int | str]:
+    async def _execute_tmux_command(action: WorkflowAction, execution: WorkflowExecution) -> dict[str, int | str]:
         """Execute tmux command."""
-        session_name = execution.context_info.session_name or cast(
-            str, action.parameters.get("session_name")
-        )
+        session_name = execution.context_info.session_name or cast(str, action.parameters.get("session_name"))
 
         if not session_name:
             msg = "No session name provided for tmux command"
@@ -650,9 +600,7 @@ class WorkflowEngine:
         }
 
     @staticmethod
-    async def _execute_claude_input(
-        action: WorkflowAction, execution: WorkflowExecution
-    ) -> dict[str, str]:
+    async def _execute_claude_input(action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str]:
         """Send input to Claude through the dashboard controller."""
         # This would integrate with the ClaudeManager
         # For now, simulate the action
@@ -663,9 +611,7 @@ class WorkflowEngine:
             "session_name": execution.context_info.session_name,
         }
 
-    async def _execute_file_operation(
-        self, action: WorkflowAction
-    ) -> dict[str, str | int]:
+    async def _execute_file_operation(self, action: WorkflowAction) -> dict[str, str | int]:
         """Execute file operation."""
         operation = action.parameters.get("operation", "read")
         file_path = Path(self.project_path) / action.command
@@ -710,27 +656,19 @@ class WorkflowEngine:
         await asyncio.sleep(delay_seconds)
         return {"delay_seconds": delay_seconds}
 
-    async def _execute_condition_check(
-        self, action: WorkflowAction, execution: WorkflowExecution
-    ) -> dict[str, str | bool]:
+    async def _execute_condition_check(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, str | bool]:
         """Execute condition check."""
         result = self._evaluate_condition(action.command, execution.context_info)
         return {"condition": action.command, "result": result}
 
-    async def _execute_parallel_actions(
-        self, action: WorkflowAction, execution: WorkflowExecution
-    ) -> dict[
-        str, list[dict[str, str | int | bool | list[str | Exception]] | Exception] | int
-    ]:
+    async def _execute_parallel_actions(self, action: WorkflowAction, execution: WorkflowExecution) -> dict[str, list[dict[str, str | int | bool | list[str | Exception]] | Exception] | int]:
         """Execute multiple actions in parallel."""
         parallel_actions = cast(list, action.parameters.get("actions", []))
 
         tasks = []
         for parallel_action_data in parallel_actions:
             parallel_action = WorkflowAction(**cast(dict, parallel_action_data))
-            task = asyncio.create_task(
-                self._execute_single_action(parallel_action, execution)
-            )
+            task = asyncio.create_task(self._execute_single_action(parallel_action, execution))
             tasks.append(task)
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -846,26 +784,18 @@ class WorkflowEngine:
             "execution_history_count": len(self.execution_history),
             "workflows": cast(
                 dict[str, str | int | bool | list[str]],
-                {
-                    name: cast(dict, workflow.to_dict())
-                    for name, workflow in self.workflows.items()
-                },
+                {name: cast(dict, workflow.to_dict()) for name, workflow in self.workflows.items()},
             ),
             "active": cast(
                 dict[str, str | int | bool | list[str]],
-                {
-                    exec_id: cast(dict, execution.to_dict())
-                    for exec_id, execution in self.active_executions.items()
-                },
+                {exec_id: cast(dict, execution.to_dict()) for exec_id, execution in self.active_executions.items()},
             ),
         }
 
     def save_workflows_config(self, file_path: Path) -> None:
         """Save workflow configurations to file."""
         config = {
-            "workflows": {
-                name: workflow.to_dict() for name, workflow in self.workflows.items()
-            },
+            "workflows": {name: workflow.to_dict() for name, workflow in self.workflows.items()},
             "saved_at": time.time(),
         }
 
@@ -888,9 +818,7 @@ class WorkflowEngine:
                 actions.append(WorkflowAction(**action_data))
 
             workflow_data["actions"] = actions
-            workflow_data["trigger_contexts"] = [
-                ContextType(ctx) for ctx in workflow_data["trigger_contexts"]
-            ]
+            workflow_data["trigger_contexts"] = [ContextType(ctx) for ctx in workflow_data["trigger_contexts"]]
 
             workflow = WorkflowChain(**workflow_data)
             self.register_workflow(workflow)

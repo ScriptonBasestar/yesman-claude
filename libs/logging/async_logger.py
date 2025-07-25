@@ -18,7 +18,6 @@ from .batch_processor import BatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Asynchronous logger with queue-based processing for high performance."""
 
 
@@ -133,9 +132,7 @@ class AsyncLogger:
         self.config = config or AsyncLoggerConfig()
 
         # Queue for log entries
-        self.log_queue: asyncio.Queue = asyncio.Queue(
-            maxsize=self.config.max_queue_size
-        )
+        self.log_queue: asyncio.Queue = asyncio.Queue(maxsize=self.config.max_queue_size)
 
         # Processing components
         self.batch_processor: BatchProcessor | None = None
@@ -173,9 +170,7 @@ class AsyncLogger:
         # Processing task
         self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
-        self._executor = ThreadPoolExecutor(
-            max_workers=2, thread_name_prefix="async_logger"
-        )
+        self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="async_logger")
 
         # Thread-safe logging from sync code
         self._sync_queue: asyncio.Queue[dict[str, object]] = asyncio.Queue()
@@ -244,9 +239,7 @@ class AsyncLogger:
                     continue
 
         except Exception as e:
-            self.standard_logger.error(
-                "Error in async logger processing loop: %s", e, exc_info=True
-            )
+            self.standard_logger.error("Error in async logger processing loop: %s", e, exc_info=True)
 
     async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
@@ -335,9 +328,7 @@ class AsyncLogger:
                     entry.exception_info = traceback.format_exc()
             except Exception as e:
                 # Ignore errors in exception info collection
-                self.standard_logger.debug(
-                    "Failed to capture exception info: %s", e, exc_info=False
-                )
+                self.standard_logger.debug("Failed to capture exception info: %s", e, exc_info=False)
 
         # Queue the entry
         self._queue_entry(entry)

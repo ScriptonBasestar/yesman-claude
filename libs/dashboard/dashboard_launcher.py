@@ -15,7 +15,6 @@ import uvicorn
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Dashboard Launcher.
 
 Detects optimal dashboard interface and manages system requirements.
@@ -35,10 +34,11 @@ class InterfaceInfo:
 
 
 class DashboardLauncher:
-    """Manages dashboard interface detection, dependency checking, and launching.
+    """Manages dashboard interface detection, dependency checking, and
+    launching.
 
-    Provides intelligent interface selection based on system capabilities,
-    user preferences, and environment constraints.
+    Provides intelligent interface selection based on system
+    capabilities, user preferences, and environment constraints.
     """
 
     def __init__(self, project_root: Path | None = None) -> None:
@@ -82,7 +82,8 @@ class DashboardLauncher:
         }
 
     def detect_best_interface(self) -> str:
-        """Automatically detect the best dashboard interface for current environment.
+        """Automatically detect the best dashboard interface for current
+        environment.
 
         Returns:
             Interface name (tui/web/tauri)

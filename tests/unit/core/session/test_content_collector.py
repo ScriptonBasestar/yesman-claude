@@ -11,7 +11,6 @@ from libs.core.content_collector import ClaudeContentCollector, ContentCollectio
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Test content collection functionality."""
 
 

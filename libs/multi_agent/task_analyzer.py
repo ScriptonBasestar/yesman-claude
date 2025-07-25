@@ -17,7 +17,6 @@ from .graph import DirectedGraph
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-
 """Task analysis and dependency graph generation for multi-agent development."""
 
 logger = logging.getLogger(__name__)
@@ -242,11 +241,7 @@ class TaskAnalyzer:
         if module.startswith(imported + "."):
             return True
 
-        return bool(
-            "." in imported
-            and imported.rsplit(".", maxsplit=1)[-1]
-            == module.rsplit(".", maxsplit=1)[-1]
-        )
+        return bool("." in imported and imported.rsplit(".", maxsplit=1)[-1] == module.rsplit(".", maxsplit=1)[-1])
 
     def create_task_from_files(
         self,
