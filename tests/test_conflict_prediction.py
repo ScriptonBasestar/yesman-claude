@@ -14,7 +14,11 @@ from libs.multi_agent.conflict_prediction import (
     PredictionConfidence,
     PredictionResult,
 )
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ConflictSeverity, ConflictType
+from libs.multi_agent.conflict_resolution import (
+    ConflictResolutionEngine,
+    ConflictSeverity,
+    ConflictType,
+)
 
 
 class TestConflictVector:
@@ -95,7 +99,9 @@ class TestConflictPredictor:
 
     @pytest.fixture
     @staticmethod
-    def predictor(mock_conflict_engine: Mock, mock_branch_manager: Mock, temp_repo: Path) -> ConflictPredictor:
+    def predictor(
+        mock_conflict_engine: Mock, mock_branch_manager: Mock, temp_repo: Path
+    ) -> ConflictPredictor:
         """Create ConflictPredictor instance."""
         return ConflictPredictor(
             conflict_engine=mock_conflict_engine,
@@ -123,14 +129,24 @@ class TestConflictPredictor:
     @staticmethod
     def test_likelihood_to_confidence(predictor: ConflictPredictor) -> None:
         """Test likelihood to confidence conversion."""
-        assert predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL  # noqa: SLF001
-        assert predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH  # noqa: SLF001
-        assert predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM  # noqa: SLF001
-        assert predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW  # noqa: SLF001
+        assert (
+            predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
+        )  # noqa: SLF001
+        assert (
+            predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH
+        )  # noqa: SLF001
+        assert (
+            predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM
+        )  # noqa: SLF001
+        assert (
+            predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW
+        )  # noqa: SLF001
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_predict_conflicts_empty_branches(predictor: ConflictPredictor) -> None:
+    async def test_predict_conflicts_empty_branches(
+        predictor: ConflictPredictor,
+    ) -> None:
         """Test conflict prediction with empty branch list."""
         predictions = await predictor.predict_conflicts([])
         assert predictions == []
@@ -140,16 +156,30 @@ class TestConflictPredictor:
     async def test_calculate_conflict_vector(predictor: ConflictPredictor) -> None:
         """Test conflict vector calculation."""
         # Mock the required methods
-        cast(Any, predictor.conflict_engine)._get_changed_files = AsyncMock(  # noqa: SLF001
-            return_value={"file1.py": "M", "file2.py": "A"},
+        cast(Any, predictor.conflict_engine)._get_changed_files = (
+            AsyncMock(  # noqa: SLF001
+                return_value={"file1.py": "M", "file2.py": "A"},
+            )
         )
-        cast(Any, predictor)._get_change_frequency = AsyncMock(return_value=2.5)  # noqa: SLF001
-        cast(Any, predictor)._calculate_branch_complexity = AsyncMock(return_value=50.0)  # noqa: SLF001
-        cast(Any, predictor)._calculate_dependency_coupling = AsyncMock(return_value=0.6)  # noqa: SLF001
-        cast(Any, predictor)._calculate_semantic_distance = AsyncMock(return_value=0.4)  # noqa: SLF001
-        cast(Any, predictor)._calculate_temporal_proximity = AsyncMock(return_value=0.3)  # noqa: SLF001
+        cast(Any, predictor)._get_change_frequency = AsyncMock(
+            return_value=2.5
+        )  # noqa: SLF001
+        cast(Any, predictor)._calculate_branch_complexity = AsyncMock(
+            return_value=50.0
+        )  # noqa: SLF001
+        cast(Any, predictor)._calculate_dependency_coupling = AsyncMock(
+            return_value=0.6
+        )  # noqa: SLF001
+        cast(Any, predictor)._calculate_semantic_distance = AsyncMock(
+            return_value=0.4
+        )  # noqa: SLF001
+        cast(Any, predictor)._calculate_temporal_proximity = AsyncMock(
+            return_value=0.3
+        )  # noqa: SLF001
 
-        vector = await cast(Any, predictor)._calculate_conflict_vector("branch1", "branch2")  # noqa: SLF001
+        vector = await cast(Any, predictor)._calculate_conflict_vector(
+            "branch1", "branch2"
+        )  # noqa: SLF001
 
         assert isinstance(vector, ConflictVector)
         assert 0.0 <= vector.file_overlap_score <= 1.0
@@ -193,7 +223,9 @@ invalid syntax here !!!
         imports1 = ["import os", "import sys", "from datetime import UTC, datetime"]
         imports2 = ["import os", "import json", "from datetime import UTC, date"]
 
-        result = cast(Any, predictor)._imports_likely_to_conflict(imports1, imports2)  # noqa: SLF001
+        result = cast(Any, predictor)._imports_likely_to_conflict(
+            imports1, imports2
+        )  # noqa: SLF001
         # This specific case might not trigger conflict, but test the logic exists
         assert isinstance(result, bool)
 
@@ -217,7 +249,9 @@ invalid syntax here !!!
             "import collections",
             "import typing",
         ]
-        result = cast(Any, predictor)._imports_likely_to_conflict(imports3, imports4)  # noqa: SLF001
+        result = cast(Any, predictor)._imports_likely_to_conflict(
+            imports3, imports4
+        )  # noqa: SLF001
         assert result is True
 
     @pytest.mark.asyncio
@@ -235,9 +269,13 @@ invalid syntax here !!!
         )
 
         # Mock conflict detection
-        cast(Any, predictor)._imports_likely_to_conflict = Mock(return_value=True)  # noqa: SLF001
+        cast(Any, predictor)._imports_likely_to_conflict = Mock(
+            return_value=True
+        )  # noqa: SLF001
 
-        result = await cast(Any, predictor)._detect_import_conflicts("branch1", "branch2", vector)  # noqa: SLF001
+        result = await cast(Any, predictor)._detect_import_conflicts(
+            "branch1", "branch2", vector
+        )  # noqa: SLF001
 
         if result:  # Only test if conflicts were detected
             assert isinstance(result, PredictionResult)
@@ -266,7 +304,9 @@ invalid syntax here !!!
             ],
         )
 
-        result = await cast(Any, predictor)._detect_signature_drift("branch1", "branch2", vector)  # noqa: SLF001
+        result = await cast(Any, predictor)._detect_signature_drift(
+            "branch1", "branch2", vector
+        )  # noqa: SLF001
 
         if result:  # Only test if drift was detected
             assert isinstance(result, PredictionResult)
@@ -288,7 +328,9 @@ invalid syntax here !!!
             ],
         )
 
-        result = await cast(Any, predictor)._detect_naming_collisions("branch1", "branch2", vector)  # noqa: SLF001
+        result = await cast(Any, predictor)._detect_naming_collisions(
+            "branch1", "branch2", vector
+        )  # noqa: SLF001
 
         if result:  # Only test if collisions were detected
             assert isinstance(result, PredictionResult)
@@ -309,9 +351,13 @@ invalid syntax here !!!
             ],
         )
 
-        cast(Any, predictor)._calculate_version_distance = Mock(return_value=0.3)  # noqa: SLF001
+        cast(Any, predictor)._calculate_version_distance = Mock(
+            return_value=0.3
+        )  # noqa: SLF001
 
-        result = await cast(Any, predictor)._detect_version_conflicts("branch1", "branch2", vector)  # noqa: SLF001
+        result = await cast(Any, predictor)._detect_version_conflicts(
+            "branch1", "branch2", vector
+        )  # noqa: SLF001
 
         if result:  # Only test if conflicts were detected
             assert isinstance(result, PredictionResult)
@@ -322,16 +368,24 @@ invalid syntax here !!!
     def test_calculate_version_distance(predictor: ConflictPredictor) -> None:
         """Test version distance calculation."""
         # Test same versions
-        distance = cast(Any, predictor)._calculate_version_distance("1.2.3", "1.2.3")  # noqa: SLF001
+        distance = cast(Any, predictor)._calculate_version_distance(
+            "1.2.3", "1.2.3"
+        )  # noqa: SLF001
         assert distance == 0.0
 
         # Test different versions
-        distance = cast(Any, predictor)._calculate_version_distance("1.2.3", "1.2.4")  # noqa: SLF001
+        distance = cast(Any, predictor)._calculate_version_distance(
+            "1.2.3", "1.2.4"
+        )  # noqa: SLF001
         assert distance > 0.0
 
         # Test major version difference
-        distance1 = cast(Any, predictor)._calculate_version_distance("1.2.3", "2.2.3")  # noqa: SLF001
-        distance2 = cast(Any, predictor)._calculate_version_distance("1.2.3", "1.3.3")  # noqa: SLF001
+        distance1 = cast(Any, predictor)._calculate_version_distance(
+            "1.2.3", "2.2.3"
+        )  # noqa: SLF001
+        distance2 = cast(Any, predictor)._calculate_version_distance(
+            "1.2.3", "1.3.3"
+        )  # noqa: SLF001
         assert distance1 > distance2  # Major version changes should be weighted more
 
     @pytest.mark.asyncio
@@ -339,11 +393,15 @@ invalid syntax here !!!
     async def test_get_change_frequency(predictor: ConflictPredictor) -> None:
         """Test change frequency calculation."""
         # Mock git command
-        cast(Any, predictor.conflict_engine)._run_git_command = AsyncMock(  # noqa: SLF001
-            return_value=Mock(stdout="14\n"),  # 14 commits in last week
+        cast(Any, predictor.conflict_engine)._run_git_command = (
+            AsyncMock(  # noqa: SLF001
+                return_value=Mock(stdout="14\n"),  # 14 commits in last week
+            )
         )
 
-        frequency = await cast(Any, predictor)._get_change_frequency("test-branch")  # noqa: SLF001
+        frequency = await cast(Any, predictor)._get_change_frequency(
+            "test-branch"
+        )  # noqa: SLF001
         assert frequency == 2.0  # 14 commits / 7 days
 
     @pytest.mark.asyncio
@@ -351,18 +409,22 @@ invalid syntax here !!!
     async def test_calculate_branch_complexity(predictor: ConflictPredictor) -> None:
         """Test branch complexity calculation."""
         # Mock git command with diff stats
-        cast(Any, predictor.conflict_engine)._run_git_command = AsyncMock(  # noqa: SLF001
-            return_value=Mock(
-                stdout="""
+        cast(Any, predictor.conflict_engine)._run_git_command = (
+            AsyncMock(  # noqa: SLF001
+                return_value=Mock(
+                    stdout="""
  file1.py | 10 ++++++++++
  file2.py | 5 +++++
  file3.py | 3 ---
  3 files changed, 15 insertions(+), 3 deletions(-)
 """,
-            ),
+                ),
+            )
         )
 
-        complexity = await cast(Any, predictor)._calculate_branch_complexity("test-branch")  # noqa: SLF001
+        complexity = await cast(Any, predictor)._calculate_branch_complexity(
+            "test-branch"
+        )  # noqa: SLF001
         assert complexity > 0.0
         assert complexity <= 100.0
 
@@ -371,17 +433,23 @@ invalid syntax here !!!
     async def test_get_python_files_with_imports(predictor: ConflictPredictor) -> None:
         """Test getting Python files with imports."""
         # Mock the required methods
-        cast(Any, predictor.conflict_engine)._get_python_files_changed = AsyncMock(  # noqa: SLF001
-            return_value=["file1.py", "file2.py"],
+        cast(Any, predictor.conflict_engine)._get_python_files_changed = (
+            AsyncMock(  # noqa: SLF001
+                return_value=["file1.py", "file2.py"],
+            )
         )
-        cast(Any, predictor.conflict_engine)._get_file_content = AsyncMock(  # noqa: SLF001
-            side_effect=[
-                "import os\nimport sys\n\ndef test():\n    pass",
-                "from datetime import UTC, datetime\n\nclass Test:\n    pass",
-            ],
+        cast(Any, predictor.conflict_engine)._get_file_content = (
+            AsyncMock(  # noqa: SLF001
+                side_effect=[
+                    "import os\nimport sys\n\ndef test():\n    pass",
+                    "from datetime import UTC, datetime\n\nclass Test:\n    pass",
+                ],
+            )
         )
 
-        files_with_imports = await cast(Any, predictor)._get_python_files_with_imports(  # noqa: SLF001
+        files_with_imports = await cast(
+            Any, predictor
+        )._get_python_files_with_imports(  # noqa: SLF001
             "test-branch",
         )
 
@@ -412,11 +480,15 @@ numpy = "^1.21.0"
 pytest = ">=6.0.0"
 """
 
-        cast(Any, predictor.conflict_engine)._get_file_content = AsyncMock(  # noqa: SLF001
-            side_effect=[requirements_content, pyproject_content],
+        cast(Any, predictor.conflict_engine)._get_file_content = (
+            AsyncMock(  # noqa: SLF001
+                side_effect=[requirements_content, pyproject_content],
+            )
         )
 
-        versions = await cast(Any, predictor)._get_dependency_versions("test-branch")  # noqa: SLF001
+        versions = await cast(Any, predictor)._get_dependency_versions(
+            "test-branch"
+        )  # noqa: SLF001
 
         assert "requests" in versions
         assert "numpy" in versions
@@ -453,13 +525,17 @@ pytest = ">=6.0.0"
         ]
 
         # Add some historical data
-        cast(Any, predictor.historical_patterns)[ConflictPattern.OVERLAPPING_IMPORTS] = [
+        cast(Any, predictor.historical_patterns)[
+            ConflictPattern.OVERLAPPING_IMPORTS
+        ] = [
             {"accurate": 1},
             {"accurate": 0},
             {"accurate": 1},
         ]
 
-        scored_predictions = await cast(Any, predictor)._apply_ml_scoring(predictions)  # noqa: SLF001
+        scored_predictions = await cast(Any, predictor)._apply_ml_scoring(
+            predictions
+        )  # noqa: SLF001
 
         assert len(scored_predictions) == 2
         # Likelihood scores may have been adjusted
@@ -477,7 +553,9 @@ pytest = ">=6.0.0"
         assert "accuracy_metrics" in cast(dict[str, Any], summary)
 
     @staticmethod
-    def test_get_prediction_summary_with_predictions(predictor: ConflictPredictor) -> None:
+    def test_get_prediction_summary_with_predictions(
+        predictor: ConflictPredictor,
+    ) -> None:
         """Test prediction summary with predictions."""
         # Add test predictions
         prediction1 = PredictionResult(
@@ -503,7 +581,8 @@ pytest = ">=6.0.0"
             predicted_severity=ConflictSeverity.HIGH,
             likelihood_score=0.6,
             description="Test prediction 2",
-            timeline_prediction=datetime.now(UTC) - timedelta(days=1),  # Past prediction
+            timeline_prediction=datetime.now(UTC)
+            - timedelta(days=1),  # Past prediction
         )
 
         cast(dict[str, Any], predictor.predictions)["test1"] = prediction1
@@ -512,12 +591,34 @@ pytest = ">=6.0.0"
         summary = predictor.get_prediction_summary()
 
         assert cast(dict[str, Any], summary)["total_predictions"] == 2
-        assert cast(dict[str, Any], summary)["active_predictions"] == 1  # Only future predictions
-        assert cast(dict[str, Any], cast(dict[str, Any], summary)["by_confidence"])["high"] == 1
-        assert cast(dict[str, Any], cast(dict[str, Any], summary)["by_confidence"])["medium"] == 1
-        assert cast(dict[str, Any], cast(dict[str, Any], summary)["by_pattern"])["overlapping_imports"] == 1
-        assert cast(dict[str, Any], cast(dict[str, Any], summary)["by_pattern"])["function_signature_drift"] == 1
-        assert len(cast(list, cast(dict[str, Any], summary)["most_likely_conflicts"])) == 2
+        assert (
+            cast(dict[str, Any], summary)["active_predictions"] == 1
+        )  # Only future predictions
+        assert (
+            cast(dict[str, Any], cast(dict[str, Any], summary)["by_confidence"])["high"]
+            == 1
+        )
+        assert (
+            cast(dict[str, Any], cast(dict[str, Any], summary)["by_confidence"])[
+                "medium"
+            ]
+            == 1
+        )
+        assert (
+            cast(dict[str, Any], cast(dict[str, Any], summary)["by_pattern"])[
+                "overlapping_imports"
+            ]
+            == 1
+        )
+        assert (
+            cast(dict[str, Any], cast(dict[str, Any], summary)["by_pattern"])[
+                "function_signature_drift"
+            ]
+            == 1
+        )
+        assert (
+            len(cast(list, cast(dict[str, Any], summary)["most_likely_conflicts"])) == 2
+        )
 
     @pytest.mark.asyncio
     @staticmethod
@@ -547,7 +648,11 @@ pytest = ">=6.0.0"
             if pattern != ConflictPattern.OVERLAPPING_IMPORTS:
                 detector_name = f"_detect_{pattern.value}"
                 if hasattr(predictor, detector_name):
-                    setattr(cast(Any, predictor), detector_name, AsyncMock(return_value=None))
+                    setattr(
+                        cast(Any, predictor),
+                        detector_name,
+                        AsyncMock(return_value=None),
+                    )
 
         predictions = await predictor.predict_conflicts(["branch1", "branch2"])
 

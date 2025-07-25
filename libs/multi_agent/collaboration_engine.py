@@ -431,7 +431,9 @@ class CollaborationEngine:
 
             # Filter by type
             if knowledge_type:
-                candidates = [k for k in candidates if k.knowledge_type == knowledge_type]
+                candidates = [
+                    k for k in candidates if k.knowledge_type == knowledge_type
+                ]
 
             # Sort by relevance and recency
             candidates.sort(
@@ -470,7 +472,9 @@ class CollaborationEngine:
         Returns:
             Session ID
         """
-        session_id = f"collab_{initiator_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
+        session_id = (
+            f"collab_{initiator_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
+        )
 
         # Ensure initiator is in participants
         if initiator_id not in participant_ids:
@@ -625,7 +629,9 @@ class CollaborationEngine:
             "changed_by": changed_by,
             "change_type": change_type,
             "change_details": change_details,
-            "affected_files": affected_files or list(self.dependency_graph.get(file_path, [])),
+            "affected_files": (
+                affected_files or list(self.dependency_graph.get(file_path, []))
+            ),
             "timestamp": datetime.now(UTC).isoformat(),
         }
 
@@ -690,7 +696,11 @@ class CollaborationEngine:
                 score += len(matching_expertise) / len(expertise_needed)
 
             # Check recent related knowledge contributions
-            agent_knowledge = [k for k in self.shared_knowledge.values() if k.contributor_id == agent.agent_id]
+            agent_knowledge = [
+                k
+                for k in self.shared_knowledge.values()
+                if k.contributor_id == agent.agent_id
+            ]
 
             for knowledge in agent_knowledge:
                 if problem_type in knowledge.tags:
@@ -932,7 +942,10 @@ class CollaborationEngine:
                 removed = []
 
                 for kid, knowledge in self.shared_knowledge.items():
-                    if knowledge.last_accessed < cutoff_date and knowledge.access_count < 5:
+                    if (
+                        knowledge.last_accessed < cutoff_date
+                        and knowledge.access_count < 5
+                    ):
                         removed.append(kid)
 
                 for kid in removed:
@@ -1034,18 +1047,26 @@ class CollaborationEngine:
         return {
             "statistics": self.collaboration_stats.copy(),
             "active_sessions": len(self.active_sessions),
-            "message_queues": {agent_id: len(queue) for agent_id, queue in self.message_queues.items()},
+            "message_queues": {
+                agent_id: len(queue) for agent_id, queue in self.message_queues.items()
+            },
             "pending_acknowledgments": len(self.pending_acknowledgments),
             "shared_knowledge_count": len(self.shared_knowledge),
             "knowledge_by_type": self._count_knowledge_by_type(),
-            "dependency_graph_size": sum(len(deps) for deps in self.dependency_graph.values()),
+            "dependency_graph_size": sum(
+                len(deps) for deps in self.dependency_graph.values()
+            ),
             "recent_sessions": [
                 {
                     "session_id": session.session_id,
                     "participants": len(session.participant_ids),
                     "mode": session.mode.value,
                     "purpose": session.purpose,
-                    "duration": ((session.ended_at or datetime.now(UTC)) - session.started_at).total_seconds(),
+                    "duration": (
+                        (
+                            (session.ended_at or datetime.now(UTC)) - session.started_at
+                        ).total_seconds()
+                    ),
                     "outcomes": session.outcomes,
                 }
                 for session in self.session_history[-10:]

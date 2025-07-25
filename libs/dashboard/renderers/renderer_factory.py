@@ -78,7 +78,9 @@ class RendererFactory:
                 ) from e
 
     @classmethod
-    def register_renderer(cls, render_format: RenderFormat, renderer_class: type[BaseRenderer]) -> None:
+    def register_renderer(
+        cls, render_format: RenderFormat, renderer_class: type[BaseRenderer]
+    ) -> None:
         """Register a new renderer class.
 
         Args:
@@ -152,10 +154,25 @@ class RendererFactory:
     def render_universal(
         cls,
         widget_type: WidgetType,
-        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
+        data: (
+            dict[str, str | int | float | bool | list[str]]
+            | list[str | int | float | bool]
+            | str
+            | int
+            | float
+            | bool
+        ),  # noqa: FBT001
         render_format: RenderFormat | None = None,
         options: dict[str, str | int | float | bool] | None = None,
-    ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool] | dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
+    ) -> (
+        str
+        | dict[str, str | int | float | bool]
+        | list[str | int | float | bool]
+        | dict[
+            RenderFormat,
+            str | dict[str, str | int | float | bool] | list[str | int | float | bool],
+        ]
+    ):
         """Universal rendering method with format selection.
 
         Args:
@@ -204,11 +221,21 @@ class RendererFactory:
     def render_parallel(
         cls,
         widget_type: WidgetType,
-        data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
+        data: (
+            dict[str, str | int | float | bool | list[str]]
+            | list[str | int | float | bool]
+            | str
+            | int
+            | float
+            | bool
+        ),  # noqa: FBT001
         formats: list[RenderFormat] | None = None,
         options: dict[str, str | int | float | bool] | None = None,
         max_workers: int = 3,
-    ) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
+    ) -> dict[
+        RenderFormat,
+        str | dict[str, str | int | float | bool] | list[str | int | float | bool],
+    ]:
         """Render widget with multiple formats in parallel.
 
         Args:
@@ -229,7 +256,16 @@ class RendererFactory:
         results = {}
         errors = []
 
-        def render_format(fmt: RenderFormat) -> tuple[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool] | None, str | None]:
+        def render_format(
+            fmt: RenderFormat,
+        ) -> tuple[
+            RenderFormat,
+            str
+            | dict[str, str | int | float | bool]
+            | list[str | int | float | bool]
+            | None,
+            str | None,
+        ]:
             try:
                 renderer = cls.get_singleton(fmt)
                 result = renderer.render_widget(widget_type, data, options)
@@ -238,7 +274,9 @@ class RendererFactory:
                 return fmt, None, str(e)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_format = {executor.submit(render_format, fmt): fmt for fmt in formats}
+            future_to_format = {
+                executor.submit(render_format, fmt): fmt for fmt in formats
+            }
 
             for future in as_completed(future_to_format):
                 fmt, result, error = future.result()
@@ -282,7 +320,14 @@ class RendererFactory:
 
 def render_widget(
     widget_type: WidgetType,
-    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
+    data: (
+        dict[str, str | int | float | bool | list[str]]
+        | list[str | int | float | bool]
+        | str
+        | int
+        | float
+        | bool
+    ),  # noqa: FBT001
     render_format: RenderFormat,
     options: dict[str, str | int | float | bool] | None = None,
 ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool]:
@@ -308,9 +353,19 @@ def render_widget(
 
 def render_all_formats(
     widget_type: WidgetType,
-    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
+    data: (
+        dict[str, str | int | float | bool | list[str]]
+        | list[str | int | float | bool]
+        | str
+        | int
+        | float
+        | bool
+    ),  # noqa: FBT001
     options: dict[str, str | int | float | bool] | None = None,
-) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
+) -> dict[
+    RenderFormat,
+    str | dict[str, str | int | float | bool] | list[str | int | float | bool],
+]:
     """Render a widget with all available formats.
 
     Args:
@@ -324,18 +379,30 @@ def render_all_formats(
     msg = "Bad dict"
     result = RendererFactory.render_universal(widget_type, data, None, options)
     # Type narrowing: when no format is specified, result should be multi-format dict
-    if not isinstance(result, dict) or not all(isinstance(k, RenderFormat) for k in result):
+    if not isinstance(result, dict) or not all(
+        isinstance(k, RenderFormat) for k in result
+    ):
         raise ValueError(msg)
     return result  # type: ignore[return-value]
 
 
 def render_formats(
     widget_type: WidgetType,
-    data: dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool,  # noqa: FBT001
+    data: (
+        dict[str, str | int | float | bool | list[str]]
+        | list[str | int | float | bool]
+        | str
+        | int
+        | float
+        | bool
+    ),  # noqa: FBT001
     formats: list[RenderFormat],
     options: dict[str, str | int | float | bool] | None = None,
     parallel: bool = False,  # noqa: FBT001
-) -> dict[RenderFormat, str | dict[str, str | int | float | bool] | list[str | int | float | bool]]:
+) -> dict[
+    RenderFormat,
+    str | dict[str, str | int | float | bool] | list[str | int | float | bool],
+]:
     """Render a widget with specific formats.
 
     Args:

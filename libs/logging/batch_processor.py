@@ -120,7 +120,10 @@ class BatchProcessor:
             while not self._stop_event.is_set():
                 await asyncio.sleep(0.1)  # Small delay to prevent CPU spinning
 
-                should_flush = len(self.pending_entries) >= self.max_batch_size or (len(self.pending_entries) > 0 and time.time() - self.last_flush_time >= self.max_batch_time)
+                should_flush = len(self.pending_entries) >= self.max_batch_size or (
+                    len(self.pending_entries) > 0
+                    and time.time() - self.last_flush_time >= self.max_batch_time
+                )
 
                 if should_flush:
                     await self._flush_pending_entries()
@@ -153,13 +156,17 @@ class BatchProcessor:
             # Update statistics
             self.stats["batches_processed"] += 1
             self.stats["entries_processed"] += len(entries)
-            self.stats["avg_batch_size"] = self.stats["entries_processed"] / self.stats["batches_processed"]
+            self.stats["avg_batch_size"] = (
+                self.stats["entries_processed"] / self.stats["batches_processed"]
+            )
 
             self.last_flush_time = time.time()
             self.batch_counter += 1
 
         except Exception:
-            self.logger.exception("Failed to write batch {batch.batch_id}")  # noqa: G004
+            self.logger.exception(
+                "Failed to write batch {batch.batch_id}"
+            )  # noqa: G004
             # Re-queue entries for retry
             self.pending_entries.extendleft(reversed(entries))
 
@@ -189,7 +196,10 @@ class BatchProcessor:
 
             # Update compression ratio
             compression_ratio = written_size / raw_size if raw_size > 0 else 1.0
-            self.stats["compression_ratio"] = (self.stats["compression_ratio"] * (self.stats["batches_processed"] - 1) + compression_ratio) / self.stats["batches_processed"]
+            self.stats["compression_ratio"] = (
+                self.stats["compression_ratio"] * (self.stats["batches_processed"] - 1)
+                + compression_ratio
+            ) / self.stats["batches_processed"]
         else:
             # Write uncompressed
             json_data += "\n"  # Add newline for easier reading
@@ -199,14 +209,21 @@ class BatchProcessor:
         self.current_file_size += written_size
         self.stats["bytes_written"] += written_size
 
-        self.logger.debug("Wrote batch %s: %d entries, %d bytes", batch.batch_id, len(batch.entries), written_size)
+        self.logger.debug(
+            "Wrote batch %s: %d entries, %d bytes",
+            batch.batch_id,
+            len(batch.entries),
+            written_size,
+        )
 
     async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
         timestamp = int(time.time())
         file_extension = ".jsonl.gz" if self.compression_enabled else ".jsonl"
 
-        self.current_log_file = self.output_dir / f"yesman_logs_{timestamp}{file_extension}"
+        self.current_log_file = (
+            self.output_dir / f"yesman_logs_{timestamp}{file_extension}"
+        )
         self.current_file_size = 0
         self.stats["files_created"] += 1
 
@@ -218,7 +235,9 @@ class BatchProcessor:
         Returns:
         object: Description of return value.
         """
-        uptime = time.time() - (self.last_flush_time if self.stats["batches_processed"] > 0 else time.time())
+        uptime = time.time() - (
+            self.last_flush_time if self.stats["batches_processed"] > 0 else time.time()
+        )
 
         return {
             **self.stats,

@@ -56,14 +56,20 @@ class AIStatusCommand(BaseCommand):
             # Basic info
             table.add_row("Total Responses", str(stats.get("total_responses", 0)))
             table.add_row("Learned Patterns", str(stats.get("total_patterns", 0)))
-            table.add_row("Recent Activity (7 days)", str(stats.get("recent_activity", 0)))
+            table.add_row(
+                "Recent Activity (7 days)", str(stats.get("recent_activity", 0))
+            )
 
             # Configuration
             config_obj = stats.get("adaptive_config", {})
             config = config_obj if isinstance(config_obj, dict) else {}
             table.add_row(
                 "Auto-Response",
-                "✅ Enabled" if bool(config.get("auto_response_enabled")) else "❌ Disabled",
+                (
+                    "✅ Enabled"
+                    if bool(config.get("auto_response_enabled"))
+                    else "❌ Disabled"
+                ),
             )
             table.add_row(
                 "Learning",
@@ -223,7 +229,9 @@ class AIHistoryCommand(BaseCommand):
             return {"history": []}
 
         # Create history table
-        table = Table(title=f"📚 AI Response History (last {len(history)})", show_header=True)
+        table = Table(
+            title=f"📚 AI Response History (last {len(history)})", show_header=True
+        )
         table.add_column("Time", style="dim", width=12)
         table.add_column("Type", style="yellow", width=15)
         table.add_column("Prompt", style="white", width=40)
@@ -234,7 +242,11 @@ class AIHistoryCommand(BaseCommand):
             time_str = time.strftime("%H:%M:%S", time.localtime(record.timestamp))
 
             # Truncate long prompts
-            prompt = record.prompt_text[:37] + "..." if len(record.prompt_text) > 40 else record.prompt_text
+            prompt = (
+                record.prompt_text[:37] + "..."
+                if len(record.prompt_text) > 40
+                else record.prompt_text
+            )
 
             table.add_row(
                 time_str,
@@ -387,7 +399,9 @@ class AIPredictCommand(BaseCommand):
         else:
             prediction_text.append("❌ No", style="red")
 
-        panel = Panel(prediction_text, title="🔮 AI Response Prediction", border_style="blue")
+        panel = Panel(
+            prediction_text, title="🔮 AI Response Prediction", border_style="blue"
+        )
         self.console.print(panel)
 
         return {
@@ -410,21 +424,27 @@ def status() -> None:
 
 
 @ai.command()
-@click.option("--threshold", "-t", type=float, help="New confidence threshold (0.0-1.0)")
+@click.option(
+    "--threshold", "-t", type=float, help="New confidence threshold (0.0-1.0)"
+)
 @click.option(
     "--auto-response/--no-auto-response",
     default=None,
     help="Enable/disable auto-response",
 )
 @click.option("--learning/--no-learning", default=None, help="Enable/disable learning")
-def config(threshold: float | None, auto_response: bool | None, learning: bool | None) -> None:  # noqa: FBT001
+def config(
+    threshold: float | None, auto_response: bool | None, learning: bool | None
+) -> None:  # noqa: FBT001
     """Configure AI learning system settings."""
     command = AIConfigCommand()
     command.run(threshold=threshold, auto_response=auto_response, learning=learning)
 
 
 @ai.command()
-@click.option("--limit", "-l", default=10, type=int, help="Number of recent responses to show")
+@click.option(
+    "--limit", "-l", default=10, type=int, help="Number of recent responses to show"
+)
 @click.option("--type", "-t", help="Filter by prompt type")
 @click.option("--project", "-p", help="Filter by project name")
 def history(limit: int, type: str | None, project: str | None) -> None:
@@ -442,7 +462,9 @@ def export(output: str | None) -> None:
 
 
 @ai.command()
-@click.option("--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)")
+@click.option(
+    "--days", "-d", default=30, type=int, help="Days of data to keep (default: 30)"
+)
 def cleanup(days: int) -> None:
     """Clean up old AI learning data."""
     command = AICleanupCommand()

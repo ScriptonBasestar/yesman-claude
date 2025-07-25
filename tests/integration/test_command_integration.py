@@ -63,13 +63,15 @@ class TestCommandLineInterface:
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create a temporary config file
             config_path = Path(temp_dir) / "test_config.yaml"
-            config_path.write_text("""
+            config_path.write_text(
+                """
 mode: merge
 logging:
   level: INFO
 tmux:
   default_shell: /bin/bash
-""")
+"""
+            )
 
             # Run validate command
             result = subprocess.run(
@@ -135,7 +137,9 @@ class TestCommandExecution:
 
         # Mock tmux_manager to raise an error
         with patch.object(command, "tmux_manager") as mock_tmux:
-            mock_tmux.list_running_sessions.side_effect = SessionError("Failed to connect to tmux", recovery_hint="Check if tmux is running")
+            mock_tmux.list_running_sessions.side_effect = SessionError(
+                "Failed to connect to tmux", recovery_hint="Check if tmux is running"
+            )
 
             # Error should be handled gracefully
             with pytest.raises(SessionError) as exc_info:
@@ -155,7 +159,9 @@ class TestConfigurationIntegration:
         loader = ConfigLoader()
         loader.add_source(EnvironmentSource())
 
-        with patch.dict(os.environ, {"YESMAN_LOGGING_LEVEL": "ERROR", "YESMAN_TMUX_MOUSE": "false"}):
+        with patch.dict(
+            os.environ, {"YESMAN_LOGGING_LEVEL": "ERROR", "YESMAN_TMUX_MOUSE": "false"}
+        ):
             config = YesmanConfig(config_loader=loader)
 
             assert config.get("logging.level") == "ERROR"
@@ -164,14 +170,18 @@ class TestConfigurationIntegration:
     @staticmethod
     def test_config_file_loading() -> None:
         """Test configuration file loading."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
-            f.write("""
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False, encoding="utf-8"
+        ) as f:
+            f.write(
+                """
 mode: isolated
 logging:
   level: WARNING
 custom:
   test_value: 42
-""")
+"""
+            )
             f.flush()
 
             try:
@@ -218,7 +228,9 @@ class TestErrorHandlingIntegration:
     @staticmethod
     def test_error_serialization() -> None:
         """Test error serialization for API responses."""
-        error = ConfigurationError("Config file not found", config_file="/missing/config.yaml")
+        error = ConfigurationError(
+            "Config file not found", config_file="/missing/config.yaml"
+        )
 
         error_dict = error.to_dict()
 

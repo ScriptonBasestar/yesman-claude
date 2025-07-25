@@ -133,7 +133,9 @@ class TestSessionEndpoints(unittest.TestCase):
         """Test creating duplicate session returns 409."""
         # Setup mock
         mock_manager_instance = MagicMock()
-        mock_manager_instance.create_session.side_effect = Exception("Session already exists")
+        mock_manager_instance.create_session.side_effect = Exception(
+            "Session already exists"
+        )
         mock_session_manager.return_value = mock_manager_instance
 
         # Make request

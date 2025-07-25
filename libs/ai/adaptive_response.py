@@ -33,7 +33,9 @@ class AdaptiveConfig:
 class AdaptiveResponse:
     """Adaptive response system that learns from user patterns."""
 
-    def __init__(self, config: AdaptiveConfig | None = None, data_dir: Path | None = None) -> None:
+    def __init__(
+        self, config: AdaptiveConfig | None = None, data_dir: Path | None = None
+    ) -> None:
         self.config = config or AdaptiveConfig()
         self.analyzer = ResponseAnalyzer(data_dir)
 
@@ -43,7 +45,9 @@ class AdaptiveResponse:
 
         logger.info("Adaptive response system initialized")
 
-    async def should_auto_respond(self, prompt_text: str, context: str = "", project_name: str | None = None) -> tuple[bool, str, float]:
+    async def should_auto_respond(
+        self, prompt_text: str, context: str = "", project_name: str | None = None
+    ) -> tuple[bool, str, float]:
         """Determine if we should auto-respond to a prompt and what the response should be."""
         if not self.config.auto_response_enabled:
             return False, "", 0.0
@@ -58,10 +62,14 @@ class AdaptiveResponse:
         # Check if confidence meets threshold
         should_respond = confidence >= self.config.min_confidence_threshold
 
-        logger.debug("Auto-response decision: {should_respond} (confidence: {confidence:.2f}, threshold: {self.config.min_confidence_threshold:.2f})")
+        logger.debug(
+            "Auto-response decision: {should_respond} (confidence: {confidence:.2f}, threshold: {self.config.min_confidence_threshold:.2f})"
+        )
 
         if should_respond:
-            logger.info("Auto-responding with: '{predicted_response}' (confidence: {confidence:.2f})")
+            logger.info(
+                "Auto-responding with: '{predicted_response}' (confidence: {confidence:.2f})"
+            )
 
         return should_respond, predicted_response, confidence
 
@@ -83,7 +91,9 @@ class AdaptiveResponse:
             self._response_queue.append((prompt_text, response, context, project_name))
 
             # Log the response attempt
-            logger.info("Sent adaptive response: '{response}' for prompt type: {self.analyzer._classify_prompt_type(prompt_text)}")
+            logger.info(
+                "Sent adaptive response: '{response}' for prompt type: {self.analyzer._classify_prompt_type(prompt_text)}"
+            )
 
             return True
 
@@ -106,7 +116,9 @@ class AdaptiveResponse:
         try:
             # Record the response for learning
             if success:
-                self.analyzer.record_response(prompt_text, response, context, project_name)
+                self.analyzer.record_response(
+                    prompt_text, response, context, project_name
+                )
                 logger.debug("Recorded successful response: {response}")
             else:
                 # For failed responses, we might want to adjust confidence
@@ -128,7 +140,9 @@ class AdaptiveResponse:
 
         try:
             # Record manual response for learning
-            self.analyzer.record_response(prompt_text, user_response, context, project_name)
+            self.analyzer.record_response(
+                prompt_text, user_response, context, project_name
+            )
             logger.debug("Learned from manual response: {user_response}")
 
         except Exception:
@@ -138,7 +152,9 @@ class AdaptiveResponse:
         """Periodically update and optimize response patterns."""
         current_time = time.time()
 
-        if (current_time - self._last_pattern_update) < self.config.pattern_update_interval:
+        if (
+            current_time - self._last_pattern_update
+        ) < self.config.pattern_update_interval:
             return
 
         try:
@@ -212,7 +228,10 @@ class AdaptiveResponse:
                 prompt_lower = record.prompt_text.lower()
 
                 # Check if any keywords match
-                if any(keyword in prompt_lower for keyword in keywords) and record.prompt_text not in suggestions:
+                if (
+                    any(keyword in prompt_lower for keyword in keywords)
+                    and record.prompt_text not in suggestions
+                ):
                     suggestions.append(record.prompt_text)
 
                 if len(suggestions) >= limit:
@@ -255,9 +274,13 @@ class AdaptiveResponse:
         """Dynamically adjust the confidence threshold for auto-responses."""
         if 0.0 <= new_threshold <= 1.0:
             self.config.min_confidence_threshold = new_threshold
-            logger.info("Confidence threshold adjusted: {old_threshold:.2f} -> {new_threshold:.2f}")
+            logger.info(
+                "Confidence threshold adjusted: {old_threshold:.2f} -> {new_threshold:.2f}"
+            )
         else:
-            logger.warning("Invalid confidence threshold: {new_threshold}. Must be between 0.0 and 1.0")
+            logger.warning(
+                "Invalid confidence threshold: {new_threshold}. Must be between 0.0 and 1.0"
+            )
 
     def enable_auto_response(self, enabled: bool = True) -> None:  # noqa: FBT001
         """Enable or disable auto-response functionality."""

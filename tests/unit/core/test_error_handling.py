@@ -108,7 +108,9 @@ class TestErrorHandling(unittest.TestCase):
                 cache.set("test_key", {"data": "test"})
                 result = cache.get("test_key")
                 # In-memory cache should still work even if disk operations fail
-                assert result is not None or result is None  # Either works or fails gracefully
+                assert (
+                    result is not None or result is None
+                )  # Either works or fails gracefully
             except OSError:
                 # If it raises OSError, that's also acceptable behavior
                 pass

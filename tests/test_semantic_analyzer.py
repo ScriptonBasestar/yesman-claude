@@ -219,10 +219,18 @@ another_var = [1, 2, 3]
         """Test visibility determination."""
         visitor = SemanticVisitor()
 
-        assert visitor._determine_visibility("public") == SymbolVisibility.PUBLIC  # noqa: SLF001
-        assert visitor._determine_visibility("_protected") == SymbolVisibility.PROTECTED  # noqa: SLF001
-        assert visitor._determine_visibility("__private") == SymbolVisibility.PRIVATE  # noqa: SLF001
-        assert visitor._determine_visibility("__magic__") == SymbolVisibility.MAGIC  # noqa: SLF001
+        assert (
+            visitor._determine_visibility("public") == SymbolVisibility.PUBLIC
+        )  # noqa: SLF001
+        assert (
+            visitor._determine_visibility("_protected") == SymbolVisibility.PROTECTED
+        )  # noqa: SLF001
+        assert (
+            visitor._determine_visibility("__private") == SymbolVisibility.PRIVATE
+        )  # noqa: SLF001
+        assert (
+            visitor._determine_visibility("__magic__") == SymbolVisibility.MAGIC
+        )  # noqa: SLF001
 
     @staticmethod
     def test_infer_type() -> None:
@@ -267,7 +275,9 @@ class TestSemanticAnalyzer:
         )
 
     @staticmethod
-    def test_init(analyzer: SemanticAnalyzer, mock_branch_manager: Mock, temp_repo: Path) -> None:
+    def test_init(
+        analyzer: SemanticAnalyzer, mock_branch_manager: Mock, temp_repo: Path
+    ) -> None:
         """Test SemanticAnalyzer initialization."""
         assert analyzer.branch_manager == mock_branch_manager
         assert analyzer.repo_path == temp_repo
@@ -322,7 +332,9 @@ class TestClass:
             return_type="int",
         )
 
-        assert analyzer._functions_have_signature_conflict(func1, func2) is True  # noqa: SLF001
+        assert (
+            analyzer._functions_have_signature_conflict(func1, func2) is True
+        )  # noqa: SLF001
 
         # Same signature
         func3 = FunctionSignature(
@@ -332,7 +344,9 @@ class TestClass:
             return_type="int",
         )
 
-        assert analyzer._functions_have_signature_conflict(func1, func3) is False  # noqa: SLF001
+        assert (
+            analyzer._functions_have_signature_conflict(func1, func3) is False
+        )  # noqa: SLF001
 
     @staticmethod
     def test_assess_function_conflict_severity(analyzer: SemanticAnalyzer) -> None:
@@ -350,7 +364,9 @@ class TestClass:
             visibility=SymbolVisibility.PUBLIC,
         )
 
-        severity = analyzer._assess_function_conflict_severity(func1, func2)  # noqa: SLF001
+        severity = analyzer._assess_function_conflict_severity(
+            func1, func2
+        )  # noqa: SLF001
         assert severity == ConflictSeverity.HIGH
 
         # Private function change (less severe)
@@ -366,7 +382,9 @@ class TestClass:
             visibility=SymbolVisibility.PROTECTED,
         )
 
-        severity = analyzer._assess_function_conflict_severity(func3, func4)  # noqa: SLF001
+        severity = analyzer._assess_function_conflict_severity(
+            func3, func4
+        )  # noqa: SLF001
         assert severity == ConflictSeverity.LOW
 
     @staticmethod
@@ -577,17 +595,23 @@ class TestClass:
             mock_get.return_value = test_code
 
             # First call should fetch and cache
-            context1 = await analyzer._get_semantic_context("test.py", "branch1")  # noqa: SLF001
+            context1 = await analyzer._get_semantic_context(
+                "test.py", "branch1"
+            )  # noqa: SLF001
             assert context1 is not None
             assert mock_get.call_count == 1
 
             # Second call should use cache
-            context2 = await analyzer._get_semantic_context("test.py", "branch1")  # noqa: SLF001
+            context2 = await analyzer._get_semantic_context(
+                "test.py", "branch1"
+            )  # noqa: SLF001
             assert context2 is context1  # Same object reference
             assert mock_get.call_count == 1  # No additional call
 
             # Different branch should fetch again
-            context3 = await analyzer._get_semantic_context("test.py", "branch2")  # noqa: SLF001
+            context3 = await analyzer._get_semantic_context(
+                "test.py", "branch2"
+            )  # noqa: SLF001
             assert context3 is not context1
             assert mock_get.call_count == 2
 
@@ -610,10 +634,14 @@ class TestClass:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_analyze_semantic_conflicts_integration(analyzer: SemanticAnalyzer) -> None:
+    async def test_analyze_semantic_conflicts_integration(
+        analyzer: SemanticAnalyzer,
+    ) -> None:
         """Test full semantic conflict analysis integration."""
         # Mock the required methods
-        analyzer._get_changed_python_files = AsyncMock(return_value=["test.py"])  # noqa: SLF001
+        analyzer._get_changed_python_files = AsyncMock(
+            return_value=["test.py"]
+        )  # noqa: SLF001
         analyzer._analyze_file_semantic_conflicts = AsyncMock(  # noqa: SLF001
             return_value=[
                 SemanticConflict(

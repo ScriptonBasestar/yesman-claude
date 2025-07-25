@@ -34,23 +34,35 @@ class ManagerMockFactory:
         mock_manager = MagicMock()
 
         # Default behaviors
-        sessions = cast(list[dict[str, Any]], kwargs.get("sessions", [MOCK_SESSION_DATA]))
+        sessions = cast(
+            list[dict[str, Any]], kwargs.get("sessions", [MOCK_SESSION_DATA])
+        )
         mock_manager.get_sessions.return_value = sessions
         mock_manager.list_sessions.return_value = [s["session_name"] for s in sessions]
 
         # Create session behavior (return value or side effect)
         if "create_session_side_effect" in kwargs:
-            mock_manager.create_session.side_effect = kwargs["create_session_side_effect"]
+            mock_manager.create_session.side_effect = kwargs[
+                "create_session_side_effect"
+            ]
         else:
-            mock_manager.create_session.return_value = kwargs.get("create_session_result", True)
+            mock_manager.create_session.return_value = kwargs.get(
+                "create_session_result", True
+            )
 
-        mock_manager.get_session_info.return_value = kwargs.get("get_session_info_result", MOCK_SESSION_DATA)
+        mock_manager.get_session_info.return_value = kwargs.get(
+            "get_session_info_result", MOCK_SESSION_DATA
+        )
 
         # Validation behavior
         if "validate_session_name_side_effect" in kwargs:
-            mock_manager.validate_session_name.side_effect = kwargs["validate_session_name_side_effect"]
+            mock_manager.validate_session_name.side_effect = kwargs[
+                "validate_session_name_side_effect"
+            ]
         else:
-            mock_manager.validate_session_name.return_value = None  # No exception = valid
+            mock_manager.validate_session_name.return_value = (
+                None  # No exception = valid
+            )
 
         # Additional session operations
         mock_manager.start_session.return_value = True
@@ -60,7 +72,9 @@ class ManagerMockFactory:
         mock_manager.kill_session.return_value = True
 
         # Project management operations
-        mock_manager.get_all_projects.return_value = kwargs.get("get_all_projects_result", [])
+        mock_manager.get_all_projects.return_value = kwargs.get(
+            "get_all_projects_result", []
+        )
 
         # Set any additional attributes
         for key, value in kwargs.items():
@@ -101,13 +115,20 @@ class ManagerMockFactory:
         # Manager behaviors
         mock_manager.get_controller.return_value = mock_controller
         mock_manager.create_controller.return_value = mock_controller
-        mock_manager.list_controllers.return_value = [mock_controller] * controller_count
+        mock_manager.list_controllers.return_value = [
+            mock_controller
+        ] * controller_count
         mock_manager.get_controller_count.return_value = controller_count
 
         # Status tracking
-        controllers_status = cast(dict[str, str], kwargs.get("controllers_status", {"test-session": "running"}))
+        controllers_status = cast(
+            dict[str, str],
+            kwargs.get("controllers_status", {"test-session": "running"}),
+        )
         mock_manager.get_all_status.return_value = controllers_status
-        mock_manager.get_status.return_value = next(iter(controllers_status.values())) if controllers_status else "stopped"
+        mock_manager.get_status.return_value = (
+            next(iter(controllers_status.values())) if controllers_status else "stopped"
+        )
 
         # Session operations
         mock_manager.start_session.return_value = True
@@ -138,8 +159,12 @@ class ManagerMockFactory:
 
         # Default sessions
         sessions = kwargs.get("sessions", ["test-session"])
-        mock_manager.list_sessions.return_value = kwargs.get("list_sessions_result", sessions)
-        mock_manager.session_exists.return_value = kwargs.get("session_exists_result", True)
+        mock_manager.list_sessions.return_value = kwargs.get(
+            "list_sessions_result", sessions
+        )
+        mock_manager.session_exists.return_value = kwargs.get(
+            "session_exists_result", True
+        )
 
         # Session operations
         mock_manager.create_session.return_value = True
@@ -151,7 +176,9 @@ class ManagerMockFactory:
         mock_manager.start_server.return_value = True
 
         # Project loading operations (for setup/up commands)
-        mock_manager.load_projects.return_value = kwargs.get("load_projects_result", {"sessions": {}})
+        mock_manager.load_projects.return_value = kwargs.get(
+            "load_projects_result", {"sessions": {}}
+        )
         mock_manager.list_running_sessions.return_value = None
 
         # Set any additional attributes
@@ -166,7 +193,9 @@ class ComponentMockFactory:
     """Factory for commonly mocked component objects."""
 
     @staticmethod
-    def create_tmux_session_mock(name: str = "test-session", **kwargs: Any) -> MagicMock:
+    def create_tmux_session_mock(
+        name: str = "test-session", **kwargs: Any
+    ) -> MagicMock:
         """Create a standardized tmux session mock."""
         mock_session = MagicMock()
         mock_session.name = name
@@ -186,22 +215,32 @@ class ComponentMockFactory:
         return mock_session
 
     @staticmethod
-    def create_subprocess_mock(returncode: int = 0, stdout: str = "", stderr: str = "") -> MagicMock:
+    def create_subprocess_mock(
+        returncode: int = 0, stdout: str = "", stderr: str = ""
+    ) -> MagicMock:
         """Create a standardized subprocess.run result mock."""
         mock_result = MagicMock()
         mock_result.returncode = returncode
         mock_result.stdout = stdout
         mock_result.stderr = stderr
-        mock_result.check_returncode.return_value = None if returncode == 0 else Exception(f"Command failed with code {returncode}")
+        mock_result.check_returncode.return_value = (
+            None
+            if returncode == 0
+            else Exception(f"Command failed with code {returncode}")
+        )
 
         return mock_result
 
     @staticmethod
-    def create_api_response_mock(status_code: int = 200, json_data: dict | None = None) -> MagicMock:
+    def create_api_response_mock(
+        status_code: int = 200, json_data: dict | None = None
+    ) -> MagicMock:
         """Create a standardized API response mock."""
         mock_response = MagicMock()
         mock_response.status_code = status_code
-        mock_response.json.return_value = json_data or MOCK_API_RESPONSES["sessions_list"]
+        mock_response.json.return_value = (
+            json_data or MOCK_API_RESPONSES["sessions_list"]
+        )
         mock_response.text = str(json_data) if json_data else ""
         mock_response.ok = status_code < 400
 
@@ -215,13 +254,17 @@ class PatchContextFactory:
     def patch_session_manager(**kwargs: object) -> object:
         """Create a patch context for SessionManager with standard mock."""
         mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs)
-        return patch("libs.core.session_manager.SessionManager", return_value=mock_manager)
+        return patch(
+            "libs.core.session_manager.SessionManager", return_value=mock_manager
+        )
 
     @staticmethod
     def patch_claude_manager(**kwargs: object) -> object:
         """Create a patch context for ClaudeManager with standard mock."""
         mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs)
-        return patch("libs.core.claude_manager.ClaudeManager", return_value=mock_manager)
+        return patch(
+            "libs.core.claude_manager.ClaudeManager", return_value=mock_manager
+        )
 
     @staticmethod
     def patch_tmux_manager(**kwargs: object) -> object:
@@ -238,7 +281,9 @@ class PatchContextFactory:
     @staticmethod
     def patch_subprocess_run(**kwargs: object) -> object:
         """Create a patch context for subprocess.run with standard mock."""
-        mock_result = ComponentMockFactory.create_subprocess_mock(**cast(dict[str, Any], kwargs))
+        mock_result = ComponentMockFactory.create_subprocess_mock(
+            **cast(dict[str, Any], kwargs)
+        )
         return patch("subprocess.run", return_value=mock_result)
 
 

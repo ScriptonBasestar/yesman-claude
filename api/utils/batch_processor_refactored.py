@@ -90,7 +90,11 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
     async def process_batch(self, batch: MessageBatch) -> None:  # type: ignore[override]
         """Process a batch by sending through the handler."""
         # Optimize batch if large enough
-        optimized_messages = self._optimize_messages(batch.messages) if len(batch.messages) >= self.config.compression_threshold else batch.messages
+        optimized_messages = (
+            self._optimize_messages(batch.messages)
+            if len(batch.messages) >= self.config.compression_threshold
+            else batch.messages
+        )
 
         # Calculate compression savings
         original_size = batch.size_bytes
@@ -98,25 +102,39 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
 
         if original_size > optimized_size:
             bytes_saved = original_size - optimized_size
-            self.parent_stats["bytes_saved"] = cast(float, self.parent_stats["bytes_saved"]) + bytes_saved
+            self.parent_stats["bytes_saved"] = (
+                cast(float, self.parent_stats["bytes_saved"]) + bytes_saved
+            )
 
             # Update compression ratio
-            compression_ratio = optimized_size / original_size if original_size > 0 else 1.0
+            compression_ratio = (
+                optimized_size / original_size if original_size > 0 else 1.0
+            )
             batches_sent = cast(int, self.parent_stats["batches_sent"])
             if batches_sent > 0:
                 current_ratio = cast(float, self.parent_stats["compression_ratio"])
-                self.parent_stats["compression_ratio"] = (current_ratio * (batches_sent - 1) + compression_ratio) / batches_sent
+                self.parent_stats["compression_ratio"] = (
+                    current_ratio * (batches_sent - 1) + compression_ratio
+                ) / batches_sent
 
         # Send optimized batch
         await self.handler(optimized_messages)
 
         # Update parent statistics
-        self.parent_stats["batches_sent"] = cast(int, self.parent_stats["batches_sent"]) + 1
-        self.parent_stats["messages_processed"] = cast(int, self.parent_stats["messages_processed"]) + len(batch.messages)
+        self.parent_stats["batches_sent"] = (
+            cast(int, self.parent_stats["batches_sent"]) + 1
+        )
+        self.parent_stats["messages_processed"] = cast(
+            int, self.parent_stats["messages_processed"]
+        ) + len(batch.messages)
 
-        self.logger.debug("Sent batch %s: %d messages", batch.batch_id, len(batch.messages))
+        self.logger.debug(
+            "Sent batch %s: %d messages", batch.batch_id, len(batch.messages)
+        )
 
-    def _optimize_messages(self, messages: list[dict[str, object]]) -> list[dict[str, object]]:
+    def _optimize_messages(
+        self, messages: list[dict[str, object]]
+    ) -> list[dict[str, object]]:
         """Optimize a batch of messages by combining similar ones.
 
         Returns:
@@ -152,7 +170,9 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
         return optimized
 
     @staticmethod
-    def _combine_update_messages(messages: list[dict[str, object]]) -> dict[str, object]:
+    def _combine_update_messages(
+        messages: list[dict[str, object]],
+    ) -> dict[str, object]:
         """Combine multiple update messages into a single message.
 
         Returns:
@@ -176,7 +196,10 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
             "data": combined_data,
             "batch_info": {
                 "original_count": len(messages),
-                "time_span": cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0)),
+                "time_span": (
+                    cast(float, messages[-1].get("queued_at", 0))
+                    - cast(float, messages[0].get("queued_at", 0))
+                ),
                 "combined_at": time.time(),
             },
         }
@@ -203,7 +226,10 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
             "data": {
                 "entries": log_entries,
                 "count": len(log_entries),
-                "time_span": cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0)),
+                "time_span": (
+                    cast(float, messages[-1].get("queued_at", 0))
+                    - cast(float, messages[0].get("queued_at", 0))
+                ),
             },
         }
 
@@ -298,7 +324,9 @@ class WebSocketBatchProcessor:
                 await handler([message])
                 self.stats["messages_processed"] += 1
             except Exception:
-                self.logger.exception("Error sending immediate message to {channel}")  # noqa: G004
+                self.logger.exception(
+                    "Error sending immediate message to {channel}"
+                )  # noqa: G004
         else:
             self.logger.warning("No handler registered for channel: %s", channel)
 
@@ -316,13 +344,20 @@ class WebSocketBatchProcessor:
         for channel, processor in self._channel_processors.items():
             proc_stats = processor.get_statistics()
             channel_stats[channel] = proc_stats
-            total_pending += cast(int, proc_stats["pending_items"]) + cast(int, proc_stats["pending_batches"])
-            if cast(int, proc_stats["pending_items"]) > 0 or cast(int, proc_stats["pending_batches"]) > 0:
+            total_pending += cast(int, proc_stats["pending_items"]) + cast(
+                int, proc_stats["pending_batches"]
+            )
+            if (
+                cast(int, proc_stats["pending_items"]) > 0
+                or cast(int, proc_stats["pending_batches"]) > 0
+            ):
                 active_channels += 1
 
         # Calculate average batch size
         if self.stats["batches_sent"] > 0:
-            self.stats["avg_batch_size"] = self.stats["messages_processed"] / self.stats["batches_sent"]
+            self.stats["avg_batch_size"] = (
+                self.stats["messages_processed"] / self.stats["batches_sent"]
+            )
 
         return {
             **self.stats,
@@ -361,7 +396,9 @@ class WebSocketBatchProcessor:
             with processor._lock:
                 processor._pending_items.clear()
 
-            self.logger.info("Cleared %d pending messages from %s", cleared_count, channel)
+            self.logger.info(
+                "Cleared %d pending messages from %s", cleared_count, channel
+            )
 
     async def get_channel_processor(self, channel: str) -> ChannelBatchProcessor | None:
         """Get the batch processor for a specific channel."""

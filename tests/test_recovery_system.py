@@ -92,10 +92,14 @@ class TestRecoveryEngine:
         # Create mock agent pool
         agent_pool = Mock()
         agent_pool.agents = {
-            "agent-1": Mock(to_dict=Mock(return_value={"agent_id": "agent-1", "state": "idle"})),
+            "agent-1": Mock(
+                to_dict=Mock(return_value={"agent_id": "agent-1", "state": "idle"})
+            ),
         }
         agent_pool.tasks = {
-            "task-1": Mock(to_dict=Mock(return_value={"task_id": "task-1", "status": "pending"})),
+            "task-1": Mock(
+                to_dict=Mock(return_value={"task_id": "task-1", "status": "pending"})
+            ),
         }
 
         snapshot_id = await recovery_engine.create_snapshot(
@@ -116,7 +120,9 @@ class TestRecoveryEngine:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_file_backup_and_restore(recovery_engine: RecoveryEngine, temp_work_dir: str) -> None:
+    async def test_file_backup_and_restore(
+        recovery_engine: RecoveryEngine, temp_work_dir: str
+    ) -> None:
         """Test file backup and restore functionality."""
         # Create test file
         test_file = Path(temp_work_dir) / "test.txt"
@@ -189,22 +195,30 @@ class TestRecoveryEngine:
     async def test_error_strategy_matching(recovery_engine: RecoveryEngine) -> None:
         """Test finding appropriate recovery strategies for different errors."""
         # Test timeout error
-        strategy = recovery_engine._find_recovery_strategy("Task timed out after 300 seconds")  # noqa: SLF001
+        strategy = recovery_engine._find_recovery_strategy(
+            "Task timed out after 300 seconds"
+        )  # noqa: SLF001
         assert strategy is not None
         assert strategy.error_pattern == r"timed? ?out|timeout"
 
         # Test agent error
-        strategy = recovery_engine._find_recovery_strategy("Agent execution error occurred")  # noqa: SLF001
+        strategy = recovery_engine._find_recovery_strategy(
+            "Agent execution error occurred"
+        )  # noqa: SLF001
         assert strategy is not None
         assert "agent" in strategy.error_pattern.lower()
 
         # Test git error
-        strategy = recovery_engine._find_recovery_strategy("fatal: git repository not found")  # noqa: SLF001
+        strategy = recovery_engine._find_recovery_strategy(
+            "fatal: git repository not found"
+        )  # noqa: SLF001
         assert strategy is not None
         assert "git" in strategy.error_pattern.lower()
 
         # Test generic error (fallback)
-        strategy = recovery_engine._find_recovery_strategy("Some unknown error")  # noqa: SLF001
+        strategy = recovery_engine._find_recovery_strategy(
+            "Some unknown error"
+        )  # noqa: SLF001
         assert strategy is not None
 
     @pytest.mark.asyncio
@@ -213,8 +227,12 @@ class TestRecoveryEngine:
         """Test handling operation failures with recovery."""
         # Mock agent pool
         agent_pool = Mock()
-        agent_pool.agents = {"agent-1": Mock(to_dict=Mock(return_value={"agent_id": "agent-1"}))}
-        agent_pool.tasks = {"task-1": Mock(to_dict=Mock(return_value={"task_id": "task-1"}))}
+        agent_pool.agents = {
+            "agent-1": Mock(to_dict=Mock(return_value={"agent_id": "agent-1"}))
+        }
+        agent_pool.tasks = {
+            "task-1": Mock(to_dict=Mock(return_value={"task_id": "task-1"}))
+        }
 
         # Create snapshot first
         snapshot_id = await recovery_engine.create_snapshot(
@@ -235,7 +253,9 @@ class TestRecoveryEngine:
         }
 
         # Mock recovery action to succeed
-        with patch.object(recovery_engine, "_execute_recovery_action", return_value=True):
+        with patch.object(
+            recovery_engine, "_execute_recovery_action", return_value=True
+        ):
             success = await recovery_engine.handle_operation_failure(
                 operation_id=operation_id,
                 exception=exception,
@@ -312,10 +332,22 @@ class TestRecoveryEngine:
 
         updated_metrics = recovery_engine.get_recovery_metrics()
 
-        assert updated_metrics["total_operations"] == initial_metrics["total_operations"] + 5
-        assert updated_metrics["failed_operations"] == initial_metrics["failed_operations"] + 2
-        assert updated_metrics["successful_recoveries"] == initial_metrics["successful_recoveries"] + 1
-        assert updated_metrics["rollbacks_performed"] == initial_metrics["rollbacks_performed"] + 1
+        assert (
+            updated_metrics["total_operations"]
+            == initial_metrics["total_operations"] + 5
+        )
+        assert (
+            updated_metrics["failed_operations"]
+            == initial_metrics["failed_operations"] + 2
+        )
+        assert (
+            updated_metrics["successful_recoveries"]
+            == initial_metrics["successful_recoveries"] + 1
+        )
+        assert (
+            updated_metrics["rollbacks_performed"]
+            == initial_metrics["rollbacks_performed"] + 1
+        )
 
     @staticmethod
     def test_state_persistence(recovery_engine: RecoveryEngine) -> None:

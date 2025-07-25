@@ -21,10 +21,17 @@ from libs.dashboard.renderers.registry import RendererRegistry
 class TestRenderer(BaseRenderer):
     """Test implementation of BaseRenderer for testing."""
 
-    def render_widget(self, widget_type: WidgetType, data: dict[str, Any], options: dict[str, Any] | None = None) -> str:  # noqa: ARG002
+    def render_widget(
+        self,
+        widget_type: WidgetType,
+        data: dict[str, Any],
+        options: dict[str, Any] | None = None,
+    ) -> str:  # noqa: ARG002
         return f"<widget type='{widget_type.value}' data='{data}' />"
 
-    def render_layout(self, widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None) -> str:
+    def render_layout(
+        self, widgets: list[dict[str, Any]], layout_config: dict[str, Any] | None = None
+    ) -> str:
         rendered_widgets = []
         for widget in widgets:
             widget_html = self.render_widget(
@@ -35,7 +42,9 @@ class TestRenderer(BaseRenderer):
             rendered_widgets.append(widget_html)
         return f"<layout>{' '.join(rendered_widgets)}</layout>"
 
-    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
+    def render_container(
+        self, content: str, container_config: dict[str, Any] | None = None
+    ) -> str:
         return f"<container>{content}</container>"
 
 

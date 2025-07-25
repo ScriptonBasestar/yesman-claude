@@ -102,7 +102,9 @@ class TestClaudeContentCollector(unittest.TestCase):
     def test_get_collection_stats(self) -> None:
         """Test collection statistics."""
         # Collect some interactions
-        self.collector.collect_interaction("First interaction with prompt", {"type": "yn"}, "yes")
+        self.collector.collect_interaction(
+            "First interaction with prompt", {"type": "yn"}, "yes"
+        )
         self.collector.collect_raw_content("Raw content without prompts")
 
         stats = self.collector.get_collection_stats()
@@ -163,7 +165,9 @@ class TestContentCollectionManager(unittest.TestCase):
         prompt_info = {"type": "yn"}
         response = "yes"
 
-        result = self.manager.collect_for_session(session_name, content, prompt_info, response)
+        result = self.manager.collect_for_session(
+            session_name, content, prompt_info, response
+        )
         assert result
 
         # Collector should be created

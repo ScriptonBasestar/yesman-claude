@@ -182,11 +182,19 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         )
 
     @staticmethod
-    def test_init(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
+    def test_init(
+        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
+    ) -> None:
         """Test ConflictPreventionSystem initialization."""
-        assert prevention_system.conflict_predictor == mock_dependencies["conflict_predictor"]
+        assert (
+            prevention_system.conflict_predictor
+            == mock_dependencies["conflict_predictor"]
+        )
         assert prevention_system.auto_resolver == mock_dependencies["auto_resolver"]
-        assert prevention_system.collaboration_engine == mock_dependencies["collaboration_engine"]
+        assert (
+            prevention_system.collaboration_engine
+            == mock_dependencies["collaboration_engine"]
+        )
         assert prevention_system.branch_manager == mock_dependencies["branch_manager"]
         assert prevention_system.repo_path == Path("/tmp/test_repo")
 
@@ -206,13 +214,25 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
         # Check strategy handlers
         assert len(prevention_system.strategy_handlers) == 7
-        assert PreventionStrategy.BRANCH_ISOLATION in prevention_system.strategy_handlers
-        assert PreventionStrategy.WORK_REALLOCATION in prevention_system.strategy_handlers
+        assert (
+            PreventionStrategy.BRANCH_ISOLATION in prevention_system.strategy_handlers
+        )
+        assert (
+            PreventionStrategy.WORK_REALLOCATION in prevention_system.strategy_handlers
+        )
         assert PreventionStrategy.DEPENDENCY_SYNC in prevention_system.strategy_handlers
         assert PreventionStrategy.EARLY_MERGE in prevention_system.strategy_handlers
-        assert PreventionStrategy.AGENT_COORDINATION in prevention_system.strategy_handlers
-        assert PreventionStrategy.TEMPORAL_SEPARATION in prevention_system.strategy_handlers
-        assert PreventionStrategy.SEMANTIC_REFACTORING in prevention_system.strategy_handlers
+        assert (
+            PreventionStrategy.AGENT_COORDINATION in prevention_system.strategy_handlers
+        )
+        assert (
+            PreventionStrategy.TEMPORAL_SEPARATION
+            in prevention_system.strategy_handlers
+        )
+        assert (
+            PreventionStrategy.SEMANTIC_REFACTORING
+            in prevention_system.strategy_handlers
+        )
 
         # Check initial statistics
         expected_stats = {
@@ -226,7 +246,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_start_stop_monitoring(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_start_stop_monitoring(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test starting and stopping prevention monitoring."""
         # Start monitoring
         await prevention_system.start_prevention_monitoring(monitoring_interval=0.1)
@@ -330,7 +352,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_generate_dependency_measures(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_generate_dependency_measures(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _generate_dependency_measures."""
         mock_prediction = PredictionResult(
             prediction_id="dep_pred_001",
@@ -345,8 +369,10 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             affected_agents=["agent1", "agent2"],
         )
 
-        measures = await prevention_system._generate_dependency_measures(  # noqa: SLF001
-            mock_prediction,
+        measures = (
+            await prevention_system._generate_dependency_measures(  # noqa: SLF001
+                mock_prediction,
+            )
         )
 
         assert len(measures) == 1
@@ -366,7 +392,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_generate_coordination_measures(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_generate_coordination_measures(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _generate_coordination_measures."""
         mock_prediction = PredictionResult(
             prediction_id="coord_pred_001",
@@ -381,8 +409,10 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             affected_agents=["api_agent", "client_agent"],
         )
 
-        measures = await prevention_system._generate_coordination_measures(  # noqa: SLF001
-            mock_prediction,
+        measures = (
+            await prevention_system._generate_coordination_measures(  # noqa: SLF001
+                mock_prediction,
+            )
         )
 
         assert len(measures) == 1
@@ -402,7 +432,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_generate_interface_measures(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_generate_interface_measures(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _generate_interface_measures."""
         mock_prediction = PredictionResult(
             prediction_id="interface_pred_001",
@@ -417,7 +449,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             affected_agents=["api_maintainer", "api_dev"],
         )
 
-        measures = await prevention_system._generate_interface_measures(mock_prediction)  # noqa: SLF001
+        measures = await prevention_system._generate_interface_measures(
+            mock_prediction
+        )  # noqa: SLF001
 
         assert len(measures) == 1
         measure = measures[0]
@@ -436,7 +470,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_generate_temporal_measures(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_generate_temporal_measures(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _generate_temporal_measures."""
         mock_prediction = PredictionResult(
             prediction_id="temporal_pred_001",
@@ -451,7 +487,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             affected_agents=["worker_agent_1", "worker_agent_2"],
         )
 
-        measures = await prevention_system._generate_temporal_measures(mock_prediction)  # noqa: SLF001
+        measures = await prevention_system._generate_temporal_measures(
+            mock_prediction
+        )  # noqa: SLF001
 
         assert len(measures) == 1
         measure = measures[0]
@@ -470,7 +508,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_generate_generic_measures_early_merge(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_generate_generic_measures_early_merge(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _generate_generic_measures with high confidence for early merge."""
         mock_prediction = PredictionResult(
             prediction_id="generic_pred_001",
@@ -485,7 +525,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             affected_agents=["dev_a", "dev_b"],
         )
 
-        measures = await prevention_system._generate_generic_measures(mock_prediction)  # noqa: SLF001
+        measures = await prevention_system._generate_generic_measures(
+            mock_prediction
+        )  # noqa: SLF001
 
         assert len(measures) == 1
         measure = measures[0]
@@ -504,7 +546,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_generate_generic_measures_low_confidence(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_generate_generic_measures_low_confidence(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _generate_generic_measures with low confidence (no early merge)."""
         mock_prediction = PredictionResult(
             prediction_id="generic_pred_002",
@@ -519,7 +563,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             affected_agents=["agent1", "agent2"],
         )
 
-        measures = await prevention_system._generate_generic_measures(mock_prediction)  # noqa: SLF001
+        measures = await prevention_system._generate_generic_measures(
+            mock_prediction
+        )  # noqa: SLF001
 
         # Should not generate early merge measure due to low likelihood score
         assert len(measures) == 0
@@ -548,7 +594,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             "_apply_branch_isolation",
             return_value=True,
         ) as mock_handler:
-            success = await prevention_system._apply_prevention_measure(measure)  # noqa: SLF001
+            success = await prevention_system._apply_prevention_measure(
+                measure
+            )  # noqa: SLF001
 
         assert success is True
         assert measure.status == "applied"
@@ -581,7 +629,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             "_apply_work_reallocation",
             return_value=False,
         ) as mock_handler:
-            success = await prevention_system._apply_prevention_measure(measure)  # noqa: SLF001
+            success = await prevention_system._apply_prevention_measure(
+                measure
+            )  # noqa: SLF001
 
         assert success is False
         assert measure.status == "failed"
@@ -613,7 +663,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             "_apply_dependency_sync",
             side_effect=Exception("Test error"),
         ) as mock_handler:
-            success = await prevention_system._apply_prevention_measure(measure)  # noqa: SLF001
+            success = await prevention_system._apply_prevention_measure(
+                measure
+            )  # noqa: SLF001
 
         assert success is False
         assert measure.status == "failed"
@@ -647,15 +699,21 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         )
 
         try:
-            success = await prevention_system._apply_prevention_measure(measure)  # noqa: SLF001
+            success = await prevention_system._apply_prevention_measure(
+                measure
+            )  # noqa: SLF001
             assert success is False
         finally:
             # Restore the handler
-            prevention_system.strategy_handlers[PreventionStrategy.SEMANTIC_REFACTORING] = original_handler
+            prevention_system.strategy_handlers[
+                PreventionStrategy.SEMANTIC_REFACTORING
+            ] = original_handler
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_work_reallocation(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
+    async def test_apply_work_reallocation(
+        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
+    ) -> None:
         """Test _apply_work_reallocation strategy."""
         measure = PreventionMeasure(
             measure_id="work_reallocation_test",
@@ -673,7 +731,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             return_value=True,
         )
 
-        success = await prevention_system._apply_work_reallocation(measure)  # noqa: SLF001
+        success = await prevention_system._apply_work_reallocation(
+            measure
+        )  # noqa: SLF001
 
         assert success is True
 
@@ -698,7 +758,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_dependency_sync(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
+    async def test_apply_dependency_sync(
+        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
+    ) -> None:
         """Test _apply_dependency_sync strategy."""
         measure = PreventionMeasure(
             measure_id="dep_sync_test",
@@ -717,7 +779,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             return_value=True,
         )
 
-        success = await prevention_system._apply_dependency_sync(measure)  # noqa: SLF001
+        success = await prevention_system._apply_dependency_sync(
+            measure
+        )  # noqa: SLF001
 
         assert success is True
 
@@ -741,7 +805,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_early_merge(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
+    async def test_apply_early_merge(
+        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
+    ) -> None:
         """Test _apply_early_merge strategy."""
         measure = PreventionMeasure(
             measure_id="early_merge_test",
@@ -766,7 +832,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         assert success is True
 
         # Verify auto resolver was called
-        mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts.assert_called_once_with(
+        mock_dependencies[
+            "auto_resolver"
+        ].auto_resolve_branch_conflicts.assert_called_once_with(
             branch1="branch1",
             branch2="branch2",
             mode=AutoResolutionMode.PREDICTIVE,
@@ -795,11 +863,15 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         assert success is False
 
         # Verify auto resolver was not called
-        mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts.assert_not_called()
+        mock_dependencies[
+            "auto_resolver"
+        ].auto_resolve_branch_conflicts.assert_not_called()
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_agent_coordination(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
+    async def test_apply_agent_coordination(
+        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
+    ) -> None:
         """Test _apply_agent_coordination strategy."""
         measure = PreventionMeasure(
             measure_id="agent_coord_test",
@@ -818,7 +890,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             return_value=True,
         )
 
-        success = await prevention_system._apply_agent_coordination(measure)  # noqa: SLF001
+        success = await prevention_system._apply_agent_coordination(
+            measure
+        )  # noqa: SLF001
 
         assert success is True
 
@@ -869,7 +943,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             return_value=True,
         )
 
-        success = await prevention_system._apply_temporal_separation(measure)  # noqa: SLF001
+        success = await prevention_system._apply_temporal_separation(
+            measure
+        )  # noqa: SLF001
 
         assert success is True
 
@@ -880,7 +956,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for i, call in enumerate(calls):
             args, kwargs = call
-            expected_delay = i * prevention_system.prevention_config["coordination_delay"]
+            expected_delay = (
+                i * prevention_system.prevention_config["coordination_delay"]
+            )
 
             assert kwargs["sender_id"] == "prevention_system"
             assert kwargs["recipient_id"] == f"agent{i + 1}"
@@ -922,7 +1000,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             return_value=True,
         )
 
-        success = await prevention_system._apply_semantic_refactoring(measure)  # noqa: SLF001
+        success = await prevention_system._apply_semantic_refactoring(
+            measure
+        )  # noqa: SLF001
 
         assert success is True
 
@@ -944,7 +1024,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
             assert content["implementation_guide"] == measure.implementation_steps
 
     @staticmethod
-    def test_get_prevention_summary(prevention_system: ConflictPreventionSystem) -> None:
+    def test_get_prevention_summary(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test get_prevention_summary method."""
         # Add some test data
         measure1 = PreventionMeasure(
@@ -1014,7 +1096,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         assert summary["system_status"] == "stopped"
 
     @staticmethod
-    def test_get_prevention_summary_empty(prevention_system: ConflictPreventionSystem) -> None:
+    def test_get_prevention_summary_empty(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test get_prevention_summary with no data."""
         summary = prevention_system.get_prevention_summary()
 
@@ -1036,7 +1120,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_get_active_branches(prevention_system: ConflictPreventionSystem) -> None:
+    async def test_get_active_branches(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test _get_active_branches method."""
         # This is a placeholder implementation, so it should return empty list
         active_branches = await prevention_system._get_active_branches()  # noqa: SLF001
@@ -1173,7 +1259,9 @@ class TestConflictPreventionSystem:  # noqa: PLR0904
         assert set(all_actions) == expected_actions
 
     @staticmethod
-    def test_default_configuration_values(prevention_system: ConflictPreventionSystem) -> None:
+    def test_default_configuration_values(
+        prevention_system: ConflictPreventionSystem,
+    ) -> None:
         """Test that default configuration values are reasonable."""
         config = prevention_system.prevention_config
 

@@ -476,21 +476,43 @@ class TestWidgetDataAdapter:
         adapter = self.adapter
 
         # Test session status parsing
-        assert adapter._parse_session_status("active") == SessionStatus.ACTIVE  # noqa: SLF001
-        assert adapter._parse_session_status("RUNNING") == SessionStatus.ACTIVE  # noqa: SLF001
-        assert adapter._parse_session_status("idle") == SessionStatus.IDLE  # noqa: SLF001
-        assert adapter._parse_session_status("invalid") == SessionStatus.IDLE  # noqa: SLF001
+        assert (
+            adapter._parse_session_status("active") == SessionStatus.ACTIVE
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_session_status("RUNNING") == SessionStatus.ACTIVE
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_session_status("idle") == SessionStatus.IDLE
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_session_status("invalid") == SessionStatus.IDLE
+        )  # noqa: SLF001
 
         # Test activity type parsing
-        assert adapter._parse_activity_type("file_created") == ActivityType.FILE_CREATED  # noqa: SLF001
-        assert adapter._parse_activity_type("CREATED") == ActivityType.FILE_CREATED  # noqa: SLF001
-        assert adapter._parse_activity_type("commit") == ActivityType.COMMIT  # noqa: SLF001
-        assert adapter._parse_activity_type("invalid") == ActivityType.FILE_MODIFIED  # noqa: SLF001
+        assert (
+            adapter._parse_activity_type("file_created") == ActivityType.FILE_CREATED
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_activity_type("CREATED") == ActivityType.FILE_CREATED
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_activity_type("commit") == ActivityType.COMMIT
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_activity_type("invalid") == ActivityType.FILE_MODIFIED
+        )  # noqa: SLF001
 
         # Test progress phase parsing
-        assert adapter._parse_progress_phase("implementing") == ProgressPhase.IMPLEMENTING  # noqa: SLF001
-        assert adapter._parse_progress_phase("TESTING") == ProgressPhase.TESTING  # noqa: SLF001
-        assert adapter._parse_progress_phase("invalid") == ProgressPhase.IDLE  # noqa: SLF001
+        assert (
+            adapter._parse_progress_phase("implementing") == ProgressPhase.IMPLEMENTING
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_progress_phase("TESTING") == ProgressPhase.TESTING
+        )  # noqa: SLF001
+        assert (
+            adapter._parse_progress_phase("invalid") == ProgressPhase.IDLE
+        )  # noqa: SLF001
 
 
 class TestModelSerialization:

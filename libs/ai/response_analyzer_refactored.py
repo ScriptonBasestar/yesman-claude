@@ -62,7 +62,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         self.learned_patterns: dict[str, PromptPattern] = self._load_patterns()
 
         # Analysis cache
-        self._pattern_cache: dict[str, tuple[str, float, float]] = {}  # prompt -> (response, confidence, timestamp)
+        self._pattern_cache: dict[str, tuple[str, float, float]] = (
+            {}
+        )  # prompt -> (response, confidence, timestamp)
         self._cache_expiry = 3600  # 1 hour
 
         # Statistics tracking
@@ -87,15 +89,23 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         type_counts = Counter(record.prompt_type for record in self.response_history)
 
         # Project distribution
-        project_counts = Counter(record.project_name or "global" for record in self.response_history)
+        project_counts = Counter(
+            record.project_name or "global" for record in self.response_history
+        )
 
         # Recent activity (last 7 days)
         recent_cutoff = time.time() - (7 * 24 * 3600)
-        recent_responses = [r for r in self.response_history if r.timestamp > recent_cutoff]
+        recent_responses = [
+            r for r in self.response_history if r.timestamp > recent_cutoff
+        ]
 
         # Cache statistics
         cache_size = len(self._pattern_cache)
-        valid_cache_entries = sum(1 for _, (_, _, timestamp) in self._pattern_cache.items() if time.time() - timestamp < self._cache_expiry)
+        valid_cache_entries = sum(
+            1
+            for _, (_, _, timestamp) in self._pattern_cache.items()
+            if time.time() - timestamp < self._cache_expiry
+        )
 
         return {
             "total_responses": total_responses,
@@ -105,7 +115,13 @@ class ResponseAnalyzer(StatisticsProviderMixin):
             "recent_responses_7d": len(recent_responses),
             "cache_size": cache_size,
             "valid_cache_entries": valid_cache_entries,
-            "cache_hit_rate": (self._stats["cache_hits"] / (self._stats["cache_hits"] + self._stats["cache_misses"]) * 100 if (self._stats["cache_hits"] + self._stats["cache_misses"]) > 0 else 0.0),
+            "cache_hit_rate": (
+                self._stats["cache_hits"]
+                / (self._stats["cache_hits"] + self._stats["cache_misses"])
+                * 100
+                if (self._stats["cache_hits"] + self._stats["cache_misses"]) > 0
+                else 0.0
+            ),
             **self._stats,
         }
 
@@ -196,7 +212,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         if pattern_id in self.learned_patterns:
             # Update existing pattern
             pattern = self.learned_patterns[pattern_id]
-            pattern.common_responses[record.user_response] = pattern.common_responses.get(record.user_response, 0) + 1
+            pattern.common_responses[record.user_response] = (
+                pattern.common_responses.get(record.user_response, 0) + 1
+            )
             pattern.last_updated = time.time()
         else:
             # Create new pattern
@@ -273,7 +291,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 # Calculate confidence based on response frequency
                 total_responses = sum(pattern.common_responses.values())
                 if total_responses > 0:
-                    most_common = max(pattern.common_responses.items(), key=lambda x: x[1])
+                    most_common = max(
+                        pattern.common_responses.items(), key=lambda x: x[1]
+                    )
                     confidence = most_common[1] / total_responses
 
                     # Adjust confidence based on recency
@@ -312,7 +332,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
         return defaults.get(prompt_type, ("", 0.1))
 
-    def analyze_response_patterns(self, project_name: str | None = None) -> dict[str, object]:
+    def analyze_response_patterns(
+        self, project_name: str | None = None
+    ) -> dict[str, object]:
         """Analyze response patterns for insights.
 
         Returns:
@@ -341,7 +363,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
 
             insights[prompt_type] = {
                 "total_responses": total,
-                "most_common": [(resp, count / total * 100) for resp, count in most_common],
+                "most_common": [
+                    (resp, count / total * 100) for resp, count in most_common
+                ],
                 "unique_responses": len(responses),
                 "entropy": self._calculate_entropy(responses),
             }
@@ -376,7 +400,9 @@ class ResponseAnalyzer(StatisticsProviderMixin):
         cutoff = time.time() - (days_to_keep * 24 * 3600)
         original_count = len(self.response_history)
 
-        self.response_history = [r for r in self.response_history if r.timestamp > cutoff]
+        self.response_history = [
+            r for r in self.response_history if r.timestamp > cutoff
+        ]
 
         removed = original_count - len(self.response_history)
         if removed > 0:

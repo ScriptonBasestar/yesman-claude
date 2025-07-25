@@ -149,7 +149,10 @@ class ProjectHealth:
                 category_metrics[category] = []
             category_metrics[category].append(metric.percentage)
 
-        return {category: sum(scores) / len(scores) if scores else 0 for category, scores in category_metrics.items()}
+        return {
+            category: sum(scores) / len(scores) if scores else 0
+            for category, scores in category_metrics.items()
+        }
 
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary.
@@ -180,14 +183,19 @@ class HealthCalculator:
         self._cache: dict[str, object] = {}
         self._cache_ttl = 300  # 5 minutes
 
-    async def calculate_health(self, force_refresh: bool = False) -> ProjectHealth:  # noqa: FBT001
+    async def calculate_health(
+        self, force_refresh: bool = False
+    ) -> ProjectHealth:  # noqa: FBT001
         """Calculate comprehensive project health."""
         cache_key = f"health_{self.project_path}"
 
         if not force_refresh and cache_key in self._cache:
             cached_data = self._cache[cache_key]
             cached_data_dict = cast(dict[str, Any], cached_data)
-            if time.time() - cast(float, cached_data_dict["timestamp"]) < self._cache_ttl:
+            if (
+                time.time() - cast(float, cached_data_dict["timestamp"])
+                < self._cache_ttl
+            ):
                 return ProjectHealth(**cast(dict[str, Any], cached_data_dict["health"]))
 
         self.logger.info("Calculating health for project: %s", self.project_path)
@@ -321,7 +329,9 @@ class HealthCalculator:
             for pattern in test_patterns:
                 test_files.extend(list(self.project_path.glob(pattern)))
 
-            test_coverage_score = min(100, len(test_files) * 10)  # 10 points per test file, max 100
+            test_coverage_score = min(
+                100, len(test_files) * 10
+            )  # 10 points per test file, max 100
 
             metrics.append(
                 HealthMetric(
@@ -405,7 +415,9 @@ class HealthCalculator:
         try:
             # Check project size and structure
             file_count = len(list(self.project_path.rglob("*")))
-            size_score = max(0, 100 - max(0, (file_count - 1000) // 100))  # Penalty for large projects
+            size_score = max(
+                0, 100 - max(0, (file_count - 1000) // 100)
+            )  # Penalty for large projects
 
             metrics.append(
                 HealthMetric(
@@ -485,8 +497,12 @@ class HealthCalculator:
                     "secrets",
                     "credentials",
                 ]
-                protected_patterns = sum(1 for pattern in sensitive_patterns if pattern in gitignore_content)
-                security_score += protected_patterns * 4  # 4 points per protected pattern
+                protected_patterns = sum(
+                    1 for pattern in sensitive_patterns if pattern in gitignore_content
+                )
+                security_score += (
+                    protected_patterns * 4
+                )  # 4 points per protected pattern
 
             security_score = min(100, security_score)
 
@@ -585,8 +601,14 @@ class HealthCalculator:
             )
 
             if result.returncode == 0:
-                uncommitted_files = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
-                git_status_score = max(0, 100 - (uncommitted_files * 10))  # Penalty for uncommitted files
+                uncommitted_files = (
+                    len(result.stdout.strip().split("\n"))
+                    if result.stdout.strip()
+                    else 0
+                )
+                git_status_score = max(
+                    0, 100 - (uncommitted_files * 10)
+                )  # Penalty for uncommitted files
 
                 metrics.append(
                     HealthMetric(
@@ -609,7 +631,11 @@ class HealthCalculator:
             )
 
             if result.returncode == 0:
-                recent_commits = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+                recent_commits = (
+                    len(result.stdout.strip().split("\n"))
+                    if result.stdout.strip()
+                    else 0
+                )
                 commit_activity_score = min(100, recent_commits * 10)
 
                 metrics.append(
@@ -790,7 +816,11 @@ class HealthCalculator:
         """Check Python dependencies."""
         try:
             content = requirements_path.read_text()
-            lines = [line.strip() for line in content.split("\n") if line.strip() and not line.startswith("#")]
+            lines = [
+                line.strip()
+                for line in content.split("\n")
+                if line.strip() and not line.startswith("#")
+            ]
             total_deps = len(lines)
 
             # Simple heuristic: assume 15% might be outdated
@@ -855,7 +885,11 @@ class HealthCalculator:
         """Check Go dependencies."""
         try:
             content = go_mod_path.read_text()
-            lines = [line.strip() for line in content.split("\n") if line.strip() and line.startswith("\t")]
+            lines = [
+                line.strip()
+                for line in content.split("\n")
+                if line.strip() and line.startswith("\t")
+            ]
             deps_count = len(lines)
 
             outdated_deps = max(1, deps_count // 10)
@@ -890,7 +924,9 @@ class HealthCalculator:
                             ):  # General comments
                                 documented_files += 1
                         except (OSError, UnicodeDecodeError) as e:
-                            self.logger.warning("Could not parse file %s: %s", file_path, e)
+                            self.logger.warning(
+                                "Could not parse file %s: %s", file_path, e
+                            )
                             continue
 
             if total_files > 0:

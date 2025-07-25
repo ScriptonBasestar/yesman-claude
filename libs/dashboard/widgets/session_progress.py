@@ -44,7 +44,9 @@ class SessionProgressWidget:
         layout["summary"].update(self._render_summary(progress_data))
 
         # Render sessions section
-        layout["sessions"].update(self._render_sessions_table(progress_data.get("sessions", [])))
+        layout["sessions"].update(
+            self._render_sessions_table(progress_data.get("sessions", []))
+        )
 
         return Panel(layout, title="📊 Progress Overview", border_style="cyan")
 
@@ -65,17 +67,23 @@ class SessionProgressWidget:
 
         content.append("🎯 Overall Progress\n", style="bold cyan")
         content.append(f"  {progress_bar} {avg_progress:.1f}%\n", style="green")
-        content.append(f"  {data.get('sessions_with_progress', 0)}/{data.get('total_sessions', 0)} sessions active\n\n")
+        content.append(
+            f"  {data.get('sessions_with_progress', 0)}/{data.get('total_sessions', 0)} sessions active\n\n"
+        )
 
         # Task statistics
         content.append("📋 Task Statistics\n", style="bold yellow")
         content.append(f"  🔄 Active: {data.get('active_tasks', 0)}\n", style="yellow")
-        content.append(f"  ✅ Completed: {data.get('completed_tasks', 0)}\n", style="green")
+        content.append(
+            f"  ✅ Completed: {data.get('completed_tasks', 0)}\n", style="green"
+        )
 
         # Activity metrics
         content.append("\n⚡ Activity Metrics\n", style="bold magenta")
         content.append(f"  📁 Files Changed: {data.get('total_files_changed', 0)}\n")
-        content.append(f"  💻 Commands Executed: {data.get('total_commands_executed', 0)}\n")
+        content.append(
+            f"  💻 Commands Executed: {data.get('total_commands_executed', 0)}\n"
+        )
 
         return Panel(content, title="Summary", border_style="dim")
 
@@ -155,7 +163,9 @@ class SessionProgressWidget:
         return text
 
     @staticmethod
-    def render_session_detail(session_name: str, progress: Any) -> Panel:  # noqa: ARG002, ARG004
+    def render_session_detail(
+        session_name: str, progress: Any
+    ) -> Panel:  # noqa: ARG002, ARG004
         """Render detailed progress for a specific session.
 
         Returns:
@@ -198,7 +208,9 @@ class SessionProgressWidget:
             content.append(f"  TODOs: {todos_completed} / {todos_identified}\n\n")
 
         # Overall session progress
-        calculate_overall_progress = getattr(progress, "calculate_overall_progress", lambda: 0.0)
+        calculate_overall_progress = getattr(
+            progress, "calculate_overall_progress", lambda: 0.0
+        )
         overall_progress = calculate_overall_progress()
         bar_length = 40
         filled = int(overall_progress / 100 * bar_length)

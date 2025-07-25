@@ -67,7 +67,9 @@ class DirectedGraph:
         """
         return list(self.nodes.keys())
 
-    def edges_iter(self, data: bool = False) -> list[tuple[str, str] | tuple[str, str, dict[str, object]]]:  # noqa: FBT001
+    def edges_iter(
+        self, data: bool = False
+    ) -> list[tuple[str, str] | tuple[str, str, dict[str, object]]]:  # noqa: FBT001
         """Iterate over edges.
 
         Returns:

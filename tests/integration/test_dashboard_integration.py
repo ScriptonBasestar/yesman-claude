@@ -57,7 +57,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         # Setup first session via CLI
         self.performance_monitor.start_timing("session_setup_dashboard")
 
-        setup_result = self.command_runner.run_command(SetupCommand, session_name=session_names[0])
+        setup_result = self.command_runner.run_command(
+            SetupCommand, session_name=session_names[0]
+        )
 
         setup_duration = self.performance_monitor.end_timing("session_setup_dashboard")
 
@@ -74,7 +76,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         assert session_names[0] in session_names_in_dashboard
 
         # Setup second session
-        setup_result_2 = self.command_runner.run_command(SetupCommand, session_name=session_names[1])
+        setup_result_2 = self.command_runner.run_command(
+            SetupCommand, session_name=session_names[1]
+        )
 
         assert setup_result_2["success"] is True
 
@@ -90,7 +94,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         assert session_names[1] in updated_session_names
 
         # Performance check
-        assert setup_duration < 5.0, f"Session setup with dashboard took {setup_duration:.2f}s, should be < 5s"
+        assert (
+            setup_duration < 5.0
+        ), f"Session setup with dashboard took {setup_duration:.2f}s, should be < 5s"
 
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
@@ -116,7 +122,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             dashboard_integration=True,
         )
 
-        monitoring_duration = self.performance_monitor.end_timing("automation_monitoring_dashboard")
+        monitoring_duration = self.performance_monitor.end_timing(
+            "automation_monitoring_dashboard"
+        )
 
         assert monitor_result["success"] is True
 
@@ -134,7 +142,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         assert monitored_project["path"] == str(project_dir)
 
         # Performance check
-        assert monitoring_duration < 8.0, f"Automation monitoring with dashboard took {monitoring_duration:.2f}s, should be < 8s"
+        assert (
+            monitoring_duration < 8.0
+        ), f"Automation monitoring with dashboard took {monitoring_duration:.2f}s, should be < 8s"
 
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
@@ -146,7 +156,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         operations = [
             (
                 "session_creation",
-                lambda: self.command_runner.run_command(SetupCommand, session_name="perf-session"),
+                lambda: self.command_runner.run_command(
+                    SetupCommand, session_name="perf-session"
+                ),
             ),
             ("status_query", lambda: self.command_runner.run_command(StatusCommand)),
         ]
@@ -170,7 +182,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
             assert operation_name in metrics
             assert metrics[operation_name]["duration"] > 0
-            assert metrics[operation_name]["duration"] == pytest.approx(operation_duration, rel=0.1)
+            assert metrics[operation_name]["duration"] == pytest.approx(
+                operation_duration, rel=0.1
+            )
 
         await self._stop_mock_dashboard(dashboard)  # noqa: SLF001
 
@@ -182,7 +196,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         update_events = []
 
         async def mock_update_handler(event_type: str, data: object) -> None:
-            update_events.append({"type": event_type, "data": data, "timestamp": time.time()})
+            update_events.append(
+                {"type": event_type, "data": data, "timestamp": time.time()}
+            )
 
         # Register update handler
         dashboard.register_update_handler(mock_update_handler)
@@ -190,7 +206,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         # Perform operations that should trigger updates
         self.create_test_session("realtime-session")
 
-        setup_result = self.command_runner.run_command(SetupCommand, session_name="realtime-session")
+        setup_result = self.command_runner.run_command(
+            SetupCommand, session_name="realtime-session"
+        )
 
         assert setup_result["success"] is True
 
@@ -222,7 +240,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
         # Create mock WebSocket clients
         for i in range(client_count):
-            client = await self._create_mock_websocket_client(dashboard, f"client-{i}")  # noqa: SLF001
+            client = await self._create_mock_websocket_client(
+                dashboard, f"client-{i}"
+            )  # noqa: SLF001
             clients.append(client)
 
         setup_duration = self.performance_monitor.end_timing("websocket_setup")
@@ -234,7 +254,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             session_name = f"bulk-session-{i}"
             self.create_test_session(session_name)
 
-            result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+            result = self.command_runner.run_command(
+                SetupCommand, session_name=session_name
+            )
             assert result["success"] is True
 
             # Small delay to allow processing
@@ -251,8 +273,12 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             assert len(received_updates) > 5  # Should have received multiple updates
 
         # Performance assertions
-        assert setup_duration < 3.0, f"WebSocket setup took {setup_duration:.2f}s, should be < 3s"
-        assert bulk_duration < 15.0, f"Bulk updates took {bulk_duration:.2f}s, should be < 15s"
+        assert (
+            setup_duration < 3.0
+        ), f"WebSocket setup took {setup_duration:.2f}s, should be < 3s"
+        assert (
+            bulk_duration < 15.0
+        ), f"Bulk updates took {bulk_duration:.2f}s, should be < 15s"
 
         # Cleanup clients
         for client in clients:
@@ -286,10 +312,14 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             dashboard._state["sessions"].append(session_data)  # noqa: SLF001
 
         async def add_automation_project(project_data: dict[str, object]) -> None:
-            dashboard._state["automation"]["monitored_projects"].append(project_data)  # noqa: SLF001
+            dashboard._state["automation"]["monitored_projects"].append(
+                project_data
+            )  # noqa: SLF001
 
         async def add_performance_metric(metric_name: str, metric_data: object) -> None:
-            dashboard._state["performance_metrics"][metric_name] = metric_data  # noqa: SLF001
+            dashboard._state["performance_metrics"][
+                metric_name
+            ] = metric_data  # noqa: SLF001
 
         dashboard.add_session = add_session
         dashboard.add_automation_project = add_automation_project
@@ -311,7 +341,9 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             await dashboard.cleanup()
 
     @staticmethod
-    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:  # noqa: ARG002, ARG004
+    async def _create_mock_websocket_client(
+        dashboard: object, client_id: str
+    ) -> Mock:  # noqa: ARG002, ARG004
         """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id
@@ -341,7 +373,9 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         dashboard = await self._start_mock_dashboard()  # noqa: SLF001
 
         # Setup session via CLI
-        cli_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+        cli_result = self.command_runner.run_command(
+            SetupCommand, session_name=session_name
+        )
         assert cli_result["success"] is True
 
         # Get CLI view of sessions
@@ -365,7 +399,9 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
 
         # Session details should match
         cli_session = next(s for s in cli_sessions if s["name"] == session_name)
-        dashboard_session = next(s for s in dashboard_sessions if s["name"] == session_name)
+        dashboard_session = next(
+            s for s in dashboard_sessions if s["name"] == session_name
+        )
 
         # Key attributes should match
         assert cli_session["name"] == dashboard_session["name"]
@@ -382,7 +418,9 @@ class TestDashboardDataConsistency(AsyncIntegrationTestBase):
         dashboard = await self._start_mock_dashboard()  # noqa: SLF001
 
         # Start automation monitoring
-        monitor_result = self.command_runner.run_command(AutomateMonitorCommand, project_path=str(project_dir), duration=1)
+        monitor_result = self.command_runner.run_command(
+            AutomateMonitorCommand, project_path=str(project_dir), duration=1
+        )
 
         assert monitor_result["success"] is True
 
@@ -442,7 +480,9 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         session_name = "recovery-test-session"
         self.create_test_session(session_name)
 
-        result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+        result = self.command_runner.run_command(
+            SetupCommand, session_name=session_name
+        )
         assert result["success"] is True  # Should succeed despite dashboard failure
 
         # Restore connection
@@ -469,7 +509,9 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
             session_name = f"load-session-{i}"
             self.create_test_session(session_name)
 
-            result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+            result = self.command_runner.run_command(
+                SetupCommand, session_name=session_name
+            )
             assert result["success"] is True
 
             # Minimal delay to create load
@@ -478,7 +520,9 @@ class TestDashboardErrorHandling(AsyncIntegrationTestBase):
         load_duration = self.performance_monitor.end_timing("high_load_scenario")
 
         # System should remain responsive
-        assert load_duration < 30.0, f"High load scenario took {load_duration:.2f}s, should be < 30s"
+        assert (
+            load_duration < 30.0
+        ), f"High load scenario took {load_duration:.2f}s, should be < 30s"
 
         # Dashboard should still be functional
         dashboard_state = await dashboard.get_current_state()

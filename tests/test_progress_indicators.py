@@ -58,7 +58,9 @@ class TestProgressIndicators:
 
         with multi_stage_progress(stages) as next_stage:
             next_stage(1)  # Move to stage 1
-            next_stage(2, "Custom description")  # Move to stage 2 with custom description
+            next_stage(
+                2, "Custom description"
+            )  # Move to stage 2 with custom description
             assert True  # If we get here, context manager worked
 
     @staticmethod
@@ -113,7 +115,9 @@ class TestProgressIndicators:
         def mock_operation(file_name: str) -> str:
             return f"processed_{file_name}"
 
-        results = ProgressManager.file_batch_operation(files, mock_operation, "Processing test files")
+        results = ProgressManager.file_batch_operation(
+            files, mock_operation, "Processing test files"
+        )
 
         assert len(results) == 3
         for i, result in enumerate(results):
@@ -132,7 +136,9 @@ class TestProgressIndicators:
                 raise OSError(msg)
             return f"processed_{file_name}"
 
-        results = ProgressManager.file_batch_operation(files, mock_operation, "Processing test files")
+        results = ProgressManager.file_batch_operation(
+            files, mock_operation, "Processing test files"
+        )
 
         assert len(results) == 3
         assert cast(dict[str, Any], results[0])["success"] is True
@@ -191,7 +197,9 @@ class TestIntegrationScenarios:
         """Test progress indicators for multi-agent startup."""
         agents = ["agent1", "agent2", "agent3"]
 
-        with multi_stage_progress(["Initializing agent pool", "Starting agents", "Monitoring setup", "Ready"]) as next_stage:
+        with multi_stage_progress(
+            ["Initializing agent pool", "Starting agents", "Monitoring setup", "Ready"]
+        ) as next_stage:
             next_stage(0)
             time.sleep(0.01)
 
@@ -243,7 +251,9 @@ class TestIntegrationScenarios:
         data_items = list(range(10))
         processed_data = []
 
-        for item in track_items(data_items, "📊 Processing data items", ProgressStyle.DATA_PROCESSING):
+        for item in track_items(
+            data_items, "📊 Processing data items", ProgressStyle.DATA_PROCESSING
+        ):
             time.sleep(0.001)
             processed_data.append(item * 2)
 

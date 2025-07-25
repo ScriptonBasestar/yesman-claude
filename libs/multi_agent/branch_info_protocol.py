@@ -255,7 +255,11 @@ class BranchInfoProtocol:
             branch_info.metadata["completed_items"] = completed_items
 
         # Determine if sync is needed
-        should_sync = requires_immediate_sync or info_type in self.immediate_sync_types or self.sync_strategy == SyncStrategy.IMMEDIATE
+        should_sync = (
+            requires_immediate_sync
+            or info_type in self.immediate_sync_types
+            or self.sync_strategy == SyncStrategy.IMMEDIATE
+        )
 
         if should_sync:
             await self._share_branch_info(branch_info, info_type, update_data)
@@ -339,7 +343,10 @@ class BranchInfoProtocol:
 
         # Check API changes
         for api_name in info1.api_signatures:
-            if api_name in info2.api_signatures and info1.api_signatures[api_name] != info2.api_signatures[api_name]:
+            if (
+                api_name in info2.api_signatures
+                and info1.api_signatures[api_name] != info2.api_signatures[api_name]
+            ):
                 conflicts.append(f"Conflicting API change: {api_name}")
 
         # Check dependency conflicts
@@ -618,7 +625,9 @@ class BranchInfoProtocol:
         return {
             "statistics": self.protocol_stats.copy(),
             "active_branches": len(self.branch_info),
-            "total_subscriptions": sum(len(subs) for subs in self.branch_subscriptions.values()),
+            "total_subscriptions": sum(
+                len(subs) for subs in self.branch_subscriptions.values()
+            ),
             "sync_strategy": self.sync_strategy.value,
             "branches": active_branches,
             "recent_syncs": recent_syncs,

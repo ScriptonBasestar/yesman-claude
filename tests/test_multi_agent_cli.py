@@ -149,7 +149,9 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_status_command(mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
+    def test_status_command(
+        mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock
+    ) -> None:
         """Test status command."""
         mock_agent_pool_class.return_value = mock_agent_pool
 
@@ -221,7 +223,9 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_add_task_command(mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
+    def test_add_task_command(
+        mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock
+    ) -> None:
         """Test add-task command."""
         mock_agent_pool_class.return_value = mock_agent_pool
 
@@ -258,7 +262,9 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_list_tasks_command(mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock) -> None:
+    def test_list_tasks_command(
+        mock_agent_pool_class: Mock, runner: CliRunner, mock_agent_pool: Mock
+    ) -> None:
         """Test list-tasks command."""
         mock_agent_pool_class.return_value = mock_agent_pool
 
@@ -308,7 +314,9 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_status_command_exception(mock_agent_pool_class: Mock, runner: CliRunner) -> None:
+    def test_status_command_exception(
+        mock_agent_pool_class: Mock, runner: CliRunner
+    ) -> None:
         """Test status command with exception."""
         mock_agent_pool_class.side_effect = Exception("Test error")
 
@@ -330,7 +338,9 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_list_tasks_exception(mock_agent_pool_class: Mock, runner: CliRunner) -> None:
+    def test_list_tasks_exception(
+        mock_agent_pool_class: Mock, runner: CliRunner
+    ) -> None:
         """Test list-tasks command with exception."""
         mock_agent_pool_class.side_effect = Exception("Test error")
 
@@ -396,7 +406,9 @@ class TestMultiAgentCLI:
 
     @patch("commands.multi_agent.AgentPool")
     @staticmethod
-    def test_monitor_no_active_pool(mock_agent_pool_class: Mock, runner: CliRunner) -> None:  # noqa: ARG002, ARG004
+    def test_monitor_no_active_pool(
+        mock_agent_pool_class: Mock, runner: CliRunner
+    ) -> None:  # noqa: ARG002, ARG004
         """Test monitor command when no active pool exists."""
         # Simulate no existing pool directory
         with patch("pathlib.Path.exists", return_value=False):

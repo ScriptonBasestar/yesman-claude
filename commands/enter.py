@@ -33,7 +33,12 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             msg = "Error: 'enter' command requires an interactive terminal\n💡 Tip: Run this command directly in your terminal, not through pipes or scripts"
             raise CommandError(msg)
 
-    def execute(self, session_name: str | None = None, list_sessions: bool = False, **kwargs: Any) -> dict:  # noqa: FBT001, ARG002
+    def execute(
+        self,
+        session_name: str | None = None,
+        list_sessions: bool = False,
+        **kwargs: Any,
+    ) -> dict:  # noqa: FBT001, ARG002
         """Execute the enter command.
 
         Returns:
@@ -105,7 +110,9 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             self.print_warning("TUI unavailable, falling back to text selection...")
             self.print_info("Available sessions:")
             for i, sess in enumerate(running_sessions, 1):
-                self.print_info(f"  [{i}] {sess['project']} (session: {sess['session']})")
+                self.print_info(
+                    f"  [{i}] {sess['project']} (session: {sess['session']})"
+                )
 
             # Prompt for selection
             try:
@@ -157,7 +164,9 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
 
 @click.command()
 @click.argument("session_name", required=False)
-@click.option("--list", "-l", "list_sessions", is_flag=True, help="List available sessions")
+@click.option(
+    "--list", "-l", "list_sessions", is_flag=True, help="List available sessions"
+)
 def enter(session_name: str | None, list_sessions: bool) -> None:  # noqa: FBT001
     """Enter (attach to) a tmux session."""
     command = EnterCommand()

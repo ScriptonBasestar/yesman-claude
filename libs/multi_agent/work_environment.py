@@ -67,7 +67,9 @@ class WorkEnvironmentManager:
 
         """
         self.repo_path = Path(repo_path).resolve()
-        self.work_dir = Path(work_dir) if work_dir else self.repo_path.parent / ".yesman-work"
+        self.work_dir = (
+            Path(work_dir) if work_dir else self.repo_path.parent / ".yesman-work"
+        )
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
         self.environments: dict[str, WorkEnvironment] = {}
@@ -124,7 +126,10 @@ class WorkEnvironmentManager:
             try:
                 with open(metadata_file, encoding="utf-8") as f:
                     data = json.load(f)
-                    self.environments = {name: WorkEnvironment.from_dict(info) for name, info in data.items()}
+                    self.environments = {
+                        name: WorkEnvironment.from_dict(info)
+                        for name, info in data.items()
+                    }
                 logger.info("Loaded {len(self.environments)} work environments")
             except Exception:
                 logger.exception("Failed to load environments")

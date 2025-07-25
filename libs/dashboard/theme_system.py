@@ -111,8 +111,12 @@ class Typography:
     """Typography settings for themes."""
 
     # Font families
-    font_family_primary: str = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    font_family_mono: str = "'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace"
+    font_family_primary: str = (
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    )
+    font_family_mono: str = (
+        "'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace"
+    )
 
     # Font sizes (in rem)
     font_size_xs: str = "0.75rem"  # 12px
@@ -248,7 +252,9 @@ class Theme:
             name=cast(str, data["name"]),
             mode=ThemeMode(data["mode"]),
             colors=ColorPalette.from_dict(cast(dict[str, str], data.get("colors", {}))),
-            typography=Typography.from_dict(cast(dict[str, str], data.get("typography", {}))),
+            typography=Typography.from_dict(
+                cast(dict[str, str], data.get("typography", {}))
+            ),
             spacing=Spacing.from_dict(cast(dict[str, str], data.get("spacing", {}))),
             custom_css=cast(str, data.get("custom_css", "")),
             description=cast(str, data.get("description", "")),

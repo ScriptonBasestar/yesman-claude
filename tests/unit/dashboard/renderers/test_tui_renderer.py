@@ -35,7 +35,9 @@ class TestTUIRenderer:
         """Setup test renderer."""
         # Use StringIO to capture output for testing
         self.string_io = StringIO()
-        self.console = Console(file=self.string_io, width=80, height=24, force_terminal=True)
+        self.console = Console(
+            file=self.string_io, width=80, height=24, force_terminal=True
+        )
         self.renderer = TUIRenderer(console=self.console)
 
     def test_renderer_initialization(self) -> None:
@@ -63,11 +65,21 @@ class TestTUIRenderer:
 
     def test_get_health_color(self) -> None:
         """Test health level color mapping."""
-        assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "green"  # noqa: SLF001
-        assert self.renderer._get_health_color(HealthLevel.GOOD) == "blue"  # noqa: SLF001
-        assert self.renderer._get_health_color(HealthLevel.WARNING) == "yellow"  # noqa: SLF001
-        assert self.renderer._get_health_color(HealthLevel.CRITICAL) == "red"  # noqa: SLF001
-        assert self.renderer._get_health_color(HealthLevel.UNKNOWN) == "dim"  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.EXCELLENT) == "green"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.GOOD) == "blue"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.WARNING) == "yellow"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.CRITICAL) == "red"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.UNKNOWN) == "dim"
+        )  # noqa: SLF001
 
     def test_supports_feature(self) -> None:
         """Test feature support checking."""
@@ -411,7 +423,9 @@ class TestTUIRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(widgets, {"type": "vertical", "spacing": 2})
+        result = self.renderer.render_layout(
+            widgets, {"type": "vertical", "spacing": 2}
+        )
 
         assert isinstance(result, str)
         assert "Test 1" in result
@@ -533,7 +547,9 @@ class TestTUIRenderer:
             current_streak=5,
         )
 
-        result = self.renderer._render_activity_heatmap(high_activity, {})  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            high_activity, {}
+        )  # noqa: SLF001
         assert "🔥🔥🔥" in result
 
         # Medium activity
@@ -545,7 +561,9 @@ class TestTUIRenderer:
             current_streak=3,
         )
 
-        result = self.renderer._render_activity_heatmap(medium_activity, {})  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            medium_activity, {}
+        )  # noqa: SLF001
         assert "🔥🔥" in result
 
         # Low activity
@@ -557,7 +575,9 @@ class TestTUIRenderer:
             current_streak=1,
         )
 
-        result = self.renderer._render_activity_heatmap(low_activity, {})  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            low_activity, {}
+        )  # noqa: SLF001
         assert "🔥" in result
 
         # Very low activity
@@ -569,7 +589,9 @@ class TestTUIRenderer:
             current_streak=0,
         )
 
-        result = self.renderer._render_activity_heatmap(very_low_activity, {})  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            very_low_activity, {}
+        )  # noqa: SLF001
         assert "❄️" in result
 
     def test_progress_phase_emojis(self) -> None:
@@ -592,7 +614,9 @@ class TestTUIRenderer:
                 overall_progress=25.0,
             )
 
-            result = self.renderer._render_progress_tracker(progress, {})  # noqa: SLF001
+            result = self.renderer._render_progress_tracker(
+                progress, {}
+            )  # noqa: SLF001
             assert emoji in result
 
     def test_metric_card_trend_indicators(self) -> None:
@@ -630,7 +654,9 @@ class TestTUIRenderer:
             value=100,
             trend=None,
         )
-        result = self.renderer._render_metric_card(no_trend_data_metric, {})  # noqa: SLF001
+        result = self.renderer._render_metric_card(
+            no_trend_data_metric, {}
+        )  # noqa: SLF001
         assert "↗️" not in result
         assert "↘️" not in result
         assert "➡️" not in result

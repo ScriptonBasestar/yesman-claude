@@ -135,7 +135,9 @@ class TestConfigModes:
         # Should raise RuntimeError
         with patch.object(Path, "home", return_value=tmp_path):
             with patch.object(Path, "cwd", return_value=tmp_path / "project"):
-                with pytest.raises(RuntimeError, match="mode: isolated but.*doesn't exist or is empty"):
+                with pytest.raises(
+                    RuntimeError, match="mode: isolated but.*doesn't exist or is empty"
+                ):
                     YesmanConfig()
 
     @staticmethod

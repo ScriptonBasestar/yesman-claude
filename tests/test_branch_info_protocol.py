@@ -97,7 +97,9 @@ class TestBranchInfoProtocol:
 
     @pytest.fixture
     @staticmethod
-    def protocol(mock_branch_manager: Mock, mock_collaboration_engine: Mock) -> BranchInfoProtocol:
+    def protocol(
+        mock_branch_manager: Mock, mock_collaboration_engine: Mock
+    ) -> BranchInfoProtocol:
         """Create BranchInfoProtocol instance."""
         return BranchInfoProtocol(
             branch_manager=mock_branch_manager,
@@ -106,7 +108,11 @@ class TestBranchInfoProtocol:
         )
 
     @staticmethod
-    def test_init(protocol: BranchInfoProtocol, mock_branch_manager: Mock, mock_collaboration_engine: Mock) -> None:
+    def test_init(
+        protocol: BranchInfoProtocol,
+        mock_branch_manager: Mock,
+        mock_collaboration_engine: Mock,
+    ) -> None:
         """Test BranchInfoProtocol initialization."""
         assert protocol.branch_manager == mock_branch_manager
         assert protocol.collaboration_engine == mock_collaboration_engine
@@ -158,7 +164,9 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_update_branch_info_file_changes(protocol: BranchInfoProtocol) -> None:
+    async def test_update_branch_info_file_changes(
+        protocol: BranchInfoProtocol,
+    ) -> None:
         """Test updating branch info with file changes."""
         # Register branch first
         await protocol.register_branch("feature-x", "agent-1")
@@ -191,7 +199,9 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_update_branch_info_build_status(protocol: BranchInfoProtocol) -> None:
+    async def test_update_branch_info_build_status(
+        protocol: BranchInfoProtocol,
+    ) -> None:
         """Test updating branch info with build status."""
         await protocol.register_branch("feature-x", "agent-1")
 
@@ -206,7 +216,9 @@ class TestBranchInfoProtocol:
         assert branch_info.build_status == "success"
 
         # Check that immediate sync was triggered
-        assert protocol.collaboration_engine.share_knowledge.call_count >= 2  # Initial + update
+        assert (
+            protocol.collaboration_engine.share_knowledge.call_count >= 2
+        )  # Initial + update
 
     @pytest.mark.asyncio
     @staticmethod
@@ -248,7 +260,9 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_update_branch_info_dependencies(protocol: BranchInfoProtocol) -> None:
+    async def test_update_branch_info_dependencies(
+        protocol: BranchInfoProtocol,
+    ) -> None:
         """Test updating branch info with dependency map."""
         await protocol.register_branch("feature-x", "agent-1")
 
@@ -268,7 +282,9 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_update_branch_info_merge_readiness(protocol: BranchInfoProtocol) -> None:
+    async def test_update_branch_info_merge_readiness(
+        protocol: BranchInfoProtocol,
+    ) -> None:
         """Test updating branch info with merge readiness."""
         await protocol.register_branch("feature-x", "agent-1")
 
@@ -284,7 +300,9 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_update_branch_info_work_progress(protocol: BranchInfoProtocol) -> None:
+    async def test_update_branch_info_work_progress(
+        protocol: BranchInfoProtocol,
+    ) -> None:
         """Test updating branch info with work progress."""
         await protocol.register_branch(
             "feature-x",
@@ -495,17 +513,35 @@ class TestBranchInfoProtocol:
     @staticmethod
     def test_determine_priority(protocol: BranchInfoProtocol) -> None:
         """Test priority determination for different info types."""
-        assert protocol._determine_priority(BranchInfoType.CONFLICT_INFO) == MessagePriority.HIGH  # noqa: SLF001
-        assert protocol._determine_priority(BranchInfoType.API_CHANGES) == MessagePriority.HIGH  # noqa: SLF001
-        assert protocol._determine_priority(BranchInfoType.BUILD_STATUS) == MessagePriority.NORMAL  # noqa: SLF001
-        assert protocol._determine_priority(BranchInfoType.FILE_CHANGES) == MessagePriority.LOW  # noqa: SLF001
+        assert (
+            protocol._determine_priority(BranchInfoType.CONFLICT_INFO)
+            == MessagePriority.HIGH
+        )  # noqa: SLF001
+        assert (
+            protocol._determine_priority(BranchInfoType.API_CHANGES)
+            == MessagePriority.HIGH
+        )  # noqa: SLF001
+        assert (
+            protocol._determine_priority(BranchInfoType.BUILD_STATUS)
+            == MessagePriority.NORMAL
+        )  # noqa: SLF001
+        assert (
+            protocol._determine_priority(BranchInfoType.FILE_CHANGES)
+            == MessagePriority.LOW
+        )  # noqa: SLF001
 
     @staticmethod
     def test_calculate_relevance(protocol: BranchInfoProtocol) -> None:
         """Test relevance score calculation."""
-        assert protocol._calculate_relevance(BranchInfoType.CONFLICT_INFO) == 1.0  # noqa: SLF001
-        assert protocol._calculate_relevance(BranchInfoType.API_CHANGES) == 0.9  # noqa: SLF001
-        assert protocol._calculate_relevance(BranchInfoType.BRANCH_STATE) == 0.3  # noqa: SLF001
+        assert (
+            protocol._calculate_relevance(BranchInfoType.CONFLICT_INFO) == 1.0
+        )  # noqa: SLF001
+        assert (
+            protocol._calculate_relevance(BranchInfoType.API_CHANGES) == 0.9
+        )  # noqa: SLF001
+        assert (
+            protocol._calculate_relevance(BranchInfoType.BRANCH_STATE) == 0.3
+        )  # noqa: SLF001
 
     @staticmethod
     def test_get_protocol_summary(protocol: BranchInfoProtocol) -> None:
@@ -574,7 +610,9 @@ class TestBranchInfoProtocol:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_protocol_with_multiple_subscribers(protocol: BranchInfoProtocol) -> None:
+    async def test_protocol_with_multiple_subscribers(
+        protocol: BranchInfoProtocol,
+    ) -> None:
         """Test protocol behavior with multiple subscribers."""
         await protocol.register_branch("feature-x", "agent-1")
         await protocol.subscribe_to_branch("agent-2", "feature-x")

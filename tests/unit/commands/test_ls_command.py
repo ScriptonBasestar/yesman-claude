@@ -71,7 +71,10 @@ class TestLsCommand(unittest.TestCase):
 
         # Assertions
         assert result.exit_code == 0
-        assert "No templates found" in result.output or "Available templates:" in result.output
+        assert (
+            "No templates found" in result.output
+            or "Available templates:" in result.output
+        )
 
     @patch("commands.ls.TmuxManager")
     def test_ls_handles_tmux_error(self, mock_tmux_manager: object) -> None:

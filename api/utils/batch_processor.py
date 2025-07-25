@@ -66,11 +66,17 @@ class WebSocketBatchProcessor:
         # Processing control
         self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
-        self._message_handlers: dict[str, Callable[[list[dict[str, object]]], Awaitable[None]]] = {}
+        self._message_handlers: dict[
+            str, Callable[[list[dict[str, object]]], Awaitable[None]]
+        ] = {}
 
         self.logger = logging.getLogger("yesman.websocket_batch")
 
-    def register_message_handler(self, channel: str, handler: Callable[[list[dict[str, object]]], Awaitable[None]]) -> None:
+    def register_message_handler(
+        self,
+        channel: str,
+        handler: Callable[[list[dict[str, object]]], Awaitable[None]],
+    ) -> None:
         """Register a message handler for a specific channel."""
         self._message_handlers[channel] = handler
         self.logger.info("Registered message handler for channel: %s", channel)
@@ -153,8 +159,12 @@ class WebSocketBatchProcessor:
 
                     should_flush = (
                         len(queue) >= self.config.max_batch_size
-                        or (len(queue) > 0 and current_time - last_flush >= self.config.max_batch_time)
-                        or self._get_queue_memory_size(queue) >= self.config.max_memory_size
+                        or (
+                            len(queue) > 0
+                            and current_time - last_flush >= self.config.max_batch_time
+                        )
+                        or self._get_queue_memory_size(queue)
+                        >= self.config.max_memory_size
                     )
 
                     if should_flush:
@@ -201,15 +211,24 @@ class WebSocketBatchProcessor:
             # Update statistics
             self.stats["batches_sent"] += 1
             self.stats["messages_processed"] += len(messages)
-            self.stats["avg_batch_size"] = self.stats["messages_processed"] / self.stats["batches_sent"]
+            self.stats["avg_batch_size"] = (
+                self.stats["messages_processed"] / self.stats["batches_sent"]
+            )
 
             self.last_flush_time[channel] = time.time()
             self.batch_counter += 1
 
-            self.logger.debug("Flushed batch %s to %s: %d messages", batch.batch_id, channel, len(messages))
+            self.logger.debug(
+                "Flushed batch %s to %s: %d messages",
+                batch.batch_id,
+                channel,
+                len(messages),
+            )
 
         except Exception:
-            self.logger.exception("Failed to send batch %s to %s", batch.batch_id, channel)
+            self.logger.exception(
+                "Failed to send batch %s to %s", batch.batch_id, channel
+            )
             # Re-queue messages for retry (with retry limit to prevent infinite loops)
             retry_messages = []
             for msg in messages:
@@ -218,7 +237,9 @@ class WebSocketBatchProcessor:
                     msg["retry_count"] = retry_count + 1
                     retry_messages.append(msg)
                 else:
-                    self.logger.warning("Dropping message after 3 failed retries: %s", msg)
+                    self.logger.warning(
+                        "Dropping message after 3 failed retries: %s", msg
+                    )
 
             if retry_messages:
                 self.pending_messages[channel].extendleft(reversed(retry_messages))
@@ -231,7 +252,11 @@ class WebSocketBatchProcessor:
             return
 
         # Optimize batch if it's large enough
-        optimized_messages = self._optimize_messages(batch.messages) if len(batch.messages) >= self.config.compression_threshold else batch.messages
+        optimized_messages = (
+            self._optimize_messages(batch.messages)
+            if len(batch.messages) >= self.config.compression_threshold
+            else batch.messages
+        )
 
         # Calculate compression savings
         original_size = batch.size_bytes
@@ -239,8 +264,13 @@ class WebSocketBatchProcessor:
 
         if original_size > optimized_size:
             self.stats["bytes_saved"] += original_size - optimized_size
-            compression_ratio = optimized_size / original_size if original_size > 0 else 1.0
-            self.stats["compression_ratio"] = (self.stats["compression_ratio"] * (self.stats["batches_sent"] - 1) + compression_ratio) / self.stats["batches_sent"]
+            compression_ratio = (
+                optimized_size / original_size if original_size > 0 else 1.0
+            )
+            self.stats["compression_ratio"] = (
+                self.stats["compression_ratio"] * (self.stats["batches_sent"] - 1)
+                + compression_ratio
+            ) / self.stats["batches_sent"]
 
         # Send optimized batch
         try:
@@ -249,7 +279,9 @@ class WebSocketBatchProcessor:
             self.logger.exception("Handler error for channel %s", batch.channel)
             raise
 
-    def _optimize_messages(self, messages: list[dict[str, object]]) -> list[dict[str, object]]:
+    def _optimize_messages(
+        self, messages: list[dict[str, object]]
+    ) -> list[dict[str, object]]:
         """Optimize a batch of messages by combining similar ones.
 
         Returns:
@@ -287,7 +319,9 @@ class WebSocketBatchProcessor:
         return optimized
 
     @staticmethod
-    def _combine_update_messages(messages: list[dict[str, object]]) -> dict[str, object]:
+    def _combine_update_messages(
+        messages: list[dict[str, object]],
+    ) -> dict[str, object]:
         """Combine multiple update messages into a single message.
 
         Returns:
@@ -311,7 +345,10 @@ class WebSocketBatchProcessor:
             "data": combined_data,
             "batch_info": {
                 "original_count": len(messages),
-                "time_span": cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0)),
+                "time_span": (
+                    cast(float, messages[-1].get("queued_at", 0))
+                    - cast(float, messages[0].get("queued_at", 0))
+                ),
                 "combined_at": time.time(),
             },
         }
@@ -340,7 +377,10 @@ class WebSocketBatchProcessor:
             "data": {
                 "entries": log_entries,
                 "count": len(log_entries),
-                "time_span": cast(float, messages[-1].get("queued_at", 0)) - cast(float, messages[0].get("queued_at", 0)),
+                "time_span": (
+                    cast(float, messages[-1].get("queued_at", 0))
+                    - cast(float, messages[0].get("queued_at", 0))
+                ),
             },
         }
 
@@ -364,14 +404,18 @@ class WebSocketBatchProcessor:
         Returns:
         object: Description of return value.
         """
-        active_channels = len([ch for ch, queue in self.pending_messages.items() if queue])
+        active_channels = len(
+            [ch for ch, queue in self.pending_messages.items() if queue]
+        )
         total_pending = sum(len(queue) for queue in self.pending_messages.values())
 
         return {
             **self.stats,
             "active_channels": active_channels,
             "total_pending_messages": total_pending,
-            "pending_by_channel": {ch: len(queue) for ch, queue in self.pending_messages.items()},
+            "pending_by_channel": {
+                ch: len(queue) for ch, queue in self.pending_messages.items()
+            },
             "config": {
                 "max_batch_size": self.config.max_batch_size,
                 "max_batch_time": self.config.max_batch_time,
@@ -393,4 +437,6 @@ class WebSocketBatchProcessor:
         if channel in self.pending_messages:
             cleared_count = len(self.pending_messages[channel])
             self.pending_messages[channel].clear()
-            self.logger.info("Cleared %d pending messages from %s", cleared_count, channel)
+            self.logger.info(
+                "Cleared %d pending messages from %s", cleared_count, channel
+            )

@@ -100,7 +100,9 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
             return {"error": "session_not_found"}
 
         # Get session info
-        session_info = self._get_session_info(session_name, cast(dict, sessions_config[session_name]))
+        session_info = self._get_session_info(
+            session_name, cast(dict, sessions_config[session_name])
+        )
 
         # Display based on layout
         self._display_session_status([session_info])
@@ -133,7 +135,9 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
 
         return {"sessions": session_infos}
 
-    def _get_session_info(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
+    def _get_session_info(
+        self, session_name: str, session_config: dict[str, object]
+    ) -> dict[str, object]:
         """Get detailed information about a session.
 
         Returns:
@@ -165,11 +169,15 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
                     session_info = self.tmux_manager.get_session_info(session_name)
                     windows = cast(list, session_info.get("windows", []))
                     info["windows"] = len(windows)
-                    info["panes"] = sum(len(cast(list, w.get("panes", []))) for w in windows)
+                    info["panes"] = sum(
+                        len(cast(list, w.get("panes", []))) for w in windows
+                    )
                     break
 
         except Exception:
-            self.logger.exception("Error getting tmux info for {session_name}")  # noqa: G004
+            self.logger.exception(
+                "Error getting tmux info for {session_name}"
+            )  # noqa: G004
             info["status"] = "error"
 
         return info
@@ -307,7 +315,9 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
     default=True,
     help="Show detailed information",
 )
-def status(session_name: str | None, format: str, details: bool) -> None:  # noqa: FBT001
+def status(
+    session_name: str | None, format: str, details: bool
+) -> None:  # noqa: FBT001
     """Show status of all or specific tmux sessions."""
     command = StatusCommand()
 

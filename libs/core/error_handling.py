@@ -115,7 +115,9 @@ class YesmanError(Exception):
 class ConfigurationError(YesmanError):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, config_file: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self, message: str, config_file: str | None = None, **kwargs: Any
+    ) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="configuration_loading",
             component="config",
@@ -124,7 +126,9 @@ class ConfigurationError(YesmanError):
 
         # Set default recovery hint if not provided
         if "recovery_hint" not in kwargs:
-            kwargs["recovery_hint"] = "Check the configuration file syntax and ensure all required fields are present. Run 'yesman validate' to check configuration."
+            kwargs["recovery_hint"] = (
+                "Check the configuration file syntax and ensure all required fields are present. Run 'yesman validate' to check configuration."
+            )
 
         # Remove context from kwargs if it exists to avoid conflict
         kwargs.pop("context", None)
@@ -140,7 +144,9 @@ class ConfigurationError(YesmanError):
 class ValidationError(YesmanError):
     """Validation-related errors."""
 
-    def __init__(self, message: str, field_name: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self, message: str, field_name: str | None = None, **kwargs: Any
+    ) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="validation",
             component="validator",
@@ -150,9 +156,13 @@ class ValidationError(YesmanError):
         # Set default recovery hint if not provided
         if "recovery_hint" not in kwargs:
             if field_name:
-                kwargs["recovery_hint"] = f"Check the value of '{field_name}' field and ensure it meets the requirements."
+                kwargs["recovery_hint"] = (
+                    f"Check the value of '{field_name}' field and ensure it meets the requirements."
+                )
             else:
-                kwargs["recovery_hint"] = "Review the input data and ensure all values meet the validation requirements."
+                kwargs["recovery_hint"] = (
+                    "Review the input data and ensure all values meet the validation requirements."
+                )
 
         super().__init__(
             message,
@@ -165,7 +175,9 @@ class ValidationError(YesmanError):
 class SessionError(YesmanError):
     """Session management related errors."""
 
-    def __init__(self, message: str, session_name: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self, message: str, session_name: str | None = None, **kwargs: Any
+    ) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="session_management",
             component="tmux_manager",
@@ -175,9 +187,13 @@ class SessionError(YesmanError):
         # Set default recovery hint if not provided
         if "recovery_hint" not in kwargs:
             if session_name:
-                kwargs["recovery_hint"] = f"Check if session '{session_name}' exists using 'yesman show'. If not, create it with 'yesman enter {{session_name}}'."
+                kwargs["recovery_hint"] = (
+                    f"Check if session '{session_name}' exists using 'yesman show'. If not, create it with 'yesman enter {{session_name}}'."
+                )
             else:
-                kwargs["recovery_hint"] = "List available sessions with 'yesman show' or check tmux directly with 'tmux ls'."
+                kwargs["recovery_hint"] = (
+                    "List available sessions with 'yesman show' or check tmux directly with 'tmux ls'."
+                )
 
         super().__init__(
             message,
@@ -190,7 +206,9 @@ class SessionError(YesmanError):
 class NetworkError(YesmanError):
     """Network-related errors."""
 
-    def __init__(self, message: str, endpoint: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self, message: str, endpoint: str | None = None, **kwargs: Any
+    ) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="network_operation",
             component="api_client",
@@ -207,7 +225,9 @@ class NetworkError(YesmanError):
 class PermissionError(YesmanError):
     """Permission-related errors."""
 
-    def __init__(self, message: str, resource_path: str | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self, message: str, resource_path: str | None = None, **kwargs: Any
+    ) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="permission_check",
             component="filesystem",
@@ -224,11 +244,15 @@ class PermissionError(YesmanError):
 class TimeoutError(YesmanError):
     """Timeout-related errors."""
 
-    def __init__(self, message: str, timeout_duration: float | None = None, **kwargs: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self, message: str, timeout_duration: float | None = None, **kwargs: Any
+    ) -> None:  # noqa: ANN401
         context = ErrorContext(
             operation="timeout_operation",
             component="timeout_handler",
-            additional_info=({"timeout_duration": timeout_duration} if timeout_duration else None),
+            additional_info=(
+                {"timeout_duration": timeout_duration} if timeout_duration else None
+            ),
         )
         super().__init__(
             message,
@@ -266,7 +290,11 @@ class ErrorHandler:
             exit_on_critical: Whether to exit on critical errors
         """
         # Convert to YesmanError if needed
-        yesman_error = YesmanError(message=str(error), context=context, cause=error) if not isinstance(error, YesmanError) else error
+        yesman_error = (
+            YesmanError(message=str(error), context=context, cause=error)
+            if not isinstance(error, YesmanError)
+            else error
+        )
 
         # Update statistics
         self._update_error_stats(yesman_error)
@@ -284,18 +312,26 @@ class ErrorHandler:
 
         # By category
         category = error.category.value
-        self.error_stats["by_category"][category] = self.error_stats["by_category"].get(category, 0) + 1
+        self.error_stats["by_category"][category] = (
+            self.error_stats["by_category"].get(category, 0) + 1
+        )
 
         # By severity
         severity = error.severity.value
-        self.error_stats["by_severity"][severity] = self.error_stats["by_severity"].get(severity, 0) + 1
+        self.error_stats["by_severity"][severity] = (
+            self.error_stats["by_severity"].get(severity, 0) + 1
+        )
 
         # By component
         if error.context and error.context.component:
             component = error.context.component
-            self.error_stats["by_component"][component] = self.error_stats["by_component"].get(component, 0) + 1
+            self.error_stats["by_component"][component] = (
+                self.error_stats["by_component"].get(component, 0) + 1
+            )
 
-    def _log_error(self, error: YesmanError, log_traceback: bool) -> None:  # noqa: FBT001
+    def _log_error(
+        self, error: YesmanError, log_traceback: bool
+    ) -> None:  # noqa: FBT001
         """Log error with appropriate level."""
         # Determine log level
         level_map = {
@@ -337,7 +373,9 @@ class ErrorHandler:
 
     def _handle_critical_error(self, error: YesmanError) -> None:
         """Handle critical errors."""
-        self.logger.critical(f"CRITICAL ERROR - System exiting: {error.message}")  # noqa: G004
+        self.logger.critical(
+            f"CRITICAL ERROR - System exiting: {error.message}"
+        )  # noqa: G004
 
         # Print user-friendly error message
         if error.context and error.context.operation:
@@ -376,7 +414,11 @@ def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
             # Create context from function
             context = ErrorContext(
                 operation=func.__name__,
-                component=(func.__module__.split(".")[-1] if hasattr(func, "__module__") else "unknown"),
+                component=(
+                    func.__module__.split(".")[-1]
+                    if hasattr(func, "__module__")
+                    else "unknown"
+                ),
             )
             error_handler.handle_error(e, context)
             return None

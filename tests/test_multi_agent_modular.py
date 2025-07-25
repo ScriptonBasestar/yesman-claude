@@ -8,7 +8,12 @@ from pathlib import Path
 import click
 
 import commands.multi_agent
-from commands.multi_agent import DetectConflictsCommand, StartAgentsCommand, agent_pool, conflict_resolution
+from commands.multi_agent import (
+    DetectConflictsCommand,
+    StartAgentsCommand,
+    agent_pool,
+    conflict_resolution,
+)
 from commands.multi_agent.agent_pool import (
     AddTaskCommand,
     ListTasksCommand,
@@ -253,23 +258,45 @@ class TestRefactoringBenefits:
             if file_path.exists():
                 module_size = os.path.getsize(file_path)
                 # Each module should be significantly smaller than original
-                assert module_size < backup_size / 4, f"{file_name} is too large relative to original"
+                assert (
+                    module_size < backup_size / 4
+                ), f"{file_name} is too large relative to original"
 
         # New main file should be much smaller
-        assert main_size < backup_size / 10, "Main file should be much smaller after refactoring"
+        assert (
+            main_size < backup_size / 10
+        ), "Main file should be much smaller after refactoring"
 
     @staticmethod
     def test_focused_responsibilities() -> None:
         """Test that each module has focused responsibilities."""
         # Agent pool module should only have agent-related commands
-        agent_classes = [name for name in dir(agent_pool) if name.endswith("Command") and not name.startswith("_") and name != "BaseCommand"]
+        agent_classes = [
+            name
+            for name in dir(agent_pool)
+            if name.endswith("Command")
+            and not name.startswith("_")
+            and name != "BaseCommand"
+        ]
 
         # All agent pool commands should be related to agent management
         for class_name in agent_classes:
-            assert any(keyword in class_name.lower() for keyword in ["agent", "start", "stop", "monitor", "status", "task"]), f"Agent pool command {class_name} seems misplaced"
+            assert any(
+                keyword in class_name.lower()
+                for keyword in ["agent", "start", "stop", "monitor", "status", "task"]
+            ), f"Agent pool command {class_name} seems misplaced"
 
         # Conflict resolution module should only have conflict-related commands
-        conflict_classes = [name for name in dir(conflict_resolution) if name.endswith("Command") and not name.startswith("_") and name != "BaseCommand"]
+        conflict_classes = [
+            name
+            for name in dir(conflict_resolution)
+            if name.endswith("Command")
+            and not name.startswith("_")
+            and name != "BaseCommand"
+        ]
 
         for class_name in conflict_classes:
-            assert any(keyword in class_name.lower() for keyword in ["conflict", "detect", "resolve", "summary"]), f"Conflict resolution command {class_name} seems misplaced"
+            assert any(
+                keyword in class_name.lower()
+                for keyword in ["conflict", "detect", "resolve", "summary"]
+            ), f"Conflict resolution command {class_name} seems misplaced"

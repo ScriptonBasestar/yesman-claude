@@ -37,7 +37,11 @@ class TestClaudeRestart(unittest.TestCase):
         assert self.mock_pane.send_keys.call_count > 3
 
         # Verify clear commands were sent
-        clear_calls = [call for call in self.mock_pane.send_keys.call_args_list if call[0][0] == "clear"]
+        clear_calls = [
+            call
+            for call in self.mock_pane.send_keys.call_args_list
+            if call[0][0] == "clear"
+        ]
         assert len(clear_calls) >= 2
 
     def test_terminate_claude_process_with_exception(self) -> None:
@@ -56,14 +60,20 @@ class TestClaudeRestart(unittest.TestCase):
         self.controller.selected_model = "sonnet"
 
         # Mock successful termination
-        with patch.object(self.controller, "_terminate_claude_process") as mock_terminate:
+        with patch.object(
+            self.controller, "_terminate_claude_process"
+        ) as mock_terminate:
             result = self.controller.restart_claude_pane()
 
             assert result
             mock_terminate.assert_called_once()
 
             # Verify claude command was sent
-            claude_calls = [call for call in self.mock_pane.send_keys.call_args_list if "claude" in str(call)]
+            claude_calls = [
+                call
+                for call in self.mock_pane.send_keys.call_args_list
+                if "claude" in str(call)
+            ]
             assert len(claude_calls) > 0
 
     def test_restart_claude_pane_no_pane(self) -> None:

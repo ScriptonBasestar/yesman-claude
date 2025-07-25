@@ -123,7 +123,9 @@ class TestConfigLoader:
         loader.add_source(DictSource({"mode": "merge", "logging": {"level": "INFO"}}))
 
         # Override config
-        loader.add_source(DictSource({"logging": {"level": "DEBUG"}, "confidence_threshold": 0.9}))
+        loader.add_source(
+            DictSource({"logging": {"level": "DEBUG"}, "confidence_threshold": 0.9})
+        )
 
         config = loader.load()
         assert config.mode == "merge"  # From first source
@@ -135,7 +137,9 @@ class TestConfigLoader:
         """Test deep merging of nested configs."""
         loader = ConfigLoader()
 
-        loader.add_source(DictSource({"tmux": {"default_shell": "/bin/bash", "mouse": True}}))
+        loader.add_source(
+            DictSource({"tmux": {"default_shell": "/bin/bash", "mouse": True}})
+        )
 
         loader.add_source(DictSource({"tmux": {"mouse": False, "base_index": 1}}))
 
@@ -148,7 +152,9 @@ class TestConfigLoader:
     def test_validation_errors() -> None:
         """Test validation error handling."""
         loader = ConfigLoader()
-        loader.add_source(DictSource({"mode": "invalid", "logging": {"level": "INVALID"}}))
+        loader.add_source(
+            DictSource({"mode": "invalid", "logging": {"level": "INVALID"}})
+        )
 
         with pytest.raises(ValueError) as exc_info:
             loader.load()
@@ -280,9 +286,13 @@ class TestConfigPriority:
             with patch("libs.core.config_loader.Path.cwd", return_value=tmp_path):
                 # Create config directories and files
                 (tmp_path / ".scripton" / "yesman").mkdir(parents=True)
-                (tmp_path / ".scripton" / "yesman" / "yesman.yaml").write_text(yaml.dump(global_config))
+                (tmp_path / ".scripton" / "yesman" / "yesman.yaml").write_text(
+                    yaml.dump(global_config)
+                )
 
-                (tmp_path / ".scripton" / "yesman" / "yesman.yaml").write_text(yaml.dump(local_config))
+                (tmp_path / ".scripton" / "yesman" / "yesman.yaml").write_text(
+                    yaml.dump(local_config)
+                )
 
                 # Test with environment variable override
                 with patch.dict(os.environ, {"YESMAN_CONFIDENCE_THRESHOLD": "0.95"}):

@@ -91,7 +91,11 @@ class AgentMetrics:
         """Calculate overall efficiency score."""
         if self.tasks_completed == 0:
             return 0.5
-        return self.success_rate * 0.6 + (1.0 - self.current_load) * 0.3 + min(1.0, self.tasks_completed / 10.0) * 0.1
+        return (
+            self.success_rate * 0.6
+            + (1.0 - self.current_load) * 0.3
+            + min(1.0, self.tasks_completed / 10.0) * 0.1
+        )
 
 
 @dataclass
@@ -162,9 +166,15 @@ class AgentMonitor:
                     self.agent_metrics[agent_id] = AgentMetrics(agent_id=agent_id)
 
                 metrics = self.agent_metrics[agent_id]
-                metrics.current_task = cast(str, cast(dict, agent_data).get("current_task"))
-                metrics.tasks_completed = cast(int, cast(dict, agent_data).get("completed_tasks", 0))
-                metrics.tasks_failed = cast(int, cast(dict, agent_data).get("failed_tasks", 0))
+                metrics.current_task = cast(
+                    str, cast(dict, agent_data).get("current_task")
+                )
+                metrics.tasks_completed = cast(
+                    int, cast(dict, agent_data).get("completed_tasks", 0)
+                )
+                metrics.tasks_failed = cast(
+                    int, cast(dict, agent_data).get("failed_tasks", 0)
+                )
                 metrics.total_execution_time = cast(
                     float,
                     cast(dict, agent_data).get(
@@ -174,8 +184,12 @@ class AgentMonitor:
                 )
 
                 if metrics.tasks_completed > 0:
-                    metrics.average_execution_time = metrics.total_execution_time / metrics.tasks_completed
-                    metrics.success_rate = metrics.tasks_completed / (metrics.tasks_completed + metrics.tasks_failed)
+                    metrics.average_execution_time = (
+                        metrics.total_execution_time / metrics.tasks_completed
+                    )
+                    metrics.success_rate = metrics.tasks_completed / (
+                        metrics.tasks_completed + metrics.tasks_failed
+                    )
 
                 # Update performance history
                 now = datetime.now(UTC)
@@ -187,7 +201,9 @@ class AgentMonitor:
                 )
                 # Keep only last 100 data points
                 if len(self.performance_history[agent_id]) > 100:
-                    self.performance_history[agent_id] = self.performance_history[agent_id][-100:]
+                    self.performance_history[agent_id] = self.performance_history[
+                        agent_id
+                    ][-100:]
 
             # Update task metrics
             tasks = cast(list, self.agent_pool.list_tasks())
@@ -198,8 +214,16 @@ class AgentMonitor:
                     task_id=task_id,
                     title=cast(str, cast(dict, task_data)["title"]),
                     status=TaskStatus(cast(str, cast(dict, task_data)["status"])),
-                    assigned_agent=cast(str, cast(dict, task_data).get("assigned_agent")),
-                    start_time=(datetime.fromisoformat(cast(str, cast(dict, task_data)["start_time"])) if cast(dict, task_data).get("start_time") else None),
+                    assigned_agent=cast(
+                        str, cast(dict, task_data).get("assigned_agent")
+                    ),
+                    start_time=(
+                        datetime.fromisoformat(
+                            cast(str, cast(dict, task_data)["start_time"])
+                        )
+                        if cast(dict, task_data).get("start_time")
+                        else None
+                    ),
                     progress=self._calculate_task_progress(cast(dict, task_data)),
                 )
 
@@ -214,7 +238,10 @@ class AgentMonitor:
                     "completed_tasks": cast(int, stats.get("completed_tasks", 0)),
                     "failed_tasks": cast(int, stats.get("failed_tasks", 0)),
                     "queue_size": cast(int, stats.get("queue_size", 0)),
-                    "average_efficiency": sum(m.efficiency_score for m in self.agent_metrics.values()) / max(len(self.agent_metrics), 1),
+                    "average_efficiency": (
+                        sum(m.efficiency_score for m in self.agent_metrics.values())
+                        / max(len(self.agent_metrics), 1)
+                    ),
                 },
             )
 
@@ -236,7 +263,11 @@ class AgentMonitor:
             start = datetime.fromisoformat(cast(str, start_time))
             elapsed = (datetime.now(UTC) - start).total_seconds()
             timeout_val = task_data.get("timeout", 300)
-            timeout: float = float(timeout_val) if isinstance(timeout_val, (int, float, str)) else 300.0
+            timeout: float = (
+                float(timeout_val)
+                if isinstance(timeout_val, (int, float, str))
+                else 300.0
+            )
             return min(0.9, elapsed / timeout)  # Cap at 90% for running tasks
         if status == "assigned":
             return 0.1
@@ -342,7 +373,9 @@ class AgentMonitor:
         # Performance history (simple text representation)
         history = self.performance_history.get(self.selected_agent, [])
         if history:
-            recent_performance = [score for _, score in history[-20:]]  # Last 20 data points
+            recent_performance = [
+                score for _, score in history[-20:]
+            ]  # Last 20 data points
             perf_text = "█" * int(
                 sum(recent_performance) / len(recent_performance) * 20,
             )
@@ -383,11 +416,17 @@ class AgentMonitor:
                 elapsed = datetime.now(UTC) - metrics.start_time
                 duration = f"{elapsed.total_seconds():.0f}s"
 
-            progress_bar = "█" * int(metrics.progress * 10) + "░" * (10 - int(metrics.progress * 10))
+            progress_bar = "█" * int(metrics.progress * 10) + "░" * (
+                10 - int(metrics.progress * 10)
+            )
 
             tasks_table.add_row(
                 task_id[:8] + "...",  # Truncate long IDs
-                (metrics.title[:30] + "..." if len(metrics.title) > 30 else metrics.title),
+                (
+                    metrics.title[:30] + "..."
+                    if len(metrics.title) > 30
+                    else metrics.title
+                ),
                 Text(metrics.status.value.upper(), style=status_color),
                 metrics.assigned_agent or "-",
                 f"{progress_bar} {metrics.progress:.0%}",
@@ -418,13 +457,25 @@ class AgentMonitor:
                     len(history),
                 )
                 older_slice = history[-10:-5] if len(history) >= 10 else history[:-5]
-                older_avg = sum(score for _, score in older_slice) / len(older_slice) if older_slice else recent_avg
-                trend = "↗" if recent_avg > older_avg else "↘" if recent_avg < older_avg else "→"
+                older_avg = (
+                    sum(score for _, score in older_slice) / len(older_slice)
+                    if older_slice
+                    else recent_avg
+                )
+                trend = (
+                    "↗"
+                    if recent_avg > older_avg
+                    else "↘" if recent_avg < older_avg else "→"
+                )
             else:
                 trend = "→"
 
             # Throughput (tasks per hour)
-            throughput = metrics.tasks_completed / (metrics.total_execution_time / 3600.0) if metrics.total_execution_time > 0 else 0.0
+            throughput = (
+                metrics.tasks_completed / (metrics.total_execution_time / 3600.0)
+                if metrics.total_execution_time > 0
+                else 0.0
+            )
 
             perf_table.add_row(
                 agent_id,

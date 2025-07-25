@@ -55,7 +55,11 @@ class SessionConfigurationError(YesmanError):
     """Raised when session configuration is invalid."""
 
     def __init__(self, message: str, config: dict | None = None) -> None:
-        context = ErrorContext(operation="session_configuration", component="session_helpers", additional_info={"config": config} if config else None)
+        context = ErrorContext(
+            operation="session_configuration",
+            component="session_helpers",
+            additional_info={"config": config} if config else None,
+        )
         super().__init__(
             message,
             category=ErrorCategory.CONFIGURATION,
@@ -83,7 +87,9 @@ def get_tmux_server() -> libtmux.Server:
         ) from e
 
 
-def check_session_exists(session_name: str, server: libtmux.Server | None = None) -> bool:
+def check_session_exists(
+    session_name: str, server: libtmux.Server | None = None
+) -> bool:
     """Check if a tmux session exists.
 
     Args:
@@ -142,7 +148,9 @@ class SessionInfo:
     status: str = "running"
 
 
-def get_session_info(session_name: str, server: libtmux.Server | None = None) -> SessionInfo:
+def get_session_info(
+    session_name: str, server: libtmux.Server | None = None
+) -> SessionInfo:
     """Get detailed information about a tmux session.
 
     Args:
@@ -441,7 +449,9 @@ def send_keys_to_pane(
         raise
 
 
-def list_session_windows(session_name: str, server: libtmux.Server | None = None) -> list[WindowInfo]:
+def list_session_windows(
+    session_name: str, server: libtmux.Server | None = None
+) -> list[WindowInfo]:
     """List all windows in a session.
 
     Args:
@@ -458,7 +468,9 @@ def list_session_windows(session_name: str, server: libtmux.Server | None = None
     return session_info.windows
 
 
-def merge_template_override(template_config: dict[str, object], override_config: dict[str, object]) -> dict[str, object]:
+def merge_template_override(
+    template_config: dict[str, object], override_config: dict[str, object]
+) -> dict[str, object]:
     """Merge template configuration with override configuration.
 
     Override values take precedence over template values.
@@ -477,7 +489,9 @@ def merge_template_override(template_config: dict[str, object], override_config:
     for key, value in override_config.items():
         if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
             # Recursively merge dictionaries
-            merged[key] = merge_template_override(cast(dict[str, object], merged[key]), value)
+            merged[key] = merge_template_override(
+                cast(dict[str, object], merged[key]), value
+            )
         else:
             # Override value
             merged[key] = value
@@ -485,7 +499,9 @@ def merge_template_override(template_config: dict[str, object], override_config:
     return merged
 
 
-def expand_and_validate_directory(directory: str, create_if_missing: bool = False) -> Path:  # noqa: FBT001
+def expand_and_validate_directory(
+    directory: str, create_if_missing: bool = False
+) -> Path:  # noqa: FBT001
     """Expand user paths and validate directory existence.
 
     Args:

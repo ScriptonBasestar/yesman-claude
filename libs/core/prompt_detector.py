@@ -135,10 +135,14 @@ class ClaudePromptDetector:
             try:
                 prompt_info = detector(cleaned_content)
                 if prompt_info:
-                    self.logger.debug(f"Detected prompt: {prompt_info.type.value}")  # noqa: G004
+                    self.logger.debug(
+                        f"Detected prompt: {prompt_info.type.value}"
+                    )  # noqa: G004
                     return prompt_info
             except Exception:
-                self.logger.exception("Error in detector {detector.__name__}")  # noqa: G004
+                self.logger.exception(
+                    "Error in detector {detector.__name__}"
+                )  # noqa: G004
 
         return None
 
@@ -187,7 +191,9 @@ class ClaudePromptDetector:
             question = ""
 
             for line in lines:
-                if any(f"{opt[0]}." in line or f"[{opt[0]}]" in line for opt in all_options):
+                if any(
+                    f"{opt[0]}." in line or f"[{opt[0]}]" in line for opt in all_options
+                ):
                     break
                 if "?" in line:
                     question = line.strip()
@@ -346,7 +352,9 @@ class ClaudePromptDetector:
                 "commit",
             ]
 
-            if any(indicator in question.lower() for indicator in continuation_indicators):
+            if any(
+                indicator in question.lower() for indicator in continuation_indicators
+            ):
                 return PromptInfo(
                     type=PromptType.CONFIRMATION,
                     question=question,
@@ -403,7 +411,9 @@ class ClaudePromptDetector:
         last_line = content.strip().split("\n")[-1]
 
         # Check if last line ends with input indicators
-        if any(last_line.strip().endswith(indicator) for indicator in cursor_indicators):
+        if any(
+            last_line.strip().endswith(indicator) for indicator in cursor_indicators
+        ):
             return True
 
         # Check for selection menus

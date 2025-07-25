@@ -33,7 +33,9 @@ class TestThemeRendererIntegration:
         dark_theme = theme_manager.current_theme
 
         # Create renderer with dark theme
-        renderer = factory.create_renderer(RenderFormat.TUI, theme=dark_theme.colors.to_dict())
+        renderer = factory.create_renderer(
+            RenderFormat.TUI, theme=dark_theme.colors.to_dict()
+        )
 
         # Test rendering with theme
         health_data = HealthData(

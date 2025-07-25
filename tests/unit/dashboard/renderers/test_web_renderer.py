@@ -55,11 +55,21 @@ class TestWebRenderer:
 
     def test_health_color_class_mapping(self) -> None:
         """Test health level to CSS class mapping."""
-        assert self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"  # noqa: SLF001
-        assert self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"  # noqa: SLF001
-        assert self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"  # noqa: SLF001
-        assert self.renderer._get_health_color_class(HealthLevel.CRITICAL) == "red-600"  # noqa: SLF001
-        assert self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color_class(HealthLevel.CRITICAL) == "red-600"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"
+        )  # noqa: SLF001
 
     def test_supports_feature(self) -> None:
         """Test feature support checking."""
@@ -77,7 +87,9 @@ class TestWebRenderer:
         component_id = "test-widget-123"
         test_data = {"type": "test", "value": 42, "name": "test widget"}
 
-        result = self.renderer._embed_widget_data(component_id, test_data)  # noqa: SLF001
+        result = self.renderer._embed_widget_data(
+            component_id, test_data
+        )  # noqa: SLF001
 
         assert isinstance(result, str)
         assert component_id in result
@@ -469,7 +481,9 @@ class TestWebRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(widgets, {"type": "vertical", "spacing": "space-y-6"})
+        result = self.renderer.render_layout(
+            widgets, {"type": "vertical", "spacing": "space-y-6"}
+        )
 
         assert isinstance(result, str)
         assert "dashboard-layout-vertical" in result
@@ -490,7 +504,9 @@ class TestWebRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(widgets, {"type": "flex", "direction": "row", "gap": "gap-6"})
+        result = self.renderer.render_layout(
+            widgets, {"type": "flex", "direction": "row", "gap": "gap-6"}
+        )
 
         assert isinstance(result, str)
         assert "dashboard-layout-flex" in result
@@ -521,7 +537,9 @@ class TestWebRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(widgets, {"type": "grid", "columns": 2, "gap": "gap-4"})
+        result = self.renderer.render_layout(
+            widgets, {"type": "grid", "columns": 2, "gap": "gap-4"}
+        )
 
         assert isinstance(result, str)
         assert "dashboard-layout-grid" in result
@@ -621,7 +639,9 @@ class TestWebRenderer:
             current_streak=5,
         )
 
-        result = self.renderer._render_activity_heatmap(high_activity, {}, "test-1")  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            high_activity, {}, "test-1"
+        )  # noqa: SLF001
         assert "🔥🔥🔥" in result
         assert "text-red-600" in result
 
@@ -634,7 +654,9 @@ class TestWebRenderer:
             current_streak=3,
         )
 
-        result = self.renderer._render_activity_heatmap(medium_activity, {}, "test-2")  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            medium_activity, {}, "test-2"
+        )  # noqa: SLF001
         assert "🔥🔥" in result
         assert "text-orange-600" in result
 
@@ -647,7 +669,9 @@ class TestWebRenderer:
             current_streak=1,
         )
 
-        result = self.renderer._render_activity_heatmap(low_activity, {}, "test-3")  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            low_activity, {}, "test-3"
+        )  # noqa: SLF001
         assert "🔥" in result
         assert "text-yellow-600" in result
 
@@ -660,7 +684,9 @@ class TestWebRenderer:
             current_streak=0,
         )
 
-        result = self.renderer._render_activity_heatmap(very_low_activity, {}, "test-4")  # noqa: SLF001
+        result = self.renderer._render_activity_heatmap(
+            very_low_activity, {}, "test-4"
+        )  # noqa: SLF001
         assert "❄️" in result
         assert "text-blue-600" in result
 
@@ -672,7 +698,9 @@ class TestWebRenderer:
             value=100,
             trend=5.2,
         )
-        result = self.renderer._render_metric_card(positive_metric, {}, "test-1")  # noqa: SLF001
+        result = self.renderer._render_metric_card(
+            positive_metric, {}, "test-1"
+        )  # noqa: SLF001
         assert "↗️ +5.2" in result
         assert "text-green-600" in result
 
@@ -682,7 +710,9 @@ class TestWebRenderer:
             value=100,
             trend=-3.1,
         )
-        result = self.renderer._render_metric_card(negative_metric, {}, "test-2")  # noqa: SLF001
+        result = self.renderer._render_metric_card(
+            negative_metric, {}, "test-2"
+        )  # noqa: SLF001
         assert "↘️ -3.1" in result
         assert "text-red-600" in result
 
@@ -692,7 +722,9 @@ class TestWebRenderer:
             value=100,
             trend=0,
         )
-        result = self.renderer._render_metric_card(no_trend_metric, {}, "test-3")  # noqa: SLF001
+        result = self.renderer._render_metric_card(
+            no_trend_metric, {}, "test-3"
+        )  # noqa: SLF001
         assert "➡️ 0" in result
         assert "text-gray-600" in result
 
@@ -702,7 +734,9 @@ class TestWebRenderer:
             value=100,
             trend=None,
         )
-        result = self.renderer._render_metric_card(no_trend_data_metric, {}, "test-4")  # noqa: SLF001
+        result = self.renderer._render_metric_card(
+            no_trend_data_metric, {}, "test-4"
+        )  # noqa: SLF001
         assert "↗️" not in result
         assert "↘️" not in result
         assert "➡️" not in result
@@ -731,7 +765,9 @@ class TestWebRenderer:
         # Extract and validate JSON structure
 
         # Find the JSON data using regex
-        json_match = re.search(r"window\.widgetData\[\'[^\']+\'\] = ({.*?});", result, re.DOTALL)
+        json_match = re.search(
+            r"window\.widgetData\[\'[^\']+\'\] = ({.*?});", result, re.DOTALL
+        )
 
         if json_match:
             json_str = json_match.group(1)
@@ -907,4 +943,6 @@ class TestWebRendererIntegration:
         )
 
         assert "<th" in table_result
-        assert "text-xs font-medium text-gray-500 uppercase" in table_result  # Proper header styling
+        assert (
+            "text-xs font-medium text-gray-500 uppercase" in table_result
+        )  # Proper header styling

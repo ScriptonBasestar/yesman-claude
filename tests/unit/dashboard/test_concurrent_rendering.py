@@ -27,7 +27,9 @@ class TestConcurrentRendering:
             uptime=1800,
         )
 
-        async def render_widget_async(format_type: RenderFormat, widget_type: WidgetType, data: object) -> object:
+        async def render_widget_async(
+            format_type: RenderFormat, widget_type: WidgetType, data: object
+        ) -> object:
             """Async wrapper for rendering."""
             renderer = factory.create_renderer(format_type)
             return renderer.render_widget(widget_type, data)

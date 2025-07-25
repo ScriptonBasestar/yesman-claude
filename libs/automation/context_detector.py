@@ -120,7 +120,9 @@ class ContextDetector:
         self._last_git_hash: str | None = None
         self._last_file_mtimes: dict[str, float] = {}
 
-    def detect_context_from_content(self, content: str, session_name: str | None = None) -> list[ContextInfo]:
+    def detect_context_from_content(
+        self, content: str, session_name: str | None = None
+    ) -> list[ContextInfo]:
         """Detect context from content (e.g., tmux pane output).
 
         Returns:
@@ -132,7 +134,9 @@ class ContextDetector:
             for pattern in patterns:
                 matches = re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE)
                 for match in matches:
-                    confidence = self._calculate_confidence(context_type, content, match)
+                    confidence = self._calculate_confidence(
+                        context_type, content, match
+                    )
 
                     if confidence > 0.6:  # Minimum confidence threshold
                         context_info = ContextInfo(
@@ -141,7 +145,9 @@ class ContextDetector:
                             details={
                                 "matched_pattern": pattern,
                                 "matched_text": match.group(),
-                                "content_snippet": content[max(0, match.start() - 50) : match.end() + 50],
+                                "content_snippet": content[
+                                    max(0, match.start() - 50) : match.end() + 50
+                                ],
                             },
                             timestamp=time.time(),
                             project_path=str(self.project_path),
@@ -195,7 +201,9 @@ class ContextDetector:
 
         return None
 
-    def detect_file_changes(self, watched_patterns: list[str] | None = None) -> list[ContextInfo]:
+    def detect_file_changes(
+        self, watched_patterns: list[str] | None = None
+    ) -> list[ContextInfo]:
         """Detect file system changes.
 
         Returns:
@@ -220,7 +228,10 @@ class ContextDetector:
                         current_mtime = file_path.stat().st_mtime
                         file_key = str(file_path)
 
-                        if file_key in self._last_file_mtimes and current_mtime > self._last_file_mtimes[file_key]:
+                        if (
+                            file_key in self._last_file_mtimes
+                            and current_mtime > self._last_file_mtimes[file_key]
+                        ):
                             # File was modified
                             detected_changes.append(
                                 ContextInfo(
@@ -239,11 +250,15 @@ class ContextDetector:
                         self._last_file_mtimes[file_key] = current_mtime
 
             except Exception as e:
-                self.logger.debug(f"File change detection failed for {pattern}: {e}")  # noqa: G004
+                self.logger.debug(
+                    f"File change detection failed for {pattern}: {e}"
+                )  # noqa: G004
 
         return detected_changes
 
-    def detect_claude_idle_context(self, last_activity_time: float, idle_threshold: int = 30) -> ContextInfo | None:
+    def detect_claude_idle_context(
+        self, last_activity_time: float, idle_threshold: int = 30
+    ) -> ContextInfo | None:
         """Detect when Claude has been idle for a while.
 
         Returns:
@@ -301,7 +316,9 @@ class ContextDetector:
         return None
 
     @staticmethod
-    def _calculate_confidence(context_type: ContextType, content: str, match: re.Match) -> float:
+    def _calculate_confidence(
+        context_type: ContextType, content: str, match: re.Match
+    ) -> float:
         """Calculate confidence score for a detected context.
 
         Returns:
@@ -311,14 +328,24 @@ class ContextDetector:
 
         # Boost confidence based on context specificity
         if context_type == ContextType.TEST_FAILURE:
-            if "failed" in match.group().lower() and any(test_word in content.lower() for test_word in ["test", "spec", "jest", "pytest"]):
+            if "failed" in match.group().lower() and any(
+                test_word in content.lower()
+                for test_word in ["test", "spec", "jest", "pytest"]
+            ):
                 base_confidence += 0.2
 
         elif context_type == ContextType.GIT_COMMIT:
             if "commit" in match.group().lower() and "success" in content.lower():
                 base_confidence += 0.2
 
-        elif context_type == ContextType.BUILD_FAILURE and "error" in match.group().lower() and any(build_word in content.lower() for build_word in ["build", "compile", "webpack", "tsc"]):
+        elif (
+            context_type == ContextType.BUILD_FAILURE
+            and "error" in match.group().lower()
+            and any(
+                build_word in content.lower()
+                for build_word in ["build", "compile", "webpack", "tsc"]
+            )
+        ):
             base_confidence += 0.2
 
         # Reduce confidence if match is very short or unclear
@@ -362,8 +389,14 @@ class ContextDetector:
             )
 
             return {
-                "message": (msg_result.stdout.strip() if msg_result.returncode == 0 else ""),
-                "files_changed": (files_result.stdout.strip().split("\n") if files_result.returncode == 0 else []),
+                "message": (
+                    msg_result.stdout.strip() if msg_result.returncode == 0 else ""
+                ),
+                "files_changed": (
+                    files_result.stdout.strip().split("\n")
+                    if files_result.returncode == 0
+                    else []
+                ),
             }
 
         except Exception as e:

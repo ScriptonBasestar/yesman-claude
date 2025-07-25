@@ -76,7 +76,9 @@ def list_session_files() -> object:
         tm = get_tmux_manager()
         return tm.list_session_configs()
     except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list session files: {e!s}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to list session files: {e!s}"
+        )
 
 
 @router.get("/config/paths", response_model=dict[str, str])
@@ -97,4 +99,6 @@ def get_config_paths() -> object:
             "local_config": str(config_manager.local_path),
         }
     except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get config paths: {e!s}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get config paths: {e!s}"
+        )

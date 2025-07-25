@@ -44,7 +44,9 @@ class ProgressStyle:
 
 
 @contextmanager
-def spinner_progress(description: str, style: str = ProgressStyle.PROCESSING) -> Iterator[Callable[[str], None]]:
+def spinner_progress(
+    description: str, style: str = ProgressStyle.PROCESSING
+) -> Iterator[Callable[[str], None]]:
     """Create a spinner progress indicator for indefinite operations.
 
     Args:
@@ -76,7 +78,9 @@ def spinner_progress(description: str, style: str = ProgressStyle.PROCESSING) ->
 
 
 @contextmanager
-def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_PROCESSING) -> Iterator[Callable[[int, str | None], None]]:
+def bar_progress(
+    description: str, total: int, style: str = ProgressStyle.DATA_PROCESSING
+) -> Iterator[Callable[[int, str | None], None]]:
     """Create a progress bar for operations with known total.
 
     Args:
@@ -104,7 +108,9 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
     ) as progress:
         task_id = progress.add_task(description, total=total)
 
-        def update_progress(advance: int = 1, new_description: str | None = None) -> None:
+        def update_progress(
+            advance: int = 1, new_description: str | None = None
+        ) -> None:
             progress.update(task_id, advance=advance)
             if new_description:
                 progress.update(task_id, description=new_description)
@@ -112,7 +118,9 @@ def bar_progress(description: str, total: int, style: str = ProgressStyle.DATA_P
         yield update_progress
 
 
-def track_items(items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING) -> Any:
+def track_items(
+    items: list[Any], description: str, style: str = ProgressStyle.DATA_PROCESSING
+) -> Any:
     """Track progress through a list of items with rich progress bar.
 
     Args:
@@ -135,7 +143,9 @@ def track_items(items: list[Any], description: str, style: str = ProgressStyle.D
 
 
 @contextmanager
-def multi_stage_progress(stages: list[str], style: str = ProgressStyle.PROCESSING) -> Iterator[Callable[[int, str | None], None]]:
+def multi_stage_progress(
+    stages: list[str], style: str = ProgressStyle.PROCESSING
+) -> Iterator[Callable[[int, str | None], None]]:
     """Create a multi-stage progress indicator.
 
     Args:
@@ -168,7 +178,11 @@ def multi_stage_progress(stages: list[str], style: str = ProgressStyle.PROCESSIN
         task_id = progress.add_task(stages[0], total=len(stages), completed=0)
 
         def next_stage(stage_index: int, custom_description: str | None = None) -> None:
-            description = custom_description or stages[stage_index] if stage_index < len(stages) else "✅ Completed"
+            description = (
+                custom_description or stages[stage_index]
+                if stage_index < len(stages)
+                else "✅ Completed"
+            )
             progress.update(task_id, completed=stage_index, description=description)
 
         yield next_stage
@@ -181,7 +195,9 @@ class ProgressManager:
     """
 
     @staticmethod
-    def startup_sequence(operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP) -> dict[str, Any]:
+    def startup_sequence(
+        operations: list[tuple[str, Callable]], style: str = ProgressStyle.STARTUP
+    ) -> dict[str, Any]:
         """Execute a sequence of startup operations with progress tracking.
 
         Args:
@@ -201,7 +217,9 @@ class ProgressManager:
         """
         results = {}
 
-        with multi_stage_progress([desc for desc, _ in operations], style) as next_stage:
+        with multi_stage_progress(
+            [desc for desc, _ in operations], style
+        ) as next_stage:
             for i, (description, operation) in enumerate(operations):
                 next_stage(i, description)
                 try:
@@ -244,9 +262,13 @@ class ProgressManager:
         for file_item in track_items(list(files), description, style):
             try:
                 result = operation(file_item)
-                results.append({"success": True, "result": result, "file": str(file_item)})
+                results.append(
+                    {"success": True, "result": result, "file": str(file_item)}
+                )
             except Exception as e:
-                results.append({"success": False, "error": str(e), "file": str(file_item)})
+                results.append(
+                    {"success": False, "error": str(e), "file": str(file_item)}
+                )
 
         return results
 

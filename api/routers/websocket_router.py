@@ -54,10 +54,16 @@ class ConnectionManager:
 
     def _register_batch_handlers(self) -> None:
         """Register message handlers for batch processing."""
-        self.batch_processor.register_message_handler("dashboard", self._send_to_dashboard)
-        self.batch_processor.register_message_handler("sessions", self._send_to_sessions)
+        self.batch_processor.register_message_handler(
+            "dashboard", self._send_to_dashboard
+        )
+        self.batch_processor.register_message_handler(
+            "sessions", self._send_to_sessions
+        )
         self.batch_processor.register_message_handler("health", self._send_to_health)
-        self.batch_processor.register_message_handler("activity", self._send_to_activity)
+        self.batch_processor.register_message_handler(
+            "activity", self._send_to_activity
+        )
         self.batch_processor.register_message_handler("logs", self._send_to_logs)
 
     async def _send_to_dashboard(self, messages: list[dict]) -> None:
@@ -80,7 +86,9 @@ class ConnectionManager:
         """Send batched messages to logs channel."""
         await self._broadcast_messages_to_channel("logs", messages)
 
-    async def _broadcast_messages_to_channel(self, channel: str, messages: list[dict]) -> None:
+    async def _broadcast_messages_to_channel(
+        self, channel: str, messages: list[dict]
+    ) -> None:
         """Broadcast multiple messages to a specific channel."""
         connections = self.channel_connections.get(channel, set())
         disconnected = []
@@ -101,7 +109,9 @@ class ConnectionManager:
                     }
                     await connection.send_json(batch_message)
             except Exception:
-                logger.exception(f"Error broadcasting batch to {channel}:")  # noqa: G004
+                logger.exception(
+                    f"Error broadcasting batch to {channel}:"
+                )  # noqa: G004
                 disconnected.append(connection)
 
         # Clean up disconnected clients
@@ -281,7 +291,9 @@ class ConnectionManager:
 
                     # Update last ping time
                     if connection in self.connection_metadata:
-                        self.connection_metadata[connection]["last_ping"] = datetime.now(UTC)
+                        self.connection_metadata[connection]["last_ping"] = (
+                            datetime.now(UTC)
+                        )
 
                 except Exception:
                     logger.exception("Error pinging connection:")
@@ -334,7 +346,9 @@ class ConnectionManager:
         Returns:
         dict containing batch processing statistics including counts, sizes, and status.
         """
-        return cast(dict[str, int | float | bool], self.batch_processor.get_statistics())
+        return cast(
+            dict[str, int | float | bool], self.batch_processor.get_statistics()
+        )
 
 
 # Create global connection manager instance
@@ -361,7 +375,9 @@ async def websocket_dashboard(websocket: WebSocket) -> None:
                 channels = data.get("channels", [])
                 for channel in channels:
                     manager.channel_connections[channel].add(websocket)
-                    logger.info(f"Dashboard client subscribed to channel: {channel}")  # noqa: G004
+                    logger.info(
+                        f"Dashboard client subscribed to channel: {channel}"
+                    )  # noqa: G004
 
             elif data.get("type") == "unsubscribe":
                 # Client wants to unsubscribe from specific updates
@@ -369,7 +385,9 @@ async def websocket_dashboard(websocket: WebSocket) -> None:
                 for channel in channels:
                     if websocket in manager.channel_connections[channel]:
                         manager.channel_connections[channel].remove(websocket)
-                        logger.info(f"Dashboard client unsubscribed from channel: {channel}")  # noqa: G004
+                        logger.info(
+                            f"Dashboard client unsubscribed from channel: {channel}"
+                        )  # noqa: G004
 
             else:
                 # Echo back unknown messages for debugging

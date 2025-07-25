@@ -32,13 +32,18 @@ class TestPerformanceThemeIntegration:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     @staticmethod
-    def test_performance_theme_integration(performance_optimizer: object, theme_manager: object) -> None:
+    def test_performance_theme_integration(
+        performance_optimizer: object, theme_manager: object
+    ) -> None:
         """Test 9: Performance optimization affects theme rendering."""
         # Set aggressive optimization
         performance_optimizer.set_optimization_level(OptimizationLevel.AGGRESSIVE)
 
         # Verify optimization applied
-        assert performance_optimizer.current_optimization_level == OptimizationLevel.AGGRESSIVE
+        assert (
+            performance_optimizer.current_optimization_level
+            == OptimizationLevel.AGGRESSIVE
+        )
         assert "animations" in performance_optimizer.applied_optimizations
 
         # Test theme rendering still works

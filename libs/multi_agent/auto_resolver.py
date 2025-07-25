@@ -136,8 +136,12 @@ class AutoResolver:
 
         # Resolution history and learning
         self.resolution_history: list[AutoResolutionResult] = []
-        self.success_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
-        self.failure_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        self.success_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(
+            list
+        )
+        self.failure_patterns: defaultdict[str, list[dict[str, Any]]] = defaultdict(
+            list
+        )
 
         # Performance tracking
         self.resolution_stats = {
@@ -174,7 +178,9 @@ class AutoResolver:
         target_branch = target_branch or branch1
         start_time = datetime.now(UTC)
 
-        logger.info("Starting auto-resolution session %s in %s mode", session_id, mode.value)
+        logger.info(
+            "Starting auto-resolution session %s in %s mode", session_id, mode.value
+        )
 
         try:
             # Step 1: Detect semantic conflicts
@@ -203,9 +209,15 @@ class AutoResolver:
             logger.info("Detected %d semantic conflicts", len(conflicts))
 
             # Step 2: Assess resolvability
-            resolvable_conflicts, escalated_conflicts = self._assess_conflict_resolvability(conflicts, mode)
+            resolvable_conflicts, escalated_conflicts = (
+                self._assess_conflict_resolvability(conflicts, mode)
+            )
 
-            logger.info("Resolvable: %d, Escalated: %d", len(resolvable_conflicts), len(escalated_conflicts))
+            logger.info(
+                "Resolvable: %d, Escalated: %d",
+                len(resolvable_conflicts),
+                len(escalated_conflicts),
+            )
 
             # Step 3: Perform automatic resolution
             merge_results = []
@@ -231,7 +243,9 @@ class AutoResolver:
                 applied_results,
             )
 
-            confidence_score = AutoResolver._calculate_session_confidence(applied_results)
+            confidence_score = AutoResolver._calculate_session_confidence(
+                applied_results
+            )
             resolution_time = (datetime.now(UTC) - start_time).total_seconds()
 
             # Create result
@@ -248,13 +262,19 @@ class AutoResolver:
                 merge_results=applied_results,
                 resolution_time=resolution_time,
                 confidence_score=confidence_score,
-                semantic_integrity_preserved=all(r.semantic_integrity for r in applied_results),
+                semantic_integrity_preserved=all(
+                    r.semantic_integrity for r in applied_results
+                ),
                 escalated_conflicts=[c.conflict_id for c in escalated_conflicts],
                 metadata={
                     "total_conflicts": len(conflicts),
                     "resolvable_conflicts": len(resolvable_conflicts),
-                    "validation_success_rate": len(validated_results) / max(len(merge_results), 1),
-                    "application_success_rate": len(applied_results) / max(len(validated_results), 1),
+                    "validation_success_rate": (
+                        len(validated_results) / max(len(merge_results), 1)
+                    ),
+                    "application_success_rate": (
+                        len(applied_results) / max(len(validated_results), 1)
+                    ),
                 },
             )
 
@@ -293,7 +313,9 @@ class AutoResolver:
         Returns:
             Dictionary with prevention results and recommendations
         """
-        logger.info("Starting predictive conflict prevention for %d branches", len(branches))
+        logger.info(
+            "Starting predictive conflict prevention for %d branches", len(branches)
+        )
 
         try:
             # Get conflict predictions
@@ -308,7 +330,9 @@ class AutoResolver:
 
             # Filter high-confidence predictions
             threshold = self.confidence_thresholds[prevention_mode]
-            high_confidence_predictions = [p for p in predictions if p.likelihood_score >= threshold]
+            high_confidence_predictions = [
+                p for p in predictions if p.likelihood_score >= threshold
+            ]
 
             # Generate prevention strategies
             prevention_strategies = AutoResolver._generate_prevention_strategies(
@@ -331,7 +355,9 @@ class AutoResolver:
                 "applied_measures": applied_measures,
                 "prevention_summary": {
                     "conflicts_prevented": len(applied_measures),
-                    "manual_intervention_needed": len(prevention_strategies) - len(applied_measures),
+                    "manual_intervention_needed": (
+                        len(prevention_strategies) - len(applied_measures)
+                    ),
                 },
             }
 
@@ -358,7 +384,9 @@ class AutoResolver:
 
             # Conservative mode: only resolve very low-risk conflicts
             if mode == AutoResolutionMode.CONSERVATIVE:
-                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity in {ConflictSeverity.LOW}:
+                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity in {
+                    ConflictSeverity.LOW
+                }:
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
@@ -367,8 +395,10 @@ class AutoResolver:
             elif mode == AutoResolutionMode.BALANCED:
                 if (
                     risk_score <= BALANCED_RISK_THRESHOLD
-                    and conflict.severity in {ConflictSeverity.LOW, ConflictSeverity.MEDIUM}
-                    and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED
+                    and conflict.severity
+                    in {ConflictSeverity.LOW, ConflictSeverity.MEDIUM}
+                    and conflict.suggested_resolution
+                    != ResolutionStrategy.HUMAN_REQUIRED
                 ):
                     resolvable.append(conflict)
                 else:
@@ -376,13 +406,20 @@ class AutoResolver:
 
             # Aggressive mode: attempt most conflicts except critical
             elif mode == AutoResolutionMode.AGGRESSIVE:
-                if conflict.severity != ConflictSeverity.CRITICAL and conflict.suggested_resolution != ResolutionStrategy.HUMAN_REQUIRED:
+                if (
+                    conflict.severity != ConflictSeverity.CRITICAL
+                    and conflict.suggested_resolution
+                    != ResolutionStrategy.HUMAN_REQUIRED
+                ):
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)
 
             # Predictive mode: use prediction confidence
-            elif risk_score <= PREDICTIVE_RISK_THRESHOLD and conflict.severity != ConflictSeverity.CRITICAL:
+            elif (
+                risk_score <= PREDICTIVE_RISK_THRESHOLD
+                and conflict.severity != ConflictSeverity.CRITICAL
+            ):
                 resolvable.append(conflict)
             else:
                 escalated.append(conflict)
@@ -432,10 +469,18 @@ class AutoResolver:
         threshold = self.confidence_thresholds[mode]
 
         for result in merge_results:
-            if result.merge_confidence >= threshold and result.resolution in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION} and result.semantic_integrity:
+            if (
+                result.merge_confidence >= threshold
+                and result.resolution
+                in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION}
+                and result.semantic_integrity
+            ):
                 filtered_results.append(result)
             else:
-                logger.info("Filtering out merge result for %s due to low confidence or integrity issues", result.file_path)
+                logger.info(
+                    "Filtering out merge result for %s due to low confidence or integrity issues",
+                    result.file_path,
+                )
 
         return filtered_results
 
@@ -451,7 +496,9 @@ class AutoResolver:
             if await self._validate_single_merge_result(result):
                 validated.append(result)
             else:
-                logger.warning("Validation failed for merge result: %s", result.merge_id)
+                logger.warning(
+                    "Validation failed for merge result: %s", result.merge_id
+                )
 
         return validated
 
@@ -482,7 +529,9 @@ class AutoResolver:
         target_branch: str,
     ) -> list[MergeResult]:
         """Apply validated merge results to target branch."""
-        logger.info("Applying %d merge results to %s", len(merge_results), target_branch)
+        logger.info(
+            "Applying %d merge results to %s", len(merge_results), target_branch
+        )
         applied = []
 
         for result in merge_results:
@@ -565,7 +614,9 @@ class AutoResolver:
             strategy: dict[str, Any] = {
                 "prediction_id": prediction.prediction_id,
                 "pattern": prediction.pattern.value,
-                "prevention_suggestions": prediction.prevention_suggestions[:],  # Copy the list
+                "prevention_suggestions": prediction.prevention_suggestions[
+                    :
+                ],  # Copy the list
                 "automated_measures": [],
                 "manual_actions": [],
             }
@@ -641,16 +692,30 @@ class AutoResolver:
             self.resolution_stats["escalated_to_human"] += 1
 
         # Update average confidence
-        total_confidence = self.resolution_stats["average_confidence"] * (self.resolution_stats["total_sessions"] - 1) + result.confidence_score
-        self.resolution_stats["average_confidence"] = total_confidence / self.resolution_stats["total_sessions"]
+        total_confidence = (
+            self.resolution_stats["average_confidence"]
+            * (self.resolution_stats["total_sessions"] - 1)
+            + result.confidence_score
+        )
+        self.resolution_stats["average_confidence"] = (
+            total_confidence / self.resolution_stats["total_sessions"]
+        )
 
         # Update semantic integrity rate
         if result.semantic_integrity_preserved:
-            current_preserved = self.resolution_stats["semantic_integrity_rate"] * (self.resolution_stats["total_sessions"] - 1) + 1
+            current_preserved = (
+                self.resolution_stats["semantic_integrity_rate"]
+                * (self.resolution_stats["total_sessions"] - 1)
+                + 1
+            )
         else:
-            current_preserved = self.resolution_stats["semantic_integrity_rate"] * (self.resolution_stats["total_sessions"] - 1)
+            current_preserved = self.resolution_stats["semantic_integrity_rate"] * (
+                self.resolution_stats["total_sessions"] - 1
+            )
 
-        self.resolution_stats["semantic_integrity_rate"] = current_preserved / self.resolution_stats["total_sessions"]
+        self.resolution_stats["semantic_integrity_rate"] = (
+            current_preserved / self.resolution_stats["total_sessions"]
+        )
 
     def _learn_from_resolution(
         self,
@@ -665,7 +730,9 @@ class AutoResolver:
         }:
             for conflict in conflicts:
                 if conflict.conflict_id not in result.escalated_conflicts:
-                    pattern_key = f"{conflict.conflict_type.value}_{conflict.severity.value}"
+                    pattern_key = (
+                        f"{conflict.conflict_type.value}_{conflict.severity.value}"
+                    )
                     self.success_patterns[pattern_key].append(
                         {
                             "mode": result.mode.value,
@@ -677,7 +744,9 @@ class AutoResolver:
         # Record failure patterns
         else:
             for conflict in conflicts:
-                pattern_key = f"{conflict.conflict_type.value}_{conflict.severity.value}"
+                pattern_key = (
+                    f"{conflict.conflict_type.value}_{conflict.severity.value}"
+                )
                 self.failure_patterns[pattern_key].append(
                     {
                         "mode": result.mode.value,
@@ -747,7 +816,10 @@ class AutoResolver:
 
         # Analyze success rates
         if self.resolution_stats["total_sessions"] > MIN_SESSIONS_FOR_ANALYSIS:
-            success_rate = self.resolution_stats["successful_resolutions"] / self.resolution_stats["total_sessions"]
+            success_rate = (
+                self.resolution_stats["successful_resolutions"]
+                / self.resolution_stats["total_sessions"]
+            )
 
             if success_rate < SUCCESS_RATE_THRESHOLD:
                 recommendations.append(
@@ -759,7 +831,10 @@ class AutoResolver:
                     "Review conflict assessment criteria to improve confidence scores",
                 )
 
-            if self.resolution_stats["semantic_integrity_rate"] < SEMANTIC_INTEGRITY_THRESHOLD:
+            if (
+                self.resolution_stats["semantic_integrity_rate"]
+                < SEMANTIC_INTEGRITY_THRESHOLD
+            ):
                 recommendations.append(
                     "Enhance AST validation and semantic integrity checks",
                 )
@@ -773,6 +848,8 @@ class AutoResolver:
 
         for pattern, failures in common_failures:
             if len(failures) > MIN_FAILURE_COUNT:
-                recommendations.append(f"Improve resolution strategy for {pattern} conflicts (failed {len(failures)} times)")
+                recommendations.append(
+                    f"Improve resolution strategy for {pattern} conflicts (failed {len(failures)} times)"
+                )
 
         return recommendations

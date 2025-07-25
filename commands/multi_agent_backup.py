@@ -17,7 +17,11 @@ import click
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from libs.core.base_command import BaseCommand, CommandError
-from libs.dashboard.widgets.agent_monitor import AgentMetrics, AgentMonitor, run_agent_monitor
+from libs.dashboard.widgets.agent_monitor import (
+    AgentMetrics,
+    AgentMonitor,
+    run_agent_monitor,
+)
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.auto_resolver import AutoResolutionMode, AutoResolver
 from libs.multi_agent.branch_info_protocol import BranchInfoType
@@ -35,7 +39,10 @@ from libs.multi_agent.collaboration_engine import (
     MessageType,
 )
 from libs.multi_agent.conflict_prediction import ConflictPattern, ConflictPredictor
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ResolutionStrategy
+from libs.multi_agent.conflict_resolution import (
+    ConflictResolutionEngine,
+    ResolutionStrategy,
+)
 from libs.multi_agent.dependency_propagation import (
     ChangeImpact,
     DependencyPropagationSystem,
@@ -91,7 +98,9 @@ class StartAgentsCommand(BaseCommand):
 
                 async def run_pool() -> None:
                     await pool.start()
-                    progress.update(startup_task, description="✅ Agent pool started successfully")
+                    progress.update(
+                        startup_task, description="✅ Agent pool started successfully"
+                    )
 
                     if monitor:
                         progress.update(
@@ -101,7 +110,9 @@ class StartAgentsCommand(BaseCommand):
                         await run_agent_monitor(pool)
                     else:
                         self.print_success("✅ Agent pool started successfully")
-                        self.print_info("Use 'yesman multi-agent monitor' to view status")
+                        self.print_info(
+                            "Use 'yesman multi-agent monitor' to view status"
+                        )
 
                         # Keep running until interrupted
                         try:
@@ -109,7 +120,9 @@ class StartAgentsCommand(BaseCommand):
                             while not event.is_set():
                                 if hasattr(pool, "is_running") and not pool.is_running:
                                     break
-                                if hasattr(pool, "_running") and not pool._running:  # noqa: SLF001
+                                if (
+                                    hasattr(pool, "_running") and not pool._running
+                                ):  # noqa: SLF001
                                     break
                                 await event.wait()
                         except KeyboardInterrupt:
@@ -154,7 +167,9 @@ class MonitorAgentsCommand(BaseCommand):
                 monitor.refresh_interval = refresh
 
                 if not pool:
-                    self.print_warning("⚠️  No active agent pool found. Showing demo mode.")
+                    self.print_warning(
+                        "⚠️  No active agent pool found. Showing demo mode."
+                    )
                     # Add some demo data for visualization
                     monitor.agent_metrics = {
                         "agent-1": AgentMetrics(
@@ -169,7 +184,9 @@ class MonitorAgentsCommand(BaseCommand):
                 if duration:
                     self.print_info(f"⏱️  Monitoring for {duration} seconds...")
 
-                    def timeout_handler(_signum: int, _frame: types.FrameType | None) -> Never:
+                    def timeout_handler(
+                        _signum: int, _frame: types.FrameType | None
+                    ) -> Never:
                         raise KeyboardInterrupt
 
                     signal.signal(signal.SIGALRM, timeout_handler)
@@ -216,7 +233,9 @@ class StatusCommand(BaseCommand):
             self.print_info(f"Completed Tasks: {stats.get('completed_tasks', 0)}")
             self.print_info(f"Failed Tasks: {stats.get('failed_tasks', 0)}")
             self.print_info(f"Queue Size: {stats.get('queue_size', 0)}")
-            self.print_info(f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s")
+            self.print_info(
+                f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s"
+            )
 
             # Display agent details
             if agents:
@@ -230,7 +249,9 @@ class StatusCommand(BaseCommand):
                         "terminated": "⚫",
                     }.get(cast(str, agent_dict.get("state", "unknown")), "❓")
 
-                    self.print_info(f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}")
+                    self.print_info(
+                        f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}"
+                    )
 
             return {
                 "success": True,
@@ -367,11 +388,15 @@ class ListTasksCommand(BaseCommand):
                     "cancelled": "🚫",
                 }.get(cast(str, task_dict.get("status", "unknown")), "❓")
 
-                self.print_info(f"{status_icon} {task_dict['task_id'][:8]}... - {task_dict['title']}")
+                self.print_info(
+                    f"{status_icon} {task_dict['task_id'][:8]}... - {task_dict['title']}"
+                )
                 self.print_info(f"   Status: {cast(str, task_dict['status']).upper()}")
                 if task_dict.get("assigned_agent"):
                     self.print_info(f"   Agent: {task_dict['assigned_agent']}")
-                self.print_info(f"   Command: {' '.join(cast(list, task_dict['command']))}")
+                self.print_info(
+                    f"   Command: {' '.join(cast(list, task_dict['command']))}"
+                )
                 self.print_info("")
 
             return {
@@ -423,7 +448,9 @@ class DetectConflictsCommand(BaseCommand):
 
                 # Run the async detection
                 conflicts = asyncio.run(run_detection())
-                progress.update(detection_task, description="✅ Conflict detection completed")
+                progress.update(
+                    detection_task, description="✅ Conflict detection completed"
+                )
 
                 if not conflicts:
                     self.print_success("✅ No conflicts detected")
@@ -454,7 +481,9 @@ class DetectConflictsCommand(BaseCommand):
                     self.print_info(f"   Branches: {', '.join(conflict_info.branches)}")
                     self.print_info(f"   Files: {', '.join(conflict_info.files)}")
                     self.print_info(f"   Description: {conflict_info.description}")
-                    self.print_info(f"   Suggested Strategy: {conflict_info.suggested_strategy.value}")
+                    self.print_info(
+                        f"   Suggested Strategy: {conflict_info.suggested_strategy.value}"
+                    )
                     self.print_info("")
 
                 auto_resolve_results = None
@@ -473,7 +502,9 @@ class DetectConflictsCommand(BaseCommand):
                     self.print_success(f"✅ Auto-resolved: {resolved}")
                     if failed > 0:
                         self.print_error(f"❌ Failed to resolve: {failed}")
-                        self.print_warning("🚨 Manual intervention required for remaining conflicts")
+                        self.print_warning(
+                            "🚨 Manual intervention required for remaining conflicts"
+                        )
 
                     auto_resolve_results = {
                         "resolved": resolved,
@@ -529,28 +560,40 @@ class ResolveConflictCommand(BaseCommand):
                     ) from e
 
             async def run_resolution() -> dict[str, Any]:
-                result = cast(Any, await engine.resolve_conflict(conflict_id, resolution_strategy))
+                result = cast(
+                    Any, await engine.resolve_conflict(conflict_id, resolution_strategy)
+                )
 
                 if result.success:
                     self.print_success("✅ Conflict resolved successfully!")
                     self.print_info(f"   Strategy used: {result.strategy_used.value}")
-                    self.print_info(f"   Resolution time: {result.resolution_time:.2f}s")
+                    self.print_info(
+                        f"   Resolution time: {result.resolution_time:.2f}s"
+                    )
                     self.print_info(f"   Message: {result.message}")
                     if result.resolved_files:
-                        self.print_info(f"   Resolved files: {', '.join(result.resolved_files)}")
+                        self.print_info(
+                            f"   Resolved files: {', '.join(result.resolved_files)}"
+                        )
                 else:
                     self.print_error("❌ Failed to resolve conflict")
-                    self.print_info(f"   Strategy attempted: {result.strategy_used.value}")
+                    self.print_info(
+                        f"   Strategy attempted: {result.strategy_used.value}"
+                    )
                     self.print_info(f"   Error: {result.message}")
                     if result.remaining_conflicts:
-                        self.print_info(f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}")
+                        self.print_info(
+                            f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}"
+                        )
 
                 return {
                     "success": result.success,
                     "conflict_id": conflict_id,
                     "strategy": strategy,
                     "repo_path": repo_path,
-                    "strategy_used": result.strategy_used.value if result.strategy_used else None,
+                    "strategy_used": (
+                        result.strategy_used.value if result.strategy_used else None
+                    ),
                     "resolution_time": result.resolution_time,
                     "message": result.message,
                     "resolved_files": result.resolved_files,
@@ -592,7 +635,9 @@ class ConflictSummaryCommand(BaseCommand):
             # Severity breakdown
             if summary["severity_breakdown"]:
                 self.print_info("\n📈 Severity Breakdown:")
-                for severity, count in cast(dict, summary["severity_breakdown"]).items():
+                for severity, count in cast(
+                    dict, summary["severity_breakdown"]
+                ).items():
                     if count > 0:
                         severity_icon = {
                             "low": "🟢",
@@ -600,12 +645,16 @@ class ConflictSummaryCommand(BaseCommand):
                             "high": "🔴",
                             "critical": "💀",
                         }.get(severity, "❓")
-                        self.print_info(f"  {severity_icon} {severity.capitalize()}: {count}")
+                        self.print_info(
+                            f"  {severity_icon} {severity.capitalize()}: {count}"
+                        )
 
             # Type breakdown
             if summary["type_breakdown"]:
                 self.print_info("\n🏷️  Type Breakdown:")
-                for conflict_type, count in cast(dict, summary["type_breakdown"]).items():
+                for conflict_type, count in cast(
+                    dict, summary["type_breakdown"]
+                ).items():
                     if count > 0:
                         type_icon = {
                             "file_modification": "📝",
@@ -615,7 +664,9 @@ class ConflictSummaryCommand(BaseCommand):
                             "dependency": "🔗",
                             "merge_conflict": "⚡",
                         }.get(conflict_type, "❓")
-                        self.print_info(f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}")
+                        self.print_info(
+                            f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}"
+                        )
 
             # Resolution statistics
             stats = cast(dict, summary["resolution_stats"])
@@ -623,8 +674,12 @@ class ConflictSummaryCommand(BaseCommand):
                 self.print_info("\n⚡ Resolution Statistics:")
                 self.print_info(f"  Auto-resolved: {stats['auto_resolved']}")
                 self.print_info(f"  Human required: {stats['human_required']}")
-                self.print_info(f"  Success rate: {stats['resolution_success_rate']:.1%}")
-                self.print_info(f"  Average time: {stats['average_resolution_time']:.2f}s")
+                self.print_info(
+                    f"  Success rate: {stats['resolution_success_rate']:.1%}"
+                )
+                self.print_info(
+                    f"  Average time: {stats['average_resolution_time']:.2f}s"
+                )
 
             return {"success": True, "repo_path": repo_path, "summary": summary}
 
@@ -651,7 +706,9 @@ class PredictConflictsCommand(BaseCommand):
         limit = kwargs.get("limit", 10)
         """Execute the predict conflicts command."""
         try:
-            self.print_info(f"🔮 Predicting conflicts for branches: {', '.join(branches)}")
+            self.print_info(
+                f"🔮 Predicting conflicts for branches: {', '.join(branches)}"
+            )
             self.print_info(f"   Time horizon: {time_horizon} days")
             self.print_info(f"   Confidence threshold: {min_confidence}")
 
@@ -683,10 +740,14 @@ class PredictConflictsCommand(BaseCommand):
                     }
 
                 # Filter and limit results
-                filtered_predictions = [p for p in predictions if p.likelihood_score >= min_confidence]
+                filtered_predictions = [
+                    p for p in predictions if p.likelihood_score >= min_confidence
+                ]
                 filtered_predictions = filtered_predictions[:limit]
 
-                self.print_info(f"⚠️  Found {len(filtered_predictions)} potential conflicts:")
+                self.print_info(
+                    f"⚠️  Found {len(filtered_predictions)} potential conflicts:"
+                )
                 self.print_info("=" * 80)
 
                 for i, prediction in enumerate(filtered_predictions, 1):
@@ -708,21 +769,33 @@ class PredictConflictsCommand(BaseCommand):
                         "merge_context_loss": "🔀",
                     }.get(prediction.pattern.value, "❓")
 
-                    self.print_info(f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}")
-                    self.print_info(f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}")
-                    self.print_info(f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})")
-                    self.print_info(f"   Branches: {', '.join(prediction.affected_branches)}")
+                    self.print_info(
+                        f"{i}. {confidence_icon} {pattern_icon} {prediction.prediction_id}"
+                    )
+                    self.print_info(
+                        f"   Pattern: {prediction.pattern.value.replace('_', ' ').title()}"
+                    )
+                    self.print_info(
+                        f"   Confidence: {prediction.confidence.value.upper()} ({prediction.likelihood_score:.1%})"
+                    )
+                    self.print_info(
+                        f"   Branches: {', '.join(prediction.affected_branches)}"
+                    )
 
                     if prediction.affected_files:
                         files_str = ", ".join(prediction.affected_files[:3])
                         if len(prediction.affected_files) > DEFAULT_DISPLAY_LIMIT_SMALL:
-                            files_str += f" (and {len(prediction.affected_files) - 3} more)"
+                            files_str += (
+                                f" (and {len(prediction.affected_files) - 3} more)"
+                            )
                         self.print_info(f"   Files: {files_str}")
 
                     self.print_info(f"   Description: {prediction.description}")
 
                     if prediction.timeline_prediction:
-                        self.print_info(f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}")
+                        self.print_info(
+                            f"   Expected: {prediction.timeline_prediction.strftime('%Y-%m-%d %H:%M')}"
+                        )
 
                     if prediction.prevention_suggestions:
                         self.print_info("   Prevention:")
@@ -774,7 +847,9 @@ class PredictionSummaryCommand(BaseCommand):
 
             # Overall statistics
             self.print_info(f"Total Predictions: {summary['total_predictions']}")
-            self.print_info(f"Active Predictions: {summary.get('active_predictions', 0)}")
+            self.print_info(
+                f"Active Predictions: {summary.get('active_predictions', 0)}"
+            )
 
             # Confidence breakdown
             if summary["by_confidence"]:
@@ -787,7 +862,9 @@ class PredictionSummaryCommand(BaseCommand):
                             "high": "🔴",
                             "critical": "💀",
                         }.get(confidence, "❓")
-                        self.print_info(f"  {confidence_icon} {confidence.capitalize()}: {count}")
+                        self.print_info(
+                            f"  {confidence_icon} {confidence.capitalize()}: {count}"
+                        )
 
             # Pattern breakdown
             if summary["by_pattern"]:
@@ -804,14 +881,18 @@ class PredictionSummaryCommand(BaseCommand):
                             "resource_contention": "⚡",
                             "merge_context_loss": "🔀",
                         }.get(pattern, "❓")
-                        self.print_info(f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}")
+                        self.print_info(
+                            f"  {pattern_icon} {pattern.replace('_', ' ').title()}: {count}"
+                        )
 
             # Accuracy metrics
             accuracy = cast(dict, summary["accuracy_metrics"])
             if accuracy["total_predictions"] > 0:
                 self.print_info("\n📊 Accuracy Metrics:")
                 self.print_info(f"  Accuracy Rate: {accuracy['accuracy_rate']:.1%}")
-                self.print_info(f"  Prevented Conflicts: {accuracy['prevented_conflicts']}")
+                self.print_info(
+                    f"  Prevented Conflicts: {accuracy['prevented_conflicts']}"
+                )
                 self.print_info(f"  False Positives: {accuracy['false_positives']}")
 
             # Most likely conflicts
@@ -819,7 +900,9 @@ class PredictionSummaryCommand(BaseCommand):
                 self.print_info("\n🚨 Most Likely Conflicts:")
                 for conflict in cast(list, summary["most_likely_conflicts"]):
                     conflict_dict = cast(dict, conflict)
-                    self.print_info(f"  • {conflict_dict['description']} ({conflict_dict['likelihood']:.1%})")
+                    self.print_info(
+                        f"  • {conflict_dict['description']} ({conflict_dict['likelihood']:.1%})"
+                    )
 
             return {"success": True, "repo_path": repo_path, "summary": summary}
 
@@ -844,7 +927,9 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
         export = kwargs.get("export")
         """Execute the analyze conflict patterns command."""
         try:
-            self.print_info(f"🔍 Analyzing conflict patterns for: {', '.join(branches)}")
+            self.print_info(
+                f"🔍 Analyzing conflict patterns for: {', '.join(branches)}"
+            )
 
             # Create prediction system
             branch_manager = BranchManager(repo_path=repo_path)
@@ -862,7 +947,9 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
                     for branch2 in branches[i + 1 :]:
                         self.print_info(f"\n🔗 {branch1} ↔ {branch2}")
 
-                        vector = await predictor._calculate_conflict_vector(branch1, branch2)
+                        vector = await predictor._calculate_conflict_vector(
+                            branch1, branch2
+                        )
                         analysis_results[f"{branch1}:{branch2}"] = {
                             "vector": vector._asdict(),
                             "patterns": {},
@@ -870,23 +957,45 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
                         }
 
                         # Display vector components
-                        self.print_info(f"   File Overlap: {vector.file_overlap_score:.2f}")
-                        self.print_info(f"   Change Frequency: {vector.change_frequency_score:.2f}")
+                        self.print_info(
+                            f"   File Overlap: {vector.file_overlap_score:.2f}"
+                        )
+                        self.print_info(
+                            f"   Change Frequency: {vector.change_frequency_score:.2f}"
+                        )
                         self.print_info(f"   Complexity: {vector.complexity_score:.2f}")
-                        self.print_info(f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}")
-                        self.print_info(f"   Semantic Distance: {vector.semantic_distance_score:.2f}")
-                        self.print_info(f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}")
+                        self.print_info(
+                            f"   Dependency Coupling: {vector.dependency_coupling_score:.2f}"
+                        )
+                        self.print_info(
+                            f"   Semantic Distance: {vector.semantic_distance_score:.2f}"
+                        )
+                        self.print_info(
+                            f"   Temporal Proximity: {vector.temporal_proximity_score:.2f}"
+                        )
 
                         # Overall risk score
                         risk_score = sum(vector) / len(vector)
-                        risk_level = "🔴 HIGH" if risk_score > RISK_THRESHOLD_HIGH else "🟡 MEDIUM" if risk_score > RISK_THRESHOLD_MEDIUM else "🟢 LOW"
-                        self.print_info(f"   Overall Risk: {risk_level} ({risk_score:.2f})")
+                        risk_level = (
+                            "🔴 HIGH"
+                            if risk_score > RISK_THRESHOLD_HIGH
+                            else (
+                                "🟡 MEDIUM"
+                                if risk_score > RISK_THRESHOLD_MEDIUM
+                                else "🟢 LOW"
+                            )
+                        )
+                        self.print_info(
+                            f"   Overall Risk: {risk_level} ({risk_score:.2f})"
+                        )
 
                         # Pattern-specific analysis
                         if pattern:
                             try:
                                 target_pattern = ConflictPattern(pattern)
-                                detector = predictor.pattern_detectors.get(target_pattern)
+                                detector = predictor.pattern_detectors.get(
+                                    target_pattern
+                                )
                                 if detector:
                                     result = await detector(branch1, branch2, vector)
                                     if result:
@@ -895,7 +1004,9 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
                                             "confidence": result.confidence.value,
                                             "description": result.description,
                                         }
-                                        self.print_info(f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence")
+                                        self.print_info(
+                                            f"   {pattern.replace('_', ' ').title()}: {result.likelihood_score:.1%} confidence"
+                                        )
                             except ValueError:
                                 self.print_warning(f"   ❌ Unknown pattern: {pattern}")
 
@@ -942,7 +1053,9 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
         detailed = kwargs.get("detailed", False)
         """Execute the analyze semantic conflicts command."""
         try:
-            self.print_info(f"🧠 Analyzing semantic conflicts between: {', '.join(branches)}")
+            self.print_info(
+                f"🧠 Analyzing semantic conflicts between: {', '.join(branches)}"
+            )
 
             # Create semantic analyzer
             branch_manager = BranchManager(repo_path=repo_path)
@@ -963,12 +1076,16 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                     )
                     all_conflicts = results
                 else:
-                    self.print_warning("⚠️  Need at least 2 branches to analyze conflicts")
+                    self.print_warning(
+                        "⚠️  Need at least 2 branches to analyze conflicts"
+                    )
                     return {}
 
                 # Display results
                 if all_conflicts:
-                    self.print_info(f"\n📄 Found {len(all_conflicts)} semantic conflicts")
+                    self.print_info(
+                        f"\n📄 Found {len(all_conflicts)} semantic conflicts"
+                    )
                     self.print_info("-" * 50)
 
                     for conflict in all_conflicts:
@@ -980,10 +1097,16 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                         }.get(conflict.severity.value, "❓")
 
                         self.print_info(f"  {severity_icon} {conflict.conflict_type}")
-                        self.print_info(f"    Branches: {conflict.branch1}, {conflict.branch2}")
+                        self.print_info(
+                            f"    Branches: {conflict.branch1}, {conflict.branch2}"
+                        )
                         self.print_info(f"    Description: {conflict.description}")
 
-                        if detailed and hasattr(conflict, "metadata") and conflict.metadata:
+                        if (
+                            detailed
+                            and hasattr(conflict, "metadata")
+                            and conflict.metadata
+                        ):
                             for key, value in conflict.metadata.items():
                                 self.print_info(f"      • {key}: {value}")
 
@@ -1042,14 +1165,20 @@ class SemanticSummaryCommand(BaseCommand):
                 contexts = {}
                 if file_list:
                     for file_path in file_list:
-                        context = await analyzer._get_semantic_context(file_path, current_branch)
+                        context = await analyzer._get_semantic_context(
+                            file_path, current_branch
+                        )
                         if context:
                             contexts[file_path] = context
                 else:
                     # Get all python files from the branch
-                    python_files = await analyzer._get_changed_python_files(current_branch, "HEAD")
+                    python_files = await analyzer._get_changed_python_files(
+                        current_branch, "HEAD"
+                    )
                     for file_path in python_files[:10]:  # Limit to first 10 files
-                        context = await analyzer._get_semantic_context(file_path, current_branch)
+                        context = await analyzer._get_semantic_context(
+                            file_path, current_branch
+                        )
                         if context:
                             contexts[file_path] = context
 
@@ -1108,14 +1237,26 @@ class FunctionDiffCommand(BaseCommand):
                 diff_results = []
                 if len(branches) >= MIN_BRANCHES_FOR_COMPARISON:
                     # Analyze differences between first two branches
-                    conflicts = await analyzer.analyze_semantic_conflicts(branches[0], branches[1], file_paths=file_list)
+                    conflicts = await analyzer.analyze_semantic_conflicts(
+                        branches[0], branches[1], file_paths=file_list
+                    )
 
-                    function_diffs = [c for c in conflicts if c.conflict_type == "function_signature"]
+                    function_diffs = [
+                        c for c in conflicts if c.conflict_type == "function_signature"
+                    ]
                     if function_diffs:
                         self.print_info("\n📄 Function signature differences:")
                         for diff in function_diffs:
-                            self.print_info(f"  • {diff.file_path}:{diff.symbol_name}: {diff.description}")
-                        diff_results = [{"location": f"{diff.file_path}:{diff.symbol_name}", "description": diff.description} for diff in function_diffs]
+                            self.print_info(
+                                f"  • {diff.file_path}:{diff.symbol_name}: {diff.description}"
+                            )
+                        diff_results = [
+                            {
+                                "location": f"{diff.file_path}:{diff.symbol_name}",
+                                "description": diff.description,
+                            }
+                            for diff in function_diffs
+                        ]
                     else:
                         self.print_info("No function signature differences found.")
                         diff_results = []
@@ -1170,7 +1311,9 @@ class SemanticMergeCommand(BaseCommand):
             branch_manager = BranchManager(repo_path=repo_path)
             semantic_analyzer = SemanticAnalyzer(branch_manager, repo_path)
             conflict_engine = ConflictResolutionEngine(branch_manager, repo_path)
-            SemanticMerger(semantic_analyzer, conflict_engine, branch_manager, repo_path)
+            SemanticMerger(
+                semantic_analyzer, conflict_engine, branch_manager, repo_path
+            )
 
             async def run_merge() -> dict[str, object]:
                 if dry_run:
@@ -1183,7 +1326,16 @@ class SemanticMergeCommand(BaseCommand):
 
                 # For now, simulate a merge result since the API doesn't match
                 # TODO: Implement proper branch-level semantic merge
-                result = type("MergeResult", (), {"resolution": MergeResolution.AUTO_RESOLVED, "conflicts_resolved": 0, "files_modified": [], "metadata": {}})()
+                result = type(
+                    "MergeResult",
+                    (),
+                    {
+                        "resolution": MergeResolution.AUTO_RESOLVED,
+                        "conflicts_resolved": 0,
+                        "files_modified": [],
+                        "metadata": {},
+                    },
+                )()
 
                 if result.resolution == MergeResolution.AUTO_RESOLVED:
                     self.print_success("✅ Semantic merge completed successfully")
@@ -1220,7 +1372,9 @@ def multi_agent_cli(ctx: click.Context) -> None:
 @click.option("--max-agents", "-a", default=3, help="Maximum number of agents")
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--monitor", "-m", is_flag=True, help="Start with monitoring dashboard")
-def start_agents(max_agents: int, work_dir: str | None, monitor: bool) -> None:  # noqa: FBT001
+def start_agents(
+    max_agents: int, work_dir: str | None, monitor: bool
+) -> None:  # noqa: FBT001
     """Start the multi-agent pool."""
     command = StartAgentsCommand()
     command.run(max_agents=max_agents, work_dir=work_dir, monitor=monitor)
@@ -1230,7 +1384,9 @@ def start_agents(max_agents: int, work_dir: str | None, monitor: bool) -> None: 
 @click.option("--work-dir", "-w", help="Work directory for agents")
 @click.option("--duration", "-d", type=float, help="Monitoring duration in seconds")
 @click.option("--refresh", "-r", default=1.0, help="Refresh interval in seconds")
-def monitor_agents(work_dir: str | None, duration: float | None, refresh: float) -> None:
+def monitor_agents(
+    work_dir: str | None, duration: float | None, refresh: float
+) -> None:
     """Start real-time agent monitoring dashboard."""
     command = MonitorAgentsCommand()
     command.run(work_dir=work_dir, duration=duration, refresh=refresh)
@@ -1295,7 +1451,9 @@ def list_tasks(work_dir: str | None, status: str | None) -> None:
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--auto-resolve", "-a", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(branches: tuple, repo_path: str | None, auto_resolve: bool) -> None:  # noqa: FBT001
+def detect_conflicts(
+    branches: tuple, repo_path: str | None, auto_resolve: bool
+) -> None:  # noqa: FBT001
     """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
@@ -1389,7 +1547,9 @@ def analyze_conflict_patterns(
 ) -> None:
     """Analyze detailed conflict patterns between branches."""
     command = AnalyzeConflictPatternsCommand()
-    command.run(branches=list(branches), repo_path=repo_path, pattern=pattern, export=export)
+    command.run(
+        branches=list(branches), repo_path=repo_path, pattern=pattern, export=export
+    )
 
 
 @multi_agent_cli.command("analyze-semantic-conflicts")
@@ -1509,7 +1669,9 @@ def analyze_semantic_conflicts(
                                 "description": conflict.description,
                                 "old_definition": conflict.old_definition,
                                 "new_definition": conflict.new_definition,
-                                "suggested_resolution": conflict.suggested_resolution.value,
+                                "suggested_resolution": (
+                                    conflict.suggested_resolution.value
+                                ),
                                 "metadata": conflict.metadata,
                             },
                         )
@@ -1602,7 +1764,9 @@ def function_diff(
 ) -> None:
     """Compare function signatures between branches."""
     command = FunctionDiffCommand()
-    command.run(branches=[branch1, branch2], repo_path=repo_path, files=file, export=None)
+    command.run(
+        branches=[branch1, branch2], repo_path=repo_path, files=file, export=None
+    )
 
 
 @multi_agent_cli.command("semantic-merge")
@@ -1702,7 +1866,12 @@ def batch_merge(
                         branch1,
                         branch2,
                     )
-                except (OSError, subprocess.CalledProcessError, RuntimeError, AttributeError):
+                except (
+                    OSError,
+                    subprocess.CalledProcessError,
+                    RuntimeError,
+                    AttributeError,
+                ):
                     click.echo(
                         "❌ Could not determine changed files. Please specify --files",
                     )
@@ -1732,9 +1901,20 @@ def batch_merge(
             )
 
             # Analyze results
-            successful = [r for r in merge_results if r.resolution in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION}]
-            failed = [r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED]
-            manual_required = [r for r in merge_results if r.resolution == MergeResolution.MANUAL_REQUIRED]
+            successful = [
+                r
+                for r in merge_results
+                if r.resolution
+                in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION}
+            ]
+            failed = [
+                r for r in merge_results if r.resolution == MergeResolution.MERGE_FAILED
+            ]
+            manual_required = [
+                r
+                for r in merge_results
+                if r.resolution == MergeResolution.MANUAL_REQUIRED
+            ]
 
             # Display summary
             click.echo("\n📊 Batch Merge Summary:")
@@ -1747,7 +1927,9 @@ def batch_merge(
                 avg_confidence = sum(r.merge_confidence for r in successful) / len(
                     successful,
                 )
-                semantic_integrity_rate = sum(1 for r in successful if r.semantic_integrity) / len(successful)
+                semantic_integrity_rate = sum(
+                    1 for r in successful if r.semantic_integrity
+                ) / len(successful)
                 click.echo(f"   📈 Average confidence: {avg_confidence:.1%}")
                 click.echo(f"   🔒 Semantic integrity: {semantic_integrity_rate:.1%}")
 
@@ -1790,13 +1972,19 @@ def batch_merge(
                         "branch1": branch1,
                         "branch2": branch2,
                         "target_branch": target_branch or branch1,
-                        "strategy": (strategy_enum.value if strategy_enum else "intelligent_merge"),
+                        "strategy": (
+                            strategy_enum.value
+                            if strategy_enum
+                            else "intelligent_merge"
+                        ),
                         "total_files": len(merge_results),
                         "successful": len(successful),
                         "manual_required": len(manual_required),
                         "failed": len(failed),
                         "average_confidence": avg_confidence if successful else 0.0,
-                        "semantic_integrity_rate": (semantic_integrity_rate if successful else 0.0),
+                        "semantic_integrity_rate": (
+                            semantic_integrity_rate if successful else 0.0
+                        ),
                     },
                     "detailed_results": [
                         {
@@ -1965,7 +2153,11 @@ def auto_resolve(
                 ]
 
                 for merge_result in successful_merges[:10]:
-                    resolution_icon = "✅" if merge_result.resolution == MergeResolution.AUTO_RESOLVED else "⚠️"
+                    resolution_icon = (
+                        "✅"
+                        if merge_result.resolution == MergeResolution.AUTO_RESOLVED
+                        else "⚠️"
+                    )
                     click.echo(f"   {resolution_icon} {merge_result.file_path}")
                     click.echo(f"      Strategy: {merge_result.strategy_used.value}")
                     click.echo(f"      Confidence: {merge_result.merge_confidence:.1%}")
@@ -1984,13 +2176,20 @@ def auto_resolve(
                 click.echo("\n👥 Manual Intervention Required:")
                 for item in result.manual_intervention_required[:5]:
                     click.echo(f"   • {item}")
-                if len(result.manual_intervention_required) > DEFAULT_DISPLAY_LIMIT_MEDIUM:
+                if (
+                    len(result.manual_intervention_required)
+                    > DEFAULT_DISPLAY_LIMIT_MEDIUM
+                ):
                     click.echo(
                         f"   ... and {len(result.manual_intervention_required) - 5} more",
                     )
 
             # Apply results if requested and not in preview mode
-            if apply and not preview and result.outcome in {"fully_resolved", "partially_resolved"}:
+            if (
+                apply
+                and not preview
+                and result.outcome in {"fully_resolved", "partially_resolved"}
+            ):
                 click.echo("\n🚀 Applying resolution results...")
                 applied_count = len(
                     [r for r in result.merge_results if r.semantic_integrity],
@@ -2021,10 +2220,14 @@ def auto_resolve(
                             "conflicts_resolved": result.conflicts_resolved,
                             "files_processed": result.files_processed,
                             "confidence_score": result.confidence_score,
-                            "semantic_integrity_preserved": result.semantic_integrity_preserved,
+                            "semantic_integrity_preserved": (
+                                result.semantic_integrity_preserved
+                            ),
                         },
                         "escalated_conflicts": result.escalated_conflicts,
-                        "manual_intervention_required": result.manual_intervention_required,
+                        "manual_intervention_required": (
+                            result.manual_intervention_required
+                        ),
                         "metadata": result.metadata,
                     },
                     "merge_results": [
@@ -2186,8 +2389,14 @@ def prevent_conflicts(
             # Show applied measures
             if result.get("applied_measures"):
                 click.echo("🚀 Applied Preventive Measures:")
-                successful = [m for m in result["applied_measures"] if m["status"] == "applied_successfully"]
-                failed = [m for m in result["applied_measures"] if m["status"] == "failed"]
+                successful = [
+                    m
+                    for m in result["applied_measures"]
+                    if m["status"] == "applied_successfully"
+                ]
+                failed = [
+                    m for m in result["applied_measures"] if m["status"] == "failed"
+                ]
 
                 if successful:
                     click.echo(f"   ✅ Successful ({len(successful)}):")
@@ -2353,10 +2562,22 @@ def collaborate(
             summary = summary_obj if isinstance(summary_obj, dict) else {}
 
             click.echo("\n📊 Collaboration Statistics:")
-            statistics = summary.get("statistics", {}) if isinstance(summary, dict) else {}
-            messages_sent = statistics.get("messages_sent", 0) if isinstance(statistics, dict) else 0
-            knowledge_shared = statistics.get("knowledge_shared", 0) if isinstance(statistics, dict) else 0
-            active_sessions = summary.get("active_sessions", 0) if isinstance(summary, dict) else 0
+            statistics = (
+                summary.get("statistics", {}) if isinstance(summary, dict) else {}
+            )
+            messages_sent = (
+                statistics.get("messages_sent", 0)
+                if isinstance(statistics, dict)
+                else 0
+            )
+            knowledge_shared = (
+                statistics.get("knowledge_shared", 0)
+                if isinstance(statistics, dict)
+                else 0
+            )
+            active_sessions = (
+                summary.get("active_sessions", 0) if isinstance(summary, dict) else 0
+            )
 
             click.echo(f"   Messages sent: {messages_sent}")
             click.echo(f"   Knowledge shared: {knowledge_shared}")
@@ -2381,14 +2602,36 @@ def collaborate(
 
             # Final summary
             final_summary_obj = collab_engine.get_collaboration_summary()
-            final_summary = final_summary_obj if isinstance(final_summary_obj, dict) else {}
-            final_statistics = final_summary.get("statistics", {}) if isinstance(final_summary, dict) else {}
+            final_summary = (
+                final_summary_obj if isinstance(final_summary_obj, dict) else {}
+            )
+            final_statistics = (
+                final_summary.get("statistics", {})
+                if isinstance(final_summary, dict)
+                else {}
+            )
 
             click.echo("\n📈 Final Summary:")
-            total_messages = final_statistics.get("messages_sent", 0) if isinstance(final_statistics, dict) else 0
-            messages_delivered = final_statistics.get("messages_delivered", 0) if isinstance(final_statistics, dict) else 0
-            knowledge_count = final_summary.get("shared_knowledge_count", 0) if isinstance(final_summary, dict) else 0
-            successful_collaborations = final_statistics.get("successful_collaborations", 0) if isinstance(final_statistics, dict) else 0
+            total_messages = (
+                final_statistics.get("messages_sent", 0)
+                if isinstance(final_statistics, dict)
+                else 0
+            )
+            messages_delivered = (
+                final_statistics.get("messages_delivered", 0)
+                if isinstance(final_statistics, dict)
+                else 0
+            )
+            knowledge_count = (
+                final_summary.get("shared_knowledge_count", 0)
+                if isinstance(final_summary, dict)
+                else 0
+            )
+            successful_collaborations = (
+                final_statistics.get("successful_collaborations", 0)
+                if isinstance(final_statistics, dict)
+                else 0
+            )
 
             click.echo(f"   Total messages: {total_messages}")
             click.echo(f"   Messages delivered: {messages_delivered}")
@@ -2814,7 +3057,9 @@ def dependency_track(
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed dependency graph")
 @click.option("--export", "-e", help="Export dependency data to JSON file")
-def dependency_status(repo_path: str | None, detailed: bool, export: str | None) -> None:  # noqa: FBT001, ARG001
+def dependency_status(
+    repo_path: str | None, detailed: bool, export: str | None
+) -> None:  # noqa: FBT001, ARG001
     """Show dependency propagation system status."""
     try:
         click.echo("📊 Dependency Propagation System Status")
@@ -2875,7 +3120,9 @@ def dependency_status(repo_path: str | None, detailed: bool, export: str | None)
 @click.argument("file_path")
 @click.option("--repo-path", "-r", help="Path to git repository")
 @click.option("--export", "-e", help="Export impact report to JSON file")
-def dependency_impact(file_path: str, repo_path: str | None, export: str | None) -> None:
+def dependency_impact(
+    file_path: str, repo_path: str | None, export: str | None
+) -> None:
     """Analyze dependency impact for a specific file."""
     try:
         click.echo(f"🔍 Analyzing dependency impact for: {file_path}")
@@ -2940,7 +3187,13 @@ def dependency_impact(file_path: str, repo_path: str | None, export: str | None)
 
         try:
             asyncio.run(analyze_impact())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
+        except (
+            TimeoutError,
+            RuntimeError,
+            OSError,
+            AttributeError,
+            json.JSONDecodeError,
+        ):
             # Fallback to demo output
             click.echo("\n📊 Impact Analysis:")
             click.echo(f"   File: {file_path}")
@@ -3049,7 +3302,13 @@ def dependency_propagate(
 
         try:
             asyncio.run(propagate_changes())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
+        except (
+            TimeoutError,
+            RuntimeError,
+            OSError,
+            AttributeError,
+            json.JSONDecodeError,
+        ):
             # Fallback to demo output
             click.echo("\n📊 Propagation Results:")
             for change_id in change_ids:
@@ -3175,7 +3434,11 @@ def review_initiate(
                     click.echo(f"   Findings: {len(review.findings)}")
 
                     # Show critical findings
-                    critical_findings = [f for f in review.findings if f.severity == ReviewSeverity.CRITICAL]
+                    critical_findings = [
+                        f
+                        for f in review.findings
+                        if f.severity == ReviewSeverity.CRITICAL
+                    ]
                     if critical_findings:
                         click.echo(f"   🚨 Critical issues: {len(critical_findings)}")
 
@@ -3351,7 +3614,9 @@ def review_reject(
 @click.argument("review_id", required=False)
 @click.option("--repo-path", help="Path to git repository")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed review information")
-def review_status(review_id: str | None, repo_path: str | None, detailed: bool) -> None:  # noqa: FBT001
+def review_status(
+    review_id: str | None, repo_path: str | None, detailed: bool
+) -> None:  # noqa: FBT001
     """Get status of a specific review or all reviews."""
     try:
         if review_id:
@@ -3400,7 +3665,9 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
                         if detailed and review.findings:
                             # Group findings by severity
 
-                            severity_counts = Counter(f.severity.value for f in review.findings)
+                            severity_counts = Counter(
+                                f.severity.value for f in review.findings
+                            )
                             for severity, count in severity_counts.items():
                                 severity_icon = {
                                     "critical": "💀",
@@ -3445,7 +3712,10 @@ def review_status(review_id: str | None, repo_path: str | None, detailed: bool) 
                         for issue, count in summary.most_common_issues[:5]:
                             click.echo(f"   • {issue}: {count}")
 
-                    if summary.review_time_stats and "average_time" in summary.review_time_stats:
+                    if (
+                        summary.review_time_stats
+                        and "average_time" in summary.review_time_stats
+                    ):
                         avg_time = summary.review_time_stats["average_time"]
                         click.echo(f"   Average review time: {avg_time:.1f}s")
 
@@ -3570,8 +3840,12 @@ def quality_check(
                             "results": [
                                 {
                                     "file_path": r.file_path,
-                                    "metrics": {m.value: v for m, v in r.metrics.items()},
-                                    "thresholds": {m.value: v for m, v in r.thresholds.items()},
+                                    "metrics": {
+                                        m.value: v for m, v in r.metrics.items()
+                                    },
+                                    "thresholds": {
+                                        m.value: v for m, v in r.thresholds.items()
+                                    },
                                     "violations": [v.value for v in r.violations],
                                     "calculated_at": r.calculated_at.isoformat(),
                                 }
@@ -3592,7 +3866,13 @@ def quality_check(
 
         try:
             asyncio.run(run_quality_check())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
+        except (
+            TimeoutError,
+            RuntimeError,
+            OSError,
+            AttributeError,
+            json.JSONDecodeError,
+        ):
             # Fallback to demo output
             click.echo("\n📊 Quality Check Results:")
             for i, file in enumerate(files, 1):
@@ -3702,7 +3982,13 @@ def review_summary(repo_path: str | None, export: str | None) -> None:
 
         try:
             asyncio.run(get_summary())
-        except (TimeoutError, RuntimeError, OSError, AttributeError, json.JSONDecodeError):
+        except (
+            TimeoutError,
+            RuntimeError,
+            OSError,
+            AttributeError,
+            json.JSONDecodeError,
+        ):
             # Fallback to demo output
             click.echo("Engine Status: Running")
             click.echo("Active reviews: 0")

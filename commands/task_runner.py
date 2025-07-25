@@ -31,7 +31,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 class TaskRunnerNextCommand(BaseCommand):
     """Process the next available task."""
 
-    def execute(self, directory: str | None = None, verbose: bool = False, **kwargs: Any) -> dict:  # noqa: FBT001, ARG002
+    def execute(
+        self, directory: str | None = None, verbose: bool = False, **kwargs: Any
+    ) -> dict:  # noqa: FBT001, ARG002
         """Execute the next command.
 
         Returns:
@@ -85,9 +87,13 @@ class TaskRunnerRunCommand(BaseCommand):
                     style="bold cyan",
                 ):
                     todo_file = TodoFile(str(file_path))
-                    incomplete_tasks = [t for t in todo_file.tasks if not t.completed and not t.skipped]
+                    incomplete_tasks = [
+                        t for t in todo_file.tasks if not t.completed and not t.skipped
+                    ]
                     if incomplete_tasks:
-                        self.print_info(f"  📁 {file_path.relative_to(runner.todo_dir.parent)}: {len(incomplete_tasks)} tasks")
+                        self.print_info(
+                            f"  📁 {file_path.relative_to(runner.todo_dir.parent)}: {len(incomplete_tasks)} tasks"
+                        )
                         task_count += len(incomplete_tasks)
 
                 self.print_info(f"\nTotal tasks to process: {task_count}")
@@ -100,7 +106,9 @@ class TaskRunnerRunCommand(BaseCommand):
                 TimeElapsedColumn(),
                 transient=True,
             ) as progress:
-                task_id = progress.add_task("🔄 Running task processor continuously...", total=None)
+                task_id = progress.add_task(
+                    "🔄 Running task processor continuously...", total=None
+                )
                 runner.run_continuously(directory, max_iterations)
                 progress.update(task_id, description="✅ Task processing completed")
 
@@ -121,7 +129,9 @@ class TaskRunnerRunCommand(BaseCommand):
 class TaskRunnerStatusCommand(BaseCommand):
     """Show current task status."""
 
-    def execute(self, directory: str | None = None, detailed: bool = False, **kwargs: Any) -> dict:  # noqa: FBT001, ARG002
+    def execute(
+        self, directory: str | None = None, detailed: bool = False, **kwargs: Any
+    ) -> dict:  # noqa: FBT001, ARG002
         """Execute the status command.
 
         Returns:
@@ -160,17 +170,27 @@ class TaskRunnerStatusCommand(BaseCommand):
 
                 # Show file status
                 relative_path = file_path.relative_to(runner.todo_dir.parent)
-                status_icon = "✅" if todo_file.is_all_completed() else "🔄" if file_completed > 0 else "📝"
+                status_icon = (
+                    "✅"
+                    if todo_file.is_all_completed()
+                    else "🔄" if file_completed > 0 else "📝"
+                )
 
                 if detailed:
-                    completion_pct = (file_completed / file_total * 100) if file_total > 0 else 0
+                    completion_pct = (
+                        (file_completed / file_total * 100) if file_total > 0 else 0
+                    )
                     self.print_info(f"{status_icon} {relative_path}")
-                    self.print_info(f"   Tasks: {file_completed}/{file_total} completed ({completion_pct:.1f}%)")
+                    self.print_info(
+                        f"   Tasks: {file_completed}/{file_total} completed ({completion_pct:.1f}%)"
+                    )
                     if file_skipped > 0:
                         self.print_info(f"   Skipped: {file_skipped}")
                     self.print_info("")
                 else:
-                    self.print_info(f"{status_icon} {relative_path}: {file_completed}/{file_total}")
+                    self.print_info(
+                        f"{status_icon} {relative_path}: {file_completed}/{file_total}"
+                    )
 
             # Summary
             self.print_info("\n📈 Summary")
@@ -207,7 +227,9 @@ class TaskRunnerStatusCommand(BaseCommand):
 class TaskRunnerAddCommand(BaseCommand):
     """Add a new task to a todo file."""
 
-    def execute(self, task: str | None = None, file_path: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002
+    def execute(
+        self, task: str | None = None, file_path: str | None = None, **kwargs: Any
+    ) -> dict:  # noqa: ARG002
         """Execute the add command.
 
         Returns:
@@ -221,7 +243,11 @@ class TaskRunnerAddCommand(BaseCommand):
             runner = TaskRunner()
 
             # Resolve file path
-            resolved_path: Path = runner.todo_dir / file_path if not file_path.startswith("/") else Path(file_path)
+            resolved_path: Path = (
+                runner.todo_dir / file_path
+                if not file_path.startswith("/")
+                else Path(file_path)
+            )
 
             if not resolved_path.exists():
                 msg = f"File not found: {resolved_path}"
@@ -231,7 +257,9 @@ class TaskRunnerAddCommand(BaseCommand):
             with open(resolved_path, "a", encoding="utf-8") as f:
                 f.write(f"\n- [ ] {task}\n")
 
-            self.print_success(f"✅ Added task to {resolved_path.relative_to(runner.todo_dir.parent)}")
+            self.print_success(
+                f"✅ Added task to {resolved_path.relative_to(runner.todo_dir.parent)}"
+            )
             self.print_info(f"   Task: {task}")
 
             return {"success": True, "task": task, "file_path": str(file_path)}
@@ -293,7 +321,9 @@ def next(directory: str | None, verbose: bool) -> None:  # noqa: FBT001
     is_flag=True,
     help="Show what would be processed without making changes",
 )
-def run(directory: str | None, max_iterations: int, dry_run: bool) -> None:  # noqa: FBT001
+def run(
+    directory: str | None, max_iterations: int, dry_run: bool
+) -> None:  # noqa: FBT001
     """Run task processor continuously.
 
     Processes all available tasks until none remain or max iterations reached.

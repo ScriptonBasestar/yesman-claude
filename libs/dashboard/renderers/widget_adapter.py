@@ -44,7 +44,9 @@ class WidgetDataAdapter:
         """Initialize the adapter."""
         self.logger = logging.getLogger("yesman.dashboard.widget_adapter")
 
-    def adapt_session_data(self, raw_data: dict[str, Any] | list[dict[str, Any]]) -> SessionData | list[SessionData]:
+    def adapt_session_data(
+        self, raw_data: dict[str, Any] | list[dict[str, Any]]
+    ) -> SessionData | list[SessionData]:
         """Convert raw session data to SessionData model(s).
 
         Args:
@@ -54,7 +56,9 @@ class WidgetDataAdapter:
             SessionData instance or list of instances
         """
         if isinstance(raw_data, list):
-            return [self._adapt_single_session(session_data) for session_data in raw_data]
+            return [
+                self._adapt_single_session(session_data) for session_data in raw_data
+            ]
 
         return self._adapt_single_session(raw_data)
 
@@ -66,8 +70,12 @@ class WidgetDataAdapter:
             status = self._parse_session_status(status_str)
 
             # Parse timestamps
-            created_at = self._parse_timestamp(data.get("created_at") or data.get("created"))
-            last_activity = self._parse_timestamp(data.get("last_activity") or data.get("last_active"))
+            created_at = self._parse_timestamp(
+                data.get("created_at") or data.get("created")
+            )
+            last_activity = self._parse_timestamp(
+                data.get("last_activity") or data.get("last_active")
+            )
 
             # Parse windows
             windows = []
@@ -151,7 +159,9 @@ class WidgetDataAdapter:
                         score = int(category_data.get("score", 0))
                         level = HealthLevel.from_score(score)
 
-                        last_checked = self._parse_timestamp(category_data.get("last_checked"))
+                        last_checked = self._parse_timestamp(
+                            category_data.get("last_checked")
+                        )
 
                         categories.append(
                             HealthCategoryData(
@@ -169,7 +179,9 @@ class WidgetDataAdapter:
                         score = int(category_data.get("score", 0))
                         level = HealthLevel.from_score(score)
 
-                        last_checked = self._parse_timestamp(category_data.get("last_checked"))
+                        last_checked = self._parse_timestamp(
+                            category_data.get("last_checked")
+                        )
 
                         categories.append(
                             HealthCategoryData(
@@ -182,7 +194,9 @@ class WidgetDataAdapter:
                             )
                         )
 
-            last_updated = self._parse_timestamp(raw_data.get("last_updated") or raw_data.get("timestamp"))
+            last_updated = self._parse_timestamp(
+                raw_data.get("last_updated") or raw_data.get("timestamp")
+            )
 
             return HealthData(
                 overall_score=overall_score,
@@ -220,7 +234,9 @@ class WidgetDataAdapter:
 
             for entry_data in raw_entries:
                 if isinstance(entry_data, dict):
-                    timestamp = self._parse_timestamp(entry_data.get("timestamp") or entry_data.get("date"))
+                    timestamp = self._parse_timestamp(
+                        entry_data.get("timestamp") or entry_data.get("date")
+                    )
 
                     # Parse activity type
                     activity_type_str = entry_data.get("type", "file_modified").lower()

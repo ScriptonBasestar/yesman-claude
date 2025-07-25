@@ -140,7 +140,9 @@ class Agent:
         if "created_at" in data:
             data["created_at"] = datetime.fromisoformat(cast(str, data["created_at"]))
         if "last_heartbeat" in data:
-            data["last_heartbeat"] = datetime.fromisoformat(cast(str, data["last_heartbeat"]))
+            data["last_heartbeat"] = datetime.fromisoformat(
+                cast(str, data["last_heartbeat"])
+            )
         # Type cast to handle mypy concerns about **dict[str, object]
         agent_data = cast(dict[str, Any], data)
         return cls(**agent_data)

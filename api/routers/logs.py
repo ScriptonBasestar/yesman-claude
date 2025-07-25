@@ -40,7 +40,9 @@ def get_session_logs(session_name: str, limit: int = 100) -> object:
         config = get_config()
         log_path_str = cast(str, config.get("log_path", "~/.scripton/yesman/logs/"))
         # 세션 이름에 유효하지 않은 문자가 있을 수 있으므로 정제합니다.
-        safe_session_name = "".join(c for c in session_name if c.isalnum() or c in {"-", "_"}).rstrip()
+        safe_session_name = "".join(
+            c for c in session_name if c.isalnum() or c in {"-", "_"}
+        ).rstrip()
         log_file = Path(log_path_str).expanduser() / f"{safe_session_name}.log"
 
         if not log_file.exists():
@@ -145,7 +147,9 @@ def get_logs(
                             if log_entry:
                                 all_logs.append(log_entry)
                 except Exception as e:
-                    logger.warning(f"Failed to parse log file {log_file}: {e}")  # noqa: G004
+                    logger.warning(
+                        f"Failed to parse log file {log_file}: {e}"
+                    )  # noqa: G004
                     continue
 
         # Sort by timestamp (newest first)
@@ -162,7 +166,9 @@ def get_logs(
 
         if search:
             search_lower = search.lower()
-            filtered_logs = [log for log in filtered_logs if search_lower in log.message.lower()]
+            filtered_logs = [
+                log for log in filtered_logs if search_lower in log.message.lower()
+            ]
 
         return filtered_logs[:limit]
 
@@ -200,7 +206,9 @@ def get_log_sources() -> object:
                             if log_entry:
                                 sources.add(log_entry.source)
                 except Exception as e:
-                    logger.warning(f"Failed to parse log file {log_file}: {e}")  # noqa: G004
+                    logger.warning(
+                        f"Failed to parse log file {log_file}: {e}"
+                    )  # noqa: G004
                     continue
 
         return {"sources": sorted(sources)}
@@ -210,7 +218,9 @@ def get_log_sources() -> object:
 
 
 @router.post("/logs/test")
-def add_test_log(level: str = "info", source: str = "test", message: str = "Test log message") -> object:
+def add_test_log(
+    level: str = "info", source: str = "test", message: str = "Test log message"
+) -> object:
     """Add a test log entry (for development/testing).
 
     Returns:

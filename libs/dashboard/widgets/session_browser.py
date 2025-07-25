@@ -178,7 +178,9 @@ class SessionBrowser:
             # Add windows as child nodes
             for window in session.windows:
                 window_text = Text()
-                window_text.append(f"🪟 {window.get('window_name', 'unnamed')}", style="blue")
+                window_text.append(
+                    f"🪟 {window.get('window_name', 'unnamed')}", style="blue"
+                )
 
                 if window.get("window_active"):
                     window_text.append(" (active)", style="green")
@@ -246,7 +248,9 @@ class SessionBrowser:
         cards = []
         for i, session in enumerate(self.sessions):
             # Create session card
-            card_style = "bold yellow on bright_black" if i == self.selected_index else "white"
+            card_style = (
+                "bold yellow on bright_black" if i == self.selected_index else "white"
+            )
 
             card_content = Text()
             card_content.append(f"📁 {session.session_name}\n", style=card_style)

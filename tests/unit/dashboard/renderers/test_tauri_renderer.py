@@ -578,12 +578,20 @@ class TestTauriRenderer:
     def test_helper_methods(self) -> None:
         """Test helper methods."""
         # Test health color mapping
-        assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"  # noqa: SLF001
-        assert self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"
+        )  # noqa: SLF001
 
         # Test phase emoji mapping
-        assert self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"  # noqa: SLF001
-        assert self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"  # noqa: SLF001
+        assert (
+            self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"
+        )  # noqa: SLF001
+        assert (
+            self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"
+        )  # noqa: SLF001
 
         # Test log level color mapping
         assert self.renderer._get_log_level_color("ERROR") == "#ef4444"  # noqa: SLF001
@@ -631,17 +639,23 @@ class TestTauriRenderer:
 
         # Negative trend
         metric_down = MetricCardData(title="Test", value=100, trend=-3.0)
-        result_down = self.renderer.render_widget(WidgetType.METRIC_CARD, metric_down, {})
+        result_down = self.renderer.render_widget(
+            WidgetType.METRIC_CARD, metric_down, {}
+        )
         assert result_down["data"]["trend_direction"] == "down"
 
         # Neutral trend
         metric_neutral = MetricCardData(title="Test", value=100, trend=0)
-        result_neutral = self.renderer.render_widget(WidgetType.METRIC_CARD, metric_neutral, {})
+        result_neutral = self.renderer.render_widget(
+            WidgetType.METRIC_CARD, metric_neutral, {}
+        )
         assert result_neutral["data"]["trend_direction"] == "neutral"
 
         # No trend
         metric_none = MetricCardData(title="Test", value=100, trend=None)
-        result_none = self.renderer.render_widget(WidgetType.METRIC_CARD, metric_none, {})
+        result_none = self.renderer.render_widget(
+            WidgetType.METRIC_CARD, metric_none, {}
+        )
         assert result_none["data"]["trend_direction"] == "neutral"
 
 

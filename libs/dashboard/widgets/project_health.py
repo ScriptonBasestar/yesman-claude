@@ -50,7 +50,11 @@ class ProjectHealth:
             scores["docs_score"] = self._check_documentation_health()
 
             # Calculate overall score
-            valid_scores = [v for v in scores.values() if v is not None and isinstance(v, (int, float))]
+            valid_scores = [
+                v
+                for v in scores.values()
+                if v is not None and isinstance(v, (int, float))
+            ]
             overall_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
 
             scores["overall_score"] = int(overall_score)
@@ -103,7 +107,11 @@ class ProjectHealth:
         try:
             # Check for test directories/files
             test_indicators = ["tests/", "test_", "pytest", "unittest"]
-            has_tests = any(os.path.exists(indicator) or any(indicator in f for f in os.listdir(".") if os.path.isfile(f)) for indicator in test_indicators)
+            has_tests = any(
+                os.path.exists(indicator)
+                or any(indicator in f for f in os.listdir(".") if os.path.isfile(f))
+                for indicator in test_indicators
+            )
 
         except (OSError, FileNotFoundError):
             return 50
@@ -142,7 +150,10 @@ class ProjectHealth:
             # Basic security checks
             has_gitignore = os.path.exists(".gitignore")
             has_secrets = any(
-                keyword in open(f, encoding="utf-8").read().lower() for f in os.listdir(".") if f.endswith((".py", ".yaml", ".yml", ".json")) for keyword in ["password", "secret", "key", "token"]
+                keyword in open(f, encoding="utf-8").read().lower()
+                for f in os.listdir(".")
+                if f.endswith((".py", ".yaml", ".yml", ".json"))
+                for keyword in ["password", "secret", "key", "token"]
             )
 
             score = 70

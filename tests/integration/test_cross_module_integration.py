@@ -42,14 +42,28 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
     def _setup_comprehensive_responses(self) -> None:
         """Setup mock Claude responses for comprehensive testing."""
         responses = {
-            "develop web application": "I'll help you develop a web application. Let me set up the project structure...",
-            "test the application": "Running comprehensive tests... All tests passed successfully!",
-            "deploy to production": "Deploying application to production environment... Deployment successful!",
-            "monitor performance": "Monitoring application performance... All metrics within normal ranges.",
-            "optimize database": "Analyzing database performance... Optimization recommendations ready.",
-            "security audit": "Performing security audit... No critical vulnerabilities found.",
+            "develop web application": (
+                "I'll help you develop a web application. Let me set up the project structure..."
+            ),
+            "test the application": (
+                "Running comprehensive tests... All tests passed successfully!"
+            ),
+            "deploy to production": (
+                "Deploying application to production environment... Deployment successful!"
+            ),
+            "monitor performance": (
+                "Monitoring application performance... All metrics within normal ranges."
+            ),
+            "optimize database": (
+                "Analyzing database performance... Optimization recommendations ready."
+            ),
+            "security audit": (
+                "Performing security audit... No critical vulnerabilities found."
+            ),
             "backup data": "Creating data backup... Backup completed successfully.",
-            "scale infrastructure": "Scaling infrastructure based on load... Scaling completed.",
+            "scale infrastructure": (
+                "Scaling infrastructure based on load... Scaling completed."
+            ),
         }
 
         for prompt, response in responses.items():
@@ -67,11 +81,15 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
 
         # Create and setup session
         session_name = f"{project_name}-session"
-        self.create_test_session(session_name, description="Full system integration test")
+        self.create_test_session(
+            session_name, description="Full system integration test"
+        )
 
         self.performance_monitor.start_timing("session_setup")
 
-        session_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+        session_result = self.command_runner.run_command(
+            SetupCommand, session_name=session_name
+        )
 
         session_duration = self.performance_monitor.end_timing("session_setup")
 
@@ -81,16 +99,22 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         # Phase 2: Automation and Context Detection
         self.performance_monitor.start_timing("automation_detection")
 
-        detect_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir), suggest_workflows=True)
+        detect_result = self.command_runner.run_command(
+            AutomateDetectCommand, project_path=str(project_dir), suggest_workflows=True
+        )
 
         detection_duration = self.performance_monitor.end_timing("automation_detection")
 
         assert detect_result["success"] is True
-        assert len(detect_result.get("contexts", [])) >= 3  # Should detect multiple contexts
+        assert (
+            len(detect_result.get("contexts", [])) >= 3
+        )  # Should detect multiple contexts
         assert detection_duration < 5.0
 
         # Phase 3: AI Learning Integration
-        learning_engine = LearningEngine(config=self.get_test_config(), session_name=session_name)
+        learning_engine = LearningEngine(
+            config=self.get_test_config(), session_name=session_name
+        )
 
         # Simulate development interactions for learning
         development_interactions = [
@@ -122,7 +146,9 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
         # Phase 4: Browse Integration with Session Context
         self.performance_monitor.start_timing("browse_integration")
 
-        browse_result = self.command_runner.run_command(BrowseCommand, path=str(project_dir), session_context=session_name)
+        browse_result = self.command_runner.run_command(
+            BrowseCommand, path=str(project_dir), session_context=session_name
+        )
 
         browse_duration = self.performance_monitor.end_timing("browse_integration")
 
@@ -160,21 +186,33 @@ class TestFullSystemIntegration(AsyncIntegrationTestBase):
             session_integration=session_name,
         )
 
-        monitoring_duration = self.performance_monitor.end_timing("monitoring_integration")
+        monitoring_duration = self.performance_monitor.end_timing(
+            "monitoring_integration"
+        )
 
         assert monitor_result["success"] is True
         assert monitoring_duration < 8.0
 
         # Total workflow performance check
-        total_workflow_time = session_duration + detection_duration + learning_duration + browse_duration + status_duration + monitoring_duration
+        total_workflow_time = (
+            session_duration
+            + detection_duration
+            + learning_duration
+            + browse_duration
+            + status_duration
+            + monitoring_duration
+        )
 
-        assert total_workflow_time < 45.0, f"Complete workflow took {total_workflow_time:.2f}s, should be < 45s"
+        assert (
+            total_workflow_time < 45.0
+        ), f"Complete workflow took {total_workflow_time:.2f}s, should be < 45s"
 
     @staticmethod
     def _create_comprehensive_project(project_dir: object) -> None:
         """Create a comprehensive project with multiple contexts."""
         # Python web application
-        (project_dir / "app.py").write_text("""
+        (project_dir / "app.py").write_text(
+            """
 
 app = Flask(__name__)
 
@@ -188,18 +226,22 @@ def get_data() -> object:
 
 if __name__ == '__main__':
     app.run(debug=True)
-""")
+"""
+        )
 
-        (project_dir / "requirements.txt").write_text("""
+        (project_dir / "requirements.txt").write_text(
+            """
 flask==2.0.0
 pytest==6.0.0
 pytest-cov==2.12.0
 gunicorn==20.1.0
-""")
+"""
+        )
 
         # Database files
         (project_dir / "database").mkdir()
-        (project_dir / "database" / "schema.sql").write_text("""
+        (project_dir / "database" / "schema.sql").write_text(
+            """
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(80) UNIQUE NOT NULL,
@@ -213,12 +255,14 @@ CREATE TABLE posts (
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
-""")
+"""
+        )
 
         # Test files
         (project_dir / "tests").mkdir()
         (project_dir / "tests" / "__init__.py").write_text("")
-        (project_dir / "tests" / "test_app.py").write_text("""
+        (project_dir / "tests" / "test_app.py").write_text(
+            """
 
 @pytest.fixture
 def client() -> object:
@@ -235,10 +279,12 @@ def test_get_data(client) -> object:
     rv = client.get('/api/data')
     assert rv.status_code == 200
     assert b'data' in rv.data
-""")
+"""
+        )
 
         # Docker files
-        (project_dir / "Dockerfile").write_text("""
+        (project_dir / "Dockerfile").write_text(
+            """
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -251,9 +297,11 @@ COPY . .
 EXPOSE 5000
 
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
-""")
+"""
+        )
 
-        (project_dir / "docker-compose.yml").write_text("""
+        (project_dir / "docker-compose.yml").write_text(
+            """
 version: '3.8'
 
 services:
@@ -277,12 +325,14 @@ services:
 
 volumes:
   postgres_data:
-""")
+"""
+        )
 
         # CI/CD configuration
         (project_dir / ".github").mkdir()
         (project_dir / ".github" / "workflows").mkdir()
-        (project_dir / ".github" / "workflows" / "ci.yml").write_text("""
+        (project_dir / ".github" / "workflows" / "ci.yml").write_text(
+            """
 name: CI
 
 on: [push, pull_request]
@@ -310,10 +360,12 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t app:latest .
-""")
+"""
+        )
 
         # Configuration files
-        (project_dir / "config.py").write_text("""
+        (project_dir / "config.py").write_text(
+            """
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
@@ -335,11 +387,13 @@ config = {
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }
-""")
+"""
+        )
 
         # Git configuration
         (project_dir / ".git").mkdir()
-        (project_dir / ".gitignore").write_text("""
+        (project_dir / ".gitignore").write_text(
+            """
 __pycache__/
 *.pyc
 *.pyo
@@ -375,10 +429,12 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-""")
+"""
+        )
 
         # Documentation
-        (project_dir / "README.md").write_text("""
+        (project_dir / "README.md").write_text(
+            """
 # Full System Integration Test Project
 
 This project demonstrates a comprehensive web application with multiple technology contexts:
@@ -413,7 +469,8 @@ This project demonstrates a comprehensive web application with multiple technolo
 - `config.py` - Application configuration
 - `Dockerfile` & `docker-compose.yml` - Container configuration
 - `.github/workflows/` - CI/CD pipelines
-""")
+"""
+        )
 
     async def test_cross_module_data_flow(self) -> None:
         """Test data flow and communication between modules."""
@@ -428,12 +485,16 @@ This project demonstrates a comprehensive web application with multiple technolo
         self.create_test_session(session_name)
 
         # Initialize all modules
-        learning_engine = LearningEngine(config=self.get_test_config(), session_name=session_name)
+        learning_engine = LearningEngine(
+            config=self.get_test_config(), session_name=session_name
+        )
 
         self.get_session_manager()
 
         # Test 1: Session → Automation data flow
-        setup_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+        setup_result = self.command_runner.run_command(
+            SetupCommand, session_name=session_name
+        )
         assert setup_result["success"] is True
 
         # Automation should be aware of session context
@@ -458,7 +519,9 @@ This project demonstrates a comprehensive web application with multiple technolo
         assert len(patterns) > 0
 
         # Test 3: AI Learning → Session enhancement data flow
-        prediction = await learning_engine.predict_response_context("setup development environment", session_id=session_name)
+        prediction = await learning_engine.predict_response_context(
+            "setup development environment", session_id=session_name
+        )
 
         if prediction:
             assert prediction.get("confidence", 0) > 0
@@ -484,7 +547,9 @@ This project demonstrates a comprehensive web application with multiple technolo
         project_dir.mkdir()
 
         # Files that might cause issues
-        (project_dir / "broken.py").write_text("import non_existent_module\nsyntax error here")
+        (project_dir / "broken.py").write_text(
+            "import non_existent_module\nsyntax error here"
+        )
         (project_dir / "empty.txt").write_text("")
 
         session_name = "error-recovery-session"
@@ -492,13 +557,17 @@ This project demonstrates a comprehensive web application with multiple technolo
         # Test 1: Session creation with problematic project should still work
         self.create_test_session(session_name, start_directory=str(project_dir))
 
-        setup_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+        setup_result = self.command_runner.run_command(
+            SetupCommand, session_name=session_name
+        )
 
         # Should succeed despite problematic files in directory
         assert setup_result["success"] is True
 
         # Test 2: Automation should handle problematic files gracefully
-        detect_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir), ignore_errors=True)
+        detect_result = self.command_runner.run_command(
+            AutomateDetectCommand, project_path=str(project_dir), ignore_errors=True
+        )
 
         # Should succeed with error handling
         assert detect_result["success"] is True
@@ -506,7 +575,9 @@ This project demonstrates a comprehensive web application with multiple technolo
             assert len(detect_result["errors"]) > 0  # Should report errors
 
         # Test 3: AI learning should handle incomplete data
-        learning_engine = LearningEngine(config=self.get_test_config(), session_name=session_name)
+        learning_engine = LearningEngine(
+            config=self.get_test_config(), session_name=session_name
+        )
 
         # Record interaction with error context
         await learning_engine.record_interaction(
@@ -521,7 +592,9 @@ This project demonstrates a comprehensive web application with multiple technolo
         assert isinstance(patterns, list)
 
         # Test 4: Browse should handle problematic files
-        browse_result = self.command_runner.run_command(BrowseCommand, path=str(project_dir), ignore_errors=True)
+        browse_result = self.command_runner.run_command(
+            BrowseCommand, path=str(project_dir), ignore_errors=True
+        )
 
         assert browse_result["success"] is True
 
@@ -559,15 +632,21 @@ This project demonstrates a comprehensive web application with multiple technolo
 
         # Setup all sessions concurrently (simulated)
         for session_name in sessions:
-            result = self.command_runner.run_command(SetupCommand, session_name=session_name)
+            result = self.command_runner.run_command(
+                SetupCommand, session_name=session_name
+            )
             assert result["success"] is True
 
         # Run automation detection on all projects
         for project_dir in projects:
-            result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir))
+            result = self.command_runner.run_command(
+                AutomateDetectCommand, project_path=str(project_dir)
+            )
             assert result["success"] is True
 
-        operations_duration = self.performance_monitor.end_timing("concurrent_operations")
+        operations_duration = self.performance_monitor.end_timing(
+            "concurrent_operations"
+        )
 
         # AI learning phase
         self.performance_monitor.start_timing("concurrent_ai_learning")
@@ -583,7 +662,9 @@ This project demonstrates a comprehensive web application with multiple technolo
                 session_id=session_name,
             )
 
-        ai_learning_duration = self.performance_monitor.end_timing("concurrent_ai_learning")
+        ai_learning_duration = self.performance_monitor.end_timing(
+            "concurrent_ai_learning"
+        )
 
         # Global status check
         self.performance_monitor.start_timing("global_status")
@@ -601,10 +682,25 @@ This project demonstrates a comprehensive web application with multiple technolo
         status_duration = self.performance_monitor.end_timing("global_status")
 
         # Performance assertions
-        total_duration = setup_duration + operations_duration + ai_learning_duration + status_duration
+        total_duration = (
+            setup_duration
+            + operations_duration
+            + ai_learning_duration
+            + status_duration
+        )
 
-        assert setup_duration < 15.0, f"Concurrent setup took {setup_duration:.2f}s, should be < 15s"
-        assert operations_duration < 25.0, f"Concurrent operations took {operations_duration:.2f}s, should be < 25s"
-        assert ai_learning_duration < 5.0, f"AI learning took {ai_learning_duration:.2f}s, should be < 5s"
-        assert status_duration < 3.0, f"Global status took {status_duration:.2f}s, should be < 3s"
-        assert total_duration < 50.0, f"Total concurrent load test took {total_duration:.2f}s, should be < 50s"
+        assert (
+            setup_duration < 15.0
+        ), f"Concurrent setup took {setup_duration:.2f}s, should be < 15s"
+        assert (
+            operations_duration < 25.0
+        ), f"Concurrent operations took {operations_duration:.2f}s, should be < 25s"
+        assert (
+            ai_learning_duration < 5.0
+        ), f"AI learning took {ai_learning_duration:.2f}s, should be < 5s"
+        assert (
+            status_duration < 3.0
+        ), f"Global status took {status_duration:.2f}s, should be < 3s"
+        assert (
+            total_duration < 50.0
+        ), f"Total concurrent load test took {total_duration:.2f}s, should be < 50s"

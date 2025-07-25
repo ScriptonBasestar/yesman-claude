@@ -61,7 +61,9 @@ class LogsConfigureCommand(BaseCommand):
             self.print_success("Async logging configured successfully")
             self.print_info(f"  Output directory: {output_path}")
             self.print_info(f"  Format: {format}")
-            self.print_info(f"  Compression: {'enabled' if compression else 'disabled'}")
+            self.print_info(
+                f"  Compression: {'enabled' if compression else 'disabled'}"
+            )
             self.print_info(f"  Buffer size: {buffer_size}")
 
             # Test log entry
@@ -118,7 +120,11 @@ class LogsAnalyzeCommand(BaseCommand):
                 raise CommandError(msg)
 
             # Find log files
-            log_files = list(log_path.glob("*.log")) + list(log_path.glob("*.jsonl")) + list(log_path.glob("*.log.gz"))
+            log_files = (
+                list(log_path.glob("*.log"))
+                + list(log_path.glob("*.jsonl"))
+                + list(log_path.glob("*.log.gz"))
+            )
 
             if not log_files:
                 self.print_warning("No log files found")
@@ -136,7 +142,9 @@ class LogsAnalyzeCommand(BaseCommand):
             msg = f"Error analyzing logs: {e}"
             raise CommandError(msg) from e
 
-    def _analyze_log_files(self, log_files: list[Path], last_hours: int, level_filter: str | None = None) -> dict[str, object]:
+    def _analyze_log_files(
+        self, log_files: list[Path], last_hours: int, level_filter: str | None = None
+    ) -> dict[str, object]:
         """Analyze log files and return statistics.
 
         Returns:
@@ -179,7 +187,11 @@ class LogsAnalyzeCommand(BaseCommand):
                                 continue
 
                             current_total = stats["total_entries"]
-                            stats["total_entries"] = (int(current_total) if isinstance(current_total, (int, str)) else 0) + 1
+                            stats["total_entries"] = (
+                                int(current_total)
+                                if isinstance(current_total, (int, str))
+                                else 0
+                            ) + 1
                             level_counts = stats["level_counts"]
                             if isinstance(level_counts, dict):
                                 level_counts[level] = level_counts.get(level, 0) + 1
@@ -193,16 +205,25 @@ class LogsAnalyzeCommand(BaseCommand):
                             # Collect errors
                             error_messages = stats["error_messages"]
                             if isinstance(error_messages, list):
-                                if level in {"ERROR", "CRITICAL"} and len(error_messages) < 10:
+                                if (
+                                    level in {"ERROR", "CRITICAL"}
+                                    and len(error_messages) < 10
+                                ):
                                     error_messages.append(entry.get("message", ""))
 
                         except json.JSONDecodeError:
                             # Handle text format
                             current_total = stats["total_entries"]
-                            stats["total_entries"] = (int(current_total) if isinstance(current_total, (int, str)) else 0) + 1
+                            stats["total_entries"] = (
+                                int(current_total)
+                                if isinstance(current_total, (int, str))
+                                else 0
+                            ) + 1
 
             except Exception as e:
-                self.logger.warning(f"Failed to process log file {log_file}: {e}")  # noqa: G004
+                self.logger.warning(
+                    f"Failed to process log file {log_file}: {e}"
+                )  # noqa: G004
                 continue  # Skip problematic files
 
         return stats
@@ -210,7 +231,9 @@ class LogsAnalyzeCommand(BaseCommand):
     def _display_log_statistics(self, stats: dict[str, object]) -> None:
         """Display log analysis statistics."""
         # Overview
-        level_counts = stats["level_counts"] if isinstance(stats["level_counts"], dict) else {}
+        level_counts = (
+            stats["level_counts"] if isinstance(stats["level_counts"], dict) else {}
+        )
         error_count = level_counts.get("ERROR", 0) + level_counts.get("CRITICAL", 0)
         overview = Panel(
             f"Total Entries: {stats['total_entries']:,}\nTime Range: Last 24 hours\nError Count: {error_count}",
@@ -241,9 +264,13 @@ class LogsAnalyzeCommand(BaseCommand):
         if stats["error_messages"]:
             self.console.print("\n🚨 Recent Errors:")
             error_messages_obj = stats["error_messages"]
-            error_messages = list(error_messages_obj) if isinstance(error_messages_obj, list) else []
+            error_messages = (
+                list(error_messages_obj) if isinstance(error_messages_obj, list) else []
+            )
             for i, error in enumerate(error_messages[:5], 1):
-                self.console.print(f"  {i}. {error[:80]}{'...' if len(error) > 80 else ''}")
+                self.console.print(
+                    f"  {i}. {error[:80]}{'...' if len(error) > 80 else ''}"
+                )
 
 
 class LogsTailCommand(BaseCommand):
@@ -334,7 +361,9 @@ class LogsTailCommand(BaseCommand):
                         }
 
                         level_color = level_colors.get(level, "white")
-                        self.console.print(f"[dim]{timestamp}[/] [{level_color}]{level:8}[/] {message}")
+                        self.console.print(
+                            f"[dim]{timestamp}[/] [{level_color}]{level:8}[/] {message}"
+                        )
 
                     except json.JSONDecodeError:
                         # Handle text format
@@ -343,7 +372,9 @@ class LogsTailCommand(BaseCommand):
                 else:
                     time.sleep(0.1)
 
-    def _show_recent_logs(self, log_file: Path, lines: int, level_filter: str | None = None) -> None:
+    def _show_recent_logs(
+        self, log_file: Path, lines: int, level_filter: str | None = None
+    ) -> None:
         """Show recent log entries."""
         self.console.print(f"📋 Last {lines} entries from {log_file.name}")
         self.console.print("=" * 60)
@@ -380,7 +411,9 @@ class LogsTailCommand(BaseCommand):
                         }
 
                         level_color = level_colors.get(level, "white")
-                        self.console.print(f"[dim]{timestamp}[/] [{level_color}]{level:8}[/] {message}")
+                        self.console.print(
+                            f"[dim]{timestamp}[/] [{level_color}]{level:8}[/] {message}"
+                        )
 
                     except json.JSONDecodeError:
                         if not level_filter:
@@ -397,7 +430,9 @@ class LogsCleanupCommand(BaseCommand):
         super().__init__()
         self.console = Console()
 
-    def execute(self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(
+        self, log_dir: str = "~/.scripton/yesman/logs", days: int = 7, **kwargs: Any
+    ) -> dict:  # noqa: ARG002, ANN401
         """Execute the cleanup command.
 
         Returns:
@@ -426,13 +461,17 @@ class LogsCleanupCommand(BaseCommand):
 
             # Confirm deletion
             size_mb = total_size / (1024 * 1024)
-            self.console.print(f"Found {len(old_files)} log files older than {days} days ({size_mb:.1f} MB)")
+            self.console.print(
+                f"Found {len(old_files)} log files older than {days} days ({size_mb:.1f} MB)"
+            )
 
             if self.confirm_action("Delete these files?"):
                 for log_file in old_files:
                     log_file.unlink()
 
-                self.print_success(f"Deleted {len(old_files)} old log files ({size_mb:.1f} MB freed)")
+                self.print_success(
+                    f"Deleted {len(old_files)} old log files ({size_mb:.1f} MB freed)"
+                )
                 return {
                     "success": True,
                     "files_deleted": len(old_files),
@@ -452,7 +491,9 @@ def logs() -> None:
 
 
 @logs.command()
-@click.option("--output-dir", "-o", default="~/.scripton/yesman/logs", help="Log output directory")
+@click.option(
+    "--output-dir", "-o", default="~/.scripton/yesman/logs", help="Log output directory"
+)
 @click.option(
     "--format",
     "-f",
@@ -461,8 +502,12 @@ def logs() -> None:
     help="Log format",
 )
 @click.option("--compression", "-c", is_flag=True, help="Enable gzip compression")
-@click.option("--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching")
-def configure(output_dir: str, format: str, compression: bool, buffer_size: int) -> None:  # noqa: FBT001
+@click.option(
+    "--buffer-size", "-b", default=1000, type=int, help="Buffer size for batching"
+)
+def configure(
+    output_dir: str, format: str, compression: bool, buffer_size: int
+) -> None:  # noqa: FBT001
     """Configure async logging system."""
     command = LogsConfigureCommand()
     command.run(
@@ -489,18 +534,24 @@ def analyze(log_dir: str, last_hours: int, level: str | None) -> None:
 
 
 @logs.command()
-@click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
+@click.option(
+    "--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory"
+)
 @click.option("--level", "-l", default="INFO", help="Log level filter")
 @click.option("--follow", "-f", is_flag=True, help="Follow log output")
 @click.option("--last-lines", "-n", default=50, type=int, help="Show last N lines")
-def tail(log_dir: str, level: str, follow: bool, last_lines: int) -> None:  # noqa: FBT001
+def tail(
+    log_dir: str, level: str, follow: bool, last_lines: int
+) -> None:  # noqa: FBT001
     """Tail log files (like tail -f)."""
     command = LogsTailCommand()
     command.run(log_dir=log_dir, level=level, follow=follow, last_lines=last_lines)
 
 
 @logs.command()
-@click.option("--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory")
+@click.option(
+    "--log-dir", "-d", default="~/.scripton/yesman/logs", help="Log directory"
+)
 @click.option("--days", default=7, type=int, help="Days of logs to keep")
 def cleanup(log_dir: str, days: int) -> None:
     """Clean up old log files."""

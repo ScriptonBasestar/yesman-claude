@@ -64,7 +64,9 @@ class BaseRenderer(ABC):
     across different rendering formats (TUI, Web, Tauri, etc.)
     """
 
-    def __init__(self, format_type: RenderFormat, theme: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self, format_type: RenderFormat, theme: dict[str, Any] | None = None
+    ) -> None:
         """Initialize base renderer.
 
         Args:
@@ -109,7 +111,9 @@ class BaseRenderer(ABC):
         """
 
     @abstractmethod
-    def render_container(self, content: str, container_config: dict[str, Any] | None = None) -> str:
+    def render_container(
+        self, content: str, container_config: dict[str, Any] | None = None
+    ) -> str:
         """Render a container wrapping content.
 
         Args:

@@ -217,7 +217,9 @@ class TaskScheduler:
 
                 # Update agent load
                 estimated_time = self._estimate_task_time(best_task, agent_capability)
-                agent_loads[agent.agent_id] += estimated_time / 3600.0  # Convert to hours
+                agent_loads[agent.agent_id] += (
+                    estimated_time / 3600.0
+                )  # Convert to hours
 
                 # Remove task from temp queue
                 temp_queue.pop(best_index)
@@ -242,21 +244,33 @@ class TaskScheduler:
 
         # Update success rate with exponential moving average
         if success:
-            capability.success_rate = capability.success_rate * (1 - self.learning_rate) + 1.0 * self.learning_rate
+            capability.success_rate = (
+                capability.success_rate * (1 - self.learning_rate)
+                + 1.0 * self.learning_rate
+            )
         else:
-            capability.success_rate = capability.success_rate * (1 - self.learning_rate) + 0.0 * self.learning_rate
+            capability.success_rate = (
+                capability.success_rate * (1 - self.learning_rate)
+                + 0.0 * self.learning_rate
+            )
 
         # Update average execution time
         if capability.average_execution_time == 0.0:
             capability.average_execution_time = execution_time
         else:
-            capability.average_execution_time = capability.average_execution_time * (1 - self.learning_rate) + execution_time * self.learning_rate
+            capability.average_execution_time = (
+                capability.average_execution_time * (1 - self.learning_rate)
+                + execution_time * self.learning_rate
+            )
 
         # Update processing power based on performance vs expected time
         expected_time = self._estimate_base_task_time(task)
         if expected_time > 0:
             performance_ratio = expected_time / execution_time
-            capability.processing_power = capability.processing_power * (1 - self.learning_rate) + performance_ratio * self.learning_rate
+            capability.processing_power = (
+                capability.processing_power * (1 - self.learning_rate)
+                + performance_ratio * self.learning_rate
+            )
 
         # Add to task history
         self.task_history[agent_id].append(task)
@@ -289,7 +303,9 @@ class TaskScheduler:
         if hasattr(task, "created_at") and task.created_at:
             age_hours = (datetime.now(UTC) - task.created_at).total_seconds() / 3600.0
 
-        urgency_score = min(1.0, age_hours / 24.0) * self.urgency_weight  # Max urgency after 24h
+        urgency_score = (
+            min(1.0, age_hours / 24.0) * self.urgency_weight
+        )  # Max urgency after 24h
 
         # Dependency impact (tasks that unblock others get higher priority)
         dependency_score = 0.0
@@ -343,7 +359,11 @@ class TaskScheduler:
         if not capability:
             return 0.5
 
-        return capability.processing_power * 0.4 + capability.success_rate * 0.4 + (1.0 - capability.current_load) * 0.2
+        return (
+            capability.processing_power * 0.4
+            + capability.success_rate * 0.4
+            + (1.0 - capability.current_load) * 0.2
+        )
 
     @staticmethod
     def _are_dependencies_met(task: Task) -> bool:
@@ -428,8 +448,15 @@ class TaskScheduler:
             load_balancing_score = 1.0
 
         # Calculate efficiency score
-        efficiency_scores = [cap.processing_power * cap.success_rate for cap in self.agent_capabilities.values()]
-        avg_efficiency = sum(efficiency_scores) / len(efficiency_scores) if efficiency_scores else 0.5
+        efficiency_scores = [
+            cap.processing_power * cap.success_rate
+            for cap in self.agent_capabilities.values()
+        ]
+        avg_efficiency = (
+            sum(efficiency_scores) / len(efficiency_scores)
+            if efficiency_scores
+            else 0.5
+        )
 
         self.scheduling_metrics.update(
             {
@@ -437,7 +464,11 @@ class TaskScheduler:
                 "efficiency_score": avg_efficiency,
                 "queue_size": len(self.priority_queue),
                 "active_agents": len(
-                    [cap for cap in self.agent_capabilities.values() if cap.current_load > 0],
+                    [
+                        cap
+                        for cap in self.agent_capabilities.values()
+                        if cap.current_load > 0
+                    ],
                 ),
             },
         )
@@ -477,21 +508,33 @@ class TaskScheduler:
             for overloaded_agent_id, overloaded_cap in overloaded:
                 for underloaded_agent_id, underloaded_cap in underloaded:
                     # Calculate load difference
-                    load_diff = overloaded_cap.current_load - underloaded_cap.current_load
+                    load_diff = (
+                        overloaded_cap.current_load - underloaded_cap.current_load
+                    )
 
                     # Only rebalance if significant difference (>0.4)
                     if load_diff > 0.4:
                         # Apply workload redistribution
-                        load_transfer = min(0.15, load_diff * 0.3)  # Transfer up to 15% or 30% of difference
+                        load_transfer = min(
+                            0.15, load_diff * 0.3
+                        )  # Transfer up to 15% or 30% of difference
 
                         # Adjust agent loads
-                        overloaded_cap.current_load = max(0.0, overloaded_cap.current_load - load_transfer)
-                        underloaded_cap.current_load = min(1.0, underloaded_cap.current_load + load_transfer)
+                        overloaded_cap.current_load = max(
+                            0.0, overloaded_cap.current_load - load_transfer
+                        )
+                        underloaded_cap.current_load = min(
+                            1.0, underloaded_cap.current_load + load_transfer
+                        )
 
                         # Boost underloaded agent's assignment preference temporarily
-                        underloaded_cap.processing_power *= 1.2  # 20% boost for next assignments
+                        underloaded_cap.processing_power *= (
+                            1.2  # 20% boost for next assignments
+                        )
 
-                        rebalancing_actions.append((overloaded_agent_id, underloaded_agent_id))
+                        rebalancing_actions.append(
+                            (overloaded_agent_id, underloaded_agent_id)
+                        )
                         logger.info(
                             "Redistributed %.2f load from %s (%.2f) to %s (%.2f)",
                             load_transfer,
@@ -502,11 +545,15 @@ class TaskScheduler:
                         )
 
                         # Apply scheduling preference adjustment
-                        self._adjust_assignment_preferences(overloaded_agent_id, underloaded_agent_id)
+                        self._adjust_assignment_preferences(
+                            overloaded_agent_id, underloaded_agent_id
+                        )
 
         return rebalancing_actions
 
-    def _adjust_assignment_preferences(self, overloaded_agent_id: str, underloaded_agent_id: str) -> None:
+    def _adjust_assignment_preferences(
+        self, overloaded_agent_id: str, underloaded_agent_id: str
+    ) -> None:
         """Adjust task assignment preferences to favor underloaded agents."""
         overloaded_cap = self.agent_capabilities.get(overloaded_agent_id)
         underloaded_cap = self.agent_capabilities.get(underloaded_agent_id)
@@ -518,7 +565,11 @@ class TaskScheduler:
         overloaded_cap.processing_power *= 0.8  # 20% penalty
 
         # The boost to underloaded agent was already applied in rebalance_tasks
-        logger.debug("Adjusted assignment preferences: %s penalty, %s boost", overloaded_agent_id, underloaded_agent_id)
+        logger.debug(
+            "Adjusted assignment preferences: %s penalty, %s boost",
+            overloaded_agent_id,
+            underloaded_agent_id,
+        )
 
     def reset_assignment_preferences(self, agent_id: str) -> None:
         """Reset assignment preferences for an agent to baseline values."""
@@ -536,7 +587,9 @@ class TaskScheduler:
 
         logger.debug("Reset assignment preferences for agent %s", agent_id)
 
-    def _estimate_task_load(self, task: Task, agent_capability: AgentCapability) -> float:
+    def _estimate_task_load(
+        self, task: Task, agent_capability: AgentCapability
+    ) -> float:
         """Estimate the load a task represents for an agent.
 
         Returns:

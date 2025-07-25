@@ -36,12 +36,16 @@ class TestBranchManager:
             check=False,
             cwd=repo_path,
         )
-        subprocess.run(["git", "config", "user.name", "Test User"], check=False, cwd=repo_path)
+        subprocess.run(
+            ["git", "config", "user.name", "Test User"], check=False, cwd=repo_path
+        )
 
         # Create initial commit
         (repo_path / "README.md").write_text("# Test Repo")
         subprocess.run(["git", "add", "."], check=False, cwd=repo_path)
-        subprocess.run(["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path)
+        subprocess.run(
+            ["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path
+        )
 
         # Create develop branch
         subprocess.run(["git", "checkout", "-b", "develop"], check=False, cwd=repo_path)
@@ -213,7 +217,9 @@ class TestBranchManager:
 
         assert branch_name in branch_manager.branches
         assert branch_manager.branches[branch_name].metadata["agent_id"] == "agent-1"
-        assert branch_manager.branches[branch_name].metadata["task"] == "implement feature"
+        assert (
+            branch_manager.branches[branch_name].metadata["task"] == "implement feature"
+        )
 
     @staticmethod
     def test_mark_branch_merged(branch_manager: BranchManager) -> None:
@@ -285,7 +291,9 @@ class TestBranchManager:
             assert "file.py" in conflicts["conflicts"][0]
 
     @staticmethod
-    def test_metadata_persistence(branch_manager: BranchManager, tmp_path: Path) -> None:  # noqa: ARG002, ARG004
+    def test_metadata_persistence(
+        branch_manager: BranchManager, tmp_path: Path
+    ) -> None:  # noqa: ARG002, ARG004
         """Test saving and loading branch metadata."""
         # Create test branch info
         branch_info = BranchInfo(

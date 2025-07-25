@@ -147,7 +147,9 @@ class TestAgentMonitor:
         assert monitor.task_metrics == {}
 
     @staticmethod
-    def test_update_metrics(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_update_metrics(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test metrics update from agent pool."""
         monitor.update_metrics()
 
@@ -210,7 +212,9 @@ class TestAgentMonitor:
         assert 0.0 < progress < 1.0
 
     @staticmethod
-    def test_render_overview(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_render_overview(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test overview rendering."""
         monitor.update_metrics()
         panel = monitor.render_overview()
@@ -227,7 +231,9 @@ class TestAgentMonitor:
         assert "No agent selected" in str(panel)
 
     @staticmethod
-    def test_render_detailed_with_selection(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_render_detailed_with_selection(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test detailed rendering with agent selected."""
         monitor.update_metrics()
         monitor.select_agent("agent-1")
@@ -238,7 +244,9 @@ class TestAgentMonitor:
         assert "Agent Details - agent-1" in str(panel)
 
     @staticmethod
-    def test_render_tasks(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_render_tasks(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test task rendering."""
         monitor.update_metrics()
         panel = monitor.render_tasks()
@@ -247,7 +255,9 @@ class TestAgentMonitor:
         assert "Task Monitor" in str(panel)
 
     @staticmethod
-    def test_render_performance(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_render_performance(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test performance rendering."""
         monitor.update_metrics()
         panel = monitor.render_performance()
@@ -265,7 +275,9 @@ class TestAgentMonitor:
         assert monitor.display_mode == MonitorDisplayMode.TASKS
 
     @staticmethod
-    def test_select_agent(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_select_agent(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test agent selection."""
         monitor.update_metrics()
         monitor.select_agent("agent-1")
@@ -336,7 +348,9 @@ class TestAgentMonitor:
         assert monitor.task_metrics == {}
 
     @staticmethod
-    def test_update_metrics_exception_handling(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:
+    def test_update_metrics_exception_handling(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:
         """Test update_metrics handles exceptions."""
         # Make agent pool raise exception
         mock_agent_pool.list_agents.side_effect = Exception("Test error")
@@ -348,7 +362,9 @@ class TestAgentMonitor:
         assert monitor.agent_metrics == {}
 
     @staticmethod
-    def test_performance_history_tracking(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_performance_history_tracking(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test performance history tracking."""
         # Update metrics multiple times
         for _ in range(5):
@@ -363,11 +379,15 @@ class TestAgentMonitor:
         assert len(monitor.performance_history["agent-2"]) == 5
 
     @staticmethod
-    def test_performance_history_limit(monitor: AgentMonitor, mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    def test_performance_history_limit(
+        monitor: AgentMonitor, mock_agent_pool: Mock
+    ) -> None:  # noqa: ARG002, ARG004
         """Test performance history size limiting."""
         # Add more than 100 data points
         agent_id = "agent-1"
-        monitor.performance_history[agent_id] = [(datetime.now(UTC), 0.5) for _ in range(105)]
+        monitor.performance_history[agent_id] = [
+            (datetime.now(UTC), 0.5) for _ in range(105)
+        ]
 
         monitor.update_metrics()
 

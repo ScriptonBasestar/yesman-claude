@@ -64,13 +64,17 @@ class ResponseAnalyzer:
             if self.responses_file.exists():
                 with open(self.responses_file, encoding="utf-8") as f:
                     data = json.load(f)
-                    self.response_history = [ResponseRecord(**record) for record in data]
+                    self.response_history = [
+                        ResponseRecord(**record) for record in data
+                    ]
                 logger.info("Loaded %d response records", len(self.response_history))
 
             if self.patterns_file.exists():
                 with open(self.patterns_file, encoding="utf-8") as f:
                     data = json.load(f)
-                    self.learned_patterns = {pid: PromptPattern(**pattern) for pid, pattern in data.items()}
+                    self.learned_patterns = {
+                        pid: PromptPattern(**pattern) for pid, pattern in data.items()
+                    }
                 logger.info("Loaded %d learned patterns", len(self.learned_patterns))
 
         except Exception:
@@ -81,12 +85,17 @@ class ResponseAnalyzer:
         try:
             # Save response history
             with open(self.responses_file, "w", encoding="utf-8") as f:
-                json.dump([asdict(record) for record in self.response_history], f, indent=2)
+                json.dump(
+                    [asdict(record) for record in self.response_history], f, indent=2
+                )
 
             # Save patterns
             with open(self.patterns_file, "w", encoding="utf-8") as f:
                 json.dump(
-                    {pid: asdict(pattern) for pid, pattern in self.learned_patterns.items()},
+                    {
+                        pid: asdict(pattern)
+                        for pid, pattern in self.learned_patterns.items()
+                    },
                     f,
                     indent=2,
                 )
@@ -181,7 +190,9 @@ class ResponseAnalyzer:
             if context_key not in pattern.context_factors:
                 pattern.context_factors[context_key] = 0.5
             # Adjust factor based on response success (simplified)
-            pattern.context_factors[context_key] = min(1.0, pattern.context_factors[context_key] + 0.1)
+            pattern.context_factors[context_key] = min(
+                1.0, pattern.context_factors[context_key] + 0.1
+            )
 
         pattern.last_updated = time.time()
 
@@ -221,7 +232,9 @@ class ResponseAnalyzer:
             return "deploy_context"
         return "general_context"
 
-    def predict_response(self, prompt_text: str, context: str = "", project_name: str | None = None) -> tuple[str, float]:
+    def predict_response(
+        self, prompt_text: str, context: str = "", project_name: str | None = None
+    ) -> tuple[str, float]:
         """Predict the best response for a given prompt.
 
         Returns:
@@ -254,7 +267,9 @@ class ResponseAnalyzer:
             return best_response, confidence
         return self._get_default_response(prompt_type)
 
-    def _calculate_confidence(self, pattern: PromptPattern, prompt_text: str, context: str) -> float:
+    def _calculate_confidence(
+        self, pattern: PromptPattern, prompt_text: str, context: str
+    ) -> float:
         """Calculate confidence score for a prediction.
 
         Returns:
@@ -313,7 +328,9 @@ class ResponseAnalyzer:
         type_counts = Counter(record.prompt_type for record in self.response_history)
 
         # Project distribution
-        project_counts = Counter(record.project_name or "global" for record in self.response_history)
+        project_counts = Counter(
+            record.project_name or "global" for record in self.response_history
+        )
 
         # Recent activity (last 7 days)
         week_ago = time.time() - (7 * 24 * 3600)
@@ -337,7 +354,9 @@ class ResponseAnalyzer:
         cutoff_time = time.time() - (days_to_keep * 24 * 3600)
 
         old_count = len(self.response_history)
-        self.response_history = [record for record in self.response_history if record.timestamp > cutoff_time]
+        self.response_history = [
+            record for record in self.response_history if record.timestamp > cutoff_time
+        ]
 
         removed = old_count - len(self.response_history)
         if removed > 0:

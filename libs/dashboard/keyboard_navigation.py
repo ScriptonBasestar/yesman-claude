@@ -72,7 +72,10 @@ class KeyBinding:
         self.key = self.key.lower()
 
         # Ensure modifiers are KeyModifier instances
-        self.modifiers = [mod if isinstance(mod, KeyModifier) else KeyModifier(mod.lower()) for mod in self.modifiers]
+        self.modifiers = [
+            mod if isinstance(mod, KeyModifier) else KeyModifier(mod.lower())
+            for mod in self.modifiers
+        ]
 
     @property
     def key_combination(self) -> str:
@@ -94,7 +97,11 @@ class KeyBinding:
 
     def matches(self, key: str, modifiers: list[KeyModifier]) -> bool:
         """Check if this binding matches the given key combination."""
-        return self.key.lower() == key.lower() and set(self.modifiers) == set(modifiers) and self.enabled
+        return (
+            self.key.lower() == key.lower()
+            and set(self.modifiers) == set(modifiers)
+            and self.enabled
+        )
 
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
@@ -113,7 +120,9 @@ class KeyBinding:
         """Create KeyBinding from dictionary."""
         return cls(
             key=cast(str, data["key"]),
-            modifiers=[KeyModifier(mod) for mod in cast(list, data.get("modifiers", []))],
+            modifiers=[
+                KeyModifier(mod) for mod in cast(list, data.get("modifiers", []))
+            ],
             action=cast(str, data.get("action", "")),
             description=cast(str, data.get("description", "")),
             context=NavigationContext(data["context"]) if data.get("context") else None,
@@ -171,7 +180,9 @@ class KeyboardNavigationManager:  # noqa: PLR0904
     def _setup_default_bindings(self) -> None:
         """Setup default keyboard bindings."""
         # Global navigation
-        self.register_binding("tab", [], "focus_next", "Next element", NavigationContext.GLOBAL)
+        self.register_binding(
+            "tab", [], "focus_next", "Next element", NavigationContext.GLOBAL
+        )
         self.register_binding(
             "tab",
             [KeyModifier.SHIFT],
@@ -179,27 +190,57 @@ class KeyboardNavigationManager:  # noqa: PLR0904
             "Previous element",
             NavigationContext.GLOBAL,
         )
-        self.register_binding("enter", [], "activate", "Activate element", NavigationContext.GLOBAL)
-        self.register_binding("escape", [], "cancel", "Cancel/Close", NavigationContext.GLOBAL)
+        self.register_binding(
+            "enter", [], "activate", "Activate element", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "escape", [], "cancel", "Cancel/Close", NavigationContext.GLOBAL
+        )
 
         # Common shortcuts
-        self.register_binding("r", [KeyModifier.CTRL], "refresh", "Refresh", NavigationContext.GLOBAL)
-        self.register_binding("f", [KeyModifier.CTRL], "find", "Find", NavigationContext.GLOBAL)
-        self.register_binding("s", [KeyModifier.CTRL], "save", "Save", NavigationContext.GLOBAL)
-        self.register_binding("z", [KeyModifier.CTRL], "undo", "Undo", NavigationContext.GLOBAL)
-        self.register_binding("y", [KeyModifier.CTRL], "redo", "Redo", NavigationContext.GLOBAL)
+        self.register_binding(
+            "r", [KeyModifier.CTRL], "refresh", "Refresh", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "f", [KeyModifier.CTRL], "find", "Find", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "s", [KeyModifier.CTRL], "save", "Save", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "z", [KeyModifier.CTRL], "undo", "Undo", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "y", [KeyModifier.CTRL], "redo", "Redo", NavigationContext.GLOBAL
+        )
 
         # Dashboard navigation
-        self.register_binding("1", [], "switch_view_1", "View 1", NavigationContext.DASHBOARD)
-        self.register_binding("2", [], "switch_view_2", "View 2", NavigationContext.DASHBOARD)
-        self.register_binding("3", [], "switch_view_3", "View 3", NavigationContext.DASHBOARD)
-        self.register_binding("4", [], "switch_view_4", "View 4", NavigationContext.DASHBOARD)
-        self.register_binding("5", [], "switch_view_5", "View 5", NavigationContext.DASHBOARD)
+        self.register_binding(
+            "1", [], "switch_view_1", "View 1", NavigationContext.DASHBOARD
+        )
+        self.register_binding(
+            "2", [], "switch_view_2", "View 2", NavigationContext.DASHBOARD
+        )
+        self.register_binding(
+            "3", [], "switch_view_3", "View 3", NavigationContext.DASHBOARD
+        )
+        self.register_binding(
+            "4", [], "switch_view_4", "View 4", NavigationContext.DASHBOARD
+        )
+        self.register_binding(
+            "5", [], "switch_view_5", "View 5", NavigationContext.DASHBOARD
+        )
 
         # Arrow key navigation
-        self.register_binding("arrowup", [], "navigate_up", "Navigate up", NavigationContext.GLOBAL)
-        self.register_binding("arrowdown", [], "navigate_down", "Navigate down", NavigationContext.GLOBAL)
-        self.register_binding("arrowleft", [], "navigate_left", "Navigate left", NavigationContext.GLOBAL)
+        self.register_binding(
+            "arrowup", [], "navigate_up", "Navigate up", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "arrowdown", [], "navigate_down", "Navigate down", NavigationContext.GLOBAL
+        )
+        self.register_binding(
+            "arrowleft", [], "navigate_left", "Navigate left", NavigationContext.GLOBAL
+        )
         self.register_binding(
             "arrowright",
             [],
@@ -209,14 +250,24 @@ class KeyboardNavigationManager:  # noqa: PLR0904
         )
 
         # Vim mode bindings
-        self.register_binding(":", [], "vim_command_mode", "Command mode", NavigationContext.VIM_NORMAL)
-        self.register_binding("i", [], "vim_insert_mode", "Insert mode", NavigationContext.VIM_NORMAL)
-        self.register_binding("v", [], "vim_visual_mode", "Visual mode", NavigationContext.VIM_NORMAL)
+        self.register_binding(
+            ":", [], "vim_command_mode", "Command mode", NavigationContext.VIM_NORMAL
+        )
+        self.register_binding(
+            "i", [], "vim_insert_mode", "Insert mode", NavigationContext.VIM_NORMAL
+        )
+        self.register_binding(
+            "v", [], "vim_visual_mode", "Visual mode", NavigationContext.VIM_NORMAL
+        )
         self.register_binding("h", [], "vim_left", "Left", NavigationContext.VIM_NORMAL)
         self.register_binding("j", [], "vim_down", "Down", NavigationContext.VIM_NORMAL)
         self.register_binding("k", [], "vim_up", "Up", NavigationContext.VIM_NORMAL)
-        self.register_binding("l", [], "vim_right", "Right", NavigationContext.VIM_NORMAL)
-        self.register_binding("escape", [], "vim_normal_mode", "Normal mode", NavigationContext.VIM_INSERT)
+        self.register_binding(
+            "l", [], "vim_right", "Right", NavigationContext.VIM_NORMAL
+        )
+        self.register_binding(
+            "escape", [], "vim_normal_mode", "Normal mode", NavigationContext.VIM_INSERT
+        )
 
         # Register default actions
         self._setup_default_actions()
@@ -322,7 +373,9 @@ class KeyboardNavigationManager:  # noqa: PLR0904
             del self.bindings[key_combo]
         else:
             # Remove only bindings for specific context
-            self.bindings[key_combo] = [b for b in self.bindings[key_combo] if b.context != context]
+            self.bindings[key_combo] = [
+                b for b in self.bindings[key_combo] if b.context != context
+            ]
 
             # Clean up empty key combination
             if not self.bindings[key_combo]:
@@ -398,7 +451,10 @@ class KeyboardNavigationManager:  # noqa: PLR0904
                 continue
 
             # Check context match
-            if (binding.context is None or binding.context in {context, NavigationContext.GLOBAL}) and (best_binding is None or binding.priority > best_binding.priority):
+            if (
+                binding.context is None
+                or binding.context in {context, NavigationContext.GLOBAL}
+            ) and (best_binding is None or binding.priority > best_binding.priority):
                 best_binding = binding
 
         if best_binding is None:
@@ -510,7 +566,9 @@ class KeyboardNavigationManager:  # noqa: PLR0904
         while attempts < len(self.focusable_elements):
             element = self.focusable_elements[next_index]
 
-            if element.enabled and (element.context is None or element.context == self.current_context):
+            if element.enabled and (
+                element.context is None or element.context == self.current_context
+            ):
                 self.current_focus_index = next_index
                 self._focus_element(element)
                 return True
@@ -533,7 +591,9 @@ class KeyboardNavigationManager:  # noqa: PLR0904
         while attempts < len(self.focusable_elements):
             element = self.focusable_elements[prev_index]
 
-            if element.enabled and (element.context is None or element.context == self.current_context):
+            if element.enabled and (
+                element.context is None or element.context == self.current_context
+            ):
                 self.current_focus_index = prev_index
                 self._focus_element(element)
                 return True
@@ -650,7 +710,10 @@ class KeyboardNavigationManager:  # noqa: PLR0904
         self.bindings.clear()
 
         for key_combo, binding_list in bindings_data.items():
-            self.bindings[key_combo] = [KeyBinding.from_dict(binding_data) for binding_data in cast(list, binding_list)]
+            self.bindings[key_combo] = [
+                KeyBinding.from_dict(binding_data)
+                for binding_data in cast(list, binding_list)
+            ]
 
     def get_help_text(self, context: NavigationContext | None = None) -> list[str]:
         """Get help text for current context."""
@@ -661,8 +724,13 @@ class KeyboardNavigationManager:  # noqa: PLR0904
 
         for bindings in self.bindings.values():
             for binding in bindings:
-                if binding.context in valid_contexts and binding.action not in processed_actions:
-                    help_lines.append(f"{binding.key_combination:<20} {binding.description}")
+                if (
+                    binding.context in valid_contexts
+                    and binding.action not in processed_actions
+                ):
+                    help_lines.append(
+                        f"{binding.key_combination:<20} {binding.description}"
+                    )
                     processed_actions.add(binding.action)
 
         return help_lines

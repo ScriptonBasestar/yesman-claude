@@ -194,7 +194,9 @@ class TestTaskScheduler:
         assert capability.agent_id == sample_agent.agent_id
 
     @staticmethod
-    def test_register_agent_with_capability(scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    def test_register_agent_with_capability(
+        scheduler: TaskScheduler, sample_agent: Agent
+    ) -> None:
         """Test agent registration with custom capability."""
         custom_capability = AgentCapability(
             agent_id=sample_agent.agent_id,
@@ -236,7 +238,9 @@ class TestTaskScheduler:
         assert score <= 1.0  # Should be normalized
 
     @staticmethod
-    def test_get_next_task_for_agent(scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task) -> None:
+    def test_get_next_task_for_agent(
+        scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task
+    ) -> None:
         """Test getting next task for agent."""
         scheduler.register_agent(sample_agent)
         scheduler.add_task(sample_task)
@@ -259,10 +263,14 @@ class TestTaskScheduler:
         task = scheduler.get_next_task_for_agent(sample_agent)
 
         assert task == sample_task
-        assert sample_agent.agent_id in scheduler.agent_capabilities  # Should auto-register
+        assert (
+            sample_agent.agent_id in scheduler.agent_capabilities
+        )  # Should auto-register
 
     @staticmethod
-    def test_get_next_task_empty_queue(scheduler: TaskScheduler, sample_agent: Agent) -> None:
+    def test_get_next_task_empty_queue(
+        scheduler: TaskScheduler, sample_agent: Agent
+    ) -> None:
         """Test getting task from empty queue."""
         scheduler.register_agent(sample_agent)
 
@@ -326,7 +334,9 @@ class TestTaskScheduler:
         assert "task-2" in [task.task_id for agent, task in assignments]
 
     @staticmethod
-    def test_update_agent_performance(scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task) -> None:
+    def test_update_agent_performance(
+        scheduler: TaskScheduler, sample_agent: Agent, sample_task: Task
+    ) -> None:
         """Test updating agent performance metrics."""
         scheduler.register_agent(sample_agent)
 

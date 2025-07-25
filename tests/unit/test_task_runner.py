@@ -57,7 +57,9 @@ Regular text here.
 - [ ] Task 5
 """
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".md", delete=False, encoding="utf-8"
+        ) as f:
             f.write(content)
             f.flush()
 
@@ -92,7 +94,9 @@ Regular text here.
 - [ ] Another task
 """
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".md", delete=False, encoding="utf-8"
+        ) as f:
             f.write(content)
             f.flush()
 
@@ -122,7 +126,9 @@ Regular text here.
 """
 
         # Test all completed
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".md", delete=False, encoding="utf-8"
+        ) as f:
             f.write(all_done_content)
             f.flush()
 
@@ -133,7 +139,9 @@ Regular text here.
                 os.unlink(f.name)
 
         # Test incomplete
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".md", delete=False, encoding="utf-8"
+        ) as f:
             f.write(incomplete_content)
             f.flush()
 
@@ -158,7 +166,9 @@ class TestTaskRunner:
         assert len(subtasks) == 0
 
         # Complex task should be broken down
-        complex_task = TodoTask("Implement comprehensive user authentication system with OAuth2, JWT tokens, password reset, email verification, and role-based access control")
+        complex_task = TodoTask(
+            "Implement comprehensive user authentication system with OAuth2, JWT tokens, password reset, email verification, and role-based access control"
+        )
         subtasks = runner.analyze_task_dependencies(complex_task)
         assert len(subtasks) == 5
         assert "Analyze requirements" in subtasks[0]

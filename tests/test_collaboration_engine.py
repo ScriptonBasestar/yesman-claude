@@ -275,7 +275,10 @@ class TestCollaborationEngine:
         # Should be queued for all agents except sender
         assert len(engine.message_queues["agent-2"]) == 1
         assert len(engine.message_queues["agent-3"]) == 1
-        assert "agent-1" not in engine.message_queues or len(engine.message_queues["agent-1"]) == 0
+        assert (
+            "agent-1" not in engine.message_queues
+            or len(engine.message_queues["agent-1"]) == 0
+        )
 
     @pytest.mark.asyncio
     @staticmethod
@@ -657,11 +660,15 @@ class TestCollaborationEngine:
         # Check review request messages
         for reviewer_id in reviewers:
             messages = list(engine.message_queues[reviewer_id])
-            assert any(msg.message_type == MessageType.REVIEW_REQUEST for msg in messages)
+            assert any(
+                msg.message_type == MessageType.REVIEW_REQUEST for msg in messages
+            )
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_prevent_conflict_collaboratively(engine: CollaborationEngine) -> None:
+    async def test_prevent_conflict_collaboratively(
+        engine: CollaborationEngine,
+    ) -> None:
         """Test collaborative conflict prevention."""
         # Setup agents with branches
         engine.agent_pool.agents["agent-1"].current_branch = "feature-a"
@@ -740,7 +747,9 @@ class TestCollaborationEngine:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_background_tasks_message_processor(engine: CollaborationEngine) -> None:
+    async def test_background_tasks_message_processor(
+        engine: CollaborationEngine,
+    ) -> None:
         """Test message processor background task."""
         # Add expired acknowledgment
         expired_msg = CollaborationMessage(

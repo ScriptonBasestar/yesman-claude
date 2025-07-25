@@ -232,7 +232,9 @@ class TestMetricsVerifier:
         assert "test_run" in task_ids
 
     @staticmethod
-    def test_single_agent_performance_tracking(metrics_verifier: MetricsVerifier) -> None:
+    def test_single_agent_performance_tracking(
+        metrics_verifier: MetricsVerifier,
+    ) -> None:
         """Test single-agent performance tracking (simplified)."""
         # Directly set single agent time
         metrics_verifier.current_metrics.single_agent_time = 10.0
@@ -242,7 +244,9 @@ class TestMetricsVerifier:
         assert len(metrics_verifier.single_agent_benchmarks) == 1
 
     @staticmethod
-    def test_multi_agent_performance_tracking(metrics_verifier: MetricsVerifier) -> None:
+    def test_multi_agent_performance_tracking(
+        metrics_verifier: MetricsVerifier,
+    ) -> None:
         """Test multi-agent performance tracking (simplified)."""
         # Set baseline first
         metrics_verifier.current_metrics.single_agent_time = 10.0
@@ -327,7 +331,9 @@ class TestComprehensiveVerification:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_comprehensive_verification_flow(mock_agent_pool: Mock) -> None:  # noqa: ARG002, ARG004
+    async def test_comprehensive_verification_flow(
+        mock_agent_pool: Mock,
+    ) -> None:  # noqa: ARG002, ARG004
         """Test complete verification flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Mock time.time to return predictable results

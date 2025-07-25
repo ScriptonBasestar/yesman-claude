@@ -50,7 +50,9 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
             self.print_info(f"   Language: {language}")
 
             branch_manager = BranchManager(repo_path or ".")
-            analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
+            analyzer = SemanticAnalyzer(
+                branch_manager=branch_manager, repo_path=repo_path
+            )
 
             async def run_analysis() -> dict[str, Any]:
                 # For semantic conflict analysis, we need branches
@@ -59,9 +61,15 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                     raise CommandError(msg)
 
                 branch1, branch2 = files[0], files[1]
-                file_paths = files[MIN_BRANCHES_FOR_ANALYSIS:] if len(files) > MIN_BRANCHES_FOR_ANALYSIS else None
+                file_paths = (
+                    files[MIN_BRANCHES_FOR_ANALYSIS:]
+                    if len(files) > MIN_BRANCHES_FOR_ANALYSIS
+                    else None
+                )
 
-                conflicts = await analyzer.analyze_semantic_conflicts(branch1, branch2, file_paths)
+                conflicts = await analyzer.analyze_semantic_conflicts(
+                    branch1, branch2, file_paths
+                )
 
                 if not conflicts:
                     self.print_success("✅ No semantic conflicts detected")
@@ -81,13 +89,22 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
                         "medium": "🟡",
                         "high": "🔴",
                         "critical": "💀",
-                    }.get(conflict.severity.value if hasattr(conflict.severity, "value") else str(conflict.severity), "❓")
+                    }.get(
+                        (
+                            conflict.severity.value
+                            if hasattr(conflict.severity, "value")
+                            else str(conflict.severity)
+                        ),
+                        "❓",
+                    )
 
                     self.print_info(f"{severity_icon} {conflict.conflict_type}")
                     self.print_info(f"   File: {conflict.file_path}")
                     self.print_info(f"   Description: {conflict.description}")
                     if hasattr(conflict, "suggested_resolution"):
-                        self.print_info(f"   Suggestion: {conflict.suggested_resolution}")
+                        self.print_info(
+                            f"   Suggestion: {conflict.suggested_resolution}"
+                        )
                     self.print_info("")
 
                 return {
@@ -107,7 +124,9 @@ class AnalyzeSemanticConflictsCommand(BaseCommand):
 class SemanticSummaryCommand(BaseCommand):
     """Show semantic analysis summary."""
 
-    def execute(self, repo_path: str | None = None, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(
+        self, repo_path: str | None = None, **kwargs: Any
+    ) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the semantic summary command.
 
         Returns:
@@ -118,7 +137,9 @@ class SemanticSummaryCommand(BaseCommand):
             self.print_info("=" * 40)
 
             branch_manager = BranchManager(repo_path or ".")
-            analyzer = SemanticAnalyzer(branch_manager=branch_manager, repo_path=repo_path)
+            analyzer = SemanticAnalyzer(
+                branch_manager=branch_manager, repo_path=repo_path
+            )
             summary = analyzer.get_analysis_summary()
 
             self.print_info(f"Files Analyzed: {summary['files_analyzed']}")
@@ -136,7 +157,13 @@ class SemanticSummaryCommand(BaseCommand):
 class FunctionDiffCommand(BaseCommand):
     """Show function-level differences."""
 
-    def execute(self, file1: str | None = None, file2: str | None = None, language: str = "python", **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002, ANN401
+    def execute(
+        self,
+        file1: str | None = None,
+        file2: str | None = None,
+        language: str = "python",
+        **kwargs: Any,
+    ) -> dict[str, Any]:  # noqa: ARG002, ANN401
         """Execute the function diff command.
 
         Returns:
@@ -159,23 +186,42 @@ class FunctionDiffCommand(BaseCommand):
             SemanticAnalyzer(branch_manager=branch_manager)
 
             # Since get_function_diff doesn't exist, create basic diff info
-            diff: dict[str, Any] = {"file1": file1, "file2": file2, "function_differences": [], "summary": f"Function differences between {file1} and {file2}"}
+            diff: dict[str, Any] = {
+                "file1": file1,
+                "file2": file2,
+                "function_differences": [],
+                "summary": f"Function differences between {file1} and {file2}",
+            }
 
             self.print_info("📋 Function Differences:")
             self.print_info("=" * 50)
 
             if diff["function_differences"]:
                 for func_diff in diff["function_differences"]:
-                    func_name = func_diff.get("function_name", "Unknown") if isinstance(func_diff, dict) else str(func_diff)
-                    change_type = func_diff.get("change_type", "Unknown") if isinstance(func_diff, dict) else "Unknown"
-                    description = func_diff.get("description", "No description") if isinstance(func_diff, dict) else "No description"
+                    func_name = (
+                        func_diff.get("function_name", "Unknown")
+                        if isinstance(func_diff, dict)
+                        else str(func_diff)
+                    )
+                    change_type = (
+                        func_diff.get("change_type", "Unknown")
+                        if isinstance(func_diff, dict)
+                        else "Unknown"
+                    )
+                    description = (
+                        func_diff.get("description", "No description")
+                        if isinstance(func_diff, dict)
+                        else "No description"
+                    )
 
                     self.print_info(f"📝 Function: {func_name}")
                     self.print_info(f"   Change Type: {change_type}")
                     self.print_info(f"   Description: {description}")
                     self.print_info("")
             else:
-                self.print_info("No function differences available in current implementation")
+                self.print_info(
+                    "No function differences available in current implementation"
+                )
 
             return {"success": True, "file1": file1, "file2": file2, "diff": diff}
 
@@ -217,7 +263,11 @@ class SemanticMergeCommand(BaseCommand):
             branch_manager = BranchManager(".")
             analyzer = SemanticAnalyzer(branch_manager=branch_manager)
             conflict_engine = ConflictResolutionEngine(branch_manager=branch_manager)
-            merger = SemanticMerger(semantic_analyzer=analyzer, conflict_engine=conflict_engine, branch_manager=branch_manager)
+            merger = SemanticMerger(
+                semantic_analyzer=analyzer,
+                conflict_engine=conflict_engine,
+                branch_manager=branch_manager,
+            )
 
             # Convert strategy string to enum if possible
             try:
@@ -226,15 +276,27 @@ class SemanticMergeCommand(BaseCommand):
                 merge_strategy = MergeStrategy.INTELLIGENT_MERGE  # Default fallback
 
             async def run_merge() -> dict[str, Any]:
-                result = await merger.perform_semantic_merge(file_path=target_file, branch1="current", branch2="other", strategy=merge_strategy)
+                result = await merger.perform_semantic_merge(
+                    file_path=target_file,
+                    branch1="current",
+                    branch2="other",
+                    strategy=merge_strategy,
+                )
 
-                success = result.resolution.value in {"auto_resolved", "partial_resolution"}
+                success = result.resolution.value in {
+                    "auto_resolved",
+                    "partial_resolution",
+                }
                 if success:
                     self.print_success("✅ Semantic merge completed successfully!")
                     self.print_info(f"   Resolution: {result.resolution.value}")
-                    self.print_info(f"   Conflicts resolved: {len(result.conflicts_resolved)}")
+                    self.print_info(
+                        f"   Conflicts resolved: {len(result.conflicts_resolved)}"
+                    )
                     if result.unresolved_conflicts:
-                        self.print_warning(f"   Manual review needed: {len(result.unresolved_conflicts)} conflicts")
+                        self.print_warning(
+                            f"   Manual review needed: {len(result.unresolved_conflicts)} conflicts"
+                        )
                 else:
                     self.print_error("❌ Semantic merge failed")
                     self.print_info(f"   Resolution: {result.resolution.value}")

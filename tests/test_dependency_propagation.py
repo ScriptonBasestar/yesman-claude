@@ -246,7 +246,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_track_dependency_change(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_track_dependency_change(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test tracking a dependency change."""
         change_id = await propagation_system.track_dependency_change(
             file_path="src/utils.py",
@@ -285,7 +287,9 @@ def test_processor() -> object:
             change_details={"description": "remove deprecated function"},
         )
 
-        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
+        change = next(
+            c for c in propagation_system.change_history if c.change_id == change_id
+        )
         assert change.impact_level == ChangeImpact.BREAKING
 
         # Security change keywords
@@ -296,7 +300,9 @@ def test_processor() -> object:
             change_details={"description": "update security token validation"},
         )
 
-        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
+        change = next(
+            c for c in propagation_system.change_history if c.change_id == change_id
+        )
         assert change.impact_level == ChangeImpact.SECURITY
 
         # Enhancement changes
@@ -307,19 +313,25 @@ def test_processor() -> object:
             change_details={"description": "add new feature functionality"},
         )
 
-        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
+        change = next(
+            c for c in propagation_system.change_history if c.change_id == change_id
+        )
         assert change.impact_level == ChangeImpact.ENHANCEMENT
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_build_dependency_graph(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_build_dependency_graph(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test building dependency graph from source files."""
         dependency_graph = await propagation_system.build_dependency_graph()
 
         assert len(dependency_graph) > 0
 
         # Check that Python files were analyzed
-        src_files = [path for path in dependency_graph.keys() if path.startswith("src/")]
+        src_files = [
+            path for path in dependency_graph.keys() if path.startswith("src/")
+        ]
         assert len(src_files) >= 2
 
         # Check specific dependency relationships
@@ -332,7 +344,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_get_dependency_impact_report(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_get_dependency_impact_report(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test getting dependency impact report."""
         # Build dependency graph first
         await propagation_system.build_dependency_graph()
@@ -359,7 +373,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_propagate_changes_to_branches(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_propagate_changes_to_branches(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test propagating changes to target branches."""
         # Track some changes first
         change_id1 = await propagation_system.track_dependency_change(
@@ -391,7 +407,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_get_pending_changes(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_get_pending_changes(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test getting pending changes."""
         # Track some changes
         await propagation_system.track_dependency_change(
@@ -429,7 +447,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_analyze_change_impact_detection(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_analyze_change_impact_detection(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test impact level detection logic."""
         # Test breaking change detection
         impact = await propagation_system._analyze_change_impact(  # noqa: SLF001
@@ -481,7 +501,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_find_affected_files(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_find_affected_files(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test finding files affected by changes."""
         # Build dependency graph first
         await propagation_system.build_dependency_graph()
@@ -498,12 +520,16 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_find_affected_branches(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_find_affected_branches(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test finding branches affected by file changes."""
         affected_files = ["src/main.py", "src/utils.py"]
 
-        affected_branches = await propagation_system._find_affected_branches(  # noqa: SLF001
-            affected_files,
+        affected_branches = (
+            await propagation_system._find_affected_branches(  # noqa: SLF001
+                affected_files,
+            )
         )
 
         # Should return branches based on mock branch info protocol
@@ -511,20 +537,26 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_calculate_indirect_dependents(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_calculate_indirect_dependents(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test calculating indirect dependent count."""
         # Build dependency graph
         await propagation_system.build_dependency_graph()
 
         if "src/utils.py" in propagation_system.dependency_graph:
-            count = await propagation_system._calculate_indirect_dependents(  # noqa: SLF001
-                "src/utils.py",
+            count = (
+                await propagation_system._calculate_indirect_dependents(  # noqa: SLF001
+                    "src/utils.py",
+                )
             )
             assert isinstance(count, int)
             assert count >= 0
 
     @staticmethod
-    def test_calculate_complexity_score(propagation_system: DependencyPropagationSystem) -> None:
+    def test_calculate_complexity_score(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test complexity score calculation."""
         node = DependencyNode(
             file_path="test.py",
@@ -546,25 +578,39 @@ def test_processor() -> object:
             dependents={f"dep{i}" for i in range(50)},  # Many dependents
         )
 
-        score = propagation_system._calculate_complexity_score(large_node)  # noqa: SLF001
+        score = propagation_system._calculate_complexity_score(
+            large_node
+        )  # noqa: SLF001
         assert score == 10.0  # Should be capped
 
     @staticmethod
-    def test_calculate_risk_level(propagation_system: DependencyPropagationSystem) -> None:
+    def test_calculate_risk_level(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test risk level calculation."""
         # High risk: high complexity or high impact
-        assert propagation_system._calculate_risk_level(8.0, 5) == "high"  # noqa: SLF001
-        assert propagation_system._calculate_risk_level(5.0, 15) == "high"  # noqa: SLF001
+        assert (
+            propagation_system._calculate_risk_level(8.0, 5) == "high"
+        )  # noqa: SLF001
+        assert (
+            propagation_system._calculate_risk_level(5.0, 15) == "high"
+        )  # noqa: SLF001
 
         # Medium risk: medium complexity or medium impact
-        assert propagation_system._calculate_risk_level(6.0, 3) == "medium"  # noqa: SLF001
-        assert propagation_system._calculate_risk_level(3.0, 8) == "medium"  # noqa: SLF001
+        assert (
+            propagation_system._calculate_risk_level(6.0, 3) == "medium"
+        )  # noqa: SLF001
+        assert (
+            propagation_system._calculate_risk_level(3.0, 8) == "medium"
+        )  # noqa: SLF001
 
         # Low risk: low complexity and low impact
         assert propagation_system._calculate_risk_level(2.0, 2) == "low"  # noqa: SLF001
 
     @staticmethod
-    def test_get_propagation_summary(propagation_system: DependencyPropagationSystem) -> None:
+    def test_get_propagation_summary(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test getting propagation system summary."""
         summary = propagation_system.get_propagation_summary()
 
@@ -582,7 +628,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_propagation_stats_tracking(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_propagation_stats_tracking(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test that statistics are properly tracked."""
         initial_stats = propagation_system.propagation_stats.copy()
 
@@ -596,11 +644,16 @@ def test_processor() -> object:
         )
 
         # Check stats updated
-        assert propagation_system.propagation_stats["changes_tracked"] == initial_stats["changes_tracked"] + 1
+        assert (
+            propagation_system.propagation_stats["changes_tracked"]
+            == initial_stats["changes_tracked"] + 1
+        )
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_immediate_propagation_for_critical_changes(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_immediate_propagation_for_critical_changes(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test that critical changes trigger immediate propagation."""
         # Start the system to enable processing
         await propagation_system.start()
@@ -625,7 +678,9 @@ def test_processor() -> object:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_notification_to_affected_agents(propagation_system: DependencyPropagationSystem) -> None:
+    async def test_notification_to_affected_agents(
+        propagation_system: DependencyPropagationSystem,
+    ) -> None:
         """Test that affected agents are notified of changes."""
         await propagation_system.start()
 

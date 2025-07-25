@@ -92,7 +92,9 @@ class ResolutionResult:
 class ConflictResolutionEngine:
     """Engine for detecting and resolving conflicts between branches."""
 
-    def __init__(self, branch_manager: BranchManager, repo_path: str | None = None) -> None:
+    def __init__(
+        self, branch_manager: BranchManager, repo_path: str | None = None
+    ) -> None:
         """Initialize the conflict resolution engine.
 
         Args:
@@ -221,7 +223,9 @@ class ConflictResolutionEngine:
             conflicts.extend(semantic_conflicts)
 
         except (subprocess.CalledProcessError, OSError, RuntimeError, AttributeError):
-            logger.exception("Error detecting conflicts between %s and %s", branch1, branch2)
+            logger.exception(
+                "Error detecting conflicts between %s and %s", branch1, branch2
+            )
 
         return conflicts
 
@@ -353,7 +357,9 @@ class ConflictResolutionEngine:
                 severity = ConflictSeverity.MEDIUM
 
                 # Determine conflict type
-                if (change1 == "D" and change2 == "M") or (change1 == "M" and change2 == "D"):
+                if (change1 == "D" and change2 == "M") or (
+                    change1 == "M" and change2 == "D"
+                ):
                     conflict_type = ConflictType.FILE_DELETION
                     severity = ConflictSeverity.HIGH
                 elif change1 == "A" and change2 == "A":
@@ -432,10 +438,15 @@ class ConflictResolutionEngine:
             functions2 = self._extract_function_signatures(content2)
 
             for func_name in functions1:
-                if func_name in functions2 and functions1[func_name] != functions2[func_name]:
-                    conflict_id = f"semantic_{branch1}_{branch2}_{file_path}_{func_name}".replace(
-                        "/",
-                        "_",
+                if (
+                    func_name in functions2
+                    and functions1[func_name] != functions2[func_name]
+                ):
+                    conflict_id = (
+                        f"semantic_{branch1}_{branch2}_{file_path}_{func_name}".replace(
+                            "/",
+                            "_",
+                        )
                     )
 
                     conflicts.append(
@@ -455,7 +466,13 @@ class ConflictResolutionEngine:
                         ),
                     )
 
-        except (subprocess.CalledProcessError, OSError, RuntimeError, ValueError, TypeError):
+        except (
+            subprocess.CalledProcessError,
+            OSError,
+            RuntimeError,
+            ValueError,
+            TypeError,
+        ):
             logger.exception("Error analyzing semantic changes in %s", file_path)
 
         return conflicts
@@ -535,13 +552,25 @@ class ConflictResolutionEngine:
             # Update success rate
             total_attempts = len(self.resolution_history)
             successful = len([r for r in self.resolution_history if r.success])
-            self.resolution_stats["resolution_success_rate"] = successful / total_attempts if total_attempts > 0 else 0.0
+            self.resolution_stats["resolution_success_rate"] = (
+                successful / total_attempts if total_attempts > 0 else 0.0
+            )
 
             # Update average resolution time
-            times = [r.resolution_time for r in self.resolution_history if r.resolution_time > 0]
-            self.resolution_stats["average_resolution_time"] = sum(times) / len(times) if times else 0.0
+            times = [
+                r.resolution_time
+                for r in self.resolution_history
+                if r.resolution_time > 0
+            ]
+            self.resolution_stats["average_resolution_time"] = (
+                sum(times) / len(times) if times else 0.0
+            )
 
-            logger.info("Conflict resolution result: %s using %s", result.success, strategy.value)
+            logger.info(
+                "Conflict resolution result: %s using %s",
+                result.success,
+                strategy.value,
+            )
 
         except Exception as e:
             logger.exception("Error resolving conflict %s", conflict_id)
@@ -753,8 +782,16 @@ class ConflictResolutionEngine:
             head_part = parts[0].replace("<<<<<<< HEAD", "").strip()
             other_part = parts[1].split(">>>>>>> ")[0].strip()
 
-            head_imports = [line.strip() for line in head_part.split("\n") if line.strip().startswith("import")]
-            other_imports = [line.strip() for line in other_part.split("\n") if line.strip().startswith("import")]
+            head_imports = [
+                line.strip()
+                for line in head_part.split("\n")
+                if line.strip().startswith("import")
+            ]
+            other_imports = [
+                line.strip()
+                for line in other_part.split("\n")
+                if line.strip().startswith("import")
+            ]
 
             all_imports = list(set(head_imports + other_imports))
             all_imports.sort()  # Sort alphabetically
@@ -793,14 +830,20 @@ class ConflictResolutionEngine:
         type_counts = {}
         for conflict_type in ConflictType:
             type_counts[conflict_type.value] = len(
-                [c for c in self.detected_conflicts.values() if c.conflict_type == conflict_type],
+                [
+                    c
+                    for c in self.detected_conflicts.values()
+                    if c.conflict_type == conflict_type
+                ],
             )
 
         return {
             "total_conflicts": total_conflicts,
             "resolved_conflicts": resolved_conflicts,
             "unresolved_conflicts": total_conflicts - resolved_conflicts,
-            "resolution_rate": (resolved_conflicts / total_conflicts if total_conflicts > 0 else 0.0),
+            "resolution_rate": (
+                resolved_conflicts / total_conflicts if total_conflicts > 0 else 0.0
+            ),
             "severity_breakdown": severity_counts,
             "type_breakdown": type_counts,
             "resolution_stats": self.resolution_stats.copy(),

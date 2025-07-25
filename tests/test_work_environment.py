@@ -33,7 +33,9 @@ class TestWorkEnvironmentManager:
             check=False,
             cwd=repo_path,
         )
-        subprocess.run(["git", "config", "user.name", "Test User"], check=False, cwd=repo_path)
+        subprocess.run(
+            ["git", "config", "user.name", "Test User"], check=False, cwd=repo_path
+        )
 
         # Create initial files
         (repo_path / "README.md").write_text("# Test Repo")
@@ -41,10 +43,14 @@ class TestWorkEnvironmentManager:
 
         # Initial commit
         subprocess.run(["git", "add", "."], check=False, cwd=repo_path)
-        subprocess.run(["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path)
+        subprocess.run(
+            ["git", "commit", "-m", "Initial commit"], check=False, cwd=repo_path
+        )
 
         # Create test branch
-        subprocess.run(["git", "checkout", "-b", "test-branch"], check=False, cwd=repo_path)
+        subprocess.run(
+            ["git", "checkout", "-b", "test-branch"], check=False, cwd=repo_path
+        )
 
         return repo_path
 
@@ -63,7 +69,9 @@ class TestWorkEnvironmentManager:
         return WorkEnvironmentManager(repo_path=str(temp_repo), work_dir=str(work_dir))
 
     @staticmethod
-    def test_init(manager: WorkEnvironmentManager, temp_repo: Path, work_dir: Path) -> None:
+    def test_init(
+        manager: WorkEnvironmentManager, temp_repo: Path, work_dir: Path
+    ) -> None:
         """Test WorkEnvironmentManager initialization."""
         assert manager.repo_path == temp_repo
         assert manager.work_dir == work_dir
@@ -77,7 +85,9 @@ class TestWorkEnvironmentManager:
             with patch.object(manager, "_create_venv") as mock_venv:
                 with patch.object(manager, "_setup_environment") as mock_setup:
                     # Mock return values
-                    mock_worktree.return_value = manager.work_dir / "worktrees" / "test-branch"
+                    mock_worktree.return_value = (
+                        manager.work_dir / "worktrees" / "test-branch"
+                    )
                     mock_venv.return_value = manager.work_dir / "venvs" / "test-branch"
 
                     # Create environment
@@ -98,7 +108,9 @@ class TestWorkEnvironmentManager:
                     assert "test-branch" in manager.environments
 
     @staticmethod
-    def test_create_work_environment_custom_config(manager: WorkEnvironmentManager) -> None:
+    def test_create_work_environment_custom_config(
+        manager: WorkEnvironmentManager,
+    ) -> None:
         """Test creating environment with custom configuration."""
         config = {
             "python_version": "3.12",

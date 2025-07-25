@@ -20,7 +20,9 @@ class TestSetupCommand:
         self.runner = CliRunner()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_creates_all_sessions(self, mock_config: object) -> None:  # noqa: ARG002
+    def test_setup_creates_all_sessions(
+        self, mock_config: object
+    ) -> None:  # noqa: ARG002
         """Test setup command creates all sessions from projects.yaml."""
         projects = {
             "sessions": {
@@ -42,7 +44,9 @@ class TestSetupCommand:
             mock_manager.list_running_sessions.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_specific_project(self, mock_config: object) -> None:  # noqa: ARG002
+    def test_setup_with_specific_project(
+        self, mock_config: object
+    ) -> None:  # noqa: ARG002
         """Test setup command with specific project name."""
         projects = {
             "sessions": {
@@ -62,7 +66,9 @@ class TestSetupCommand:
             mock_manager.create_session.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_handles_session_creation_failure(self, mock_config: object) -> None:  # noqa: ARG002
+    def test_setup_handles_session_creation_failure(
+        self, mock_config: object
+    ) -> None:  # noqa: ARG002
         """Test setup handles session creation failure gracefully."""
         projects = {
             "sessions": {
@@ -79,10 +85,14 @@ class TestSetupCommand:
 
             # Should handle error gracefully
             assert result.exit_code == 0  # Command completes but reports failure
-            assert "already exists" in result.output or "failed to create" in result.output
+            assert (
+                "already exists" in result.output or "failed to create" in result.output
+            )
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_nonexistent_project(self, mock_config: object) -> None:  # noqa: ARG002
+    def test_setup_with_nonexistent_project(
+        self, mock_config: object
+    ) -> None:  # noqa: ARG002
         """Test setup with nonexistent project name."""
         projects = {
             "sessions": {

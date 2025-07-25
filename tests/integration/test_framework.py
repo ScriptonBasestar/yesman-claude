@@ -126,7 +126,9 @@ class IntegrationTestBase:
             self.session_manager = SessionManager()
         return self.session_manager
 
-    def create_test_session(self, session_name: str, **kwargs: Any) -> dict[str, object]:
+    def create_test_session(
+        self, session_name: str, **kwargs: Any
+    ) -> dict[str, object]:
         """Create a test session with specified configuration."""
         config = {
             "name": session_name,
@@ -159,7 +161,9 @@ class IntegrationTestBase:
         return config
 
     @staticmethod
-    def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
+    def wait_for_condition(
+        condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1
+    ) -> bool:
         """Wait for a condition to become true."""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -173,14 +177,18 @@ class IntegrationTestBase:
         session_manager = self.get_session_manager()
         sessions = session_manager.list_sessions()
         session_names = [s.get("name") for s in sessions]
-        assert session_name in session_names, f"Session {session_name} not found in {session_names}"
+        assert (
+            session_name in session_names
+        ), f"Session {session_name} not found in {session_names}"
 
     def assert_session_state(self, session_name: str, expected_state: str) -> None:
         """Assert that a session is in the expected state."""
         session_manager = self.get_session_manager()
         session_info = session_manager.get_session_info(session_name)
         assert session_info is not None, f"Session {session_name} not found"
-        assert session_info.get("state") == expected_state, f"Session {session_name} state is {session_info.get('state')}, expected {expected_state}"
+        assert (
+            session_info.get("state") == expected_state
+        ), f"Session {session_name} state is {session_info.get('state')}, expected {expected_state}"
 
 
 class AsyncIntegrationTestBase(IntegrationTestBase):
@@ -199,11 +207,17 @@ class AsyncIntegrationTestBase(IntegrationTestBase):
         super().teardown_method()
 
     @staticmethod
-    async def async_wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1) -> bool:
+    async def async_wait_for_condition(
+        condition_func: Callable[[], bool], timeout: float = 5.0, interval: float = 0.1
+    ) -> bool:
         """Async version of wait_for_condition."""
         start_time = time.time()
         while time.time() - start_time < timeout:
-            if await condition_func() if asyncio.iscoroutinefunction(condition_func) else condition_func():
+            if (
+                await condition_func()
+                if asyncio.iscoroutinefunction(condition_func)
+                else condition_func()
+            ):
                 return True
             await asyncio.sleep(interval)
         return False
@@ -226,12 +240,16 @@ class MockClaudeEnvironment:
         # Find matching response
         for pattern, response in self.mock_responses.items():
             if pattern.lower() in prompt.lower():
-                self.interaction_history.append({"prompt": prompt, "response": response, "timestamp": time.time()})
+                self.interaction_history.append(
+                    {"prompt": prompt, "response": response, "timestamp": time.time()}
+                )
                 return response
 
         # Default response
         default_response = f"Mock Claude response to: {prompt[:50]}..."
-        self.interaction_history.append({"prompt": prompt, "response": default_response, "timestamp": time.time()})
+        self.interaction_history.append(
+            {"prompt": prompt, "response": default_response, "timestamp": time.time()}
+        )
         return default_response
 
     def get_interaction_count(self) -> int:
@@ -272,7 +290,9 @@ class IntegrationTestFixtures:
         mock_env = MockClaudeEnvironment(test_dir)
 
         # Add common mock responses
-        mock_env.add_mock_response("help", "I'm here to help! What would you like to know?")
+        mock_env.add_mock_response(
+            "help", "I'm here to help! What would you like to know?"
+        )
         mock_env.add_mock_response("code", "Here's some code for you...")
         mock_env.add_mock_response("explain", "Let me explain that concept...")
 
@@ -327,11 +347,15 @@ class CommandTestRunner:
 
     def assert_command_succeeded(self, command_class: type) -> None:
         """Assert that the most recent command of given type succeeded."""
-        matching_results = [r for r in self.command_results if r["command"] == command_class.__name__]
+        matching_results = [
+            r for r in self.command_results if r["command"] == command_class.__name__
+        ]
         assert matching_results, f"No {command_class.__name__} command found in history"
 
         latest_result = matching_results[-1]
-        assert latest_result["success"], f"Command {command_class.__name__} failed: {latest_result['error']}"
+        assert latest_result[
+            "success"
+        ], f"Command {command_class.__name__} failed: {latest_result['error']}"
 
 
 class PerformanceMonitor:
@@ -369,7 +393,9 @@ class PerformanceMonitor:
     def assert_performance_threshold(self, operation: str, max_time: float) -> None:
         """Assert that operation average time is below threshold."""
         avg_time = self.get_average_time(operation)
-        assert avg_time <= max_time, f"Operation {operation} average time {avg_time:.3f}s exceeds threshold {max_time}s"
+        assert (
+            avg_time <= max_time
+        ), f"Operation {operation} average time {avg_time:.3f}s exceeds threshold {max_time}s"
 
 
 __all__ = [

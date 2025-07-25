@@ -46,7 +46,9 @@ class StatusDashboard:
 
         # Use provided dependencies or create defaults
         self.config = config if config is not None else YesmanConfig()
-        self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)
+        self.tmux_manager = (
+            tmux_manager if tmux_manager is not None else TmuxManager(self.config)
+        )
 
         # Initialize widgets
         self.session_browser = SessionBrowser(self.console)
@@ -74,7 +76,9 @@ class StatusDashboard:
         ]
 
         for todo_file in todo_files:
-            if todo_file.exists() and self.progress_tracker.load_todos_from_file(str(todo_file)):
+            if todo_file.exists() and self.progress_tracker.load_todos_from_file(
+                str(todo_file)
+            ):
                 break
 
     def update_data(self) -> None:
@@ -179,7 +183,10 @@ class StatusDashboard:
         # Project health - use available method or create fallback
         try:
             health_data = self.project_health.calculate_health()
-            health_content = Panel(f"Project Health: {health_data.get('overall_score', 'Unknown')}", title="Health")
+            health_content = Panel(
+                f"Project Health: {health_data.get('overall_score', 'Unknown')}",
+                title="Health",
+            )
         except Exception:
             health_content = Panel("Health data unavailable", title="Health")
         layout["health"].update(health_content)
@@ -194,7 +201,9 @@ class StatusDashboard:
 
         # Session progress
         if self.progress_data:
-            session_progress_content = self.session_progress.render_progress_overview(self.progress_data)
+            session_progress_content = self.session_progress.render_progress_overview(
+                self.progress_data
+            )
             layout["session_progress"].update(session_progress_content)
         else:
             layout["session_progress"].update(
@@ -247,9 +256,13 @@ class StatusDashboard:
         # Project health detailed - use fallback since render method not available
         try:
             health_data = self.project_health.calculate_health()
-            health_detailed = Panel(f"Project Health Details: {health_data}", title="Health Details")
+            health_detailed = Panel(
+                f"Project Health Details: {health_data}", title="Health Details"
+            )
         except Exception:
-            health_detailed = Panel("Health details unavailable", title="Health Details")
+            health_detailed = Panel(
+                "Health details unavailable", title="Health Details"
+            )
         panels.append(health_detailed)
 
         # Git activity
@@ -263,7 +276,9 @@ class StatusDashboard:
         panels.extend([progress_overview, todo_list])
 
         # Activity heatmap - create fallback since render method not available
-        activity_heatmap = Panel("Activity heatmap not available", title="Activity Heatmap")
+        activity_heatmap = Panel(
+            "Activity heatmap not available", title="Activity Heatmap"
+        )
         panels.append(activity_heatmap)
 
         # Display all panels
@@ -285,7 +300,9 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     ) -> dict:
         """Execute the status command."""
         try:
-            dashboard = StatusDashboard(project_path, update_interval, self.config, self.tmux_manager)
+            dashboard = StatusDashboard(
+                project_path, update_interval, self.config, self.tmux_manager
+            )
 
             if interactive:
                 self.print_info("Starting interactive project status dashboard...")
@@ -326,7 +343,9 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
             console.print(f"  Git: {git_status}")
             console.print(f"  Progress: {progress_status}")
 
-            console.print("\n💡 Use --interactive for live dashboard or --detailed for full view")
+            console.print(
+                "\n💡 Use --interactive for live dashboard or --detailed for full view"
+            )
             return {"success": True, "mode": "quick", "project_path": project_path}
 
         except KeyboardInterrupt:
@@ -348,7 +367,9 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
     help="Update interval in seconds",
 )
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
-def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:  # noqa: FBT001
+def status(
+    project_path: str, interactive: bool, update_interval: float, detailed: bool
+) -> None:  # noqa: FBT001
     """Comprehensive project status dashboard."""
     command = StatusCommand()
     command.run(

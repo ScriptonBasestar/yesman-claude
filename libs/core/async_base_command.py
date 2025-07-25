@@ -52,7 +52,12 @@ class AsyncBaseCommand(BaseCommand, ABC):
         """Async sleep wrapper for better concurrency."""
         await asyncio.sleep(duration)
 
-    async def run_with_interval(self, async_func: Callable[[], Coroutine[Any, Any, None]], interval: float, max_iterations: int | None = None) -> None:
+    async def run_with_interval(
+        self,
+        async_func: Callable[[], Coroutine[Any, Any, None]],
+        interval: float,
+        max_iterations: int | None = None,
+    ) -> None:
         """Run an async function repeatedly with specified interval."""
         self._running = True
         iterations = 0
@@ -102,7 +107,9 @@ class AsyncMonitoringMixin:
     stop: Callable[[], None]
     run_with_interval: Callable
 
-    async def start_monitoring(self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None) -> None:
+    async def start_monitoring(
+        self, update_func: Callable[[], Coroutine[Any, Any, None]] | None = None
+    ) -> None:
         """Start monitoring with regular updates."""
         if not isinstance(self, AsyncBaseCommand):
             msg = "AsyncMonitoringMixin requires AsyncBaseCommand"
@@ -141,7 +148,12 @@ class AsyncProgressMixin:
     print_success: Callable[[str], None]
     print_error: Callable[[str], None]
 
-    async def with_progress(self, async_func: Callable[[], Coroutine[Any, Any, object]], total_steps: int, description: str = "Processing") -> object:
+    async def with_progress(
+        self,
+        async_func: Callable[[], Coroutine[Any, Any, object]],
+        total_steps: int,
+        description: str = "Processing",
+    ) -> object:
         """Execute async function with progress tracking."""
         self._progress_total = total_steps
         self._progress_current = 0
@@ -208,7 +220,9 @@ class AsyncRetryMixin:
                 last_exception = e
 
                 if attempt < max_retries:
-                    self.print_warning(f"⚠️  Attempt {attempt + 1} failed: {e}. Retrying in {current_delay:.1f}s...")
+                    self.print_warning(
+                        f"⚠️  Attempt {attempt + 1} failed: {e}. Retrying in {current_delay:.1f}s..."
+                    )
                     await asyncio.sleep(current_delay)
                     current_delay *= backoff_multiplier
                 else:
@@ -249,5 +263,7 @@ class AsyncRetryCommand(AsyncBaseCommand, AsyncRetryMixin):
     """Base class for async commands with retry capabilities."""
 
 
-class AsyncFullFeaturedCommand(AsyncBaseCommand, AsyncMonitoringMixin, AsyncProgressMixin, AsyncRetryMixin):
+class AsyncFullFeaturedCommand(
+    AsyncBaseCommand, AsyncMonitoringMixin, AsyncProgressMixin, AsyncRetryMixin
+):
     """Base class for async commands with all features."""

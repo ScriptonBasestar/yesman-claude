@@ -77,7 +77,9 @@ class TestSessionSelector(unittest.TestCase):
 
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
-    def test_select_session_quit(self, mock_console_class: MagicMock, mock_prompt: MagicMock) -> None:  # noqa: ARG002
+    def test_select_session_quit(
+        self, mock_console_class: MagicMock, mock_prompt: MagicMock
+    ) -> None:  # noqa: ARG002
         """Test quitting the selector."""
         mock_prompt.return_value = "q"
 
@@ -88,7 +90,9 @@ class TestSessionSelector(unittest.TestCase):
 
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
-    def test_select_session_valid_choice(self, mock_console_class: MagicMock, mock_prompt: MagicMock) -> None:  # noqa: ARG002
+    def test_select_session_valid_choice(
+        self, mock_console_class: MagicMock, mock_prompt: MagicMock
+    ) -> None:  # noqa: ARG002
         """Test selecting a valid session."""
         mock_prompt.return_value = "2"  # Select second session
 

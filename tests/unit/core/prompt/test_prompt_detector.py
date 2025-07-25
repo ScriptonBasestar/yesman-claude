@@ -33,7 +33,9 @@ Do you want to make this edit to VideoProcessingService.kt?
         assert len(prompt_info.options) == 3
         assert "Yes" in prompt_info.options[0][1]
 
-    def test_detect_binary_choice_yn_prompt_should_return_binary_choice_type(self) -> None:
+    def test_detect_binary_choice_yn_prompt_should_return_binary_choice_type(
+        self,
+    ) -> None:
         """Test that y/n binary choice prompts are correctly detected
         and return PromptType.BINARY_CHOICE.
 
@@ -163,7 +165,9 @@ Do you want to continue with this operation?
         for content in test_cases:
             with self.subTest(content=content):
                 prompt_info = self.detector.detect_prompt(content)
-                assert prompt_info is not None, f"Should detect numbered selection: {content}"
+                assert (
+                    prompt_info is not None
+                ), f"Should detect numbered selection: {content}"
                 assert prompt_info.type == PromptType.NUMBERED_SELECTION
                 assert len(prompt_info.options) >= 2
 

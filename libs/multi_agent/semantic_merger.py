@@ -155,7 +155,12 @@ class SemanticMerger:
         Returns:
             MergeResult with merge outcome and details
         """
-        logger.info("Performing semantic merge for %s between %s and %s", file_path, branch1, branch2)
+        logger.info(
+            "Performing semantic merge for %s between %s and %s",
+            file_path,
+            branch1,
+            branch2,
+        )
 
         merge_id = f"merge_{branch1}_{branch2}_{hashlib.sha256(file_path.encode()).hexdigest()[:8]}"
         strategy = strategy or self.default_strategy
@@ -438,7 +443,11 @@ class SemanticMerger:
                     unresolved_conflicts.append(conflict.conflict_id)
 
             # Calculate overall confidence
-            overall_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
+            overall_confidence = (
+                sum(confidence_scores) / len(confidence_scores)
+                if confidence_scores
+                else 0.0
+            )
 
             # Determine resolution status
             if not unresolved_conflicts:
@@ -513,7 +522,11 @@ class SemanticMerger:
             return MergeResult(
                 merge_id=merge_id,
                 file_path=file_path,
-                resolution=(MergeResolution.AUTO_RESOLVED if semantic_integrity else MergeResolution.MERGE_FAILED),
+                resolution=(
+                    MergeResolution.AUTO_RESOLVED
+                    if semantic_integrity
+                    else MergeResolution.MERGE_FAILED
+                ),
                 strategy_used=MergeStrategy.AST_BASED_MERGE,
                 merged_content=merged_content,
                 merge_confidence=0.8 if semantic_integrity else 0.0,
@@ -594,7 +607,15 @@ class SemanticMerger:
             confidence = len(resolved_conflicts) / max(len(conflicts), 1)
 
             # Determine resolution status
-            resolution = (MergeResolution.PARTIAL_RESOLUTION if resolved_conflicts else MergeResolution.MANUAL_REQUIRED) if unresolved_conflicts else MergeResolution.AUTO_RESOLVED
+            resolution = (
+                (
+                    MergeResolution.PARTIAL_RESOLUTION
+                    if resolved_conflicts
+                    else MergeResolution.MANUAL_REQUIRED
+                )
+                if unresolved_conflicts
+                else MergeResolution.AUTO_RESOLVED
+            )
 
             return MergeResult(
                 merge_id=merge_id,
@@ -675,10 +696,18 @@ class SemanticMerger:
                 }:
                     resolved_conflicts.append(conflict.conflict_id)
 
-            unresolved_conflicts = [c.conflict_id for c in conflicts if c.conflict_id not in resolved_conflicts]
+            unresolved_conflicts = [
+                c.conflict_id
+                for c in conflicts
+                if c.conflict_id not in resolved_conflicts
+            ]
 
             confidence = len(resolved_conflicts) / max(len(conflicts), 1)
-            resolution = MergeResolution.AUTO_RESOLVED if not unresolved_conflicts else MergeResolution.PARTIAL_RESOLUTION
+            resolution = (
+                MergeResolution.AUTO_RESOLVED
+                if not unresolved_conflicts
+                else MergeResolution.PARTIAL_RESOLUTION
+            )
 
             return MergeResult(
                 merge_id=merge_id,
@@ -741,7 +770,11 @@ class SemanticMerger:
             merge_id=merge_id,
             file_path=file_path,
             resolution=MergeResolution.AUTO_RESOLVED,
-            strategy_used=(MergeStrategy.PREFER_FIRST if branch_preference == "first" else MergeStrategy.PREFER_SECOND),
+            strategy_used=(
+                MergeStrategy.PREFER_FIRST
+                if branch_preference == "first"
+                else MergeStrategy.PREFER_SECOND
+            ),
             merged_content=content,
             conflicts_resolved=[c.conflict_id for c in conflicts],
             merge_confidence=1.0,
@@ -767,7 +800,9 @@ class SemanticMerger:
 
     async def _get_file_content(self, file_path: str, branch: str) -> str | None:
         """Get file content from a specific branch."""
-        return await self.semantic_analyzer._get_file_content(file_path, branch)  # noqa: SLF001
+        return await self.semantic_analyzer._get_file_content(
+            file_path, branch
+        )  # noqa: SLF001
 
     @staticmethod
     def _validate_ast_integrity(content: str) -> bool:
@@ -871,9 +906,14 @@ class SemanticMerger:
                     {"resolved": True, "confidence": 0.9, "strategy": "import_union"},
                 )
 
-            elif conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE:
+            elif (
+                conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE
+            ):
                 # Intelligent function signature merge
-                if conflict.symbol_name in context1.functions and conflict.symbol_name in context2.functions:
+                if (
+                    conflict.symbol_name in context1.functions
+                    and conflict.symbol_name in context2.functions
+                ):
                     func1 = context1.functions[conflict.symbol_name]
                     func2 = context2.functions[conflict.symbol_name]
 
@@ -908,7 +948,11 @@ class SemanticMerger:
         merge_result: MergeResult,
     ) -> bool:
         """Check if a conflict was resolved by the merge operation."""
-        return merge_result.resolution in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION} and merge_result.semantic_integrity
+        return (
+            merge_result.resolution
+            in {MergeResolution.AUTO_RESOLVED, MergeResolution.PARTIAL_RESOLUTION}
+            and merge_result.semantic_integrity
+        )
 
     def _update_merge_stats(self, merge_result: MergeResult) -> None:
         """Update merge statistics."""
@@ -926,8 +970,12 @@ class SemanticMerger:
             self.merge_stats["semantic_integrity_maintained"] += 1
 
         # Update average confidence
-        total_confidence = self.merge_stats["average_confidence"] * (self.merge_stats["total_merges"] - 1)
-        self.merge_stats["average_confidence"] = (total_confidence + merge_result.merge_confidence) / self.merge_stats["total_merges"]
+        total_confidence = self.merge_stats["average_confidence"] * (
+            self.merge_stats["total_merges"] - 1
+        )
+        self.merge_stats["average_confidence"] = (
+            total_confidence + merge_result.merge_confidence
+        ) / self.merge_stats["total_merges"]
 
     # Placeholder methods for complex operations (would be fully implemented)
 
@@ -987,7 +1035,11 @@ class SemanticMerger:
     ) -> SemanticConflict | None:
         """Find conflict related to a specific function."""
         for conflict in conflicts:
-            if conflict.symbol_name == func_name and conflict.conflict_type == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE:
+            if (
+                conflict.symbol_name == func_name
+                and conflict.conflict_type
+                == SemanticConflictType.FUNCTION_SIGNATURE_CHANGE
+            ):
                 return conflict
         return None
 
@@ -1050,9 +1102,18 @@ class SemanticMerger:
         """Get comprehensive summary of merge operations."""
         return {
             "total_merges": self.merge_stats["total_merges"],
-            "success_rate": (self.merge_stats["successful_merges"] / max(self.merge_stats["total_merges"], 1)),
-            "auto_resolution_rate": (self.merge_stats["auto_resolved"] / max(self.merge_stats["total_merges"], 1)),
-            "semantic_integrity_rate": (self.merge_stats["semantic_integrity_maintained"] / max(self.merge_stats["total_merges"], 1)),
+            "success_rate": (
+                self.merge_stats["successful_merges"]
+                / max(self.merge_stats["total_merges"], 1)
+            ),
+            "auto_resolution_rate": (
+                self.merge_stats["auto_resolved"]
+                / max(self.merge_stats["total_merges"], 1)
+            ),
+            "semantic_integrity_rate": (
+                self.merge_stats["semantic_integrity_maintained"]
+                / max(self.merge_stats["total_merges"], 1)
+            ),
             "average_confidence": self.merge_stats["average_confidence"],
             "strategy_performance": dict(self.success_rate_by_strategy),
             "recent_merges": [

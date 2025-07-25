@@ -46,7 +46,11 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
             "successful_sessions": successful_count,
             "failed_sessions": failed_count,
             "total_sessions": successful_count + failed_count,
-            "success_rate": ((successful_count / (successful_count + failed_count) * 100) if (successful_count + failed_count) > 0 else 0),
+            "success_rate": (
+                (successful_count / (successful_count + failed_count) * 100)
+                if (successful_count + failed_count) > 0
+                else 0
+            ),
         }
 
         # Log results
@@ -103,7 +107,9 @@ def setup(session_name: str | None, dry_run: bool, force: bool) -> None:  # noqa
         return
 
     if force:
-        command.print_warning("Force mode: existing sessions will be recreated without prompting")
+        command.print_warning(
+            "Force mode: existing sessions will be recreated without prompting"
+        )
         # TODO: Pass force flag to setup service
 
     command.run(session_name=session_name)

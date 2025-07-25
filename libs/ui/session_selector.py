@@ -37,7 +37,10 @@ class SessionSelector:
                 attached_clients = getattr(session, "attached", 0)
                 return {
                     "windows": len(windows),
-                    "window_names": ", ".join(window_names[:3]) + ("..." if len(window_names) > 3 else ""),
+                    "window_names": (
+                        ", ".join(window_names[:3])
+                        + ("..." if len(window_names) > 3 else "")
+                    ),
                     "attached": attached_clients > 0,
                     "clients": attached_clients,
                 }
@@ -50,7 +53,9 @@ class SessionSelector:
             "clients": 0,
         }
 
-    def _create_display(self, search_term: str = "") -> tuple[Table, list[dict[str, str]]]:
+    def _create_display(
+        self, search_term: str = ""
+    ) -> tuple[Table, list[dict[str, str]]]:
         """Create the display table.
 
         Returns:
@@ -72,7 +77,12 @@ class SessionSelector:
         # Filter sessions if search term provided
         filtered_sessions = self.sessions
         if search_term:
-            filtered_sessions = [s for s in self.sessions if search_term.lower() in s["project"].lower() or search_term.lower() in s["session"].lower()]
+            filtered_sessions = [
+                s
+                for s in self.sessions
+                if search_term.lower() in s["project"].lower()
+                or search_term.lower() in s["session"].lower()
+            ]
 
         for i, session in enumerate(filtered_sessions, 1):
             details = self._get_session_details(session["session"])
@@ -145,7 +155,9 @@ class SessionSelector:
                         if 0 <= idx < len(filtered_sessions):
                             return filtered_sessions[idx]["session"]
                 else:
-                    self.console.print("[yellow]No sessions found matching search term[/]")
+                    self.console.print(
+                        "[yellow]No sessions found matching search term[/]"
+                    )
                     Prompt.ask("Press Enter to continue")
                 self.console.clear()
             elif choice.isdigit():
@@ -154,7 +166,9 @@ class SessionSelector:
                     return filtered_sessions[idx]["session"]
                 self.console.print("[red]Invalid selection[/]")
             else:
-                self.console.print("[red]Invalid input. Enter a number, 's' to search, or 'q' to quit[/]")
+                self.console.print(
+                    "[red]Invalid input. Enter a number, 's' to search, or 'q' to quit[/]"
+                )
 
 
 def show_session_selector(sessions: list[dict[str, str]]) -> str | None:

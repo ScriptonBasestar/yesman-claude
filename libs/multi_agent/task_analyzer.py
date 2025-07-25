@@ -242,7 +242,11 @@ class TaskAnalyzer:
         if module.startswith(imported + "."):
             return True
 
-        return bool("." in imported and imported.rsplit(".", maxsplit=1)[-1] == module.rsplit(".", maxsplit=1)[-1])
+        return bool(
+            "." in imported
+            and imported.rsplit(".", maxsplit=1)[-1]
+            == module.rsplit(".", maxsplit=1)[-1]
+        )
 
     def create_task_from_files(
         self,

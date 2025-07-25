@@ -41,4 +41,6 @@ class TestPerformanceBenchmark:
         assert result is not None
 
         # Performance target: 100 sessions should render within 50ms
-        assert render_time < 0.05, f"Rendering took {render_time:.3f}s, expected < 0.05s"
+        assert (
+            render_time < 0.05
+        ), f"Rendering took {render_time:.3f}s, expected < 0.05s"

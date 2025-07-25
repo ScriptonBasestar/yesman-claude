@@ -1,7 +1,12 @@
 import pytest
 
 from libs.core.container import DIContainer, container
-from libs.core.services import get_config, get_tmux_manager, initialize_services, register_test_services
+from libs.core.services import (
+    get_config,
+    get_tmux_manager,
+    initialize_services,
+    register_test_services,
+)
 from libs.tmux_manager import TmuxManager
 from libs.yesman_config import YesmanConfig
 
@@ -81,7 +86,9 @@ class TestDIContainer:
         """Test circular dependency detection."""
 
         def factory_a() -> object:
-            return self.container.resolve(TmuxManager)  # This would create a circular dependency
+            return self.container.resolve(
+                TmuxManager
+            )  # This would create a circular dependency
 
         def factory_b() -> object:
             return self.container.resolve(YesmanConfig)

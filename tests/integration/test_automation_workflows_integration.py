@@ -50,7 +50,9 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
             "I'll help set up your development environment. Detecting project type...",
         )
 
-        self.mock_claude.add_mock_response("run tests", "Running test suite... All tests passed successfully!")
+        self.mock_claude.add_mock_response(
+            "run tests", "Running test suite... All tests passed successfully!"
+        )
 
         self.mock_claude.add_mock_response(
             "deploy application",
@@ -65,12 +67,16 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
 
         # Python project files
         (project_dir / "requirements.txt").write_text("flask==2.0.0\npytest==6.0.0")
-        (project_dir / "app.py").write_text("from flask import Flask\napp = Flask(__name__)")
+        (project_dir / "app.py").write_text(
+            "from flask import Flask\napp = Flask(__name__)"
+        )
         (project_dir / "test_app.py").write_text("import pytest\ndef test_app(): pass")
 
         # Docker files
         (project_dir / "Dockerfile").write_text("FROM python:3.9\nCOPY . /app")
-        (project_dir / "docker-compose.yml").write_text("version: '3.8'\nservices:\n  app:\n    build: .")
+        (project_dir / "docker-compose.yml").write_text(
+            "version: '3.8'\nservices:\n  app:\n    build: ."
+        )
 
         # Git repository
         (project_dir / ".git").mkdir()
@@ -79,7 +85,9 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         # Step 2: Test context detection
         self.performance_monitor.start_timing("context_detection")
 
-        detect_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir))
+        detect_result = self.command_runner.run_command(
+            AutomateDetectCommand, project_path=str(project_dir)
+        )
 
         detection_duration = self.performance_monitor.end_timing("context_detection")
 
@@ -132,9 +140,15 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         assert monitor_result["success"] is True
 
         # Performance assertions
-        assert detection_duration < 3.0, f"Context detection took {detection_duration:.2f}s, should be < 3s"
-        assert workflow_duration < 10.0, f"Workflow execution took {workflow_duration:.2f}s, should be < 10s"
-        assert monitoring_duration < 5.0, f"Monitoring setup took {monitoring_duration:.2f}s, should be < 5s"
+        assert (
+            detection_duration < 3.0
+        ), f"Context detection took {detection_duration:.2f}s, should be < 3s"
+        assert (
+            workflow_duration < 10.0
+        ), f"Workflow execution took {workflow_duration:.2f}s, should be < 10s"
+        assert (
+            monitoring_duration < 5.0
+        ), f"Monitoring setup took {monitoring_duration:.2f}s, should be < 5s"
 
     def test_multi_project_automation_coordination(self) -> None:
         """Test automation coordination across multiple projects."""
@@ -150,8 +164,12 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
             },
             "react_frontend": {
                 "files": {
-                    "package.json": '{"name": "frontend", "dependencies": {"react": "^17.0.0"}}',
-                    "src/App.js": "import React from 'react';\nfunction App() { return <div>Hello</div>; }",
+                    "package.json": (
+                        '{"name": "frontend", "dependencies": {"react": "^17.0.0"}}'
+                    ),
+                    "src/App.js": (
+                        "import React from 'react';\nfunction App() { return <div>Hello</div>; }"
+                    ),
                     "src/App.test.js": "test('renders app', () => {});",
                 },
                 "expected_contexts": ["javascript", "react"],
@@ -159,7 +177,9 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
             "docker_service": {
                 "files": {
                     "Dockerfile": "FROM nginx:alpine",
-                    "docker-compose.yml": "version: '3.8'\nservices:\n  web:\n    build: .",
+                    "docker-compose.yml": (
+                        "version: '3.8'\nservices:\n  web:\n    build: ."
+                    ),
                     "nginx.conf": "server { listen 80; }",
                 },
                 "expected_contexts": ["docker", "nginx"],
@@ -180,7 +200,9 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
                 full_path.write_text(content)
 
             # Test context detection for each project
-            detect_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir))
+            detect_result = self.command_runner.run_command(
+                AutomateDetectCommand, project_path=str(project_dir)
+            )
 
             assert detect_result["success"] is True
             detected_contexts = detect_result.get("contexts", [])
@@ -194,12 +216,16 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
         for project_name, results in project_results.items():
             detected_types = [ctx.get("type") for ctx in results["detected_contexts"]]
             for expected_type in results["expected_contexts"]:
-                assert expected_type in detected_types, f"Project {project_name} missing context {expected_type}"
+                assert (
+                    expected_type in detected_types
+                ), f"Project {project_name} missing context {expected_type}"
 
         # Test global monitoring across all projects
         all_project_paths = [str(self.test_dir / name) for name in projects.keys()]
 
-        global_monitor_result = self.command_runner.run_command(AutomateMonitorCommand, project_paths=all_project_paths, duration=3)
+        global_monitor_result = self.command_runner.run_command(
+            AutomateMonitorCommand, project_paths=all_project_paths, duration=3
+        )
 
         assert global_monitor_result["success"] is True
         monitored_projects = global_monitor_result.get("monitored_projects", [])
@@ -212,10 +238,14 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
 
         # Create project with potential issues
         (project_dir / "requirements.txt").write_text("invalid-package==999.999.999")
-        (project_dir / "broken_script.py").write_text("import non_existent_module\nbroken syntax here")
+        (project_dir / "broken_script.py").write_text(
+            "import non_existent_module\nbroken syntax here"
+        )
 
         # Test context detection with problematic files
-        detect_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir))
+        detect_result = self.command_runner.run_command(
+            AutomateDetectCommand, project_path=str(project_dir)
+        )
 
         # Should succeed even with problematic files
         assert detect_result["success"] is True
@@ -235,7 +265,9 @@ class TestAutomationWorkflowIntegration(AsyncIntegrationTestBase):
 
         # Fix the issues
         (project_dir / "requirements.txt").write_text("requests==2.25.1")
-        (project_dir / "fixed_script.py").write_text("import requests\nprint('Hello World')")
+        (project_dir / "fixed_script.py").write_text(
+            "import requests\nprint('Hello World')"
+        )
         (project_dir / "broken_script.py").unlink()
 
         # Test recovery workflow
@@ -264,7 +296,9 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         command_runner = CommandTestRunner(self)
 
         # Start monitoring
-        monitor_task = asyncio.create_task(self._run_async_monitor(command_runner, str(project_dir)))
+        monitor_task = asyncio.create_task(
+            self._run_async_monitor(command_runner, str(project_dir))
+        )
 
         # Wait a moment for monitoring to start
         await asyncio.sleep(0.5)
@@ -294,7 +328,9 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         assert True  # Placeholder - actual verification would depend on monitoring implementation
 
     @staticmethod
-    async def _run_async_monitor(command_runner: project_path, object) -> None:  # noqa: ARG002, ARG004
+    async def _run_async_monitor(
+        command_runner: project_path, object
+    ) -> None:  # noqa: ARG002, ARG004
         """Helper to run monitoring in async context."""
         # This would be the actual async monitoring implementation
         # For now, we simulate it
@@ -308,7 +344,9 @@ class TestRealTimeMonitoringIntegration(AsyncIntegrationTestBase):
         project_dir.mkdir()
 
         # Create test project
-        (project_dir / "slow_script.py").write_text("import time\ntime.sleep(1)\nprint('Done')")
+        (project_dir / "slow_script.py").write_text(
+            "import time\ntime.sleep(1)\nprint('Done')"
+        )
         (project_dir / "fast_script.py").write_text("print('Quick task')")
 
         command_runner = CommandTestRunner(self)
@@ -358,7 +396,9 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
 
         # Create project with evolving requirements
         (project_dir / "requirements.txt").write_text("requests==2.25.1")
-        (project_dir / "api_client.py").write_text("import requests\ndef get_data(): pass")
+        (project_dir / "api_client.py").write_text(
+            "import requests\ndef get_data(): pass"
+        )
 
         command_runner = CommandTestRunner(self)
 
@@ -422,4 +462,7 @@ class TestAutomationIntegrationWithAI(AsyncIntegrationTestBase):
 
         # Should suggest API-related workflows for FastAPI project
         suggestion_types = [s.get("type") for s in suggestions]
-        assert any("api" in str(suggestion_type).lower() for suggestion_type in suggestion_types)
+        assert any(
+            "api" in str(suggestion_type).lower()
+            for suggestion_type in suggestion_types
+        )

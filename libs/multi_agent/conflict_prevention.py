@@ -175,7 +175,9 @@ class ConflictPreventionSystem:
         self._running = False
         self._prevention_monitor_task: asyncio.Task[object] | None = None
 
-    async def start_prevention_monitoring(self, monitoring_interval: float = 300.0) -> None:
+    async def start_prevention_monitoring(
+        self, monitoring_interval: float = 300.0
+    ) -> None:
         """Start continuous conflict prevention monitoring."""
         self._running = True
         self._prevention_monitor_task = asyncio.create_task(
@@ -224,9 +226,15 @@ class ConflictPreventionSystem:
         )
 
         # Filter predictions by confidence threshold
-        significant_predictions = [p for p in predictions if p.likelihood_score >= self.prevention_config["prediction_threshold"]]
+        significant_predictions = [
+            p
+            for p in predictions
+            if p.likelihood_score >= self.prevention_config["prediction_threshold"]
+        ]
 
-        logger.info("Found %d significant conflict predictions", len(significant_predictions))
+        logger.info(
+            "Found %d significant conflict predictions", len(significant_predictions)
+        )
 
         # Generate prevention measures
         prevention_measures = []
@@ -256,10 +264,16 @@ class ConflictPreventionSystem:
 
         # Calculate prevention effectiveness
         prevention_time = (datetime.now(UTC) - start_time).total_seconds()
-        success_rate = len(applied_measures) / len(prevention_measures) if prevention_measures else 0.0
+        success_rate = (
+            len(applied_measures) / len(prevention_measures)
+            if prevention_measures
+            else 0.0
+        )
 
         # Estimate time saved (rough heuristic)
-        time_saved = conflicts_prevented * 2.0  # Assume 2 hours saved per prevented conflict
+        time_saved = (
+            conflicts_prevented * 2.0
+        )  # Assume 2 hours saved per prevented conflict
 
         # Update statistics
         self.prevention_stats["predictions_analyzed"] += len(predictions)
@@ -268,7 +282,10 @@ class ConflictPreventionSystem:
         self.prevention_stats["total_time_saved"] += time_saved
 
         if self.prevention_stats["measures_applied"] > 0:
-            self.prevention_stats["prevention_success_rate"] = self.prevention_stats["conflicts_prevented"] / self.prevention_stats["measures_applied"]
+            self.prevention_stats["prevention_success_rate"] = (
+                self.prevention_stats["conflicts_prevented"]
+                / self.prevention_stats["measures_applied"]
+            )
 
         # Create result
         result = PreventionResult(
@@ -291,7 +308,11 @@ class ConflictPreventionSystem:
         )
 
         self.prevention_history.append(result)
-        logger.info("Prevention session %s completed: %d conflicts prevented", session_id, conflicts_prevented)
+        logger.info(
+            "Prevention session %s completed: %d conflicts prevented",
+            session_id,
+            conflicts_prevented,
+        )
 
         return result
 
@@ -317,7 +338,11 @@ class ConflictPreventionSystem:
             measures.extend(await self._generate_generic_measures(prediction))
 
         # Filter by effort threshold
-        return [m for m in measures if m.estimated_effort <= self.prevention_config["effort_threshold"]]
+        return [
+            m
+            for m in measures
+            if m.estimated_effort <= self.prevention_config["effort_threshold"]
+        ]
 
     @staticmethod
     async def _generate_dependency_measures(
@@ -447,7 +472,10 @@ class ConflictPreventionSystem:
         measures = []
 
         # Early merge if high confidence
-        if prediction.likelihood_score >= self.prevention_config["early_merge_threshold"]:
+        if (
+            prediction.likelihood_score
+            >= self.prevention_config["early_merge_threshold"]
+        ):
             merge_measure = PreventionMeasure(
                 measure_id=f"early_merge_{prediction.prediction_id}",
                 strategy=PreventionStrategy.EARLY_MERGE,
@@ -638,7 +666,10 @@ class ConflictPreventionSystem:
                     result = await self.analyze_and_prevent_conflicts(active_branches)
 
                     if result.measures_applied > 0:
-                        logger.info("Prevention monitor applied %d measures", result.measures_applied)
+                        logger.info(
+                            "Prevention monitor applied %d measures",
+                            result.measures_applied,
+                        )
 
                 await asyncio.sleep(interval)
 
@@ -663,7 +694,9 @@ class ConflictPreventionSystem:
     def get_prevention_summary(self) -> dict[str, Any]:
         """Get summary of prevention system status and performance."""
         active_measures_count = len(self.active_measures)
-        recent_results = self.prevention_history[-10:] if self.prevention_history else []
+        recent_results = (
+            self.prevention_history[-10:] if self.prevention_history else []
+        )
 
         return {
             "statistics": self.prevention_stats.copy(),
@@ -671,7 +704,12 @@ class ConflictPreventionSystem:
             "prevention_sessions": len(self.prevention_history),
             "recent_effectiveness": {
                 "sessions": len(recent_results),
-                "avg_prevention_rate": (sum(r.prevention_success_rate for r in recent_results) / len(recent_results) if recent_results else 0.0),
+                "avg_prevention_rate": (
+                    sum(r.prevention_success_rate for r in recent_results)
+                    / len(recent_results)
+                    if recent_results
+                    else 0.0
+                ),
                 "total_time_saved": sum(r.time_saved for r in recent_results),
             },
             "configuration": self.prevention_config.copy(),

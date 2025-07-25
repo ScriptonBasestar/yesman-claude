@@ -131,7 +131,9 @@ class TestAgentPool:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_assign_task_to_agent(agent_pool: AgentPool, sample_task: Task) -> None:
+    async def test_assign_task_to_agent(
+        agent_pool: AgentPool, sample_task: Task
+    ) -> None:
         """Test assigning a task to an agent."""
         agent = await agent_pool._create_agent()  # noqa: SLF001
 

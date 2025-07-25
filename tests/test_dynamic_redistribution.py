@@ -64,7 +64,10 @@ class TestDynamicRedistribution:
 
         # Should detect need for rebalancing
         assert len(rebalancing_actions) > 0
-        assert any(action[0] == "agent-1" and action[1] == "agent-3" for action in rebalancing_actions)
+        assert any(
+            action[0] == "agent-1" and action[1] == "agent-3"
+            for action in rebalancing_actions
+        )
 
     @staticmethod
     def test_assignment_preference_adjustment(scheduler: TaskScheduler) -> None:
@@ -98,8 +101,12 @@ class TestDynamicRedistribution:
         assert len(rebalancing_actions) > 0
 
         # Processing power should be adjusted
-        assert overloaded_cap.processing_power < initial_overloaded_power  # Penalty applied
-        assert underloaded_cap.processing_power > initial_underloaded_power  # Boost applied
+        assert (
+            overloaded_cap.processing_power < initial_overloaded_power
+        )  # Penalty applied
+        assert (
+            underloaded_cap.processing_power > initial_underloaded_power
+        )  # Boost applied
 
     @staticmethod
     def test_load_estimation(scheduler: TaskScheduler) -> None:
@@ -141,10 +148,14 @@ class TestDynamicRedistribution:
 
             # Enable auto-rebalancing with short interval
             agent_pool._auto_rebalancing_enabled = True  # noqa: SLF001
-            agent_pool._auto_rebalancing_interval = 0.1  # 100ms for testing  # noqa: SLF001
+            agent_pool._auto_rebalancing_interval = (
+                0.1  # 100ms for testing  # noqa: SLF001
+            )
 
             # Start the auto-rebalancing loop
-            task = asyncio.create_task(agent_pool._auto_rebalancing_loop())  # noqa: SLF001
+            task = asyncio.create_task(
+                agent_pool._auto_rebalancing_loop()
+            )  # noqa: SLF001
 
             # Let it run for enough time to execute at least once
             await asyncio.sleep(0.3)

@@ -31,7 +31,9 @@ class ClaudeContentCollector:
         Returns:
         object: Description of return value.
         """
-        logger = logging.getLogger(f"yesman.dashboard.content_collector.{self.session_name}")
+        logger = logging.getLogger(
+            f"yesman.dashboard.content_collector.{self.session_name}"
+        )
         logger.setLevel(logging.INFO)
         logger.propagate = False
 
@@ -40,7 +42,9 @@ class ClaudeContentCollector:
 
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
@@ -52,7 +56,9 @@ class ClaudeContentCollector:
         Returns:
         Path: Description of return value.
         """
-        collection_dir = ensure_log_directory(get_default_log_path() / "claude_interactions")
+        collection_dir = ensure_log_directory(
+            get_default_log_path() / "claude_interactions"
+        )
         session_dir = collection_dir / self.session_name
         session_dir.mkdir(exist_ok=True)
         return session_dir
@@ -119,7 +125,12 @@ class ClaudeContentCollector:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(interaction, f, indent=2, ensure_ascii=False)
 
-            self.logger.info("Collected interaction %s - prompt: %s, response: %s", interaction["interaction_id"], prompt_info is not None, response)
+            self.logger.info(
+                "Collected interaction %s - prompt: %s, response: %s",
+                interaction["interaction_id"],
+                prompt_info is not None,
+                response,
+            )
 
             return True
 
@@ -159,7 +170,9 @@ class ClaudeContentCollector:
         }
 
         try:
-            filename = f"raw_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{content_hash}.json"
+            filename = (
+                f"raw_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{content_hash}.json"
+            )
             filepath = self.collection_path / filename
 
             with open(filepath, "w", encoding="utf-8") as f:
@@ -266,7 +279,10 @@ class ContentCollectionManager:
         Returns:
         object: Description of return value.
         """
-        return {session: collector.get_collection_stats() for session, collector in self.collectors.items()}
+        return {
+            session: collector.get_collection_stats()
+            for session, collector in self.collectors.items()
+        }
 
     def cleanup_all_sessions(self, days_to_keep: int = 7) -> dict[str, int]:
         """Clean up old files for all sessions.
@@ -274,4 +290,7 @@ class ContentCollectionManager:
         Returns:
         object: Description of return value.
         """
-        return {session: collector.cleanup_old_files(days_to_keep) for session, collector in self.collectors.items()}
+        return {
+            session: collector.cleanup_old_files(days_to_keep)
+            for session, collector in self.collectors.items()
+        }

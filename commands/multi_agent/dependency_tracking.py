@@ -72,5 +72,7 @@ class DependencyPropagateCommand(BaseCommand):
         """
         # Placeholder implementation - to be extracted from original multi_agent.py
         logger.info("Propagating dependency changes...")
-        msg = "Dependency propagate implementation pending extraction from original file"
+        msg = (
+            "Dependency propagate implementation pending extraction from original file"
+        )
         raise NotImplementedError(msg)

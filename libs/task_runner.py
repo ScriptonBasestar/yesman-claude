@@ -121,7 +121,11 @@ class TodoFile:
             new_lines.append(f"- [ ] {subtask}\n")
 
         # Insert the new lines
-        self.content_lines = self.content_lines[:parent_line] + new_lines + self.content_lines[parent_line:]
+        self.content_lines = (
+            self.content_lines[:parent_line]
+            + new_lines
+            + self.content_lines[parent_line:]
+        )
 
         # Mark parent as completed since we broke it down
         parent_task.completed = True
@@ -138,7 +142,9 @@ class TodoFile:
                 task = self.tasks[task_index]
                 # Replace the task line with updated version
                 marker = "[x]" if task.completed else "[>]" if task.skipped else "[ ]"
-                updated_line = re.sub(r"^(\s*-\s*)\[[x >\]]\s*\]?\s*", f"\\1{marker} ", line)
+                updated_line = re.sub(
+                    r"^(\s*-\s*)\[[x >\]]\s*\]?\s*", f"\\1{marker} ", line
+                )
                 updated_lines.append(updated_line)
                 task_index += 1
             else:
@@ -177,7 +183,11 @@ class TaskRunner:
         """
         if specific_dir:
             # Handle both absolute and relative paths
-            search_dir = Path(specific_dir) if specific_dir.startswith("/") else self.todo_dir / specific_dir
+            search_dir = (
+                Path(specific_dir)
+                if specific_dir.startswith("/")
+                else self.todo_dir / specific_dir
+            )
         else:
             search_dir = self.todo_dir
 
@@ -193,7 +203,9 @@ class TaskRunner:
 
         return todo_files
 
-    def get_next_task(self, specific_dir: str | None = None) -> tuple[TodoFile, TodoTask] | None:
+    def get_next_task(
+        self, specific_dir: str | None = None
+    ) -> tuple[TodoFile, TodoTask] | None:
         """Get the next incomplete task from todo files.
 
         Returns:
@@ -286,7 +298,9 @@ class TaskRunner:
 
         return []
 
-    def commit_changes(self, task: TodoTask, file_changes: list[str]) -> bool | None:  # noqa: ARG002
+    def commit_changes(
+        self, task: TodoTask, file_changes: list[str]
+    ) -> bool | None:  # noqa: ARG002
         """Commit changes with appropriate message.
 
         Returns:
@@ -367,7 +381,9 @@ class TaskRunner:
 
         return True
 
-    def run_continuously(self, specific_dir: str | None = None, max_iterations: int = 100) -> None:
+    def run_continuously(
+        self, specific_dir: str | None = None, max_iterations: int = 100
+    ) -> None:
         """Run task processor continuously until no more tasks."""
         iterations = 0
 
@@ -383,9 +399,15 @@ class TaskRunner:
 def main() -> None:
     """CLI entry point for task runner."""
     parser = argparse.ArgumentParser(description="Automated TODO task processor")
-    parser.add_argument("--dir", "-d", help="Specific directory to process (e.g. /tasks/todo/phase3)")
-    parser.add_argument("--single", "-s", action="store_true", help="Process only one task")
-    parser.add_argument("--max-iterations", "-m", type=int, default=100, help="Maximum iterations")
+    parser.add_argument(
+        "--dir", "-d", help="Specific directory to process (e.g. /tasks/todo/phase3)"
+    )
+    parser.add_argument(
+        "--single", "-s", action="store_true", help="Process only one task"
+    )
+    parser.add_argument(
+        "--max-iterations", "-m", type=int, default=100, help="Maximum iterations"
+    )
 
     args = parser.parse_args()
 

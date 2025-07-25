@@ -25,7 +25,11 @@ def main() -> None:
                 time.sleep(1)
 
             content = controller.capture_pane_content()
-            if "Welcome to Claude Code!" in content or "continue" in content.lower() or "press enter" in content.lower():
+            if (
+                "Welcome to Claude Code!" in content
+                or "continue" in content.lower()
+                or "press enter" in content.lower()
+            ):
                 pass
             else:
                 pass

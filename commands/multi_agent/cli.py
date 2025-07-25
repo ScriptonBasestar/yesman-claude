@@ -69,7 +69,16 @@ def stop(work_dir: str | None) -> None:
 @click.option("--complexity", "-c", default=5, help="Task complexity (1-10)")
 @click.option("--timeout", "-t", default=300, help="Task timeout in seconds")
 @click.option("--description", help="Task description")
-def add_task(title: str, command: tuple[str, ...], work_dir: str | None, directory: str, priority: int, complexity: int, timeout: int, description: str | None) -> None:
+def add_task(
+    title: str,
+    command: tuple[str, ...],
+    work_dir: str | None,
+    directory: str,
+    priority: int,
+    complexity: int,
+    timeout: int,
+    description: str | None,
+) -> None:
     """Add a task to the agent pool queue."""
     command_obj = AddTaskCommand()
     command_obj.run(
@@ -98,7 +107,9 @@ def list_tasks(work_dir: str | None, status: str | None) -> None:
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Repository path")
 @click.option("--auto-resolve", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(branches: str, repo_path: str | None, auto_resolve: bool) -> None:  # noqa: FBT001
+def detect_conflicts(
+    branches: str, repo_path: str | None, auto_resolve: bool
+) -> None:  # noqa: FBT001
     """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
@@ -108,7 +119,9 @@ def detect_conflicts(branches: str, repo_path: str | None, auto_resolve: bool) -
 @click.argument("conflict_id")
 @click.option("--strategy", "-s", help="Resolution strategy")
 @click.option("--repo-path", "-r", help="Repository path")
-def resolve_conflict(conflict_id: str, strategy: str | None, repo_path: str | None) -> None:
+def resolve_conflict(
+    conflict_id: str, strategy: str | None, repo_path: str | None
+) -> None:
     """Resolve a specific conflict."""
     command = ResolveConflictCommand()
     command.run(conflict_id=conflict_id, strategy=strategy, repo_path=repo_path)

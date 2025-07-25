@@ -108,11 +108,20 @@ class PerformanceMetrics:
 
     def get_threshold_level(self) -> PerformanceThreshold:
         """Get performance threshold level based on metrics."""
-        if self.cpu_usage >= CPU_CRITICAL_THRESHOLD or self.memory_usage >= MEMORY_CRITICAL_THRESHOLD:
+        if (
+            self.cpu_usage >= CPU_CRITICAL_THRESHOLD
+            or self.memory_usage >= MEMORY_CRITICAL_THRESHOLD
+        ):
             return PerformanceThreshold.CRITICAL
-        if self.cpu_usage >= CPU_WARNING_THRESHOLD or self.memory_usage >= MEMORY_WARNING_THRESHOLD:
+        if (
+            self.cpu_usage >= CPU_WARNING_THRESHOLD
+            or self.memory_usage >= MEMORY_WARNING_THRESHOLD
+        ):
             return PerformanceThreshold.WARNING
-        if self.cpu_usage >= CPU_GOOD_THRESHOLD or self.memory_usage >= MEMORY_GOOD_THRESHOLD:
+        if (
+            self.cpu_usage >= CPU_GOOD_THRESHOLD
+            or self.memory_usage >= MEMORY_GOOD_THRESHOLD
+        ):
             return PerformanceThreshold.GOOD
         return PerformanceThreshold.EXCELLENT
 
@@ -140,14 +149,19 @@ class OptimizationStrategy:
 
     def should_optimize(self, metrics: PerformanceMetrics) -> bool:
         """Check if optimization should be applied."""
-        return metrics.cpu_usage > self.cpu_threshold or metrics.memory_usage > self.memory_threshold
+        return (
+            metrics.cpu_usage > self.cpu_threshold
+            or metrics.memory_usage > self.memory_threshold
+        )
 
 
 class PerformanceProfiler:
     """Performance profiling and measurement utilities."""
 
     def __init__(self) -> None:
-        self.measurements: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=100))
+        self.measurements: dict[str, deque[float]] = defaultdict(
+            lambda: deque(maxlen=100)
+        )
         self.start_times: dict[str, float] = {}
         self.lock = threading.Lock()
 
@@ -164,7 +178,9 @@ class PerformanceProfiler:
             with self.lock:
                 self.measurements[operation_name].append(duration)
 
-    def measure_function(self, operation_name: str | None = None) -> Callable[[Callable], Callable]:
+    def measure_function(
+        self, operation_name: str | None = None
+    ) -> Callable[[Callable], Callable]:
         """Decorator for measuring function execution time."""
 
         def decorator(func: Callable) -> Callable:
@@ -245,7 +261,9 @@ class PerformanceOptimizer:
         self.monitor_thread: threading.Thread | None = None
 
         # Performance data
-        self.metrics_history: deque[PerformanceMetrics] = deque(maxlen=300)  # 5 minutes at 1s interval
+        self.metrics_history: deque[PerformanceMetrics] = deque(
+            maxlen=300
+        )  # 5 minutes at 1s interval
         self.current_metrics = PerformanceMetrics()
 
         # Profiler
@@ -267,7 +285,9 @@ class PerformanceOptimizer:
         self.process = psutil.Process()
 
     @staticmethod
-    def _create_optimization_strategies() -> dict[OptimizationLevel, OptimizationStrategy]:
+    def _create_optimization_strategies() -> (
+        dict[OptimizationLevel, OptimizationStrategy]
+    ):
         """Create built-in optimization strategies."""
         return {
             OptimizationLevel.NONE: OptimizationStrategy(
@@ -403,7 +423,11 @@ class PerformanceOptimizer:
             system_memory = psutil.virtual_memory()
 
             # IO metrics
-            io_counters = self.process.io_counters() if hasattr(self.process, "io_counters") else None
+            io_counters = (
+                self.process.io_counters()
+                if hasattr(self.process, "io_counters")
+                else None
+            )
 
             # Dashboard metrics (would be updated by dashboard components)
             render_stats = self.profiler.get_stats("render")
@@ -521,7 +545,9 @@ class PerformanceOptimizer:
         logger.debug("Update frequency optimized: %ss interval", new_interval)
 
     @staticmethod
-    def _optimize_caching(strategy: OptimizationStrategy) -> None:  # noqa: ARG002, ARG004
+    def _optimize_caching(
+        strategy: OptimizationStrategy,
+    ) -> None:  # noqa: ARG002, ARG004
         """Optimize caching behavior."""
         # This would integrate with actual cache systems
         logger.debug("Caching optimization applied")
@@ -533,7 +559,9 @@ class PerformanceOptimizer:
         logger.debug("Widget count limited to: %d", strategy.max_widget_count)
 
     @staticmethod
-    def _optimize_animations(strategy: OptimizationStrategy) -> None:  # noqa: ARG002, ARG004
+    def _optimize_animations(
+        strategy: OptimizationStrategy,
+    ) -> None:  # noqa: ARG002, ARG004
         """Optimize animations."""
         # This would integrate with animation system
         logger.debug("Animations disabled for performance")
@@ -553,12 +581,18 @@ class PerformanceOptimizer:
         with self.lock:
             return self.current_metrics
 
-    def get_metrics_history(self, duration_minutes: int = 5) -> list[PerformanceMetrics]:
+    def get_metrics_history(
+        self, duration_minutes: int = 5
+    ) -> list[PerformanceMetrics]:
         """Get metrics history for specified duration."""
         cutoff_time = datetime.now(UTC) - timedelta(minutes=duration_minutes)
 
         with self.lock:
-            return [metrics for metrics in self.metrics_history if metrics.timestamp >= cutoff_time]
+            return [
+                metrics
+                for metrics in self.metrics_history
+                if metrics.timestamp >= cutoff_time
+            ]
 
     def get_performance_report(self) -> dict[str, object]:
         """Generate comprehensive performance report."""
@@ -596,25 +630,35 @@ class PerformanceOptimizer:
         }
 
     @staticmethod
-    def _generate_recommendations(current: PerformanceMetrics, history: list[PerformanceMetrics]) -> list[str]:
+    def _generate_recommendations(
+        current: PerformanceMetrics, history: list[PerformanceMetrics]
+    ) -> list[str]:
         """Generate performance recommendations."""
         recommendations = []
 
         # CPU recommendations
         if current.cpu_usage > CPU_CRITICAL_THRESHOLD:
-            recommendations.append("High CPU usage detected. Consider reducing update frequency or widget count.")
+            recommendations.append(
+                "High CPU usage detected. Consider reducing update frequency or widget count."
+            )
 
         # Memory recommendations
         if current.memory_usage > MEMORY_CRITICAL_THRESHOLD:
-            recommendations.append("High memory usage detected. Consider enabling aggressive caching or garbage collection.")
+            recommendations.append(
+                "High memory usage detected. Consider enabling aggressive caching or garbage collection."
+            )
 
         # Render time recommendations
         if current.render_time > RENDER_TIME_THRESHOLD:
-            recommendations.append("Slow rendering detected. Consider optimizing widget complexity or enabling caching.")
+            recommendations.append(
+                "Slow rendering detected. Consider optimizing widget complexity or enabling caching."
+            )
 
         # Cache recommendations
         if current.cache_hit_rate < CACHE_HIT_RATE_THRESHOLD:
-            recommendations.append("Low cache hit rate. Consider adjusting cache size or retention policies.")
+            recommendations.append(
+                "Low cache hit rate. Consider adjusting cache size or retention policies."
+            )
 
         # Historical trends
         if len(history) > HISTORY_LENGTH_THRESHOLD:
@@ -622,18 +666,26 @@ class PerformanceOptimizer:
             older_cpu = statistics.mean([m.cpu_usage for m in history[:10]])
 
             if recent_cpu > older_cpu * 1.2:
-                recommendations.append("CPU usage trend increasing. Monitor for performance degradation.")
+                recommendations.append(
+                    "CPU usage trend increasing. Monitor for performance degradation."
+                )
 
         if not recommendations:
-            recommendations.append("Performance is optimal. No recommendations at this time.")
+            recommendations.append(
+                "Performance is optimal. No recommendations at this time."
+            )
 
         return recommendations
 
-    def add_optimization_callback(self, callback: Callable[[OptimizationLevel], None]) -> None:
+    def add_optimization_callback(
+        self, callback: Callable[[OptimizationLevel], None]
+    ) -> None:
         """Add callback for optimization level changes."""
         self.optimization_callbacks.append(callback)
 
-    def add_metrics_callback(self, callback: Callable[[PerformanceMetrics], None]) -> None:
+    def add_metrics_callback(
+        self, callback: Callable[[PerformanceMetrics], None]
+    ) -> None:
         """Add callback for metrics updates."""
         self.metrics_callbacks.append(callback)
 
@@ -653,7 +705,9 @@ class AsyncPerformanceOptimizer:
     and concurrent optimization strategies.
     """
 
-    def __init__(self, monitoring_interval: float = 1.0, max_concurrent_tasks: int = 10) -> None:
+    def __init__(
+        self, monitoring_interval: float = 1.0, max_concurrent_tasks: int = 10
+    ) -> None:
         """Initialize async performance optimizer.
 
         Args:
@@ -743,7 +797,9 @@ class AsyncPerformanceOptimizer:
         current_time = time.time()
         last_optimization = self.rate_limiter.get("optimization", 0)
 
-        if current_time - last_optimization < OPTIMIZATION_RATE_LIMIT_SECONDS:  # Max 1 optimization per 30 seconds
+        if (
+            current_time - last_optimization < OPTIMIZATION_RATE_LIMIT_SECONDS
+        ):  # Max 1 optimization per 30 seconds
             return
 
         if threshold_level == PerformanceThreshold.CRITICAL:

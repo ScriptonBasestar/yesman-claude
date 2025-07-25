@@ -6,7 +6,10 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from libs.core.base_command import BaseCommand, CommandError
 from libs.multi_agent.branch_manager import BranchManager
-from libs.multi_agent.conflict_resolution import ConflictResolutionEngine, ResolutionStrategy
+from libs.multi_agent.conflict_resolution import (
+    ConflictResolutionEngine,
+    ResolutionStrategy,
+)
 
 # Copyright notice.
 # Copyright (c) 2024 Yesman Claude Project
@@ -53,7 +56,9 @@ class DetectConflictsCommand(BaseCommand):
 
                 async def run_detection():
                     conflicts = await engine.detect_potential_conflicts(branches)
-                    progress.update(detection_task, description="✅ Conflict detection completed")
+                    progress.update(
+                        detection_task, description="✅ Conflict detection completed"
+                    )
 
                     if not conflicts:
                         self.print_success("✅ No conflicts detected")
@@ -82,7 +87,9 @@ class DetectConflictsCommand(BaseCommand):
                         self.print_info(f"   Branches: {', '.join(conflict.branches)}")
                         self.print_info(f"   Files: {', '.join(conflict.files)}")
                         self.print_info(f"   Description: {conflict.description}")
-                        self.print_info(f"   Suggested Strategy: {conflict.suggested_strategy.value}")
+                        self.print_info(
+                            f"   Suggested Strategy: {conflict.suggested_strategy.value}"
+                        )
                         self.print_info("")
 
                     auto_resolve_results = None
@@ -96,7 +103,9 @@ class DetectConflictsCommand(BaseCommand):
                         self.print_success(f"✅ Auto-resolved: {resolved}")
                         if failed > 0:
                             self.print_error(f"❌ Failed to resolve: {failed}")
-                            self.print_warning("🚨 Manual intervention required for remaining conflicts")
+                            self.print_warning(
+                                "🚨 Manual intervention required for remaining conflicts"
+                            )
 
                         auto_resolve_results = {
                             "resolved": resolved,
@@ -161,23 +170,33 @@ class ResolveConflictCommand(BaseCommand):
                 if result.success:
                     self.print_success("✅ Conflict resolved successfully!")
                     self.print_info(f"   Strategy used: {result.strategy_used.value}")
-                    self.print_info(f"   Resolution time: {result.resolution_time:.2f}s")
+                    self.print_info(
+                        f"   Resolution time: {result.resolution_time:.2f}s"
+                    )
                     self.print_info(f"   Message: {result.message}")
                     if result.resolved_files:
-                        self.print_info(f"   Resolved files: {', '.join(result.resolved_files)}")
+                        self.print_info(
+                            f"   Resolved files: {', '.join(result.resolved_files)}"
+                        )
                 else:
                     self.print_error("❌ Failed to resolve conflict")
-                    self.print_info(f"   Strategy attempted: {result.strategy_used.value}")
+                    self.print_info(
+                        f"   Strategy attempted: {result.strategy_used.value}"
+                    )
                     self.print_info(f"   Error: {result.message}")
                     if result.remaining_conflicts:
-                        self.print_info(f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}")
+                        self.print_info(
+                            f"   Remaining conflicts: {', '.join(result.remaining_conflicts)}"
+                        )
 
                 return {
                     "success": result.success,
                     "conflict_id": conflict_id,
                     "strategy": strategy,
                     "repo_path": repo_path,
-                    "strategy_used": result.strategy_used.value if result.strategy_used else None,
+                    "strategy_used": (
+                        result.strategy_used.value if result.strategy_used else None
+                    ),
                     "resolution_time": result.resolution_time,
                     "message": result.message,
                     "resolved_files": result.resolved_files,
@@ -223,7 +242,9 @@ class ConflictSummaryCommand(BaseCommand):
             # Severity breakdown
             if summary["severity_breakdown"]:
                 self.print_info("\n📈 Severity Breakdown:")
-                for severity, count in cast(dict, summary["severity_breakdown"]).items():
+                for severity, count in cast(
+                    dict, summary["severity_breakdown"]
+                ).items():
                     if count > 0:
                         severity_icon = {
                             "low": "🟢",
@@ -231,12 +252,16 @@ class ConflictSummaryCommand(BaseCommand):
                             "high": "🔴",
                             "critical": "💀",
                         }.get(severity, "❓")
-                        self.print_info(f"  {severity_icon} {severity.capitalize()}: {count}")
+                        self.print_info(
+                            f"  {severity_icon} {severity.capitalize()}: {count}"
+                        )
 
             # Type breakdown
             if summary["type_breakdown"]:
                 self.print_info("\n🏷️  Type Breakdown:")
-                for conflict_type, count in cast(dict, summary["type_breakdown"]).items():
+                for conflict_type, count in cast(
+                    dict, summary["type_breakdown"]
+                ).items():
                     if count > 0:
                         type_icon = {
                             "file_modification": "📝",
@@ -246,7 +271,9 @@ class ConflictSummaryCommand(BaseCommand):
                             "dependency": "🔗",
                             "merge_conflict": "⚡",
                         }.get(conflict_type, "❓")
-                        self.print_info(f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}")
+                        self.print_info(
+                            f"  {type_icon} {conflict_type.replace('_', ' ').title()}: {count}"
+                        )
 
             # Resolution statistics
             stats = cast(dict, summary["resolution_stats"])
@@ -254,8 +281,12 @@ class ConflictSummaryCommand(BaseCommand):
                 self.print_info("\n⚡ Resolution Statistics:")
                 self.print_info(f"  Auto-resolved: {stats['auto_resolved']}")
                 self.print_info(f"  Human required: {stats['human_required']}")
-                self.print_info(f"  Success rate: {stats['resolution_success_rate']:.1%}")
-                self.print_info(f"  Average time: {stats['average_resolution_time']:.2f}s")
+                self.print_info(
+                    f"  Success rate: {stats['resolution_success_rate']:.1%}"
+                )
+                self.print_info(
+                    f"  Average time: {stats['average_resolution_time']:.2f}s"
+                )
 
             return {"success": True, "repo_path": repo_path, "summary": summary}
 

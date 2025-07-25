@@ -285,7 +285,9 @@ class GitActivityWidget:
 
         # Total branches
         all_branches = self._run_git_command(["branch", "-a"])
-        info["total_branches"] = str(len([b for b in all_branches.split("\\n") if b.strip()]))
+        info["total_branches"] = str(
+            len([b for b in all_branches.split("\\n") if b.strip()])
+        )
 
         # Recent branches
         recent_branches = self._run_git_command(
@@ -297,7 +299,9 @@ class GitActivityWidget:
                 "--count=5",
             ]
         )
-        info["recent_branches"] = ", ".join(recent_branches.split("\\n")[:5]) if recent_branches else ""
+        info["recent_branches"] = (
+            ", ".join(recent_branches.split("\\n")[:5]) if recent_branches else ""
+        )
 
         return cast(dict[str, object], info)
 
@@ -314,7 +318,9 @@ class GitActivityWidget:
         # Repository stats
         content.append("📊 Repository Overview\\n", style="bold cyan")
         content.append(f"  Total Commits: {stats.total_commits:,}\\n", style="white")
-        content.append(f"  Active Contributors: {stats.active_contributors}\\n", style="white")
+        content.append(
+            f"  Active Contributors: {stats.active_contributors}\\n", style="white"
+        )
         content.append(
             f"  Current Branch: {stats.branch_info.get('current_branch', 'unknown')}\\n",
             style="yellow",
@@ -356,7 +362,11 @@ class GitActivityWidget:
             date_str = commit.date.strftime("%m-%d %H:%M")
 
             # Truncate message
-            message = commit.message[:37] + "..." if len(commit.message) > 40 else commit.message
+            message = (
+                commit.message[:37] + "..."
+                if len(commit.message) > 40
+                else commit.message
+            )
 
             # Format changes
             changes = f"+{commit.insertions}/-{commit.deletions}"
@@ -380,7 +390,9 @@ class GitActivityWidget:
         stats = self.update_git_stats()
 
         if not stats.file_changes:
-            return Panel(Text("No file activity data", style="dim"), title="📁 File Activity")
+            return Panel(
+                Text("No file activity data", style="dim"), title="📁 File Activity"
+            )
 
         content = Text()
         content.append("📁 Most Changed Files\\n", style="bold cyan")
@@ -410,7 +422,9 @@ class GitActivityWidget:
         contributors = self._get_active_contributors(days=30)
 
         if not contributors:
-            return Panel(Text("No contributor data", style="dim"), title="👥 Contributors")
+            return Panel(
+                Text("No contributor data", style="dim"), title="👥 Contributors"
+            )
 
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Contributor", style="cyan", width=20)
@@ -419,7 +433,9 @@ class GitActivityWidget:
 
         max_commits = max(contributors.values()) if contributors else 1
 
-        for author, commits in sorted(contributors.items(), key=lambda x: x[1], reverse=True):
+        for author, commits in sorted(
+            contributors.items(), key=lambda x: x[1], reverse=True
+        ):
             # Activity bar
             bar_length = int((commits / max_commits) * 15)
             activity_bar = "█" * bar_length + "░" * (15 - bar_length)
@@ -469,7 +485,11 @@ class GitActivityWidget:
             recent_total = sum(count for _, count in recent_week)
             prev_total = sum(count for _, count in prev_week)
 
-            trend = ((recent_total - prev_total) / prev_total * 100) if prev_total > 0 else 0
+            trend = (
+                ((recent_total - prev_total) / prev_total * 100)
+                if prev_total > 0
+                else 0
+            )
         else:
             trend = 0
 
@@ -479,6 +499,14 @@ class GitActivityWidget:
             "commits_this_week": sum(stats.daily_activity.values()),
             "trend_percentage": trend,
             "current_branch": stats.branch_info.get("current_branch"),
-            "most_active_file": (max(stats.file_changes.items(), key=lambda x: x[1])[0] if stats.file_changes else None),
-            "last_commit": (stats.recent_commits[0].date.isoformat() if stats.recent_commits else None),
+            "most_active_file": (
+                max(stats.file_changes.items(), key=lambda x: x[1])[0]
+                if stats.file_changes
+                else None
+            ),
+            "last_commit": (
+                stats.recent_commits[0].date.isoformat()
+                if stats.recent_commits
+                else None
+            ),
         }

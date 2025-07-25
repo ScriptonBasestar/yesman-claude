@@ -9,7 +9,11 @@ from typing import Any, Never, cast
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from libs.core.base_command import BaseCommand, CommandError
-from libs.dashboard.widgets.agent_monitor import AgentMetrics, AgentMonitor, run_agent_monitor
+from libs.dashboard.widgets.agent_monitor import (
+    AgentMetrics,
+    AgentMonitor,
+    run_agent_monitor,
+)
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.types import TaskStatus
 
@@ -55,7 +59,9 @@ class StartAgentsCommand(BaseCommand):
 
                 async def run_pool() -> None:
                     await pool.start()
-                    progress.update(startup_task, description="✅ Agent pool started successfully")
+                    progress.update(
+                        startup_task, description="✅ Agent pool started successfully"
+                    )
 
                     if monitor:
                         progress.update(
@@ -65,7 +71,9 @@ class StartAgentsCommand(BaseCommand):
                         await run_agent_monitor(pool)
                     else:
                         self.print_success("✅ Agent pool started successfully")
-                        self.print_info("Use 'yesman multi-agent monitor' to view status")
+                        self.print_info(
+                            "Use 'yesman multi-agent monitor' to view status"
+                        )
 
                         # Keep running until interrupted
                         try:
@@ -115,7 +123,9 @@ class MonitorAgentsCommand(BaseCommand):
                 monitor.refresh_interval = refresh
 
                 if not pool:
-                    self.print_warning("⚠️  No active agent pool found. Showing demo mode.")
+                    self.print_warning(
+                        "⚠️  No active agent pool found. Showing demo mode."
+                    )
                     # Add some demo data for visualization
 
                     monitor.agent_metrics = {
@@ -153,7 +163,9 @@ class MonitorAgentsCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Show current agent pool status."""
 
-    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(
+        self, work_dir: str | None = None, **kwargs: Any
+    ) -> dict:  # noqa: ARG002, ANN401
         """Execute the status command.
 
         Returns:
@@ -179,7 +191,9 @@ class StatusCommand(BaseCommand):
             self.print_info(f"Completed Tasks: {stats.get('completed_tasks', 0)}")
             self.print_info(f"Failed Tasks: {stats.get('failed_tasks', 0)}")
             self.print_info(f"Queue Size: {stats.get('queue_size', 0)}")
-            self.print_info(f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s")
+            self.print_info(
+                f"Average Execution Time: {stats.get('average_execution_time', 0):.1f}s"
+            )
 
             # Display agent details
             if agents:
@@ -193,7 +207,9 @@ class StatusCommand(BaseCommand):
                     }.get(cast(dict, agent).get("state", "unknown"), "❓")
 
                     agent_dict = cast(dict, agent)
-                    self.print_info(f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}")
+                    self.print_info(
+                        f"  {status_icon} {agent_dict['agent_id']} - Completed: {agent_dict.get('completed_tasks', 0)}, Failed: {agent_dict.get('failed_tasks', 0)}"
+                    )
 
             return {
                 "success": True,
@@ -211,7 +227,9 @@ class StatusCommand(BaseCommand):
 class StopAgentsCommand(BaseCommand):
     """Stop the multi-agent pool."""
 
-    def execute(self, work_dir: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(
+        self, work_dir: str | None = None, **kwargs: Any
+    ) -> dict:  # noqa: ARG002, ANN401
         """Execute the stop agents command.
 
         Returns:
@@ -302,7 +320,9 @@ class AddTaskCommand(BaseCommand):
 class ListTasksCommand(BaseCommand):
     """List tasks in the agent pool."""
 
-    def execute(self, work_dir: str | None = None, status: str | None = None, **kwargs: Any) -> dict:  # noqa: ARG002, ANN401
+    def execute(
+        self, work_dir: str | None = None, status: str | None = None, **kwargs: Any
+    ) -> dict:  # noqa: ARG002, ANN401
         """Execute the list tasks command.
 
         Returns:
@@ -342,11 +362,15 @@ class ListTasksCommand(BaseCommand):
                 }.get(cast(dict, task).get("status", "unknown"), "❓")
 
                 task_dict = cast(dict, task)
-                self.print_info(f"{status_icon} {cast(str, task_dict['task_id'])[:8]}... - {task_dict['title']}")
+                self.print_info(
+                    f"{status_icon} {cast(str, task_dict['task_id'])[:8]}... - {task_dict['title']}"
+                )
                 self.print_info(f"   Status: {cast(str, task_dict['status']).upper()}")
                 if task_dict.get("assigned_agent"):
                     self.print_info(f"   Agent: {task_dict['assigned_agent']}")
-                self.print_info(f"   Command: {' '.join(cast(list, task_dict['command']))}")
+                self.print_info(
+                    f"   Command: {' '.join(cast(list, task_dict['command']))}"
+                )
                 self.print_info("")
 
             return {
