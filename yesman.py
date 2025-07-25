@@ -15,11 +15,11 @@ from commands.enter import enter
 from commands.logs import logs
 from commands.ls import ls
 from commands.multi_agent import multi_agent as multi_agent_cli
-from commands.setup import setup, up  # setup is main, up is alias
+from commands.setup import setup
 from commands.show import show
 from commands.status import status
 from commands.task_runner import task_runner
-from commands.teardown import down, teardown  # teardown is main, down is alias
+from commands.teardown import teardown
 from commands.validate import validate
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -37,16 +37,9 @@ def cli() -> None:
 cli.add_command(ls)
 cli.add_command(show)
 cli.add_command(setup)  # Main setup command
-cli.add_command(up)  # Alias for setup
 cli.add_command(teardown)  # Main teardown command
-cli.add_command(down)  # Alias for teardown
 cli.add_command(dashboard)
 cli.add_command(dashboard_group)  # New dashboard interface management
-# Add dash as an alias for dashboard
-dashboard_alias = click.Group(name="dash", help="Alias for 'dashboard' command")
-for command_name, command in dashboard_group.commands.items():
-    dashboard_alias.add_command(command, name=command_name)
-cli.add_command(dashboard_alias)
 cli.add_command(enter)
 cli.add_command(browse)
 cli.add_command(ai)

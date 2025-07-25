@@ -109,8 +109,5 @@ def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
     command.run(session_name=session_name)
 
 
-# Create alias
-up = setup
-
 if __name__ == "__main__":
     setup()

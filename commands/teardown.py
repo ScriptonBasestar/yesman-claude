@@ -71,13 +71,4 @@ def teardown(session_name: str | None) -> None:
     command.run(session_name=session_name)
 
 
-# Alias
-@click.command()
-@click.argument("session_name", required=False)
-def down(session_name: str | None) -> None:
-    """Alias for 'teardown' command."""
-    command = TeardownCommand()
-    command.run(session_name=session_name)
-
-
-__all__ = ["down", "teardown"]
+__all__ = ["teardown"]

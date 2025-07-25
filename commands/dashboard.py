@@ -646,14 +646,6 @@ def list_interfaces() -> None:
     command.run()
 
 
-# Add ls as an alias for list-interfaces
-@dashboard_group.command()
-def ls() -> None:
-    """Alias for 'list-interfaces' command."""
-    ctx = click.get_current_context()
-    ctx.invoke(list_interfaces)
-
-
 @dashboard_group.command()
 @click.option(
     "--interface",
