@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { notifications, dismissNotification, clearAllNotifications } from '$lib/stores/notifications';
+  import { notifications, dismissNotification, clearAllNotifications, notificationSettings } from '$lib/stores/notifications';
   import { fade, fly } from 'svelte/transition';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -57,13 +57,43 @@
   // 알림이 있는지 확인
   $: hasNotifications = $notifications.length > 0;
   $: unreadCount = $notifications.filter(n => !n.read).length;
+
+  // 알림 자동 숨김 타이머 관리
+  let timers = new Map<string, number>();
+
+  // 새 알림이 추가될 때마다 타이머 설정
+  $: {
+    $notifications.forEach(notification => {
+      if (!timers.has(notification.id) && 
+          !notification.persistent && 
+          !(notification.type === 'error' && $notificationSettings.persistErrors)) {
+        const delay = notification.type === 'error' 
+          ? $notificationSettings.errorHideDelay 
+          : $notificationSettings.autoHideDelay;
+        const timer = window.setTimeout(() => {
+          dismissNotification(notification.id);
+          timers.delete(notification.id);
+        }, delay);
+        
+        timers.set(notification.id, timer);
+      }
+    });
+  }
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  onMount(() => {
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+      timers.clear();
+    };
+  });
 </script>
 
 <!-- 토스트 알림 컨테이너 (우측 상단) -->
 <div class="toast-container fixed top-4 right-4 z-50 space-y-2">
   {#each $notifications.slice(0, 5) as notification (notification.id)}
     <div
-      class="alert {getNotificationStyle(notification.type).class} shadow-lg max-w-sm relative pr-12"
+      class="alert {getNotificationStyle(notification.type).class} shadow-lg max-w-sm relative pr-12 overflow-hidden"
       in:fly={{ x: 300, duration: 300 }}
       out:fade={{ duration: 200 }}
     >
@@ -93,6 +123,16 @@
       >
         ✕
       </button>
+
+      <!-- Auto-dismiss progress bar -->
+      {#if !notification.persistent && !(notification.type === 'error' && $notificationSettings.persistErrors)}
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-base-content/20">
+          <div 
+            class="h-full bg-base-content/40 transition-all duration-300"
+            style="animation: shrink {notification.type === 'error' ? $notificationSettings.errorHideDelay : $notificationSettings.autoHideDelay}ms linear forwards"
+          />
+        </div>
+      {/if}
     </div>
   {/each}
 
@@ -218,5 +258,18 @@
 
   .notification-item {
     @apply transition-colors;
+  }
+
+  .toast-close-btn {
+    @apply absolute top-2 right-2 btn btn-ghost btn-xs btn-circle;
+  }
+
+  @keyframes shrink {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
   }
 </style>

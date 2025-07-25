@@ -299,15 +299,13 @@ export async function stopController(sessionName: string): Promise<void> {
 export async function restartController(sessionName: string): Promise<void> {
   try {
     showNotification('info', 'Restarting', `Restarting controller for ${sessionName}...`);
-    await pythonBridge.stop_claude(sessionName);
-    // 상태 업데이트를 위해 잠시 대기
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await pythonBridge.start_claude(sessionName);
+    // Use the dedicated restart endpoint
+    await pythonBridge.restart_claude(sessionName);
     showNotification('success', 'Controller Restarted', `Controller for ${sessionName} has been restarted.`);
     setTimeout(refreshSessions, 1000);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    showNotification('error', 'Error', `Failed to restart controller: ${errorMessage}`);
+    showNotification('error', 'Restart Failed', `Failed to restart controller: ${errorMessage}`);
     throw err;
   }
 }

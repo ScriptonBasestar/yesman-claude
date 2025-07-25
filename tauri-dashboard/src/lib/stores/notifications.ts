@@ -30,9 +30,10 @@ export const unreadCount = writable<number>(0);
 export const notificationSettings = writable({
   enabled: true,
   showDesktopNotifications: true,
-  autoHideDelay: 5000, // 5초 후 자동 숨김
+  autoHideDelay: 3000, // 3초 후 자동 숨김
+  errorHideDelay: 5000, // 에러는 5초 후 자동 숨김
   maxNotifications: 50, // 최대 알림 개수
-  persistErrors: true, // 에러 알림은 수동으로만 삭제
+  persistErrors: false, // 에러 알림도 자동으로 삭제
   enableSounds: false
 });
 
@@ -81,9 +82,10 @@ export function showNotification(
 
   // 자동 숨김 설정 (에러는 지속 설정에 따라)
   if (!persistent && !(type === 'error' && settings.persistErrors)) {
+    const delay = type === 'error' ? settings.errorHideDelay : settings.autoHideDelay;
     setTimeout(() => {
-      markAsRead(notification.id);
-    }, settings.autoHideDelay);
+      dismissNotification(notification.id);
+    }, delay);
   }
 
   return notification.id;
@@ -96,7 +98,7 @@ export function notifySuccess(title: string, message?: string, actions?: Notific
   return showNotification('success', title, message, false, actions);
 }
 
-export function notifyError(title: string, message?: string, persistent: boolean = true, actions?: NotificationAction[]): string {
+export function notifyError(title: string, message?: string, persistent: boolean = false, actions?: NotificationAction[]): string {
   return showNotification('error', title, message, persistent, actions);
 }
 
