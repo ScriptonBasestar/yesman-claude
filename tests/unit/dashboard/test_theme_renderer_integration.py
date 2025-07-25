@@ -1,4 +1,5 @@
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import tempfile
 from pathlib import Path
@@ -19,7 +20,11 @@ class TestThemeRendererIntegration:
     @pytest.fixture
     @staticmethod
     def theme_manager() -> object:
-        """Create ThemeManager instance."""
+        """Create ThemeManager instance.
+        
+        Yields:
+            ThemeManager: Configured theme manager instance.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 

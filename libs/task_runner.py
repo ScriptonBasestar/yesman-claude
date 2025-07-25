@@ -113,11 +113,9 @@ class TodoFile:
     def add_subtasks(self, parent_task: TodoTask, subtasks: list[str]) -> None:
         """Add subtasks before the parent task."""
         parent_line = parent_task.line_num
-        new_lines = []
 
         # Insert subtasks at the parent task location
-        for i, subtask in enumerate(subtasks):
-            new_lines.append(f"- [ ] {subtask}\n")
+        new_lines = [f"- [ ] {subtask}\n" for subtask in subtasks]
 
         # Insert the new lines
         self.content_lines = self.content_lines[:parent_line] + new_lines + self.content_lines[parent_line:]

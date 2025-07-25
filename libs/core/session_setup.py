@@ -7,9 +7,10 @@
 """Session setup logic extracted from setup command."""
 
 import os
+import pathlib
 import re
 import subprocess
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import click
 import yaml
@@ -17,7 +18,9 @@ from rich.progress import track
 
 from .base_command import CommandError
 from .settings import ValidationPatterns, settings
-import pathlib
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class SessionValidator:
@@ -318,7 +321,7 @@ class SessionSetupService:
 
     def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
         """Load sessions configuration with optional filter."""
-        projects_data = getattr(self.tmux_manager, "load_projects", lambda: {})() or {}
+        projects_data = getattr(self.tmux_manager, "load_projects", dict)() or {}
         all_sessions: dict[str, Any] = projects_data.get("sessions", {}) if isinstance(projects_data, dict) else {}
 
         if not all_sessions:
@@ -377,9 +380,7 @@ class SessionSetupService:
     def _session_exists(self, session_name: str) -> bool:
         """Check if session already exists."""
         try:
-            from collections.abc import Callable
-
-            get_sessions_func: Callable[[], list] = getattr(self.tmux_manager, "get_all_sessions", lambda: [])
+            get_sessions_func: Callable[[], list] = getattr(self.tmux_manager, "get_all_sessions", list)
             sessions = get_sessions_func()
             return any(session.get("session_name") == session_name for session in sessions)
         except Exception:

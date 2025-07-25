@@ -2,6 +2,7 @@
 
 import json
 import logging
+import operator
 import re
 import time
 from collections import Counter
@@ -249,7 +250,7 @@ class ResponseAnalyzer:
 
         # Get most common response
         if pattern.common_responses:
-            best_response = max(pattern.common_responses.items(), key=lambda x: x[1])[0]
+            best_response = max(pattern.common_responses.items(), key=operator.itemgetter(1))[0]
             return best_response, confidence
         return self._get_default_response(prompt_type)
 

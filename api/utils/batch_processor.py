@@ -182,12 +182,9 @@ class WebSocketBatchProcessor:
             return
 
         # Collect messages for this batch
-        messages = []
         batch_size = min(len(queue), self.config.max_batch_size)
 
-        for _ in range(batch_size):
-            if queue:
-                messages.append(queue.popleft())
+        messages = [queue.popleft() for _ in range(batch_size) if queue]
 
         if not messages:
             return
@@ -221,14 +218,15 @@ class WebSocketBatchProcessor:
         except Exception:
             self.logger.exception("Failed to send batch %s to %s", batch.batch_id, channel)
             # Re-queue messages for retry (with retry limit to prevent infinite loops)
+            MAX_RETRIES = 3
             retry_messages = []
             for msg in messages:
                 retry_count = msg.get("retry_count", 0)
-                if retry_count < 3:  # Max 3 retries
+                if retry_count < MAX_RETRIES:
                     msg["retry_count"] = retry_count + 1
                     retry_messages.append(msg)
                 else:
-                    self.logger.warning("Dropping message after 3 failed retries: %s", msg)
+                    self.logger.warning("Dropping message after %d failed retries: %s", MAX_RETRIES, msg)
 
             if retry_messages:
                 self.pending_messages[channel].extendleft(reversed(retry_messages))
@@ -338,11 +336,7 @@ class WebSocketBatchProcessor:
         if not messages:
             return {}
 
-        log_entries = []
-
-        for msg in messages:
-            if "data" in msg:
-                log_entries.append(msg["data"])
+        log_entries = [msg["data"] for msg in messages if "data" in msg]
 
         # Create batched log message
         return {

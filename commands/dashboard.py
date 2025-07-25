@@ -42,7 +42,7 @@ class DashboardEnvironment:
         """Check if GUI environment is available.
 
         Returns:
-        Boolean indicating.
+            bool: True if GUI environment is available, False otherwise.
         """
         if platform.system() == "Darwin" or platform.system() == "Windows":  # macOS
             return True
@@ -54,7 +54,7 @@ class DashboardEnvironment:
         """Check if running in SSH session.
 
         Returns:
-        Boolean indicating.
+            bool: True if running in SSH session, False otherwise.
         """
         return bool(os.environ.get("SSH_CLIENT") or os.environ.get("SSH_TTY"))
 
@@ -63,7 +63,7 @@ class DashboardEnvironment:
         """Check if terminal supports rich output.
 
         Returns:
-        Boolean indicating.
+            bool: True if terminal supports rich output, False otherwise.
         """
         return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
 
@@ -72,7 +72,7 @@ class DashboardEnvironment:
         """Get recommended interface based on environment.
 
         Returns:
-        String containing the requested data.
+            str: Recommended interface type ('tui', 'tauri', or 'web').
         """
         if DashboardEnvironment.is_ssh_session():
             return "tui"
@@ -87,7 +87,7 @@ def check_dependencies(interface: str) -> dict[str, bool]:
     """Check if required dependencies are available for interface.
 
     Returns:
-        Dict containing.
+        dict[str, bool]: Dictionary mapping interface names to availability status.
     """
     deps = {
         "tui": True,  # Always available (uses rich)
@@ -122,7 +122,10 @@ class DashboardRunCommand(BaseCommand):
         """Execute the dashboard run command.
 
         Returns:
-        Dict containing.
+            dict: Dictionary containing dashboard execution results.
+
+        Raises:
+            CommandError: If dashboard execution fails.
         """
         # Auto-detect interface if needed
         if interface == "auto":
@@ -176,8 +179,9 @@ class DashboardRunCommand(BaseCommand):
     def _launch_tui_dashboard(self, theme: str | None = None, dev: bool = False) -> None:
         """Launch TUI-based dashboard interface.
 
-        Returns:
-        None.
+        Args:
+            theme: Optional theme for the dashboard.
+            dev: Whether to run in development mode.
         """
         self.print_info("🖥️  Starting TUI Dashboard...")
 
@@ -238,8 +242,12 @@ class DashboardRunCommand(BaseCommand):
     ) -> None:
         """Launch web-based dashboard interface.
 
-        Returns:
-        None.
+        Args:
+            host: Host address for the web server.
+            port: Port number for the web server.
+            theme: Optional theme for the dashboard.
+            dev: Whether to run in development mode.
+            detach: Whether to run in background.
         """
         self.print_info(f"🌐 Starting Web Dashboard on http://{host}:{port}...")
 
@@ -509,7 +517,7 @@ class DashboardListCommand(BaseCommand):
         """Execute the list command.
 
         Returns:
-        Dict containing.
+            dict: Dictionary containing available interfaces and their status.
         """
         self.print_info("📋 Available Dashboard Interfaces:\n")
 
@@ -556,7 +564,10 @@ class DashboardBuildCommand(BaseCommand):
         """Execute the build command.
 
         Returns:
-        Dict containing.
+            dict: Dictionary containing build results and status.
+
+        Raises:
+            CommandError: If build fails.
         """
         self.print_info(f"🔨 Building {interface} dashboard for production...")
 

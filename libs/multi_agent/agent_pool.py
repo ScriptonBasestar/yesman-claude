@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import logging
+import operator
 import os
 import time
 import uuid
@@ -12,7 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Import scheduler types after main types to avoid circular imports
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from .branch_test_manager import BranchTestManager
 from .recovery_engine import OperationType, RecoveryEngine
@@ -23,9 +24,6 @@ from .types import Agent, AgentState, Task, TaskStatus
 # Licensed under the MIT License
 """Agent pool management for multi-agent development system."""
 
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -1042,7 +1040,7 @@ class AgentPool:
                 )
 
             # Sort by timestamp (newest first)
-            snapshots.sort(key=lambda x: x["timestamp"], reverse=True)
+            snapshots.sort(key=operator.itemgetter("timestamp"), reverse=True)
             return snapshots
 
         except Exception:

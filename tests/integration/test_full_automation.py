@@ -35,4 +35,3 @@ def main() -> None:
             pass
         finally:
             controller.stop()
-

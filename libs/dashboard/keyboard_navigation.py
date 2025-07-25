@@ -76,17 +76,17 @@ class KeyBinding:
     @property
     def key_combination(self) -> str:
         """Get normalized key combination string."""
-        parts = []
-
         # Add modifiers in standard order
-        for mod in [
-            KeyModifier.CTRL,
-            KeyModifier.SHIFT,
-            KeyModifier.ALT,
-            KeyModifier.META,
-        ]:
-            if mod in self.modifiers:
-                parts.append(mod.value)
+        parts = [
+            mod.value
+            for mod in [
+                KeyModifier.CTRL,
+                KeyModifier.SHIFT,
+                KeyModifier.ALT,
+                KeyModifier.META,
+            ]
+            if mod in self.modifiers
+        ]
 
         parts.append(self.key)
         return "+".join(parts)

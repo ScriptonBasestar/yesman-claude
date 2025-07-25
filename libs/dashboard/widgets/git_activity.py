@@ -1,5 +1,6 @@
 # Copyright notice.
 
+import operator
 import re
 import subprocess
 from collections import defaultdict
@@ -267,7 +268,7 @@ class GitActivityWidget:
                 file_changes[line] += 1
 
         # Return top files
-        sorted_files = sorted(file_changes.items(), key=lambda x: x[1], reverse=True)
+        sorted_files = sorted(file_changes.items(), key=operator.itemgetter(1), reverse=True)
         return dict(sorted_files[:limit])
 
     def _get_branch_info(self) -> dict[str, object]:
@@ -418,7 +419,7 @@ class GitActivityWidget:
 
         max_commits = max(contributors.values()) if contributors else 1
 
-        for author, commits in sorted(contributors.items(), key=lambda x: x[1], reverse=True):
+        for author, commits in sorted(contributors.items(), key=operator.itemgetter(1), reverse=True):
             # Activity bar
             bar_length = int((commits / max_commits) * 15)
             activity_bar = "█" * bar_length + "░" * (15 - bar_length)
@@ -478,6 +479,6 @@ class GitActivityWidget:
             "commits_this_week": sum(stats.daily_activity.values()),
             "trend_percentage": trend,
             "current_branch": stats.branch_info.get("current_branch"),
-            "most_active_file": (max(stats.file_changes.items(), key=lambda x: x[1])[0] if stats.file_changes else None),
+            "most_active_file": (max(stats.file_changes.items(), key=operator.itemgetter(1))[0] if stats.file_changes else None),
             "last_commit": (stats.recent_commits[0].date.isoformat() if stats.recent_commits else None),
         }

@@ -598,7 +598,7 @@ def function2() -> object:
 
         # Mock successful merges
         async def mock_perform_merge(
-            file_path: str, branch1: str, branch2: str, target_branch: str = None
+            file_path: str, branch1: str, branch2: str, target_branch: str | None = None
         ) -> MergeResult:
             return MergeResult(
                 merge_id=f"merge_{file_path}",

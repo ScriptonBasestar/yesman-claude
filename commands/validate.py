@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 # Try to keep the important parts (end of path)
 # Copyright notice.
@@ -15,7 +16,6 @@ from rich.text import Text
 from rich.tree import Tree
 
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
-import pathlib
 
 
 class ValidateCommand(BaseCommand, SessionCommandMixin):

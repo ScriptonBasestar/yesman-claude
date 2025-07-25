@@ -152,18 +152,17 @@ class SessionData:
         status = SessionStatus(data.get("status", SessionStatus.IDLE.value))
 
         # Parse windows
-        windows = []
-        for window_data in cast("list", data.get("windows", [])):
-            windows.append(
-                WindowData(
-                    id=window_data.get("id", ""),
-                    name=window_data.get("name", ""),
-                    active=window_data.get("active", False),
-                    panes=window_data.get("panes", 0),
-                    layout=window_data.get("layout", "even-horizontal"),
-                    metadata=window_data.get("metadata", {}),
-                )
+        windows = [
+            WindowData(
+                id=window_data.get("id", ""),
+                name=window_data.get("name", ""),
+                active=window_data.get("active", False),
+                panes=window_data.get("panes", 0),
+                layout=window_data.get("layout", "even-horizontal"),
+                metadata=window_data.get("metadata", {}),
             )
+            for window_data in cast("list", data.get("windows", []))
+        ]
 
         return cls(
             name=cast("str", data["name"]),

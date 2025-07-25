@@ -389,7 +389,7 @@ class BackgroundTaskRunner:
     async def cleanup_task(self) -> None:
         """Periodic cleanup of resources."""
 
-        async def cleanup() -> None:
+        async def cleanup() -> None:  # noqa: RUF029
             try:
                 # Clean up old connections
 

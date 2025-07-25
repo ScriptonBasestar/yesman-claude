@@ -1225,13 +1225,16 @@ class CodeReviewEngine:
         # In a real system, this would consider expertise, availability, workload, etc.
 
         # Get all available agents
-        available_agents = []
-        for agent in self.collaboration_engine.agent_pool.agents.values():
-            if agent.agent_id != requester_id and agent.state in {
+        available_agents = [
+            agent.agent_id
+            for agent in self.collaboration_engine.agent_pool.agents.values()
+            if agent.agent_id != requester_id
+            and agent.state
+            in {
                 AgentState.IDLE,
                 AgentState.WORKING,
-            }:
-                available_agents.append(agent.agent_id)
+            }
+        ]
 
         # For now, just return the first available agents
         return available_agents[:num_reviewers]

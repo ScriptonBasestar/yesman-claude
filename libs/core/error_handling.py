@@ -73,13 +73,21 @@ class YesmanError(Exception):
         super().__init__(message)
 
     def _generate_error_code(self) -> str:
-        """Generate error code from category and message."""
+        """Generate error code from category and message.
+
+        Returns:
+            str: Generated error code combining category and message hash.
+        """
         # Create a simple error code from category and hash of message
         msg_hash = hashlib.sha256(self.message.encode()).hexdigest()[:8].upper()
         return f"{self.category.value.upper()}_{msg_hash}"
 
     def to_dict(self) -> dict[str, object]:
-        """Convert error to dictionary for logging/serialization."""
+        """Convert error to dictionary for logging/serialization.
+
+        Returns:
+            dict[str, object]: Error data as dictionary.
+        """
         result: dict[str, object] = {
             "code": self.error_code,
             "message": self.message,
@@ -345,7 +353,11 @@ class ErrorHandler:
         sys.exit(error.exit_code)
 
     def get_error_summary(self) -> dict[str, object]:
-        """Get error statistics summary."""
+        """Get error statistics summary.
+
+        Returns:
+            dict[str, object]: Copy of error statistics data.
+        """
         return self.error_stats.copy()
 
     def reset_stats(self) -> None:
@@ -363,7 +375,14 @@ error_handler = ErrorHandler()
 
 
 def handle_exceptions(func: Callable[..., object]) -> Callable[..., object]:
-    """Decorator for automatic exception handling."""
+    """Decorator for automatic exception handling.
+
+    Args:
+        func: Function to wrap with exception handling.
+
+    Returns:
+        Callable[..., object]: Wrapped function with exception handling.
+    """
 
     def wrapper(*args: Any, **kwargs: Any) -> object:
         try:

@@ -14,9 +14,7 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 class TeardownCommand(BaseCommand, SessionCommandMixin):
     """Kill all tmux sessions (기본) 또는 지정한 세션만 삭제합니다."""
 
-    def execute(
-        self, session_name: str | None = None, **kwargs: Any
-    ) -> dict:
+    def execute(self, session_name: str | None = None, **kwargs: Any) -> dict:
         """Execute the teardown command.
 
         Returns:
@@ -36,9 +34,7 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
             # If a specific session is provided, only kill that session
             if session_name:
                 if session_name not in sessions:
-                    self.print_error(
-                        f"Session {session_name} not defined in projects.yaml"
-                    )
+                    self.print_error(f"Session {session_name} not defined in projects.yaml")
                     return {"success": False, "error": "session_not_defined"}
                 sessions = {session_name: sessions[session_name]}
 
@@ -47,9 +43,7 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
                 actual_session_name = override_conf.get("session_name", session_key)
 
                 if server.find_where({"session_name": actual_session_name}):
-                    subprocess.run(
-                        ["tmux", "kill-session", "-t", actual_session_name], check=False
-                    )
+                    subprocess.run(["tmux", "kill-session", "-t", actual_session_name], check=False)
                     self.print_success(f"Killed session: {actual_session_name}")
                     killed_sessions.append(actual_session_name)
                 else:

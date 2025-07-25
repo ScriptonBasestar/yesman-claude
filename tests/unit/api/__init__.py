@@ -1,3 +1,3 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-"""API routers for Yesman Claude."""
+"""API unit tests package."""

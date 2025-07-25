@@ -130,7 +130,7 @@ async def stress_test_connections(num_connections: int = 10) -> None:
         await asyncio.sleep(5)
 
         # Close all connections
-        for i, ws in enumerate(connections):
+        for ws in connections:
             await ws.close()
 
     except Exception:

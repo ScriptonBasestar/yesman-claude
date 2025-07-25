@@ -192,10 +192,7 @@ class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch])
         if not messages:
             return {}
 
-        log_entries = []
-        for msg in messages:
-            if "data" in msg:
-                log_entries.append(msg["data"])
+        log_entries = [msg["data"] for msg in messages if "data" in msg]
 
         # Create batched log message
         return {

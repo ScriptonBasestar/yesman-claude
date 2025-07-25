@@ -26,7 +26,10 @@ def get_app_config() -> object:
     """애플리케이션의 현재 설정을 조회합니다.
 
     Returns:
-        object: Description of return value.
+        AppConfig: Current application configuration.
+
+    Raises:
+        HTTPException: If configuration retrieval fails.
     """
     try:
         # DI 컨테이너에서 YesmanConfig 인스턴스를 가져옵니다.
@@ -37,11 +40,19 @@ def get_app_config() -> object:
         raise HTTPException(status_code=500, detail=f"Failed to get config: {e!s}")
 
 
-# TODO: POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
+# TODO(config): POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
+# See: https://github.com/project/yesman/issues/config-save
 #       YesmanConfig에 save 메서드를 추가해야 합니다.
 @router.post("/config", status_code=204)
 def save_app_config(config: AppConfig) -> None:
-    """애플리케이션 설정을 저장합니다."""
+    """애플리케이션 설정을 저장합니다.
+
+    Args:
+        config: Application configuration to save.
+
+    Raises:
+        HTTPException: If configuration saving fails.
+    """
     try:
         config_manager = get_config()
         config_data = config.dict(exclude_unset=True)
@@ -55,7 +66,10 @@ def get_available_projects() -> object:
     """세션 설정에 정의된 모든 프로젝트 목록을 반환합니다.
 
     Returns:
-        object: Description of return value.
+        object: List of project names.
+
+    Raises:
+        HTTPException: If project listing fails.
     """
     try:
         tm = get_tmux_manager()
@@ -70,15 +84,16 @@ def list_session_files() -> object:
     """사용 가능한 세션 설정 파일 목록을 반환합니다.
 
     Returns:
-        object: Description of return value.
+        list[str]: List of session configuration files.
+
+    Raises:
+        HTTPException: If session listing fails.
     """
     try:
         tm = get_tmux_manager()
         return tm.list_session_configs()
     except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to list session files: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to list session files: {e!s}")
 
 
 @router.get("/config/paths", response_model=dict[str, str])
@@ -86,7 +101,10 @@ def get_config_paths() -> object:
     """설정 파일 경로 정보를 반환합니다.
 
     Returns:
-        object: Description of return value.
+        dict[str, str]: Dictionary containing configuration file paths.
+
+    Raises:
+        HTTPException: If path retrieval fails.
     """
     try:
         config_manager = get_config()
@@ -99,6 +117,4 @@ def get_config_paths() -> object:
             "local_config": str(config_manager.local_path),
         }
     except (FileNotFoundError, PermissionError, ValueError, KeyError, OSError) as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get config paths: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get config paths: {e!s}")

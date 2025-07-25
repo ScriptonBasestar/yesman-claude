@@ -748,7 +748,7 @@ class TestConflictPreventionSystem:
         # Verify message content for each agent
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for i, call in enumerate(calls):
-            args, kwargs = call
+            _args, kwargs = call
             assert kwargs["sender_id"] == "prevention_system"
             assert kwargs["recipient_id"] == f"agent{i + 1}"
             assert kwargs["message_type"] == MessageType.STATUS_UPDATE
@@ -796,7 +796,7 @@ class TestConflictPreventionSystem:
         # Verify message content
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for call in calls:
-            args, kwargs = call
+            _args, kwargs = call
             assert kwargs["sender_id"] == "prevention_system"
             assert kwargs["message_type"] == MessageType.DEPENDENCY_CHANGE
             assert kwargs["subject"] == "Dependency Synchronization Required"
@@ -907,7 +907,7 @@ class TestConflictPreventionSystem:
         # Verify message content for each agent
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for i, call in enumerate(calls):
-            args, kwargs = call
+            _args, kwargs = call
             agent_id = f"agent_{'a' if i == 0 else 'b'}"
             other_agent = f"agent_{'b' if i == 0 else 'a'}"
 
@@ -960,7 +960,7 @@ class TestConflictPreventionSystem:
         # Verify message content for each agent with increasing delays
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for i, call in enumerate(calls):
-            args, kwargs = call
+            _args, kwargs = call
             expected_delay = (
                 i * prevention_system.prevention_config["coordination_delay"]
             )
@@ -1017,7 +1017,7 @@ class TestConflictPreventionSystem:
         # Verify message content
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for call in calls:
-            args, kwargs = call
+            _args, kwargs = call
             assert kwargs["sender_id"] == "prevention_system"
             assert kwargs["message_type"] == MessageType.STATUS_UPDATE
             assert kwargs["subject"] == "Semantic Refactoring Required"

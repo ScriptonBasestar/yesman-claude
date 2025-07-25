@@ -1,4 +1,5 @@
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import unittest
 from unittest.mock import MagicMock, patch
@@ -49,7 +50,7 @@ class TestSessionSelector(unittest.TestCase):
                 "clients": 0,
             }
 
-            table, filtered = selector._create_display()
+            _table, filtered = selector._create_display()
 
             # Should return all sessions
             assert len(filtered) == 3
@@ -68,7 +69,7 @@ class TestSessionSelector(unittest.TestCase):
             }
 
             # Filter for 'app'
-            table, filtered = selector._create_display("app")
+            _table, filtered = selector._create_display("app")
 
             # Should only return myapp session
             assert len(filtered) == 1
@@ -77,7 +78,7 @@ class TestSessionSelector(unittest.TestCase):
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
     def test_select_session_quit(
-        self, mock_console_class: MagicMock, mock_prompt: MagicMock
+        self, _mock_console_class: MagicMock, mock_prompt: MagicMock
     ) -> None:
         """Test quitting the selector."""
         mock_prompt.return_value = "q"
@@ -90,7 +91,7 @@ class TestSessionSelector(unittest.TestCase):
     @patch("libs.ui.session_selector.Prompt.ask")
     @patch("libs.ui.session_selector.Console")
     def test_select_session_valid_choice(
-        self, mock_console_class: MagicMock, mock_prompt: MagicMock
+        self, _mock_console_class: MagicMock, mock_prompt: MagicMock
     ) -> None:
         """Test selecting a valid session."""
         mock_prompt.return_value = "2"  # Select second session

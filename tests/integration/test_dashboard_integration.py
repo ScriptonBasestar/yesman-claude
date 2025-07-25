@@ -3,6 +3,7 @@
 # Copyright notice.
 
 import asyncio
+import operator
 import time
 from typing import Never
 from unittest.mock import AsyncMock, Mock
@@ -222,7 +223,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
         assert len(session_updates) > 0
 
         # Updates should be recent
-        latest_update = max(update_events, key=lambda e: e["timestamp"])
+        latest_update = max(update_events, key=operator.itemgetter("timestamp"))
         assert time.time() - latest_update["timestamp"] < 5.0
 
         await self._stop_mock_dashboard(dashboard)

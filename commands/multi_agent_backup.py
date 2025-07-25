@@ -1,4 +1,6 @@
 # Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import asyncio
 import contextlib
@@ -1509,7 +1511,7 @@ def analyze_semantic_conflicts(
                         click.echo(f"   File: {conflict.file_path}")
                         click.echo(f"   Description: {conflict.description}")
 
-                        if kwargs.get("detailed", False):
+                        if kwargs.get("detailed"):
                             if conflict.old_definition:
                                 click.echo(f"   Old: {conflict.old_definition}")
                             if conflict.new_definition:

@@ -1,11 +1,11 @@
 # Copyright notice.
 
-import os
+
+import pathlib
 
 import pytest
 
 from libs.dashboard.theme_system import SystemThemeDetector
-import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

@@ -189,8 +189,6 @@ class SessionManager:
         # Cast to libtmux Window for proper attribute access
         from typing import cast
 
-        import libtmux
-
         if hasattr(window, "list_panes"):
             tmux_window = cast("libtmux.Window", window)
 

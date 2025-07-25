@@ -187,9 +187,8 @@ class LogsAnalyzeCommand(BaseCommand):
 
                             # Collect errors
                             error_messages = stats["error_messages"]
-                            if isinstance(error_messages, list):
-                                if level in {"ERROR", "CRITICAL"} and len(error_messages) < 10:
-                                    error_messages.append(entry.get("message", ""))
+                            if isinstance(error_messages, list) and level in {"ERROR", "CRITICAL"} and len(error_messages) < 10:
+                                error_messages.append(entry.get("message", ""))
 
                         except json.JSONDecodeError:
                             # Handle text format

@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import click
 from rich.console import Console
@@ -9,7 +10,6 @@ from rich.text import Text
 from rich.tree import Tree
 
 from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
-import pathlib
 
 # Try to keep the important parts (end of path)
 

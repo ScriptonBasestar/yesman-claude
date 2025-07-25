@@ -3,6 +3,7 @@
 import json
 import logging
 import math
+import operator
 import re
 import time
 from collections import Counter
@@ -272,7 +273,7 @@ class ResponseAnalyzer(StatisticsProviderMixin):
                 # Calculate confidence based on response frequency
                 total_responses = sum(pattern.common_responses.values())
                 if total_responses > 0:
-                    most_common = max(pattern.common_responses.items(), key=lambda x: x[1])
+                    most_common = max(pattern.common_responses.items(), key=operator.itemgetter(1))
                     confidence = most_common[1] / total_responses
 
                     # Adjust confidence based on recency

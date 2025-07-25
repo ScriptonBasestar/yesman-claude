@@ -80,7 +80,11 @@ class BaseCommand(ABC):
         settings.ensure_directories()
 
     def _setup_logger(self) -> logging.Logger:
-        """Set up logger for this command."""
+        """Set up logger for this command.
+
+        Returns:
+            logging.Logger: Configured logger instance for this command.
+        """
         logger = logging.getLogger(f"yesman.{self.__class__.__name__.lower()}")
 
         if not logger.handlers:
@@ -94,7 +98,11 @@ class BaseCommand(ABC):
         return logger
 
     def _resolve_config(self) -> YesmanConfig:
-        """Resolve YesmanConfig from DI container with error handling."""
+        """Resolve YesmanConfig from DI container with error handling.
+
+        Returns:
+            YesmanConfig: Configuration instance from DI container.
+        """
         try:
             return get_config()
         except Exception as e:
@@ -111,7 +119,11 @@ class BaseCommand(ABC):
             ) from e
 
     def _resolve_tmux_manager(self) -> TmuxManager:
-        """Resolve TmuxManager from DI container with error handling."""
+        """Resolve TmuxManager from DI container with error handling.
+
+        Returns:
+            TmuxManager: TmuxManager instance from DI container.
+        """
         try:
             return get_tmux_manager()
         except Exception as e:
@@ -122,6 +134,9 @@ class BaseCommand(ABC):
     def _create_config(self) -> YesmanConfig:
         """Create YesmanConfig instance with error handling (fallback
         method).
+
+        Returns:
+            YesmanConfig: New configuration instance.
         """
         try:
             return YesmanConfig()
@@ -133,6 +148,9 @@ class BaseCommand(ABC):
     def _create_tmux_manager(self) -> TmuxManager:
         """Create TmuxManager instance with error handling (fallback
         method).
+
+        Returns:
+            TmuxManager: New TmuxManager instance.
         """
         try:
             return TmuxManager(self.config)
@@ -142,7 +160,11 @@ class BaseCommand(ABC):
             raise CommandError(msg) from e
 
     def _create_claude_manager(self) -> ClaudeManager:
-        """Create ClaudeManager instance with error handling."""
+        """Create ClaudeManager instance with error handling.
+
+        Returns:
+            ClaudeManager: New ClaudeManager instance.
+        """
         try:
             return ClaudeManager()
         except Exception as e:
@@ -166,7 +188,11 @@ class BaseCommand(ABC):
 
     @staticmethod
     def _is_tmux_available() -> bool:
-        """Check if tmux is available."""
+        """Check if tmux is available.
+
+        Returns:
+            bool: True if tmux command is available, False otherwise.
+        """
         return shutil.which("tmux") is not None
 
     def handle_error(self, error: Exception, context_str: str = "") -> None:
@@ -192,7 +218,15 @@ class BaseCommand(ABC):
         self.logger.info("Command %s %s", command_name, status)
 
     def confirm_action(self, message: str, default: bool = False) -> bool:
-        """Ask for user confirmation."""
+        """Ask for user confirmation.
+
+        Args:
+            message: Confirmation message to display.
+            default: Default value if user just presses Enter.
+
+        Returns:
+            bool: True if user confirms, False otherwise.
+        """
         try:
             return click.confirm(message, default=default)
         except click.Abort:
@@ -222,10 +256,21 @@ class BaseCommand(ABC):
     @abstractmethod
     def execute(self, **kwargs) -> object:
         """Execute the command (must be implemented by subclasses)."""
-        raise NotImplementedError("Subclasses must implement the execute method")
+        msg = "Subclasses must implement the execute method"
+        raise NotImplementedError(msg)
 
     def run(self, **kwargs) -> object:
-        """Main execution wrapper with error handling."""
+        """Main execution wrapper with error handling.
+
+        Args:
+            **kwargs: Command arguments to pass to execute method.
+
+        Returns:
+            object: Result from the execute method.
+
+        Raises:
+            CommandError: If command execution fails.
+        """
         command_name = self.__class__.__name__.replace("Command", "").lower()
 
         try:
@@ -283,7 +328,14 @@ class SessionCommandMixin:
     logger: logging.Logger
 
     def get_session_list(self) -> list[str]:
-        """Get list of available sessions."""
+        """Get list of available sessions.
+
+        Returns:
+            list[str]: List of session names.
+
+        Raises:
+            CommandError: If session listing fails.
+        """
         try:
             sessions = self.tmux_manager.get_cached_sessions_list()
             return [str(session.get("session_name", "unknown")) for session in sessions]
@@ -307,7 +359,14 @@ class SessionCommandMixin:
             raise CommandError(msg)
 
     def session_exists(self, session_name: str) -> bool:
-        """Check if session exists."""
+        """Check if session exists.
+
+        Args:
+            session_name: Name of session to check.
+
+        Returns:
+            bool: True if session exists, False otherwise.
+        """
         try:
             return session_name in self.get_session_list()
         except Exception:
@@ -321,7 +380,14 @@ class ConfigCommandMixin:
     logger: logging.Logger
 
     def load_projects_config(self) -> dict[str, object]:
-        """Load projects configuration with error handling."""
+        """Load projects configuration with error handling.
+
+        Returns:
+            dict[str, object]: Projects configuration data.
+
+        Raises:
+            CommandError: If configuration loading fails.
+        """
         try:
             with open(settings.paths.projects_file, encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
@@ -343,7 +409,17 @@ class ConfigCommandMixin:
             raise CommandError(msg) from e
 
     def backup_config(self, config_path: str) -> str:
-        """Create backup of configuration file."""
+        """Create backup of configuration file.
+
+        Args:
+            config_path: Path to configuration file to backup.
+
+        Returns:
+            str: Path to the created backup file.
+
+        Raises:
+            CommandError: If backup creation fails.
+        """
         backup_path = f"{config_path}.backup.{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         try:
             shutil.copy2(config_path, backup_path)
@@ -359,7 +435,15 @@ class OutputFormatterMixin:
 
     @staticmethod
     def format_table(data: list[dict[str, object]], headers: list[str]) -> str:
-        """Format data as table."""
+        """Format data as table.
+
+        Args:
+            data: List of dictionaries containing row data.
+            headers: List of column headers.
+
+        Returns:
+            str: Formatted table as string.
+        """
         if not data:
             return "No data to display"
 
@@ -376,8 +460,7 @@ class OutputFormatterMixin:
 
         # Header
         header_line = " | ".join(header.ljust(widths[header]) for header in headers)
-        lines.append(header_line)
-        lines.append("-" * len(header_line))
+        lines.extend((header_line, "-" * len(header_line)))
 
         # Data rows
         for row in data:
@@ -388,10 +471,25 @@ class OutputFormatterMixin:
 
     @staticmethod
     def format_json(data: object, indent: int = 2) -> str:
-        """Format data as JSON."""
+        """Format data as JSON.
+
+        Args:
+            data: Data to format as JSON.
+            indent: Number of spaces for indentation.
+
+        Returns:
+            str: JSON-formatted string.
+        """
         return json.dumps(data, indent=indent, default=str)
 
     @staticmethod
     def format_yaml(data: object) -> str:
-        """Format data as YAML."""
+        """Format data as YAML.
+
+        Args:
+            data: Data to format as YAML.
+
+        Returns:
+            str: YAML-formatted string.
+        """
         return yaml.dump(data, default_flow_style=False)

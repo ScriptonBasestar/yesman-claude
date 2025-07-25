@@ -109,7 +109,14 @@ class StatusDashboard:
 
     @staticmethod
     def _calculate_session_activity(session_info: dict) -> float:
-        """Calculate activity level for a session."""
+        """Calculate activity level for a session.
+
+        Args:
+            session_info: Dictionary containing session information.
+
+        Returns:
+            float: Activity level between 0.0 and 1.0.
+        """
         if not session_info.get("exists", True):
             return 0.0
 
@@ -133,7 +140,11 @@ class StatusDashboard:
 
     @staticmethod
     def create_layout() -> Layout:
-        """Create the dashboard layout."""
+        """Create the dashboard layout.
+
+        Returns:
+            Layout: The created dashboard layout object.
+        """
         layout = Layout()
 
         # Main layout structure
@@ -214,9 +225,7 @@ class StatusDashboard:
             footer_parts.append(f"Health: {health_data.get('overall_score', 'N/A')}")
         except Exception:
             footer_parts.append("Health: N/A")
-        footer_parts.append(str(self.git_activity.render_compact_status()))
-        footer_parts.append(str(self.progress_tracker.render_compact_progress()))
-        footer_parts.append("Activity: N/A")  # render_compact_overview not available
+        footer_parts.extend((str(self.git_activity.render_compact_status()), str(self.progress_tracker.render_compact_progress()), "Activity: N/A"))  # render_compact_overview not available
 
         footer_text = " | ".join(str(part) for part in footer_parts)
         layout["footer"].update(Panel(footer_text, style="dim"))
@@ -285,7 +294,16 @@ class StatusCommand(BaseCommand, SessionCommandMixin):
         detailed: bool = False,
         **kwargs: Any,
     ) -> dict:
-        """Execute the status command."""
+        """Execute the status command.
+
+        Args:
+            project_path: Path to project for status monitoring.
+            update_interval: Refresh interval in seconds.
+            **kwargs: Additional command arguments.
+
+        Returns:
+            dict: Dictionary containing execution results and status.
+        """
         try:
             dashboard = StatusDashboard(project_path, update_interval, self.config, self.tmux_manager)
 

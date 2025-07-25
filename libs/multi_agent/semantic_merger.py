@@ -306,10 +306,7 @@ class SemanticMerger:
             )
 
             # Record which conflicts were addressed
-            resolved_conflicts = []
-            for conflict in file_conflicts:
-                if self._conflict_resolved_by_merge(conflict, merge_result):
-                    resolved_conflicts.append(conflict.conflict_id)
+            resolved_conflicts = [conflict.conflict_id for conflict in file_conflicts if self._conflict_resolved_by_merge(conflict, merge_result)]
 
             merge_result.conflicts_resolved = resolved_conflicts
             results.append(merge_result)
@@ -672,14 +669,16 @@ class SemanticMerger:
             )
 
             # Assess conflicts resolution
-            resolved_conflicts = []
-            for conflict in conflicts:
-                if conflict.conflict_type in {
+            resolved_conflicts = [
+                conflict.conflict_id
+                for conflict in conflicts
+                if conflict.conflict_type
+                in {
                     SemanticConflictType.IMPORT_SEMANTIC_CONFLICT,
                     SemanticConflictType.FUNCTION_SIGNATURE_CHANGE,
                     SemanticConflictType.CLASS_INTERFACE_CHANGE,
-                }:
-                    resolved_conflicts.append(conflict.conflict_id)
+                }
+            ]
 
             unresolved_conflicts = [c.conflict_id for c in conflicts if c.conflict_id not in resolved_conflicts]
 

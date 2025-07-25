@@ -75,7 +75,7 @@ class InteractiveBrowser:
         """Calculate activity level for a session.
 
         Returns:
-        Float representing.
+            float: Activity level between 0.0 and 1.0.
         """
         if not session_info.get("exists", True):
             return 0.0
@@ -106,7 +106,7 @@ class InteractiveBrowser:
         """Create the main dashboard layout.
 
         Returns:
-        Layout object the created item.
+            Layout: The created dashboard layout.
         """
         layout = Layout()
 
@@ -203,7 +203,7 @@ class InteractiveBrowser:
         """Render heatmap data as a simple text display.
 
         Returns:
-        String containing.
+            str: Formatted heatmap display string.
         """
         if not heatmap_data or "heatmap" not in heatmap_data:
             return "[dim]No activity data available[/dim]"
@@ -235,7 +235,7 @@ class BrowseCommand(BaseCommand, SessionCommandMixin):
         """Execute the browse command.
 
         Returns:
-        Dict containing.
+            dict: Dictionary containing execution results and status.
         """
         try:
             with with_startup_progress("🔧 Initializing session browser...") as update:  # type: ignore

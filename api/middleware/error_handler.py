@@ -53,8 +53,16 @@ def error_to_status_code(error: YesmanError) -> int:
     return severity_map.get(error.severity, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-async def global_error_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Global error handler for all exceptions."""
+async def global_error_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: RUF029
+    """Global error handler for all exceptions.
+
+    Args:
+        request: The incoming HTTP request.
+        exc: The exception that was raised.
+
+    Returns:
+        JSONResponse: JSON response containing error details.
+    """
     # Generate request ID if not present
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
 
@@ -129,7 +137,15 @@ async def add_request_id_middleware(
     request: Request,
     call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
-    """Middleware to add request ID to all requests."""
+    """Middleware to add request ID to all requests.
+
+    Args:
+        request: The incoming HTTP request.
+        call_next: The next callable in the middleware chain.
+
+    Returns:
+        Response: The HTTP response with request ID added.
+    """
     # Generate or extract request ID
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     request.state.request_id = request_id

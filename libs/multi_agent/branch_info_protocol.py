@@ -336,16 +336,12 @@ class BranchInfoProtocol:
             conflicts.append(f"Both branches modify: {', '.join(common_files)}")
 
         # Check API changes
-        for api_name in info1.api_signatures:
-            if api_name in info2.api_signatures and info1.api_signatures[api_name] != info2.api_signatures[api_name]:
-                conflicts.append(f"Conflicting API change: {api_name}")
+        conflicts.extend(
+            f"Conflicting API change: {api_name}" for api_name in info1.api_signatures if api_name in info2.api_signatures and info1.api_signatures[api_name] != info2.api_signatures[api_name]
+        )
 
         # Check dependency conflicts
-        for dep_file in info1.dependencies:
-            if dep_file in info2.files_modified:
-                conflicts.append(
-                    f"Branch {branch2} modifies dependency of {branch1}: {dep_file}",
-                )
+        conflicts.extend(f"Branch {branch2} modifies dependency of {branch1}: {dep_file}" for dep_file in info1.dependencies if dep_file in info2.files_modified)
 
         return conflicts
 

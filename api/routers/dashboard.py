@@ -10,16 +10,20 @@ from typing import Annotated, Any, TypedDict
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.templating import Jinja2Templates
 
+from api.shared import claude_manager
 from libs.core.session_manager import SessionManager
 from libs.dashboard.widgets.activity_heatmap import ActivityHeatmapGenerator
 from libs.dashboard.widgets.project_health import ProjectHealth
 from libs.yesman_config import YesmanConfig
 
-from ..shared import claude_manager
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Web dashboard router for FastAPI."""
+
+# Constants
+ACTIVITY_THRESHOLD = 3
+MAX_ACTIVITY_COUNT = 16
+RANDOM_BOUND = 10
 
 
 class ActivityData(TypedDict):
@@ -44,7 +48,14 @@ heatmap_generator = ActivityHeatmapGenerator(config)
 
 @router.get("/api/dashboard/sessions")
 async def get_sessions() -> list[dict[str, Any]]:
-    """Get session list."""
+    """Get session list.
+
+    Returns:
+        list[dict[str, Any]]: List of session information dictionaries.
+
+    Raises:
+        HTTPException: If session retrieval fails.
+    """
     try:
         # Get session information from SessionManager
         sessions = session_manager.get_all_sessions()
@@ -100,7 +111,14 @@ async def get_sessions() -> list[dict[str, Any]]:
 
 @router.get("/api/dashboard/health")
 async def get_project_health() -> dict[str, Any]:
-    """Get project health metrics."""
+    """Get project health metrics.
+
+    Returns:
+        dict[str, Any]: Project health data including scores and suggestions.
+
+    Raises:
+        HTTPException: If health data retrieval fails.
+    """
     try:
         # Try to use ProjectHealth widget if available
         try:
@@ -181,7 +199,14 @@ async def get_project_health() -> dict[str, Any]:
 
 @router.get("/api/dashboard/activity")
 async def get_activity_data() -> dict[str, Any]:
-    """Get activity heatmap data."""
+    """Get activity heatmap data.
+
+    Returns:
+        dict[str, Any]: Activity data with daily statistics and metrics.
+
+    Raises:
+        HTTPException: If activity data retrieval fails.
+    """
     try:
         # Try to get real git activity data
 
@@ -238,7 +263,7 @@ async def get_activity_data() -> dict[str, Any]:
             current_date = start_date
             while current_date <= end_date:
                 # Generate mock activity data
-                activity_count = secrets.randbelow(16) if secrets.randbelow(10) > 3 else 0
+                activity_count = secrets.randbelow(MAX_ACTIVITY_COUNT) if secrets.randbelow(RANDOM_BOUND) > ACTIVITY_THRESHOLD else 0
                 activities.append(
                     ActivityData(
                         date=current_date.isoformat(),
@@ -263,7 +288,18 @@ async def get_activity_data() -> dict[str, Any]:
 
 @router.get("/api/dashboard/heatmap/{session_name}")
 async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1, le=30)] = 7) -> dict[str, Any]:
-    """세션별 히트맵 데이터 반환."""
+    """세션별 히트맵 데이터 반환.
+
+    Args:
+        session_name: Name of the session to get heatmap for.
+        days: Number of days to include in heatmap (1-30).
+
+    Returns:
+        dict[str, Any]: Heatmap data for the specified session.
+
+    Raises:
+        HTTPException: If heatmap data retrieval fails.
+    """
     try:
         return heatmap_generator.generate_heatmap_data([session_name], days=days)
     except Exception as e:
@@ -273,7 +309,14 @@ async def get_session_heatmap(session_name: str, days: Annotated[int, Query(ge=1
 
 @router.get("/api/dashboard/stats")
 async def get_dashboard_stats() -> dict[str, Any]:
-    """Get dashboard statistics summary."""
+    """Get dashboard statistics summary.
+
+    Returns:
+        dict[str, Any]: Dashboard statistics including session counts and health metrics.
+
+    Raises:
+        HTTPException: If statistics retrieval fails.
+    """
     try:
         # Get data from other endpoints
         sessions_data = await get_sessions()

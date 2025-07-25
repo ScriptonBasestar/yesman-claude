@@ -1,18 +1,19 @@
 import logging
-import os
 import pathlib
 import subprocess
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from fastapi import APIRouter, HTTPException, status
 
 from api import models
 from libs.core.error_handling import ErrorCategory, YesmanError
-from libs.core.models import SessionInfo
 from libs.core.services import get_session_manager, get_tmux_manager
 from libs.core.session_manager import SessionManager
 from libs.core.types import SessionAPIData, SessionStatusType
 from libs.tmux_manager import TmuxManager
+
+if TYPE_CHECKING:
+    from libs.core.models import SessionInfo
 
 # !/usr/bin/env python3
 # Copyright notice.
@@ -93,7 +94,7 @@ class SessionService:
                 # Session not found in configuration
                 return None
 
-            session_data = self.session_manager._get_session_info(project_name, project_conf)  # noqa: SLF001
+            session_data = self.session_manager._get_session_info(project_name, project_conf)
             if session_data:
                 return self._convert_session_to_api_data(session_data)
             return None
@@ -249,7 +250,7 @@ class SessionService:
                     "exists": False,
                 }
 
-            session_data = self.session_manager._get_session_info(project_name, project_conf)  # noqa: SLF001
+            session_data = self.session_manager._get_session_info(project_name, project_conf)
             if not session_data:
                 return {
                     "session_name": session_name,
@@ -284,7 +285,6 @@ class SessionService:
             YesmanError: If setup fails.
         """
         try:
-
             projects_data = self.tmux_manager.load_projects()
             projects = cast("dict", projects_data.get("sessions", {}))
             successful = []
@@ -611,7 +611,7 @@ class SessionService:
                 create_cmd.extend(["-c", str(expanded_path)])
 
             # Create the session
-            self.logger.info("Running tmux command: %s", ' '.join(create_cmd))
+            self.logger.info("Running tmux command: %s", " ".join(create_cmd))
             result = subprocess.run(create_cmd, check=False, capture_output=True, text=True)
 
             self.logger.info("tmux command result: returncode=%s, stdout=%s, stderr=%s", result.returncode, result.stdout, result.stderr)
@@ -723,16 +723,15 @@ def get_all_sessions() -> object:
                 windows = []
                 for window in session.get("windows", []):
                     if isinstance(window, dict):
-                        panes = []
-                        for pane in cast("list", window.get("panes", [])):
-                            if isinstance(pane, dict):
-                                panes.append(
-                                    models.PaneInfo(
-                                        command=str(pane.get("command", "")),
-                                        is_claude=bool(pane.get("is_claude", False)),
-                                        is_controller=bool(pane.get("is_controller", False)),
-                                    )
-                                )
+                        panes = [
+                            models.PaneInfo(
+                                command=str(pane.get("command", "")),
+                                is_claude=bool(pane.get("is_claude", False)),
+                                is_controller=bool(pane.get("is_controller", False)),
+                            )
+                            for pane in cast("list", window.get("panes", []))
+                            if isinstance(pane, dict)
+                        ]
                         windows.append(
                             models.WindowInfo(
                                 index=int(cast("int", window.get("index", 0))),
@@ -809,16 +808,15 @@ def get_session(session_name: str) -> object:
         if isinstance(session_data, dict):
             for window in session_data.get("windows", []):
                 if isinstance(window, dict):
-                    panes = []
-                    for pane in cast("list", window.get("panes", [])):
-                        if isinstance(pane, dict):
-                            panes.append(
-                                models.PaneInfo(
-                                    command=str(pane.get("command", "")),
-                                    is_claude=bool(pane.get("is_claude", False)),
-                                    is_controller=bool(pane.get("is_controller", False)),
-                                )
-                            )
+                    panes = [
+                        models.PaneInfo(
+                            command=str(pane.get("command", "")),
+                            is_claude=bool(pane.get("is_claude", False)),
+                            is_controller=bool(pane.get("is_controller", False)),
+                        )
+                        for pane in cast("list", window.get("panes", []))
+                        if isinstance(pane, dict)
+                    ]
                     windows.append(
                         models.WindowInfo(
                             index=int(cast("int", window.get("index", 0))),

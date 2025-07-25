@@ -3,8 +3,9 @@
 # Copyright notice.
 
 import os
+import pathlib
 import subprocess
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import click
 import yaml
@@ -17,7 +18,9 @@ from libs.validation import (
 
 from .base_command import CommandError
 from .settings import settings
-import pathlib
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -67,7 +70,7 @@ class SessionValidator:
         expanded_dir = pathlib.Path(start_dir).expanduser()
 
         # Use centralized directory validation
-        is_valid, error = validate_directory_path(expanded_dir)
+        is_valid, _error = validate_directory_path(expanded_dir)
 
         if not is_valid:
             # Directory doesn't exist, offer to create it
@@ -155,7 +158,7 @@ class SessionValidator:
         expanded_window_dir = pathlib.Path(window_start_dir).expanduser()
 
         # Use centralized directory validation
-        is_valid, error = validate_directory_path(expanded_window_dir)
+        is_valid, _error = validate_directory_path(expanded_window_dir)
 
         if not is_valid:
             click.echo(f"❌ Error: Window '{window_name}' start_directory does not exist")
@@ -298,7 +301,7 @@ class SessionSetupService:
 
     def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
         """Load sessions configuration with optional filter."""
-        projects_data = getattr(self.tmux_manager, "load_projects", lambda: {})() or {}
+        projects_data = getattr(self.tmux_manager, "load_projects", dict)() or {}
         all_sessions = projects_data.get("sessions", {}) if isinstance(projects_data, dict) else {}
 
         if not all_sessions:
@@ -357,9 +360,7 @@ class SessionSetupService:
     def _session_exists(self, session_name: str) -> bool:
         """Check if session already exists."""
         try:
-            from collections.abc import Callable
-
-            get_sessions_func: Callable[[], list] = getattr(self.tmux_manager, "get_all_sessions", lambda: [])
+            get_sessions_func: Callable[[], list] = getattr(self.tmux_manager, "get_all_sessions", list)
             sessions = get_sessions_func()
             return any(session.get("session_name") == session_name for session in sessions)
         except Exception:

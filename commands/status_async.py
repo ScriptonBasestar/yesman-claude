@@ -437,11 +437,8 @@ class AsyncStatusCommand(AsyncMonitoringCommand, SessionCommandMixin):
         # Extract parameters from kwargs with defaults
         project_path = str(kwargs.get("project_path", "."))
         update_interval_value = kwargs.get("update_interval", 5.0)
-        if isinstance(update_interval_value, (int, float)):
-            update_interval = float(update_interval_value)
-        else:
-            update_interval = 5.0
-        interactive = bool(kwargs.get("interactive", False))
+        update_interval = float(update_interval_value) if isinstance(update_interval_value, (int, float)) else 5.0
+        interactive = bool(kwargs.get("interactive"))
         config = kwargs.get("config", self.config)
         tmux_manager = kwargs.get("tmux_manager", self.tmux_manager)
 

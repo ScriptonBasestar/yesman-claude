@@ -1,4 +1,5 @@
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import threading
 
@@ -29,7 +30,7 @@ class TestThreadSafety:
                 )
                 result = renderer.render_widget(RenderFormat.TUI, [data])
                 results.append((thread_id, result))
-            except Exception as e:
+            except (RuntimeError, ValueError, AttributeError, ImportError) as e:
                 errors.append((thread_id, e))
 
         # Create multiple threads

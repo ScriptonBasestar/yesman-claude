@@ -1,4 +1,5 @@
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import time
 
@@ -18,8 +19,8 @@ class TestPerformanceMonitoring:
     def performance_optimizer() -> object:
         """Create PerformanceOptimizer instance.
 
-        Returns:
-        object: Description of return value.
+        Yields:
+            PerformanceOptimizer: Configured performance optimizer instance.
         """
         optimizer = PerformanceOptimizer()
         yield optimizer

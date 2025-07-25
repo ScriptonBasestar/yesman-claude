@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import pytest
 
@@ -111,7 +112,7 @@ class TestValidationFunctions:
         """Test valid port numbers."""
         valid_ports = ["80", "443", "8000", "3000", "65535"]
         for port in valid_ports:
-            valid, error = validate_port_number(port)
+            valid, _error = validate_port_number(port)
             assert valid is True, f"'{port}' should be valid"
 
     @staticmethod

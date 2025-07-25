@@ -368,9 +368,7 @@ class BranchManager:
         conflicts = []
         if result.returncode != 0 or result.stdout.strip():
             # Parse conflict information
-            for line in result.stdout.strip().split("\n"):
-                if line.startswith("CONFLICT"):
-                    conflicts.append(line)
+            conflicts.extend(line for line in result.stdout.strip().split("\n") if line.startswith("CONFLICT"))
 
         return {
             "branch": branch_name,

@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 
-def fix_remaining_ann003():
+def fix_remaining_ann003() -> None:
     """Fix remaining ANN003 errors manually."""
     # Get remaining errors
     result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", "."], capture_output=True, text=True, check=False)

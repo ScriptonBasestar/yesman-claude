@@ -233,7 +233,9 @@ class AIHistoryCommand(BaseCommand):
             time_str = time.strftime("%H:%M:%S", time.localtime(record.timestamp))
 
             # Truncate long prompts
-            prompt = record.prompt_text[:37] + "..." if len(record.prompt_text) > 40 else record.prompt_text
+            MAX_PROMPT_LENGTH = 40
+            TRUNCATE_LENGTH = 37
+            prompt = record.prompt_text[:TRUNCATE_LENGTH] + "..." if len(record.prompt_text) > MAX_PROMPT_LENGTH else record.prompt_text
 
             table.add_row(
                 time_str,

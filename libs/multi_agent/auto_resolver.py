@@ -365,7 +365,7 @@ class AutoResolver:
 
             # Conservative mode: only resolve very low-risk conflicts
             if mode == AutoResolutionMode.CONSERVATIVE:
-                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity in {ConflictSeverity.LOW}:
+                if risk_score <= CONSERVATIVE_RISK_THRESHOLD and conflict.severity == ConflictSeverity.LOW:
                     resolvable.append(conflict)
                 else:
                     escalated.append(conflict)

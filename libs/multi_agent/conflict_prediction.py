@@ -704,12 +704,10 @@ class ConflictPredictor:
             tree = ast.parse(content)
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        imports.append(f"import {alias.name}")
+                    imports.extend(f"import {alias.name}" for alias in node.names)
                 elif isinstance(node, ast.ImportFrom):
                     module = node.module or ""
-                    for alias in node.names:
-                        imports.append(f"from {module} import {alias.name}")
+                    imports.extend(f"from {module} import {alias.name}" for alias in node.names)
         except SyntaxError:
             # Fallback to regex for invalid syntax
             import_patterns = [

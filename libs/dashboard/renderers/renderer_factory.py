@@ -152,7 +152,7 @@ class RendererFactory:
     def render_universal(
         cls,
         widget_type: WidgetType,
-        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
+        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | float | bool),
         render_format: RenderFormat | None = None,
         options: dict[str, str | int | float | bool] | None = None,
     ) -> (
@@ -212,7 +212,7 @@ class RendererFactory:
     def render_parallel(
         cls,
         widget_type: WidgetType,
-        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
+        data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | float | bool),
         formats: list[RenderFormat] | None = None,
         options: dict[str, str | int | float | bool] | None = None,
         max_workers: int = 3,
@@ -299,7 +299,7 @@ class RendererFactory:
 
 def render_widget(
     widget_type: WidgetType,
-    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
+    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | float | bool),
     render_format: RenderFormat,
     options: dict[str, str | int | float | bool] | None = None,
 ) -> str | dict[str, str | int | float | bool] | list[str | int | float | bool]:
@@ -325,7 +325,7 @@ def render_widget(
 
 def render_all_formats(
     widget_type: WidgetType,
-    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
+    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | float | bool),
     options: dict[str, str | int | float | bool] | None = None,
 ) -> dict[
     RenderFormat,
@@ -351,7 +351,7 @@ def render_all_formats(
 
 def render_formats(
     widget_type: WidgetType,
-    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | int | float | bool),
+    data: (dict[str, str | int | float | bool | list[str]] | list[str | int | float | bool] | str | float | bool),
     formats: list[RenderFormat],
     options: dict[str, str | int | float | bool] | None = None,
     parallel: bool = False,

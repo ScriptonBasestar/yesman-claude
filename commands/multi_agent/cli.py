@@ -107,9 +107,7 @@ def list_tasks(work_dir: str | None, status: str | None) -> None:
 @click.argument("branches", nargs=-1, required=True)
 @click.option("--repo-path", "-r", help="Repository path")
 @click.option("--auto-resolve", is_flag=True, help="Attempt automatic resolution")
-def detect_conflicts(
-    branches: str, repo_path: str | None, auto_resolve: bool
-) -> None:
+def detect_conflicts(branches: str, repo_path: str | None, auto_resolve: bool) -> None:
     """Detect conflicts between branches."""
     command = DetectConflictsCommand()
     command.run(branches=list(branches), repo_path=repo_path, auto_resolve=auto_resolve)
@@ -119,9 +117,7 @@ def detect_conflicts(
 @click.argument("conflict_id")
 @click.option("--strategy", "-s", help="Resolution strategy")
 @click.option("--repo-path", "-r", help="Repository path")
-def resolve_conflict(
-    conflict_id: str, strategy: str | None, repo_path: str | None
-) -> None:
+def resolve_conflict(conflict_id: str, strategy: str | None, repo_path: str | None) -> None:
     """Resolve a specific conflict."""
     command = ResolveConflictCommand()
     command.run(conflict_id=conflict_id, strategy=strategy, repo_path=repo_path)

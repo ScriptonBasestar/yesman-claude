@@ -168,8 +168,7 @@ class WebRenderer(BaseRenderer):
         if title:
             html_parts.append(f'<h3 class="text-lg font-semibold mb-3 text-gray-800">{html.escape(title)}</h3>')
 
-        html_parts.append(content)
-        html_parts.append("</div>")
+        html_parts.extend((content, "</div>"))
 
         return "\\n".join(html_parts)
 
@@ -833,8 +832,7 @@ class WebRenderer(BaseRenderer):
                 ]
             )
 
-            for header in headers:
-                html_parts.append(f'<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{html.escape(str(header))}</th>')
+            html_parts.extend(f'<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{html.escape(str(header))}</th>' for header in headers)
 
             html_parts.extend(
                 [
@@ -850,8 +848,7 @@ class WebRenderer(BaseRenderer):
             html_parts.append('<tr class="hover:bg-gray-50">')
 
             if isinstance(row, list | tuple):
-                for cell in row:
-                    html_parts.append(f'<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{html.escape(str(cell))}</td>')
+                html_parts.extend(f'<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{html.escape(str(cell))}</td>' for cell in row)
             elif isinstance(row, dict):
                 for header in headers:
                     cell_value = row.get(header, "")
@@ -941,8 +938,7 @@ class WebRenderer(BaseRenderer):
 
         html_parts = [f'<div class="{" ".join(css_classes)}">']
 
-        for widget in widgets:
-            html_parts.append(f'<div class="flex-1">{widget}</div>')
+        html_parts.extend(f'<div class="flex-1">{widget}</div>' for widget in widgets)
 
         html_parts.append("</div>")
 

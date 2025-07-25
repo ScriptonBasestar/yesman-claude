@@ -44,7 +44,7 @@ class BatchStatistics:
     average_processing_time_ms: float = 0.0
 
 
-class BaseBatchProcessor(Generic[T, B], StatisticsProviderMixin, ABC):
+class BaseBatchProcessor(StatisticsProviderMixin, ABC, Generic[T, B]):
     """Generic base class for batch processing.
 
     Type Parameters:

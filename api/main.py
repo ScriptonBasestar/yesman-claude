@@ -1,5 +1,5 @@
 import asyncio
-import os
+import pathlib
 from datetime import UTC, datetime
 from typing import TypedDict, cast
 
@@ -16,7 +16,6 @@ from api.middleware.error_handler import add_request_id_middleware, global_error
 from api.routers import config, controllers, dashboard, logs, sessions, websocket_router
 from api.routers.websocket_router import ConnectionManager
 from libs.core.error_handling import YesmanError
-import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -139,7 +138,11 @@ if pathlib.Path(sveltekit_build_path).exists():
 # Health check endpoint
 @app.get("/healthz")
 async def health_check() -> dict[str, str]:
-    """Health check endpoint for monitoring and load balancer."""
+    """Health check endpoint for monitoring and load balancer.
+
+    Returns:
+        dict[str, str]: Health status information.
+    """
     return {
         "status": "healthy",
         "service": "yesman-claude-api",
@@ -151,7 +154,11 @@ async def health_check() -> dict[str, str]:
 # API info endpoint
 @app.get("/api")
 async def api_info() -> dict[str, str | dict[str, str] | None]:
-    """API information and available endpoints."""
+    """API information and available endpoints.
+
+    Returns:
+        dict[str, str | dict[str, str] | None]: API information and endpoint mapping.
+    """
     return {
         "service": "Yesman Claude API",
         "version": "0.1.0",
@@ -178,7 +185,14 @@ if pathlib.Path(sveltekit_build_path).exists():
     @app.get("/")
     @app.get("/{path:path}")
     async def serve_dashboard(path: str = "") -> FileResponse:
-        """Serve SvelteKit dashboard at root."""
+        """Serve SvelteKit dashboard at root.
+
+        Returns:
+            FileResponse: Dashboard HTML file.
+
+        Raises:
+            HTTPException: If the path is not found.
+        """
         # Skip API routes and specific endpoints
         if path.startswith(("api/", "docs", "openapi.json", "healthz", "_app/", "fonts/")):
             raise HTTPException(status_code=404, detail="Not found")
@@ -194,8 +208,10 @@ else:
     # Development mode: provide a basic dashboard page when Tauri build is not available
     @app.get("/")
     async def serve_dev_dashboard() -> Response:
-        """Serve development dashboard when SvelteKit build is not
-        available.
+        """Serve development dashboard when SvelteKit build is not available.
+
+        Returns:
+            Response: HTML response with development dashboard.
         """
         html_content = """
         <!DOCTYPE html>
@@ -256,9 +272,10 @@ else:
 
 # Startup event
 @app.on_event("startup")
-async def startup_event() -> None:
+async def startup_event() -> None:  # noqa: RUF029
     """Start background tasks on application startup."""
-    asyncio.create_task(task_runner.start())
+    task = asyncio.create_task(task_runner.start())
+    _ = task  # Keep reference to prevent garbage collection
 
 
 # Shutdown event
@@ -274,7 +291,11 @@ async def shutdown_event() -> None:
 # Add endpoint to check task status
 @app.get("/api/tasks/status")
 async def get_task_status() -> TaskStatesDict:
-    """Get status of background tasks."""
+    """Get status of background tasks.
+
+    Returns:
+        TaskStatesDict: Current status of all background tasks.
+    """
     return {
         "is_running": task_runner.is_running,
         "tasks": cast("dict[str, TaskStateDict]", task_runner.get_task_states()),
@@ -284,7 +305,11 @@ async def get_task_status() -> TaskStatesDict:
 # Add endpoint to check WebSocket batch processing stats
 @app.get("/api/websocket/stats")
 async def get_websocket_stats() -> WebSocketStatsDict:
-    """Get WebSocket connection and batch processing statistics."""
+    """Get WebSocket connection and batch processing statistics.
+
+    Returns:
+        WebSocketStatsDict: WebSocket statistics including connections and batch processing.
+    """
     connection_stats = manager.get_connection_stats()
     batch_stats = manager.get_batch_statistics()
 

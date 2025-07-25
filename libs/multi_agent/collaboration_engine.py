@@ -421,9 +421,7 @@ class CollaborationEngine:
                 for tag in tags:
                     matching_ids.update(self.knowledge_index.get(tag, []))
 
-                for kid in matching_ids:
-                    if kid in self.shared_knowledge:
-                        candidates.append(self.shared_knowledge[kid])
+                candidates.extend(self.shared_knowledge[kid] for kid in matching_ids if kid in self.shared_knowledge)
             else:
                 candidates = list(self.shared_knowledge.values())
 
@@ -984,11 +982,8 @@ class CollaborationEngine:
         while self._running:
             try:
                 # Find agents that need synchronization
-                sync_needed = []
 
-                for agent in self.agent_pool.agents.values():
-                    if agent.state == AgentState.WORKING:
-                        sync_needed.append(agent.agent_id)
+                sync_needed = [agent.agent_id for agent in self.agent_pool.agents.values() if agent.state == AgentState.WORKING]
 
                 if len(sync_needed) >= 2:
                     # Create sync session

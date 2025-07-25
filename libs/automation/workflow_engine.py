@@ -260,7 +260,7 @@ class ConditionEvaluator:
         return value_str
 
     @staticmethod
-    def _equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    def _equals(left: str | float | bool | None, right: str | float | bool | None) -> bool:
         """Equality comparison.
 
         Returns:
@@ -269,7 +269,7 @@ class ConditionEvaluator:
         return bool(left == right)
 
     @staticmethod
-    def _not_equals(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    def _not_equals(left: str | float | bool | None, right: str | float | bool | None) -> bool:
         """Inequality comparison.
 
         Returns:
@@ -278,7 +278,7 @@ class ConditionEvaluator:
         return bool(left != right)
 
     @staticmethod
-    def _greater_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    def _greater_than(left: str | float | bool | None, right: str | float | bool | None) -> bool:
         """Greater than comparison.
 
         Returns:
@@ -290,7 +290,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _less_than(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    def _less_than(left: str | float | bool | None, right: str | float | bool | None) -> bool:
         """Less than comparison.
 
         Returns:
@@ -302,7 +302,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _greater_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    def _greater_equal(left: str | float | bool | None, right: str | float | bool | None) -> bool:
         """Greater than or equal comparison.
 
         Returns:
@@ -314,7 +314,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _less_equal(left: str | int | float | bool | None, right: str | int | float | bool | None) -> bool:
+    def _less_equal(left: str | float | bool | None, right: str | float | bool | None) -> bool:
         """Less than or equal comparison.
 
         Returns:
@@ -326,7 +326,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
+    def _contains(left: str | list[str] | dict[str, str], right: str | float | bool | None) -> bool:
         """Containment check.
 
         Returns:
@@ -338,7 +338,7 @@ class ConditionEvaluator:
             return False
 
     @staticmethod
-    def _not_contains(left: str | list[str] | dict[str, str], right: str | int | float | bool | None) -> bool:
+    def _not_contains(left: str | list[str] | dict[str, str], right: str | float | bool | None) -> bool:
         """Not containment check.
 
         Returns:
@@ -592,7 +592,7 @@ class WorkflowEngine:
             stderr=asyncio.subprocess.PIPE,
         )
 
-        stdout, stderr = await process.communicate()
+        _stdout, _stderr = await process.communicate()
 
         return {
             "returncode": process.returncode,

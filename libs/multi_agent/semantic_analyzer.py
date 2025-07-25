@@ -993,8 +993,7 @@ class SemanticVisitor(ast.NodeVisitor):
 
         # Default arguments
         if node.args.defaults:
-            for default in node.args.defaults:
-                defaults.append(ast.unparse(default))
+            defaults.extend(ast.unparse(default) for default in node.args.defaults)
 
         # Keyword-only arguments
         for arg in node.args.kwonlyargs:

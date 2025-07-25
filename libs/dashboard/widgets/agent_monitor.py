@@ -13,20 +13,19 @@ from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
-from rich.progress import Progress, TaskID
 from rich.table import Table
 from rich.text import Text
 
 from libs.multi_agent.agent_pool import AgentPool
 from libs.multi_agent.types import Agent, AgentState, Task, TaskStatus
 
+if TYPE_CHECKING:
+    from rich.progress import Progress, TaskID
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Real-time multi-agent monitoring dashboard widget."""
 
-
-if TYPE_CHECKING:
-    pass
 
 try:
     pass

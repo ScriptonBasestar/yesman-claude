@@ -110,7 +110,7 @@ def parse_log_line(line: str) -> LogEntry | None:
     )
 
 
-@router.get("/logs", response_model=list[LogEntry])
+@router.get("/logs")
 def get_logs(
     limit: Annotated[int, Query(ge=1, le=1000)] = 100,
     level: Annotated[str | None, Query()] = None,
@@ -190,9 +190,10 @@ def get_log_sources() -> object:
             if log_file.exists():
                 try:
                     with open(log_file, encoding="utf-8") as f:
-                        # Sample first 50 lines to get sources
+                        # Sample first lines to get sources
+                        SAMPLE_SIZE = 50
                         for i, line in enumerate(f):
-                            if i >= 50:
+                            if i >= SAMPLE_SIZE:
                                 break
                             log_entry = parse_log_line(line)
                             if log_entry:

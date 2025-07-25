@@ -1,4 +1,5 @@
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 import tempfile
 from pathlib import Path
@@ -18,7 +19,11 @@ class TestKeyboardThemeIntegration:
     @pytest.fixture
     @staticmethod
     def keyboard_manager() -> object:
-        """Create KeyboardNavigationManager instance."""
+        """Create KeyboardNavigationManager instance.
+        
+        Yields:
+            KeyboardNavigationManager: Configured keyboard navigation manager.
+        """
         manager = KeyboardNavigationManager()
         yield manager
         # Cleanup
@@ -28,7 +33,11 @@ class TestKeyboardThemeIntegration:
     @pytest.fixture
     @staticmethod
     def theme_manager() -> object:
-        """Create ThemeManager instance."""
+        """Create ThemeManager instance.
+        
+        Yields:
+            ThemeManager: Configured theme manager instance.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             yield ThemeManager(config_dir=Path(temp_dir))
 

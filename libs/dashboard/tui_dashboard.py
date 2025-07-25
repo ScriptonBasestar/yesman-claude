@@ -8,7 +8,6 @@ from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.message import Message
 from textual.reactive import reactive
-from textual.timer import Timer
 from textual.widgets import (
     Footer,
     Header,
@@ -31,6 +30,9 @@ from .renderers.widget_models import (
     SessionStatus,
 )
 
+if TYPE_CHECKING:
+    from textual.timer import Timer
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """TUI Dashboard.
@@ -38,9 +40,6 @@ from .renderers.widget_models import (
 Textual-based terminal user interface dashboard for Yesman-Claude
 Provides comprehensive project monitoring with multiple views and real-time updates.
 """
-
-if TYPE_CHECKING:
-    pass
 
 
 class DashboardWidget(Static):

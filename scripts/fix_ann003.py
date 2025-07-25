@@ -21,7 +21,7 @@ from pathlib import Path
 class KwargsTypeFixer:
     """Fixes missing type annotations for **kwargs parameters."""
 
-    def __init__(self, backup_dir: Path | None = None):
+    def __init__(self, backup_dir: Path | None = None) -> None:
         self.backup_dir = backup_dir
         self.fixed_files: set[Path] = set()
         self.failed_files: set[Path] = set()
@@ -32,7 +32,7 @@ class KwargsTypeFixer:
         try:
             result = subprocess.run(["ruff", "check", "--select", "ANN003", "--exclude", ".backups", ".", "--output-format", "json"], capture_output=True, text=True, cwd=Path.cwd(), check=False)
 
-            if result.returncode not in (0, 1):  # 0 = no issues, 1 = issues found
+            if result.returncode not in {0, 1}:  # 0 = no issues, 1 = issues found
                 print(f"Error running ruff: {result.stderr}")
                 return {}
 
@@ -68,10 +68,7 @@ class KwargsTypeFixer:
             return False
         if re.search(r"import typing", content) and re.search(r"typing\.Any", content):
             return False
-        if re.search(r"from typing_extensions import.*\bAny\b", content):
-            return False
-
-        return True
+        return not re.search(r"from typing_extensions import.*\bAny\b", content)
 
     def add_any_import(self, content: str) -> str:
         """Add 'Any' to typing imports or create new import."""
@@ -236,7 +233,7 @@ class KwargsTypeFixer:
                 print(f"  {file_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Fix ANN003 missing-type-kwargs errors")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be fixed without making changes")
     parser.add_argument("--backup-dir", type=Path, default=Path(".backups/ann003"), help="Directory to store backup files")

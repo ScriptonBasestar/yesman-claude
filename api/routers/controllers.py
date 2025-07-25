@@ -2,9 +2,8 @@ import subprocess
 
 from fastapi import APIRouter, HTTPException
 
+from api.shared import claude_manager
 from libs.core.session_manager import SessionManager
-
-from ..shared import claude_manager
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -20,8 +19,14 @@ cm = claude_manager
 def get_controller_status(session_name: str) -> str | None:
     """지정된 세션의 컨트롤러 상태를 조회합니다 ('running' 또는 'stopped').
 
+    Args:
+        session_name: Name of the session to check.
+
     Returns:
-        Dict containing status information.
+        str | None: Controller status ('running' or 'stopped').
+
+    Raises:
+        HTTPException: If controller status retrieval fails.
     """
     try:
         controller = cm.get_controller(session_name)
@@ -36,7 +41,14 @@ def get_controller_status(session_name: str) -> str | None:
 
 @router.post("/sessions/{session_name}/controller/start", status_code=204)
 def start_controller(session_name: str) -> None:
-    """지정된 세션의 컨트롤러를 시작합니다."""
+    """지정된 세션의 컨트롤러를 시작합니다.
+
+    Args:
+        session_name: Name of the session to start controller for.
+
+    Raises:
+        HTTPException: If controller start fails or session is not running.
+    """
     try:
         controller = cm.get_controller(session_name)
 
@@ -207,7 +219,14 @@ def start_controller(session_name: str) -> None:
 
 @router.post("/sessions/{session_name}/controller/stop", status_code=204)
 def stop_controller(session_name: str) -> None:
-    """지정된 세션의 컨트롤러를 중지합니다."""
+    """지정된 세션의 컨트롤러를 중지합니다.
+
+    Args:
+        session_name: Name of the session to stop controller for.
+
+    Raises:
+        HTTPException: If controller stop fails.
+    """
     try:
         controller = cm.get_controller(session_name)
 
@@ -258,7 +277,14 @@ def stop_controller(session_name: str) -> None:
 
 @router.post("/sessions/{session_name}/controller/restart", status_code=204)
 def restart_claude_pane(session_name: str) -> None:
-    """Claude가 실행 중인 pane을 재시작합니다."""
+    """Claude가 실행 중인 pane을 재시작합니다.
+
+    Args:
+        session_name: Name of the session to restart Claude pane for.
+
+    Raises:
+        HTTPException: If Claude pane restart fails or pane not found.
+    """
     try:
         controller = cm.get_controller(session_name)
 

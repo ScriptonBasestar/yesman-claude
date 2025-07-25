@@ -1,4 +1,5 @@
-# Copyright notice.
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
 
 from commands.multi_agent.agent_pool import (
     AddTaskCommand,

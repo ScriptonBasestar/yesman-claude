@@ -2,9 +2,9 @@
 
 import logging
 import os
+import pathlib
 import subprocess
 from typing import Any
-import pathlib
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License

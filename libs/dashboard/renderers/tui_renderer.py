@@ -683,9 +683,7 @@ class TUIRenderer(BaseRenderer):
 
         # For horizontal layout, we'll use Rich Columns
         # Convert strings back to renderables (this is a limitation of the current design)
-        panels = []
-        for widget in widgets:
-            panels.append(Panel(widget, box=MINIMAL))
+        panels = [Panel(widget, box=MINIMAL) for widget in widgets]
 
         columns = Columns(panels, equal=True, expand=True)
 

@@ -179,12 +179,10 @@ class TmuxManager:
         session_names = set()
 
         # .yaml 파일들
-        for session_file in self.sessions_path.glob("*.yaml"):
-            session_names.add(session_file.stem)
+        session_names.update(session_file.stem for session_file in self.sessions_path.glob("*.yaml"))
 
         # .yml 파일들
-        for session_file in self.sessions_path.glob("*.yml"):
-            session_names.add(session_file.stem)
+        session_names.update(session_file.stem for session_file in self.sessions_path.glob("*.yml"))
 
         return sorted(session_names)
 
@@ -287,16 +285,16 @@ class TmuxManager:
                     for window in session.list_windows():
                         panes = []
                         if hasattr(window, "list_panes"):
-                            for pane in window.list_panes():
-                                panes.append(
-                                    {
-                                        "pane_id": (getattr(pane, "pane_id", None) or pane.get("pane_id", "unknown")),
-                                        "pane_current_command": (getattr(pane, "pane_current_command", "") or pane.get("pane_current_command", "")),
-                                        "pane_active": ((getattr(pane, "pane_active", "0") or pane.get("pane_active", "0")) == "1"),
-                                        "pane_width": (getattr(pane, "pane_width", 0) or pane.get("pane_width", 0)),
-                                        "pane_height": (getattr(pane, "pane_height", 0) or pane.get("pane_height", 0)),
-                                    }
-                                )
+                            panes.extend(
+                                {
+                                    "pane_id": (getattr(pane, "pane_id", None) or pane.get("pane_id", "unknown")),
+                                    "pane_current_command": (getattr(pane, "pane_current_command", "") or pane.get("pane_current_command", "")),
+                                    "pane_active": ((getattr(pane, "pane_active", "0") or pane.get("pane_active", "0")) == "1"),
+                                    "pane_width": (getattr(pane, "pane_width", 0) or pane.get("pane_width", 0)),
+                                    "pane_height": (getattr(pane, "pane_height", 0) or pane.get("pane_height", 0)),
+                                }
+                                for pane in window.list_panes()
+                            )
 
                         windows.append(
                             {
