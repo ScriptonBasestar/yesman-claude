@@ -21,7 +21,7 @@ class TestThemeRendererIntegration:
     @staticmethod
     def theme_manager() -> object:
         """Create ThemeManager instance.
-        
+
         Yields:
             ThemeManager: Configured theme manager instance.
         """

@@ -19,7 +19,7 @@ class TestPerformanceThemeIntegration:
     @staticmethod
     def performance_optimizer() -> object:
         """Create PerformanceOptimizer instance.
-        
+
         Yields:
             PerformanceOptimizer: Configured performance optimizer instance.
         """
@@ -33,7 +33,7 @@ class TestPerformanceThemeIntegration:
     @staticmethod
     def theme_manager() -> object:
         """Create ThemeManager instance.
-        
+
         Yields:
             ThemeManager: Configured theme manager instance.
         """

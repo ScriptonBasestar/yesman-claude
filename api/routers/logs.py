@@ -191,9 +191,9 @@ def get_log_sources() -> object:
                 try:
                     with open(log_file, encoding="utf-8") as f:
                         # Sample first lines to get sources
-                        SAMPLE_SIZE = 50
+                        sample_size = 50
                         for i, line in enumerate(f):
-                            if i >= SAMPLE_SIZE:
+                            if i >= sample_size:
                                 break
                             log_entry = parse_log_line(line)
                             if log_entry:

@@ -218,15 +218,15 @@ class WebSocketBatchProcessor:
         except Exception:
             self.logger.exception("Failed to send batch %s to %s", batch.batch_id, channel)
             # Re-queue messages for retry (with retry limit to prevent infinite loops)
-            MAX_RETRIES = 3
+            max_retries = 3
             retry_messages = []
             for msg in messages:
                 retry_count = msg.get("retry_count", 0)
-                if retry_count < MAX_RETRIES:
+                if retry_count < max_retries:
                     msg["retry_count"] = retry_count + 1
                     retry_messages.append(msg)
                 else:
-                    self.logger.warning("Dropping message after %d failed retries: %s", MAX_RETRIES, msg)
+                    self.logger.warning("Dropping message after %d failed retries: %s", max_retries, msg)
 
             if retry_messages:
                 self.pending_messages[channel].extendleft(reversed(retry_messages))

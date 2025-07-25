@@ -377,6 +377,7 @@ class ConfigCommandMixin:
     """Mixin for commands that work with configuration."""
 
     # Expected attributes from BaseCommand
+    tmux_manager: "TmuxManager"
     logger: logging.Logger
 
     def load_projects_config(self) -> dict[str, object]:
@@ -445,7 +446,7 @@ class OutputFormatterMixin:
                 widths[header] = max(widths[header], len(value))
 
         # Build table
-        lines = []
+        lines: list[str] = []
 
         # Header
         header_line = " | ".join(header.ljust(widths[header]) for header in headers)

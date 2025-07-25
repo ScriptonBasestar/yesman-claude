@@ -19,7 +19,7 @@ class TestThemeSwitching:
     @staticmethod
     def theme_manager() -> ThemeManager:
         """Create ThemeManager instance.
-        
+
         Yields:
             ThemeManager: Configured theme manager instance.
         """

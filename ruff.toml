@@ -223,3 +223,9 @@ convention = "google"
 
 # API files - allow exception chaining bypass for security
 "api/**/*" = ["B904"]  # HTTPException often should not expose internal errors
+
+# Classes with many public methods - architectural decision
+"libs/core/claude_manager.py" = ["PLR0904"]  # DashboardController serves as facade pattern
+"libs/core/claude_monitor.py" = ["PLR0904"]  # ClaudeMonitor requires many monitoring methods
+"libs/dashboard/event_strategy.py" = ["PLR0904"]  # EventStrategy requires many event handlers
+"libs/dashboard/keyboard_navigation.py" = ["PLR0904"]  # KeyboardNavigationManager needs extensive API

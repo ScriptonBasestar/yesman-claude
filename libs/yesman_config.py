@@ -143,7 +143,6 @@ class YesmanConfig:
         """Get templates directory path."""
         return self.root_dir / self._config_schema.session.templates_dir
 
-
     def reload(self) -> None:
         """Reload configuration from all sources."""
         self._config_schema = self._loader.reload()

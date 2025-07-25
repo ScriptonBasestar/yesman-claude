@@ -899,7 +899,7 @@ class AnalyzeConflictPatternsCommand(BaseCommand):
                                 if detector:
                                     result = await detector(branch1, branch2, vector)
                                     if result:
-                                        analysis_results[f"{branch1}:{branch2}"]["patterns"][pattern] = {  # type: ignore[index]
+                                        analysis_results[f"{branch1}:{branch2}"]["patterns"][pattern] = {
                                             "likelihood": result.likelihood_score,
                                             "confidence": result.confidence.value,
                                             "description": result.description,

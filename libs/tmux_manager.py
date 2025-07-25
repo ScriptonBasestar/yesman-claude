@@ -8,7 +8,7 @@ import subprocess
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import click
 import libtmux
@@ -61,12 +61,12 @@ class TmuxManager:
             return False
         else:
             return True
-    
+
     def create_session_from_config(self, config_dict: dict) -> bool:
         """Create tmux session from configuration dictionary.
-        
+
         This is an alias for create_session to maintain compatibility.
-        
+
         Returns:
         Boolean indicating the created item.
         """
@@ -102,7 +102,7 @@ class TmuxManager:
                 try:
                     with session_file.open(encoding="utf-8") as f:
                         session_config = yaml.safe_load(f) or {}
-                    
+
                     # subdirectory가 있는 경우 디렉토리명을 prefix로 사용
                     relative_path = session_file.relative_to(self.sessions_path)
                     if len(relative_path.parts) > 1:
@@ -110,7 +110,7 @@ class TmuxManager:
                         session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
                     else:
                         session_name = session_file.stem
-                    
+
                     sessions_dict[session_name] = session_config
                     self.logger.debug(f"Loaded session config: {session_name} from {relative_path}")
                 except Exception:
@@ -124,14 +124,14 @@ class TmuxManager:
                 try:
                     with session_file.open(encoding="utf-8") as f:
                         session_config = yaml.safe_load(f) or {}
-                    
+
                     # subdirectory가 있는 경우 디렉토리명을 prefix로 사용
                     relative_path = session_file.relative_to(self.sessions_path)
                     if len(relative_path.parts) > 1:
                         session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
                     else:
                         session_name = session_file.stem
-                    
+
                     # .yaml 파일이 이미 있으면 건너뛰기 (중복 방지)
                     if session_name not in sessions_dict:
                         sessions_dict[session_name] = session_config
@@ -201,7 +201,7 @@ class TmuxManager:
             return yaml_file
         if yml_file.exists():
             return yml_file
-        
+
         # subdirectory에서 찾기
         # e.g., development-frontend -> development/frontend.yaml
         if "-" in session_name:
@@ -209,15 +209,15 @@ class TmuxManager:
             for i in range(1, len(parts)):
                 subdir = "-".join(parts[:i])
                 filename = "-".join(parts[i:])
-                
+
                 yaml_file = self.sessions_path / subdir / f"{filename}.yaml"
                 yml_file = self.sessions_path / subdir / f"{filename}.yml"
-                
+
                 if yaml_file.exists():
                     return yaml_file
                 if yml_file.exists():
                     return yml_file
-        
+
         return None
 
     def list_session_configs(self) -> list[str]:
@@ -234,7 +234,7 @@ class TmuxManager:
                 # 언더스코어로 시작하는 파일은 템플릿이므로 제외
                 if session_file.name.startswith("_"):
                     continue
-                
+
                 relative_path = session_file.relative_to(self.sessions_path)
                 if len(relative_path.parts) > 1:
                     # e.g., development/frontend.yaml -> development-frontend
@@ -248,7 +248,7 @@ class TmuxManager:
                 # 언더스코어로 시작하는 파일은 템플릿이므로 제외
                 if session_file.name.startswith("_"):
                     continue
-                
+
                 relative_path = session_file.relative_to(self.sessions_path)
                 if len(relative_path.parts) > 1:
                     session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
@@ -355,7 +355,7 @@ class TmuxManager:
                 windows = []
                 if hasattr(session, "list_windows"):
                     for window in session.list_windows():
-                        panes = []
+                        panes: list[dict[str, Any]] = []
                         if hasattr(window, "list_panes"):
                             panes.extend(
                                 {

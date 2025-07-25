@@ -248,7 +248,7 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         """Display sessions in grid format."""
         for i, session in enumerate(sessions):
             # Create panel for each session
-            content = []
+            content: list[str] = []
             content.extend((f"[bold]Project:[/bold] {session['project']}", f"[bold]Template:[/bold] {session['template']}"))
 
             if session["status"] == "running":

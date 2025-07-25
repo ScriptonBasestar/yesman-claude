@@ -19,7 +19,6 @@ from libs.dashboard.widgets import (
     GitActivityWidget,
     ProgressTracker,
     ProjectHealth,
-    SessionBrowser,
 )
 from libs.dashboard.widgets.session_progress import SessionProgressWidget
 
@@ -52,7 +51,7 @@ class AsyncStatusDashboard:
         self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)  # type: ignore
 
         # Initialize widgets
-        self.session_browser = SessionBrowser(self.console)
+        # SessionBrowser removed
         self.activity_heatmap = ActivityHeatmapGenerator(self.config)  # type: ignore
         self.project_health = ProjectHealth(str(self.project_path))
         self.git_activity = GitActivityWidget(self.console, str(self.project_path))
@@ -149,8 +148,7 @@ class AsyncStatusDashboard:
                     session_name = session_detail.get("session_name", "unknown")
                     # Store activity data for later rendering
 
-        # Update session browser
-        self.session_browser.update_sessions(detailed_sessions)
+        # SessionBrowser removed - was updating sessions
         self._data_cache["sessions"] = detailed_sessions
 
     async def _get_session_detail_async(self, session_name: str):
@@ -253,9 +251,8 @@ class AsyncStatusDashboard:
         header_text = f"🚀 Yesman Dashboard (Async) - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache: {hit_rate_pct:.1%} | Data Age: {cache_age:.1f}s"
         layout["header"].update(Panel(header_text, style="bold green"))
 
-        # Sessions panel
-        sessions_content, _ = self.session_browser.render()
-        layout["sessions"].update(Panel(sessions_content, title="📋 Active Sessions", border_style="blue"))
+        # Sessions panel - SessionBrowser removed
+        layout["sessions"].update(Panel("Session browser removed", title="📋 Active Sessions", border_style="blue"))
 
         # Project health panel
         health_data = self.project_health.calculate_health()

@@ -20,7 +20,7 @@ class TestKeyboardThemeIntegration:
     @staticmethod
     def keyboard_manager() -> object:
         """Create KeyboardNavigationManager instance.
-        
+
         Yields:
             KeyboardNavigationManager: Configured keyboard navigation manager.
         """
@@ -34,7 +34,7 @@ class TestKeyboardThemeIntegration:
     @staticmethod
     def theme_manager() -> object:
         """Create ThemeManager instance.
-        
+
         Yields:
             ThemeManager: Configured theme manager instance.
         """

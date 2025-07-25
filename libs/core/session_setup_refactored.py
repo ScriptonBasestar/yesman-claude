@@ -70,7 +70,7 @@ class SessionValidator:
         expanded_dir = pathlib.Path(start_dir).expanduser()
 
         # Use centralized directory validation
-        is_valid, _error = validate_directory_path(expanded_dir)
+        is_valid, _error = validate_directory_path(str(expanded_dir))
 
         if not is_valid:
             # Directory doesn't exist, offer to create it
@@ -158,7 +158,7 @@ class SessionValidator:
         expanded_window_dir = pathlib.Path(window_start_dir).expanduser()
 
         # Use centralized directory validation
-        is_valid, _error = validate_directory_path(expanded_window_dir)
+        is_valid, _error = validate_directory_path(str(expanded_window_dir))
 
         if not is_valid:
             click.echo(f"❌ Error: Window '{window_name}' start_directory does not exist")
