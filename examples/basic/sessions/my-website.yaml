@@ -1,0 +1,12 @@
+# Basic web project
+session_name: "my-website"
+template_name: "default"
+start_directory: "~/projects/my-website"
+
+windows:
+  - window_name: "editor"
+    panes:
+      - claude
+  - window_name: "server"
+    panes:
+      - npm run dev

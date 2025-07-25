@@ -143,9 +143,6 @@ class YesmanConfig:
         """Get templates directory path."""
         return self.root_dir / self._config_schema.session.templates_dir
 
-    def get_projects_file(self) -> Path:
-        """Get projects file path."""
-        return self.get_sessions_dir() / self._config_schema.session.projects_file
 
     def reload(self) -> None:
         """Reload configuration from all sources."""

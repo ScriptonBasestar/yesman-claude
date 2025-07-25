@@ -1,0 +1,29 @@
+# Template session file
+# Copy this file and modify for your needs
+# Files starting with underscore are ignored by yesman
+
+session_name: "{{ SESSION_NAME }}"
+start_directory: "{{ PROJECT_PATH | default('~/projects') }}"
+
+# Environment variables
+environment:
+  ENV: "{{ ENVIRONMENT | default('development') }}"
+
+# Before script - runs once when session is created
+before_script: |
+  echo "Setting up {{ SESSION_NAME }} environment..."
+  # Add your setup commands here
+
+# Windows configuration
+windows:
+  - window_name: "main"
+    layout: "even-horizontal"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: "echo 'Add your main command here'"
+        name: "main-process"
+        
+  - window_name: "logs"
+    panes:
+      - command: "tail -f logs/app.log"
+        name: "app-logs"

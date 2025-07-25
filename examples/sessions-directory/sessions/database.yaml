@@ -1,0 +1,34 @@
+# Database management session
+# File: ~/.scripton/yesman/sessions/database.yaml
+
+session_name: "database"
+start_directory: "~/projects/my-app/database"
+windows:
+  - window_name: "postgres"
+    layout: "even-horizontal"
+    panes:
+      - claude
+      - command: "pgcli -h localhost -U postgres -d myapp_dev"
+        name: "dev-db"
+      - command: "pgcli -h localhost -U postgres -d myapp_test"
+        name: "test-db"
+        
+  - window_name: "redis"
+    panes:
+      - command: "redis-cli"
+        name: "redis-cli"
+        
+  - window_name: "migrations"
+    panes:
+      - command: "cd ../backend && source .venv/bin/activate"
+        name: "migration-shell"
+        
+  - window_name: "monitoring"
+    layout: "tiled"
+    panes:
+      - command: "pg_top"
+        name: "pg-top"
+      - command: "redis-cli monitor"
+        name: "redis-monitor"
+      - command: "tail -f /var/log/postgresql/*.log"
+        name: "pg-logs"

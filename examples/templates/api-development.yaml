@@ -1,0 +1,143 @@
+# API Development Template
+# Comprehensive template for API development with testing and documentation
+
+template_name: "api-development"
+start_directory: "${PROJECT_ROOT:-./}"
+
+environment:
+  # API Configuration
+  API_ENV: "${API_ENV:-development}"
+  API_PORT: "${API_PORT:-8000}"
+  API_HOST: "${API_HOST:-0.0.0.0}"
+  
+  # Database
+  DATABASE_URL: "${DATABASE_URL:-postgresql://localhost/api_dev}"
+  REDIS_URL: "${REDIS_URL:-redis://localhost:6379}"
+  
+  # Testing
+  TEST_DATABASE_URL: "${TEST_DATABASE_URL:-postgresql://localhost/api_test}"
+  PYTEST_ARGS: "${PYTEST_ARGS:--v}"
+  
+  # Development
+  DEBUG: "${DEBUG:-true}"
+  LOG_LEVEL: "${LOG_LEVEL:-debug}"
+
+before_script: |
+  echo "🚀 Setting up API development environment..."
+  
+  # Python environment
+  if [ -f "pyproject.toml" ]; then
+    echo "Using uv for dependency management"
+    uv sync
+    source .venv/bin/activate
+  elif [ -f "requirements.txt" ]; then
+    echo "Using pip for dependency management"
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+  fi
+  
+  # Database migrations
+  if [ -f "alembic.ini" ]; then
+    echo "Running Alembic migrations..."
+    alembic upgrade head
+  elif [ -f "manage.py" ]; then
+    echo "Running Django migrations..."
+    python manage.py migrate
+  fi
+  
+  # Pre-commit hooks
+  if [ -f ".pre-commit-config.yaml" ]; then
+    pre-commit install
+  fi
+
+windows:
+  - window_name: "api"
+    layout: "main-vertical"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: |
+          if [ -f "main.py" ] && grep -q "uvicorn" requirements.txt 2>/dev/null; then
+            uvicorn main:app --reload --host $API_HOST --port $API_PORT
+          elif [ -f "app.py" ] && grep -q "flask" requirements.txt 2>/dev/null; then
+            flask run --host $API_HOST --port $API_PORT --debug
+          elif [ -f "manage.py" ]; then
+            python manage.py runserver $API_HOST:$API_PORT
+          else
+            echo "No recognized API framework found"
+            echo "Please start your API server manually"
+          fi
+        name: "api-server"
+      - command: |
+          if [ -f "worker.py" ]; then
+            python worker.py
+          elif grep -q "celery" requirements.txt 2>/dev/null; then
+            celery -A app worker --loglevel=$LOG_LEVEL
+          else
+            echo "No background worker configured"
+          fi
+        name: "worker"
+  
+  - window_name: "testing"
+    layout: "even-horizontal"
+    panes:
+      - command: |
+          if command -v pytest &> /dev/null; then
+            pytest-watch $PYTEST_ARGS
+          else
+            echo "pytest not installed"
+          fi
+        name: "test-watch"
+      - command: |
+          if [ -f "tox.ini" ]; then
+            tox
+          else
+            echo "No tox configuration found"
+          fi
+        name: "tox"
+      - command: |
+          if command -v mypy &> /dev/null; then
+            mypy . --watch
+          else
+            echo "mypy not installed"
+          fi
+        name: "type-check"
+  
+  - window_name: "database"
+    layout: "even-horizontal"
+    panes:
+      - command: |
+          if command -v pgcli &> /dev/null; then
+            pgcli $DATABASE_URL
+          elif command -v psql &> /dev/null; then
+            psql $DATABASE_URL
+          else
+            echo "No PostgreSQL client found"
+          fi
+        name: "postgres"
+      - command: |
+          if command -v redis-cli &> /dev/null; then
+            redis-cli
+          else
+            echo "Redis CLI not found"
+          fi
+        name: "redis"
+  
+  - window_name: "docs"
+    panes:
+      - command: |
+          if [ -f "openapi.yaml" ] || [ -f "openapi.json" ]; then
+            npx @redocly/openapi-cli preview-docs openapi.yaml
+          elif grep -q "fastapi" requirements.txt 2>/dev/null; then
+            echo "FastAPI autodocs available at http://localhost:$API_PORT/docs"
+          else
+            echo "No API documentation found"
+          fi
+        name: "api-docs"
+      - command: |
+          if [ -d "docs" ] && [ -f "mkdocs.yml" ]; then
+            mkdocs serve
+          else
+            echo "No documentation site configured"
+          fi
+        name: "docs-site"

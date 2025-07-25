@@ -1,0 +1,45 @@
+# Advanced yesman configuration with detailed settings
+log_level: debug
+log_path: ~/.scripton/yesman/logs/
+log_rotate: true
+log_max_size: 10M
+log_backup_count: 5
+
+# Auto-response configuration with patterns
+choice:
+  # Yes/No patterns
+  yn: yes
+  yesno: yes
+  'y/n': y
+  'Y/N': Y
+  
+  # Numbered choices
+  '123': 1
+  '1234': 1
+  '12345': 1
+  
+  # Continue/Abort patterns
+  'continue/abort': continue
+  'c/a': c
+  
+  # Custom patterns
+  'install/skip': install
+  'retry/cancel': retry
+
+# Performance settings
+monitoring:
+  interval: 5  # seconds
+  metrics_enabled: true
+  
+# Advanced features
+features:
+  auto_restart: true
+  smart_selection: true
+  learning_mode: true
+  
+# Custom hooks
+hooks:
+  pre_start: |
+    echo "Starting yesman controller..."
+  post_stop: |
+    echo "Yesman controller stopped"

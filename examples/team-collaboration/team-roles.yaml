@@ -1,0 +1,185 @@
+# Team Collaboration by Roles
+# Different configurations for different team roles
+
+sessions:
+  # Frontend Developer Configuration
+  frontend-developer:
+    session_name: "${USER}-frontend"
+    start_directory: "${PROJECT_ROOT}/frontend"
+    
+    environment:
+      ROLE: "frontend"
+      API_MOCK: "true"  # Use mock API for frontend development
+      HOT_RELOAD: "true"
+      BROWSER_SYNC: "true"
+    
+    windows:
+      - window_name: "development"
+        layout: "main-vertical"
+        panes:
+          - claude --dangerously-skip-permissions
+          - command: "npm run dev"
+            name: "dev-server"
+          - command: "npm run storybook"
+            name: "component-library"
+      
+      - window_name: "testing"
+        layout: "even-horizontal"
+        panes:
+          - command: "npm run test:unit:watch"
+            name: "unit-tests"
+          - command: "npm run test:visual"
+            name: "visual-tests"
+      
+      - window_name: "design"
+        panes:
+          - command: "npm run figma:sync"
+            name: "design-sync"
+  
+  # Backend Developer Configuration
+  backend-developer:
+    session_name: "${USER}-backend"
+    start_directory: "${PROJECT_ROOT}/backend"
+    
+    environment:
+      ROLE: "backend"
+      DEBUG: "true"
+      LOG_LEVEL: "debug"
+      DATABASE_LOGGING: "true"
+    
+    windows:
+      - window_name: "api-development"
+        layout: "main-vertical"
+        panes:
+          - claude
+          - command: "./manage.py runserver"
+            name: "django-server"
+          - command: "celery -A myproject worker -l debug"
+            name: "celery-worker"
+      
+      - window_name: "database"
+        layout: "even-horizontal"
+        panes:
+          - command: "./manage.py dbshell"
+            name: "db-shell"
+          - command: "redis-cli monitor"
+            name: "redis-monitor"
+      
+      - window_name: "api-testing"
+        panes:
+          - command: "pytest --watch"
+            name: "test-runner"
+          - command: "httpie :8000/api/health"
+            name: "api-tester"
+  
+  # DevOps Engineer Configuration
+  devops-engineer:
+    session_name: "${USER}-devops"
+    start_directory: "${PROJECT_ROOT}/infrastructure"
+    
+    environment:
+      ROLE: "devops"
+      KUBECONFIG: "${HOME}/.kube/config"
+      TERRAFORM_WORKSPACE: "dev"
+    
+    windows:
+      - window_name: "infrastructure"
+        layout: "tiled"
+        panes:
+          - claude
+          - command: "kubectl get pods -w"
+            name: "k8s-pods"
+          - command: "docker stats"
+            name: "docker-stats"
+          - command: "terraform plan"
+            name: "terraform"
+      
+      - window_name: "monitoring"
+        layout: "even-horizontal"
+        panes:
+          - command: "prometheus --config.file=prometheus.yml"
+            name: "prometheus"
+          - command: "watch -n 5 'kubectl top nodes'"
+            name: "node-metrics"
+      
+      - window_name: "logs"
+        layout: "tiled"
+        panes:
+          - command: "stern ."
+            name: "k8s-logs"
+          - command: "tail -f /var/log/nginx/error.log"
+            name: "nginx-logs"
+          - command: "journalctl -f"
+            name: "system-logs"
+  
+  # QA Engineer Configuration
+  qa-engineer:
+    session_name: "${USER}-qa"
+    start_directory: "${PROJECT_ROOT}/tests"
+    
+    environment:
+      ROLE: "qa"
+      TEST_ENV: "staging"
+      HEADLESS: "false"  # Show browser for debugging
+    
+    windows:
+      - window_name: "test-execution"
+        layout: "even-horizontal"
+        panes:
+          - claude
+          - command: "pytest -v tests/e2e/"
+            name: "e2e-tests"
+          - command: "newman run postman/collection.json"
+            name: "api-tests"
+      
+      - window_name: "test-development"
+        panes:
+          - command: "cypress open"
+            name: "cypress"
+          - command: "python test_generator.py"
+            name: "test-gen"
+      
+      - window_name: "reporting"
+        panes:
+          - command: "allure serve reports/"
+            name: "test-reports"
+          - command: "python scripts/test_metrics.py"
+            name: "metrics"
+  
+  # Tech Lead Configuration
+  tech-lead:
+    session_name: "${USER}-lead"
+    start_directory: "${PROJECT_ROOT}"
+    
+    environment:
+      ROLE: "lead"
+      SHOW_ALL_LOGS: "true"
+    
+    windows:
+      - window_name: "overview"
+        layout: "tiled"
+        panes:
+          - claude --dangerously-skip-permissions
+          - command: "gource -f"
+            name: "code-visualization"
+          - command: "npm run metrics:dashboard"
+            name: "metrics"
+          - command: "git log --oneline --graph --all"
+            name: "git-history"
+      
+      - window_name: "code-quality"
+        layout: "even-horizontal"
+        panes:
+          - command: "npm run lint:report"
+            name: "lint-report"
+          - command: "npm run test:coverage"
+            name: "coverage"
+          - command: "npm run security:audit"
+            name: "security"
+      
+      - window_name: "team-tools"
+        panes:
+          - command: "./scripts/pr-dashboard.sh"
+            name: "pr-status"
+          - command: "./scripts/deployment-status.sh"
+            name: "deployments"

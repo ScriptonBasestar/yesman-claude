@@ -1,0 +1,49 @@
+# Production Monitoring Session
+session_name: "prod-monitoring"
+start_directory: "/var/log"
+
+environment:
+  ALERT_THRESHOLD: "error"
+  SLACK_WEBHOOK: "${SLACK_MONITORING_WEBHOOK}"
+
+before_script: |
+  echo "📊 Starting production monitoring..."
+  # Check permissions
+  if [ ! -r /var/log/nginx/access.log ]; then
+    echo "⚠️  Warning: No read access to nginx logs"
+  fi
+
+windows:
+  - window_name: "servers"
+    layout: "tiled"
+    panes:
+      - command: "ssh prod-web-01 'tail -f /var/log/nginx/error.log'"
+        name: "web-01"
+      - command: "ssh prod-web-02 'tail -f /var/log/nginx/error.log'"
+        name: "web-02"
+      - command: "ssh prod-api-01 'tail -f /var/log/app/error.log'"
+        name: "api-01"
+      - command: "ssh prod-api-02 'tail -f /var/log/app/error.log'"
+        name: "api-02"
+        
+  - window_name: "metrics"
+    layout: "even-horizontal"
+    panes:
+      - command: "watch -n 5 'curl -s http://prod-lb/metrics | jq .'"
+        name: "api-metrics"
+      - command: "htop"
+        name: "system-metrics"
+        
+  - window_name: "alerts"
+    panes:
+      - claude
+      - command: "./scripts/monitor-alerts.sh"
+        name: "alert-monitor"
+        
+  - window_name: "database"
+    layout: "even-horizontal"
+    panes:
+      - command: "pgcli -h prod-db -U monitoring -d production"
+        name: "postgres-monitor"
+      - command: "redis-cli -h prod-redis monitor"
+        name: "redis-monitor"

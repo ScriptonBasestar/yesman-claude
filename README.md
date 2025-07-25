@@ -78,8 +78,10 @@ uv run ./yesman.py --help
 # List available templates and projects
 ./yesman.py ls
 
-# Create all tmux sessions from projects.yaml
-uv run ./yesman.py up
+# Create tmux sessions from sessions/ directory
+uv run ./yesman.py setup [session-name]
+# Or setup all sessions
+uv run ./yesman.py setup
 
 # Build SvelteKit for web interface (one-time setup)
 cd tauri-dashboard && npm run build && cd ..
@@ -184,7 +186,7 @@ For detailed setup and usage instructions, see
 
 ```bash
 $HOME/.scripton/yesman/yesman.yaml
-$HOME/.scripton/yesman/projects.yaml
+$HOME/.scripton/yesman/sessions/   # Individual session files
 ```
 
 파일 구조 examples/참고
@@ -229,12 +231,12 @@ panes:
 
 ### 템플릿 사용하기
 
-`projects.yaml`에서 템플릿을 참조하고 필요한 값을 오버라이드할 수 있습니다:
+개별 세션 파일에서 템플릿을 참조하고 필요한 값을 오버라이드할 수 있습니다:
 
 ```yaml
-sessions:
-  my_project:
-    template_name: django
+# ~/.scripton/yesman/sessions/my_project.yaml
+session_name: "my_project"
+template_name: "django"
     override:
       session_name: my_django_app
       start_directory: ~/projects/django-app

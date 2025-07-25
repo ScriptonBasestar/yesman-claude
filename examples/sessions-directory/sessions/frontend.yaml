@@ -1,0 +1,32 @@
+# Frontend development session
+# File: ~/.scripton/yesman/sessions/frontend.yaml
+
+template_name: "react"
+override:
+  session_name: "frontend"
+  start_directory: "~/projects/my-app/frontend"
+  environment:
+    NODE_ENV: "development"
+    PORT: "3000"
+  before_script: |
+    echo "Starting frontend development environment..."
+    nvm use 18
+    npm install
+  windows:
+    - window_name: "dev"
+      layout: "main-vertical"
+      panes:
+        - claude --dangerously-skip-permissions
+        - command: "npm run dev"
+          name: "dev-server"
+        - command: "npm run test:watch"
+          name: "tests"
+          
+    - window_name: "build"
+      panes:
+        - command: "npm run build:watch"
+          name: "build-watch"
+          
+    - window_name: "logs"
+      panes:
+        - tail -f logs/frontend.log

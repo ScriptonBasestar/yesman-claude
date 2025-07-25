@@ -1,0 +1,43 @@
+# Backend Development Session
+session_name: "dev-backend"
+start_directory: "~/projects/my-app/backend"
+
+environment:
+  PYTHONPATH: "."
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/myapp_dev"
+  REDIS_URL: "redis://localhost:6379/0"
+  ENVIRONMENT: "development"
+  DEBUG: "true"
+
+before_script: |
+  echo "🚀 Starting backend development environment..."
+  source .venv/bin/activate
+  uv sync
+  # Run migrations
+  alembic upgrade head
+
+windows:
+  - window_name: "api"
+    layout: "main-vertical"
+    panes:
+      - claude
+      - command: "uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+        name: "api-server"
+      - command: "uv run celery -A app.worker worker --loglevel=info"
+        name: "celery-worker"
+        
+  - window_name: "database"
+    layout: "even-horizontal"
+    panes:
+      - command: "pgcli -d myapp_dev"
+        name: "postgres"
+      - command: "redis-cli"
+        name: "redis"
+        
+  - window_name: "testing"
+    layout: "even-horizontal"
+    panes:
+      - command: "uv run pytest-watch"
+        name: "test-watch"
+      - command: "uv run mypy app --watch"
+        name: "type-check"

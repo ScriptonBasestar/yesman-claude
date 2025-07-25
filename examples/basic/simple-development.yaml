@@ -1,0 +1,19 @@
+# Simple Development Session Example
+# This shows a minimal configuration for a development workflow
+
+sessions:
+  # Single window development
+  simple-dev:
+    template_name: "default"
+    override:
+      session_name: "simple-dev"
+      start_directory: "~/projects/myapp"
+      environment:
+        NODE_ENV: "development"
+      windows:
+        - window_name: "dev"
+          layout: "even-horizontal"
+          panes:
+            - claude --dangerously-skip-permissions
+            - command: "npm run dev"
+              name: "server"

@@ -1,0 +1,11 @@
+# Minimal Configuration Example
+# The absolute minimum required for a working session
+
+sessions:
+  minimal:
+    # Just a session name and single pane with Claude
+    session_name: "minimal"
+    windows:
+      - window_name: "main"
+        panes:
+          - claude

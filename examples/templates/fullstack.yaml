@@ -1,0 +1,39 @@
+# Full-stack development template
+# Includes backend, frontend, database, and monitoring
+
+session_name: "{{ session_name }}"
+start_directory: "{{ start_directory }}"
+
+# Environment setup
+before_script: |
+  echo "Setting up fullstack environment..."
+  if [ -f ".env" ]; then
+    export $(cat .env | xargs)
+  fi
+
+windows:
+  - window_name: "backend"
+    layout: "main-vertical"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: "{{ backend_command | default('npm run dev:backend') }}"
+        name: "server"
+      - command: "{{ db_command | default('docker-compose up db') }}"
+        name: "database"
+        
+  - window_name: "frontend"
+    layout: "even-horizontal"
+    panes:
+      - command: "{{ frontend_command | default('npm run dev:frontend') }}"
+        name: "dev-server"
+      - command: "{{ test_command | default('npm run test:watch') }}"
+        name: "tests"
+        
+  - window_name: "tools"
+    layout: "tiled"
+    panes:
+      - htop
+      - command: "tail -f {{ log_file | default('logs/app.log') }}"
+        name: "logs"
+      - command: "{{ monitor_command | default('npm run monitor') }}"
+        name: "monitoring"

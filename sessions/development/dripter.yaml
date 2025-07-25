@@ -1,0 +1,14 @@
+# Dripter Session Configuration
+session_name: "dripter"
+start_directory: "~/myopen/dripter"
+
+environment:
+  NODE_ENV: "development"
+  
+windows:
+  - window_name: "main"
+    layout: "even-horizontal"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: "npm run dev"
+        name: "dev-server"

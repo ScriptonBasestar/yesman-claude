@@ -1,0 +1,41 @@
+# Data Science workspace session
+# File: ~/.scripton/yesman/sessions/data-science.yaml
+
+template_name: "jupyter"
+override:
+  session_name: "data-science"
+  start_directory: "~/projects/data-analysis"
+  environment:
+    JUPYTER_PORT: "8888"
+    SPARK_HOME: "/opt/spark"
+  before_script: |
+    echo "Activating data science environment..."
+    conda activate data-science
+    export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+  windows:
+    - window_name: "jupyter"
+      layout: "main-vertical"
+      panes:
+        - claude --dangerously-skip-permissions
+        - command: "jupyter lab --port=8888"
+          name: "jupyter-server"
+        - command: "tensorboard --logdir=./logs"
+          name: "tensorboard"
+          
+    - window_name: "notebooks"
+      panes:
+        - command: "watch -n 5 'ls -la notebooks/*.ipynb'"
+          name: "notebook-watch"
+          
+    - window_name: "spark"
+      layout: "even-horizontal"
+      panes:
+        - command: "pyspark"
+          name: "spark-shell"
+        - command: "spark-submit --master local[4] --driver-memory 4g"
+          name: "spark-submit"
+          
+    - window_name: "data"
+      panes:
+        - command: "ipython"
+          name: "ipython"

@@ -1,0 +1,142 @@
+# Additional Edge Cases - Error Scenarios and Recovery
+
+sessions:
+  # Case: Command failures and recovery
+  command-failures:
+    session_name: "cmd-fail-test"
+    start_directory: "~/test"
+    
+    # Test before_script failure handling
+    before_script: |
+      echo "Testing command that might fail..."
+      fake-command-that-doesnt-exist || echo "Command failed, continuing..."
+      
+      # Test conditional setup
+      if [ ! -d "$HOME/test" ]; then
+        mkdir -p "$HOME/test"
+      fi
+    
+    windows:
+      - window_name: "error-handling"
+        layout: "even-horizontal"
+        panes:
+          # Pane with failing command
+          - command: "exit 1"
+            name: "fail-immediately"
+            restart_on_exit: true
+            max_restarts: 3
+          
+          # Pane with retry logic
+          - command: |
+              n=0
+              while [ $n -lt 5 ]; do
+                echo "Attempt $n"
+                fake-command && break
+                n=$((n+1))
+                sleep 2
+              done
+            name: "retry-logic"
+          
+          # Pane that should continue despite other failures
+          - claude --dangerously-skip-permissions
+  
+  # Case: Environment variable edge cases
+  env-edge-cases:
+    session_name: "env-test"
+    start_directory: "${UNDEFINED_VAR:-$HOME}"  # Fallback for undefined var
+    
+    environment:
+      # Test various environment scenarios
+      EMPTY_VAR: ""
+      NULL_VAR: null
+      NUMERIC_VAR: 12345
+      BOOL_VAR: true
+      SPECIAL_CHARS: "!@#$%^&*()"
+      MULTILINE_VAR: |
+        line1
+        line2
+        line3
+      PATH_APPEND: "${PATH}:/custom/bin"
+      RECURSIVE_VAR: "${RECURSIVE_VAR:-default}"
+    
+    windows:
+      - window_name: "env-test"
+        panes:
+          - command: "env | grep -E 'VAR|PATH'"
+  
+  # Case: Pane synchronization issues
+  pane-sync-issues:
+    session_name: "sync-test"
+    
+    windows:
+      - window_name: "timing-sensitive"
+        layout: "tiled"
+        panes:
+          # These panes depend on each other in timing
+          - command: "sleep 5 && echo 'data' > /tmp/test.txt"
+            name: "writer"
+          
+          - command: "while [ ! -f /tmp/test.txt ]; do sleep 1; done; cat /tmp/test.txt"
+            name: "reader"
+          
+          - command: "watch -n 1 'ls -la /tmp/test.txt 2>/dev/null || echo \"File not yet created\"'"
+            name: "watcher"
+  
+  # Case: Unicode and encoding issues
+  unicode-test:
+    session_name: "unicode-test"
+    
+    environment:
+      LANG: "en_US.UTF-8"
+      LC_ALL: "en_US.UTF-8"
+    
+    windows:
+      - window_name: "unicode"
+        panes:
+          - command: |
+              echo "Testing unicode: 🚀 🎨 🔥"
+              echo "Chinese: 你好世界"
+              echo "Arabic: مرحبا بالعالم"
+              echo "Emoji in paths: ~/📁/test"
+            name: "unicode-test"
+  
+  # Case: Resource exhaustion protection
+  resource-protection:
+    session_name: "resource-test"
+    
+    windows:
+      - window_name: "protection"
+        panes:
+          # Fork bomb protection
+          - command: "ulimit -u 100; echo 'Fork bomb protection enabled'"
+            name: "fork-protection"
+          
+          # Memory limit
+          - command: "ulimit -v 1048576; python -c 'a = []'"
+            name: "memory-limit"
+          
+          # CPU limit using nice
+          - command: "nice -n 19 yes > /dev/null"
+            name: "cpu-limited"
+  
+  # Case: Signal handling and cleanup
+  signal-handling:
+    session_name: "signal-test"
+    
+    # Cleanup script on session end
+    after_script: |
+      echo "Cleaning up temporary files..."
+      rm -f /tmp/signal-test-*
+    
+    windows:
+      - window_name: "signals"
+        panes:
+          - command: |
+              trap 'echo "Caught SIGINT"' INT
+              trap 'echo "Caught SIGTERM"' TERM
+              trap 'echo "Cleaning up..."; rm -f /tmp/signal-test-$$' EXIT
+              
+              touch /tmp/signal-test-$$
+              echo "PID: $$, Press Ctrl+C to test signal handling"
+              while true; do sleep 1; done
+            name: "trap-test"

@@ -1,0 +1,68 @@
+# Configuration Inheritance Example
+# Shows how configurations inherit and override
+
+# Base configuration that can be inherited
+base_config: &base
+  environment:
+    NODE_ENV: "development"
+    LOG_LEVEL: "info"
+  before_script: |
+    echo "Base setup..."
+    nvm use 18
+  windows:
+    - window_name: "main"
+      panes:
+        - claude
+
+sessions:
+  # Inherits everything from base
+  simple-inherit:
+    <<: *base
+    session_name: "simple"
+    start_directory: "~/projects/simple"
+  
+  # Inherits and overrides
+  override-example:
+    <<: *base
+    session_name: "override"
+    start_directory: "~/projects/override"
+    # Override environment (merges with base)
+    environment:
+      NODE_ENV: "production"  # Overrides
+      LOG_LEVEL: "debug"      # Overrides
+      API_KEY: "xyz123"       # Adds new
+    # Additional window (doesn't replace base windows)
+    windows:
+      - window_name: "main"
+        panes:
+          - claude
+      - window_name: "monitoring"  # Additional window
+        panes:
+          - htop
+  
+  # Template inheritance with override
+  template-inherit:
+    template_name: "react"  # Inherit from template
+    override:
+      session_name: "my-react-app"
+      start_directory: "~/projects/my-react"
+      # Override template environment
+      environment:
+        REACT_APP_API_URL: "http://localhost:8080"
+      # Add extra window to template
+      windows_append:  # Special key to append windows
+        - window_name: "testing"
+          panes:
+            - npm run test:watch
+  
+  # Multiple inheritance (last one wins)
+  multi-inherit:
+    # First apply base config
+    <<: *base
+    # Then apply template
+    template_name: "django"
+    # Then apply specific overrides
+    override:
+      session_name: "complex-app"
+      environment:
+        DEBUG: "true"  # This wins over any previous DEBUG setting

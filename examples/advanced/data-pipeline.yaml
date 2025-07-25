@@ -1,0 +1,72 @@
+# Advanced Data Pipeline Configuration
+# Shows complex data processing workflow with monitoring
+
+sessions:
+  data-pipeline:
+    session_name: "data-pipeline"
+    start_directory: "~/projects/data-pipeline"
+    
+    environment:
+      PYTHONPATH: "."
+      AIRFLOW_HOME: "./airflow"
+      SPARK_HOME: "/opt/spark"
+      KAFKA_BROKERS: "localhost:9092"
+    
+    before_script: |
+      echo "🚀 Initializing data pipeline environment..."
+      source .venv/bin/activate
+      
+      # Check services
+      if ! nc -z localhost 9092; then
+        echo "⚠️  Kafka not running - starting..."
+        brew services start kafka
+      fi
+      
+      if ! nc -z localhost 9000; then
+        echo "⚠️  MinIO not running - starting..."
+        minio server ~/minio-data &
+      fi
+    
+    windows:
+      - window_name: "orchestration"
+        layout: "even-horizontal"
+        panes:
+          - claude --dangerously-skip-permissions
+          - command: "airflow webserver"
+            name: "airflow-web"
+          - command: "airflow scheduler"
+            name: "airflow-scheduler"
+      
+      - window_name: "streaming"
+        layout: "tiled"
+        panes:
+          - command: "python consumers/main_consumer.py"
+            name: "main-consumer"
+          - command: "python consumers/error_consumer.py"
+            name: "error-consumer"
+          - command: "kafkacat -b localhost:9092 -t events -C -f '%T %s'"
+            name: "kafka-monitor"
+          - command: "spark-submit streaming_job.py"
+            name: "spark-streaming"
+      
+      - window_name: "storage"
+        layout: "even-horizontal"
+        panes:
+          - command: "mc alias set myminio http://localhost:9000 minioadmin minioadmin && mc admin info myminio"
+            name: "minio-admin"
+          - command: "clickhouse-client"
+            name: "clickhouse"
+          - command: "redis-cli"
+            name: "redis-cache"
+      
+      - window_name: "monitoring"
+        layout: "tiled"
+        panes:
+          - command: "prometheus --config.file=prometheus.yml"
+            name: "prometheus"
+          - command: "grafana-server"
+            name: "grafana"
+          - command: "watch -n 5 'python scripts/pipeline_stats.py'"
+            name: "pipeline-stats"
+          - command: "tail -f logs/pipeline.log | grep -E 'ERROR|WARNING'"
+            name: "error-logs"

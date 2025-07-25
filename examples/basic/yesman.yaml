@@ -1,0 +1,9 @@
+# Basic yesman configuration
+log_level: info
+log_path: ~/.scripton/yesman/logs/
+
+# Simple auto-response configuration
+choice:
+  yn: yes      # Always answer 'yes' to y/n prompts
+  '123': 1     # Select first option for numbered choices
+  '12': 1      # Select first option for two choices

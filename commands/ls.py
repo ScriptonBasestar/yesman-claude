@@ -141,9 +141,9 @@ class LsCommand(BaseCommand, ConfigCommandMixin, OutputFormatterMixin, SessionCo
         click.echo()
 
         # Display projects
-        click.echo("Configured projects:")
+        click.echo("Configured sessions:")
         if not projects:
-            self.print_warning("No projects configured in ~/.scripton/yesman/projects.yaml")
+            self.print_warning("No sessions found in ~/.scripton/yesman/sessions/")
         else:
             headers = ["name", "template", "session", "windows", "status"]
             table = self.format_table(projects, headers)

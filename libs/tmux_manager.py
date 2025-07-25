@@ -41,7 +41,7 @@ class TmuxManager:
             session_name_from_config = config_dict.get("session_name", session_name)
 
             if server.find_where({"session_name": session_name_from_config}):
-                self.logger.warning("Session {session_name_from_config} already exists.")
+                self.logger.warning(f"Session {session_name_from_config} already exists.")
                 return False
 
             # print("--------------------------------")
@@ -54,13 +54,24 @@ class TmuxManager:
 
             builder = WorkspaceBuilder(config_dict, server=server)
             builder.build()
-            self.logger.info("Session {session_name_from_config} created successfully.")
+            self.logger.info(f"Session {session_name_from_config} created successfully.")
 
         except (OSError, RuntimeError, ValueError, AttributeError):
-            self.logger.exception("Failed to create session from %s")
+            self.logger.exception("Failed to create session from %s", session_name)
             return False
         else:
             return True
+    
+    def create_session_from_config(self, config_dict: dict) -> bool:
+        """Create tmux session from configuration dictionary.
+        
+        This is an alias for create_session to maintain compatibility.
+        
+        Returns:
+        Boolean indicating the created item.
+        """
+        session_name = config_dict.get("session_name", "default")
+        return self.create_session(session_name, config_dict)
 
     def get_templates(self) -> list[str]:
         """Get all available session templates.
@@ -71,41 +82,62 @@ class TmuxManager:
         return [f.stem for f in self.templates_path.glob("*.yaml")]
 
     def load_projects(self) -> dict[str, object]:
-        """Load project sessions from individual session files in sessions/
-        directory.
+        """Load project sessions from individual session files in sessions/ directory.
 
         Returns:
-        Dict containing.
+        Dict containing all sessions.
         """
         projects: dict[str, object] = {"sessions": {}}
         sessions_dict = projects["sessions"]
         if not isinstance(sessions_dict, dict):
             sessions_dict = {}
 
-        # 새로운 sessions/ 디렉토리에서 개별 세션 파일들 로드
+        # sessions/ 디렉토리에서 개별 세션 파일들 로드
         if self.sessions_path.exists():
-            for session_file in self.sessions_path.glob("*.yaml"):
+            # 재귀적으로 모든 yaml 파일 찾기 (subdirectory 지원)
+            for session_file in self.sessions_path.rglob("*.yaml"):
+                # 언더스코어로 시작하는 파일은 템플릿이므로 제외
+                if session_file.name.startswith("_"):
+                    continue
                 try:
                     with session_file.open(encoding="utf-8") as f:
                         session_config = yaml.safe_load(f) or {}
-                    session_name = session_file.stem
+                    
+                    # subdirectory가 있는 경우 디렉토리명을 prefix로 사용
+                    relative_path = session_file.relative_to(self.sessions_path)
+                    if len(relative_path.parts) > 1:
+                        # e.g., development/frontend.yaml -> development-frontend
+                        session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
+                    else:
+                        session_name = session_file.stem
+                    
                     sessions_dict[session_name] = session_config
-                    self.logger.debug("Loaded session config: {session_name}")
+                    self.logger.debug(f"Loaded session config: {session_name} from {relative_path}")
                 except Exception:
-                    self.logger.exception("Failed to load session file {session_file}:")
+                    self.logger.exception(f"Failed to load session file {session_file}:")
 
             # .yml 확장자도 지원
-            for session_file in self.sessions_path.glob("*.yml"):
+            for session_file in self.sessions_path.rglob("*.yml"):
+                # 언더스코어로 시작하는 파일은 템플릿이므로 제외
+                if session_file.name.startswith("_"):
+                    continue
                 try:
                     with session_file.open(encoding="utf-8") as f:
                         session_config = yaml.safe_load(f) or {}
-                    session_name = session_file.stem
+                    
+                    # subdirectory가 있는 경우 디렉토리명을 prefix로 사용
+                    relative_path = session_file.relative_to(self.sessions_path)
+                    if len(relative_path.parts) > 1:
+                        session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
+                    else:
+                        session_name = session_file.stem
+                    
                     # .yaml 파일이 이미 있으면 건너뛰기 (중복 방지)
                     if session_name not in sessions_dict:
                         sessions_dict[session_name] = session_config
-                        self.logger.debug("Loaded session config: {session_name}")
+                        self.logger.debug(f"Loaded session config: {session_name} from {relative_path}")
                 except Exception:
-                    self.logger.exception("Failed to load session file {session_file}:")
+                    self.logger.exception(f"Failed to load session file {session_file}:")
 
         return projects
 
@@ -161,6 +193,7 @@ class TmuxManager:
         Returns:
         Configuration object or settings.
         """
+        # 먼저 루트에서 찾기
         yaml_file = self.sessions_path / f"{session_name}.yaml"
         yml_file = self.sessions_path / f"{session_name}.yml"
 
@@ -168,6 +201,23 @@ class TmuxManager:
             return yaml_file
         if yml_file.exists():
             return yml_file
+        
+        # subdirectory에서 찾기
+        # e.g., development-frontend -> development/frontend.yaml
+        if "-" in session_name:
+            parts = session_name.split("-")
+            for i in range(1, len(parts)):
+                subdir = "-".join(parts[:i])
+                filename = "-".join(parts[i:])
+                
+                yaml_file = self.sessions_path / subdir / f"{filename}.yaml"
+                yml_file = self.sessions_path / subdir / f"{filename}.yml"
+                
+                if yaml_file.exists():
+                    return yaml_file
+                if yml_file.exists():
+                    return yml_file
+        
         return None
 
     def list_session_configs(self) -> list[str]:
@@ -178,11 +228,33 @@ class TmuxManager:
         """
         session_names = set()
 
-        # .yaml 파일들
-        session_names.update(session_file.stem for session_file in self.sessions_path.glob("*.yaml"))
+        if self.sessions_path.exists():
+            # .yaml 파일들 (재귀적으로 찾기)
+            for session_file in self.sessions_path.rglob("*.yaml"):
+                # 언더스코어로 시작하는 파일은 템플릿이므로 제외
+                if session_file.name.startswith("_"):
+                    continue
+                
+                relative_path = session_file.relative_to(self.sessions_path)
+                if len(relative_path.parts) > 1:
+                    # e.g., development/frontend.yaml -> development-frontend
+                    session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
+                else:
+                    session_name = session_file.stem
+                session_names.add(session_name)
 
-        # .yml 파일들
-        session_names.update(session_file.stem for session_file in self.sessions_path.glob("*.yml"))
+            # .yml 파일들 (재귀적으로 찾기)
+            for session_file in self.sessions_path.rglob("*.yml"):
+                # 언더스코어로 시작하는 파일은 템플릿이므로 제외
+                if session_file.name.startswith("_"):
+                    continue
+                
+                relative_path = session_file.relative_to(self.sessions_path)
+                if len(relative_path.parts) > 1:
+                    session_name = "-".join(relative_path.parts[:-1]) + "-" + session_file.stem
+                else:
+                    session_name = session_file.stem
+                session_names.add(session_name)
 
         return sorted(session_names)
 

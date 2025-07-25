@@ -389,24 +389,13 @@ class ConfigCommandMixin:
             CommandError: If configuration loading fails.
         """
         try:
-            with open(settings.paths.projects_file, encoding="utf-8") as f:
-                return yaml.safe_load(f) or {}
-        except FileNotFoundError:
-            self.logger.warning("Projects file not found: %s", settings.paths.projects_file)
-            return {}
+            # Use tmux_manager to load projects from sessions/*.yaml
+            return self.tmux_manager.load_projects()
         except Exception as e:
             msg = f"Failed to load projects configuration: {e}"
             raise CommandError(msg) from e
 
-    @staticmethod
-    def save_projects_config(config: dict[str, object]) -> None:
-        """Save projects configuration with error handling."""
-        try:
-            with open(settings.paths.projects_file, "w", encoding="utf-8") as f:
-                yaml.dump(config, f, default_flow_style=False)
-        except Exception as e:
-            msg = f"Failed to save projects configuration: {e}"
-            raise CommandError(msg) from e
+    # save_projects_config removed - using individual session files only
 
     def backup_config(self, config_path: str) -> str:
         """Create backup of configuration file.

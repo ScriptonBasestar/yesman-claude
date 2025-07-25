@@ -276,7 +276,7 @@ class SessionService:
             )
 
     def setup_all_sessions(self) -> dict[str, object]:
-        """Setup all sessions defined in projects.yaml.
+        """Setup all sessions defined in sessions/ directory.
 
         Returns:
             dict[str, object]: Dictionary containing setup results.
@@ -431,7 +431,8 @@ class SessionService:
                         "status": "started",
                         "action": "attached_after_race_condition",
                     }
-                # Re-raise the setup error
+                # Re-raise the setup error instead of silently failing
+                self.logger.exception("Failed to setup session '%s': %s", session_name, setup_error.message)
                 raise
 
         except YesmanError:
@@ -561,23 +562,13 @@ class SessionService:
             bool: True if session exists, False otherwise.
         """
         try:
-            # First check with session manager
-            sessions = self.session_manager.get_all_sessions()
-            session_manager_result = any(getattr(session, "session_name", None) == session_name for session in sessions)
-
-            # Also check directly with tmux
-            try:
-                result = subprocess.run(
-                    ["tmux", "has-session", "-t", session_name],
-                    check=False,
-                    capture_output=True,
-                )
-                tmux_result = result.returncode == 0
-            except Exception:
-                tmux_result = False
-
-            # Return True if either method confirms the session exists
-            return session_manager_result or tmux_result
+            # Check directly with tmux as the source of truth
+            result = subprocess.run(
+                ["tmux", "has-session", "-t", session_name],
+                check=False,
+                capture_output=True,
+            )
+            return result.returncode == 0
         except Exception:
             return False
 
@@ -968,7 +959,7 @@ def get_session_status(session_name: str) -> object:
 @router.post(
     "/sessions/setup-all",
     summary="Setup all sessions",
-    description="Create and setup all tmux sessions defined in projects.yaml",
+    description="Create and setup all tmux sessions defined in sessions/ directory",
 )
 def setup_all_sessions() -> object:
     """Setup all sessions from projects configuration.

@@ -1,0 +1,101 @@
+# Machine Learning Development Template
+# For ML/AI projects with Jupyter, training, and monitoring
+
+template_name: "machine-learning"
+start_directory: "${PROJECT_ROOT:-./}"
+
+environment:
+  # Python and ML
+  PYTHONPATH: "."
+  CUDA_VISIBLE_DEVICES: "${CUDA_VISIBLE_DEVICES:-0}"
+  
+  # Jupyter
+  JUPYTER_PORT: "${JUPYTER_PORT:-8888}"
+  JUPYTER_TOKEN: "${JUPYTER_TOKEN:-}"
+  
+  # MLflow
+  MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI:-http://localhost:5000}"
+  
+  # Weights & Biases
+  WANDB_PROJECT: "${WANDB_PROJECT:-my-ml-project}"
+  WANDB_MODE: "${WANDB_MODE:-online}"
+
+before_script: |
+  echo "🤖 Setting up ML development environment..."
+  
+  # Activate conda environment if exists
+  if [ -f "environment.yml" ]; then
+    conda env create -f environment.yml || conda env update -f environment.yml
+    conda activate $(grep 'name:' environment.yml | cut -d' ' -f2)
+  elif [ -f "requirements.txt" ]; then
+    pip install -r requirements.txt
+  fi
+  
+  # Check GPU availability
+  if command -v nvidia-smi &> /dev/null; then
+    echo "GPU Status:"
+    nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
+  fi
+  
+  # Download datasets if needed
+  if [ -f "scripts/download_data.sh" ]; then
+    ./scripts/download_data.sh
+  fi
+
+windows:
+  - window_name: "notebook"
+    layout: "main-vertical"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: "jupyter lab --port=$JUPYTER_PORT --no-browser"
+        name: "jupyter"
+      - command: |
+          if [ -f "train.py" ]; then
+            echo "Ready to train. Run: python train.py"
+          else
+            echo "No training script found"
+          fi
+        name: "training"
+  
+  - window_name: "experiments"
+    layout: "even-horizontal"
+    panes:
+      - command: "mlflow ui --host 0.0.0.0"
+        name: "mlflow"
+      - command: "tensorboard --logdir=./logs"
+        name: "tensorboard"
+      - command: |
+          if command -v wandb &> /dev/null; then
+            wandb login
+            echo "W&B ready. Project: $WANDB_PROJECT"
+          fi
+        name: "wandb"
+  
+  - window_name: "data"
+    layout: "tiled"
+    panes:
+      - command: |
+          if [ -f "data_exploration.ipynb" ]; then
+            echo "Data exploration notebook available"
+          fi
+          python -c "import pandas as pd; print('Pandas version:', pd.__version__)"
+        name: "data-tools"
+      - command: |
+          if command -v dvc &> /dev/null; then
+            dvc status
+          else
+            echo "DVC not installed"
+          fi
+        name: "dvc"
+      - command: "watch -n 60 'du -sh data/* | sort -h'"
+        name: "data-size"
+  
+  - window_name: "monitoring"
+    layout: "even-horizontal"
+    panes:
+      - command: "watch -n 1 nvidia-smi"
+        name: "gpu-monitor"
+      - command: "htop"
+        name: "cpu-monitor"
+      - command: "tail -f logs/training.log"
+        name: "training-logs"

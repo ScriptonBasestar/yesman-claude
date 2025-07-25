@@ -1,0 +1,11 @@
+# Default session template
+# This is the most basic template that other templates can extend
+
+session_name: "{{ session_name }}"
+start_directory: "{{ start_directory | default('~') }}"
+
+# Basic window with single pane
+windows:
+  - window_name: "main"
+    panes:
+      - claude --dangerously-skip-permissions

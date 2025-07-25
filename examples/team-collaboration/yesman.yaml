@@ -1,0 +1,32 @@
+# Team collaboration yesman configuration
+# Standardized settings for all team members
+
+log_level: info
+log_path: ~/.scripton/yesman/logs/${USER}/
+
+# Team standard auto-responses
+choice:
+  yn: yes
+  '123': 1
+  'continue/abort': continue
+  
+# Team notifications
+notifications:
+  enabled: true
+  channels:
+    - type: "slack"
+      webhook: "${SLACK_WEBHOOK_URL}"
+      events:
+        - "session_start"
+        - "session_error"
+        
+# Shared monitoring
+monitoring:
+  enabled: true
+  metrics_endpoint: "http://metrics.internal/yesman"
+  
+# Team features
+features:
+  share_logs: true
+  team_dashboard: true
+  audit_trail: true

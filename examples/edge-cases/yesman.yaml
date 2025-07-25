@@ -1,0 +1,56 @@
+# Edge case yesman configuration
+
+# Extreme logging settings
+log_level: debug  # Maximum verbosity
+log_path: /tmp/yesman-edge-cases/
+log_format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+log_max_size: 1M  # Very small to test rotation
+log_backup_count: 100  # Many backups
+
+# Complex choice patterns
+choice:
+  # Standard patterns
+  yn: yes
+  yesno: yes
+  
+  # Edge case patterns
+  '': yes  # Empty prompt
+  ' ': yes  # Space prompt
+  '\n': yes  # Newline prompt
+  
+  # Very long patterns
+  'This is a very long prompt that might appear in some edge cases. Do you want to continue? (y/n)': y
+  
+  # Unicode patterns
+  '是/否': '是'
+  'はい/いいえ': 'はい'
+  
+  # Number patterns
+  '1234567890': 1
+  '0123456789': 0  # Select first (0-indexed)
+  
+  # Special character patterns
+  '!@#$%^&*()': yes
+  '[y]/n': y
+  '{yes}/no': yes
+  
+# Error handling settings
+error_handling:
+  max_retries: 10
+  retry_delay: 0.1  # Very fast retries
+  ignore_errors: false
+  fallback_responses:
+    default: yes
+    timeout: yes
+    
+# Resource limits
+limits:
+  max_sessions: 100
+  max_response_time: 0.001  # 1ms - very fast
+  max_memory: 10M
+  
+# Experimental features
+experimental:
+  parallel_monitoring: true
+  predictive_responses: true
+  quantum_selection: false  # Not yet implemented 😄

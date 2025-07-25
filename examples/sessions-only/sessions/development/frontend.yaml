@@ -1,0 +1,39 @@
+# Frontend Development Session
+session_name: "dev-frontend"
+start_directory: "~/projects/my-app/frontend"
+
+environment:
+  NODE_ENV: "development"
+  REACT_APP_API_URL: "http://localhost:8000"
+  PORT: "3000"
+
+before_script: |
+  echo "🎨 Starting frontend development environment..."
+  nvm use 18
+  npm install
+
+windows:
+  - window_name: "coding"
+    layout: "main-vertical"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: "npm run dev"
+        name: "dev-server"
+        
+  - window_name: "testing"
+    layout: "even-horizontal"
+    panes:
+      - command: "npm run test:watch"
+        name: "unit-tests"
+      - command: "npm run cypress:open"
+        name: "e2e-tests"
+        
+  - window_name: "tools"
+    layout: "tiled"
+    panes:
+      - command: "npm run storybook"
+        name: "storybook"
+      - command: "npm run lint:watch"
+        name: "linter"
+      - command: "npm run build:watch"
+        name: "build"

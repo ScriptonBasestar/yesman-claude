@@ -1,0 +1,133 @@
+# Mobile Development Template
+# For React Native, Flutter, or native mobile development
+
+template_name: "mobile-development"
+start_directory: "${PROJECT_ROOT:-./}"
+
+environment:
+  # Platform
+  MOBILE_PLATFORM: "${MOBILE_PLATFORM:-react-native}"  # react-native, flutter, ios, android
+  
+  # React Native
+  REACT_NATIVE_PACKAGER_PORT: "${REACT_NATIVE_PACKAGER_PORT:-8081}"
+  
+  # Android
+  ANDROID_HOME: "${ANDROID_HOME:-$HOME/Android/Sdk}"
+  ANDROID_SDK_ROOT: "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+  
+  # iOS
+  DEVELOPER_DIR: "${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
+
+before_script: |
+  echo "📱 Setting up mobile development environment..."
+  
+  # Detect platform
+  if [ -f "package.json" ] && grep -q "react-native" package.json; then
+    echo "React Native project detected"
+    npm install
+    cd ios && pod install && cd ..
+  elif [ -f "pubspec.yaml" ]; then
+    echo "Flutter project detected"
+    flutter pub get
+  elif [ -f "*.xcodeproj" ] || [ -f "*.xcworkspace" ]; then
+    echo "iOS project detected"
+    if command -v pod &> /dev/null; then
+      pod install
+    fi
+  elif [ -f "build.gradle" ]; then
+    echo "Android project detected"
+    ./gradlew dependencies
+  fi
+  
+  # Check simulators/emulators
+  if command -v xcrun &> /dev/null; then
+    echo "iOS Simulators:"
+    xcrun simctl list devices | grep -E "iPhone|iPad" | head -5
+  fi
+  
+  if command -v adb &> /dev/null; then
+    echo "Android Devices:"
+    adb devices
+  fi
+
+windows:
+  - window_name: "development"
+    layout: "main-vertical"
+    panes:
+      - claude --dangerously-skip-permissions
+      - command: |
+          if [ -f "package.json" ] && grep -q "react-native" package.json; then
+            npx react-native start
+          elif [ -f "pubspec.yaml" ]; then
+            flutter run
+          else
+            echo "Please start your development server"
+          fi
+        name: "metro/flutter"
+      - command: |
+          if [ "$MOBILE_PLATFORM" = "react-native" ]; then
+            echo "Use 'npm run ios' or 'npm run android' to launch"
+          fi
+        name: "launcher"
+  
+  - window_name: "platforms"
+    layout: "even-horizontal"
+    panes:
+      - command: |
+          if [ -f "package.json" ] && grep -q "react-native" package.json; then
+            echo "iOS: npm run ios"
+            echo "Press 'i' in Metro to open iOS"
+          elif [ -f "pubspec.yaml" ]; then
+            flutter run -d iphone
+          fi
+        name: "ios"
+      - command: |
+          if [ -f "package.json" ] && grep -q "react-native" package.json; then
+            echo "Android: npm run android"
+            echo "Press 'a' in Metro to open Android"
+          elif [ -f "pubspec.yaml" ]; then
+            flutter run -d android
+          fi
+        name: "android"
+  
+  - window_name: "debugging"
+    layout: "tiled"
+    panes:
+      - command: |
+          if [ "$MOBILE_PLATFORM" = "react-native" ]; then
+            npx react-devtools
+          else
+            echo "Platform-specific debugging tools"
+          fi
+        name: "devtools"
+      - command: |
+          if command -v adb &> /dev/null; then
+            adb logcat | grep -E "ReactNative|flutter"
+          fi
+        name: "logcat"
+      - command: |
+          if [ -f "package.json" ]; then
+            npm run test:watch
+          fi
+        name: "tests"
+      - command: |
+          if command -v xcrun &> /dev/null; then
+            xcrun simctl list devices | grep Booted
+          fi
+        name: "simulators"
+  
+  - window_name: "tools"
+    layout: "even-horizontal"
+    panes:
+      - command: |
+          if [ "$MOBILE_PLATFORM" = "react-native" ]; then
+            npx react-native doctor
+          elif [ "$MOBILE_PLATFORM" = "flutter" ]; then
+            flutter doctor -v
+          fi
+        name: "doctor"
+      - command: |
+          echo "Build commands:"
+          echo "iOS: npm run build:ios"
+          echo "Android: npm run build:android"
+        name: "build"

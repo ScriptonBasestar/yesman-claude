@@ -40,7 +40,7 @@ class PathSettings:
     templates_dir: str = "~/.scripton/yesman/templates"
     logs_dir: str = "~/.scripton/yesman/logs"
     cache_dir: str = "~/.scripton/yesman/cache"
-    projects_file: str = "~/.scripton/yesman/projects.yaml"
+    sessions_dir: str = "~/.scripton/yesman/sessions"
     config_file: str = "~/.scripton/yesman/yesman.yaml"
 
 
@@ -135,7 +135,7 @@ class AppSettings:
         self.paths.templates_dir = Path(self.paths.templates_dir).expanduser()
         self.paths.logs_dir = Path(self.paths.logs_dir).expanduser()
         self.paths.cache_dir = Path(self.paths.cache_dir).expanduser()
-        self.paths.projects_file = Path(self.paths.projects_file).expanduser()
+        self.paths.sessions_dir = Path(self.paths.sessions_dir).expanduser()
         self.paths.config_file = Path(self.paths.config_file).expanduser()
         self.logging.default_path = Path(self.logging.default_path).expanduser()
 
@@ -177,7 +177,7 @@ class AppSettings:
                 "templates_dir": self.paths.templates_dir,
                 "logs_dir": self.paths.logs_dir,
                 "cache_dir": self.paths.cache_dir,
-                "projects_file": self.paths.projects_file,
+                "sessions_dir": self.paths.sessions_dir,
                 "config_file": self.paths.config_file,
             },
             "sessions": {

@@ -47,7 +47,6 @@ class SessionConfig(BaseModel):
 
     sessions_dir: str = "sessions"
     templates_dir: str = "templates"
-    projects_file: str = "projects.yaml"
     default_window_name: str = "main"
     default_layout: str = "even-horizontal"
 

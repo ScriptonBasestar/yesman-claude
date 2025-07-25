@@ -1,0 +1,59 @@
+# Mixed Configuration Example
+# Shows how projects.yaml and sessions/*.yaml work together
+
+# This would be in projects.yaml
+sessions:
+  # Core sessions defined in projects.yaml
+  main-app:
+    template_name: "fullstack"
+    override:
+      session_name: "main-app"
+      start_directory: "~/projects/main-app"
+      environment:
+        ENVIRONMENT: "development"
+        API_PORT: "8000"
+      windows:
+        - window_name: "development"
+          layout: "main-vertical"
+          panes:
+            - claude --dangerously-skip-permissions
+            - command: "npm run dev:all"
+              name: "servers"
+  
+  # Shared infrastructure session
+  infrastructure:
+    template_name: "docker"
+    override:
+      session_name: "infra"
+      start_directory: "~/projects/infrastructure"
+      windows:
+        - window_name: "services"
+          panes:
+            - docker-compose up
+            - docker stats
+
+# Additional sessions in sessions/*.yaml can:
+# 1. Add completely new sessions
+# 2. Override sessions with same name from projects.yaml
+# 3. Be organized in subdirectories
+
+# Example directory structure:
+# ~/.scripton/yesman/
+# ├── projects.yaml          # Contains above configuration
+# ├── sessions/
+# │   ├── personal/         # Personal project sessions
+# │   │   ├── blog.yaml
+# │   │   └── dotfiles.yaml
+# │   ├── work/            # Work-specific sessions
+# │   │   ├── client-a.yaml
+# │   │   └── client-b.yaml
+# │   └── experiments/     # Experimental sessions
+# │       ├── rust-learning.yaml
+# │       └── ml-playground.yaml
+
+# Benefits of this approach:
+# - Core/stable sessions in projects.yaml
+# - Dynamic/temporary sessions in sessions/*.yaml
+# - Easy to share projects.yaml with team
+# - Keep personal sessions private
+# - Organize sessions by category

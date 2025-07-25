@@ -19,7 +19,7 @@ from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixi
 
 
 class ValidateCommand(BaseCommand, SessionCommandMixin):
-    """Check if all directories in projects.yaml exist (or only for a specific
+    """Check if all directories in session configurations exist (or only for a specific
     session).
     """
 
@@ -34,12 +34,12 @@ class ValidateCommand(BaseCommand, SessionCommandMixin):
             sessions = cast("dict", self.tmux_manager.load_projects().get("sessions", {}))
 
             if not sessions:
-                console.print("[red]❌ No sessions defined in projects.yaml[/red]")
+                console.print("[red]❌ No sessions found in sessions/ directory[/red]")
                 return {"success": False, "error": "no_sessions_defined"}
 
             if session_name:
                 if session_name not in sessions:
-                    console.print(f"[red]❌ Session '{session_name}' not defined in projects.yaml[/red]")
+                    console.print(f"[red]❌ Session '{session_name}' not found in sessions/ directory[/red]")
                     return {"success": False, "error": "session_not_defined"}
                 sessions = {session_name: sessions[session_name]}
 

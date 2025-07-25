@@ -1,0 +1,40 @@
+# System monitoring session
+# File: ~/.scripton/yesman/sessions/monitoring.yaml
+
+session_name: "monitoring"
+start_directory: "~/projects/my-app"
+windows:
+  - window_name: "system"
+    layout: "tiled"
+    panes:
+      - htop
+      - command: "iotop"
+        name: "disk-io"
+      - command: "nethogs"
+        name: "network"
+      - command: "watch -n 1 'df -h'"
+        name: "disk-usage"
+        
+  - window_name: "docker"
+    layout: "even-horizontal"
+    panes:
+      - docker stats
+      - docker-compose logs -f
+      
+  - window_name: "logs"
+    layout: "tiled"
+    panes:
+      - command: "tail -f logs/app.log"
+        name: "app-logs"
+      - command: "tail -f logs/error.log"
+        name: "error-logs"
+      - command: "journalctl -f"
+        name: "system-logs"
+      - command: "tail -f /var/log/nginx/access.log"
+        name: "nginx-logs"
+        
+  - window_name: "alerts"
+    panes:
+      - claude
+      - command: "./scripts/monitor-alerts.sh"
+        name: "alert-monitor"

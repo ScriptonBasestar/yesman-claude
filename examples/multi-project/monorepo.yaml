@@ -1,0 +1,109 @@
+# Monorepo Project Configuration
+# Managing multiple services in a single repository
+
+sessions:
+  # Main monorepo orchestration
+  monorepo-main:
+    session_name: "monorepo-main"
+    start_directory: "~/workspace/my-monorepo"
+    
+    environment:
+      MONOREPO_ROOT: "."
+      NODE_ENV: "development"
+    
+    before_script: |
+      echo "🏗️  Setting up monorepo environment..."
+      
+      # Install dependencies at root
+      npm install
+      
+      # Build shared packages
+      npm run build:shared
+    
+    windows:
+      - window_name: "orchestration"
+        layout: "even-horizontal"
+        panes:
+          - claude --dangerously-skip-permissions
+          - command: "npm run dev:all"
+            name: "all-services"
+          - command: "npm run test:watch"
+            name: "test-runner"
+      
+      - window_name: "monitoring"
+        layout: "tiled"
+        panes:
+          - command: "lerna run build --stream"
+            name: "build-watch"
+          - command: "npm run lint:watch"
+            name: "lint-watch"
+          - command: "tail -f logs/*.log"
+            name: "logs"
+          - command: "npm run deps:check"
+            name: "dependency-check"
+  
+  # Individual service sessions
+  monorepo-web-app:
+    session_name: "monorepo-web"
+    start_directory: "~/workspace/my-monorepo/apps/web"
+    
+    windows:
+      - window_name: "web-dev"
+        layout: "main-vertical"
+        panes:
+          - claude
+          - command: "npm run dev"
+            name: "next-dev"
+          - command: "npm run storybook"
+            name: "storybook"
+  
+  monorepo-api-service:
+    session_name: "monorepo-api"
+    start_directory: "~/workspace/my-monorepo/services/api"
+    
+    windows:
+      - window_name: "api-dev"
+        layout: "even-horizontal"
+        panes:
+          - claude
+          - command: "npm run dev"
+            name: "api-server"
+          - command: "npm run test:integration:watch"
+            name: "integration-tests"
+  
+  monorepo-shared-libs:
+    session_name: "monorepo-libs"
+    start_directory: "~/workspace/my-monorepo/packages"
+    
+    windows:
+      - window_name: "libraries"
+        layout: "tiled"
+        panes:
+          - claude
+          - command: "cd ui-components && npm run build:watch"
+            name: "ui-lib"
+          - command: "cd utils && npm run build:watch"
+            name: "utils-lib"
+          - command: "cd types && tsc --watch"
+            name: "types-lib"
+  
+  # Database and infrastructure
+  monorepo-infra:
+    session_name: "monorepo-infra"
+    start_directory: "~/workspace/my-monorepo/infrastructure"
+    
+    windows:
+      - window_name: "databases"
+        layout: "even-horizontal"
+        panes:
+          - command: "docker-compose up postgres redis"
+            name: "databases"
+          - command: "npm run migrate:watch"
+            name: "migrations"
+      
+      - window_name: "tools"
+        panes:
+          - command: "npm run seed:dev"
+            name: "seed-data"
+          - command: "npm run backup:dev"
+            name: "backup"

@@ -1,0 +1,147 @@
+# Environment-Specific Configuration Example
+# Shows how to handle different environments (dev, staging, prod)
+
+sessions:
+  # Base configuration for all environments
+  app-base: &app-base
+    template_name: "default"
+    start_directory: "~/projects/myapp"
+    environment:
+      APP_NAME: "MyApp"
+      LOG_FORMAT: "json"
+    windows:
+      - window_name: "main"
+        panes:
+          - claude
+
+  # Development environment
+  app-dev:
+    <<: *app-base
+    override:
+      session_name: "myapp-dev"
+      environment:
+        ENVIRONMENT: "development"
+        API_URL: "http://localhost:8000"
+        DATABASE_URL: "postgresql://postgres:password@localhost:5432/myapp_dev"
+        DEBUG: "true"
+        HOT_RELOAD: "true"
+      windows:
+        - window_name: "development"
+          layout: "main-vertical"
+          panes:
+            - claude --dangerously-skip-permissions
+            - command: "npm run dev"
+              name: "dev-server"
+            - command: "npm run test:watch"
+              name: "tests"
+        - window_name: "logs"
+          panes:
+            - command: "tail -f logs/dev.log"
+              name: "app-logs"
+
+  # Staging environment
+  app-staging:
+    <<: *app-base
+    override:
+      session_name: "myapp-staging"
+      environment:
+        ENVIRONMENT: "staging"
+        API_URL: "https://staging-api.myapp.com"
+        DATABASE_URL: "${STAGING_DB_URL}"  # From environment
+        DEBUG: "false"
+        LOG_LEVEL: "warning"
+      before_script: |
+        # Connect to staging VPN
+        if ! pgrep -x openvpn > /dev/null; then
+          sudo openvpn --config ~/vpn/staging.ovpn --daemon
+        fi
+        
+        # Load staging credentials
+        source ~/.env.staging
+      windows:
+        - window_name: "staging-monitor"
+          layout: "even-horizontal"
+          panes:
+            - command: "ssh staging-server 'tail -f /var/log/myapp/app.log'"
+              name: "staging-logs"
+            - command: "watch -n 30 'curl -s https://staging-api.myapp.com/health | jq .'"
+              name: "health-check"
+        - window_name: "staging-debug"
+          panes:
+            - claude
+            - command: "ssh staging-server"
+              name: "staging-ssh"
+
+  # Production environment (read-only monitoring)
+  app-prod:
+    <<: *app-base
+    override:
+      session_name: "myapp-prod"
+      environment:
+        ENVIRONMENT: "production"
+        API_URL: "https://api.myapp.com"
+        READONLY: "true"
+      before_script: |
+        echo "⚠️  PRODUCTION ENVIRONMENT - READ ONLY ACCESS"
+        echo "All modifications are disabled"
+        
+        # Load production credentials (read-only)
+        source ~/.env.production.readonly
+        
+        # Connect to production VPN
+        if ! pgrep -x openvpn > /dev/null; then
+          sudo openvpn --config ~/vpn/production.ovpn --daemon
+        fi
+      windows:
+        - window_name: "prod-monitoring"
+          layout: "tiled"
+          panes:
+            - command: "ssh prod-lb-01 'tail -f /var/log/nginx/access.log | grep -v \"GET /health\"'"
+              name: "nginx-logs"
+            - command: "ssh prod-app-01 'tail -f /var/log/myapp/error.log'"
+              name: "app-errors"
+            - command: "watch -n 10 './scripts/prod-metrics.sh'"
+              name: "metrics"
+            - command: "ssh prod-db-01 'pg_activity -U readonly'"
+              name: "database"
+        - window_name: "prod-alerts"
+          panes:
+            - command: "./scripts/monitor-alerts.sh production"
+              name: "alert-monitor"
+            - command: "slack-cli --channel '#prod-alerts' --watch"
+              name: "slack-alerts"
+
+  # Local testing with production-like setup
+  app-prod-like:
+    <<: *app-base
+    override:
+      session_name: "myapp-prodlike"
+      environment:
+        ENVIRONMENT: "production"
+        API_URL: "http://localhost:8000"
+        DATABASE_URL: "postgresql://postgres:password@localhost:5432/myapp_prodlike"
+        REDIS_URL: "redis://localhost:6379"
+        # Production-like settings
+        DEBUG: "false"
+        LOG_LEVEL: "warning"
+        CACHE_ENABLED: "true"
+        RATE_LIMIT_ENABLED: "true"
+      before_script: |
+        echo "Setting up production-like environment..."
+        
+        # Start required services
+        docker-compose -f docker-compose.prod.yml up -d
+        
+        # Load production data snapshot
+        if [ -f "data/prod-snapshot.sql" ]; then
+          psql $DATABASE_URL < data/prod-snapshot.sql
+        fi
+      windows:
+        - window_name: "prod-like"
+          layout: "even-horizontal"
+          panes:
+            - claude
+            - command: "npm run start:prod"
+              name: "prod-server"
+            - command: "npm run test:e2e"
+              name: "e2e-tests"

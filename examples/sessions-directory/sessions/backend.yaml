@@ -1,0 +1,37 @@
+# Backend API session
+# File: ~/.scripton/yesman/sessions/backend.yaml
+
+template_name: "fastapi"
+override:
+  session_name: "backend"
+  start_directory: "~/projects/my-app/backend"
+  environment:
+    PYTHONPATH: "."
+    DATABASE_URL: "postgresql://localhost/myapp_dev"
+    REDIS_URL: "redis://localhost:6379/0"
+  before_script: |
+    echo "Setting up backend environment..."
+    source .venv/bin/activate
+    uv sync
+  windows:
+    - window_name: "api"
+      layout: "even-horizontal"
+      panes:
+        - claude
+        - command: "uv run uvicorn app.main:app --reload --port 8000"
+          name: "api-server"
+        - command: "uv run celery -A app.worker worker --loglevel=info"
+          name: "celery"
+          
+    - window_name: "database"
+      panes:
+        - command: "pgcli -d myapp_dev"
+          name: "postgres-cli"
+          
+    - window_name: "testing"
+      layout: "even-horizontal"
+      panes:
+        - command: "uv run pytest --watch"
+          name: "test-watch"
+        - command: "uv run mypy app --watch"
+          name: "type-check"
