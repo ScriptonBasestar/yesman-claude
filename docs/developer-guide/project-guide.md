@@ -32,11 +32,17 @@ uv run ./yesman.py ls
 # Show running tmux sessions  
 uv run ./yesman.py show
 
-# Create all tmux sessions from projects.yaml
+# Create all tmux sessions from session files
 uv run ./yesman.py setup
 
-# Teardown all sessions from projects.yaml
+# Create specific session
+uv run ./yesman.py setup session-name
+
+# Teardown all sessions
 uv run ./yesman.py teardown
+
+# Teardown specific session
+uv run ./yesman.py teardown session-name
 
 # Enter (attach to) a tmux session
 uv run ./yesman.py enter [session_name]
@@ -67,11 +73,7 @@ uv run ./yesman.py logs analyze     # Analyze log patterns
 uv run ./yesman.py logs tail -f     # Follow logs in real-time
 uv run ./yesman.py logs cleanup     # Clean up old logs
 
-# NEW: Context-aware automation
-uv run ./yesman.py automate status  # Show automation status
-uv run ./yesman.py automate monitor # Start context monitoring
-uv run ./yesman.py automate detect  # Run context detection
-uv run ./yesman.py automate config  # Generate workflow config
+# Command removed - automate functionality has been deprecated
 ```
 
 ### Testing and Development Commands
@@ -97,22 +99,36 @@ cd api && python -m uvicorn main:app --reload
 cd tauri-dashboard && npm run tauri dev
 ```
 
-Currently no formal linting is configured. Future plans include:
+### Code Quality Tools
 
-- pytest for testing
-- ruff for linting/formatting
-- mypy for type checking
+The project uses comprehensive code quality tools:
+
+- **Ruff** for linting, formatting, and import sorting (replaces Black + isort)
+- **mypy** for static type checking
+- **pytest** for testing with coverage reports
+- **bandit** for security vulnerability scanning
+- **pre-commit** for automatic quality checks
+
+Quick commands:
+```bash
+make format      # Format code with Ruff
+make lint        # Check code quality
+make lint-fix    # Auto-fix linting issues
+make test        # Run all tests
+make full        # Complete quality check
+```
+
+See [Code Quality Guide](/docs/development/code-quality-guide.md) for detailed information.
 
 ## Architecture
 
 ### Directory Structure
 
 - `yesman.py` - Main CLI entry point using Click
-- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter, browse, status, ai, logs,
-  automate)
+- `commands/` - CLI command implementations (ls, show, setup, teardown, dashboard, enter, browse, status, ai, logs)
 - `libs/core/` - Core functionality (SessionManager, ClaudeManager, models, caching)
 - `libs/ai/` - AI learning and adaptive response system
-- `libs/automation/` - Context-aware automation and workflow engine
+- `libs/automation/` - [Deprecated] Previously contained automation features
 - `libs/dashboard/` - Dashboard components and health monitoring
 - `libs/logging/` - Asynchronous logging system
 - `libs/` - Additional functionality (YesmanConfig, TmuxManager)
@@ -126,7 +142,7 @@ Currently no formal linting is configured. Future plans include:
 ### Configuration Hierarchy
 
 1. Global config: `~/.scripton/yesman/yesman.yaml` (logging, default choices)
-1. Global projects: `~/.scripton/yesman/projects.yaml` (session definitions)
+1. Session files: `~/.scripton/yesman/sessions/*.yaml` (individual session definitions)
 1. Templates: `~/.scripton/yesman/templates/*.yaml` (reusable session templates)
 1. Local overrides: `./.scripton/yesman/*` (project-specific configs)
 
@@ -193,10 +209,7 @@ Configuration merge modes:
 
 - **ContextDetector** (`libs/automation/context_detector.py`): Workflow context detection system
 - **WorkflowEngine** (`libs/automation/workflow_engine.py`): Automation chain execution engine
-- **AutomationManager** (`libs/automation/automation_manager.py`): Integrated automation orchestrator
-- Detects git commits, test failures, build events, and other development contexts
-- Executes automated workflow chains based on detected contexts
-- Real-time monitoring and execution history tracking
+- **[Removed] AutomationManager**: Previously handled automated workflows (deprecated)
 
 **Project Health Monitoring** (`libs/dashboard/`):
 
@@ -216,13 +229,12 @@ Configuration merge modes:
 **Session Templates**:
 
 - Support Jinja2-style variable substitution (removed in latest version)
-- Can be overridden per-project in projects.yaml
+- Can be customized in individual session files
 - Define windows, panes, layouts, and startup commands
 
 ### Important Implementation Details
 
-1. **Template Processing**: The `setup` command reads templates from `~/.scripton/yesman/templates/`, applies overrides
-   from `projects.yaml`, and creates tmux sessions.
+1. **Template Processing**: The `setup` command reads templates from `~/.scripton/yesman/templates/` or individual session files from `~/.scripton/yesman/sessions/`, and creates tmux sessions.
 
 1. **Session Naming**: Sessions can have different names than their project keys using the `session_name` override.
 
@@ -285,7 +297,7 @@ Configuration merge modes:
 
 ### 🛠️ Developer Tools
 
-- **Extended CLI Commands**: 11 command groups (browse, status, ai, logs, automate, etc.)
+- **Extended CLI Commands**: Multiple command groups (browse, status, ai, logs, etc.)
 - **REST API Integration**: FastAPI endpoints for external tool integration
 - **Configuration Management**: Advanced config merging and validation
 - **Debug Utilities**: Comprehensive debugging and diagnostic tools
@@ -363,7 +375,7 @@ Tauri Desktop App Stack (tauri-dashboard/ directory):
 - Uses tmuxp for declarative session configuration
 - Sessions defined in YAML templates with window/pane layouts
 - Supports both global (`~/.scripton/yesman/`) and local (`./.scripton/yesman/`) configurations
-- Templates can be overridden per-project in `projects.yaml`
+- Templates can be customized in individual session YAML files
 
 ### Monitoring and Control
 

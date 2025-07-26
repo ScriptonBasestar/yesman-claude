@@ -87,7 +87,7 @@ source venv/bin/activate  # Linux/Mac
 pip install -e .
 
 # 개발 의존성 설치
-pip install pytest pytest-cov ruff black mypy
+pip install pytest pytest-cov ruff mypy pre-commit
 ```
 
 ### 개발 환경 설정
@@ -99,6 +99,13 @@ export YESMAN_ENV=development
 # 설정 파일 생성 (선택적)
 mkdir -p ~/.scripton/yesman
 cp config/development.yaml ~/.scripton/yesman/yesman.yaml
+
+# Git hooks 설치 (권장)
+make hooks-install
+
+# 코드 품질 검사
+make lint
+make format
 ```
 
 ## ➕ 새로운 명령어 추가
@@ -468,12 +475,30 @@ uvicorn api.main:app --reload --port 8000
 export YESMAN_ENV=production
 export YESMAN_LOGGING_LEVEL=WARNING
 
+# Python 패키지 빌드
+make build
+
 # API 서버 실행
 uvicorn api.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# 또는 Makefile 사용
+make build-all  # 전체 프로젝트 빌드
 ```
 
 ### Docker 배포
 
+```bash
+# Docker 이미지 빌드
+make docker-build
+
+# Docker 컨테이너 실행
+make docker-run
+
+# Docker 상태 확인
+make docker-status
+```
+
+Dockerfile 예시:
 ```dockerfile
 FROM python:3.11-slim
 
@@ -492,16 +517,26 @@ CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ### 코드 스타일
 
-```bash
-# 코드 포맷팅
-black .
+프로젝트는 Ruff를 사용하여 일관된 코드 스타일을 유지합니다:
 
-# 린팅
-ruff check .
+```bash
+# 코드 포맷팅 (Ruff 사용)
+make format
+
+# 린팅 검사
+make lint
+
+# 자동 수정 포함 린팅
+make lint-fix
 
 # 타입 체킹
-mypy libs/ commands/
+make type-check
+
+# 전체 품질 검사
+make full
 ```
+
+자세한 내용은 [Code Quality Guide](/docs/development/code-quality-guide.md)를 참조하세요.
 
 ### 커밋 메시지
 

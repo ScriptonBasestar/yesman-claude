@@ -74,7 +74,19 @@ Makefile (main)
 
 ### ✨ Makefile.quality.mk - Code Quality
 
-**Purpose**: Code formatting, linting, type checking, and analysis (existing module)
+**Purpose**: Code formatting, linting, type checking, and analysis
+
+**Key Commands**:
+- `fmt`, `format` - Format code with Ruff (replaces Black+isort)
+- `lint`, `lint-fast`, `lint-check` - Check code quality
+- `lint-fix` - Auto-fix linting issues
+- `lint-strict` - Comprehensive quality checks
+- `type-check`, `mypy` - Static type checking
+- `security`, `bandit` - Security vulnerability scanning
+- `hooks-install`, `hooks-uninstall` - Git hooks management
+- `quality-info` - Quality tools information
+
+**Important**: All formatting now uses Ruff exclusively for consistency. See [Code Quality Guide](/docs/development/code-quality-guide.md) for details.
 
 ### 🧪 Makefile.test.mk - Testing
 

@@ -10,7 +10,6 @@ This comprehensive guide covers all aspects of using Yesman-Claude, from basic s
 1. [Keyboard Shortcuts](#keyboard-shortcuts)
 1. [Theme Customization](#theme-customization)
 1. [AI Learning System](#ai-learning-system)
-1. [Context-Aware Automation](#context-aware-automation)
 1. [Performance Optimization](#performance-optimization)
 1. [Troubleshooting](#troubleshooting)
 
@@ -150,7 +149,7 @@ uv run ./yesman.py dash tauri
 
 ### Creating Sessions
 
-Sessions are defined in your `projects.yaml` file:
+Sessions are defined in individual YAML files under `~/.scripton/yesman/sessions/`:
 
 ```yaml
 sessions:
@@ -434,79 +433,6 @@ uv run ./yesman.py ai import --file training_data.json
 uv run ./yesman.py ai reset --confirm
 ```
 
-## 🔄 Context-Aware Automation
-
-The automation system detects development context and triggers appropriate workflows.
-
-### Context Detection
-
-Supported context types:
-
-1. **Git commits**: Detects new commits
-1. **Test failures**: Monitors test results
-1. **Build events**: Tracks build status
-1. **File changes**: Watches file modifications
-1. **Error patterns**: Identifies error conditions
-1. **Performance issues**: Detects slowdowns
-1. **Dependency changes**: Monitors package updates
-1. **TODO progress**: Tracks task completion
-
-### Configuration
-
-```bash
-# Start context monitoring
-uv run ./yesman.py automate monitor
-
-# Configure detection rules
-uv run ./yesman.py automate config
-
-# View current automation status
-uv run ./yesman.py automate status
-
-# Manual context detection
-uv run ./yesman.py automate detect
-```
-
-### Workflow Chains
-
-Define automated workflow chains:
-
-```yaml
-# ~/.scripton/yesman/automation.yaml
-workflows:
-  test_and_build:
-    triggers:
-      - git_commit
-    steps:
-      - run_tests
-      - build_project
-      - notify_completion
-  
-  dependency_update:
-    triggers:
-      - package_change
-    steps:
-      - install_dependencies
-      - run_security_scan
-      - update_documentation
-```
-
-### Custom Automation
-
-```python
-# docs/examples/custom-automation.py
-from libs.automation import get_automation_manager
-
-automation = get_automation_manager()
-
-def custom_workflow():
-    print("Running custom workflow...")
-    # Your automation logic here
-
-# Register custom workflow
-automation.register_workflow("custom", custom_workflow)
-automation.add_trigger("custom", "file_change", "src/**/*.py")
-```
 
 ## ⚡ Performance Optimization
 
