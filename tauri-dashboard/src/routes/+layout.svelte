@@ -8,17 +8,42 @@
   import NotificationContainer from '$lib/components/common/NotificationContainer.svelte';
   import { loadConfig } from '$lib/stores/config';
   import { refreshSessions, startAutoRefresh, stopAutoRefresh } from '$lib/stores/sessions';
-  import { showNotification, notifySuccess, notifyError } from '$lib/stores/notifications';
+  import { showNotification, notifySuccess, notifyError, notifyWarning } from '$lib/stores/notifications';
+  import { health, isHealthy } from '$lib/stores/health';
 
   let isMinimized = false;
 
   onMount(async () => {
-    // 초기 데이터 로드
-    await loadConfig();
-    await refreshSessions(true); // 초기 로딩임을 명시
+    // API 헬스체크 시작
+    health.startChecking({
+      interval: 30000, // 30초마다 체크
+      onStatusChange: (status) => {
+        if (status === 'unhealthy') {
+          notifyWarning('API Disconnected', 'Unable to connect to backend server. Please check if the API server is running.');
+        } else if (status === 'healthy') {
+          // 처음 연결되거나 재연결된 경우에만 알림
+          const prevStatus = $health.status;
+          if (prevStatus === 'unhealthy' || prevStatus === 'checking') {
+            notifySuccess('API Connected', 'Successfully connected to backend server.');
+          }
+        }
+      }
+    });
 
-    // 자동 새로고침 시작
-    startAutoRefresh();
+    // 초기 헬스체크 대기
+    await health.check();
+    
+    // API가 건강한 상태일 때만 데이터 로드
+    if ($isHealthy) {
+      // 초기 데이터 로드
+      await loadConfig();
+      await refreshSessions(true); // 초기 로딩임을 명시
+
+      // 자동 새로고침 시작
+      startAutoRefresh();
+    } else {
+      notifyError('Connection Failed', 'Could not connect to the API server. Please ensure the backend is running.');
+    }
 
     // 실시간 이벤트 리스너 설정 (Tauri 환경에서만)
     let unlistenSessionUpdate: (() => void) | undefined;
@@ -49,6 +74,7 @@
 
     // 컴포넌트 언마운트 시 정리
     return () => {
+      health.stopChecking();
       stopAutoRefresh();
       if (unlistenSessionUpdate) unlistenSessionUpdate();
       if (unlistenLogUpdate) unlistenLogUpdate();

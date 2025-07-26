@@ -14,6 +14,7 @@
     updateControllerStatus
   } from '$lib/stores/sessions';
   import { notifySuccess, notifyError } from '$lib/stores/notifications';
+  import { api } from '$lib/utils/api';
 
   // 세션 상태 변경 핸들러
   function handleSessionStatusChanged(event: CustomEvent) {
@@ -31,37 +32,19 @@
 
   // 세션 시작 핸들러
   async function handleStartSession(event: CustomEvent) {
-    console.log('Main page: handleStartSession called with event:', event);
     const { session } = event.detail;
     console.log('Starting session:', session);
     
     try {
-      const url = `http://localhost:8000/api/sessions/${session}/start`;
-      console.log('Calling API:', url);
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Response status:', response.status);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Success result:', result);
-        notifySuccess('Session Started', `Session "${session}" has been started successfully.`);
-        // 세션 목록 새로고침
-        setTimeout(() => refreshSessions(), 1500);
-      } else {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        notifyError('Start Failed', `Failed to start session: ${errorData.detail || errorData.message || 'Unknown error'}`);
-      }
+      const result = await api.sessions.start(session);
+      console.log('Success result:', result);
+      notifySuccess('Session Started', `Session "${session}" has been started successfully.`);
+      // 세션 목록 새로고침
+      setTimeout(() => refreshSessions(), 1500);
     } catch (error) {
       console.error('Failed to start session:', error);
-      notifyError('Start Failed', `Failed to start session: ${error.message || error}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      notifyError('Start Failed', `Failed to start session: ${errorMessage}`);
     }
   }
 
@@ -69,23 +52,13 @@
   async function handleStopSession(event: CustomEvent) {
     const { session } = event.detail;
     try {
-      const response = await fetch(`http://localhost:8000/api/sessions/${session}/stop`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        notifySuccess('Session Stopped', `Session "${session}" has been stopped successfully.`);
-        setTimeout(() => refreshSessions(), 1000);
-      } else {
-        const errorData = await response.json();
-        notifyError('Stop Failed', `Failed to stop session: ${errorData.detail || errorData.message || 'Unknown error'}`);
-      }
+      await api.sessions.stop(session);
+      notifySuccess('Session Stopped', `Session "${session}" has been stopped successfully.`);
+      setTimeout(() => refreshSessions(), 1000);
     } catch (error) {
       console.error('Failed to stop session:', error);
-      notifyError('Stop Failed', `Failed to stop session: ${error.message || error}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      notifyError('Stop Failed', `Failed to stop session: ${errorMessage}`);
     }
   }
 

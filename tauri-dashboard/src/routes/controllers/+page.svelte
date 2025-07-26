@@ -14,6 +14,7 @@
     viewSessionLogs
   } from '$lib/stores/sessions';
   import { showNotification } from '$lib/stores/notifications';
+  import { api } from '$lib/utils/api';
 
   onMount(() => {
     refreshSessions();
@@ -70,30 +71,11 @@
   }
 
   async function handleStartSession(event: CustomEvent) {
-    console.log('handleStartSession called with event:', event);
     const { session } = event.detail;
     console.log('Starting session:', session);
     
     try {
-      const url = `http://localhost:8000/api/sessions/${session}/start`;
-      console.log('Calling API:', url);
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        throw new Error(errorData.detail || 'Failed to start session');
-      }
-      
-      const result = await response.json();
+      const result = await api.sessions.start(session);
       console.log('Success result:', result);
       showNotification('success', 'Session Started', `Session ${session} started successfully`);
       
@@ -108,28 +90,16 @@
   async function handleStopSession(event: CustomEvent) {
     const { session } = event.detail;
     try {
-      const response = await fetch(`http://localhost:8000/api/sessions/${session}/stop`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to stop session');
-      }
-      
-      const result = await response.json();
+      await api.sessions.stop(session);
       showNotification('success', 'Session Stopped', `Session ${session} stopped successfully`);
-      
-      // 세션 목록 새로고침
       setTimeout(() => refreshSessions(), 1000);
     } catch (error) {
       console.error('Failed to stop session:', error);
-      showNotification('error', 'Stop Failed', `Failed to stop session: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showNotification('error', 'Stop Failed', `Failed to stop session: ${errorMessage}`);
     }
   }
+
 
   // 컨트롤러 상태별 세션 필터링
   $: sessionsWithControllers = $filteredSessions.filter(session =>

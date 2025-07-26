@@ -16,6 +16,7 @@
     getAvailableProjects
   } from '$lib/stores/sessions';
   import { showNotification } from '$lib/stores/notifications';
+  import { api } from '$lib/utils/api';
 
   // 세션 생성 모달 상태
   let showCreateModal = false;
@@ -84,60 +85,33 @@
   }
 
   async function handleStartSession(event: CustomEvent) {
-    console.log('Sessions page: handleStartSession called with event:', event);
     const { session } = event.detail;
     console.log('Starting session:', session);
     
     try {
-      // 세션 시작 API 호출
-      const url = `http://localhost:8000/api/sessions/${session}/start`;
-      console.log('Calling API:', url);
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('Response status:', response.status);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Success result:', result);
-        showNotification('success', 'Session Started', `Session "${session}" has been started successfully.`);
-        // 세션 목록 새로고침 - 세션이 완전히 시작될 때까지 약간의 지연 필요
-        setTimeout(() => refreshSessions(), 1500);
-      } else {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        showNotification('error', 'Start Failed', `Failed to start session: ${errorData.detail || errorData.message || 'Unknown error'}`);
-      }
+      const result = await api.sessions.start(session);
+      console.log('Success result:', result);
+      showNotification('success', 'Session Started', `Session "${session}" has been started successfully.`);
+      // 세션 목록 새로고침 - 세션이 완전히 시작될 때까지 약간의 지연 필요
+      setTimeout(() => refreshSessions(), 1500);
     } catch (error) {
       console.error('Failed to start session:', error);
-      showNotification('error', 'Start Failed', `Failed to start session: ${error.message || error}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showNotification('error', 'Start Failed', `Failed to start session: ${errorMessage}`);
     }
   }
 
   async function handleStopSession(event: CustomEvent) {
     const { session } = event.detail;
     try {
-      // 세션 중지 API 호출
-      const response = await fetch(`/api/sessions/${session}/stop`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        showNotification('success', 'Session Stopped', `Session "${session}" has been stopped successfully.`);
-        // 세션 목록 새로고침
-        setTimeout(() => refreshSessions(), 1000);
-      } else {
-        const errorText = await response.text();
-        showNotification('error', 'Stop Failed', `Failed to stop session: ${errorText}`);
-      }
+      await api.sessions.stop(session);
+      showNotification('success', 'Session Stopped', `Session "${session}" has been stopped successfully.`);
+      // 세션 목록 새로고침
+      setTimeout(() => refreshSessions(), 1000);
     } catch (error) {
       console.error('Failed to stop session:', error);
-      showNotification('error', 'Stop Failed', `Failed to stop session: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showNotification('error', 'Stop Failed', `Failed to stop session: ${errorMessage}`);
     }
   }
 

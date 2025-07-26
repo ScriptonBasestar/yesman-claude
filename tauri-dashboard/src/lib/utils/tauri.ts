@@ -15,76 +15,29 @@ const isTauri = typeof window !== 'undefined' &&
   window.__TAURI__ !== undefined &&
   window.__TAURI_IPC__ !== undefined;
 
-const API_BASE_URL = '/api';
-
-/**
- * FastAPI 서버에 API 요청을 보내는 헬퍼 함수
- * @param endpoint API 엔드포인트 경로 (e.g., '/sessions')
- * @param options fetch 함수의 옵션 객체
- * @returns API 응답을 JSON 형태로 파싱한 결과
- */
-async function fetchApi(endpoint: string, options: RequestInit = {}) {
-	try {
-		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-			...options,
-			headers: {
-				'Content-Type': 'application/json',
-				...options.headers
-			}
-		});
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({ detail: response.statusText }));
-			throw new Error(`API Error: ${errorData.detail || 'Unknown error'}`);
-		}
-		if (response.status === 204) {
-			return null;
-		}
-		return await response.json();
-	} catch (e) {
-		console.error(`Failed to fetch API endpoint ${endpoint}:`, e);
-		throw e;
-	}
-}
+// Import centralized API client
+import { api } from './api';
 
 export const pythonBridge = {
-	// Session Management - 올바른 API 엔드포인트로 수정
-	get_sessions: () => fetchApi('/dashboard/sessions'),
-	get_session_details: (sessionId: string) => fetchApi(`/sessions/${sessionId}`),
-	create_session: (config: any) =>
-		fetchApi(`/sessions/${config.project_name}/setup`, {
-			method: 'POST',
-			body: JSON.stringify(config)
-		}),
-	delete_session: (sessionId: string) => fetchApi(`/sessions/${sessionId}`, { method: 'DELETE' }),
+	// Session Management - Use centralized API client
+	get_sessions: () => api.dashboard.sessions(),
+	get_session_details: (sessionId: string) => api.sessions.get(sessionId),
+	create_session: (config: any) => api.sessions.create(config.project_name, config),
+	delete_session: (sessionId: string) => api.sessions.delete(sessionId),
 
-	// Controller Management - 올바른 API 엔드포인트로 수정
-	start_claude: (sessionId: string) =>
-		fetchApi(`/sessions/${sessionId}/controller/start`, {
-			method: 'POST'
-		}),
-	stop_claude: (sessionId: string) =>
-		fetchApi(`/sessions/${sessionId}/controller/stop`, {
-			method: 'POST'
-		}),
-	get_claude_status: (sessionId: string) =>
-		fetchApi(`/sessions/${sessionId}/controller/status`),
-
-	restart_claude: (sessionId: string) =>
-		fetchApi(`/sessions/${sessionId}/controller/restart`, {
-			method: 'POST'
-		}),
+	// Controller Management - Use centralized API client
+	start_claude: (sessionId: string) => api.controllers.start(sessionId),
+	stop_claude: (sessionId: string) => api.controllers.stop(sessionId),
+	get_claude_status: (sessionId: string) => api.controllers.status(sessionId),
+	restart_claude: (sessionId: string) => api.controllers.restart(sessionId),
 
 	// Config Management
-	get_app_config: () => fetchApi('/config'),
-	save_app_config: (config: any) =>
-		fetchApi('/config', {
-			method: 'POST',
-			body: JSON.stringify(config)
-		}),
+	get_app_config: () => api.config.get(),
+	save_app_config: (config: any) => api.config.save(config),
 
-	// Logs - 올바른 API 엔드포인트로 수정
-	get_logs: (sessionId: string, follow = false, lines = 50) =>
-		fetchApi(`/sessions/${sessionId}/logs?follow=${follow}&lines=${lines}`),
+	// Logs
+	get_logs: (sessionId: string, follow = false, lines = 50) => 
+		api.sessions.logs(sessionId, follow, lines),
 
 	// Tauri-specific functions
 	send_notification: async (message: string) => {
@@ -113,12 +66,12 @@ export const pythonBridge = {
 	// Deprecated functions
 	get_session_info: () => {
 		console.warn('get_session_info is deprecated. Use get_sessions instead.');
-		return fetchApi('/sessions');
+		return api.dashboard.sessions();
 	},
 	get_project_name: async () => {
 		console.warn('get_project_name is deprecated. Use get_app_config instead.');
 		try {
-			const config = await fetchApi('/config');
+			const config = await api.config.get();
 			return config?.project_name || 'Unknown Project';
 		} catch (error) {
 			return 'Unknown Project';
