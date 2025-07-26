@@ -1,0 +1,25 @@
+# Claude AI Modification Protection Rules
+# Files and directories listed here should NOT be modified by AI agents
+
+# Root-level protected documents
+README.md
+TECH_STACK.md
+DEFINITION.md
+LICENSE
+
+# Core specifications and design documents
+specs/**
+
+# Auto-generated API documentation
+api-docs/**
+
+# Special protection patterns
+*.readonly.md
+*.locked.md
+MANUAL_*.md
+FINAL_*.md
+
+# Protected directories
+docs/manual/
+docs/readonly/
+docs/archive/

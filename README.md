@@ -1,3 +1,6 @@
+<!-- 🚫 AI_MODIFY_PROHIBITED -->
+<!-- This file is protected and should not be modified by AI agents -->
+
 # Yesman Claude
 
 Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions and automates interactions with Claude
