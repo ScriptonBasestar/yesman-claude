@@ -288,6 +288,47 @@ check-health: ## perform health check
 	@echo -e "$(GREEN)✅ Health check completed$(RESET)"
 
 # ==============================================================================
+# Documentation Generation
+# ==============================================================================
+
+.PHONY: generate-api-docs generate-docs docs-clean docs-serve
+
+generate-api-docs: ## generate API documentation from FastAPI
+	@echo -e "$(CYAN)Generating API documentation...$(RESET)"
+	@if [ -f "scripts/generate-docs.py" ]; then \
+		uv run python scripts/generate-docs.py --api; \
+		echo "$(GREEN)✅ API documentation generated$(RESET)"; \
+	else \
+		echo "$(YELLOW)⚠️  Documentation generator not found$(RESET)"; \
+		echo "$(YELLOW)   Creating basic OpenAPI export...$(RESET)"; \
+		uv run python -c "from api.main import app; import json; print(json.dumps(app.openapi(), indent=2))" > api-docs/openapi.json 2>/dev/null || \
+		echo "$(RED)❌ Failed to generate API docs$(RESET)"; \
+	fi
+
+generate-docs: generate-api-docs ## generate all documentation
+	@echo -e "$(CYAN)Generating project documentation...$(RESET)"
+	@if [ -f "scripts/generate-docs.py" ]; then \
+		uv run python scripts/generate-docs.py --all; \
+	else \
+		echo "$(YELLOW)⚠️  Full documentation generator not implemented yet$(RESET)"; \
+	fi
+
+docs-clean: ## clean generated documentation
+	@echo -e "$(CYAN)Cleaning generated documentation...$(RESET)"
+	@rm -rf api-docs/generated/
+	@rm -f api-docs/openapi.json
+	@echo -e "$(GREEN)✅ Generated documentation cleaned$(RESET)"
+
+docs-serve: ## serve documentation locally
+	@echo -e "$(CYAN)Starting documentation server...$(RESET)"
+	@if command -v python -m http.server >/dev/null 2>&1; then \
+		echo "$(GREEN)Documentation available at http://localhost:8001$(RESET)"; \
+		cd docs && python -m http.server 8001; \
+	else \
+		echo "$(RED)❌ Python http.server not available$(RESET)"; \
+	fi
+
+# ==============================================================================
 # Operations Information
 # ==============================================================================
 
@@ -309,6 +350,12 @@ ops-tools-info: ## show operations information
 	@echo "  • $(CYAN)docker-run$(RESET)          Run container"
 	@echo "  • $(CYAN)docker-status$(RESET)       Show container status"
 	@echo "  • $(CYAN)docker-scan$(RESET)         Security scan"
+	@echo ""
+	@echo -e "$(GREEN)📚 Documentation Commands:$(RESET)"
+	@echo "  • $(CYAN)generate-api-docs$(RESET)   Generate API documentation"
+	@echo "  • $(CYAN)generate-docs$(RESET)       Generate all documentation"
+	@echo "  • $(CYAN)docs-clean$(RESET)          Clean generated docs"
+	@echo "  • $(CYAN)docs-serve$(RESET)          Serve docs locally"
 	@echo ""
 	@echo -e "$(GREEN)ℹ️  Information Commands:$(RESET)"
 	@echo "  • $(CYAN)info$(RESET)                Project information"

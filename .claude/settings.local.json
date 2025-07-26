@@ -60,7 +60,8 @@
       "Bash(/opt/homebrew/Caskroom/miniforge/base/bin/python --version)",
       "Bash(for file in tests/test_renderers.py tests/test_semantic_merger.py tests/test_conflict_prevention.py tests/unit/dashboard/renderers/test_base_renderer.py)",
       "Bash(do echo \"=== $file ===\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(diff:*)"
     ],
     "deny": []
   }
