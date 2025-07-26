@@ -488,5 +488,10 @@ nohup.out
 *.swn
 *.bak
 
+# Backup files
+*-backup.md
+*_backup.md
+*.backup
+
 ## custom
 results/
