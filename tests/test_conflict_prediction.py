@@ -132,15 +132,9 @@ class TestConflictPredictor:
         assert (
             predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
         )
-        assert (
-            predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH
-        )
-        assert (
-            predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM
-        )
-        assert (
-            predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW
-        )
+        assert predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH
+        assert predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM
+        assert predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW
 
     @pytest.mark.asyncio
     @staticmethod
@@ -156,14 +150,10 @@ class TestConflictPredictor:
     async def test_calculate_conflict_vector(predictor: ConflictPredictor) -> None:
         """Test conflict vector calculation."""
         # Mock the required methods
-        cast("Any", predictor.conflict_engine)._get_changed_files = (
-            AsyncMock(
-                return_value={"file1.py": "M", "file2.py": "A"},
-            )
+        cast("Any", predictor.conflict_engine)._get_changed_files = AsyncMock(
+            return_value={"file1.py": "M", "file2.py": "A"},
         )
-        cast("Any", predictor)._get_change_frequency = AsyncMock(
-            return_value=2.5
-        )
+        cast("Any", predictor)._get_change_frequency = AsyncMock(return_value=2.5)
         cast("Any", predictor)._calculate_branch_complexity = AsyncMock(
             return_value=50.0
         )
@@ -223,9 +213,7 @@ invalid syntax here !!!
         imports1 = ["import os", "import sys", "from datetime import UTC, datetime"]
         imports2 = ["import os", "import json", "from datetime import UTC, date"]
 
-        result = cast("Any", predictor)._imports_likely_to_conflict(
-            imports1, imports2
-        )
+        result = cast("Any", predictor)._imports_likely_to_conflict(imports1, imports2)
         # This specific case might not trigger conflict, but test the logic exists
         assert isinstance(result, bool)
 
@@ -249,9 +237,7 @@ invalid syntax here !!!
             "import collections",
             "import typing",
         ]
-        result = cast("Any", predictor)._imports_likely_to_conflict(
-            imports3, imports4
-        )
+        result = cast("Any", predictor)._imports_likely_to_conflict(imports3, imports4)
         assert result is True
 
     @pytest.mark.asyncio
@@ -269,9 +255,7 @@ invalid syntax here !!!
         )
 
         # Mock conflict detection
-        cast("Any", predictor)._imports_likely_to_conflict = Mock(
-            return_value=True
-        )
+        cast("Any", predictor)._imports_likely_to_conflict = Mock(return_value=True)
 
         result = await cast("Any", predictor)._detect_import_conflicts(
             "branch1", "branch2", vector
@@ -351,9 +335,7 @@ invalid syntax here !!!
             ],
         )
 
-        cast("Any", predictor)._calculate_version_distance = Mock(
-            return_value=0.3
-        )
+        cast("Any", predictor)._calculate_version_distance = Mock(return_value=0.3)
 
         result = await cast("Any", predictor)._detect_version_conflicts(
             "branch1", "branch2", vector
@@ -368,24 +350,16 @@ invalid syntax here !!!
     def test_calculate_version_distance(predictor: ConflictPredictor) -> None:
         """Test version distance calculation."""
         # Test same versions
-        distance = cast("Any", predictor)._calculate_version_distance(
-            "1.2.3", "1.2.3"
-        )
+        distance = cast("Any", predictor)._calculate_version_distance("1.2.3", "1.2.3")
         assert distance == 0.0
 
         # Test different versions
-        distance = cast("Any", predictor)._calculate_version_distance(
-            "1.2.3", "1.2.4"
-        )
+        distance = cast("Any", predictor)._calculate_version_distance("1.2.3", "1.2.4")
         assert distance > 0.0
 
         # Test major version difference
-        distance1 = cast("Any", predictor)._calculate_version_distance(
-            "1.2.3", "2.2.3"
-        )
-        distance2 = cast("Any", predictor)._calculate_version_distance(
-            "1.2.3", "1.3.3"
-        )
+        distance1 = cast("Any", predictor)._calculate_version_distance("1.2.3", "2.2.3")
+        distance2 = cast("Any", predictor)._calculate_version_distance("1.2.3", "1.3.3")
         assert distance1 > distance2  # Major version changes should be weighted more
 
     @pytest.mark.asyncio
@@ -393,15 +367,11 @@ invalid syntax here !!!
     async def test_get_change_frequency(predictor: ConflictPredictor) -> None:
         """Test change frequency calculation."""
         # Mock git command
-        cast("Any", predictor.conflict_engine)._run_git_command = (
-            AsyncMock(
-                return_value=Mock(stdout="14\n"),  # 14 commits in last week
-            )
+        cast("Any", predictor.conflict_engine)._run_git_command = AsyncMock(
+            return_value=Mock(stdout="14\n"),  # 14 commits in last week
         )
 
-        frequency = await cast("Any", predictor)._get_change_frequency(
-            "test-branch"
-        )
+        frequency = await cast("Any", predictor)._get_change_frequency("test-branch")
         assert frequency == 2.0  # 14 commits / 7 days
 
     @pytest.mark.asyncio
@@ -409,17 +379,15 @@ invalid syntax here !!!
     async def test_calculate_branch_complexity(predictor: ConflictPredictor) -> None:
         """Test branch complexity calculation."""
         # Mock git command with diff stats
-        cast("Any", predictor.conflict_engine)._run_git_command = (
-            AsyncMock(
-                return_value=Mock(
-                    stdout="""
+        cast("Any", predictor.conflict_engine)._run_git_command = AsyncMock(
+            return_value=Mock(
+                stdout="""
  file1.py | 10 ++++++++++
  file2.py | 5 +++++
  file3.py | 3 ---
  3 files changed, 15 insertions(+), 3 deletions(-)
 """,
-                ),
-            )
+            ),
         )
 
         complexity = await cast("Any", predictor)._calculate_branch_complexity(
@@ -433,18 +401,14 @@ invalid syntax here !!!
     async def test_get_python_files_with_imports(predictor: ConflictPredictor) -> None:
         """Test getting Python files with imports."""
         # Mock the required methods
-        cast("Any", predictor.conflict_engine)._get_python_files_changed = (
-            AsyncMock(
-                return_value=["file1.py", "file2.py"],
-            )
+        cast("Any", predictor.conflict_engine)._get_python_files_changed = AsyncMock(
+            return_value=["file1.py", "file2.py"],
         )
-        cast("Any", predictor.conflict_engine)._get_file_content = (
-            AsyncMock(
-                side_effect=[
-                    "import os\nimport sys\n\ndef test():\n    pass",
-                    "from datetime import UTC, datetime\n\nclass Test:\n    pass",
-                ],
-            )
+        cast("Any", predictor.conflict_engine)._get_file_content = AsyncMock(
+            side_effect=[
+                "import os\nimport sys\n\ndef test():\n    pass",
+                "from datetime import UTC, datetime\n\nclass Test:\n    pass",
+            ],
         )
 
         files_with_imports = await cast(
@@ -480,15 +444,11 @@ numpy = "^1.21.0"
 pytest = ">=6.0.0"
 """
 
-        cast("Any", predictor.conflict_engine)._get_file_content = (
-            AsyncMock(
-                side_effect=[requirements_content, pyproject_content],
-            )
+        cast("Any", predictor.conflict_engine)._get_file_content = AsyncMock(
+            side_effect=[requirements_content, pyproject_content],
         )
 
-        versions = await cast("Any", predictor)._get_dependency_versions(
-            "test-branch"
-        )
+        versions = await cast("Any", predictor)._get_dependency_versions("test-branch")
 
         assert "requests" in versions
         assert "numpy" in versions
@@ -533,9 +493,7 @@ pytest = ">=6.0.0"
             {"accurate": 1},
         ]
 
-        scored_predictions = await cast("Any", predictor)._apply_ml_scoring(
-            predictions
-        )
+        scored_predictions = await cast("Any", predictor)._apply_ml_scoring(predictions)
 
         assert len(scored_predictions) == 2
         # Likelihood scores may have been adjusted
@@ -595,7 +553,9 @@ pytest = ">=6.0.0"
             cast("dict[str, Any]", summary)["active_predictions"] == 1
         )  # Only future predictions
         assert (
-            cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_confidence"])["high"]
+            cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_confidence"])[
+                "high"
+            ]
             == 1
         )
         assert (
@@ -617,7 +577,8 @@ pytest = ">=6.0.0"
             == 1
         )
         assert (
-            len(cast("list", cast("dict[str, Any]", summary)["most_likely_conflicts"])) == 2
+            len(cast("list", cast("dict[str, Any]", summary)["most_likely_conflicts"]))
+            == 2
         )
 
     @pytest.mark.asyncio

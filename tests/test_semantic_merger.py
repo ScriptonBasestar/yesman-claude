@@ -91,9 +91,7 @@ class TestSemanticMerger:
         """Create mock semantic analyzer."""
         analyzer = Mock(spec=SemanticAnalyzer)
         analyzer._extract_semantic_context = Mock()
-        analyzer._analyze_file_semantic_conflicts = AsyncMock(
-            return_value=[]
-        )
+        analyzer._analyze_file_semantic_conflicts = AsyncMock(return_value=[])
         analyzer._get_file_content = AsyncMock()
         return analyzer
 
@@ -323,9 +321,7 @@ def test_function(
             semantic_integrity=True,
         )
 
-        assert (
-            merger._conflict_resolved_by_merge(conflict, successful_result) is True
-        )
+        assert merger._conflict_resolved_by_merge(conflict, successful_result) is True
 
         # Failed merge
         failed_result = MergeResult(
@@ -336,9 +332,7 @@ def test_function(
             semantic_integrity=False,
         )
 
-        assert (
-            merger._conflict_resolved_by_merge(conflict, failed_result) is False
-        )
+        assert merger._conflict_resolved_by_merge(conflict, failed_result) is False
 
     @staticmethod
     def test_update_merge_stats(merger: SemanticMerger) -> None:
@@ -460,16 +454,12 @@ def function2() -> object:
         ]
 
         # Find existing function conflict
-        found_conflict = merger._find_function_conflict(
-            "target_function", conflicts
-        )
+        found_conflict = merger._find_function_conflict("target_function", conflicts)
         assert found_conflict is not None
         assert found_conflict.conflict_id == "function-conflict"
 
         # Try to find non-existing function conflict
-        not_found = merger._find_function_conflict(
-            "other_function", conflicts
-        )
+        not_found = merger._find_function_conflict("other_function", conflicts)
         assert not_found is None
 
     @staticmethod
@@ -489,9 +479,7 @@ def function2() -> object:
             description="Function signature conflict",
         )
 
-        result = merger._merge_function_definitions(
-            func1, func2, conflict
-        )
+        result = merger._merge_function_definitions(func1, func2, conflict)
 
         assert result["resolved"] is True
         assert result["confidence"] > 0
@@ -555,9 +543,7 @@ def function2() -> object:
             content1,
             content2,
         ]
-        merger.semantic_analyzer._analyze_file_semantic_conflicts.return_value = (
-            []
-        )
+        merger.semantic_analyzer._analyze_file_semantic_conflicts.return_value = []
 
         result = await merger.perform_semantic_merge(
             "test.py",

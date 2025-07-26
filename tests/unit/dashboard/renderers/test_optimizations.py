@@ -53,15 +53,11 @@ class MockRenderer(BaseRenderer):
         return f"mock-{widget_type.value}-{self.render_count}"
 
     @staticmethod
-    def render_layout(
-        widgets: list, layout_config: dict | None = None
-    ) -> str:
+    def render_layout(widgets: list, layout_config: dict | None = None) -> str:
         return f"mock-layout-{len(widgets)}"
 
     @staticmethod
-    def render_container(
-        content: str, container_config: dict | None = None
-    ) -> str:
+    def render_container(content: str, container_config: dict | None = None) -> str:
         return "mock-container"
 
     @staticmethod

@@ -370,10 +370,8 @@ class TestConflictPreventionSystem:
             affected_agents=["agent1", "agent2"],
         )
 
-        measures = (
-            await prevention_system._generate_dependency_measures(
-                mock_prediction,
-            )
+        measures = await prevention_system._generate_dependency_measures(
+            mock_prediction,
         )
 
         assert len(measures) == 1
@@ -410,10 +408,8 @@ class TestConflictPreventionSystem:
             affected_agents=["api_agent", "client_agent"],
         )
 
-        measures = (
-            await prevention_system._generate_coordination_measures(
-                mock_prediction,
-            )
+        measures = await prevention_system._generate_coordination_measures(
+            mock_prediction,
         )
 
         assert len(measures) == 1
@@ -450,9 +446,7 @@ class TestConflictPreventionSystem:
             affected_agents=["api_maintainer", "api_dev"],
         )
 
-        measures = await prevention_system._generate_interface_measures(
-            mock_prediction
-        )
+        measures = await prevention_system._generate_interface_measures(mock_prediction)
 
         assert len(measures) == 1
         measure = measures[0]
@@ -488,9 +482,7 @@ class TestConflictPreventionSystem:
             affected_agents=["worker_agent_1", "worker_agent_2"],
         )
 
-        measures = await prevention_system._generate_temporal_measures(
-            mock_prediction
-        )
+        measures = await prevention_system._generate_temporal_measures(mock_prediction)
 
         assert len(measures) == 1
         measure = measures[0]
@@ -528,9 +520,7 @@ class TestConflictPreventionSystem:
             affected_agents=["dev_a", "dev_b"],
         )
 
-        measures = await prevention_system._generate_generic_measures(
-            mock_prediction
-        )
+        measures = await prevention_system._generate_generic_measures(mock_prediction)
 
         assert len(measures) == 1
         measure = measures[0]
@@ -568,9 +558,7 @@ class TestConflictPreventionSystem:
             affected_agents=["agent1", "agent2"],
         )
 
-        measures = await prevention_system._generate_generic_measures(
-            mock_prediction
-        )
+        measures = await prevention_system._generate_generic_measures(mock_prediction)
 
         # Should not generate early merge measure due to low likelihood score
         assert len(measures) == 0
@@ -599,9 +587,7 @@ class TestConflictPreventionSystem:
             "_apply_branch_isolation",
             return_value=True,
         ) as mock_handler:
-            success = await prevention_system._apply_prevention_measure(
-                measure
-            )
+            success = await prevention_system._apply_prevention_measure(measure)
 
         assert success is True
         assert measure.status == "applied"
@@ -634,9 +620,7 @@ class TestConflictPreventionSystem:
             "_apply_work_reallocation",
             return_value=False,
         ) as mock_handler:
-            success = await prevention_system._apply_prevention_measure(
-                measure
-            )
+            success = await prevention_system._apply_prevention_measure(measure)
 
         assert success is False
         assert measure.status == "failed"
@@ -668,9 +652,7 @@ class TestConflictPreventionSystem:
             "_apply_dependency_sync",
             side_effect=Exception("Test error"),
         ) as mock_handler:
-            success = await prevention_system._apply_prevention_measure(
-                measure
-            )
+            success = await prevention_system._apply_prevention_measure(measure)
 
         assert success is False
         assert measure.status == "failed"
@@ -704,9 +686,7 @@ class TestConflictPreventionSystem:
         )
 
         try:
-            success = await prevention_system._apply_prevention_measure(
-                measure
-            )
+            success = await prevention_system._apply_prevention_measure(measure)
             assert success is False
         finally:
             # Restore the handler
@@ -736,9 +716,7 @@ class TestConflictPreventionSystem:
             return_value=True,
         )
 
-        success = await prevention_system._apply_work_reallocation(
-            measure
-        )
+        success = await prevention_system._apply_work_reallocation(measure)
 
         assert success is True
 
@@ -784,9 +762,7 @@ class TestConflictPreventionSystem:
             return_value=True,
         )
 
-        success = await prevention_system._apply_dependency_sync(
-            measure
-        )
+        success = await prevention_system._apply_dependency_sync(measure)
 
         assert success is True
 
@@ -895,9 +871,7 @@ class TestConflictPreventionSystem:
             return_value=True,
         )
 
-        success = await prevention_system._apply_agent_coordination(
-            measure
-        )
+        success = await prevention_system._apply_agent_coordination(measure)
 
         assert success is True
 
@@ -948,9 +922,7 @@ class TestConflictPreventionSystem:
             return_value=True,
         )
 
-        success = await prevention_system._apply_temporal_separation(
-            measure
-        )
+        success = await prevention_system._apply_temporal_separation(measure)
 
         assert success is True
 
@@ -1005,9 +977,7 @@ class TestConflictPreventionSystem:
             return_value=True,
         )
 
-        success = await prevention_system._apply_semantic_refactoring(
-            measure
-        )
+        success = await prevention_system._apply_semantic_refactoring(measure)
 
         assert success is True
 

@@ -157,9 +157,7 @@ class TestConflictResolutionEngine:
  line2
 """
 
-        conflicts = engine._parse_merge_tree_output(
-            output, "branch1", "branch2"
-        )
+        conflicts = engine._parse_merge_tree_output(output, "branch1", "branch2")
 
         assert len(conflicts) > 0
         conflict = conflicts[0]
@@ -188,15 +186,11 @@ class TestConflictResolutionEngine:
     def test_suggest_resolution_strategy(engine: ConflictResolutionEngine) -> None:
         """Test resolution strategy suggestion."""
         # Test Python file
-        strategy = engine._suggest_resolution_strategy(
-            "def test():", "test.py"
-        )
+        strategy = engine._suggest_resolution_strategy("def test():", "test.py")
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
         # Test markdown file
-        strategy = engine._suggest_resolution_strategy(
-            "# Header", "README.md"
-        )
+        strategy = engine._suggest_resolution_strategy("# Header", "README.md")
         assert strategy == ResolutionStrategy.AUTO_MERGE
 
         # Test JSON file
@@ -207,9 +201,7 @@ class TestConflictResolutionEngine:
         assert strategy == ResolutionStrategy.PREFER_LATEST
 
         import_content = "<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> "
-        strategy = engine._suggest_resolution_strategy(
-            import_content, "test.py"
-        )
+        strategy = engine._suggest_resolution_strategy(import_content, "test.py")
         assert strategy == ResolutionStrategy.SEMANTIC_ANALYSIS
 
     @pytest.mark.asyncio
@@ -523,16 +515,12 @@ class TestClass:
             assert files == {"file1.py": "M", "file2.py": "A", "file3.py": "D"}
 
             # Test get_python_files_changed
-            python_files = await engine._get_python_files_changed(
-                "branch1"
-            )
+            python_files = await engine._get_python_files_changed("branch1")
             assert set(python_files) == {"file1.py", "file2.py"}
 
             # Test get_file_content
             mock_git.return_value = Mock(stdout="file content", returncode=0)
-            content = await engine._get_file_content(
-                "test.py", "branch1"
-            )
+            content = await engine._get_file_content("test.py", "branch1")
             assert content == "file content"
 
     @pytest.mark.asyncio
@@ -550,9 +538,7 @@ class TestClass:
 
             mock_git.side_effect = side_effect
 
-            latest = await engine._get_latest_branch(
-                ["branch1", "branch2", "branch3"]
-            )
+            latest = await engine._get_latest_branch(["branch1", "branch2", "branch3"])
             assert latest == "branch2"
 
     @pytest.mark.asyncio
@@ -560,20 +546,14 @@ class TestClass:
     async def test_try_git_merge(engine: ConflictResolutionEngine) -> None:
         """Test git merge attempt."""
         # Test successful merge strategies
-        result = await engine._try_git_merge(
-            ["branch1", "branch2"], "recursive"
-        )
+        result = await engine._try_git_merge(["branch1", "branch2"], "recursive")
         assert result is True
 
-        result = await engine._try_git_merge(
-            ["branch1", "branch2"], "ours"
-        )
+        result = await engine._try_git_merge(["branch1", "branch2"], "ours")
         assert result is True
 
         # Test unsupported strategy
-        result = await engine._try_git_merge(
-            ["branch1", "branch2"], "unsupported"
-        )
+        result = await engine._try_git_merge(["branch1", "branch2"], "unsupported")
         assert result is False
 
         # Test with wrong number of branches

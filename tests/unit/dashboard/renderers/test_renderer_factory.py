@@ -92,9 +92,7 @@ class TestRendererFactory:
         RendererFactory.initialize()
 
         assert cast("bool", cast("Any", RendererFactory)._initialized)
-        assert (
-            len(cast("dict", cast("Any", RendererFactory)._renderer_classes)) == 3
-        )
+        assert len(cast("dict", cast("Any", RendererFactory)._renderer_classes)) == 3
         assert RenderFormat.TUI in cast(
             "dict", cast("Any", RendererFactory)._renderer_classes
         )
@@ -214,8 +212,12 @@ class TestRendererFactory:
         assert RenderFormat.TAURI in cast("dict[RenderFormat, Any]", results)
 
         # Each should have different format output
-        assert isinstance(cast("dict[RenderFormat, Any]", results)[RenderFormat.TUI], str)
-        assert isinstance(cast("dict[RenderFormat, Any]", results)[RenderFormat.WEB], str)
+        assert isinstance(
+            cast("dict[RenderFormat, Any]", results)[RenderFormat.TUI], str
+        )
+        assert isinstance(
+            cast("dict[RenderFormat, Any]", results)[RenderFormat.WEB], str
+        )
         assert isinstance(
             cast("dict[RenderFormat, Any]", results)[RenderFormat.TAURI], dict
         )

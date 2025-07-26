@@ -221,7 +221,13 @@ class StatusDashboard:
             footer_parts.append(f"Health: {health_data.get('overall_score', 'N/A')}")
         except Exception:
             footer_parts.append("Health: N/A")
-        footer_parts.extend((str(self.git_activity.render_compact_status()), str(self.progress_tracker.render_compact_progress()), "Activity: N/A"))  # render_compact_overview not available
+        footer_parts.extend(
+            (
+                str(self.git_activity.render_compact_status()),
+                str(self.progress_tracker.render_compact_progress()),
+                "Activity: N/A",
+            )
+        )  # render_compact_overview not available
 
         footer_text = " | ".join(str(part) for part in footer_parts)
         layout["footer"].update(Panel(footer_text, style="dim"))

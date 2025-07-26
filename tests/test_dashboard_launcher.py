@@ -436,9 +436,7 @@ class TestDashboardLauncher:
     @staticmethod
     def test_check_requirement_unknown(launcher: DashboardLauncher) -> None:
         """Test checking unknown requirement."""
-        status, details = launcher._check_requirement(
-            "unknown_requirement"
-        )
+        status, details = launcher._check_requirement("unknown_requirement")
 
         assert status is False
         assert "Unknown requirement" in details

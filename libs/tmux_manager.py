@@ -313,7 +313,10 @@ class TmuxManager:
 
         for key, value in override.items():
             if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-                result[key] = self._deep_merge_dicts(cast("dict[str, object]", result[key]), cast("dict[str, object]", value))
+                result[key] = self._deep_merge_dicts(
+                    cast("dict[str, object]", result[key]),
+                    cast("dict[str, object]", value),
+                )
             else:
                 result[key] = value
 

@@ -526,10 +526,8 @@ def test_processor() -> object:
         """Test finding branches affected by file changes."""
         affected_files = ["src/main.py", "src/utils.py"]
 
-        affected_branches = (
-            await propagation_system._find_affected_branches(
-                affected_files,
-            )
+        affected_branches = await propagation_system._find_affected_branches(
+            affected_files,
         )
 
         # Should return branches based on mock branch info protocol
@@ -545,10 +543,8 @@ def test_processor() -> object:
         await propagation_system.build_dependency_graph()
 
         if "src/utils.py" in propagation_system.dependency_graph:
-            count = (
-                await propagation_system._calculate_indirect_dependents(
-                    "src/utils.py",
-                )
+            count = await propagation_system._calculate_indirect_dependents(
+                "src/utils.py",
             )
             assert isinstance(count, int)
             assert count >= 0
@@ -578,9 +574,7 @@ def test_processor() -> object:
             dependents={f"dep{i}" for i in range(50)},  # Many dependents
         )
 
-        score = propagation_system._calculate_complexity_score(
-            large_node
-        )
+        score = propagation_system._calculate_complexity_score(large_node)
         assert score == 10.0  # Should be capped
 
     @staticmethod
@@ -589,20 +583,12 @@ def test_processor() -> object:
     ) -> None:
         """Test risk level calculation."""
         # High risk: high complexity or high impact
-        assert (
-            propagation_system._calculate_risk_level(8.0, 5) == "high"
-        )
-        assert (
-            propagation_system._calculate_risk_level(5.0, 15) == "high"
-        )
+        assert propagation_system._calculate_risk_level(8.0, 5) == "high"
+        assert propagation_system._calculate_risk_level(5.0, 15) == "high"
 
         # Medium risk: medium complexity or medium impact
-        assert (
-            propagation_system._calculate_risk_level(6.0, 3) == "medium"
-        )
-        assert (
-            propagation_system._calculate_risk_level(3.0, 8) == "medium"
-        )
+        assert propagation_system._calculate_risk_level(6.0, 3) == "medium"
+        assert propagation_system._calculate_risk_level(3.0, 8) == "medium"
 
         # Low risk: low complexity and low impact
         assert propagation_system._calculate_risk_level(2.0, 2) == "low"

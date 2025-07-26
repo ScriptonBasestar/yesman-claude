@@ -65,21 +65,11 @@ class TestTUIRenderer:
 
     def test_get_health_color(self) -> None:
         """Test health level color mapping."""
-        assert (
-            self.renderer._get_health_color(HealthLevel.EXCELLENT) == "green"
-        )
-        assert (
-            self.renderer._get_health_color(HealthLevel.GOOD) == "blue"
-        )
-        assert (
-            self.renderer._get_health_color(HealthLevel.WARNING) == "yellow"
-        )
-        assert (
-            self.renderer._get_health_color(HealthLevel.CRITICAL) == "red"
-        )
-        assert (
-            self.renderer._get_health_color(HealthLevel.UNKNOWN) == "dim"
-        )
+        assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "green"
+        assert self.renderer._get_health_color(HealthLevel.GOOD) == "blue"
+        assert self.renderer._get_health_color(HealthLevel.WARNING) == "yellow"
+        assert self.renderer._get_health_color(HealthLevel.CRITICAL) == "red"
+        assert self.renderer._get_health_color(HealthLevel.UNKNOWN) == "dim"
 
     def test_supports_feature(self) -> None:
         """Test feature support checking."""
@@ -547,9 +537,7 @@ class TestTUIRenderer:
             current_streak=5,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            high_activity, {}
-        )
+        result = self.renderer._render_activity_heatmap(high_activity, {})
         assert "🔥🔥🔥" in result
 
         # Medium activity
@@ -561,9 +549,7 @@ class TestTUIRenderer:
             current_streak=3,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            medium_activity, {}
-        )
+        result = self.renderer._render_activity_heatmap(medium_activity, {})
         assert "🔥🔥" in result
 
         # Low activity
@@ -575,9 +561,7 @@ class TestTUIRenderer:
             current_streak=1,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            low_activity, {}
-        )
+        result = self.renderer._render_activity_heatmap(low_activity, {})
         assert "🔥" in result
 
         # Very low activity
@@ -589,9 +573,7 @@ class TestTUIRenderer:
             current_streak=0,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            very_low_activity, {}
-        )
+        result = self.renderer._render_activity_heatmap(very_low_activity, {})
         assert "❄️" in result
 
     def test_progress_phase_emojis(self) -> None:
@@ -614,9 +596,7 @@ class TestTUIRenderer:
                 overall_progress=25.0,
             )
 
-            result = self.renderer._render_progress_tracker(
-                progress, {}
-            )
+            result = self.renderer._render_progress_tracker(progress, {})
             assert emoji in result
 
     def test_metric_card_trend_indicators(self) -> None:
@@ -654,9 +634,7 @@ class TestTUIRenderer:
             value=100,
             trend=None,
         )
-        result = self.renderer._render_metric_card(
-            no_trend_data_metric, {}
-        )
+        result = self.renderer._render_metric_card(no_trend_data_metric, {})
         assert "↗️" not in result
         assert "↘️" not in result
         assert "➡️" not in result

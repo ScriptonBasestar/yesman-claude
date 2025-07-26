@@ -432,7 +432,11 @@ class SessionService:
                         "action": "attached_after_race_condition",
                     }
                 # Re-raise the setup error instead of silently failing
-                self.logger.exception("Failed to setup session '%s': %s", session_name, setup_error.message)
+                self.logger.exception(
+                    "Failed to setup session '%s': %s",
+                    session_name,
+                    setup_error.message,
+                )
                 raise
 
         except YesmanError:
@@ -605,7 +609,12 @@ class SessionService:
             self.logger.info("Running tmux command: %s", " ".join(create_cmd))
             result = subprocess.run(create_cmd, check=False, capture_output=True, text=True)
 
-            self.logger.info("tmux command result: returncode=%s, stdout=%s, stderr=%s", result.returncode, result.stdout, result.stderr)
+            self.logger.info(
+                "tmux command result: returncode=%s, stdout=%s, stderr=%s",
+                result.returncode,
+                result.stdout,
+                result.stderr,
+            )
 
             if result.returncode != 0:
                 if "duplicate session" in result.stderr:

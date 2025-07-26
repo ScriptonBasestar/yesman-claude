@@ -578,20 +578,12 @@ class TestTauriRenderer:
     def test_helper_methods(self) -> None:
         """Test helper methods."""
         # Test health color mapping
-        assert (
-            self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"
-        )
-        assert (
-            self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"
-        )
+        assert self.renderer._get_health_color(HealthLevel.EXCELLENT) == "#10b981"
+        assert self.renderer._get_health_color(HealthLevel.CRITICAL) == "#ef4444"
 
         # Test phase emoji mapping
-        assert (
-            self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"
-        )
-        assert (
-            self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"
-        )
+        assert self.renderer._get_phase_emoji(ProgressPhase.IMPLEMENTING) == "⚙️"
+        assert self.renderer._get_phase_emoji(ProgressPhase.COMPLETED) == "🎉"
 
         # Test log level color mapping
         assert self.renderer._get_log_level_color("ERROR") == "#ef4444"

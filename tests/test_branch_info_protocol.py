@@ -533,15 +533,9 @@ class TestBranchInfoProtocol:
     @staticmethod
     def test_calculate_relevance(protocol: BranchInfoProtocol) -> None:
         """Test relevance score calculation."""
-        assert (
-            protocol._calculate_relevance(BranchInfoType.CONFLICT_INFO) == 1.0
-        )
-        assert (
-            protocol._calculate_relevance(BranchInfoType.API_CHANGES) == 0.9
-        )
-        assert (
-            protocol._calculate_relevance(BranchInfoType.BRANCH_STATE) == 0.3
-        )
+        assert protocol._calculate_relevance(BranchInfoType.CONFLICT_INFO) == 1.0
+        assert protocol._calculate_relevance(BranchInfoType.API_CHANGES) == 0.9
+        assert protocol._calculate_relevance(BranchInfoType.BRANCH_STATE) == 0.3
 
     @staticmethod
     def test_get_protocol_summary(protocol: BranchInfoProtocol) -> None:

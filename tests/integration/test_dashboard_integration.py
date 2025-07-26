@@ -240,9 +240,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
 
         # Create mock WebSocket clients
         for i in range(client_count):
-            client = await self._create_mock_websocket_client(
-                dashboard, f"client-{i}"
-            )
+            client = await self._create_mock_websocket_client(dashboard, f"client-{i}")
             clients.append(client)
 
         setup_duration = self.performance_monitor.end_timing("websocket_setup")
@@ -312,14 +310,10 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             dashboard._state["sessions"].append(session_data)
 
         async def add_automation_project(project_data: dict[str, object]) -> None:
-            dashboard._state["automation"]["monitored_projects"].append(
-                project_data
-            )
+            dashboard._state["automation"]["monitored_projects"].append(project_data)
 
         async def add_performance_metric(metric_name: str, metric_data: object) -> None:
-            dashboard._state["performance_metrics"][
-                metric_name
-            ] = metric_data
+            dashboard._state["performance_metrics"][metric_name] = metric_data
 
         dashboard.add_session = add_session
         dashboard.add_automation_project = add_automation_project
@@ -341,9 +335,7 @@ class TestDashboardSystemIntegration(AsyncIntegrationTestBase):
             await dashboard.cleanup()
 
     @staticmethod
-    async def _create_mock_websocket_client(
-        dashboard: object, client_id: str
-    ) -> Mock:
+    async def _create_mock_websocket_client(dashboard: object, client_id: str) -> Mock:
         """Create mock WebSocket client for testing."""
         client = Mock()
         client.client_id = client_id

@@ -249,10 +249,21 @@ class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
         for i, session in enumerate(sessions):
             # Create panel for each session
             content: list[str] = []
-            content.extend((f"[bold]Project:[/bold] {session['project']}", f"[bold]Template:[/bold] {session['template']}"))
+            content.extend(
+                (
+                    f"[bold]Project:[/bold] {session['project']}",
+                    f"[bold]Template:[/bold] {session['template']}",
+                )
+            )
 
             if session["status"] == "running":
-                content.extend(("[bold]Status:[/bold] [green]● running[/green]", f"[bold]Windows:[/bold] {session['windows']}", f"[bold]Panes:[/bold] {session['panes']}"))
+                content.extend(
+                    (
+                        "[bold]Status:[/bold] [green]● running[/green]",
+                        f"[bold]Windows:[/bold] {session['windows']}",
+                        f"[bold]Panes:[/bold] {session['panes']}",
+                    )
+                )
                 if session["attached"]:
                     content.append("[bold]Attached:[/bold] ✓")
             else:

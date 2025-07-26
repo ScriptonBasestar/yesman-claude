@@ -147,14 +147,10 @@ class TestDynamicRedistribution:
 
             # Enable auto-rebalancing with short interval
             agent_pool._auto_rebalancing_enabled = True
-            agent_pool._auto_rebalancing_interval = (
-                0.1  # 100ms for testing
-            )
+            agent_pool._auto_rebalancing_interval = 0.1  # 100ms for testing
 
             # Start the auto-rebalancing loop
-            task = asyncio.create_task(
-                agent_pool._auto_rebalancing_loop()
-            )
+            task = asyncio.create_task(agent_pool._auto_rebalancing_loop())
 
             # Let it run for enough time to execute at least once
             await asyncio.sleep(0.3)

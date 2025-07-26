@@ -219,9 +219,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test automated style and quality review."""
-        findings = await code_review_engine._check_style_quality(
-            ["src/test_module.py"]
-        )
+        findings = await code_review_engine._check_style_quality(["src/test_module.py"])
 
         # Should detect line length issues
         line_length_findings = [f for f in findings if "Line too long" in f.message]
@@ -238,9 +236,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test automated security review."""
-        findings = await code_review_engine._check_security(
-            ["src/test_module.py"]
-        )
+        findings = await code_review_engine._check_security(["src/test_module.py"])
 
         # Should detect hardcoded password
         security_findings = [
@@ -259,9 +255,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test automated performance review."""
-        findings = await code_review_engine._check_performance(
-            ["src/test_module.py"]
-        )
+        findings = await code_review_engine._check_performance(["src/test_module.py"])
 
         # Should detect range(len()) pattern
         range_len_findings = [f for f in findings if "enumerate" in f.message]
@@ -303,9 +297,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test automated documentation review."""
-        findings = await code_review_engine._check_documentation(
-            ["src/test_module.py"]
-        )
+        findings = await code_review_engine._check_documentation(["src/test_module.py"])
 
         # Should detect missing docstrings
         docstring_findings = [f for f in findings if "Missing docstring" in f.message]
@@ -325,9 +317,7 @@ class TestCodeReviewEngine:
         code_review_engine: CodeReviewEngine,
     ) -> None:
         """Test automated testing review."""
-        findings = await code_review_engine._check_testing(
-            ["src/test_module.py"]
-        )
+        findings = await code_review_engine._check_testing(["src/test_module.py"])
 
         # Should detect missing test file
         test_findings = [f for f in findings if "No test file found" in f.message]
@@ -411,9 +401,7 @@ class TestCodeReviewEngine:
             ),
         ]
 
-        score = code_review_engine._calculate_overall_score(
-            findings, metrics
-        )
+        score = code_review_engine._calculate_overall_score(findings, metrics)
 
         # Score should be reduced due to critical finding and violations
         assert score < 10.0
@@ -658,9 +646,7 @@ class TestCodeReviewEngine:
 def simple_function() -> object:
     return True
 """
-        complexity = code_review_engine._estimate_cyclomatic_complexity(
-            simple_code
-        )
+        complexity = code_review_engine._estimate_cyclomatic_complexity(simple_code)
         assert complexity == 1.0
 
         complex_code = """
@@ -678,9 +664,7 @@ def complex_function(x, y) -> object:
                 print(i)
         return 0
 """
-        complexity = code_review_engine._estimate_cyclomatic_complexity(
-            complex_code
-        )
+        complexity = code_review_engine._estimate_cyclomatic_complexity(complex_code)
         assert complexity > 5.0
 
     @staticmethod
@@ -705,9 +689,7 @@ def function() -> object:
 
         # Poor code with no comments
         poor_code = "def f(): return True"
-        mi = code_review_engine._calculate_maintainability_index(
-            poor_code, 1
-        )
+        mi = code_review_engine._calculate_maintainability_index(poor_code, 1)
         assert mi < 100.0
 
     @pytest.mark.asyncio

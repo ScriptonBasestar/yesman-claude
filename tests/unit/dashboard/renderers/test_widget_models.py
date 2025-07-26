@@ -476,43 +476,23 @@ class TestWidgetDataAdapter:
         adapter = self.adapter
 
         # Test session status parsing
-        assert (
-            adapter._parse_session_status("active") == SessionStatus.ACTIVE
-        )
-        assert (
-            adapter._parse_session_status("RUNNING") == SessionStatus.ACTIVE
-        )
-        assert (
-            adapter._parse_session_status("idle") == SessionStatus.IDLE
-        )
-        assert (
-            adapter._parse_session_status("invalid") == SessionStatus.IDLE
-        )
+        assert adapter._parse_session_status("active") == SessionStatus.ACTIVE
+        assert adapter._parse_session_status("RUNNING") == SessionStatus.ACTIVE
+        assert adapter._parse_session_status("idle") == SessionStatus.IDLE
+        assert adapter._parse_session_status("invalid") == SessionStatus.IDLE
 
         # Test activity type parsing
-        assert (
-            adapter._parse_activity_type("file_created") == ActivityType.FILE_CREATED
-        )
-        assert (
-            adapter._parse_activity_type("CREATED") == ActivityType.FILE_CREATED
-        )
-        assert (
-            adapter._parse_activity_type("commit") == ActivityType.COMMIT
-        )
-        assert (
-            adapter._parse_activity_type("invalid") == ActivityType.FILE_MODIFIED
-        )
+        assert adapter._parse_activity_type("file_created") == ActivityType.FILE_CREATED
+        assert adapter._parse_activity_type("CREATED") == ActivityType.FILE_CREATED
+        assert adapter._parse_activity_type("commit") == ActivityType.COMMIT
+        assert adapter._parse_activity_type("invalid") == ActivityType.FILE_MODIFIED
 
         # Test progress phase parsing
         assert (
             adapter._parse_progress_phase("implementing") == ProgressPhase.IMPLEMENTING
         )
-        assert (
-            adapter._parse_progress_phase("TESTING") == ProgressPhase.TESTING
-        )
-        assert (
-            adapter._parse_progress_phase("invalid") == ProgressPhase.IDLE
-        )
+        assert adapter._parse_progress_phase("TESTING") == ProgressPhase.TESTING
+        assert adapter._parse_progress_phase("invalid") == ProgressPhase.IDLE
 
 
 class TestModelSerialization:

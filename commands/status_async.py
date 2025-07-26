@@ -252,7 +252,13 @@ class AsyncStatusDashboard:
         layout["header"].update(Panel(header_text, style="bold green"))
 
         # Sessions panel - SessionBrowser removed
-        layout["sessions"].update(Panel("Session browser removed", title="📋 Active Sessions", border_style="blue"))
+        layout["sessions"].update(
+            Panel(
+                "Session browser removed",
+                title="📋 Active Sessions",
+                border_style="blue",
+            )
+        )
 
         # Project health panel
         health_data = self.project_health.calculate_health()

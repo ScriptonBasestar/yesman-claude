@@ -19,9 +19,7 @@ class TestSetupCommand:
         self.runner = CliRunner()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_creates_all_sessions(
-        self, mock_config: object
-    ) -> None:
+    def test_setup_creates_all_sessions(self, mock_config: object) -> None:
         """Test setup command creates all sessions from projects.yaml."""
         projects = {
             "sessions": {
@@ -43,9 +41,7 @@ class TestSetupCommand:
             mock_manager.list_running_sessions.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_specific_project(
-        self, mock_config: object
-    ) -> None:
+    def test_setup_with_specific_project(self, mock_config: object) -> None:
         """Test setup command with specific project name."""
         projects = {
             "sessions": {
@@ -65,9 +61,7 @@ class TestSetupCommand:
             mock_manager.create_session.assert_called_once()
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_handles_session_creation_failure(
-        self, mock_config: object
-    ) -> None:
+    def test_setup_handles_session_creation_failure(self, mock_config: object) -> None:
         """Test setup handles session creation failure gracefully."""
         projects = {
             "sessions": {
@@ -89,9 +83,7 @@ class TestSetupCommand:
             )
 
     @patch("commands.setup.YesmanConfig")
-    def test_setup_with_nonexistent_project(
-        self, mock_config: object
-    ) -> None:
+    def test_setup_with_nonexistent_project(self, mock_config: object) -> None:
         """Test setup with nonexistent project name."""
         projects = {
             "sessions": {

@@ -214,7 +214,9 @@ class TestRendererSystemIntegration:
         for widget_type, data in widget_tests:
             for render_format in formats:
                 try:
-                    result = render_widget(widget_type, cast("Any", data), render_format)
+                    result = render_widget(
+                        widget_type, cast("Any", data), render_format
+                    )
                     assert result is not None
 
                     # Format-specific validations
@@ -526,7 +528,9 @@ class TestRendererPerformance:
         ]
 
         start_batch = time.time()
-        batch_results = batch_renderer.render_batch(cast("Any", requests), parallel=True)
+        batch_results = batch_renderer.render_batch(
+            cast("Any", requests), parallel=True
+        )
         batch_time = time.time() - start_batch
 
         # Verify results are equivalent
@@ -546,12 +550,16 @@ class TestRendererPerformance:
 
         # First render (cache miss)
         start1 = time.time()
-        result1 = renderer.render_widget(WidgetType.METRIC_CARD, cast("Any", self.metric))
+        result1 = renderer.render_widget(
+            WidgetType.METRIC_CARD, cast("Any", self.metric)
+        )
         time1 = time.time() - start1
 
         # Second render (cache hit)
         start2 = time.time()
-        result2 = renderer.render_widget(WidgetType.METRIC_CARD, cast("Any", self.metric))
+        result2 = renderer.render_widget(
+            WidgetType.METRIC_CARD, cast("Any", self.metric)
+        )
         time2 = time.time() - start2
 
         # Results should be identical
@@ -642,7 +650,9 @@ class TestRendererMemoryStability:
 
         # Memory should be released
         final_memory = self._get_memory_usage()
-        memory_after_cleanup = cast("float", final_memory) - cast("float", initial_memory)
+        memory_after_cleanup = cast("float", final_memory) - cast(
+            "float", initial_memory
+        )
 
         # Most memory should be released (allow some overhead)
         assert (

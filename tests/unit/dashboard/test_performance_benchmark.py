@@ -19,11 +19,14 @@ class TestPerformanceBenchmark:
         renderer = factory.create_renderer(RenderFormat.TUI)
 
         # Prepare test data
-        sessions = [SessionData(
-                    name=f"benchmark-session-{i}",
-                    status=SessionStatus.ACTIVE,
-                    uptime=i * 60,
-                ) for i in range(100)]
+        sessions = [
+            SessionData(
+                name=f"benchmark-session-{i}",
+                status=SessionStatus.ACTIVE,
+                uptime=i * 60,
+            )
+            for i in range(100)
+        ]
 
         # Measure rendering time
         start_time = time.perf_counter()

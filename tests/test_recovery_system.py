@@ -218,9 +218,7 @@ class TestRecoveryEngine:
         assert "git" in strategy.error_pattern.lower()
 
         # Test generic error (fallback)
-        strategy = recovery_engine._find_recovery_strategy(
-            "Some unknown error"
-        )
+        strategy = recovery_engine._find_recovery_strategy("Some unknown error")
         assert strategy is not None
 
     @pytest.mark.asyncio

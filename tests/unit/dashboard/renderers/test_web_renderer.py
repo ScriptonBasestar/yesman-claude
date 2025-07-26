@@ -58,18 +58,12 @@ class TestWebRenderer:
         assert (
             self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"
         )
-        assert (
-            self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"
-        )
+        assert self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"
         assert (
             self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"
         )
-        assert (
-            self.renderer._get_health_color_class(HealthLevel.CRITICAL) == "red-600"
-        )
-        assert (
-            self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"
-        )
+        assert self.renderer._get_health_color_class(HealthLevel.CRITICAL) == "red-600"
+        assert self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"
 
     def test_supports_feature(self) -> None:
         """Test feature support checking."""
@@ -87,9 +81,7 @@ class TestWebRenderer:
         component_id = "test-widget-123"
         test_data = {"type": "test", "value": 42, "name": "test widget"}
 
-        result = self.renderer._embed_widget_data(
-            component_id, test_data
-        )
+        result = self.renderer._embed_widget_data(component_id, test_data)
 
         assert isinstance(result, str)
         assert component_id in result
@@ -639,9 +631,7 @@ class TestWebRenderer:
             current_streak=5,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            high_activity, {}, "test-1"
-        )
+        result = self.renderer._render_activity_heatmap(high_activity, {}, "test-1")
         assert "🔥🔥🔥" in result
         assert "text-red-600" in result
 
@@ -654,9 +644,7 @@ class TestWebRenderer:
             current_streak=3,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            medium_activity, {}, "test-2"
-        )
+        result = self.renderer._render_activity_heatmap(medium_activity, {}, "test-2")
         assert "🔥🔥" in result
         assert "text-orange-600" in result
 
@@ -669,9 +657,7 @@ class TestWebRenderer:
             current_streak=1,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            low_activity, {}, "test-3"
-        )
+        result = self.renderer._render_activity_heatmap(low_activity, {}, "test-3")
         assert "🔥" in result
         assert "text-yellow-600" in result
 
@@ -684,9 +670,7 @@ class TestWebRenderer:
             current_streak=0,
         )
 
-        result = self.renderer._render_activity_heatmap(
-            very_low_activity, {}, "test-4"
-        )
+        result = self.renderer._render_activity_heatmap(very_low_activity, {}, "test-4")
         assert "❄️" in result
         assert "text-blue-600" in result
 
@@ -698,9 +682,7 @@ class TestWebRenderer:
             value=100,
             trend=5.2,
         )
-        result = self.renderer._render_metric_card(
-            positive_metric, {}, "test-1"
-        )
+        result = self.renderer._render_metric_card(positive_metric, {}, "test-1")
         assert "↗️ +5.2" in result
         assert "text-green-600" in result
 
@@ -710,9 +692,7 @@ class TestWebRenderer:
             value=100,
             trend=-3.1,
         )
-        result = self.renderer._render_metric_card(
-            negative_metric, {}, "test-2"
-        )
+        result = self.renderer._render_metric_card(negative_metric, {}, "test-2")
         assert "↘️ -3.1" in result
         assert "text-red-600" in result
 
@@ -722,9 +702,7 @@ class TestWebRenderer:
             value=100,
             trend=0,
         )
-        result = self.renderer._render_metric_card(
-            no_trend_metric, {}, "test-3"
-        )
+        result = self.renderer._render_metric_card(no_trend_metric, {}, "test-3")
         assert "➡️ 0" in result
         assert "text-gray-600" in result
 
@@ -734,9 +712,7 @@ class TestWebRenderer:
             value=100,
             trend=None,
         )
-        result = self.renderer._render_metric_card(
-            no_trend_data_metric, {}, "test-4"
-        )
+        result = self.renderer._render_metric_card(no_trend_data_metric, {}, "test-4")
         assert "↗️" not in result
         assert "↘️" not in result
         assert "➡️" not in result

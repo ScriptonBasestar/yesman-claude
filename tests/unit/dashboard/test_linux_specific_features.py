@@ -14,7 +14,9 @@ from libs.dashboard.theme_system import SystemThemeDetector
 class TestLinuxSpecificFeatures:
     """Tests for Linux-specific functionality."""
 
-    @pytest.mark.skipif(not pathlib.Path("/proc").exists(), reason="Linux-specific test")
+    @pytest.mark.skipif(
+        not pathlib.Path("/proc").exists(), reason="Linux-specific test"
+    )
     @staticmethod
     def test_linux_specific_features() -> None:
         """Test Linux-specific functionality."""

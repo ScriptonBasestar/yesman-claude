@@ -538,7 +538,10 @@ class ResolveConflictCommand(BaseCommand):
                     ) from e
 
             async def run_resolution() -> dict[str, Any]:
-                result = cast("Any", await engine.resolve_conflict(conflict_id, resolution_strategy))
+                result = cast(
+                    "Any",
+                    await engine.resolve_conflict(conflict_id, resolution_strategy),
+                )
 
                 if result.success:
                     self.print_success("✅ Conflict resolved successfully!")
