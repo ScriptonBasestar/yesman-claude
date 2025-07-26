@@ -1,4 +1,5 @@
 <!-- 🚫 AI_MODIFY_PROHIBITED -->
+
 <!-- This file is protected and should not be modified by AI agents -->
 
 # TECH_STACK.md - 기술 스택 문서

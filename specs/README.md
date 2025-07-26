@@ -1,4 +1,5 @@
 <!-- 🚫 AI_MODIFY_PROHIBITED -->
+
 <!-- This directory contains protected specification documents -->
 
 # Specifications Directory
@@ -19,24 +20,26 @@ This directory contains core design documents and specifications that define the
 ## Modification Policy
 
 These documents should only be modified by:
+
 1. Project maintainers
-2. Senior developers with architecture decision authority
-3. Through formal review processes
+1. Senior developers with architecture decision authority
+1. Through formal review processes
 
 ## Why These Documents Are Protected
 
 1. **Consistency**: These documents define the core principles and patterns that must be consistently followed throughout the project
-2. **Stability**: Frequent changes to fundamental architecture decisions can destabilize the entire project
-3. **Authority**: Architecture decisions require human judgment and cannot be delegated to AI agents
-4. **Traceability**: All changes to these documents must be traceable to specific human decisions
+1. **Stability**: Frequent changes to fundamental architecture decisions can destabilize the entire project
+1. **Authority**: Architecture decisions require human judgment and cannot be delegated to AI agents
+1. **Traceability**: All changes to these documents must be traceable to specific human decisions
 
 ## Adding New Documents
 
 When adding new specification documents:
+
 1. Include the protection header at the top of the file
-2. Follow the existing naming conventions
-3. Update this README with the new document's purpose
-4. Ensure the document is added to version control with proper commit messages
+1. Follow the existing naming conventions
+1. Update this README with the new document's purpose
+1. Ensure the document is added to version control with proper commit messages
 
 ## Document Templates
 

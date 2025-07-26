@@ -77,6 +77,7 @@ Makefile (main)
 **Purpose**: Code formatting, linting, type checking, and analysis
 
 **Key Commands**:
+
 - `fmt`, `format` - Format code with Ruff (replaces Black+isort)
 - `lint`, `lint-fast`, `lint-check` - Check code quality
 - `lint-fix` - Auto-fix linting issues

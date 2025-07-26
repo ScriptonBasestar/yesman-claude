@@ -499,6 +499,7 @@ make docker-status
 ```
 
 Dockerfile 예시:
+
 ```dockerfile
 FROM python:3.11-slim
 

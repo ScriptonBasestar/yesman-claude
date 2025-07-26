@@ -1,9 +1,10 @@
 <!-- 🚫 AI_MODIFY_PROHIBITED -->
+
 <!-- This directory contains auto-generated API documentation -->
 
 # API Documentation Directory
 
-This directory contains automatically generated API documentation. 
+This directory contains automatically generated API documentation.
 
 ## 🚫 Protection Level: AUTO-GENERATED
 
@@ -20,10 +21,12 @@ This directory contains automatically generated API documentation.
 ## Generation Process
 
 API documentation is generated using:
+
 1. FastAPI's automatic OpenAPI schema generation
-2. Custom documentation generators in `/scripts/generate-docs.py`
+1. Custom documentation generators in `/scripts/generate-docs.py`
 
 To regenerate documentation:
+
 ```bash
 make generate-api-docs
 ```
@@ -37,8 +40,9 @@ make generate-api-docs
 ## Customization
 
 To customize the generated documentation:
+
 1. Update docstrings in source code
-2. Modify OpenAPI metadata in `api/main.py`
-3. Update generation scripts in `/scripts/`
+1. Modify OpenAPI metadata in `api/main.py`
+1. Update generation scripts in `/scripts/`
 
 **Never edit the generated files directly** - your changes will be lost on the next generation.

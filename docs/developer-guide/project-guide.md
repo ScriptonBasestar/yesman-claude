@@ -110,6 +110,7 @@ The project uses comprehensive code quality tools:
 - **pre-commit** for automatic quality checks
 
 Quick commands:
+
 ```bash
 make format      # Format code with Ruff
 make lint        # Check code quality

@@ -1,4 +1,5 @@
 <!-- 🚫 AI_MODIFY_PROHIBITED -->
+
 <!-- This file is protected and should not be modified by AI agents -->
 
 # Yesman Claude
