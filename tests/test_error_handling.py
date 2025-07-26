@@ -73,9 +73,7 @@ class TestSpecificErrors:
     @staticmethod
     def test_configuration_error() -> None:
         """Test ConfigurationError."""
-        error = ConfigurationError(
-            "Invalid config file", config_file="/path/to/config.yaml"
-        )
+        error = ConfigurationError("Invalid config file", config_file="/path/to/config.yaml")
 
         assert error.category == ErrorCategory.CONFIGURATION
         assert error.context.file_path == "/path/to/config.yaml"
@@ -150,9 +148,7 @@ class TestAPIErrorHandling:
 
         # Test configuration error
         config_error = ConfigurationError("Config error")
-        assert (
-            error_to_status_code(config_error) == status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        assert error_to_status_code(config_error) == status.HTTP_500_INTERNAL_SERVER_ERROR
 
         # Test session error
         session_error = SessionError("Session not found")
@@ -243,9 +239,7 @@ class TestIntegrationScenarios:
     def test_command_error_flow() -> None:
         """Test error flow from command to API response."""
         # Simulate a command raising a SessionError
-        session_error = SessionError(
-            "Session 'myproject' not found", session_name="myproject"
-        )
+        session_error = SessionError("Session 'myproject' not found", session_name="myproject")
 
         # Convert to API response
         status_code = error_to_status_code(session_error)
@@ -259,9 +253,7 @@ class TestIntegrationScenarios:
     @staticmethod
     def test_validation_error_with_multiple_fields() -> None:
         """Test validation error with complex context."""
-        error = ValidationError(
-            "Multiple validation errors", field_name="config.tmux.port"
-        )
+        error = ValidationError("Multiple validation errors", field_name="config.tmux.port")
 
         error_dict = error.to_dict()
 

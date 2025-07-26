@@ -91,12 +91,8 @@ async def test_auto_test_branch_creation() -> None:
 
         # Verify task types
         tasks = list(agent_pool.tasks.values())
-        critical_task = next(
-            (t for t in tasks if t.metadata.get("test_suite") == "critical_test"), None
-        )
-        combined_task = next(
-            (t for t in tasks if t.metadata.get("test_suite") is None), None
-        )
+        critical_task = next((t for t in tasks if t.metadata.get("test_suite") == "critical_test"), None)
+        combined_task = next((t for t in tasks if t.metadata.get("test_suite") is None), None)
 
         assert critical_task is not None
         assert combined_task is not None

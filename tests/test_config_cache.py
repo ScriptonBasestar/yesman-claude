@@ -175,9 +175,7 @@ class TestCachedConfigLoader:
     @staticmethod
     def test_file_watching_integration() -> None:
         """Test file watching with cached loader."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".yaml", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
             f.write(
                 """
 mode: merge
@@ -294,9 +292,7 @@ class TestPerformanceImprovements:
         assert stats["miss_count"] >= 1, "Should have at least one cache miss"
 
         # Also check that second load is not significantly slower
-        assert (
-            second_load_time <= first_load_time * 2
-        ), f"Cache hit ({second_load_time:.4f}s) should not be much slower than miss ({first_load_time:.4f}s)"
+        assert second_load_time <= first_load_time * 2, f"Cache hit ({second_load_time:.4f}s) should not be much slower than miss ({first_load_time:.4f}s)"
 
     @pytest.mark.skip(reason="Integration test - requires environment setup")
     @staticmethod
@@ -312,6 +308,4 @@ class TestPerformanceImprovements:
         access_time = time.time() - start
 
         # Should complete very quickly
-        assert (
-            access_time < 0.1
-        ), f"10 cached accesses took {access_time:.4f}s, should be < 0.1s"
+        assert access_time < 0.1, f"10 cached accesses took {access_time:.4f}s, should be < 0.1s"

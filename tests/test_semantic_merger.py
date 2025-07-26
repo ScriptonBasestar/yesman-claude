@@ -162,9 +162,7 @@ class TestSemanticMerger:
         # Check specific rules
         import_rule = next((r for r in rules if r.rule_id == "import_order"), None)
         assert import_rule is not None
-        assert (
-            SemanticConflictType.IMPORT_SEMANTIC_CONFLICT in import_rule.conflict_types
-        )
+        assert SemanticConflictType.IMPORT_SEMANTIC_CONFLICT in import_rule.conflict_types
         assert import_rule.resolution_strategy == MergeStrategy.SEMANTIC_UNION
 
     @staticmethod
@@ -583,9 +581,7 @@ def function2() -> object:
         file_paths = ["file1.py", "file2.py", "file3.py"]
 
         # Mock successful merges
-        async def mock_perform_merge(
-            file_path: str, branch1: str, branch2: str, target_branch: str | None = None
-        ) -> MergeResult:
+        async def mock_perform_merge(file_path: str, branch1: str, branch2: str, target_branch: str | None = None) -> MergeResult:
             return MergeResult(
                 merge_id=f"merge_{file_path}",
                 file_path=file_path,
@@ -599,9 +595,7 @@ def function2() -> object:
         results = await merger.batch_merge_files(file_paths, "branch1", "branch2")
 
         assert len(results) == 3
-        assert all(
-            result.resolution == MergeResolution.AUTO_RESOLVED for result in results
-        )
+        assert all(result.resolution == MergeResolution.AUTO_RESOLVED for result in results)
         assert all(result.merge_confidence == 0.8 for result in results)
 
     @pytest.mark.asyncio
@@ -632,9 +626,7 @@ def function2() -> object:
         ]
 
         # Mock merge operation
-        async def mock_perform_merge(
-            file_path: str, branch1: str, branch2: str, strategy: MergeStrategy = None
-        ) -> MergeResult:
+        async def mock_perform_merge(file_path: str, branch1: str, branch2: str, strategy: MergeStrategy = None) -> MergeResult:
             return MergeResult(
                 merge_id=f"merge_{file_path}",
                 file_path=file_path,

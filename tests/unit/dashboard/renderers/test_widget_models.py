@@ -488,9 +488,7 @@ class TestWidgetDataAdapter:
         assert adapter._parse_activity_type("invalid") == ActivityType.FILE_MODIFIED
 
         # Test progress phase parsing
-        assert (
-            adapter._parse_progress_phase("implementing") == ProgressPhase.IMPLEMENTING
-        )
+        assert adapter._parse_progress_phase("implementing") == ProgressPhase.IMPLEMENTING
         assert adapter._parse_progress_phase("TESTING") == ProgressPhase.TESTING
         assert adapter._parse_progress_phase("invalid") == ProgressPhase.IDLE
 

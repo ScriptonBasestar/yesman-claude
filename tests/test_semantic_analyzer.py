@@ -267,9 +267,7 @@ class TestSemanticAnalyzer:
         )
 
     @staticmethod
-    def test_init(
-        analyzer: SemanticAnalyzer, mock_branch_manager: Mock, temp_repo: Path
-    ) -> None:
+    def test_init(analyzer: SemanticAnalyzer, mock_branch_manager: Mock, temp_repo: Path) -> None:
         """Test SemanticAnalyzer initialization."""
         assert analyzer.branch_manager == mock_branch_manager
         assert analyzer.repo_path == temp_repo

@@ -123,9 +123,7 @@ class CaptureOutput:
         self.stderr.clear()
 
 
-def wait_for_condition(
-    condition_func: Callable[[], bool], timeout: float = 5, interval: float = 0.1
-) -> bool:
+def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5, interval: float = 0.1) -> bool:
     """조건이 만족될 때까지 대기."""
     start_time = time.time()
 

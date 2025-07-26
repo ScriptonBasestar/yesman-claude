@@ -97,9 +97,7 @@ class TestBranchInfoProtocol:
 
     @pytest.fixture
     @staticmethod
-    def protocol(
-        mock_branch_manager: Mock, mock_collaboration_engine: Mock
-    ) -> BranchInfoProtocol:
+    def protocol(mock_branch_manager: Mock, mock_collaboration_engine: Mock) -> BranchInfoProtocol:
         """Create BranchInfoProtocol instance."""
         return BranchInfoProtocol(
             branch_manager=mock_branch_manager,
@@ -216,9 +214,7 @@ class TestBranchInfoProtocol:
         assert branch_info.build_status == "success"
 
         # Check that immediate sync was triggered
-        assert (
-            protocol.collaboration_engine.share_knowledge.call_count >= 2
-        )  # Initial + update
+        assert protocol.collaboration_engine.share_knowledge.call_count >= 2  # Initial + update
 
     @pytest.mark.asyncio
     @staticmethod
@@ -513,22 +509,10 @@ class TestBranchInfoProtocol:
     @staticmethod
     def test_determine_priority(protocol: BranchInfoProtocol) -> None:
         """Test priority determination for different info types."""
-        assert (
-            protocol._determine_priority(BranchInfoType.CONFLICT_INFO)
-            == MessagePriority.HIGH
-        )
-        assert (
-            protocol._determine_priority(BranchInfoType.API_CHANGES)
-            == MessagePriority.HIGH
-        )
-        assert (
-            protocol._determine_priority(BranchInfoType.BUILD_STATUS)
-            == MessagePriority.NORMAL
-        )
-        assert (
-            protocol._determine_priority(BranchInfoType.FILE_CHANGES)
-            == MessagePriority.LOW
-        )
+        assert protocol._determine_priority(BranchInfoType.CONFLICT_INFO) == MessagePriority.HIGH
+        assert protocol._determine_priority(BranchInfoType.API_CHANGES) == MessagePriority.HIGH
+        assert protocol._determine_priority(BranchInfoType.BUILD_STATUS) == MessagePriority.NORMAL
+        assert protocol._determine_priority(BranchInfoType.FILE_CHANGES) == MessagePriority.LOW
 
     @staticmethod
     def test_calculate_relevance(protocol: BranchInfoProtocol) -> None:

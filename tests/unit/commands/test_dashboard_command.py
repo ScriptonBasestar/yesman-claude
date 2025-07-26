@@ -18,9 +18,7 @@ class TestDashboardCommand(unittest.TestCase):
 
     @patch("commands.dashboard.subprocess.run")
     @patch("commands.dashboard.find_free_port")
-    def test_dashboard_starts_streamlit(
-        self, mock_find_port: MagicMock, mock_subprocess: MagicMock
-    ) -> None:
+    def test_dashboard_starts_streamlit(self, mock_find_port: MagicMock, mock_subprocess: MagicMock) -> None:
         """Test dashboard command starts streamlit app."""
         # Setup mocks
         mock_find_port.return_value = 8501
@@ -42,9 +40,7 @@ class TestDashboardCommand(unittest.TestCase):
 
     @patch("commands.dashboard.subprocess.run")
     @patch("commands.dashboard.find_free_port")
-    def test_dashboard_with_custom_port(
-        self, mock_find_port: MagicMock, mock_subprocess: MagicMock
-    ) -> None:
+    def test_dashboard_with_custom_port(self, mock_find_port: MagicMock, mock_subprocess: MagicMock) -> None:
         """Test dashboard with custom port."""
         # Setup mocks
         mock_subprocess.return_value = MagicMock(returncode=0)
@@ -61,9 +57,7 @@ class TestDashboardCommand(unittest.TestCase):
         assert "9000" in call_args
 
     @patch("commands.dashboard.subprocess.run")
-    def test_dashboard_handles_streamlit_not_found(
-        self, mock_subprocess: MagicMock
-    ) -> None:
+    def test_dashboard_handles_streamlit_not_found(self, mock_subprocess: MagicMock) -> None:
         """Test dashboard handles missing streamlit."""
         # Setup mock to simulate streamlit not found
         mock_subprocess.side_effect = FileNotFoundError("streamlit not found")
@@ -77,9 +71,7 @@ class TestDashboardCommand(unittest.TestCase):
 
     @patch("commands.dashboard.subprocess.run")
     @patch("commands.dashboard.find_free_port")
-    def test_dashboard_handles_port_in_use(
-        self, mock_find_port: MagicMock, mock_subprocess: MagicMock
-    ) -> None:
+    def test_dashboard_handles_port_in_use(self, mock_find_port: MagicMock, mock_subprocess: MagicMock) -> None:
         """Test dashboard handles port already in use."""
         # Setup mocks
         mock_find_port.return_value = 8501

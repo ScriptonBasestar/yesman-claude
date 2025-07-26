@@ -275,10 +275,7 @@ class TestCollaborationEngine:
         # Should be queued for all agents except sender
         assert len(engine.message_queues["agent-2"]) == 1
         assert len(engine.message_queues["agent-3"]) == 1
-        assert (
-            "agent-1" not in engine.message_queues
-            or len(engine.message_queues["agent-1"]) == 0
-        )
+        assert "agent-1" not in engine.message_queues or len(engine.message_queues["agent-1"]) == 0
 
     @pytest.mark.asyncio
     @staticmethod
@@ -660,9 +657,7 @@ class TestCollaborationEngine:
         # Check review request messages
         for reviewer_id in reviewers:
             messages = list(engine.message_queues[reviewer_id])
-            assert any(
-                msg.message_type == MessageType.REVIEW_REQUEST for msg in messages
-            )
+            assert any(msg.message_type == MessageType.REVIEW_REQUEST for msg in messages)
 
     @pytest.mark.asyncio
     @staticmethod

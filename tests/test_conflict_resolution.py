@@ -90,9 +90,7 @@ class TestConflictResolutionEngine:
         )
 
     @staticmethod
-    def test_init(
-        engine: ConflictResolutionEngine, mock_branch_manager: Mock, temp_repo: Path
-    ) -> None:
+    def test_init(engine: ConflictResolutionEngine, mock_branch_manager: Mock, temp_repo: Path) -> None:
         """Test ConflictResolutionEngine initialization."""
         assert engine.branch_manager == mock_branch_manager
         assert engine.repo_path == temp_repo
@@ -328,9 +326,7 @@ class TestConflictResolutionEngine:
             description="Import conflict",
             suggested_strategy=ResolutionStrategy.CUSTOM_MERGE,
             metadata={
-                "conflict_content": (
-                    "<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> "
-                ),
+                "conflict_content": ("<<<<<<< HEAD\nimport os\n=======\nimport sys\n>>>>>>> "),
             },
         )
 
@@ -590,11 +586,7 @@ class TestClass:
         total = len(engine.resolution_history)
         engine.resolution_stats["resolution_success_rate"] = successful / total
 
-        times = [
-            r.resolution_time
-            for r in engine.resolution_history
-            if r.resolution_time > 0
-        ]
+        times = [r.resolution_time for r in engine.resolution_history if r.resolution_time > 0]
         engine.resolution_stats["average_resolution_time"] = sum(times) / len(times)
 
         assert engine.resolution_stats["resolution_success_rate"] == 0.5

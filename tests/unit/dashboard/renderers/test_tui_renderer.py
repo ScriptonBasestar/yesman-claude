@@ -35,9 +35,7 @@ class TestTUIRenderer:
         """Setup test renderer."""
         # Use StringIO to capture output for testing
         self.string_io = StringIO()
-        self.console = Console(
-            file=self.string_io, width=80, height=24, force_terminal=True
-        )
+        self.console = Console(file=self.string_io, width=80, height=24, force_terminal=True)
         self.renderer = TUIRenderer(console=self.console)
 
     def test_renderer_initialization(self) -> None:
@@ -413,9 +411,7 @@ class TestTUIRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(
-            widgets, {"type": "vertical", "spacing": 2}
-        )
+        result = self.renderer.render_layout(widgets, {"type": "vertical", "spacing": 2})
 
         assert isinstance(result, str)
         assert "Test 1" in result

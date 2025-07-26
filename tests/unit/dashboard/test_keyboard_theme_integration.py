@@ -42,9 +42,7 @@ class TestKeyboardThemeIntegration:
             yield ThemeManager(config_dir=Path(temp_dir))
 
     @staticmethod
-    def test_keyboard_theme_integration(
-        keyboard_manager: object, theme_manager: object
-    ) -> None:
+    def test_keyboard_theme_integration(keyboard_manager: object, theme_manager: object) -> None:
         """Test 10: Keyboard navigation with theme switching."""
 
         # Register theme switching action

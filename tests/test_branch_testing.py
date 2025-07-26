@@ -31,9 +31,7 @@ class TestBranchTestManager:
             repo_path = Path(tmpdir)
 
             # Initialize actual git repository
-            subprocess.run(
-                ["git", "init"], check=False, cwd=repo_path, capture_output=True
-            )
+            subprocess.run(["git", "init"], check=False, cwd=repo_path, capture_output=True)
             subprocess.run(
                 ["git", "config", "user.name", "Test User"],
                 check=False,
@@ -60,9 +58,7 @@ class TestBranchTestManager:
             )
 
             # Create initial commit
-            subprocess.run(
-                ["git", "add", "."], check=False, cwd=repo_path, capture_output=True
-            )
+            subprocess.run(["git", "add", "."], check=False, cwd=repo_path, capture_output=True)
             subprocess.run(
                 ["git", "commit", "-m", "Initial commit"],
                 check=False,
@@ -180,9 +176,7 @@ class TestBranchTestManager:
         )
 
         # Mock branch switching
-        with patch.object(
-            branch_test_manager.branch_manager, "switch_branch", return_value=True
-        ):
+        with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
             with patch.object(
                 branch_test_manager.branch_manager,
                 "_get_current_branch",
@@ -212,9 +206,7 @@ class TestBranchTestManager:
             timeout=30,
         )
 
-        with patch.object(
-            branch_test_manager.branch_manager, "switch_branch", return_value=True
-        ):
+        with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
             with patch.object(
                 branch_test_manager.branch_manager,
                 "_get_current_branch",
@@ -241,9 +233,7 @@ class TestBranchTestManager:
             timeout=1,  # 1 second timeout
         )
 
-        with patch.object(
-            branch_test_manager.branch_manager, "switch_branch", return_value=True
-        ):
+        with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
             with patch.object(
                 branch_test_manager.branch_manager,
                 "_get_current_branch",
@@ -276,9 +266,7 @@ class TestBranchTestManager:
             critical=False,
         )
 
-        with patch.object(
-            branch_test_manager.branch_manager, "switch_branch", return_value=True
-        ):
+        with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
             with patch.object(
                 branch_test_manager.branch_manager,
                 "_get_current_branch",
@@ -292,9 +280,7 @@ class TestBranchTestManager:
         assert len(results) >= 2
 
         # Find our test results
-        critical_result = next(
-            (r for r in results if "critical_test" in r.test_id), None
-        )
+        critical_result = next((r for r in results if "critical_test" in r.test_id), None)
         normal_result = next((r for r in results if "normal_test" in r.test_id), None)
 
         assert critical_result is not None
@@ -323,9 +309,7 @@ class TestBranchTestManager:
             critical=False,
         )
 
-        with patch.object(
-            branch_test_manager.branch_manager, "switch_branch", return_value=True
-        ):
+        with patch.object(branch_test_manager.branch_manager, "switch_branch", return_value=True):
             with patch.object(
                 branch_test_manager.branch_manager,
                 "_get_current_branch",

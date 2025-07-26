@@ -21,24 +21,22 @@ PYTHON_FILES = $(shell find $(PYTHON_DIRS) -name "*.py" 2>/dev/null)
 .PHONY: hooks-install hooks-uninstall hooks-status pre-commit-install
 .PHONY: pre-commit-run pre-commit-update validate-hooks
 
-fmt: ## format Python files with black and isort
+fmt: ## format Python files with ruff
 	@echo -e "$(CYAN)Formatting Python code...$(RESET)"
-	@echo "1. Running black..."
-	@command -v black >/dev/null 2>&1 || pip install black
-	@black $(PYTHON_DIRS)
-	@echo "2. Running isort..."
-	@command -v isort >/dev/null 2>&1 || pip install isort
-	@isort $(PYTHON_DIRS) --profile black
+	@echo "1. Running ruff format..."
+	@uv run ruff format $(PYTHON_DIRS) $(EXCLUDE_DIRS)
+	@echo "2. Running ruff check with import sorting..."
+	@uv run ruff check $(PYTHON_DIRS) --fix --select I $(EXCLUDE_DIRS)
 	@echo -e "$(GREEN)✅ Code formatting complete!$(RESET)"
 
 format: fmt ## alias for fmt
 
 format-all: ## run all formatters including advanced ones
 	@echo -e "$(CYAN)Running comprehensive code formatting...$(RESET)"
-	@echo "1. Running black (strict formatting)..."
-	@black $(PYTHON_DIRS) --preview
-	@echo "2. Running isort (import organization)..."
-	@isort $(PYTHON_DIRS) --profile black --float-to-top
+	@echo "1. Running ruff format..."
+	@uv run ruff format $(PYTHON_DIRS) $(EXCLUDE_DIRS)
+	@echo "2. Running ruff check with all safe fixes..."
+	@uv run ruff check $(PYTHON_DIRS) --fix $(EXCLUDE_DIRS)
 	@echo "3. Running autoflake (remove unused imports)..."
 	@autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive $(PYTHON_DIRS) || true
 	@echo "4. Running docformatter (format docstrings)..."
@@ -47,12 +45,12 @@ format-all: ## run all formatters including advanced ones
 
 format-check: ## check code formatting without fixing
 	@echo -e "$(CYAN)Checking code formatting...$(RESET)"
-	@if ! black --check $(PYTHON_DIRS) 2>/dev/null; then \
-		echo "$(RED)❌ Black formatting issues found$(RESET)"; \
+	@if ! uv run ruff format --check $(PYTHON_DIRS) $(EXCLUDE_DIRS) 2>/dev/null; then \
+		echo "$(RED)❌ Formatting issues found$(RESET)"; \
 		echo "$(YELLOW)Run 'make fmt' to fix.$(RESET)"; \
 		exit 1; \
 	fi
-	@if ! isort --check-only $(PYTHON_DIRS) --profile black 2>/dev/null; then \
+	@if ! uv run ruff check --select I $(PYTHON_DIRS) $(EXCLUDE_DIRS) 2>/dev/null; then \
 		echo "$(RED)❌ Import sorting issues found$(RESET)"; \
 		echo "$(YELLOW)Run 'make fmt' to fix.$(RESET)"; \
 		exit 1; \
@@ -61,11 +59,11 @@ format-check: ## check code formatting without fixing
 
 format-diff: ## show formatting differences
 	@echo -e "$(CYAN)Showing formatting differences...$(RESET)"
-	@black --diff $(PYTHON_DIRS)
+	@uv run ruff format --diff $(PYTHON_DIRS) $(EXCLUDE_DIRS) || true
 
 format-imports: ## organize imports only
 	@echo -e "$(CYAN)Organizing imports...$(RESET)"
-	@isort $(PYTHON_DIRS) --profile black
+	@uv run ruff check $(PYTHON_DIRS) --fix --select I $(EXCLUDE_DIRS)
 	@echo -e "$(GREEN)✅ Imports organized!$(RESET)"
 
 format-docstrings: ## format docstrings

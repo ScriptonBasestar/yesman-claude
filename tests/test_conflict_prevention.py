@@ -183,19 +183,11 @@ class TestConflictPreventionSystem:
         )
 
     @staticmethod
-    def test_init(
-        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
-    ) -> None:
+    def test_init(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
         """Test ConflictPreventionSystem initialization."""
-        assert (
-            prevention_system.conflict_predictor
-            == mock_dependencies["conflict_predictor"]
-        )
+        assert prevention_system.conflict_predictor == mock_dependencies["conflict_predictor"]
         assert prevention_system.auto_resolver == mock_dependencies["auto_resolver"]
-        assert (
-            prevention_system.collaboration_engine
-            == mock_dependencies["collaboration_engine"]
-        )
+        assert prevention_system.collaboration_engine == mock_dependencies["collaboration_engine"]
         assert prevention_system.branch_manager == mock_dependencies["branch_manager"]
         assert prevention_system.repo_path == Path("/tmp/test_repo")
 
@@ -215,25 +207,13 @@ class TestConflictPreventionSystem:
 
         # Check strategy handlers
         assert len(prevention_system.strategy_handlers) == 7
-        assert (
-            PreventionStrategy.BRANCH_ISOLATION in prevention_system.strategy_handlers
-        )
-        assert (
-            PreventionStrategy.WORK_REALLOCATION in prevention_system.strategy_handlers
-        )
+        assert PreventionStrategy.BRANCH_ISOLATION in prevention_system.strategy_handlers
+        assert PreventionStrategy.WORK_REALLOCATION in prevention_system.strategy_handlers
         assert PreventionStrategy.DEPENDENCY_SYNC in prevention_system.strategy_handlers
         assert PreventionStrategy.EARLY_MERGE in prevention_system.strategy_handlers
-        assert (
-            PreventionStrategy.AGENT_COORDINATION in prevention_system.strategy_handlers
-        )
-        assert (
-            PreventionStrategy.TEMPORAL_SEPARATION
-            in prevention_system.strategy_handlers
-        )
-        assert (
-            PreventionStrategy.SEMANTIC_REFACTORING
-            in prevention_system.strategy_handlers
-        )
+        assert PreventionStrategy.AGENT_COORDINATION in prevention_system.strategy_handlers
+        assert PreventionStrategy.TEMPORAL_SEPARATION in prevention_system.strategy_handlers
+        assert PreventionStrategy.SEMANTIC_REFACTORING in prevention_system.strategy_handlers
 
         # Check initial statistics
         expected_stats = {
@@ -690,15 +670,11 @@ class TestConflictPreventionSystem:
             assert success is False
         finally:
             # Restore the handler
-            prevention_system.strategy_handlers[
-                PreventionStrategy.SEMANTIC_REFACTORING
-            ] = original_handler
+            prevention_system.strategy_handlers[PreventionStrategy.SEMANTIC_REFACTORING] = original_handler
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_work_reallocation(
-        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
-    ) -> None:
+    async def test_apply_work_reallocation(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
         """Test _apply_work_reallocation strategy."""
         measure = PreventionMeasure(
             measure_id="work_reallocation_test",
@@ -741,9 +717,7 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_dependency_sync(
-        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
-    ) -> None:
+    async def test_apply_dependency_sync(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
         """Test _apply_dependency_sync strategy."""
         measure = PreventionMeasure(
             measure_id="dep_sync_test",
@@ -786,9 +760,7 @@ class TestConflictPreventionSystem:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_early_merge(
-        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
-    ) -> None:
+    async def test_apply_early_merge(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
         """Test _apply_early_merge strategy."""
         measure = PreventionMeasure(
             measure_id="early_merge_test",
@@ -813,9 +785,7 @@ class TestConflictPreventionSystem:
         assert success is True
 
         # Verify auto resolver was called
-        mock_dependencies[
-            "auto_resolver"
-        ].auto_resolve_branch_conflicts.assert_called_once_with(
+        mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts.assert_called_once_with(
             branch1="branch1",
             branch2="branch2",
             mode=AutoResolutionMode.PREDICTIVE,
@@ -844,15 +814,11 @@ class TestConflictPreventionSystem:
         assert success is False
 
         # Verify auto resolver was not called
-        mock_dependencies[
-            "auto_resolver"
-        ].auto_resolve_branch_conflicts.assert_not_called()
+        mock_dependencies["auto_resolver"].auto_resolve_branch_conflicts.assert_not_called()
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_apply_agent_coordination(
-        prevention_system: ConflictPreventionSystem, mock_dependencies: dict
-    ) -> None:
+    async def test_apply_agent_coordination(prevention_system: ConflictPreventionSystem, mock_dependencies: dict) -> None:
         """Test _apply_agent_coordination strategy."""
         measure = PreventionMeasure(
             measure_id="agent_coord_test",
@@ -933,9 +899,7 @@ class TestConflictPreventionSystem:
         calls = mock_dependencies["collaboration_engine"].send_message.call_args_list
         for i, call in enumerate(calls):
             _args, kwargs = call
-            expected_delay = (
-                i * prevention_system.prevention_config["coordination_delay"]
-            )
+            expected_delay = i * prevention_system.prevention_config["coordination_delay"]
 
             assert kwargs["sender_id"] == "prevention_system"
             assert kwargs["recipient_id"] == f"agent{i + 1}"

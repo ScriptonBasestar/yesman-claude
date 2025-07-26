@@ -161,9 +161,7 @@ Do you want to continue with this operation?
         for content in test_cases:
             with self.subTest(content=content):
                 prompt_info = self.detector.detect_prompt(content)
-                assert (
-                    prompt_info is not None
-                ), f"Should detect numbered selection: {content}"
+                assert prompt_info is not None, f"Should detect numbered selection: {content}"
                 assert prompt_info.type == PromptType.NUMBERED_SELECTION
                 assert len(prompt_info.options) >= 2
 

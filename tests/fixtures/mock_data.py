@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 # Import here to avoid circular imports
-from .mock_factories import ComponentMockFactory, ManagerMockFactory
+# Moved to the end of file to avoid circular imports
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -21,9 +21,7 @@ Updated: Enhanced with factory system integration for better mock management
 class MockTmuxSession:
     """Tmux 세션 Mock 객체."""
 
-    def __init__(
-        self, name: str = "test-session", windows: list[object] | None = None
-    ) -> None:
+    def __init__(self, name: str = "test-session", windows: list[object] | None = None) -> None:
         self.name = name
         self.windows = windows or []
         self.id = f"${name}:0"
@@ -94,9 +92,7 @@ MOCK_SESSION_DATA = {
 # 프롬프트 관련 Mock 데이터
 MOCK_PROMPTS = {
     "yes_no": "Do you want to continue? [y/n]: ",
-    "numbered": (
-        "Select an option:\n1. Option A\n2. Option B\n3. Option C\nEnter choice: "
-    ),
+    "numbered": ("Select an option:\n1. Option A\n2. Option B\n3. Option C\nEnter choice: "),
     "file_overwrite": "File exists. Overwrite? (y/N): ",
     "trust_prompt": "Do you trust this workspace? [y/n]: ",
 }
@@ -195,7 +191,5 @@ def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
             status_code=500,
             json_data=MOCK_API_RESPONSES["error_response"],
         ),
-        "session_manager": get_factory_mock(
-            "session_manager", create_session_result=False
-        ),
+        "session_manager": get_factory_mock("session_manager", create_session_result=False),
     }

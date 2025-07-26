@@ -99,9 +99,7 @@ class TestConflictPredictor:
 
     @pytest.fixture
     @staticmethod
-    def predictor(
-        mock_conflict_engine: Mock, mock_branch_manager: Mock, temp_repo: Path
-    ) -> ConflictPredictor:
+    def predictor(mock_conflict_engine: Mock, mock_branch_manager: Mock, temp_repo: Path) -> ConflictPredictor:
         """Create ConflictPredictor instance."""
         return ConflictPredictor(
             conflict_engine=mock_conflict_engine,
@@ -129,9 +127,7 @@ class TestConflictPredictor:
     @staticmethod
     def test_likelihood_to_confidence(predictor: ConflictPredictor) -> None:
         """Test likelihood to confidence conversion."""
-        assert (
-            predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
-        )
+        assert predictor._likelihood_to_confidence(0.95) == PredictionConfidence.CRITICAL
         assert predictor._likelihood_to_confidence(0.8) == PredictionConfidence.HIGH
         assert predictor._likelihood_to_confidence(0.6) == PredictionConfidence.MEDIUM
         assert predictor._likelihood_to_confidence(0.3) == PredictionConfidence.LOW
@@ -154,22 +150,12 @@ class TestConflictPredictor:
             return_value={"file1.py": "M", "file2.py": "A"},
         )
         cast("Any", predictor)._get_change_frequency = AsyncMock(return_value=2.5)
-        cast("Any", predictor)._calculate_branch_complexity = AsyncMock(
-            return_value=50.0
-        )
-        cast("Any", predictor)._calculate_dependency_coupling = AsyncMock(
-            return_value=0.6
-        )
-        cast("Any", predictor)._calculate_semantic_distance = AsyncMock(
-            return_value=0.4
-        )
-        cast("Any", predictor)._calculate_temporal_proximity = AsyncMock(
-            return_value=0.3
-        )
+        cast("Any", predictor)._calculate_branch_complexity = AsyncMock(return_value=50.0)
+        cast("Any", predictor)._calculate_dependency_coupling = AsyncMock(return_value=0.6)
+        cast("Any", predictor)._calculate_semantic_distance = AsyncMock(return_value=0.4)
+        cast("Any", predictor)._calculate_temporal_proximity = AsyncMock(return_value=0.3)
 
-        vector = await cast("Any", predictor)._calculate_conflict_vector(
-            "branch1", "branch2"
-        )
+        vector = await cast("Any", predictor)._calculate_conflict_vector("branch1", "branch2")
 
         assert isinstance(vector, ConflictVector)
         assert 0.0 <= vector.file_overlap_score <= 1.0
@@ -257,9 +243,7 @@ invalid syntax here !!!
         # Mock conflict detection
         cast("Any", predictor)._imports_likely_to_conflict = Mock(return_value=True)
 
-        result = await cast("Any", predictor)._detect_import_conflicts(
-            "branch1", "branch2", vector
-        )
+        result = await cast("Any", predictor)._detect_import_conflicts("branch1", "branch2", vector)
 
         if result:  # Only test if conflicts were detected
             assert isinstance(result, PredictionResult)
@@ -288,9 +272,7 @@ invalid syntax here !!!
             ],
         )
 
-        result = await cast("Any", predictor)._detect_signature_drift(
-            "branch1", "branch2", vector
-        )
+        result = await cast("Any", predictor)._detect_signature_drift("branch1", "branch2", vector)
 
         if result:  # Only test if drift was detected
             assert isinstance(result, PredictionResult)
@@ -312,9 +294,7 @@ invalid syntax here !!!
             ],
         )
 
-        result = await cast("Any", predictor)._detect_naming_collisions(
-            "branch1", "branch2", vector
-        )
+        result = await cast("Any", predictor)._detect_naming_collisions("branch1", "branch2", vector)
 
         if result:  # Only test if collisions were detected
             assert isinstance(result, PredictionResult)
@@ -337,9 +317,7 @@ invalid syntax here !!!
 
         cast("Any", predictor)._calculate_version_distance = Mock(return_value=0.3)
 
-        result = await cast("Any", predictor)._detect_version_conflicts(
-            "branch1", "branch2", vector
-        )
+        result = await cast("Any", predictor)._detect_version_conflicts("branch1", "branch2", vector)
 
         if result:  # Only test if conflicts were detected
             assert isinstance(result, PredictionResult)
@@ -390,9 +368,7 @@ invalid syntax here !!!
             ),
         )
 
-        complexity = await cast("Any", predictor)._calculate_branch_complexity(
-            "test-branch"
-        )
+        complexity = await cast("Any", predictor)._calculate_branch_complexity("test-branch")
         assert complexity > 0.0
         assert complexity <= 100.0
 
@@ -411,9 +387,7 @@ invalid syntax here !!!
             ],
         )
 
-        files_with_imports = await cast(
-            "Any", predictor
-        )._get_python_files_with_imports(
+        files_with_imports = await cast("Any", predictor)._get_python_files_with_imports(
             "test-branch",
         )
 
@@ -485,9 +459,7 @@ pytest = ">=6.0.0"
         ]
 
         # Add some historical data
-        cast("Any", predictor.historical_patterns)[
-            ConflictPattern.OVERLAPPING_IMPORTS
-        ] = [
+        cast("Any", predictor.historical_patterns)[ConflictPattern.OVERLAPPING_IMPORTS] = [
             {"accurate": 1},
             {"accurate": 0},
             {"accurate": 1},
@@ -539,8 +511,7 @@ pytest = ">=6.0.0"
             predicted_severity=ConflictSeverity.HIGH,
             likelihood_score=0.6,
             description="Test prediction 2",
-            timeline_prediction=datetime.now(UTC)
-            - timedelta(days=1),  # Past prediction
+            timeline_prediction=datetime.now(UTC) - timedelta(days=1),  # Past prediction
         )
 
         cast("dict[str, Any]", predictor.predictions)["test1"] = prediction1
@@ -549,37 +520,12 @@ pytest = ">=6.0.0"
         summary = predictor.get_prediction_summary()
 
         assert cast("dict[str, Any]", summary)["total_predictions"] == 2
-        assert (
-            cast("dict[str, Any]", summary)["active_predictions"] == 1
-        )  # Only future predictions
-        assert (
-            cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_confidence"])[
-                "high"
-            ]
-            == 1
-        )
-        assert (
-            cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_confidence"])[
-                "medium"
-            ]
-            == 1
-        )
-        assert (
-            cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_pattern"])[
-                "overlapping_imports"
-            ]
-            == 1
-        )
-        assert (
-            cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_pattern"])[
-                "function_signature_drift"
-            ]
-            == 1
-        )
-        assert (
-            len(cast("list", cast("dict[str, Any]", summary)["most_likely_conflicts"]))
-            == 2
-        )
+        assert cast("dict[str, Any]", summary)["active_predictions"] == 1  # Only future predictions
+        assert cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_confidence"])["high"] == 1
+        assert cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_confidence"])["medium"] == 1
+        assert cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_pattern"])["overlapping_imports"] == 1
+        assert cast("dict[str, Any]", cast("dict[str, Any]", summary)["by_pattern"])["function_signature_drift"] == 1
+        assert len(cast("list", cast("dict[str, Any]", summary)["most_likely_conflicts"])) == 2
 
     @pytest.mark.asyncio
     @staticmethod

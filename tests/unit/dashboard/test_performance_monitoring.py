@@ -53,9 +53,7 @@ class TestPerformanceMonitoring:
 
         # Test optimization application
         performance_optimizer.set_optimization_level(OptimizationLevel.MEDIUM)
-        assert (
-            performance_optimizer.current_optimization_level == OptimizationLevel.MEDIUM
-        )
+        assert performance_optimizer.current_optimization_level == OptimizationLevel.MEDIUM
 
         # Test performance report
         report = performance_optimizer.get_performance_report()

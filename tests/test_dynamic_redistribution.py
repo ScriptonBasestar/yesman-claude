@@ -63,10 +63,7 @@ class TestDynamicRedistribution:
 
         # Should detect need for rebalancing
         assert len(rebalancing_actions) > 0
-        assert any(
-            action[0] == "agent-1" and action[1] == "agent-3"
-            for action in rebalancing_actions
-        )
+        assert any(action[0] == "agent-1" and action[1] == "agent-3" for action in rebalancing_actions)
 
     @staticmethod
     def test_assignment_preference_adjustment(scheduler: TaskScheduler) -> None:
@@ -100,12 +97,8 @@ class TestDynamicRedistribution:
         assert len(rebalancing_actions) > 0
 
         # Processing power should be adjusted
-        assert (
-            overloaded_cap.processing_power < initial_overloaded_power
-        )  # Penalty applied
-        assert (
-            underloaded_cap.processing_power > initial_underloaded_power
-        )  # Boost applied
+        assert overloaded_cap.processing_power < initial_overloaded_power  # Penalty applied
+        assert underloaded_cap.processing_power > initial_underloaded_power  # Boost applied
 
     @staticmethod
     def test_load_estimation(scheduler: TaskScheduler) -> None:

@@ -85,9 +85,7 @@ class TestDIContainer:
         """Test circular dependency detection."""
 
         def factory_a() -> object:
-            return self.container.resolve(
-                TmuxManager
-            )  # This would create a circular dependency
+            return self.container.resolve(TmuxManager)  # This would create a circular dependency
 
         def factory_b() -> object:
             return self.container.resolve(YesmanConfig)

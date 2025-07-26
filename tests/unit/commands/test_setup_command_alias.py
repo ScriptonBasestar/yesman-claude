@@ -17,9 +17,7 @@ class TestSetupAliasCommand(unittest.TestCase):
         self.runner = CliRunner()
 
     @patch("commands.up.SessionManager")
-    def test_setup_alias_creates_all_sessions(
-        self, mock_session_manager: object
-    ) -> None:
+    def test_setup_alias_creates_all_sessions(self, mock_session_manager: object) -> None:
         """Test setup alias (up) command creates all sessions from
         projects.yaml.
         """
@@ -47,9 +45,7 @@ class TestSetupAliasCommand(unittest.TestCase):
         )
 
     @patch("commands.up.SessionManager")
-    def test_setup_alias_with_specific_project(
-        self, mock_session_manager: object
-    ) -> None:
+    def test_setup_alias_with_specific_project(self, mock_session_manager: object) -> None:
         """Test setup alias (up) command with specific project name."""
         # Setup mock
         mock_manager_instance = MagicMock()
@@ -64,15 +60,11 @@ class TestSetupAliasCommand(unittest.TestCase):
         mock_manager_instance.create_session.assert_called_once_with("myproject")
 
     @patch("commands.up.SessionManager")
-    def test_setup_alias_handles_session_exists(
-        self, mock_session_manager: object
-    ) -> None:
+    def test_setup_alias_handles_session_exists(self, mock_session_manager: object) -> None:
         """Test setup alias (up) handles existing session gracefully."""
         # Setup mock
         mock_manager_instance = MagicMock()
-        mock_manager_instance.create_session.side_effect = Exception(
-            "Session already exists"
-        )
+        mock_manager_instance.create_session.side_effect = Exception("Session already exists")
         mock_session_manager.return_value = mock_manager_instance
 
         # Run command

@@ -631,23 +631,17 @@ class TestTauriRenderer:
 
         # Negative trend
         metric_down = MetricCardData(title="Test", value=100, trend=-3.0)
-        result_down = self.renderer.render_widget(
-            WidgetType.METRIC_CARD, metric_down, {}
-        )
+        result_down = self.renderer.render_widget(WidgetType.METRIC_CARD, metric_down, {})
         assert result_down["data"]["trend_direction"] == "down"
 
         # Neutral trend
         metric_neutral = MetricCardData(title="Test", value=100, trend=0)
-        result_neutral = self.renderer.render_widget(
-            WidgetType.METRIC_CARD, metric_neutral, {}
-        )
+        result_neutral = self.renderer.render_widget(WidgetType.METRIC_CARD, metric_neutral, {})
         assert result_neutral["data"]["trend_direction"] == "neutral"
 
         # No trend
         metric_none = MetricCardData(title="Test", value=100, trend=None)
-        result_none = self.renderer.render_widget(
-            WidgetType.METRIC_CARD, metric_none, {}
-        )
+        result_none = self.renderer.render_widget(WidgetType.METRIC_CARD, metric_none, {})
         assert result_none["data"]["trend_direction"] == "neutral"
 
 

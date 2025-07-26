@@ -4,29 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Yesman-Claude is a CLI automation tool that manages tmux sessions and automates interactions with Claude Code. It provides multiple dashboard interfaces (TUI, Web, Tauri) for monitoring and controlling development environments.
+Yesman-Claude is a CLI automation tool that manages tmux sessions and automates interactions with Claude Code. It
+provides multiple dashboard interfaces (TUI, Web, Tauri) for monitoring and controlling development environments.
 
 ## Key Architecture Concepts
 
 ### 1. Command Pattern Architecture
+
 All CLI commands inherit from `BaseCommand` in `libs/core/base_command.py`. Commands must implement:
+
 - `execute()` method that returns a dict with success status
 - Mixins for shared functionality (SessionCommandMixin, ConfigCommandMixin)
 - Standardized error handling via `CommandError`
 
 ### 2. Session Management System
+
 - Sessions are defined in YAML files under `~/.scripton/yesman/sessions/`
 - Templates live in `~/.scripton/yesman/templates/`
 - The `TmuxManager` class handles all tmux interactions
 - Projects.yaml has been removed - use individual session files only
 
 ### 3. Dashboard Architecture
+
 - Three interfaces: TUI (terminal), Web (SvelteKit/FastAPI), Tauri (desktop)
 - All dashboards share the same SvelteKit codebase
 - FastAPI backend at `api/` provides REST endpoints
 - Real-time updates via WebSocket connections
 
 ### 4. Claude Automation
+
 - `ClaudeMonitor` watches tmux panes for Claude prompts
 - `ClaudePromptDetector` identifies different prompt types
 - `AdaptiveResponse` system learns from user behavior
@@ -35,6 +41,7 @@ All CLI commands inherit from `BaseCommand` in `libs/core/base_command.py`. Comm
 ## Essential Development Commands
 
 ### Running and Testing
+
 ```bash
 # Development with uv (recommended)
 uv run ./yesman.py --help
@@ -55,6 +62,7 @@ make full              # Full quality check before commits
 ```
 
 ### Building
+
 ```bash
 # Build everything
 make build-all
@@ -69,6 +77,7 @@ cd tauri-dashboard && npm run tauri:dev
 ```
 
 ### Session Management
+
 ```bash
 # List sessions
 ./yesman.py ls
@@ -85,13 +94,15 @@ cd tauri-dashboard && npm run tauri:dev
 ## Code Organization Patterns
 
 ### Adding New Commands
+
 1. Create file in `commands/` directory
-2. Import and use `@click.command()` decorator
-3. Create command class inheriting from `BaseCommand`
-4. Implement `execute()` method
-5. Add command to `yesman.py` imports and CLI group
+1. Import and use `@click.command()` decorator
+1. Create command class inheriting from `BaseCommand`
+1. Implement `execute()` method
+1. Add command to `yesman.py` imports and CLI group
 
 Example:
+
 ```python
 from libs.core.base_command import BaseCommand, CommandError
 
@@ -105,12 +116,14 @@ class MyCommand(BaseCommand):
 ```
 
 ### Working with Sessions
+
 - Session configs use Pydantic models in `libs/core/config_schema.py`
 - Always validate paths with `validate_directory_path()` from `libs/validation.py`
 - Use `TmuxManager.create_session()` for session creation
 - Handle missing directories by prompting user to create them
 
 ### API Development
+
 - All API routes in `api/routers/`
 - Use dependency injection with `get_tmux_manager()`
 - Return standardized responses using models from `api/models.py`
@@ -119,17 +132,20 @@ class MyCommand(BaseCommand):
 ## Important Configuration
 
 ### Lint Configuration (ruff.toml)
+
 - Line length: 200
 - Python 3.11+
 - Classes with many methods are allowed for facade patterns:
   - `DashboardController`, `ClaudeMonitor`, `EventStrategy`, `KeyboardNavigationManager`
 
 ### Type Checking
+
 - All code should have type hints
 - Use `from typing import Any` when needed
 - Run `make type-check` to verify
 
 ### Testing Patterns
+
 - Unit tests mirror source structure under `tests/unit/`
 - Integration tests in `tests/integration/`
 - Use pytest fixtures from `tests/conftest.py`
@@ -138,17 +154,20 @@ class MyCommand(BaseCommand):
 ## Common Issues and Solutions
 
 ### Import Errors
+
 - Ensure running with `uv run` or proper virtualenv
 - Check PYTHONPATH includes project root
 - Use absolute imports: `from libs.core.base_command import BaseCommand`
 
 ### Session Creation Failures
+
 - Verify tmux is installed: `which tmux`
 - Check session YAML syntax
 - Ensure start_directory exists or handle creation
 - Check for existing sessions with same name
 
 ### Dashboard Issues
+
 - Web dashboard requires building first: `cd tauri-dashboard && npm run build`
 - API must be running for web interface: check port 8000
 - Tauri requires Rust toolchain for development
@@ -156,10 +175,10 @@ class MyCommand(BaseCommand):
 ## Development Workflow
 
 1. Make changes following existing patterns
-2. Run `make quick` for fast validation
-3. Run `make full` before committing
-4. Use standardized commit messages: `type(scope): description`
-5. All commits should be signed with `--no-verify` if using pre-commit hooks
+1. Run `make quick` for fast validation
+1. Run `make full` before committing
+1. Use standardized commit messages: `type(scope): description`
+1. All commits should be signed with `--no-verify` if using pre-commit hooks
 
 ## Key Technical Decisions
 

@@ -287,9 +287,7 @@ def test_processor() -> object:
             change_details={"description": "remove deprecated function"},
         )
 
-        change = next(
-            c for c in propagation_system.change_history if c.change_id == change_id
-        )
+        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
         assert change.impact_level == ChangeImpact.BREAKING
 
         # Security change keywords
@@ -300,9 +298,7 @@ def test_processor() -> object:
             change_details={"description": "update security token validation"},
         )
 
-        change = next(
-            c for c in propagation_system.change_history if c.change_id == change_id
-        )
+        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
         assert change.impact_level == ChangeImpact.SECURITY
 
         # Enhancement changes
@@ -313,9 +309,7 @@ def test_processor() -> object:
             change_details={"description": "add new feature functionality"},
         )
 
-        change = next(
-            c for c in propagation_system.change_history if c.change_id == change_id
-        )
+        change = next(c for c in propagation_system.change_history if c.change_id == change_id)
         assert change.impact_level == ChangeImpact.ENHANCEMENT
 
     @pytest.mark.asyncio
@@ -329,9 +323,7 @@ def test_processor() -> object:
         assert len(dependency_graph) > 0
 
         # Check that Python files were analyzed
-        src_files = [
-            path for path in dependency_graph.keys() if path.startswith("src/")
-        ]
+        src_files = [path for path in dependency_graph.keys() if path.startswith("src/")]
         assert len(src_files) >= 2
 
         # Check specific dependency relationships
@@ -630,10 +622,7 @@ def test_processor() -> object:
         )
 
         # Check stats updated
-        assert (
-            propagation_system.propagation_stats["changes_tracked"]
-            == initial_stats["changes_tracked"] + 1
-        )
+        assert propagation_system.propagation_stats["changes_tracked"] == initial_stats["changes_tracked"] + 1
 
     @pytest.mark.asyncio
     @staticmethod

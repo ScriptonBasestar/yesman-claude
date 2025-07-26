@@ -189,9 +189,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_initiate_review(
-        code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock
-    ) -> None:
+    async def test_initiate_review(code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test initiating a code review."""
         review_id = await code_review_engine.initiate_review(
             branch_name="feature/test-branch",
@@ -239,9 +237,7 @@ class TestCodeReviewEngine:
         findings = await code_review_engine._check_security(["src/test_module.py"])
 
         # Should detect hardcoded password
-        security_findings = [
-            f for f in findings if "hardcoded secret" in f.message.lower()
-        ]
+        security_findings = [f for f in findings if "hardcoded secret" in f.message.lower()]
         assert len(security_findings) > 0
 
         for finding in security_findings:
@@ -358,15 +354,11 @@ class TestCodeReviewEngine:
         assert len(metrics_list) == 2
 
         # Test module should have violations
-        test_metrics = next(
-            m for m in metrics_list if m.file_path == "src/test_module.py"
-        )
+        test_metrics = next(m for m in metrics_list if m.file_path == "src/test_module.py")
         assert len(test_metrics.violations) > 0
 
         # Good module should have fewer or no violations
-        good_metrics = next(
-            m for m in metrics_list if m.file_path == "src/good_module.py"
-        )
+        good_metrics = next(m for m in metrics_list if m.file_path == "src/good_module.py")
         assert len(good_metrics.violations) <= len(test_metrics.violations)
 
     @pytest.mark.asyncio
@@ -452,9 +444,7 @@ class TestCodeReviewEngine:
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_approve_review(
-        code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock
-    ) -> None:
+    async def test_approve_review(code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test review approval."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
@@ -476,18 +466,12 @@ class TestCodeReviewEngine:
         assert any(r.review_id == review_id for r in code_review_engine.review_history)
 
         # Check that approval message was sent
-        approval_messages = [
-            call
-            for call in mock_collaboration_engine.send_message.call_args_list
-            if "approved" in str(call)
-        ]
+        approval_messages = [call for call in mock_collaboration_engine.send_message.call_args_list if "approved" in str(call)]
         assert len(approval_messages) > 0
 
     @pytest.mark.asyncio
     @staticmethod
-    async def test_reject_review(
-        code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock
-    ) -> None:
+    async def test_reject_review(code_review_engine: CodeReviewEngine, mock_collaboration_engine: Mock) -> None:
         """Test review rejection."""
         # Create a test review
         review_id = await code_review_engine.initiate_review(
@@ -510,11 +494,7 @@ class TestCodeReviewEngine:
         assert any(r.review_id == review_id for r in code_review_engine.review_history)
 
         # Check that rejection message was sent
-        rejection_messages = [
-            call
-            for call in mock_collaboration_engine.send_message.call_args_list
-            if "rejected" in str(call)
-        ]
+        rejection_messages = [call for call in mock_collaboration_engine.send_message.call_args_list if "rejected" in str(call)]
         assert len(rejection_messages) > 0
 
     @pytest.mark.asyncio
@@ -713,11 +693,7 @@ def function() -> object:
         if not review:
             # Review might have been auto-approved and moved to history
             review = next(
-                (
-                    r
-                    for r in code_review_engine.review_history
-                    if r.review_id == review_id
-                ),
+                (r for r in code_review_engine.review_history if r.review_id == review_id),
                 None,
             )
 
@@ -727,11 +703,7 @@ def function() -> object:
         assert review.overall_score >= 0.0
 
         # Review should not be auto-approved due to security issues
-        assert (
-            not review.auto_approved
-            or review.overall_score
-            < code_review_engine.review_config["auto_approve_threshold"]
-        )
+        assert not review.auto_approved or review.overall_score < code_review_engine.review_config["auto_approve_threshold"]
 
 
 class TestReviewDataClasses:

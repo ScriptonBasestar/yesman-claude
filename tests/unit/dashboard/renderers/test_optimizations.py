@@ -33,17 +33,13 @@ from libs.dashboard.renderers.widget_models import MetricCardData
 class MockRenderer(BaseRenderer):
     """Mock renderer for testing."""
 
-    def __init__(
-        self, render_format: RenderFormat = RenderFormat.TUI, delay: float = 0.0
-    ) -> None:
+    def __init__(self, render_format: RenderFormat = RenderFormat.TUI, delay: float = 0.0) -> None:
         super().__init__(render_format)
         self.delay = delay
         self.render_count = 0
         self.last_params = None
 
-    def render_widget(
-        self, widget_type: WidgetType, data: Any, options: dict | None = None
-    ) -> str:
+    def render_widget(self, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
         self.render_count += 1
         self.last_params = (widget_type, data, options)
 
@@ -257,9 +253,7 @@ class TestCachedDecorators:
         self.render_count = 0
 
         @cached_render(self.cache)
-        def mock_render(
-            widget_type: WidgetType, data: Any, options: dict | None = None
-        ) -> str:
+        def mock_render(widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
             self.render_count += 1
             return f"render-{self.render_count}"
 
@@ -281,9 +275,7 @@ class TestCachedDecorators:
         """Test cached_layout decorator."""
 
         @cached_layout(self.cache)
-        def mock_render_layout(
-            self: MockRenderer, widgets: list, layout_config: dict | None = None
-        ) -> str:
+        def mock_render_layout(self: MockRenderer, widgets: list, layout_config: dict | None = None) -> str:
             return f"layout-{len(widgets)}-{id(layout_config)}"
 
         # Bind method to renderer
@@ -625,14 +617,8 @@ class TestOptimizationIntegration:
         assert len(individual_results) == len(batch_results)
 
         # Both approaches should produce valid results
-        assert all(
-            "Performance Test" in str(result) or "Metric" in str(result)
-            for result in individual_results
-        )
-        assert all(
-            "Performance Test" in str(result) or "Metric" in str(result)
-            for result in batch_results
-        )
+        assert all("Performance Test" in str(result) or "Metric" in str(result) for result in individual_results)
+        assert all("Performance Test" in str(result) or "Metric" in str(result) for result in batch_results)
 
     @staticmethod
     def test_global_cache_utilities() -> None:

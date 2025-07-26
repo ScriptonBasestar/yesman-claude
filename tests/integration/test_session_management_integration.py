@@ -54,9 +54,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         # Step 2: Test session setup via CLI
         self.performance_monitor.start_timing("session_setup")
 
-        setup_result = self.command_runner.run_command(
-            SetupCommand, session_name=session_name
-        )
+        setup_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
 
         self.performance_monitor.end_timing("session_setup")
 
@@ -121,9 +119,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         )
 
         # Re-run setup to apply modifications
-        setup_result = self.command_runner.run_command(
-            SetupCommand, session_name=session_name
-        )
+        setup_result = self.command_runner.run_command(SetupCommand, session_name=session_name)
         assert setup_result["success"] is True
 
         # Verify modifications propagated
@@ -155,14 +151,10 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         self.performance_monitor.start_timing("multi_session_setup")
 
         for session_name in session_names:
-            result = self.command_runner.run_command(
-                SetupCommand, session_name=session_name
-            )
+            result = self.command_runner.run_command(SetupCommand, session_name=session_name)
             assert result["success"] is True
 
-        multi_setup_duration = self.performance_monitor.end_timing(
-            "multi_session_setup"
-        )
+        multi_setup_duration = self.performance_monitor.end_timing("multi_session_setup")
 
         # Verify all sessions exist
         self.get_session_manager()
@@ -177,9 +169,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
             assert session_name in status_session_names
 
         # Performance check for multiple sessions
-        assert (
-            multi_setup_duration < 30.0
-        ), f"Multi-session setup took {multi_setup_duration:.2f}s, should be < 30s"
+        assert multi_setup_duration < 30.0, f"Multi-session setup took {multi_setup_duration:.2f}s, should be < 30s"
 
     def test_session_error_handling_integration(self) -> None:
         """Test error handling across session operations."""
@@ -189,24 +179,18 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
                 "invalid-session",
                 windows=[],  # Invalid: no windows
             )
-            self.command_runner.run_command(
-                SetupCommand, session_name="invalid-session"
-            )
+            self.command_runner.run_command(SetupCommand, session_name="invalid-session")
 
         # Test 2: Non-existent session
         with pytest.raises(Exception):
-            self.command_runner.run_command(
-                SetupCommand, session_name="non-existent-session"
-            )
+            self.command_runner.run_command(SetupCommand, session_name="non-existent-session")
 
         # Test 3: Recovery from partial failure
         # Create valid session after failures
         valid_session = "recovery-test-session"
         self.create_test_session(valid_session)
 
-        result = self.command_runner.run_command(
-            SetupCommand, session_name=valid_session
-        )
+        result = self.command_runner.run_command(SetupCommand, session_name=valid_session)
         assert result["success"] is True
 
         # Verify system is still functional
@@ -244,9 +228,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
         self.create_test_session(session_name)
         command_runner = CommandTestRunner(self)
 
-        cli_setup_result = command_runner.run_command(
-            SetupCommand, session_name=session_name
-        )
+        cli_setup_result = command_runner.run_command(SetupCommand, session_name=session_name)
         assert cli_setup_result["success"] is True
 
         # Get state via CLI
@@ -268,9 +250,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
         assert cli_session_info["name"] == api_session_info["name"]
 
         # Both should report same basic structure
-        assert len(cli_session_info.get("windows", [])) == len(
-            api_session_info.get("windows", [])
-        )
+        assert len(cli_session_info.get("windows", [])) == len(api_session_info.get("windows", []))
 
     def test_concurrent_session_access(self) -> None:
         """Test concurrent access to session information."""
@@ -316,9 +296,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
         first_result = results[0]
         for result in results[1:]:
             assert result["name"] == first_result["name"]
-            assert len(result.get("windows", [])) == len(
-                first_result.get("windows", [])
-            )
+            assert len(result.get("windows", [])) == len(first_result.get("windows", []))
 
 
 class TestSessionPerformanceIntegration(IntegrationTestBase):
@@ -360,9 +338,7 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
         assert result["success"] is True
 
         # Performance assertion - complex session should still setup quickly
-        assert (
-            setup_duration < 15.0
-        ), f"Complex session setup took {setup_duration:.2f}s, should be < 15s"
+        assert setup_duration < 15.0, f"Complex session setup took {setup_duration:.2f}s, should be < 15s"
 
     def test_status_query_performance(self) -> None:
         """Test status query performance with multiple sessions."""
@@ -395,9 +371,7 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
             assert expected_name in session_names
 
         # Performance assertion
-        assert (
-            status_duration < 5.0
-        ), f"Status query with {session_count} sessions took {status_duration:.2f}s, should be < 5s"
+        assert status_duration < 5.0, f"Status query with {session_count} sessions took {status_duration:.2f}s, should be < 5s"
 
     def test_memory_usage_stability(self) -> None:
         """Test that session operations don't cause memory leaks."""
@@ -426,6 +400,4 @@ class TestSessionPerformanceIntegration(IntegrationTestBase):
 
         # Memory increase should be reasonable (< 50MB for 20 operations)
         memory_increase_mb = memory_increase / (1024 * 1024)
-        assert (
-            memory_increase_mb < 50
-        ), f"Memory increased by {memory_increase_mb:.2f}MB, should be < 50MB"
+        assert memory_increase_mb < 50, f"Memory increased by {memory_increase_mb:.2f}MB, should be < 50MB"

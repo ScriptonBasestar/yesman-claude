@@ -55,13 +55,9 @@ class TestWebRenderer:
 
     def test_health_color_class_mapping(self) -> None:
         """Test health level to CSS class mapping."""
-        assert (
-            self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"
-        )
+        assert self.renderer._get_health_color_class(HealthLevel.EXCELLENT) == "green-600"
         assert self.renderer._get_health_color_class(HealthLevel.GOOD) == "blue-600"
-        assert (
-            self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"
-        )
+        assert self.renderer._get_health_color_class(HealthLevel.WARNING) == "yellow-600"
         assert self.renderer._get_health_color_class(HealthLevel.CRITICAL) == "red-600"
         assert self.renderer._get_health_color_class(HealthLevel.UNKNOWN) == "gray-600"
 
@@ -473,9 +469,7 @@ class TestWebRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(
-            widgets, {"type": "vertical", "spacing": "space-y-6"}
-        )
+        result = self.renderer.render_layout(widgets, {"type": "vertical", "spacing": "space-y-6"})
 
         assert isinstance(result, str)
         assert "dashboard-layout-vertical" in result
@@ -496,9 +490,7 @@ class TestWebRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(
-            widgets, {"type": "flex", "direction": "row", "gap": "gap-6"}
-        )
+        result = self.renderer.render_layout(widgets, {"type": "flex", "direction": "row", "gap": "gap-6"})
 
         assert isinstance(result, str)
         assert "dashboard-layout-flex" in result
@@ -529,9 +521,7 @@ class TestWebRenderer:
             },
         ]
 
-        result = self.renderer.render_layout(
-            widgets, {"type": "grid", "columns": 2, "gap": "gap-4"}
-        )
+        result = self.renderer.render_layout(widgets, {"type": "grid", "columns": 2, "gap": "gap-4"})
 
         assert isinstance(result, str)
         assert "dashboard-layout-grid" in result
@@ -741,9 +731,7 @@ class TestWebRenderer:
         # Extract and validate JSON structure
 
         # Find the JSON data using regex
-        json_match = re.search(
-            r"window\.widgetData\[\'[^\']+\'\] = ({.*?});", result, re.DOTALL
-        )
+        json_match = re.search(r"window\.widgetData\[\'[^\']+\'\] = ({.*?});", result, re.DOTALL)
 
         if json_match:
             json_str = json_match.group(1)
@@ -919,6 +907,4 @@ class TestWebRendererIntegration:
         )
 
         assert "<th" in table_result
-        assert (
-            "text-xs font-medium text-gray-500 uppercase" in table_result
-        )  # Proper header styling
+        assert "text-xs font-medium text-gray-500 uppercase" in table_result  # Proper header styling

@@ -128,7 +128,6 @@ uv run ./yesman.py ai history
 uv run ./yesman.py ai export
 ```
 
-
 ### Performance Monitoring
 
 ```bash

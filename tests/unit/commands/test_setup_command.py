@@ -78,9 +78,7 @@ class TestSetupCommand:
 
             # Should handle error gracefully
             assert result.exit_code == 0  # Command completes but reports failure
-            assert (
-                "already exists" in result.output or "failed to create" in result.output
-            )
+            assert "already exists" in result.output or "failed to create" in result.output
 
     @patch("commands.setup.YesmanConfig")
     def test_setup_with_nonexistent_project(self, mock_config: object) -> None:
