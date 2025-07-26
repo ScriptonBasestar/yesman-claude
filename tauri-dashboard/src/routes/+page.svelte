@@ -15,6 +15,7 @@
   } from '$lib/stores/sessions';
   import { notifySuccess, notifyError } from '$lib/stores/notifications';
   import { api } from '$lib/utils/api';
+  import ConnectionStatusBadge from '$lib/components/common/ConnectionStatusBadge.svelte';
 
   // 세션 상태 변경 핸들러
   function handleSessionStatusChanged(event: CustomEvent) {
@@ -276,6 +277,9 @@
       {/if}
     </div>
   </div>
+  
+  <!-- Fixed Connection Status Badge -->
+  <ConnectionStatusBadge position="fixed" size="md" />
 </div>
 
 <style>

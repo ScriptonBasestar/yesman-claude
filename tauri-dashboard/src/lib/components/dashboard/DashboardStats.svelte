@@ -1,6 +1,7 @@
 <script lang="ts">
   import { sessions, isLoading } from '$lib/stores/sessions';
   import { onMount } from 'svelte';
+  import { health, healthStatus, formatLastCheck } from '$lib/stores/health';
 
   // 통계 데이터 계산
   $: totalSessions = $sessions.length;
@@ -64,7 +65,45 @@
 
 <div class="dashboard-stats">
   <!-- 메인 통계 카드들 -->
-  <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+  <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+    <!-- API 서버 상태 -->
+    <div class="stat-card bg-gradient-to-br from-base-300 to-base-200 border border-base-content/20 rounded-xl p-6">
+      <div class="stat-header flex items-center justify-between mb-4">
+        <div class="stat-icon {$health.status === 'healthy' ? 'text-success' : $health.status === 'unhealthy' ? 'text-error' : 'text-warning'}">
+          <span class="text-3xl">{$healthStatus.icon}</span>
+        </div>
+        <div class="stat-trend text-xs {$health.status === 'healthy' ? 'text-success' : $health.status === 'unhealthy' ? 'text-error' : 'text-warning'}">
+          {$healthStatus.text}
+        </div>
+      </div>
+
+      <div class="stat-content">
+        <div class="stat-title text-lg font-bold text-base-content">
+          API Server
+        </div>
+        <div class="stat-subtitle text-sm text-base-content/70">
+          {$health.service || 'Backend Service'}
+        </div>
+
+        <div class="stat-breakdown mt-3 space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-base-content/60">Version:</span>
+            <span class="font-semibold">{$health.version || 'Unknown'}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/60">Last Check:</span>
+            <span class="font-semibold">{formatLastCheck($health.lastCheck)}</span>
+          </div>
+          {#if $health.retryCount > 0}
+            <div class="flex justify-between">
+              <span class="text-base-content/60">Retries:</span>
+              <span class="font-semibold text-warning">{$health.retryCount}</span>
+            </div>
+          {/if}
+        </div>
+      </div>
+    </div>
+    
     <!-- 세션 통계 -->
     <div class="stat-card bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-6">
       <div class="stat-header flex items-center justify-between mb-4">

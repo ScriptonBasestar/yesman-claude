@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import { sessions, isLoading } from '$lib/stores/sessions';
   import { notifications } from '$lib/stores/notifications';
+  import HealthStatusIndicator from '$lib/components/common/HealthStatusIndicator.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -107,6 +108,11 @@
 
     <!-- 오른쪽: 액션 버튼들 -->
     <div class="header-right flex items-center gap-3">
+      <!-- API 상태 표시 -->
+      <HealthStatusIndicator size="sm" />
+      
+      <div class="divider divider-horizontal mx-1"></div>
+      
       <!-- 새로고침 버튼 -->
       <button
         class="btn btn-ghost btn-sm"
