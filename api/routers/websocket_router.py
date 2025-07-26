@@ -48,8 +48,8 @@ class ConnectionManager:
         # Register message handlers for each channel
         self._register_batch_handlers()
 
-        # Start background tasks
-        self.start_background_tasks()
+        # Background tasks will be started when the app starts
+        self._background_tasks_started = False
 
     def _register_batch_handlers(self) -> None:
         """Register message handlers for batch processing."""
@@ -109,8 +109,10 @@ class ConnectionManager:
 
     def start_background_tasks(self) -> None:
         """Start background tasks for connection management."""
-        asyncio.create_task(self.ping_connections())
-        asyncio.create_task(self.batch_processor.start())
+        if not self._background_tasks_started:
+            self._background_tasks_started = True
+            asyncio.create_task(self.ping_connections())
+            asyncio.create_task(self.batch_processor.start())
 
     async def connect(self, websocket: WebSocket, channel: str = "dashboard") -> None:
         """Accept a new WebSocket connection."""

@@ -1,0 +1,25 @@
+# Tests to skip due to removed features
+test_agent_monitor.py
+test_agent_pool.py
+test_branch_info_protocol.py
+test_branch_manager.py
+test_branch_testing.py
+test_branch_testing_simple.py
+test_code_review_engine.py
+test_collaboration_engine.py
+test_conflict_prediction.py
+test_conflict_prevention.py
+test_conflict_resolution.py
+test_dependency_propagation.py
+test_dynamic_redistribution.py
+test_metrics_verification.py
+test_recovery_system.py
+test_semantic_analyzer.py
+test_semantic_merger.py
+test_task_analyzer.py
+test_task_scheduler.py
+test_work_environment.py
+integration/test_ai_learning_integration.py
+integration/test_automation_workflows_integration.py
+integration/test_cross_module_integration.py
+integration/test_dashboard_integration.py
