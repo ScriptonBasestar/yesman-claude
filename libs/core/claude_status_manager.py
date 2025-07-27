@@ -7,9 +7,6 @@ from pathlib import Path
 
 from libs.utils import ensure_log_directory, get_default_log_path
 
-# Import here to avoid circular import
-from libs.yesman_config import YesmanConfig
-
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 """Claude status and callback management."""
@@ -74,9 +71,9 @@ class ClaudeStatusManager:
         String containing.
         """
         try:
-            config = YesmanConfig()
-            log_base = config.get("log_path", str(get_default_log_path()))
-            log_path = ensure_log_directory(Path(str(log_base)))
+            # Use default log path to avoid circular import
+            log_base = str(get_default_log_path())
+            log_path = ensure_log_directory(Path(log_base))
             capture_dir = ensure_log_directory(log_path / "captures")
 
             ts = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S")

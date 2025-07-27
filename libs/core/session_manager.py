@@ -5,7 +5,7 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import libtmux
 
@@ -16,8 +16,9 @@ import psutil
 from libs.tmux_manager import TmuxManager
 from libs.utils import ensure_log_directory
 
-# Import here to avoid circular import
-from libs.yesman_config import YesmanConfig
+# Avoid circular import
+if TYPE_CHECKING:
+    from libs.yesman_config import YesmanConfig
 
 from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
 from .progress_tracker import ProgressAnalyzer
@@ -38,6 +39,8 @@ class SessionManager:
     """Manages tmux session information for dashboard."""
 
     def __init__(self) -> None:
+        # Import at runtime to avoid circular import
+        from libs.yesman_config import YesmanConfig
         self.config = YesmanConfig()
 
         self.tmux_manager = TmuxManager(self.config)
@@ -106,14 +109,14 @@ class SessionManager:
             session_name = override.get("session_name", project_name)
 
             # Check if session exists
-            session = self.server.find_where({"session_name": session_name})
+            session = self.server.sessions.get(session_name=session_name, default=None)
 
             windows: list[WindowInfo] = []
             controller_status = "unknown"
 
-            if session and hasattr(session, "list_windows"):
+            if session and hasattr(session, "windows"):
                 # Get window information
-                for window in session.list_windows():
+                for window in session.windows:
                     window_info = self._get_window_info(window)
                     windows.append(window_info)
 
@@ -149,7 +152,15 @@ class SessionManager:
                             # Get full pane content for better analysis
                             try:
                                 if hasattr(session, "find_where"):
-                                    tmux_pane = session.find_where({"pane_id": pane_info.id})
+                                    # Find pane by id across all windows and panes
+                                    tmux_pane = None
+                                    for w in session.windows:
+                                        for p in w.panes:
+                                            if p.pane_id == pane_info.id:
+                                                tmux_pane = p
+                                                break
+                                        if tmux_pane:
+                                            break
                                     if tmux_pane and hasattr(tmux_pane, "cmd"):
                                         cmd_result = tmux_pane.cmd("capture-pane", "-p")
                                         if hasattr(cmd_result, "stdout") and cmd_result.stdout:
@@ -189,10 +200,10 @@ class SessionManager:
         # Cast to libtmux Window for proper attribute access
         from typing import cast
 
-        if hasattr(window, "list_panes"):
+        if hasattr(window, "panes"):
             tmux_window = cast("libtmux.Window", window)
 
-            for pane in tmux_window.list_panes():
+            for pane in tmux_window.panes:
                 try:
                     pane_info = self._get_detailed_pane_info(pane)
                     panes.append(pane_info)
@@ -400,8 +411,8 @@ class SessionManager:
         """
         try:
             # Find the session
-            session = self.server.find_where({"session_name": session_name})
-            if not session or not hasattr(session, "find_where"):
+            session = self.server.sessions.get(session_name=session_name, default=None)
+            if not session:
                 return {
                     "success": False,
                     "error": f"Session '{session_name}' not found",
@@ -409,8 +420,12 @@ class SessionManager:
                 }
 
             # Find the window
-            window = session.find_where({"window_index": window_index})
-            if not window or not hasattr(window, "find_where"):
+            window = None
+            for w in session.windows:
+                if int(w.window_index or 0) == window_index:
+                    window = w
+                    break
+            if not window:
                 return {
                     "success": False,
                     "error": (f"Window {window_index} not found in session '{session_name}'"),
@@ -418,7 +433,11 @@ class SessionManager:
                 }
 
             # Find the pane
-            pane = window.find_where({"pane_id": pane_id})
+            pane = None
+            for p in window.panes:
+                if p.pane_id == pane_id:
+                    pane = p
+                    break
             if not pane:
                 return {
                     "success": False,
