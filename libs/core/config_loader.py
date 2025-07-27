@@ -245,8 +245,44 @@ class ConfigLoader:
 def create_default_loader() -> ConfigLoader:
     """Create a ConfigLoader with default sources."""
     loader = ConfigLoader()
+    
+    # First, check if local config exists and has mode set
+    local_config_path = Path.cwd() / ".scripton" / "yesman" / "yesman.yaml"
+    mode = None
+    
+    if local_config_path.exists():
+        try:
+            with open(local_config_path, encoding="utf-8") as f:
+                local_data = yaml.safe_load(f) or {}
+                mode = local_data.get("mode", "merge")
+        except Exception:
+            mode = "merge"
+    else:
+        mode = "merge"
 
-    # Add default configuration sources in priority order
+    # If mode is isolated or local, only use local config
+    if mode in {"isolated", "local"}:
+        # Check if local config exists and has sufficient configuration
+        if not local_config_path.exists():
+            raise RuntimeError(f"mode: {mode} but local config doesn't exist")
+        
+        # Check if local config has required fields
+        with open(local_config_path, encoding="utf-8") as f:
+            local_data = yaml.safe_load(f) or {}
+            
+        # Check for required fields in isolated mode
+        if "tmux" not in local_data or "logging" not in local_data:
+            raise RuntimeError(f"mode: {mode} but local config doesn't exist or is empty")
+        
+        # Only add local config and environment variables
+        loader.add_source(YamlFileSource(local_config_path))
+        
+        # Add environment variables (always highest priority)
+        loader.add_source(EnvironmentSource())
+            
+        return loader
+
+    # Otherwise, use normal merge mode
     # 1. Default config
     default_config_path = Path(__file__).parent.parent.parent / "config" / "default.yaml"
     if default_config_path.exists():
@@ -257,8 +293,7 @@ def create_default_loader() -> ConfigLoader:
     loader.add_source(YamlFileSource(global_config))
 
     # 3. Local project config
-    local_config = Path.cwd() / ".scripton" / "yesman" / "yesman.yaml"
-    loader.add_source(YamlFileSource(local_config))
+    loader.add_source(YamlFileSource(local_config_path))
 
     # 4. Environment-specific config (if YESMAN_ENV is set)
     env = os.environ.get("YESMAN_ENV")

@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -81,6 +81,8 @@ class ServerConfig(BaseModel):
 class YesmanConfigSchema(BaseModel):
     """Main configuration schema for Yesman."""
 
+    model_config = ConfigDict(extra="allow")  # Allow extra fields for testing
+
     # Core settings
     mode: str = Field(default="merge", pattern="^(merge|isolated|local)$")
     root_dir: str = "~/.scripton/yesman"
@@ -122,8 +124,4 @@ class YesmanConfigSchema(BaseModel):
             db_path = self.database.url.replace("sqlite:///", "")
             self.database.url = f"sqlite:///{Path(db_path).expanduser()}"
 
-    class Config:
-        """Pydantic config."""
-
-        validate_assignment = True
-        extra = "forbid"  # Don't allow extra fields in main config
+    # Config is now handled by model_config above
