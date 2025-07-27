@@ -21,7 +21,7 @@ class TestConfigModes:
         """Test default merge mode behavior."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"
-        global_dir.mkdir()
+        global_dir.mkdir(parents=True)
         global_config = {
             "log_level": "INFO",
             "global_setting": "global_value",
@@ -56,7 +56,7 @@ class TestConfigModes:
         """Test isolated mode (new name)."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"
-        global_dir.mkdir()
+        global_dir.mkdir(parents=True)
         global_config = {
             "log_level": "INFO",
             "global_setting": "global_value",
@@ -71,6 +71,8 @@ class TestConfigModes:
             "mode": "isolated",
             "log_level": "DEBUG",
             "local_setting": "local_value",
+            "tmux": {"default_shell": "/bin/bash"},
+            "logging": {"level": "DEBUG"},
         }
         with (local_dir / "yesman.yaml").open("w") as f:
             yaml.dump(local_config, f)
@@ -91,7 +93,7 @@ class TestConfigModes:
         """Test that 'local' mode still works for backward compatibility."""
         # Create global config
         global_dir = tmp_path / ".scripton" / "yesman"
-        global_dir.mkdir()
+        global_dir.mkdir(parents=True)
         global_config = {
             "log_level": "INFO",
             "global_setting": "global_value",
@@ -106,6 +108,8 @@ class TestConfigModes:
             "mode": "local",  # Old name
             "log_level": "DEBUG",
             "local_setting": "local_value",
+            "tmux": {"default_shell": "/bin/bash"},
+            "logging": {"level": "DEBUG"},
         }
         with (local_dir / "yesman.yaml").open("w") as f:
             yaml.dump(local_config, f)
@@ -150,5 +154,5 @@ class TestConfigModes:
         # Should raise ValueError
         with patch.object(Path, "home", return_value=tmp_path):
             with patch.object(Path, "cwd", return_value=tmp_path / "project"):
-                with pytest.raises(ValueError, match="Unsupported mode: invalid_mode"):
+                with pytest.raises(ValueError, match="String should match pattern"):
                     YesmanConfig()

@@ -164,8 +164,10 @@ class TestErrorHandling(unittest.TestCase):
         # Simulate tmux not running
         mock_server.side_effect = Exception("tmux server not found")
 
-        manager = TmuxManager()
-        sessions = manager.list_sessions()
+        from libs.yesman_config import YesmanConfig
+        config = YesmanConfig()
+        manager = TmuxManager(config)
+        sessions = manager.get_cached_sessions_list()
 
         assert sessions == [], "Should return empty list when tmux not running"
 

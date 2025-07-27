@@ -95,39 +95,34 @@ class TestDashboardLauncher:
             assert isinstance(config.priority, int)
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
-    @staticmethod
-    def test_is_gui_available_macos(mock_platform: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_gui_available_macos(self, mock_platform: Mock, launcher: DashboardLauncher) -> None:
         """Test GUI detection on macOS."""
         mock_platform.return_value = "Darwin"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
-    @staticmethod
-    def test_is_gui_available_windows(mock_platform: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_gui_available_windows(self, mock_platform: Mock, launcher: DashboardLauncher) -> None:
         """Test GUI detection on Windows."""
         mock_platform.return_value = "Windows"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {"DISPLAY": ":0"})
-    @staticmethod
-    def test_is_gui_available_linux_with_display(mock_platform: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_gui_available_linux_with_display(self, mock_platform: Mock, launcher: DashboardLauncher) -> None:
         """Test GUI detection on Linux with DISPLAY."""
         mock_platform.return_value = "Linux"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {"WAYLAND_DISPLAY": "wayland-0"})
-    @staticmethod
-    def test_is_gui_available_linux_with_wayland(mock_platform: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_gui_available_linux_with_wayland(self, mock_platform: Mock, launcher: DashboardLauncher) -> None:
         """Test GUI detection on Linux with Wayland."""
         mock_platform.return_value = "Linux"
         assert launcher._is_gui_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.platform.system")
     @patch.dict(os.environ, {}, clear=True)
-    @staticmethod
-    def test_is_gui_available_linux_without_display(mock_platform: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_gui_available_linux_without_display(self, mock_platform: Mock, launcher: DashboardLauncher) -> None:
         """Test GUI detection on Linux without display."""
         mock_platform.return_value = "Linux"
         assert launcher._is_gui_available() is False
@@ -152,44 +147,38 @@ class TestDashboardLauncher:
 
     @patch("sys.stdout.isatty")
     @patch.dict(os.environ, {"TERM": "xterm-256color"})
-    @staticmethod
-    def test_is_terminal_capable_with_tty(mock_isatty: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_terminal_capable_with_tty(self, mock_isatty: Mock, launcher: DashboardLauncher) -> None:
         """Test terminal capability with TTY."""
         mock_isatty.return_value = True
         assert launcher._is_terminal_capable() is True
 
     @patch("sys.stdout.isatty")
     @patch.dict(os.environ, {"TERM": "dumb"})
-    @staticmethod
-    def test_is_terminal_capable_with_dumb_term(mock_isatty: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_terminal_capable_with_dumb_term(self, mock_isatty: Mock, launcher: DashboardLauncher) -> None:
         """Test terminal capability with dumb terminal."""
         mock_isatty.return_value = True
         assert launcher._is_terminal_capable() is False
 
     @patch("sys.stdout.isatty")
-    @staticmethod
-    def test_is_terminal_capable_without_tty(mock_isatty: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_terminal_capable_without_tty(self, mock_isatty: Mock, launcher: DashboardLauncher) -> None:
         """Test terminal capability without TTY."""
         mock_isatty.return_value = False
         assert launcher._is_terminal_capable() is False
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
-    @staticmethod
-    def test_is_node_available_with_both(mock_which: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_node_available_with_both(self, mock_which: Mock, launcher: DashboardLauncher) -> None:
         """Test Node.js availability with both node and npm."""
         mock_which.side_effect = lambda cmd: ("/usr/bin/" + cmd if cmd in {"node", "npm"} else None)
         assert launcher._is_node_available() is True
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
-    @staticmethod
-    def test_is_node_available_missing_node(mock_which: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_node_available_missing_node(self, mock_which: Mock, launcher: DashboardLauncher) -> None:
         """Test Node.js availability with missing node."""
         mock_which.side_effect = lambda cmd: "/usr/bin/npm" if cmd == "npm" else None
         assert launcher._is_node_available() is False
 
     @patch("libs.dashboard.dashboard_launcher.shutil.which")
-    @staticmethod
-    def test_is_node_available_missing_npm(mock_which: Mock, launcher: DashboardLauncher) -> None:
+    def test_is_node_available_missing_npm(self, mock_which: Mock, launcher: DashboardLauncher) -> None:
         """Test Node.js availability with missing npm."""
         mock_which.side_effect = lambda cmd: "/usr/bin/node" if cmd == "node" else None
         assert launcher._is_node_available() is False
@@ -266,18 +255,16 @@ class TestDashboardLauncher:
             assert isinstance(info, InterfaceInfo)
 
     @patch.object(DashboardLauncher, "_is_ssh_session")
-    @staticmethod
-    def test_detect_best_interface_ssh(mock_ssh: Mock, launcher: DashboardLauncher) -> None:
+    def test_detect_best_interface_ssh(self, mock_ssh: Mock, launcher: DashboardLauncher) -> None:
         """Test interface detection in SSH environment."""
         mock_ssh.return_value = True
 
         result = launcher.detect_best_interface()
         assert result == "tui"
 
-    @patch.object(DashboardLauncher, "_is_ssh_session")
     @patch.object(DashboardLauncher, "_is_gui_available")
-    @staticmethod
-    def test_detect_best_interface_gui_with_tauri(mock_gui: Mock, mock_ssh: Mock, launcher: DashboardLauncher) -> None:
+    @patch.object(DashboardLauncher, "_is_ssh_session")
+    def test_detect_best_interface_gui_with_tauri(self, mock_ssh: Mock, mock_gui: Mock, launcher: DashboardLauncher) -> None:
         """Test interface detection with GUI and Tauri available."""
         mock_ssh.return_value = False
         mock_gui.return_value = True
@@ -288,28 +275,25 @@ class TestDashboardLauncher:
         result = launcher.detect_best_interface()
         assert result == "tauri"
 
-    @patch.object(DashboardLauncher, "_is_ssh_session")
-    @patch.object(DashboardLauncher, "_is_gui_available")
+    @patch.object(DashboardLauncher, "_is_node_available")
     @patch.object(DashboardLauncher, "_is_terminal_capable")
-    @staticmethod
-    def test_detect_best_interface_gui_without_tauri_no_terminal(mock_term: Mock, mock_gui: Mock, mock_ssh: Mock, launcher: DashboardLauncher) -> None:
+    @patch.object(DashboardLauncher, "_is_gui_available")
+    @patch.object(DashboardLauncher, "_is_ssh_session")
+    def test_detect_best_interface_gui_without_tauri_no_terminal(self, mock_ssh: Mock, mock_gui: Mock, mock_term: Mock, mock_node: Mock, launcher: DashboardLauncher) -> None:
         """Test interface detection with GUI but no Tauri and no terminal
         capability.
         """
         mock_ssh.return_value = False
         mock_gui.return_value = True
         mock_term.return_value = False
-
-        # Mock tauri as unavailable
-        launcher._interface_configs["tauri"].available = False
+        mock_node.return_value = False  # This will make tauri unavailable
 
         result = launcher.detect_best_interface()
         assert result == "web"
 
-    @patch.object(DashboardLauncher, "_is_ssh_session")
     @patch.object(DashboardLauncher, "_is_terminal_capable")
-    @staticmethod
-    def test_detect_best_interface_terminal_capable(mock_term: Mock, mock_ssh: Mock, launcher: DashboardLauncher) -> None:
+    @patch.object(DashboardLauncher, "_is_ssh_session")
+    def test_detect_best_interface_terminal_capable(self, mock_ssh: Mock, mock_term: Mock, launcher: DashboardLauncher) -> None:
         """Test interface detection with terminal capability."""
         mock_ssh.return_value = False
         mock_term.return_value = True
@@ -317,10 +301,9 @@ class TestDashboardLauncher:
         result = launcher.detect_best_interface()
         assert result == "tui"
 
-    @patch.object(DashboardLauncher, "_is_ssh_session")
     @patch.object(DashboardLauncher, "_is_terminal_capable")
-    @staticmethod
-    def test_detect_best_interface_fallback_to_web(mock_term: Mock, mock_ssh: Mock, launcher: DashboardLauncher) -> None:
+    @patch.object(DashboardLauncher, "_is_ssh_session")
+    def test_detect_best_interface_fallback_to_web(self, mock_ssh: Mock, mock_term: Mock, launcher: DashboardLauncher) -> None:
         """Test interface detection fallback to web."""
         mock_ssh.return_value = False
         mock_term.return_value = False
@@ -346,8 +329,7 @@ class TestDashboardLauncher:
             assert isinstance(req_info["missing"], list)
 
     @patch("subprocess.run")
-    @staticmethod
-    def test_check_requirement_node_success(mock_run: Mock, launcher: DashboardLauncher) -> None:
+    def test_check_requirement_node_success(self, mock_run: Mock, launcher: DashboardLauncher) -> None:
         """Test checking Node.js requirement successfully."""
         mock_run.return_value = MagicMock(stdout="v18.0.0\\n")
 
@@ -361,8 +343,7 @@ class TestDashboardLauncher:
             assert "v18.0.0" in details
 
     @patch("subprocess.run")
-    @staticmethod
-    def test_check_requirement_node_failure(mock_run: Mock, launcher: DashboardLauncher) -> None:
+    def test_check_requirement_node_failure(self, mock_run: Mock, launcher: DashboardLauncher) -> None:
         """Test checking Node.js requirement with failure."""
         mock_run.side_effect = subprocess.CalledProcessError(1, ["node"])
 
@@ -403,8 +384,7 @@ class TestDashboardLauncher:
 
     @patch("subprocess.run")
     @patch.object(DashboardLauncher, "_is_python_package_available")
-    @staticmethod
-    def test_install_dependencies_web_success(mock_available: Mock, mock_run: Mock, launcher: DashboardLauncher) -> None:
+    def test_install_dependencies_web_success(self, mock_available: Mock, mock_run: Mock, launcher: DashboardLauncher) -> None:
         """Test installing web dependencies successfully."""
         mock_available.side_effect = [False, False]  # fastapi and uvicorn not available
         mock_run.return_value = MagicMock()
@@ -425,8 +405,7 @@ class TestDashboardLauncher:
     @patch("subprocess.run")
     @patch.object(DashboardLauncher, "_is_node_available")
     @patch("os.chdir")
-    @staticmethod
-    def test_install_dependencies_tauri_success(mock_chdir: Mock, mock_node: Mock, mock_run: Mock, launcher: DashboardLauncher) -> None:
+    def test_install_dependencies_tauri_success(self, mock_chdir: Mock, mock_node: Mock, mock_run: Mock, launcher: DashboardLauncher) -> None:
         """Test installing Tauri dependencies successfully."""
         mock_node.return_value = True
         mock_run.return_value = MagicMock()
@@ -438,8 +417,7 @@ class TestDashboardLauncher:
         mock_run.assert_called_with(["npm", "install"], check=True)
 
     @patch.object(DashboardLauncher, "_is_node_available")
-    @staticmethod
-    def test_install_dependencies_tauri_no_node(mock_node: Mock, launcher: DashboardLauncher) -> None:
+    def test_install_dependencies_tauri_no_node(self, mock_node: Mock, launcher: DashboardLauncher) -> None:
         """Test installing Tauri dependencies without Node.js."""
         mock_node.return_value = False
 
