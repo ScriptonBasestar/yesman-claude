@@ -108,7 +108,7 @@ class TestRenderCache:
 
         # Keys should be hex strings
         assert isinstance(key1, str)
-        assert len(key1) == 32  # MD5 hex length
+        assert len(key1) == 64  # SHA256 hex length
 
     def test_cache_set_get(self) -> None:
         """Test basic cache set and get operations."""
@@ -253,7 +253,7 @@ class TestCachedDecorators:
         self.render_count = 0
 
         @cached_render(self.cache)
-        def mock_render(widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
+        def mock_render(self: MockRenderer, widget_type: WidgetType, data: Any, options: dict | None = None) -> str:
             self.render_count += 1
             return f"render-{self.render_count}"
 
