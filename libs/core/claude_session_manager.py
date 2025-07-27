@@ -51,7 +51,7 @@ class ClaudeSessionManager:
         bool: Description of return value.
         """
         try:
-            self.session = self.server.find_where({"session_name": self.session_name})
+            self.session = self.server.sessions.get(session_name=self.session_name, default=None)
             if not self.session:
                 self.logger.error("Session '%s' not found", self.session_name)
                 return False
@@ -78,8 +78,8 @@ class ClaudeSessionManager:
         if not self.session:
             return None
 
-        for window in self.session.list_windows():
-            for pane in window.list_panes():
+        for window in self.session.windows:
+            for pane in window.panes:
                 try:
                     # Check both command and pane content
                     cmd = pane.cmd("display-message", "-p", "#{pane_current_command}").stdout[0]

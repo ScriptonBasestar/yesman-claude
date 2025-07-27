@@ -81,9 +81,9 @@ def start_controller(session_name: str) -> None:
 
             try:
                 if controller.session_manager.session:
-                    for window in controller.session_manager.session.list_windows():
+                    for window in controller.session_manager.session.windows:
                         window_count += 1
-                        panes_in_window = window.list_panes()
+                        panes_in_window = list(window.panes)
                         total_panes += len(panes_in_window)
 
                         for pane in panes_in_window:

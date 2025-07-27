@@ -84,7 +84,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             actual_session_name = override.get("session_name", project_name)
 
             # Check if session exists
-            if self.server.find_where({"session_name": actual_session_name}):
+            if self.server.sessions.get(session_name=actual_session_name, default=None):
                 running_sessions.append(
                     {
                         "project": project_name,
@@ -130,7 +130,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
         Str | None object.
         """
         # Check if the session exists directly
-        if self.server.find_where({"session_name": session_name}):
+        if self.server.sessions.get(session_name=session_name, default=None):
             return session_name
 
         # Try to find by project name
@@ -141,7 +141,7 @@ class EnterCommand(BaseCommand, SessionCommandMixin):
             if project_name == session_name:
                 override = project_conf.get("override", {})
                 actual_session_name: str = override.get("session_name", project_name)
-                if self.server.find_where({"session_name": actual_session_name}):
+                if self.server.sessions.get(session_name=actual_session_name, default=None):
                     return actual_session_name
                 break
 

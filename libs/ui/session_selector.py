@@ -28,7 +28,7 @@ class SessionSelector:
         """
         try:
             server = libtmux.Server()
-            session = server.find_where({"session_name": session_name})
+            session = server.sessions.get(session_name=session_name, default=None)
             if session:
                 windows = session.windows if hasattr(session, "windows") else []
                 window_names = [w.name for w in windows] if windows else []

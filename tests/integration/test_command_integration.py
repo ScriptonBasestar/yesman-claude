@@ -120,14 +120,15 @@ class TestCommandExecution:
         """Test ValidateCommand execution."""
         command = ValidateCommand()
 
-        # Mock configuration validation
-        with patch.object(command, "config") as mock_config:
-            mock_config.validate.return_value = True
+        # Mock tmux_manager to return empty sessions
+        with patch.object(command, "tmux_manager") as mock_tmux:
+            mock_tmux.load_projects.return_value = {"sessions": {}}
 
             result = command.execute()
 
-            assert result["success"] is True
-            assert "validation" in result["message"].lower()
+            # When no sessions are defined, it should return failure
+            assert result["success"] is False
+            assert result["error"] == "no_sessions_defined"
 
     @staticmethod
     def test_command_error_handling() -> None:

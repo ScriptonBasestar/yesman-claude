@@ -70,7 +70,7 @@ class TestSessionLifecycleIntegration(IntegrationTestBase):
         # Step 4: Get session details and verify structure
         session_info = session_manager.get_session_info(session_name)
         assert session_info is not None
-        assert session_info["name"] == session_name
+        assert session_info["session_name"] == session_name
         assert len(session_info.get("windows", [])) >= 2  # main + secondary
 
         # Step 5: Test session status via CLI
@@ -247,7 +247,7 @@ class TestSessionStateConsistency(IntegrationTestBase):
 
         # Verify consistency
         assert api_session_info is not None
-        assert cli_session_info["name"] == api_session_info["name"]
+        assert cli_session_info["name"] == api_session_info["session_name"]
 
         # Both should report same basic structure
         assert len(cli_session_info.get("windows", [])) == len(api_session_info.get("windows", []))
@@ -290,12 +290,12 @@ class TestSessionStateConsistency(IntegrationTestBase):
         assert len(results) == 5
         for result in results:
             assert result is not None
-            assert result["name"] == session_name
+            assert result["session_name"] == session_name
 
         # All results should be consistent
         first_result = results[0]
         for result in results[1:]:
-            assert result["name"] == first_result["name"]
+            assert result["session_name"] == first_result["session_name"]
             assert len(result.get("windows", [])) == len(first_result.get("windows", []))
 
 

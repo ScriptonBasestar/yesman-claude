@@ -42,7 +42,7 @@ class TeardownCommand(BaseCommand, SessionCommandMixin):
                 override_conf = sess_conf.get("override", {})
                 actual_session_name = override_conf.get("session_name", session_key)
 
-                if server.find_where({"session_name": actual_session_name}):
+                if server.sessions.get(session_name=actual_session_name, default=None):
                     subprocess.run(["tmux", "kill-session", "-t", actual_session_name], check=False)
                     self.print_success(f"Killed session: {actual_session_name}")
                     killed_sessions.append(actual_session_name)

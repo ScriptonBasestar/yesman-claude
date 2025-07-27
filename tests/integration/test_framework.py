@@ -73,7 +73,7 @@ class IntegrationTestBase:
     def _create_test_config(self) -> dict[str, object]:
         """Create test configuration."""
         return {
-            "mode": "test",
+            "mode": "isolated",  # Use isolated mode for tests
             "root_dir": str(self.test_dir),
             "logging": {
                 "level": "DEBUG",
@@ -83,24 +83,37 @@ class IntegrationTestBase:
             "session": {
                 "sessions_dir": "sessions",
                 "templates_dir": "templates",
-                "projects_file": "projects.yaml",
-                "default_shell": "/bin/bash",
+                "default_window_name": "main",
+                "default_layout": "even-horizontal",
             },
             "tmux": {
                 "default_shell": "/bin/bash",
-                "session_prefix": "yesman-test",
                 "base_index": 1,
+                "pane_base_index": 0,
+                "mouse": True,
+                "status_position": "bottom",
+                "status_interval": 1,
             },
             "ai": {
-                "learning_enabled": True,
-                "prediction_threshold": 0.7,
-                "pattern_history_limit": 1000,
+                "provider": "anthropic",
+                "model": "claude-3-opus-20240229",
+                "temperature": 0.7,
+                "max_tokens": 4096,
+                "api_key_env": "ANTHROPIC_API_KEY",
             },
-            "automation": {
-                "enabled": True,
-                "context_detection_interval": 5,
-                "workflow_timeout": 30,
+            "database": {
+                "enabled": False,
+                "url": "sqlite:///" + str(self.test_dir / "test.db"),
+                "pool_size": 5,
+                "echo": False,
             },
+            "server": {
+                "host": "localhost",
+                "port": 8001,  # Different port for tests
+            },
+            "confidence_threshold": 0.8,
+            "auto_cleanup_days": 30,
+            "enable_telemetry": False,
         }
 
     def _write_test_config(self) -> None:
@@ -169,8 +182,8 @@ class IntegrationTestBase:
     def assert_session_exists(self, session_name: str) -> None:
         """Assert that a session exists."""
         session_manager = self.get_session_manager()
-        sessions = session_manager.list_sessions()
-        session_names = [s.get("name") for s in sessions]
+        sessions = session_manager.get_all_sessions()
+        session_names = [s.session_name for s in sessions]
         assert session_name in session_names, f"Session {session_name} not found in {session_names}"
 
     def assert_session_state(self, session_name: str, expected_state: str) -> None:
@@ -178,7 +191,7 @@ class IntegrationTestBase:
         session_manager = self.get_session_manager()
         session_info = session_manager.get_session_info(session_name)
         assert session_info is not None, f"Session {session_name} not found"
-        assert session_info.get("state") == expected_state, f"Session {session_name} state is {session_info.get('state')}, expected {expected_state}"
+        assert session_info.get("status") == expected_state, f"Session {session_name} status is {session_info.get('status')}, expected {expected_state}"
 
 
 class AsyncIntegrationTestBase(IntegrationTestBase):

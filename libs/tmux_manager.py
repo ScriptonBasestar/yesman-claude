@@ -8,7 +8,7 @@ import subprocess
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 import libtmux
@@ -16,14 +16,16 @@ import yaml
 from tmuxp.workspace.builder import WorkspaceBuilder
 from tmuxp.workspace.loader import expand
 
-from libs.yesman_config import YesmanConfig
+# Avoid circular import
+if TYPE_CHECKING:
+    from libs.yesman_config import YesmanConfig
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 
 class TmuxManager:
-    def __init__(self, config: YesmanConfig) -> None:
+    def __init__(self, config: "YesmanConfig") -> None:
         self.config = config
         self.logger = logging.getLogger("yesman.tmux")
         # Directory for session templates
@@ -40,7 +42,7 @@ class TmuxManager:
             server = libtmux.Server()
             session_name_from_config = config_dict.get("session_name", session_name)
 
-            if server.find_where({"session_name": session_name_from_config}):
+            if server.sessions.get(session_name=session_name_from_config, default=None):
                 self.logger.warning(f"Session {session_name_from_config} already exists.")
                 return False
 
@@ -326,7 +328,7 @@ class TmuxManager:
     def list_running_sessions() -> None:
         """List currently running tmux sessions."""
         server = libtmux.Server()
-        sessions = server.list_sessions()
+        sessions = list(server.sessions)
         if not sessions:
             click.echo("No running tmux sessions found")
             return
@@ -350,14 +352,14 @@ class TmuxManager:
             """
             try:
                 server = libtmux.Server()
-                session = server.find_where({"session_name": session_name})
+                session = server.sessions.get(session_name=session_name, default=None)
                 if not session:
                     return {"exists": False, "session_name": session_name}
 
                 # Get session details
                 windows = []
                 if hasattr(session, "list_windows"):
-                    for window in session.list_windows():
+                    for window in session.windows:
                         panes: list[dict[str, Any]] = []
                         if hasattr(window, "list_panes"):
                             panes.extend(
@@ -368,7 +370,7 @@ class TmuxManager:
                                     "pane_width": (getattr(pane, "pane_width", 0) or pane.get("pane_width", 0)),
                                     "pane_height": (getattr(pane, "pane_height", 0) or pane.get("pane_height", 0)),
                                 }
-                                for pane in window.list_panes()
+                                for pane in window.panes
                             )
 
                         windows.append(
@@ -401,7 +403,7 @@ class TmuxManager:
         """
         try:
             server = libtmux.Server()
-            sessions = server.list_sessions()
+            sessions = list(server.sessions)
             return [
                 {
                     "session_name": (getattr(sess, "session_name", None) or sess.get("session_name", "unknown")),

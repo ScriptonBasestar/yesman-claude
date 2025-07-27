@@ -98,7 +98,7 @@ def check_session_exists(session_name: str, server: libtmux.Server | None = None
     """
     try:
         server = server or get_tmux_server()
-        session = server.find_where({"session_name": session_name})
+        session = server.sessions.get(session_name=session_name, default=None)
         return session is not None
     except Exception:
         logger.exception("Error checking session existence")
@@ -160,16 +160,16 @@ def get_session_info(session_name: str, server: libtmux.Server | None = None) ->
         YesmanError: For other errors
     """
     server = server or get_tmux_server()
-    session = server.find_where({"session_name": session_name})
+    session = server.sessions.get(session_name=session_name, default=None)
 
     if not session:
         raise SessionNotFoundError(session_name)
 
     try:
         windows = []
-        for window in session.list_windows():
+        for window in session.windows:
             panes = []
-            for pane in window.list_panes():
+            for pane in window.panes:
                 pane_info = PaneInfo(
                     pane_id=pane.pane_id or "",
                     pane_index=int(pane.pane_index or 0),
@@ -243,7 +243,7 @@ def create_session_windows(
     server = server or get_tmux_server()
 
     # Check if session exists
-    session = server.find_where({"session_name": session_name})
+    session = server.sessions.get(session_name=session_name, default=None)
     if not session:
         # Create new session
         try:
@@ -322,7 +322,7 @@ def get_active_pane(
         YesmanError: For other errors
     """
     server = server or get_tmux_server()
-    session = server.find_where({"session_name": session_name})
+    session = server.sessions.get(session_name=session_name, default=None)
 
     if not session:
         raise SessionNotFoundError(session_name)
@@ -330,7 +330,7 @@ def get_active_pane(
     try:
         # Get window
         if window_name:
-            window = session.find_where({"window_name": window_name})
+            window = session.windows.get(window_name=window_name, default=None)
             if not window:
                 msg = f"Window '{window_name}' not found in session '{session_name}'"
                 raise YesmanError(
@@ -394,7 +394,7 @@ def send_keys_to_pane(
         YesmanError: For other errors
     """
     server = server or get_tmux_server()
-    session = server.find_where({"session_name": session_name})
+    session = server.sessions.get(session_name=session_name, default=None)
 
     if not session:
         raise SessionNotFoundError(session_name)
@@ -402,7 +402,7 @@ def send_keys_to_pane(
     try:
         # Get window by index
         window = None
-        for w in session.list_windows():
+        for w in session.windows:
             if int(w.window_index or 0) == window_index:
                 window = w
                 break
@@ -416,7 +416,7 @@ def send_keys_to_pane(
 
         # Get pane by index
         pane = None
-        for p in window.list_panes():
+        for p in window.panes:
             if int(p.pane_index or 0) == pane_index:
                 pane = p
                 break
