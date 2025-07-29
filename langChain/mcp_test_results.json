@@ -1,0 +1,73 @@
+{
+  "basic_functionality": {
+    "test_name": "basic_mcp_list",
+    "success": false,
+    "output": "",
+    "has_mcp_servers": false
+  },
+  "custom_prompt_simple": {
+    "test_name": "mcp_with_custom_prompt",
+    "custom_prompt": "Act as a file system assistant",
+    "success": false,
+    "output": "",
+    "used_mcp_tools": []
+  },
+  "custom_prompt_complex": {
+    "test_name": "mcp_with_custom_prompt",
+    "custom_prompt": "You are a development assistant with access to filesystem and database tools",
+    "success": false,
+    "output": "",
+    "used_mcp_tools": []
+  },
+  "session_continuity": {
+    "test_name": "mcp_session_continuity",
+    "first_command_success": false,
+    "second_command_success": false,
+    "session_id": null,
+    "continuity_preserved": false
+  },
+  "server_filesystem": {
+    "test_name": "specific_mcp_filesystem",
+    "server_name": "filesystem",
+    "test_command": "perform a basic operation",
+    "success": false,
+    "output": "",
+    "server_responded": false
+  },
+  "server_database": {
+    "test_name": "specific_mcp_database",
+    "server_name": "database",
+    "test_command": "perform a basic operation",
+    "success": false,
+    "output": "",
+    "server_responded": false
+  },
+  "server_web": {
+    "test_name": "specific_mcp_web",
+    "server_name": "web",
+    "test_command": "perform a basic operation",
+    "success": false,
+    "output": "",
+    "server_responded": false
+  },
+  "server_git": {
+    "test_name": "specific_mcp_git",
+    "server_name": "git",
+    "test_command": "perform a basic operation",
+    "success": false,
+    "output": "",
+    "server_responded": false
+  },
+  "summary": {
+    "total_tests": 8,
+    "successful_tests": 0,
+    "success_rate": 0.0,
+    "mcp_tools_detected": [],
+    "mcp_functionality_confirmed": false,
+    "recommendations": [
+      "MCP servers may not be properly configured",
+      "MCP functionality may be affected by custom prompts (-p option)",
+      "Session continuity may not preserve MCP context properly"
+    ]
+  }
+}

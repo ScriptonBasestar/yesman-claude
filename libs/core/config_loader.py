@@ -245,11 +245,11 @@ class ConfigLoader:
 def create_default_loader() -> ConfigLoader:
     """Create a ConfigLoader with default sources."""
     loader = ConfigLoader()
-    
+
     # First, check if local config exists and has mode set
     local_config_path = Path.cwd() / ".scripton" / "yesman" / "yesman.yaml"
     mode = None
-    
+
     if local_config_path.exists():
         try:
             with open(local_config_path, encoding="utf-8") as f:
@@ -265,21 +265,21 @@ def create_default_loader() -> ConfigLoader:
         # Check if local config exists and has sufficient configuration
         if not local_config_path.exists():
             raise RuntimeError(f"mode: {mode} but local config doesn't exist")
-        
+
         # Check if local config has required fields
         with open(local_config_path, encoding="utf-8") as f:
             local_data = yaml.safe_load(f) or {}
-            
+
         # Check for required fields in isolated mode
         if "tmux" not in local_data or "logging" not in local_data:
             raise RuntimeError(f"mode: {mode} but local config doesn't exist or is empty")
-        
+
         # Only add local config and environment variables
         loader.add_source(YamlFileSource(local_config_path))
-        
+
         # Add environment variables (always highest priority)
         loader.add_source(EnvironmentSource())
-            
+
         return loader
 
     # Otherwise, use normal merge mode

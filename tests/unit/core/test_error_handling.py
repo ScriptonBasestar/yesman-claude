@@ -165,6 +165,7 @@ class TestErrorHandling(unittest.TestCase):
         mock_server.side_effect = Exception("tmux server not found")
 
         from libs.yesman_config import YesmanConfig
+
         config = YesmanConfig()
         manager = TmuxManager(config)
         sessions = manager.get_cached_sessions_list()

@@ -244,7 +244,7 @@ class TestYesmanConfig:
         # Create a project directory to serve as cwd
         project_dir = tmp_path / "project"
         project_dir.mkdir()
-        
+
         with patch("libs.yesman_config.Path.home", return_value=tmp_path):
             with patch("libs.yesman_config.Path.cwd", return_value=project_dir):
                 # Also need to patch cwd in config_loader
@@ -257,7 +257,7 @@ class TestYesmanConfig:
                             if path_str.startswith("~"):
                                 return tmp_path / path_str[2:]
                             return path_obj
-                            
+
                         with patch.object(Path, "expanduser", mock_expanduser_func):
                             YesmanConfig()
 
@@ -311,6 +311,6 @@ class TestConfigPriority:
                     config = loader.load()
 
                     # Environment variable creates nested dict due to underscore parsing
-                    assert hasattr(config, 'confidence') and config.confidence.get('threshold') == 0.95
+                    assert hasattr(config, "confidence") and config.confidence.get("threshold") == 0.95
                     # Local config value should be preserved for confidence_threshold
                     assert config.confidence_threshold == 0.9

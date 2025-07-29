@@ -6,7 +6,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
-from libs.core.error_handling import ConfigurationError
 from libs.core.services import register_test_services
 
 # Copyright notice.
@@ -28,10 +27,7 @@ def setup_test_services() -> None:
     mock_config.get.return_value = "test_value"
     mock_config.schema.logging.level = "INFO"
     # Add config dict that the API expects
-    mock_config.config = {
-        "log_level": "INFO",
-        "log_path": "/tmp/test.log"
-    }
+    mock_config.config = {"log_level": "INFO", "log_path": "/tmp/test.log"}
 
     mock_tmux = MagicMock()
     mock_tmux.list_running_sessions.return_value = []
@@ -73,7 +69,7 @@ class TestConfigAPI:
     def test_get_config(client: TestClient) -> None:
         """Test get configuration endpoint."""
         response = client.get("/api/config")
-        
+
         assert response.status_code == 200
         data = response.json()
         assert data["log_level"] == "INFO"
@@ -120,10 +116,10 @@ class TestSessionsAPI:
 
         assert response.status_code == 200
         data = response.json()
-        
+
         # Check that the response is a list
         assert isinstance(data, list)
-        
+
         # If there are sessions, verify the structure
         if data:
             # Verify the first session has the expected structure

@@ -277,9 +277,10 @@ async def startup_event() -> None:  # noqa: RUF029
     # Start task runner
     task = asyncio.create_task(task_runner.start())
     _ = task  # Keep reference to prevent garbage collection
-    
+
     # Start WebSocket connection manager background tasks
     from api.routers.websocket_router import manager
+
     manager.start_background_tasks()
 
 

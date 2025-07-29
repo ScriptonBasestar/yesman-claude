@@ -18,7 +18,7 @@ from libs.utils import ensure_log_directory
 
 # Avoid circular import
 if TYPE_CHECKING:
-    from libs.yesman_config import YesmanConfig
+    pass
 
 from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
 from .progress_tracker import ProgressAnalyzer
@@ -41,6 +41,7 @@ class SessionManager:
     def __init__(self) -> None:
         # Import at runtime to avoid circular import
         from libs.yesman_config import YesmanConfig
+
         self.config = YesmanConfig()
 
         self.tmux_manager = TmuxManager(self.config)
