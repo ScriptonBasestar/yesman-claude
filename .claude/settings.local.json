@@ -61,7 +61,15 @@
       "Bash(for file in tests/test_renderers.py tests/test_semantic_merger.py tests/test_conflict_prevention.py tests/unit/dashboard/renderers/test_base_renderer.py)",
       "Bash(do echo \"=== $file ===\")",
       "Bash(done)",
-      "Bash(diff:*)"
+      "Bash(diff:*)",
+      "mcp__filesystem__directory_tree",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__read_file",
+      "mcp__filesystem__search_files",
+      "Bash(tree:*)",
+      "mcp__filesystem__read_multiple_files",
+      "mcp__filesystem__write_file",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": []
   }

@@ -1,0 +1,56 @@
+{
+  "test_execution_time": 21.520289182662964,
+  "tests": {
+    "monitor_creation": {
+      "success": true,
+      "startup_success": true,
+      "shutdown_success": true,
+      "monitor_instance": "<class 'libs.core.claude_monitor_async.AsyncClaudeMonitor'>"
+    },
+    "event_integration": {
+      "success": true,
+      "events_published": 2,
+      "events_received": 2,
+      "total_events": 9
+    },
+    "performance_metrics": {
+      "success": true,
+      "monitoring_metrics_recorded": true,
+      "quality_metrics_recorded": true,
+      "report_generated": true,
+      "report_sections": [
+        "report_timestamp",
+        "report_date",
+        "monitoring_duration_seconds",
+        "system_summary",
+        "monitoring_summary",
+        "event_bus_summary",
+        "quality_gates_summary",
+        "baseline_comparison"
+      ]
+    },
+    "prompt_handling": {
+      "success": true,
+      "prompt_events_detected": 2,
+      "monitor_responded": true,
+      "activity_messages": 3
+    },
+    "error_handling": {
+      "success": true,
+      "restart_attempts": 1,
+      "graceful_shutdown": true,
+      "error_recovery": true
+    },
+    "baseline_integration": {
+      "success": true,
+      "baseline_established": true,
+      "has_system_metrics": true,
+      "monitoring_samples": 0,
+      "execution_time": 5.001202821731567,
+      "baseline_loaded": true
+    }
+  },
+  "events_received": 37,
+  "performance_samples": 0,
+  "overall_success": true
+}

@@ -1,0 +1,204 @@
+{
+  "analysis_metadata": {
+    "analysis_date": "2025-01-29",
+    "analyzer": "Claude Code Assistant",
+    "analysis_duration_hours": 3,
+    "project_version": "0.1.0"
+  },
+  "project_health": {
+    "overall_score": 72,
+    "status": "moderate_health",
+    "risk_level": "medium",
+    "confidence": "high"
+  },
+  "project_scale": {
+    "total_python_files": 270,
+    "total_lines_of_code": 88466,
+    "average_file_size_lines": 328,
+    "directory_depth": 5,
+    "total_modules": 118
+  },
+  "dependency_analysis": {
+    "external_dependencies": {
+      "total_packages": 206,
+      "critical_dependencies": 10,
+      "outdated_packages": 0,
+      "security_vulnerabilities": 0,
+      "conflicts": 1
+    },
+    "internal_dependencies": {
+      "total_modules": 118,
+      "total_internal_dependencies": 94,
+      "circular_dependencies": 0,
+      "average_coupling": 1.54,
+      "high_coupling_modules": 1,
+      "most_depended_upon": [
+        {"module": "libs.core", "dependents": 38},
+        {"module": "libs.yesman_config", "dependents": 10},
+        {"module": "libs.dashboard", "dependents": 8},
+        {"module": "libs.tmux_manager", "dependents": 8}
+      ]
+    }
+  },
+  "code_quality": {
+    "complexity": {
+      "high_complexity_functions": 45,
+      "max_complexity": 29,
+      "functions_over_20_complexity": 8,
+      "average_complexity": "moderate"
+    },
+    "linting": {
+      "total_issues": 488,
+      "critical_issues": 157,
+      "top_issue_types": [
+        {"code": "Q000", "count": 157, "description": "Double quotes required"},
+        {"code": "W293", "count": 128, "description": "Blank line contains whitespace"},
+        {"code": "UP006", "count": 69, "description": "Use PEP585 type annotations"},
+        {"code": "S101", "count": 32, "description": "Use of assert detected"},
+        {"code": "D202", "count": 28, "description": "No blank lines after function docstring"}
+      ]
+    },
+    "type_safety": {
+      "mypy_errors": "multiple",
+      "type_coverage": "partial",
+      "gradual_typing": true
+    }
+  },
+  "test_analysis": {
+    "test_files": 99,
+    "test_lines": 26223,
+    "total_tests": 494,
+    "ignored_test_files": 27,
+    "skip_markers": 5,
+    "test_to_code_ratio": 0.30,
+    "coverage_estimate": "50%",
+    "test_categories": {
+      "unit_tests": "majority",
+      "integration_tests": "limited",
+      "e2e_tests": "minimal"
+    }
+  },
+  "architecture": {
+    "patterns_identified": [
+      "Command Pattern",
+      "Dependency Injection",
+      "Factory Pattern", 
+      "Strategy Pattern",
+      "Adapter Pattern"
+    ],
+    "layers": [
+      "presentation",
+      "api", 
+      "business",
+      "core",
+      "infrastructure"
+    ],
+    "layer_violations": "minimal",
+    "architectural_debt_score": 28,
+    "max_inheritance_depth": 4
+  },
+  "technical_debt": {
+    "total_debt_markers": 92,
+    "debt_breakdown": {
+      "TODO": 25,
+      "FIXME": 0,
+      "HACK": 0,
+      "BUG": 3,
+      "OLD_DEPRECATED": 64
+    },
+    "documentation_debt": {
+      "total_files": 186,
+      "documented_files": 62,
+      "missing_documentation": 124,
+      "documentation_coverage": 33.3
+    },
+    "estimated_remediation_hours": 140,
+    "critical_debt_items": 25
+  },
+  "risk_matrix": [
+    {
+      "area": "Test Infrastructure",
+      "risk_level": "critical",
+      "likelihood": "high",
+      "impact": "high",
+      "mitigation": "Re-enable ignored test files"
+    },
+    {
+      "area": "Documentation",
+      "risk_level": "high", 
+      "likelihood": "high",
+      "impact": "medium",
+      "mitigation": "Systematic documentation effort"
+    },
+    {
+      "area": "Code Quality",
+      "risk_level": "high",
+      "likelihood": "medium",
+      "impact": "medium",
+      "mitigation": "Linting fixes and quality gates"
+    },
+    {
+      "area": "Architecture Coupling",
+      "risk_level": "medium",
+      "likelihood": "medium",
+      "impact": "high",
+      "mitigation": "Refactor libs.core dependencies"
+    }
+  ],
+  "improvement_roadmap": {
+    "week_1": [
+      "Enable 27 ignored test files",
+      "Fix top 3 linting issue types",
+      "Document core modules"
+    ],
+    "month_1": [
+      "Refactor high-complexity functions",
+      "Improve test coverage to 70%",
+      "Reduce core module coupling"
+    ],
+    "quarter_1": [
+      "Architecture modernization",
+      "Quality gates implementation",
+      "Comprehensive documentation"
+    ]
+  },
+  "success_metrics": {
+    "quality_score": {
+      "current": 2.4,
+      "target": 90,
+      "calculation": "100 - (linting_issues / 5)"
+    },
+    "test_health": {
+      "current": 72.7,
+      "target": 100,
+      "calculation": "(enabled_tests / total_tests) * 100"
+    },
+    "documentation_coverage": {
+      "current": 33.3,
+      "target": 90,
+      "calculation": "(documented_files / total_files) * 100"
+    },
+    "debt_ratio": {
+      "current": 1.04,
+      "target": 0.5,
+      "calculation": "(debt_markers / total_loc) * 1000"
+    }
+  },
+  "recommendations": {
+    "immediate": [
+      "Re-enable ignored test files immediately",
+      "Set up pre-commit hooks for linting",
+      "Create documentation template for modules"
+    ],
+    "short_term": [
+      "Implement test coverage reporting",
+      "Refactor complex functions systematically", 
+      "Extract interfaces from libs.core"
+    ],
+    "long_term": [
+      "Consider microservices architecture",
+      "Implement comprehensive monitoring",
+      "Establish architectural decision records"
+    ]
+  }
+}

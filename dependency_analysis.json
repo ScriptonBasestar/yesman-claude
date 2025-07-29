@@ -1,0 +1,2743 @@
+{
+  "analysis_metadata": {
+    "directories_scanned": [
+      "libs",
+      "commands",
+      "api"
+    ],
+    "project_root": "/home/archmagece/myopen/scripton/yesman-agent",
+    "timestamp": "2025-07-29T14:37:15.633908",
+    "total_modules_analyzed": 118
+  },
+  "circular_dependencies": [],
+  "high_coupling_modules": [
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 2,
+      "instability": 1.0,
+      "module": "libs.session_helpers"
+    },
+    {
+      "afferent_coupling": 4,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.utils"
+    },
+    {
+      "afferent_coupling": 10,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.yesman_config"
+    },
+    {
+      "afferent_coupling": 8,
+      "distance": 0.8888888888888888,
+      "efferent_coupling": 1,
+      "instability": 0.1111111111111111,
+      "module": "libs.tmux_manager"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 0.6666666666666667,
+      "efferent_coupling": 1,
+      "instability": 0.3333333333333333,
+      "module": "libs.validation"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.tmux"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.models"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.progress_indicators"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.types"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.core.claude_session_manager"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.claude_manager"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.config_schema"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.progress_tracker"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.interfaces"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 6,
+      "instability": 1.0,
+      "module": "libs.core.claude_monitor"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.core.content_collector"
+    },
+    {
+      "afferent_coupling": 21,
+      "distance": 0.9130434782608696,
+      "efferent_coupling": 2,
+      "instability": 0.08695652173913043,
+      "module": "libs.core.base_command"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.config_loader"
+    },
+    {
+      "afferent_coupling": 4,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.error_handling"
+    },
+    {
+      "afferent_coupling": 4,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.mixins"
+    },
+    {
+      "afferent_coupling": 8,
+      "distance": 0.7272727272727273,
+      "efferent_coupling": 3,
+      "instability": 0.2727272727272727,
+      "module": "libs.core.session_manager"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.prompt_detector"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.core.claude_status_manager"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.claude_process_controller"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 0.6666666666666667,
+      "efferent_coupling": 1,
+      "instability": 0.3333333333333333,
+      "module": "libs.core.base_batch_processor"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.settings"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.core.session_setup_refactored"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.container"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.session_setup"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.core.async_base_command"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.core.config_cache"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.ai"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.ai.response_analyzer"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.ai.adaptive_response"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.ai.response_analyzer_refactored"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.automation"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.automation.context_detector"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.automation.automation_manager"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.automation.workflow_engine"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.dashboard_launcher"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.theme_system"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.keyboard_navigation"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.tui_dashboard"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.performance_optimizer"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.dashboard.health_calculator"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.logging"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.logging.async_logger_refactored"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "libs.logging.batch_processor_refactored"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.logging.async_logger"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.logging.batch_processor"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.ui"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.ui.session_selector"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.base_renderer"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.optimizations"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.tui_renderer"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.widget_adapter"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.widget_models"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.renderer_factory"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.web_renderer"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.tauri_renderer"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.renderers.registry"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 0.6666666666666667,
+      "efferent_coupling": 1,
+      "instability": 0.3333333333333333,
+      "module": "libs.dashboard.widgets.activity_heatmap"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.dashboard.widgets"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.widgets.progress_tracker"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "libs.dashboard.widgets.git_activity"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.dashboard.widgets.project_health"
+    },
+    {
+      "afferent_coupling": 3,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "libs.dashboard.widgets.session_progress"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 3,
+      "instability": 1.0,
+      "module": "commands.setup"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 8,
+      "instability": 1.0,
+      "module": "commands.status_async"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "commands.validate"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "commands"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "commands.ls"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 9,
+      "instability": 1.0,
+      "module": "commands.browse_async"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 2,
+      "instability": 1.0,
+      "module": "commands.enter"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "commands.dashboard"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "commands.teardown"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 0.1428571428571429,
+      "efferent_coupling": 6,
+      "instability": 0.8571428571428571,
+      "module": "commands.status"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 3,
+      "instability": 1.0,
+      "module": "commands.ai"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 14,
+      "instability": 1.0,
+      "module": "commands.multi_agent_backup"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 2,
+      "instability": 1.0,
+      "module": "commands.status_refactored"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "commands.show"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 9,
+      "instability": 1.0,
+      "module": "commands.multi_agent_main"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "commands.multi_agent"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 0.16666666666666663,
+      "efferent_coupling": 5,
+      "instability": 0.8333333333333334,
+      "module": "commands.multi_agent.semantic_analysis"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "commands.multi_agent.cli"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api.models"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 5,
+      "instability": 1.0,
+      "module": "api.main"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 0.16666666666666663,
+      "efferent_coupling": 5,
+      "instability": 0.8333333333333334,
+      "module": "api.background_tasks"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 0.6666666666666667,
+      "efferent_coupling": 1,
+      "instability": 0.3333333333333333,
+      "module": "api.shared"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api.middleware"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api.tests"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api.tests.test_background_tasks"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api.tests.test_websocket"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "api.tests.test_batch_processor"
+    },
+    {
+      "afferent_coupling": 2,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "api.utils"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "api.utils.batch_processor_refactored"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0,
+      "module": "api.utils.batch_processor"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 1.0,
+      "efferent_coupling": 0,
+      "instability": 0.0,
+      "module": "api.routers"
+    },
+    {
+      "afferent_coupling": 1,
+      "distance": 0.16666666666666663,
+      "efferent_coupling": 5,
+      "instability": 0.8333333333333334,
+      "module": "api.routers.dashboard"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 6,
+      "instability": 1.0,
+      "module": "api.routers.sessions"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 1,
+      "instability": 1.0,
+      "module": "api.routers.config"
+    },
+    {
+      "afferent_coupling": 0,
+      "distance": 0.0,
+      "efferent_coupling": 2,
+      "instability": 1.0,
+      "module": "api.routers.controllers"
+    }
+  ],
+  "modules": {
+    "api": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 1
+    },
+    "api.background_tasks": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.16666666666666663,
+        "efferent_coupling": 5,
+        "instability": 0.8333333333333334
+      },
+      "dependencies": [
+        "libs.yesman_config",
+        "libs.core.session_manager",
+        "libs.dashboard.health_calculator",
+        "libs.tmux_manager",
+        "api.routers.websocket_router"
+      ],
+      "dependents": [
+        "api.main"
+      ],
+      "import_count": 5,
+      "is_package": false,
+      "lines_of_code": 335
+    },
+    "api.main": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 5,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.error_handling",
+        "api.routers",
+        "api.middleware.error_handler",
+        "api.routers.websocket_router",
+        "api.background_tasks"
+      ],
+      "dependents": [],
+      "import_count": 6,
+      "is_package": false,
+      "lines_of_code": 236
+    },
+    "api.middleware": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 1
+    },
+    "api.middleware.error_handler": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.5,
+        "efferent_coupling": 1,
+        "instability": 0.5
+      },
+      "dependencies": [
+        "libs.core.error_handling"
+      ],
+      "dependents": [
+        "api.main"
+      ],
+      "import_count": 3,
+      "is_package": false,
+      "lines_of_code": 146
+    },
+    "api.models": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 15
+    },
+    "api.routers": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.main"
+      ],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 1
+    },
+    "api.routers.config": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.services"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 83
+    },
+    "api.routers.controllers": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 2,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "api.shared",
+        "libs.core.session_manager"
+      ],
+      "dependents": [],
+      "import_count": 2,
+      "is_package": false,
+      "lines_of_code": 363
+    },
+    "api.routers.dashboard": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.16666666666666663,
+        "efferent_coupling": 5,
+        "instability": 0.8333333333333334
+      },
+      "dependencies": [
+        "api.shared",
+        "libs.yesman_config",
+        "libs.core.session_manager",
+        "libs.dashboard.widgets.project_health",
+        "libs.dashboard.widgets.activity_heatmap"
+      ],
+      "dependents": [
+        "api.routers.websocket_router"
+      ],
+      "import_count": 5,
+      "is_package": false,
+      "lines_of_code": 266
+    },
+    "api.routers.logs": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.5,
+        "efferent_coupling": 1,
+        "instability": 0.5
+      },
+      "dependencies": [
+        "libs.core.services"
+      ],
+      "dependents": [
+        "api.routers.websocket_router"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 166
+    },
+    "api.routers.sessions": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 6,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.session_manager",
+        "libs.core.error_handling",
+        "libs.core.models",
+        "libs.core.types",
+        "libs.core.services",
+        "libs.tmux_manager"
+      ],
+      "dependents": [],
+      "import_count": 6,
+      "is_package": false,
+      "lines_of_code": 896
+    },
+    "api.routers.websocket_router": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 0.4,
+        "efferent_coupling": 3,
+        "instability": 0.6
+      },
+      "dependencies": [
+        "api.routers.dashboard",
+        "api.utils",
+        "api.routers.logs"
+      ],
+      "dependents": [
+        "api.background_tasks",
+        "api.main"
+      ],
+      "import_count": 3,
+      "is_package": false,
+      "lines_of_code": 367
+    },
+    "api.shared": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 0.6666666666666667,
+        "efferent_coupling": 1,
+        "instability": 0.3333333333333333
+      },
+      "dependencies": [
+        "libs.core.claude_manager"
+      ],
+      "dependents": [
+        "api.routers.dashboard",
+        "api.routers.controllers"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 3
+    },
+    "api.tests": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 1
+    },
+    "api.tests.test_background_tasks": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 72
+    },
+    "api.tests.test_batch_processor": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "api.utils"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 221
+    },
+    "api.tests.test_websocket": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 105
+    },
+    "api.utils": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.routers.websocket_router",
+        "api.tests.test_batch_processor"
+      ],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 3
+    },
+    "api.utils.batch_processor": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 298
+    },
+    "api.utils.batch_processor_refactored": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_batch_processor"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 269
+    },
+    "commands": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 0
+    },
+    "commands.ai": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 3,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.ai.adaptive_response",
+        "libs.ai.response_analyzer"
+      ],
+      "dependents": [],
+      "import_count": 3,
+      "is_package": false,
+      "lines_of_code": 339
+    },
+    "commands.browse_async": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 9,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.yesman_config",
+        "libs.core.session_manager",
+        "libs.dashboard.widgets.session_browser",
+        "libs.tmux_manager",
+        "libs.core.base_command",
+        "commands.browse",
+        "libs.core.async_base_command",
+        "libs.dashboard.widgets.session_progress",
+        "libs.dashboard.widgets.activity_heatmap"
+      ],
+      "dependents": [],
+      "import_count": 9,
+      "is_package": false,
+      "lines_of_code": 255
+    },
+    "commands.dashboard": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 518
+    },
+    "commands.enter": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 2,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.ui.session_selector"
+      ],
+      "dependents": [],
+      "import_count": 2,
+      "is_package": false,
+      "lines_of_code": 120
+    },
+    "commands.ls": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 120
+    },
+    "commands.multi_agent": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 100
+    },
+    "commands.multi_agent.agent_pool": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.19999999999999996,
+        "efferent_coupling": 4,
+        "instability": 0.8
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.multi_agent.types",
+        "libs.dashboard.widgets.agent_monitor",
+        "libs.multi_agent.agent_pool"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 4,
+      "is_package": false,
+      "lines_of_code": 281
+    },
+    "commands.multi_agent.batch_operations": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.5,
+        "efferent_coupling": 1,
+        "instability": 0.5
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 37
+    },
+    "commands.multi_agent.cli": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 107
+    },
+    "commands.multi_agent.code_review": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.5,
+        "efferent_coupling": 1,
+        "instability": 0.5
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 70
+    },
+    "commands.multi_agent.collaboration": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.5,
+        "efferent_coupling": 1,
+        "instability": 0.5
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 48
+    },
+    "commands.multi_agent.conflict_prediction": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.19999999999999996,
+        "efferent_coupling": 4,
+        "instability": 0.8
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.multi_agent.conflict_prediction",
+        "libs.multi_agent.conflict_resolution",
+        "libs.multi_agent.branch_manager"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 4,
+      "is_package": false,
+      "lines_of_code": 146
+    },
+    "commands.multi_agent.conflict_resolution": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.25,
+        "efferent_coupling": 3,
+        "instability": 0.75
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.multi_agent.conflict_resolution",
+        "libs.multi_agent.branch_manager"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 3,
+      "is_package": false,
+      "lines_of_code": 200
+    },
+    "commands.multi_agent.dependency_tracking": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.5,
+        "efferent_coupling": 1,
+        "instability": 0.5
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 48
+    },
+    "commands.multi_agent.semantic_analysis": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.16666666666666663,
+        "efferent_coupling": 5,
+        "instability": 0.8333333333333334
+      },
+      "dependencies": [
+        "libs.multi_agent.semantic_merger",
+        "libs.core.base_command",
+        "libs.multi_agent.conflict_resolution",
+        "libs.multi_agent.semantic_analyzer",
+        "libs.multi_agent.branch_manager"
+      ],
+      "dependents": [
+        "commands.multi_agent_main"
+      ],
+      "import_count": 5,
+      "is_package": false,
+      "lines_of_code": 214
+    },
+    "commands.multi_agent_backup": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 14,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.multi_agent.semantic_merger",
+        "libs.multi_agent.conflict_prediction",
+        "libs.multi_agent.dependency_propagation",
+        "libs.core.base_command",
+        "libs.multi_agent.types",
+        "libs.dashboard.widgets.agent_monitor",
+        "libs.multi_agent.code_review_engine",
+        "libs.multi_agent.auto_resolver",
+        "libs.multi_agent.conflict_resolution",
+        "libs.multi_agent.agent_pool",
+        "libs.multi_agent.semantic_analyzer",
+        "libs.multi_agent.branch_manager",
+        "libs.multi_agent.branch_info_protocol",
+        "libs.multi_agent.collaboration_engine"
+      ],
+      "dependents": [],
+      "import_count": 14,
+      "is_package": false,
+      "lines_of_code": 2992
+    },
+    "commands.multi_agent_main": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 9,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "commands.multi_agent.cli",
+        "commands.multi_agent.dependency_tracking",
+        "commands.multi_agent.code_review",
+        "commands.multi_agent.semantic_analysis",
+        "commands.multi_agent.conflict_resolution",
+        "commands.multi_agent.batch_operations",
+        "commands.multi_agent.agent_pool",
+        "commands.multi_agent.conflict_prediction",
+        "commands.multi_agent.collaboration"
+      ],
+      "dependents": [],
+      "import_count": 9,
+      "is_package": false,
+      "lines_of_code": 86
+    },
+    "commands.setup": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 3,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.core.session_setup",
+        "libs.core.progress_indicators"
+      ],
+      "dependents": [],
+      "import_count": 3,
+      "is_package": false,
+      "lines_of_code": 79
+    },
+    "commands.show": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 17
+    },
+    "commands.status": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 0.1428571428571429,
+        "efferent_coupling": 6,
+        "instability": 0.8571428571428571
+      },
+      "dependencies": [
+        "libs.dashboard.widgets",
+        "libs.core.session_manager",
+        "libs.yesman_config",
+        "libs.tmux_manager",
+        "libs.core.base_command",
+        "libs.dashboard.widgets.session_progress"
+      ],
+      "dependents": [
+        "commands.status_async"
+      ],
+      "import_count": 6,
+      "is_package": false,
+      "lines_of_code": 273
+    },
+    "commands.status_async": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 8,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.dashboard.widgets",
+        "libs.core.session_manager",
+        "libs.yesman_config",
+        "libs.tmux_manager",
+        "libs.core.base_command",
+        "libs.core.async_base_command",
+        "libs.dashboard.widgets.session_progress",
+        "commands.status"
+      ],
+      "dependents": [],
+      "import_count": 8,
+      "is_package": false,
+      "lines_of_code": 419
+    },
+    "commands.status_refactored": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 2,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command",
+        "libs.core.mixins"
+      ],
+      "dependents": [],
+      "import_count": 2,
+      "is_package": false,
+      "lines_of_code": 250
+    },
+    "commands.teardown": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 53
+    },
+    "commands.validate": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_command"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 211
+    },
+    "libs": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 0
+    },
+    "libs.ai": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 7
+    },
+    "libs.ai.adaptive_response": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.claude_monitor",
+        "commands.ai"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 198
+    },
+    "libs.ai.response_analyzer": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.ai"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 249
+    },
+    "libs.ai.response_analyzer_refactored": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.mixins"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 285
+    },
+    "libs.automation": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 1
+    },
+    "libs.automation.automation_manager": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.claude_monitor"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 244
+    },
+    "libs.automation.context_detector": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.claude_monitor"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 382
+    },
+    "libs.automation.workflow_engine": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 645
+    },
+    "libs.core": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 16
+    },
+    "libs.core.async_base_command": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.status_async",
+        "commands.browse_async"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 196
+    },
+    "libs.core.base_batch_processor": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 0.6666666666666667,
+        "efferent_coupling": 1,
+        "instability": 0.3333333333333333
+      },
+      "dependencies": [
+        "libs.core.mixins"
+      ],
+      "dependents": [
+        "api.utils.batch_processor_refactored",
+        "libs.logging.batch_processor_refactored"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 209
+    },
+    "libs.core.base_command": {
+      "coupling_metrics": {
+        "afferent_coupling": 21,
+        "distance": 0.9130434782608696,
+        "efferent_coupling": 2,
+        "instability": 0.08695652173913043
+      },
+      "dependencies": [
+        "libs.yesman_config",
+        "libs.tmux_manager"
+      ],
+      "dependents": [
+        "commands.status_refactored",
+        "commands.status_async",
+        "commands.teardown",
+        "commands.multi_agent.conflict_prediction",
+        "commands.setup",
+        "commands.dashboard",
+        "commands.ls",
+        "commands.multi_agent.code_review",
+        "commands.multi_agent.agent_pool",
+        "commands.browse_async",
+        "commands.status",
+        "commands.multi_agent.dependency_tracking",
+        "commands.ai",
+        "commands.enter",
+        "commands.multi_agent.batch_operations",
+        "commands.multi_agent.conflict_resolution",
+        "commands.validate",
+        "commands.show",
+        "commands.multi_agent_backup",
+        "commands.multi_agent.semantic_analysis",
+        "commands.multi_agent.collaboration"
+      ],
+      "import_count": 2,
+      "is_package": false,
+      "lines_of_code": 367
+    },
+    "libs.core.claude_manager": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.shared"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 292
+    },
+    "libs.core.claude_monitor": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 6,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.automation.workflow_chain",
+        "libs.logging.async_logger",
+        "libs.ai.adaptive_response",
+        "libs.automation.automation_manager",
+        "libs.dashboard.health_calculator",
+        "libs.automation.context_detector"
+      ],
+      "dependents": [],
+      "import_count": 6,
+      "is_package": false,
+      "lines_of_code": 498
+    },
+    "libs.core.claude_process_controller": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 82
+    },
+    "libs.core.claude_session_manager": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.utils"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 120
+    },
+    "libs.core.claude_status_manager": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.utils"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 67
+    },
+    "libs.core.config_cache": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 307
+    },
+    "libs.core.config_loader": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 213
+    },
+    "libs.core.config_schema": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 84
+    },
+    "libs.core.container": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.services"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 103
+    },
+    "libs.core.content_collector": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.utils"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 212
+    },
+    "libs.core.error_handling": {
+      "coupling_metrics": {
+        "afferent_coupling": 4,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.session_helpers",
+        "api.routers.sessions",
+        "api.middleware.error_handler",
+        "api.main"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 332
+    },
+    "libs.core.interfaces": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 329
+    },
+    "libs.core.mixins": {
+      "coupling_metrics": {
+        "afferent_coupling": 4,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.status_refactored",
+        "libs.logging.async_logger_refactored",
+        "libs.core.base_batch_processor",
+        "libs.ai.response_analyzer_refactored"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 136
+    },
+    "libs.core.models": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.routers.sessions"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 254
+    },
+    "libs.core.progress_indicators": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.setup"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 199
+    },
+    "libs.core.progress_tracker": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 151
+    },
+    "libs.core.prompt_detector": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 300
+    },
+    "libs.core.services": {
+      "coupling_metrics": {
+        "afferent_coupling": 3,
+        "distance": 0.4285714285714286,
+        "efferent_coupling": 4,
+        "instability": 0.5714285714285714
+      },
+      "dependencies": [
+        "libs.yesman_config",
+        "libs.core.session_manager",
+        "libs.core.container",
+        "libs.tmux_manager"
+      ],
+      "dependents": [
+        "api.routers.sessions",
+        "api.routers.config",
+        "api.routers.logs"
+      ],
+      "import_count": 4,
+      "is_package": false,
+      "lines_of_code": 55
+    },
+    "libs.core.session_manager": {
+      "coupling_metrics": {
+        "afferent_coupling": 8,
+        "distance": 0.7272727272727273,
+        "efferent_coupling": 3,
+        "instability": 0.2727272727272727
+      },
+      "dependencies": [
+        "libs.yesman_config",
+        "libs.tmux_manager",
+        "libs.utils"
+      ],
+      "dependents": [
+        "api.routers.dashboard",
+        "commands.status_async",
+        "api.routers.controllers",
+        "api.routers.sessions",
+        "libs.core.services",
+        "api.background_tasks",
+        "commands.browse_async",
+        "commands.status"
+      ],
+      "import_count": 3,
+      "is_package": false,
+      "lines_of_code": 455
+    },
+    "libs.core.session_setup": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.setup"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 306
+    },
+    "libs.core.session_setup_refactored": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.validation"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 287
+    },
+    "libs.core.settings": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.validation"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 206
+    },
+    "libs.core.types": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.routers.sessions"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 239
+    },
+    "libs.dashboard": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 64
+    },
+    "libs.dashboard.dashboard_launcher": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 306
+    },
+    "libs.dashboard.health_calculator": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.claude_monitor",
+        "api.background_tasks"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 720
+    },
+    "libs.dashboard.keyboard_navigation": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 513
+    },
+    "libs.dashboard.performance_optimizer": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 578
+    },
+    "libs.dashboard.renderers": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 100
+    },
+    "libs.dashboard.renderers.base_renderer": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 329
+    },
+    "libs.dashboard.renderers.optimizations": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 490
+    },
+    "libs.dashboard.renderers.registry": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 147
+    },
+    "libs.dashboard.renderers.renderer_factory": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 320
+    },
+    "libs.dashboard.renderers.tauri_renderer": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 711
+    },
+    "libs.dashboard.renderers.tui_renderer": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 565
+    },
+    "libs.dashboard.renderers.web_renderer": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 821
+    },
+    "libs.dashboard.renderers.widget_adapter": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 420
+    },
+    "libs.dashboard.renderers.widget_models": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 470
+    },
+    "libs.dashboard.theme_system": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 617
+    },
+    "libs.dashboard.tui_dashboard": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 422
+    },
+    "libs.dashboard.widgets": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.status_async",
+        "commands.status"
+      ],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 11
+    },
+    "libs.dashboard.widgets.activity_heatmap": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 0.6666666666666667,
+        "efferent_coupling": 1,
+        "instability": 0.3333333333333333
+      },
+      "dependencies": [
+        "libs.yesman_config"
+      ],
+      "dependents": [
+        "api.routers.dashboard",
+        "commands.browse_async"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 65
+    },
+    "libs.dashboard.widgets.git_activity": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 360
+    },
+    "libs.dashboard.widgets.progress_tracker": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 342
+    },
+    "libs.dashboard.widgets.project_health": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.routers.dashboard"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 210
+    },
+    "libs.dashboard.widgets.session_progress": {
+      "coupling_metrics": {
+        "afferent_coupling": 3,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.status_async",
+        "commands.browse_async",
+        "commands.status"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 158
+    },
+    "libs.logging": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 10
+    },
+    "libs.logging.async_logger": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.claude_monitor"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 296
+    },
+    "libs.logging.async_logger_refactored": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.mixins"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 270
+    },
+    "libs.logging.batch_processor": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 210
+    },
+    "libs.logging.batch_processor_refactored": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 1,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.base_batch_processor"
+      ],
+      "dependents": [],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 174
+    },
+    "libs.session_helpers": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 0.0,
+        "efferent_coupling": 2,
+        "instability": 1.0
+      },
+      "dependencies": [
+        "libs.core.error_handling",
+        "libs.validation"
+      ],
+      "dependents": [],
+      "import_count": 2,
+      "is_package": false,
+      "lines_of_code": 432
+    },
+    "libs.tmux": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 26
+    },
+    "libs.tmux_manager": {
+      "coupling_metrics": {
+        "afferent_coupling": 8,
+        "distance": 0.8888888888888888,
+        "efferent_coupling": 1,
+        "instability": 0.1111111111111111
+      },
+      "dependencies": [
+        "libs.yesman_config"
+      ],
+      "dependents": [
+        "commands.status_async",
+        "libs.core.session_manager",
+        "api.routers.sessions",
+        "libs.core.services",
+        "libs.core.base_command",
+        "api.background_tasks",
+        "commands.browse_async",
+        "commands.status"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 393
+    },
+    "libs.ui": {
+      "coupling_metrics": {
+        "afferent_coupling": 0,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0
+      },
+      "dependencies": [],
+      "dependents": [],
+      "import_count": 0,
+      "is_package": true,
+      "lines_of_code": 1
+    },
+    "libs.ui.session_selector": {
+      "coupling_metrics": {
+        "afferent_coupling": 1,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "commands.enter"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 130
+    },
+    "libs.utils": {
+      "coupling_metrics": {
+        "afferent_coupling": 4,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "libs.core.content_collector",
+        "libs.core.claude_session_manager",
+        "libs.core.claude_status_manager",
+        "libs.core.session_manager"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 24
+    },
+    "libs.validation": {
+      "coupling_metrics": {
+        "afferent_coupling": 2,
+        "distance": 0.6666666666666667,
+        "efferent_coupling": 1,
+        "instability": 0.3333333333333333
+      },
+      "dependencies": [
+        "libs.core.settings"
+      ],
+      "dependents": [
+        "libs.session_helpers",
+        "libs.core.session_setup_refactored"
+      ],
+      "import_count": 1,
+      "is_package": false,
+      "lines_of_code": 226
+    },
+    "libs.yesman_config": {
+      "coupling_metrics": {
+        "afferent_coupling": 10,
+        "distance": 1.0,
+        "efferent_coupling": 0,
+        "instability": 0.0
+      },
+      "dependencies": [],
+      "dependents": [
+        "api.routers.dashboard",
+        "commands.status_async",
+        "libs.core.session_manager",
+        "libs.core.services",
+        "libs.tmux_manager",
+        "libs.core.base_command",
+        "api.background_tasks",
+        "commands.browse_async",
+        "libs.dashboard.widgets.activity_heatmap",
+        "commands.status"
+      ],
+      "import_count": 0,
+      "is_package": false,
+      "lines_of_code": 130
+    }
+  },
+  "most_depended_upon_modules": [
+    {
+      "dependent_count": 21,
+      "module": "libs.core.base_command"
+    },
+    {
+      "dependent_count": 10,
+      "module": "libs.yesman_config"
+    },
+    {
+      "dependent_count": 8,
+      "module": "libs.tmux_manager"
+    },
+    {
+      "dependent_count": 8,
+      "module": "libs.core.session_manager"
+    },
+    {
+      "dependent_count": 4,
+      "module": "libs.utils"
+    },
+    {
+      "dependent_count": 4,
+      "module": "libs.core.error_handling"
+    },
+    {
+      "dependent_count": 4,
+      "module": "libs.core.mixins"
+    },
+    {
+      "dependent_count": 3,
+      "module": "libs.core.services"
+    },
+    {
+      "dependent_count": 3,
+      "module": "libs.dashboard.widgets.session_progress"
+    },
+    {
+      "dependent_count": 2,
+      "module": "libs.validation"
+    }
+  ],
+  "most_dependent_modules": [
+    {
+      "dependency_count": 14,
+      "module": "commands.multi_agent_backup"
+    },
+    {
+      "dependency_count": 9,
+      "module": "commands.browse_async"
+    },
+    {
+      "dependency_count": 9,
+      "module": "commands.multi_agent_main"
+    },
+    {
+      "dependency_count": 8,
+      "module": "commands.status_async"
+    },
+    {
+      "dependency_count": 6,
+      "module": "libs.core.claude_monitor"
+    },
+    {
+      "dependency_count": 6,
+      "module": "commands.status"
+    },
+    {
+      "dependency_count": 6,
+      "module": "api.routers.sessions"
+    },
+    {
+      "dependency_count": 5,
+      "module": "commands.multi_agent.semantic_analysis"
+    },
+    {
+      "dependency_count": 5,
+      "module": "api.main"
+    },
+    {
+      "dependency_count": 5,
+      "module": "api.background_tasks"
+    }
+  ],
+  "summary_statistics": {
+    "average_dependencies_per_module": 1.194915254237288,
+    "circular_dependencies_by_severity": {},
+    "circular_dependencies_count": 0,
+    "total_internal_dependencies": 141,
+    "total_lines_of_code": 29918,
+    "total_modules": 118
+  }
+}

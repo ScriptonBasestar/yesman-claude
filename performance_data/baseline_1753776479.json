@@ -1,0 +1,23 @@
+{
+  "timestamp": 1753776479.619774,
+  "system_metrics": {
+    "timestamp": 1753776479.7210464,
+    "cpu_percent": 43.9,
+    "memory_percent": 71.2,
+    "memory_used_mb": 41368.40234375,
+    "memory_available_mb": 18471.03515625,
+    "disk_io_read_mb": 0.0078125,
+    "disk_io_write_mb": 0.0625,
+    "network_bytes_sent": 6054368,
+    "network_bytes_recv": 2016378,
+    "process_count": 865,
+    "python_version": "3.12.10",
+    "system_platform": "Linux-6.15.6-1-MANJARO-x86_64-with-glibc2.41"
+  },
+  "monitoring_metrics": [],
+  "event_bus_metrics": null,
+  "quality_gates_metrics": [],
+  "benchmark_duration_seconds": 5.001266002655029,
+  "total_cpu_time_seconds": 0,
+  "baseline_version": "1.0.0"
+}

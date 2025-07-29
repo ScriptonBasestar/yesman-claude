@@ -85,9 +85,26 @@ repos:
         exclude: ^(node_modules/|package-lock\.json)
         stages: [pre-push]
 
-  # Final validation (replaces make lint + make test-fast)
+  # Quality Gates Integration - Phase 3 Implementation
   - repo: local
     hooks:
+      # Fast quality gates check for pre-commit (essential checks only)
+      - id: quality-gates-essential
+        name: "🛡️ Essential Quality Gates"
+        entry: python scripts/run_quality_gates.py --fast
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+        
+      # Comprehensive quality gates for pre-push
+      - id: quality-gates-comprehensive
+        name: "🛡️ Comprehensive Quality Gates"
+        entry: python scripts/run_quality_gates.py --comprehensive
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+        
+      # Final validation (replaces make lint + make test-fast)
       - id: test-fast-final
         name: "⚡ Fast Tests (final validation)"
         entry: make test-fast
