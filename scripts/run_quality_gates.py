@@ -3,8 +3,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-Simple runner for quality gates checker.
+"""Simple runner for quality gates checker.
 
 This script provides a convenient way to run quality gates with
 commonly used configurations and output formats.
@@ -21,7 +20,7 @@ sys.path.insert(0, str(project_root))
 from scripts.quality_gates_checker import QualityGatesChecker
 
 
-async def run_basic_quality_gates():
+async def run_basic_quality_gates() -> None:
     """Run basic quality gates check."""
     print("🛡️ Running Yesman-Claude Quality Gates...")
 
@@ -44,7 +43,7 @@ async def run_basic_quality_gates():
     return results
 
 
-async def run_essential_quality_gates():
+async def run_essential_quality_gates() -> None:
     """Run essential quality gates for fast pre-commit checks."""
     print("🛡️ Running Essential Quality Gates (fast)...")
 
@@ -68,7 +67,7 @@ async def run_essential_quality_gates():
     return results
 
 
-async def run_comprehensive_quality_gates():
+async def run_comprehensive_quality_gates() -> None:
     """Run comprehensive quality gates for pre-push validation."""
     print("🛡️ Running Comprehensive Quality Gates...")
 

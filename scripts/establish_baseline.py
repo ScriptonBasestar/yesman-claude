@@ -3,8 +3,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-Performance baseline establishment runner for Yesman-Claude project.
+"""Performance baseline establishment runner for Yesman-Claude project.
 
 This script establishes performance baselines and integrates with the quality gates system
 to provide continuous performance monitoring and regression detection.
@@ -25,8 +24,7 @@ from scripts.quality_gates_checker import QualityGatesChecker
 
 
 async def establish_baseline(duration: int = 60, run_quality_gates: bool = True) -> None:
-    """
-    Establish a new performance baseline.
+    """Establish a new performance baseline.
 
     Args:
         duration: Baseline monitoring duration in seconds
@@ -65,7 +63,7 @@ async def establish_baseline(duration: int = 60, run_quality_gates: bool = True)
 
         # Save detailed report
         report_file = perf_monitor.data_dir / "baseline_report.json"
-        with open(report_file, "w") as f:
+        with open(report_file, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, default=str)
 
         print(f"📄 Detailed report saved to: {report_file}")
@@ -174,7 +172,7 @@ async def compare_with_baseline() -> None:
         print(f"❌ Comparison failed: {comparison.get('error', 'unknown')}")
 
 
-def main():
+def main() -> None:
     """Main entry point for baseline establishment."""
     parser = argparse.ArgumentParser(description="Establish performance baseline for Yesman-Claude")
 

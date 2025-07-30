@@ -4,8 +4,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-AsyncEventBus - Core event-driven architecture component for Yesman-Claude.
+"""AsyncEventBus - Core event-driven architecture component for Yesman-Claude.
 
 This module provides the foundational event bus infrastructure that enables
 asynchronous, decoupled communication between system components. It supports
@@ -28,7 +27,7 @@ from collections import defaultdict, deque
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 from weakref import WeakSet
 
 # Local imports
@@ -78,8 +77,7 @@ class EventType(Enum):
 
 @dataclass
 class Event:
-    """
-    Event data structure for the async event bus.
+    """Event data structure for the async event bus.
 
     Attributes:
         type: Event type identifier
@@ -91,15 +89,15 @@ class Event:
         metadata: Additional event metadata
     """
 
-    type: Union[EventType, str]
-    data: Dict[str, Any]
+    type: EventType | str
+    data: dict[str, Any]
     timestamp: float
     source: str
-    correlation_id: Optional[str] = None
+    correlation_id: str | None = None
     priority: EventPriority = EventPriority.NORMAL
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert event to dictionary representation."""
         return asdict(self)
 
@@ -140,8 +138,7 @@ class EventMetrics:
 
 
 class AsyncEventBus:
-    """
-    High-performance asynchronous event bus for inter-component communication.
+    """High-performance asynchronous event bus for inter-component communication.
 
     The AsyncEventBus provides a decoupled communication mechanism that allows
     components to publish events and subscribe to events of interest without
@@ -149,17 +146,16 @@ class AsyncEventBus:
     error handling and monitoring.
     """
 
-    def __init__(self, max_queue_size: int = 10000, worker_count: int = 4):
-        """
-        Initialize the AsyncEventBus.
+    def __init__(self, max_queue_size: int = 10000, worker_count: int = 4) -> None:
+        """Initialize the AsyncEventBus.
 
         Args:
             max_queue_size: Maximum number of events in the queue
             worker_count: Number of concurrent event processing workers
         """
-        self._subscribers: Dict[Union[EventType, str], List[Callable]] = defaultdict(list)
+        self._subscribers: dict[EventType | str, list[Callable]] = defaultdict(list)
         self._event_queue: asyncio.Queue = asyncio.Queue(maxsize=max_queue_size)
-        self._processing_tasks: List[asyncio.Task] = []
+        self._processing_tasks: list[asyncio.Task] = []
         self._is_running: bool = False
         self._shutdown_event = asyncio.Event()
         self._metrics = EventMetrics()
@@ -173,15 +169,14 @@ class AsyncEventBus:
         self.logger = logging.getLogger(__name__)
 
         # Event filtering capabilities
-        self._event_filters: List[Callable[[Event], bool]] = []
+        self._event_filters: list[Callable[[Event], bool]] = []
 
         # Performance monitoring
         self._last_metrics_report = time.time()
         self._metrics_interval = 60.0  # Report metrics every 60 seconds
 
     async def start(self) -> None:
-        """
-        Start the event bus processing.
+        """Start the event bus processing.
 
         Initializes worker tasks for concurrent event processing and begins
         monitoring system performance.
@@ -213,8 +208,7 @@ class AsyncEventBus:
         )
 
     async def stop(self, timeout: float = 10.0) -> None:
-        """
-        Gracefully stop the event bus.
+        """Gracefully stop the event bus.
 
         Args:
             timeout: Maximum time to wait for graceful shutdown
@@ -227,8 +221,8 @@ class AsyncEventBus:
         # Publish shutdown event
         try:
             await self.publish(Event(type=EventType.SYSTEM_SHUTDOWN, data={"graceful": True}, timestamp=time.time(), source="async_event_bus", priority=EventPriority.CRITICAL))
-        except Exception:
-            pass  # Ignore errors during shutdown
+        except Exception as e:
+            self.logger.debug(f"Ignoring shutdown event error: {e}")
 
         # Signal shutdown to all workers
         self._is_running = False
@@ -238,7 +232,7 @@ class AsyncEventBus:
         if self._processing_tasks:
             try:
                 await asyncio.wait_for(asyncio.gather(*self._processing_tasks, return_exceptions=True), timeout=timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self.logger.warning("Event bus shutdown timed out, cancelling tasks")
                 for task in self._processing_tasks:
                     if not task.done():
@@ -247,15 +241,14 @@ class AsyncEventBus:
                 # Wait a bit more for cancellation
                 try:
                     await asyncio.wait_for(asyncio.gather(*self._processing_tasks, return_exceptions=True), timeout=2.0)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
 
         self._processing_tasks.clear()
         self.logger.info("AsyncEventBus stopped")
 
-    def subscribe(self, event_type: Union[EventType, str], handler: Callable) -> None:
-        """
-        Subscribe to events of a specific type.
+    def subscribe(self, event_type: EventType | str, handler: Callable) -> None:
+        """Subscribe to events of a specific type.
 
         Args:
             event_type: Type of events to subscribe to
@@ -270,9 +263,8 @@ class AsyncEventBus:
 
         self.logger.debug(f"Subscribed handler to {event_type}")
 
-    def unsubscribe(self, event_type: Union[EventType, str], handler: Callable) -> bool:
-        """
-        Unsubscribe a handler from events.
+    def unsubscribe(self, event_type: EventType | str, handler: Callable) -> bool:
+        """Unsubscribe a handler from events.
 
         Args:
             event_type: Event type to unsubscribe from
@@ -298,8 +290,7 @@ class AsyncEventBus:
         return False
 
     def add_event_filter(self, filter_func: Callable[[Event], bool]) -> None:
-        """
-        Add an event filter that can drop events before processing.
+        """Add an event filter that can drop events before processing.
 
         Args:
             filter_func: Function that returns True to allow event, False to drop
@@ -307,8 +298,7 @@ class AsyncEventBus:
         self._event_filters.append(filter_func)
 
     async def publish(self, event: Event) -> bool:
-        """
-        Publish an event to the bus.
+        """Publish an event to the bus.
 
         Args:
             event: Event to publish
@@ -327,7 +317,7 @@ class AsyncEventBus:
                     self.logger.debug(f"Event {event.type} dropped by filter")
                     return False
             except Exception as e:
-                self.logger.error(f"Error in event filter: {e}")
+                self.logger.exception("Error in event filter")
                 continue
 
         try:
@@ -354,9 +344,8 @@ class AsyncEventBus:
 
             return False
 
-    async def publish_and_wait(self, event: Event, timeout: float = 5.0) -> List[Any]:
-        """
-        Publish an event and wait for all handlers to complete.
+    async def publish_and_wait(self, event: Event, timeout: float = 5.0) -> list[Any]:
+        """Publish an event and wait for all handlers to complete.
 
         Args:
             event: Event to publish
@@ -382,8 +371,7 @@ class AsyncEventBus:
         return results
 
     async def _event_processing_worker(self, worker_id: int) -> None:
-        """
-        Event processing worker that handles events from the queue.
+        """Event processing worker that handles events from the queue.
 
         Args:
             worker_id: Unique identifier for this worker
@@ -395,7 +383,7 @@ class AsyncEventBus:
                 # Wait for event or shutdown signal
                 try:
                     event = await asyncio.wait_for(self._event_queue.get(), timeout=1.0)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     continue  # Check shutdown condition
 
                 # Process the event
@@ -420,13 +408,12 @@ class AsyncEventBus:
                 break
             except Exception as e:
                 self._metrics.processing_errors += 1
-                self.logger.error(f"Error in event processing worker {worker_id}: {e}")
+                self.logger.exception(f"Error in event processing worker {worker_id}")
 
         self.logger.debug(f"Event processing worker {worker_id} stopped")
 
     async def _handle_event(self, event: Event) -> None:
-        """
-        Handle an individual event by calling all registered handlers.
+        """Handle an individual event by calling all registered handlers.
 
         Args:
             event: Event to handle
@@ -444,8 +431,7 @@ class AsyncEventBus:
             await asyncio.gather(*handler_tasks, return_exceptions=True)
 
     async def _safe_handler_call(self, handler: Callable, event: Event) -> Any:
-        """
-        Safely call an event handler with proper error handling.
+        """Safely call an event handler with proper error handling.
 
         Args:
             handler: Handler function to call
@@ -464,7 +450,7 @@ class AsyncEventBus:
 
         except Exception as e:
             self._metrics.handler_errors += 1
-            self.logger.error(f"Error in event handler for {event.type}: {e}")
+            self.logger.exception(f"Error in event handler for {event.type}")
 
             # Publish error event for monitoring
             try:
@@ -478,8 +464,8 @@ class AsyncEventBus:
                 # Use put_nowait to avoid blocking in error handler
                 if not self._event_queue.full():
                     self._event_queue.put_nowait(error_event)
-            except Exception:
-                pass  # Ignore errors in error handling
+            except Exception as e:
+                self.logger.debug(f"Error in error event publishing: {e}")
 
             return None
 
@@ -516,7 +502,7 @@ class AsyncEventBus:
                 self.logger.info(f"Dropped {dropped_count} low priority events to make room")
 
         except Exception as e:
-            self.logger.error(f"Error making queue room: {e}")
+            self.logger.exception("Error making queue room")
 
     async def _metrics_reporter(self) -> None:
         """Periodically report event bus metrics."""
@@ -531,7 +517,7 @@ class AsyncEventBus:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                self.logger.error(f"Error in metrics reporter: {e}")
+                self.logger.exception("Error in metrics reporter")
 
     async def _publish_metrics(self) -> None:
         """Publish current event bus metrics."""
@@ -549,11 +535,10 @@ class AsyncEventBus:
                 self._event_queue.put_nowait(metrics_event)
 
         except Exception as e:
-            self.logger.error(f"Error publishing metrics: {e}")
+            self.logger.exception("Error publishing metrics")
 
     def get_metrics(self) -> EventMetrics:
-        """
-        Get current event bus metrics.
+        """Get current event bus metrics.
 
         Returns:
             Current metrics snapshot
@@ -562,9 +547,8 @@ class AsyncEventBus:
         self._metrics.queue_size = self._event_queue.qsize()
         return self._metrics
 
-    def get_subscriber_count(self, event_type: Union[EventType, str] = None) -> int:
-        """
-        Get number of subscribers for an event type or total.
+    def get_subscriber_count(self, event_type: EventType | str = None) -> int:
+        """Get number of subscribers for an event type or total.
 
         Args:
             event_type: Specific event type or None for total
@@ -582,8 +566,7 @@ class AsyncEventBus:
         return self._is_running
 
     async def wait_for_empty_queue(self, timeout: float = 10.0) -> bool:
-        """
-        Wait for the event queue to be empty.
+        """Wait for the event queue to be empty.
 
         Args:
             timeout: Maximum time to wait
@@ -594,18 +577,17 @@ class AsyncEventBus:
         try:
             await asyncio.wait_for(self._event_queue.join(), timeout=timeout)
             return True
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return False
 
 
 # Global event bus instance
 # This provides a convenient singleton for the application
-_global_event_bus: Optional[AsyncEventBus] = None
+_global_event_bus: AsyncEventBus | None = None
 
 
 def get_event_bus() -> AsyncEventBus:
-    """
-    Get the global event bus instance.
+    """Get the global event bus instance.
 
     Returns:
         Global AsyncEventBus instance
@@ -617,8 +599,7 @@ def get_event_bus() -> AsyncEventBus:
 
 
 async def initialize_global_event_bus(**kwargs) -> AsyncEventBus:
-    """
-    Initialize and start the global event bus.
+    """Initialize and start the global event bus.
 
     Args:
         **kwargs: Arguments to pass to AsyncEventBus constructor

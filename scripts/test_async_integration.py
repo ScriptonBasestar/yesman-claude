@@ -3,8 +3,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-Integration test for AsyncClaudeMonitor with performance monitoring.
+"""Integration test for AsyncClaudeMonitor with performance monitoring.
 
 This script validates the async monitoring system integration with the performance
 baseline system, ensuring proper event flow, metrics collection, and error handling.
@@ -16,7 +15,7 @@ import logging
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Add the project root to sys.path so we can import our modules
 project_root = Path(__file__).parent.parent
@@ -29,7 +28,7 @@ from scripts.performance_baseline import create_monitoring_metrics, create_quali
 class MockSessionManager:
     """Mock session manager for testing."""
 
-    def __init__(self, session_name: str = "test_session"):
+    def __init__(self, session_name: str = "test_session") -> None:
         self.session_name = session_name
         self._claude_pane = True
         self._content = "Claude is ready and waiting for input..."
@@ -50,7 +49,7 @@ class MockSessionManager:
 class MockProcessController:
     """Mock process controller for testing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._claude_running = True
         self._restart_count = 0
 
@@ -76,7 +75,7 @@ class MockProcessController:
 class MockStatusManager:
     """Mock status manager for testing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.last_activity_time = time.time()
         self._status_messages = []
         self._activity_messages = []
@@ -98,13 +97,11 @@ class MockStatusManager:
 
 
 class AsyncIntegrationTester:
-    """
-    Comprehensive integration tester for async monitoring system.
-    """
+    """Comprehensive integration tester for async monitoring system."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger("async_integration_tester")
-        self.results: Dict[str, Any] = {}
+        self.results: dict[str, Any] = {}
         self.test_duration = 30  # seconds
 
         # Initialize mock components
@@ -120,9 +117,8 @@ class AsyncIntegrationTester:
         self.events_received = []
         self.performance_samples = []
 
-    async def run_integration_tests(self) -> Dict[str, Any]:
-        """
-        Run comprehensive integration tests.
+    async def run_integration_tests(self) -> dict[str, Any]:
+        """Run comprehensive integration tests.
 
         Returns:
             Test results dictionary
@@ -219,7 +215,7 @@ class AsyncIntegrationTester:
         if not success:
             raise RuntimeError("Failed to start performance monitoring")
 
-    async def _test_monitor_creation(self) -> Dict[str, Any]:
+    async def _test_monitor_creation(self) -> dict[str, Any]:
         """Test AsyncClaudeMonitor creation and basic functionality."""
         try:
             # Import and create AsyncClaudeMonitor
@@ -229,22 +225,29 @@ class AsyncIntegrationTester:
             monitor = AsyncClaudeMonitor(session_manager=self.session_manager, process_controller=self.process_controller, status_manager=self.status_manager, event_bus=self.event_bus)
 
             # Test basic properties
-            assert monitor.session_name == "integration_test"
-            assert monitor.is_auto_next_enabled == True
-            assert monitor.is_running == False
+            if monitor.session_name != "integration_test":
+                raise ValueError(f"Expected session_name 'integration_test', got '{monitor.session_name}'")
+            if not monitor.is_auto_next_enabled:
+                raise ValueError("Expected is_auto_next_enabled to be True")
+            if monitor.is_running:
+                raise ValueError("Expected is_running to be False initially")
 
             # Test startup
             startup_success = await monitor.start_monitoring_async()
-            assert startup_success == True
-            assert monitor.is_running == True
+            if not startup_success:
+                raise RuntimeError("Failed to start async monitoring")
+            if not monitor.is_running:
+                raise RuntimeError("Monitor should be running after startup")
 
             # Let it run for a few seconds
             await asyncio.sleep(3)
 
             # Test shutdown
             shutdown_success = await monitor.stop_monitoring_async()
-            assert shutdown_success == True
-            assert monitor.is_running == False
+            if not shutdown_success:
+                raise RuntimeError("Failed to stop async monitoring")
+            if monitor.is_running:
+                raise RuntimeError("Monitor should not be running after shutdown")
 
             return {"success": True, "startup_success": startup_success, "shutdown_success": shutdown_success, "monitor_instance": str(type(monitor))}
 
@@ -252,7 +255,7 @@ class AsyncIntegrationTester:
             self.logger.error(f"Monitor creation test failed: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
-    async def _test_event_integration(self) -> Dict[str, Any]:
+    async def _test_event_integration(self) -> dict[str, Any]:
         """Test event bus integration."""
         try:
             initial_event_count = len(self.events_received)
@@ -278,7 +281,7 @@ class AsyncIntegrationTester:
             self.logger.error(f"Event integration test failed: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
-    async def _test_performance_metrics(self) -> Dict[str, Any]:
+    async def _test_performance_metrics(self) -> dict[str, Any]:
         """Test performance metrics collection."""
         try:
             # Create and record test monitoring metrics
@@ -303,7 +306,7 @@ class AsyncIntegrationTester:
             self.logger.error(f"Performance metrics test failed: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
-    async def _test_prompt_handling(self) -> Dict[str, Any]:
+    async def _test_prompt_handling(self) -> dict[str, Any]:
         """Test prompt detection and handling."""
         try:
             from libs.core.claude_monitor_async import AsyncClaudeMonitor
@@ -340,7 +343,7 @@ Please enter your choice (1-3):
             self.logger.error(f"Prompt handling test failed: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
-    async def _test_error_handling(self) -> Dict[str, Any]:
+    async def _test_error_handling(self) -> dict[str, Any]:
         """Test error handling and recovery."""
         try:
             from libs.core.claude_monitor_async import AsyncClaudeMonitor
@@ -367,13 +370,13 @@ Please enter your choice (1-3):
             # Immediate shutdown to test cancellation
             await monitor.stop_monitoring_async()
 
-            return {"success": True, "restart_attempts": restart_count, "graceful_shutdown": monitor.is_running == False, "error_recovery": restart_count > 0}
+            return {"success": True, "restart_attempts": restart_count, "graceful_shutdown": not monitor.is_running, "error_recovery": restart_count > 0}
 
         except Exception as e:
             self.logger.error(f"Error handling test failed: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
-    async def _test_baseline_integration(self) -> Dict[str, Any]:
+    async def _test_baseline_integration(self) -> dict[str, Any]:
         """Test performance baseline integration."""
         try:
             # Test baseline establishment (short duration for testing)
@@ -437,7 +440,7 @@ Please enter your choice (1-3):
 
             # Add specific details for each test
             for key, value in test_result.items():
-                if key != "success" and key != "error":
+                if key not in {"success", "error"}:
                     report += f"- **{key.replace('_', ' ').title()}**: {value}\n"
 
             if "error" in test_result:
@@ -464,7 +467,7 @@ The system is ready for production deployment.
             report += """### ❌ Issues Detected
 Some tests failed. Review the individual test results above and address:
 - Any integration failures
-- Performance monitoring issues  
+- Performance monitoring issues
 - Event communication problems
 - Error handling gaps
 
@@ -479,7 +482,7 @@ Fix these issues before proceeding to production.
         return report
 
 
-async def main():
+async def main() -> None:
     """Main entry point for integration testing."""
     print("🚀 Starting AsyncClaudeMonitor Integration Testing")
 
@@ -504,7 +507,7 @@ async def main():
 
         # Save detailed results
         results_path = project_root / "integration_test_results.json"
-        with open(results_path, "w") as f:
+        with open(results_path, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, default=str)
         print(f"📊 Detailed results saved to: {results_path}")
 

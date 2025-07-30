@@ -69,7 +69,8 @@
       "Bash(tree:*)",
       "mcp__filesystem__read_multiple_files",
       "mcp__filesystem__write_file",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(bandit:*)"
     ],
     "deny": []
   }

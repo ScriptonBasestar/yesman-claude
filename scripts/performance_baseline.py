@@ -3,8 +3,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-Performance monitoring baseline system for Yesman-Claude project.
+"""Performance monitoring baseline system for Yesman-Claude project.
 
 This module provides comprehensive performance benchmarking to establish baselines
 and measure the impact of architectural improvements, particularly async conversions.
@@ -26,7 +25,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import psutil
 
@@ -105,25 +104,23 @@ class PerformanceBaseline:
 
     timestamp: float
     system_metrics: SystemMetrics
-    monitoring_metrics: List[MonitoringMetrics]
-    event_bus_metrics: Optional[EventBusMetrics]
-    quality_gates_metrics: List[QualityGatesMetrics]
+    monitoring_metrics: list[MonitoringMetrics]
+    event_bus_metrics: EventBusMetrics | None
+    quality_gates_metrics: list[QualityGatesMetrics]
     benchmark_duration_seconds: float
     total_cpu_time_seconds: float
     baseline_version: str
 
 
 class PerformanceMonitor:
-    """
-    Comprehensive performance monitoring system.
+    """Comprehensive performance monitoring system.
 
     Provides baseline establishment, continuous monitoring, and performance
     comparison capabilities for the Yesman-Claude project.
     """
 
-    def __init__(self, data_dir: Optional[Path] = None):
-        """
-        Initialize the performance monitor.
+    def __init__(self, data_dir: Path | None = None) -> None:
+        """Initialize the performance monitor.
 
         Args:
             data_dir: Directory for storing performance data (defaults to project root)
@@ -132,22 +129,35 @@ class PerformanceMonitor:
         self.data_dir.mkdir(exist_ok=True)
 
         self.logger = logging.getLogger("yesman.performance_monitor")
-        self.event_bus = get_event_bus()
+
+        # Initialize event bus safely - start it if not running
+        try:
+            self.event_bus = get_event_bus()
+            # Ensure event bus is started
+            if not self.event_bus.is_running():
+                # We'll start it when needed in async context
+                self._event_bus_needs_start = True
+            else:
+                self._event_bus_needs_start = False
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize event bus: {e}")
+            self.event_bus = None
+            self._event_bus_needs_start = False
 
         # Monitoring state
         self.is_monitoring = False
-        self._monitor_task: Optional[asyncio.Task] = None
+        self._monitor_task: asyncio.Task | None = None
         self._start_time = 0.0
 
         # Performance tracking
-        self._system_samples: List[SystemMetrics] = []
-        self._monitoring_samples: List[MonitoringMetrics] = []
-        self._event_bus_samples: List[EventBusMetrics] = []
-        self._quality_gates_samples: List[QualityGatesMetrics] = []
+        self._system_samples: list[SystemMetrics] = []
+        self._monitoring_samples: list[MonitoringMetrics] = []
+        self._event_bus_samples: list[EventBusMetrics] = []
+        self._quality_gates_samples: list[QualityGatesMetrics] = []
 
         # Baseline data
-        self._current_baseline: Optional[PerformanceBaseline] = None
-        self._historical_baselines: List[PerformanceBaseline] = []
+        self._current_baseline: PerformanceBaseline | None = None
+        self._historical_baselines: list[PerformanceBaseline] = []
 
         # Process monitoring
         self._process = psutil.Process()
@@ -155,8 +165,7 @@ class PerformanceMonitor:
         self._initial_net_counters = None
 
     async def establish_baseline(self, duration_seconds: int = 60) -> PerformanceBaseline:
-        """
-        Establish a new performance baseline over specified duration.
+        """Establish a new performance baseline over specified duration.
 
         Args:
             duration_seconds: How long to monitor for baseline establishment
@@ -165,6 +174,16 @@ class PerformanceMonitor:
             Complete performance baseline data
         """
         self.logger.info(f"Establishing performance baseline over {duration_seconds} seconds...")
+
+        # Start event bus if needed
+        if self.event_bus and self._event_bus_needs_start:
+            try:
+                await self.event_bus.start()
+                self._event_bus_needs_start = False
+                self.logger.info("Started event bus for performance monitoring")
+            except Exception as e:
+                self.logger.warning(f"Failed to start event bus: {e}")
+                self.event_bus = None
 
         # Clear existing samples
         self._system_samples.clear()
@@ -249,7 +268,7 @@ class PerformanceMonitor:
 
         except Exception as e:
             self.is_monitoring = False
-            self.logger.error(f"Failed to start performance monitoring: {e}")
+            self.logger.exception("Failed to start performance monitoring")
             return False
 
     async def stop_monitoring(self) -> bool:
@@ -264,7 +283,7 @@ class PerformanceMonitor:
             self._monitor_task.cancel()
             try:
                 await asyncio.wait_for(self._monitor_task, timeout=5.0)
-            except (asyncio.TimeoutError, asyncio.CancelledError):
+            except (TimeoutError, asyncio.CancelledError):
                 self.logger.warning("Monitor task cancellation timed out")
 
         self.logger.info("Performance monitoring stopped")
@@ -292,7 +311,7 @@ class PerformanceMonitor:
                     self._limit_sample_history()
 
                 except Exception as e:
-                    self.logger.error(f"Error collecting performance samples: {e}")
+                    self.logger.exception("Error collecting performance samples")
 
                 # Calculate sleep time to maintain consistent interval
                 loop_duration = time.perf_counter() - loop_start
@@ -302,7 +321,7 @@ class PerformanceMonitor:
         except asyncio.CancelledError:
             self.logger.info("Performance monitoring loop cancelled")
         except Exception as e:
-            self.logger.error(f"Critical error in monitoring loop: {e}")
+            self.logger.exception("Critical error in monitoring loop")
 
     def _collect_system_metrics(self) -> SystemMetrics:
         """Collect current system resource metrics."""
@@ -345,7 +364,7 @@ class PerformanceMonitor:
             )
 
         except Exception as e:
-            self.logger.error(f"Error collecting system metrics: {e}")
+            self.logger.exception("Error collecting system metrics")
             # Return minimal metrics on error
             return SystemMetrics(
                 timestamp=time.time(),
@@ -362,7 +381,7 @@ class PerformanceMonitor:
                 system_platform=platform.platform(),
             )
 
-    async def _collect_event_bus_metrics(self) -> Optional[EventBusMetrics]:
+    async def _collect_event_bus_metrics(self) -> EventBusMetrics | None:
         """Collect AsyncEventBus performance metrics."""
         try:
             # Get metrics from event bus if available
@@ -385,7 +404,7 @@ class PerformanceMonitor:
             return None
 
         except Exception as e:
-            self.logger.error(f"Error collecting event bus metrics: {e}")
+            self.logger.exception("Error collecting event bus metrics")
             return None
 
     def record_monitoring_metrics(self, metrics: MonitoringMetrics) -> None:
@@ -439,20 +458,20 @@ class PerformanceMonitor:
             baseline_dict = asdict(baseline)
 
             # Save to file
-            with open(filepath, "w") as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(baseline_dict, f, indent=2, default=str)
 
             # Also save as latest baseline
             latest_path = self.data_dir / "latest_baseline.json"
-            with open(latest_path, "w") as f:
+            with open(latest_path, "w", encoding="utf-8") as f:
                 json.dump(baseline_dict, f, indent=2, default=str)
 
             self.logger.info(f"Baseline saved to: {filepath}")
 
         except Exception as e:
-            self.logger.error(f"Failed to save baseline: {e}")
+            self.logger.exception("Failed to save baseline")
 
-    async def load_baseline(self, filename: Optional[str] = None) -> Optional[PerformanceBaseline]:
+    async def load_baseline(self, filename: str | None = None) -> PerformanceBaseline | None:
         """Load baseline data from file."""
         try:
             if filename:
@@ -464,7 +483,7 @@ class PerformanceMonitor:
                 self.logger.warning(f"Baseline file not found: {filepath}")
                 return None
 
-            with open(filepath, "r") as f:
+            with open(filepath, encoding="utf-8") as f:
                 baseline_dict = json.load(f)
 
             # Convert back to dataclass (simplified for now)
@@ -477,12 +496,11 @@ class PerformanceMonitor:
             return baseline
 
         except Exception as e:
-            self.logger.error(f"Failed to load baseline: {e}")
+            self.logger.exception("Failed to load baseline")
             return None
 
-    def generate_performance_report(self, compare_to_baseline: bool = True) -> Dict[str, Any]:
-        """
-        Generate comprehensive performance report.
+    def generate_performance_report(self, compare_to_baseline: bool = True) -> dict[str, Any]:
+        """Generate comprehensive performance report.
 
         Args:
             compare_to_baseline: Whether to include baseline comparison
@@ -509,10 +527,10 @@ class PerformanceMonitor:
             return report
 
         except Exception as e:
-            self.logger.error(f"Error generating performance report: {e}")
+            self.logger.exception("Error generating performance report")
             return {"error": str(e), "timestamp": time.time()}
 
-    def _generate_system_summary(self) -> Dict[str, Any]:
+    def _generate_system_summary(self) -> dict[str, Any]:
         """Generate system performance summary."""
         if not self._system_samples:
             return {"error": "No system samples available"}
@@ -544,7 +562,7 @@ class PerformanceMonitor:
             },
         }
 
-    def _generate_monitoring_summary(self) -> Dict[str, Any]:
+    def _generate_monitoring_summary(self) -> dict[str, Any]:
         """Generate Claude monitoring performance summary."""
         if not self._monitoring_samples:
             return {"error": "No monitoring samples available"}
@@ -570,7 +588,7 @@ class PerformanceMonitor:
             "total_errors": sum(m.error_count for m in self._monitoring_samples),
         }
 
-    def _generate_event_bus_summary(self) -> Dict[str, Any]:
+    def _generate_event_bus_summary(self) -> dict[str, Any]:
         """Generate event bus performance summary."""
         if not self._event_bus_samples:
             return {"info": "No event bus samples available"}
@@ -588,7 +606,7 @@ class PerformanceMonitor:
             },
         }
 
-    def _generate_quality_gates_summary(self) -> Dict[str, Any]:
+    def _generate_quality_gates_summary(self) -> dict[str, Any]:
         """Generate quality gates performance summary."""
         if not self._quality_gates_samples:
             return {"info": "No quality gates samples available"}
@@ -607,7 +625,7 @@ class PerformanceMonitor:
             "gates_tested": list(set(q.gate_name for q in self._quality_gates_samples)),
         }
 
-    def _generate_baseline_comparison(self) -> Dict[str, Any]:
+    def _generate_baseline_comparison(self) -> dict[str, Any]:
         """Generate comparison with baseline metrics."""
         if not self._current_baseline:
             return {"error": "No baseline available for comparison"}
@@ -628,7 +646,7 @@ class PerformanceMonitor:
 
 
 # Global performance monitor instance
-_performance_monitor: Optional[PerformanceMonitor] = None
+_performance_monitor: PerformanceMonitor | None = None
 
 
 def get_performance_monitor() -> PerformanceMonitor:

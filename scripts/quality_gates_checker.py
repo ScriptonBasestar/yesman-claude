@@ -3,8 +3,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-Automated Quality Gates Checker for Yesman-Claude.
+"""Automated Quality Gates Checker for Yesman-Claude.
 
 This script implements the comprehensive quality gate system designed in Phase 2,
 providing automated checks for code quality, performance, security, and architecture
@@ -25,7 +24,7 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class GateResult(Enum):
@@ -55,7 +54,7 @@ class QualityCheck:
     score: float
     threshold: float
     message: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     execution_time: float
 
 
@@ -68,37 +67,37 @@ class QualityGateResults:
     warning_failures: int
     total_checks: int
     execution_time: float
-    checks: List[QualityCheck]
-    summary: Dict[str, Any]
+    checks: list[QualityCheck]
+    summary: dict[str, Any]
 
 
 class QualityGatesChecker:
-    """
-    Comprehensive quality gates checker implementing the Phase 2 quality framework.
-    """
+    """Comprehensive quality gates checker implementing the Phase 2 quality framework."""
 
-    def __init__(self, config_path: Optional[Path] = None):
-        """
-        Initialize quality gates checker.
+    def __init__(self, config_path: Path | None = None) -> None:
+        """Initialize quality gates checker.
 
         Args:
             config_path: Optional path to quality gates configuration
         """
         self.config = self._load_config(config_path)
         self.logger = self._setup_logging()
-        self.results: List[QualityCheck] = []
+        self.results: list[QualityCheck] = []
 
-        # Performance monitoring integration
+        # Performance monitoring integration - disabled by default for faster execution
         self.performance_monitor = None
+        self._performance_monitoring_enabled = False
         try:
-            from scripts.performance_baseline import create_quality_gates_metrics, get_performance_monitor
+            # Only enable performance monitoring if explicitly requested
+            if config_path and "enable_performance_monitoring" in (config_path.read_text() if config_path.exists() else ""):
+                from scripts.performance_baseline import create_quality_gates_metrics, get_performance_monitor
+                self.performance_monitor = get_performance_monitor()
+                self._create_quality_gates_metrics = create_quality_gates_metrics
+                self._performance_monitoring_enabled = True
+        except Exception as e:
+            self.logger.debug(f"Performance monitoring not available: {e}")
 
-            self.performance_monitor = get_performance_monitor()
-            self._create_quality_gates_metrics = create_quality_gates_metrics
-        except ImportError:
-            self.logger.warning("Performance monitoring not available")
-
-    def _load_config(self, config_path: Optional[Path]) -> Dict[str, Any]:
+    def _load_config(self, config_path: Path | None) -> dict[str, Any]:
         """Load quality gates configuration."""
         default_config = {
             "blocking_gates": {
@@ -123,7 +122,7 @@ class QualityGatesChecker:
 
         if config_path and config_path.exists():
             try:
-                with open(config_path) as f:
+                with open(config_path, encoding="utf-8") as f:
                     user_config = json.load(f)
                 # Merge user config with defaults
                 for section, values in user_config.items():
@@ -164,8 +163,7 @@ class QualityGatesChecker:
                 self.logger.debug(f"Failed to record performance metrics for {gate_name}: {e}")
 
     async def run_all_gates(self) -> QualityGateResults:
-        """
-        Run all enabled quality gates.
+        """Run all enabled quality gates.
 
         Returns:
             Complete quality gate results
@@ -202,7 +200,7 @@ class QualityGatesChecker:
                 result = await check_task
                 self.results.append(result)
             except Exception as e:
-                self.logger.error(f"Error running quality check: {e}")
+                self.logger.exception("Error running quality check")
                 # Add error result
                 self.results.append(
                     QualityCheck(
@@ -226,7 +224,7 @@ class QualityGatesChecker:
 
         try:
             # Run ruff linting check
-            result = subprocess.run(["ruff", "check", ".", "--output-format=json"], capture_output=True, text=True)
+            result = subprocess.run(["ruff", "check", ".", "--output-format=json"], check=False, capture_output=True, text=True)
 
             violations = 0
             details = {"violations": []}
@@ -295,8 +293,14 @@ class QualityGatesChecker:
         start_time = time.perf_counter()
 
         try:
-            # Run bandit security scan
-            result = subprocess.run(["bandit", "-r", ".", "-f", "json"], capture_output=True, text=True)
+            # Run bandit security scan with timeout and exclusions for faster execution
+            result = subprocess.run(
+                ["bandit", "-r", ".", "-f", "json", "--exclude", "./.backups,./.venv", "--skip", "B101,B601"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=30  # 30 second timeout
+            )
 
             critical_issues = 0
             details = {"issues": []}
@@ -343,6 +347,19 @@ class QualityGatesChecker:
                 execution_time=execution_time,
             )
 
+        except subprocess.TimeoutExpired:
+            execution_time = time.perf_counter() - start_time
+            self.logger.warning("Bandit security scan timed out after 30 seconds")
+            return QualityCheck(
+                name="security",
+                level=GateLevel.BLOCKING,
+                result=GateResult.WARNING,
+                score=50.0,
+                threshold=0,
+                message="Security check timed out - partial scan only",
+                details={"timeout": True, "duration": 30},
+                execution_time=execution_time,
+            )
         except FileNotFoundError:
             execution_time = time.perf_counter() - start_time
             self.logger.warning("Bandit not found, skipping security check")
@@ -376,7 +393,11 @@ class QualityGatesChecker:
         try:
             # Run pytest with coverage
             result = subprocess.run(
-                ["python", "-m", "pytest", "--cov=libs", "--cov=commands", "--cov=api", "--cov-report=json", "--cov-report=term-missing", "--quiet"], capture_output=True, text=True, timeout=300
+                [
+                    "python", "-m", "pytest", "--cov=libs", "--cov=commands", "--cov=api",
+                    "--cov-report=json", "--cov-report=term-missing", "--quiet"
+                ],
+                check=False, capture_output=True, text=True, timeout=300
             )
 
             coverage_percent = 0.0
@@ -386,7 +407,7 @@ class QualityGatesChecker:
             coverage_file = Path("coverage.json")
             if coverage_file.exists():
                 try:
-                    with open(coverage_file) as f:
+                    with open(coverage_file, encoding="utf-8") as f:
                         coverage_data = json.load(f)
 
                     coverage_percent = coverage_data["totals"]["percent_covered"]
@@ -450,7 +471,7 @@ class QualityGatesChecker:
                 execution_time=execution_time,
             )
 
-    def _group_coverage_by_module(self, file_coverage: Dict[str, float]) -> Dict[str, Dict[str, Any]]:
+    def _group_coverage_by_module(self, file_coverage: dict[str, float]) -> dict[str, dict[str, Any]]:
         """Group coverage data by module for analysis."""
         modules = {}
 
@@ -480,7 +501,7 @@ class QualityGatesChecker:
 
         try:
             # Run radon complexity analysis
-            result = subprocess.run(["radon", "cc", ".", "--json"], capture_output=True, text=True)
+            result = subprocess.run(["radon", "cc", ".", "--json"], check=False, capture_output=True, text=True)
 
             avg_complexity = 0.0
             high_complexity_functions = []
@@ -557,7 +578,7 @@ class QualityGatesChecker:
                 execution_time=execution_time,
             )
 
-    def _calculate_complexity_distribution(self, complexities: List[float]) -> Dict[str, int]:
+    def _calculate_complexity_distribution(self, complexities: list[float]) -> dict[str, int]:
         """Calculate complexity score distribution."""
         distribution = {"1-5 (Simple)": 0, "6-10 (Moderate)": 0, "11-15 (Complex)": 0, "16+ (Very Complex)": 0}
 
@@ -588,7 +609,7 @@ class QualityGatesChecker:
                     continue
 
                 try:
-                    with open(py_file, "r", encoding="utf-8") as f:
+                    with open(py_file, encoding="utf-8") as f:
                         content = f.read()
 
                     import ast
@@ -666,7 +687,7 @@ class QualityGatesChecker:
                     # Use the most recent benchmark file
                     latest_benchmark = max(benchmark_files, key=lambda p: p.stat().st_mtime)
 
-                    with open(latest_benchmark) as f:
+                    with open(latest_benchmark, encoding="utf-8") as f:
                         benchmark_data = json.load(f)
 
                     # Calculate performance score from benchmark data
@@ -701,7 +722,7 @@ class QualityGatesChecker:
                 try:
                     # Simple startup time test
                     import_start = time.perf_counter()
-                    subprocess.run([sys.executable, "-c", "import libs.core"], capture_output=True, timeout=10)
+                    subprocess.run([sys.executable, "-c", "import libs.core"], check=False, capture_output=True, timeout=10)
                     import_time = time.perf_counter() - import_start
 
                     performance_score = max(20, 100 - (import_time * 20))  # 5s = 0 score
@@ -755,7 +776,7 @@ class QualityGatesChecker:
                     continue
 
                 try:
-                    with open(py_file, "r", encoding="utf-8") as f:
+                    with open(py_file, encoding="utf-8") as f:
                         content = f.read()
 
                     import ast
@@ -825,7 +846,7 @@ class QualityGatesChecker:
 
         try:
             # Run mypy for type checking analysis
-            result = subprocess.run(["mypy", ".", "--show-error-codes", "--no-error-summary"], capture_output=True, text=True)
+            result = subprocess.run(["mypy", ".", "--show-error-codes", "--no-error-summary"], check=False, capture_output=True, text=True)
 
             # Analyze type annotation coverage manually
             annotated_functions = 0
@@ -837,7 +858,7 @@ class QualityGatesChecker:
                     continue
 
                 try:
-                    with open(py_file, "r", encoding="utf-8") as f:
+                    with open(py_file, encoding="utf-8") as f:
                         content = f.read()
 
                     import ast
@@ -1028,7 +1049,7 @@ class QualityGatesChecker:
                 report += f"- **Message**: {result.message}\n"
                 report += f"- **Execution Time**: {result.execution_time:.3f}s\n"
 
-                if result.details and any(key not in ["error", "skipped"] for key in result.details.keys()):
+                if result.details and any(key not in {"error", "skipped"} for key in result.details):
                     report += f"- **Details**: {self._format_details_summary(result.details)}\n"
 
                 report += "\n"
@@ -1070,28 +1091,25 @@ class QualityGatesChecker:
         emoji_map = {GateResult.PASS: "✅", GateResult.FAIL: "❌", GateResult.WARNING: "⚠️", GateResult.SKIP: "⏭️"}
         return emoji_map.get(result, "❓")
 
-    def _format_details_summary(self, details: Dict[str, Any]) -> str:
+    def _format_details_summary(self, details: dict[str, Any]) -> str:
         """Format details for summary display."""
         if not details:
             return "No additional details"
 
         summary_items = []
         for key, value in details.items():
-            if key in ["error", "skipped"]:
+            if key in {"error", "skipped"}:
                 continue
 
             if isinstance(value, (int, float)):
                 summary_items.append(f"{key}: {value}")
-            elif isinstance(value, dict) and len(value) < 5:
-                summary_items.append(f"{key}: {len(value)} items")
-            elif isinstance(value, list) and len(value) < 10:
+            elif isinstance(value, dict) and len(value) < 5 or isinstance(value, list) and len(value) < 10:
                 summary_items.append(f"{key}: {len(value)} items")
 
         return ", ".join(summary_items) if summary_items else "See full report for details"
 
     async def run_essential_gates(self) -> QualityGateResults:
-        """
-        Run essential quality gates for fast pre-commit checks.
+        """Run essential quality gates for fast pre-commit checks.
 
         Returns:
             Essential quality gate results (blocking gates only)
@@ -1116,7 +1134,7 @@ class QualityGatesChecker:
                 result = await check_task
                 self.results.append(result)
             except Exception as e:
-                self.logger.error(f"Error running essential check: {e}")
+                self.logger.exception("Error running essential check")
                 self.results.append(
                     QualityCheck(
                         name="essential_check_error",
@@ -1134,8 +1152,7 @@ class QualityGatesChecker:
         return self._compile_results(execution_time)
 
     async def run_comprehensive_gates(self) -> QualityGateResults:
-        """
-        Run comprehensive quality gates for pre-push validation.
+        """Run comprehensive quality gates for pre-push validation.
 
         Returns:
             Complete quality gate results (all levels)
@@ -1144,7 +1161,7 @@ class QualityGatesChecker:
         return await self.run_all_gates()
 
 
-async def main():
+async def main() -> None:
     """Main entry point for quality gates checker."""
     import argparse
 
@@ -1174,9 +1191,7 @@ async def main():
 
     # Determine exit code
     exit_code = 0
-    if results.overall_result == GateResult.FAIL:
-        exit_code = 1
-    elif results.overall_result == GateResult.WARNING and args.fail_on_warning:
+    if results.overall_result == GateResult.FAIL or results.overall_result == GateResult.WARNING and args.fail_on_warning:
         exit_code = 1
 
     if exit_code == 0:

@@ -4,8 +4,7 @@
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
-"""
-Async-first Claude monitoring system integrated with AsyncEventBus.
+"""Async-first Claude monitoring system integrated with AsyncEventBus.
 
 This module provides a high-performance, event-driven Claude monitoring system
 that replaces the thread-based approach with native async operations. It integrates
@@ -22,7 +21,7 @@ Key Improvements:
 import asyncio
 import logging
 import time
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
 from libs.automation.automation_manager import AutomationManager
@@ -35,8 +34,7 @@ from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType
 
 
 class AsyncClaudeMonitor:
-    """
-    High-performance async Claude monitoring system.
+    """High-performance async Claude monitoring system.
 
     This class provides event-driven Claude monitoring with non-blocking operations,
     integrated performance metrics, and seamless AsyncEventBus communication.
@@ -47,10 +45,9 @@ class AsyncClaudeMonitor:
         session_manager: object,
         process_controller: object,
         status_manager: object,
-        event_bus: Optional[AsyncEventBus] = None,
+        event_bus: AsyncEventBus | None = None,
     ) -> None:
-        """
-        Initialize the AsyncClaudeMonitor.
+        """Initialize the AsyncClaudeMonitor.
 
         Args:
             session_manager: Session management interface
@@ -68,8 +65,8 @@ class AsyncClaudeMonitor:
 
         # Monitoring state
         self.is_running = False
-        self._monitor_task: Optional[asyncio.Task] = None
-        self._cleanup_task: Optional[asyncio.Task] = None
+        self._monitor_task: asyncio.Task | None = None
+        self._cleanup_task: asyncio.Task | None = None
 
         # Performance monitoring
         self._loop_count = 0
@@ -89,7 +86,7 @@ class AsyncClaudeMonitor:
         # Prompt detection and content analysis
         self.prompt_detector = ClaudePromptDetector()
         self.content_collector = ClaudeContentCollector(self.session_name)
-        self.current_prompt: Optional[PromptInfo] = None
+        self.current_prompt: PromptInfo | None = None
         self.waiting_for_input = False
         self._last_content = ""
 
@@ -110,7 +107,7 @@ class AsyncClaudeMonitor:
         self.health_calculator = HealthCalculator(project_path=None)
 
         # High-performance async logging system
-        self.async_logger: Optional[AsyncLogger] = None
+        self.async_logger: AsyncLogger | None = None
 
         # Logger setup
         self.logger = logging.getLogger(f"yesman.async_claude_monitor.{self.session_name}")
@@ -129,8 +126,7 @@ class AsyncClaudeMonitor:
 
     # Core monitoring methods
     async def start_monitoring_async(self) -> bool:
-        """
-        Start the async monitoring loop.
+        """Start the async monitoring loop.
 
         Returns:
             True if monitoring started successfully, False otherwise
@@ -179,8 +175,7 @@ class AsyncClaudeMonitor:
             return False
 
     async def stop_monitoring_async(self) -> bool:
-        """
-        Stop the async monitoring loop gracefully.
+        """Stop the async monitoring loop gracefully.
 
         Returns:
             True if monitoring stopped successfully, False otherwise
@@ -207,7 +202,7 @@ class AsyncClaudeMonitor:
             # Wait for cancellation with timeout
             try:
                 await asyncio.wait_for(asyncio.gather(*tasks_to_cancel, return_exceptions=True), timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self.logger.warning("Monitor tasks cancellation timed out")
 
         # Stop async logging
@@ -229,8 +224,7 @@ class AsyncClaudeMonitor:
         return True
 
     async def _monitor_loop_async(self) -> None:
-        """
-        Main async monitoring loop - non-blocking and event-driven.
+        """Main async monitoring loop - non-blocking and event-driven.
 
         This is the core performance-critical method that replaces the
         thread-based monitoring with pure async operations.
@@ -304,8 +298,7 @@ class AsyncClaudeMonitor:
             self.logger.info("Async monitoring loop stopped")
 
     async def _capture_pane_content_async(self) -> str:
-        """
-        Capture pane content asynchronously.
+        """Capture pane content asynchronously.
 
         Returns:
             Current pane content as string
@@ -316,12 +309,11 @@ class AsyncClaudeMonitor:
             content = await loop.run_in_executor(None, cast("Any", self.session_manager).capture_pane_content)
             return cast(str, content)
         except Exception as e:
-            self.logger.error("Error capturing pane content: %s", e)
+            self.logger.exception("Error capturing pane content")
             return ""
 
     async def _check_claude_status_async(self) -> bool:
-        """
-        Check Claude process status asynchronously.
+        """Check Claude process status asynchronously.
 
         Returns:
             True if Claude is running, False otherwise
@@ -332,7 +324,7 @@ class AsyncClaudeMonitor:
             is_running = await loop.run_in_executor(None, cast("Any", self.process_controller).is_claude_running)
             return cast(bool, is_running)
         except Exception as e:
-            self.logger.error("Error checking Claude status: %s", e)
+            self.logger.exception("Error checking Claude status")
             return False
 
     async def _handle_claude_not_running(self) -> None:
@@ -360,7 +352,7 @@ class AsyncClaudeMonitor:
                 )
 
             except Exception as e:
-                self.logger.error("Failed to restart Claude: %s", e)
+                self.logger.exception("Failed to restart Claude")
                 await self.event_bus.publish(
                     Event(
                         type=EventType.CLAUDE_ERROR,
@@ -375,8 +367,7 @@ class AsyncClaudeMonitor:
             await self._publish_status_event("warning", "Claude not running. Auto-restart disabled.")
 
     async def _process_content_async(self, content: str) -> None:
-        """
-        Process pane content for prompts and automation opportunities.
+        """Process pane content for prompts and automation opportunities.
 
         Args:
             content: Current pane content
@@ -402,9 +393,8 @@ class AsyncClaudeMonitor:
             await self._publish_activity_event("📝 Content updated")
             self._last_content = content
 
-    async def _check_for_prompt_async(self, content: str) -> Optional[PromptInfo]:
-        """
-        Check for prompts in content asynchronously.
+    async def _check_for_prompt_async(self, content: str) -> PromptInfo | None:
+        """Check for prompts in content asynchronously.
 
         Args:
             content: Content to analyze
@@ -443,15 +433,14 @@ class AsyncClaudeMonitor:
                 # Check if still waiting based on content patterns
                 self.waiting_for_input = await loop.run_in_executor(None, self.prompt_detector.is_waiting_for_input, content)
 
-            return cast(Optional[PromptInfo], prompt_info)
+            return cast(PromptInfo | None, prompt_info)
 
         except Exception as e:
-            self.logger.error("Error checking for prompts: %s", e)
+            self.logger.exception("Error checking for prompts")
             return None
 
     async def _handle_prompt_async(self, prompt_info: PromptInfo, content: str) -> None:
-        """
-        Handle detected prompts with AI-powered and fallback responses.
+        """Handle detected prompts with AI-powered and fallback responses.
 
         Args:
             prompt_info: Detected prompt information
@@ -486,7 +475,7 @@ class AsyncClaudeMonitor:
             await self._publish_activity_event(f"⏳ Waiting for input: {prompt_info.type.value}")
 
         except Exception as e:
-            self.logger.error("Error handling prompt: %s", e)
+            self.logger.exception("Error handling prompt")
             await self._publish_activity_event(f"❌ Error handling prompt: {e}")
 
     async def _send_ai_response(self, prompt_info: PromptInfo, response: str, confidence: float, context: str) -> bool:
@@ -532,7 +521,7 @@ class AsyncClaudeMonitor:
                 return True
 
         except Exception as e:
-            self.logger.error("Error sending AI response: %s", e)
+            self.logger.exception("Error sending AI response")
 
         return False
 
@@ -567,7 +556,7 @@ class AsyncClaudeMonitor:
             self._clear_prompt_state()
 
         except Exception as e:
-            self.logger.error("Error sending legacy response: %s", e)
+            self.logger.exception("Error sending legacy response")
 
     async def _send_input_async(self, input_text: str) -> None:
         """Send input to Claude process asynchronously."""
@@ -575,7 +564,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.process_controller).send_input, input_text)
         except Exception as e:
-            self.logger.error("Error sending input: %s", e)
+            self.logger.exception("Error sending input")
             raise
 
     async def _record_response_async(self, prompt_type: str, response: str, question: str) -> None:
@@ -584,7 +573,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.status_manager).record_response, prompt_type, response, question)
         except Exception as e:
-            self.logger.error("Error recording response: %s", e)
+            self.logger.exception("Error recording response")
 
     async def _auto_respond_to_selection_async(self, prompt_info: PromptInfo) -> bool:
         """Check if we should auto-respond to selection prompts."""
@@ -597,18 +586,18 @@ class AsyncClaudeMonitor:
             should_respond = await loop.run_in_executor(None, self._should_auto_respond, prompt_info)
             return cast(bool, should_respond)
         except Exception as e:
-            self.logger.error("Error checking auto-response: %s", e)
+            self.logger.exception("Error checking auto-response")
             return False
 
     def _should_auto_respond(self, prompt_info: PromptInfo) -> bool:
         """Determine if we should auto-respond (runs in thread pool)."""
         try:
-            return prompt_info.type in [
+            return prompt_info.type in {
                 PromptType.NUMBERED_SELECTION,
                 PromptType.BINARY_CHOICE,
                 PromptType.CONFIRMATION,
                 PromptType.LOGIN_REDIRECT,
-            ]
+            }
         except Exception:
             return False
 
@@ -644,9 +633,9 @@ class AsyncClaudeMonitor:
                     )
 
         except Exception as e:
-            self.logger.error("Error analyzing automation context: %s", e)
+            self.logger.exception("Error analyzing automation context")
 
-    async def _collect_content_interaction(self, content: str, prompt_info: Optional[PromptInfo]) -> None:
+    async def _collect_content_interaction(self, content: str, prompt_info: PromptInfo | None) -> None:
         """Collect content interaction for pattern analysis."""
         try:
             # Convert PromptInfo to dict for compatibility
@@ -662,7 +651,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, self.content_collector.collect_interaction, content, prompt_dict, None)
         except Exception as e:
-            self.logger.error("Error collecting content interaction: %s", e)
+            self.logger.exception("Error collecting content interaction")
 
     async def _maintenance_loop(self) -> None:
         """Background maintenance loop for cleanup and optimization."""
@@ -700,7 +689,7 @@ class AsyncClaudeMonitor:
                             self.logger.debug("Claude idle context: %.2f", idle_context.confidence)
 
                 except Exception as e:
-                    self.logger.error("Error in maintenance loop: %s", e)
+                    self.logger.exception("Error in maintenance loop")
 
         except asyncio.CancelledError:
             self.logger.info("Maintenance loop cancelled")
@@ -736,7 +725,7 @@ class AsyncClaudeMonitor:
             self.logger.debug("Performance: %.2f loops/sec, %d total loops", loops_per_second, self._loop_count)
 
         except Exception as e:
-            self.logger.error("Error reporting performance metrics: %s", e)
+            self.logger.exception("Error reporting performance metrics")
 
     # Event publishing helpers
     async def _publish_status_event(self, status_type: str, message: str) -> None:
@@ -757,7 +746,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.status_manager).update_status, f"[{status_type}]{message}[/]")
         except Exception as e:
-            self.logger.error("Error publishing status event: %s", e)
+            self.logger.exception("Error publishing status event")
 
     async def _publish_activity_event(self, message: str) -> None:
         """Publish activity update event."""
@@ -777,7 +766,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.status_manager).update_activity, message)
         except Exception as e:
-            self.logger.error("Error publishing activity event: %s", e)
+            self.logger.exception("Error publishing activity event")
 
     # Utility methods (maintaining backward compatibility)
     def _clear_prompt_state(self) -> None:
@@ -812,7 +801,7 @@ class AsyncClaudeMonitor:
                     return ""  # Just press Enter
 
         except Exception as e:
-            self.logger.error("Error getting legacy response: %s", e)
+            self.logger.exception("Error getting legacy response")
 
         return "1"  # Safe fallback
 
@@ -838,7 +827,7 @@ class AsyncClaudeMonitor:
             await self.async_logger.start()
             self.logger.info("Async logging system started")
         except Exception as e:
-            self.logger.error("Failed to start async logging: %s", e)
+            self.logger.exception("Failed to start async logging")
 
     async def _stop_async_logging(self) -> None:
         """Stop the async logging system."""
@@ -848,7 +837,7 @@ class AsyncClaudeMonitor:
                 self.async_logger = None
                 self.logger.info("Async logging system stopped")
             except Exception as e:
-                self.logger.error("Error stopping async logging: %s", e)
+                self.logger.exception("Error stopping async logging")
 
     # Public interface methods (backward compatibility)
     def set_auto_next(self, enabled: bool) -> None:
@@ -876,7 +865,7 @@ class AsyncClaudeMonitor:
         """Check if Claude is currently waiting for user input."""
         return self.waiting_for_input
 
-    def get_current_prompt(self) -> Optional[PromptInfo]:
+    def get_current_prompt(self) -> PromptInfo | None:
         """Get the current prompt information."""
         return self.current_prompt
 
@@ -929,10 +918,9 @@ def create_claude_monitor(
     process_controller: object,
     status_manager: object,
     prefer_async: bool = True,
-    event_bus: Optional[AsyncEventBus] = None,
+    event_bus: AsyncEventBus | None = None,
 ) -> Any:
-    """
-    Factory function to create appropriate Claude monitor.
+    """Factory function to create appropriate Claude monitor.
 
     Args:
         session_manager: Session management interface

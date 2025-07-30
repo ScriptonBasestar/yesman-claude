@@ -264,7 +264,7 @@ def create_default_loader() -> ConfigLoader:
     if mode in {"isolated", "local"}:
         # Check if local config exists and has sufficient configuration
         if not local_config_path.exists():
-            raise RuntimeError(f"mode: {mode} but local config doesn't exist")
+            raise RuntimeError(f"Local config missing for mode: {mode}")
 
         # Check if local config has required fields
         with open(local_config_path, encoding="utf-8") as f:
@@ -272,7 +272,7 @@ def create_default_loader() -> ConfigLoader:
 
         # Check for required fields in isolated mode
         if "tmux" not in local_data or "logging" not in local_data:
-            raise RuntimeError(f"mode: {mode} but local config doesn't exist or is empty")
+            raise RuntimeError(f"Local config incomplete for mode: {mode}")
 
         # Only add local config and environment variables
         loader.add_source(YamlFileSource(local_config_path))

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""
-Workflow Examples for LangChain-Claude CLI Integration
+"""Workflow Examples for LangChain-Claude CLI Integration.
 
 This module provides common workflow patterns and examples for integrating
 LangChain with Claude CLI for various development tasks.
 """
 
 import asyncio
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain_claude_integration import ClaudeAgent
 
@@ -16,7 +15,7 @@ class WorkflowTemplates:
     """Collection of common workflow templates."""
 
     @staticmethod
-    def code_review_workflow() -> List[Dict[str, Any]]:
+    def code_review_workflow() -> list[dict[str, Any]]:
         """Workflow for automated code review."""
         return [
             {
@@ -46,7 +45,7 @@ class WorkflowTemplates:
         ]
 
     @staticmethod
-    def feature_development_workflow() -> List[Dict[str, Any]]:
+    def feature_development_workflow() -> list[dict[str, Any]]:
         """Workflow for new feature development."""
         return [
             {
@@ -82,7 +81,7 @@ class WorkflowTemplates:
         ]
 
     @staticmethod
-    def refactoring_workflow() -> List[Dict[str, Any]]:
+    def refactoring_workflow() -> list[dict[str, Any]]:
         """Workflow for code refactoring."""
         return [
             {
@@ -112,7 +111,7 @@ class WorkflowTemplates:
         ]
 
     @staticmethod
-    def deployment_workflow() -> List[Dict[str, Any]]:
+    def deployment_workflow() -> list[dict[str, Any]]:
         """Workflow for deployment preparation."""
         return [
             {
@@ -145,14 +144,13 @@ class WorkflowTemplates:
 class WorkflowExecutor:
     """Advanced workflow executor with error handling and recovery."""
 
-    def __init__(self, project_path: str):
+    def __init__(self, project_path: str) -> None:
         self.agent = ClaudeAgent(project_path)
         self.execution_history = []
         self.checkpoints = {}
 
-    async def execute_with_checkpoints(self, workflow: List[Dict[str, Any]], checkpoint_interval: int = 2) -> Dict[str, Any]:
+    async def execute_with_checkpoints(self, workflow: list[dict[str, Any]], checkpoint_interval: int = 2) -> dict[str, Any]:
         """Execute workflow with checkpoint saving."""
-
         results = {}
 
         for i, step in enumerate(workflow):
@@ -181,9 +179,8 @@ class WorkflowExecutor:
 
         return results
 
-    async def _execute_step(self, step: Dict[str, Any]) -> str:
+    async def _execute_step(self, step: dict[str, Any]) -> str:
         """Execute a single workflow step."""
-
         step_type = step.get("type", "general")
         prompt = step["prompt"]
         context = step.get("context", {})
@@ -203,9 +200,8 @@ class WorkflowExecutor:
 
         return result
 
-    async def _save_checkpoint(self, step_index: int, results: Dict[str, Any], workflow: List[Dict[str, Any]]):
+    async def _save_checkpoint(self, step_index: int, results: dict[str, Any], workflow: list[dict[str, Any]]):
         """Save execution checkpoint."""
-
         checkpoint = {
             "step_index": step_index,
             "results": results,
@@ -216,9 +212,8 @@ class WorkflowExecutor:
 
         self.checkpoints[step_index] = checkpoint
 
-    async def _handle_error(self, step: Dict[str, Any], error: Exception, partial_results: Dict[str, Any]) -> str:
+    async def _handle_error(self, step: dict[str, Any], error: Exception, partial_results: dict[str, Any]) -> str:
         """Handle execution errors with recovery attempts."""
-
         # Log error
         error_info = {
             "step": step["id"],
@@ -241,40 +236,37 @@ class WorkflowExecutor:
                 result = await strategy(step, error)
                 if result:
                     return result
-            except Exception:
+            except Exception as strategy_error:
+                print(f"⚠️ Recovery strategy {strategy.__name__} failed: {strategy_error}")
                 continue
 
         return None
 
-    async def _retry_with_simplified_prompt(self, step: Dict[str, Any], error: Exception) -> str:
+    async def _retry_with_simplified_prompt(self, step: dict[str, Any], error: Exception) -> str:
         """Retry with a simplified version of the prompt."""
-
         simplified_prompt = f"Simple version: {step['prompt']}"
 
         result = self.agent.claude_tool._run(prompt=simplified_prompt, custom_prompt="Keep it simple and focused")
 
         return result
 
-    async def _retry_with_context_reset(self, step: Dict[str, Any], error: Exception) -> str:
+    async def _retry_with_context_reset(self, step: dict[str, Any], error: Exception) -> str:
         """Retry with fresh context (no session continuity)."""
-
         result = self.agent.claude_tool._run(prompt=step["prompt"], continue_session=False)
 
         return result
 
-    async def _skip_step_with_warning(self, step: Dict[str, Any], error: Exception) -> str:
+    async def _skip_step_with_warning(self, step: dict[str, Any], error: Exception) -> str:
         """Skip step with warning message."""
-
         return f"SKIPPED: {step['id']} - {str(error)}"
 
     async def _save_failure_state(
         self,
-        failed_step: Dict[str, Any],
+        failed_step: dict[str, Any],
         error: Exception,
-        partial_results: Dict[str, Any],
+        partial_results: dict[str, Any],
     ):
         """Save failure state for debugging."""
-
         failure_state = {
             "failed_step": failed_step,
             "error": str(error),
@@ -286,12 +278,11 @@ class WorkflowExecutor:
         # Save to file for analysis
         import json
 
-        with open("workflow_failure.json", "w") as f:
+        with open("workflow_failure.json", "w", encoding="utf-8") as f:
             json.dump(failure_state, f, indent=2, default=str)
 
-    def _log_progress(self, step: Dict[str, Any], result: str):
+    def _log_progress(self, step: dict[str, Any], result: str):
         """Log workflow progress."""
-
         progress_info = {
             "step_id": step["id"],
             "step_type": step.get("type", "general"),
@@ -303,9 +294,8 @@ class WorkflowExecutor:
 
 
 # Example usage functions
-async def run_code_review():
+async def run_code_review() -> None:
     """Run automated code review workflow."""
-
     executor = WorkflowExecutor("/path/to/your/project")
     workflow = WorkflowTemplates.code_review_workflow()
 
@@ -313,9 +303,8 @@ async def run_code_review():
     return results
 
 
-async def run_feature_development():
+async def run_feature_development() -> None:
     """Run feature development workflow."""
-
     executor = WorkflowExecutor("/path/to/your/project")
     workflow = WorkflowTemplates.feature_development_workflow()
 
@@ -323,9 +312,8 @@ async def run_feature_development():
     return results
 
 
-async def run_refactoring():
+async def run_refactoring() -> None:
     """Run refactoring workflow."""
-
     executor = WorkflowExecutor("/path/to/your/project")
     workflow = WorkflowTemplates.refactoring_workflow()
 

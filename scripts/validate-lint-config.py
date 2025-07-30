@@ -14,15 +14,22 @@ Ensures make lint, pre-commit, and pre-push hooks are consistent.
 """
 
 
-def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(cmd: str | list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a shell command and return the result.
 
     Returns:
         object: Description of return value.
     """
-    print(f"🔍 Running: {cmd}")
-    # nosec B602 - shell=True is intentional for this validation script
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    # Convert string commands to list for security
+    if isinstance(cmd, str):
+        cmd_list = cmd.split()
+        print(f"🔍 Running: {' '.join(cmd_list)}")
+    else:
+        cmd_list = cmd
+        print(f"🔍 Running: {' '.join(cmd_list)}")
+
+    # Use shell=False for security
+    result = subprocess.run(cmd_list, capture_output=True, text=True, check=False)
 
     if result.returncode != 0 and check:
         print(f"❌ Command failed: {cmd}")
@@ -43,15 +50,15 @@ def validate_lint_consistency() -> bool:
 
     # Test make lint
     print("\n📋 Testing make lint...")
-    make_lint_result = run_command("make lint", check=False)
+    make_lint_result = run_command(["make", "lint"], check=False)
 
     # Test pre-commit hooks
     print("\n🔨 Testing pre-commit hooks...")
-    precommit_result = run_command("uv run pre-commit run --all-files", check=False)
+    precommit_result = run_command(["uv", "run", "pre-commit", "run", "--all-files"], check=False)
 
     # Test pre-push hooks
     print("\n🚀 Testing pre-push hooks...")
-    prepush_result = run_command("uv run pre-commit run --hook-stage pre-push --all-files", check=False)
+    prepush_result = run_command(["uv", "run", "pre-commit", "run", "--hook-stage", "pre-push", "--all-files"], check=False)
 
     # Summary
     print("\n📊 Validation Summary:")
@@ -81,8 +88,8 @@ def validate_lint_consistency() -> bool:
 def install_hooks() -> None:
     """Install pre-commit hooks."""
     print("🔗 Installing pre-commit hooks...")
-    run_command("uv run pre-commit install")
-    run_command("uv run pre-commit install --hook-type pre-push")
+    run_command(["uv", "run", "pre-commit", "install"])
+    run_command(["uv", "run", "pre-commit", "install", "--hook-type", "pre-push"])
 
 
 def main() -> None:

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-LangChain-Claude CLI Integration Example
+"""LangChain-Claude CLI Integration Example.
 
 This module demonstrates how to integrate LangChain workflows with Claude CLI
 using --continue and -p options for enhanced context management and tool usage.
@@ -11,7 +10,7 @@ import subprocess
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain.agents import AgentExecutor, create_structured_chat_agent
 from langchain.tools import BaseTool
@@ -22,9 +21,9 @@ from langchain_core.prompts import ChatPromptTemplate
 class ClaudeSession:
     session_id: str
     project_path: Path
-    current_context: Dict[str, Any]
-    todo_state: List[Dict[str, Any]]
-    mcp_servers: List[str]
+    current_context: dict[str, Any]
+    todo_state: list[dict[str, Any]]
+    mcp_servers: list[str]
 
 
 class ClaudeCliTool(BaseTool):
@@ -33,7 +32,7 @@ class ClaudeCliTool(BaseTool):
     name = "claude_cli"
     description = "Execute Claude CLI commands with session management and context continuity"
 
-    def __init__(self, session: ClaudeSession):
+    def __init__(self, session: ClaudeSession) -> None:
         super().__init__()
         self.session = session
 
@@ -41,10 +40,9 @@ class ClaudeCliTool(BaseTool):
         self,
         prompt: str,
         continue_session: bool = True,
-        custom_prompt: Optional[str] = None,
+        custom_prompt: str | None = None,
     ) -> str:
         """Execute Claude CLI command with optional session continuity."""
-
         cmd = ["claude"]
 
         # Add custom prompt if provided
@@ -61,7 +59,7 @@ class ClaudeCliTool(BaseTool):
         try:
             result = subprocess.run(
                 cmd,
-                cwd=self.session.project_path,
+                check=False, cwd=self.session.project_path,
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 minutes timeout
@@ -89,7 +87,7 @@ class ClaudeCliTool(BaseTool):
 class ClaudeAgent:
     """Main agent class for LangChain-Claude integration."""
 
-    def __init__(self, project_path: str):
+    def __init__(self, project_path: str) -> None:
         self.session = ClaudeSession(
             session_id=str(uuid.uuid4()),
             project_path=Path(project_path),
@@ -108,15 +106,14 @@ class ClaudeAgent:
             [
                 (
                     "system",
-                    """You are a software development assistant that can use Claude CLI 
+                    """You are a software development assistant that can use Claude CLI
             to perform complex coding tasks. You have access to:
-            
+
             - Context continuity through --continue
-            - Custom prompts via -p option  
+            - Custom prompts via -p option
             - MCP servers for tool integration
             - Todo list management
             - File operations and code analysis
-            
             Always maintain session state and leverage Claude's capabilities for:
             - Multi-step tasks
             - Code generation and modification
@@ -136,7 +133,7 @@ class ClaudeAgent:
 
         self.executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
 
-    async def execute_workflow(self, workflow_steps: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def execute_workflow(self, workflow_steps: list[dict[str, Any]]) -> dict[str, Any]:
         """Execute a multi-step workflow using Claude CLI."""
         results = {}
 
@@ -171,7 +168,7 @@ class ClaudeAgent:
 
         return results
 
-    def sync_todo_state(self) -> List[Dict[str, Any]]:
+    def sync_todo_state(self) -> list[dict[str, Any]]:
         """Synchronize todo state between LangChain and Claude."""
         # Get current todo state from Claude
         result = self.claude_tool._run("Show current todo list")
@@ -180,7 +177,7 @@ class ClaudeAgent:
         # Implementation would parse Claude's todo output
         return self.session.todo_state
 
-    def get_mcp_tools(self) -> List[str]:
+    def get_mcp_tools(self) -> list[str]:
         """Get available MCP tools from Claude session."""
         result = self.claude_tool._run("List available MCP servers and tools")
 
@@ -190,9 +187,8 @@ class ClaudeAgent:
 
 
 # Example usage
-async def example_workflow():
+async def example_workflow() -> dict[str, Any]:
     """Example of using Claude CLI with LangChain for a development workflow."""
-
     # Initialize agent
     agent = ClaudeAgent("/path/to/your/project")
 

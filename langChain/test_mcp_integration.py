@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-MCP Integration Testing Script
+"""MCP Integration Testing Script.
 
 Tests whether MCP servers work correctly with claude -p option
 and provides methods to verify MCP functionality in LangChain integration.
@@ -10,19 +9,18 @@ import asyncio
 import json
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class MCPTester:
     """Test MCP server functionality with Claude CLI."""
 
-    def __init__(self, project_path: str = "."):
+    def __init__(self, project_path: str = ".") -> None:
         self.project_path = Path(project_path)
         self.test_results = {}
 
-    def test_basic_mcp_functionality(self) -> Dict[str, Any]:
+    def test_basic_mcp_functionality(self) -> dict[str, Any]:
         """Test basic MCP server functionality without -p option."""
-
         print("🧪 Testing basic MCP functionality...")
 
         # Test 1: Check if MCP servers are available
@@ -39,9 +37,8 @@ class MCPTester:
         self.test_results["basic_mcp"] = test_result
         return test_result
 
-    def test_mcp_with_custom_prompt(self, custom_prompt: str) -> Dict[str, Any]:
+    def test_mcp_with_custom_prompt(self, custom_prompt: str) -> dict[str, Any]:
         """Test MCP functionality with -p option."""
-
         print(f"🧪 Testing MCP with custom prompt: {custom_prompt}")
 
         # Test MCP servers with custom prompt
@@ -64,9 +61,8 @@ class MCPTester:
         self.test_results["mcp_custom_prompt"] = test_result
         return test_result
 
-    def test_specific_mcp_server(self, server_name: str, test_command: str) -> Dict[str, Any]:
+    def test_specific_mcp_server(self, server_name: str, test_command: str) -> dict[str, Any]:
         """Test specific MCP server functionality."""
-
         print(f"🧪 Testing specific MCP server: {server_name}")
 
         # Test specific server
@@ -85,9 +81,8 @@ class MCPTester:
         self.test_results[f"mcp_{server_name}"] = test_result
         return test_result
 
-    def test_mcp_continuity_with_sessions(self) -> Dict[str, Any]:
+    def test_mcp_continuity_with_sessions(self) -> dict[str, Any]:
         """Test MCP functionality with session continuity."""
-
         print("🧪 Testing MCP with session continuity...")
 
         # First command - establish session
@@ -124,9 +119,8 @@ class MCPTester:
         self.test_results["mcp_continuity"] = test_result
         return test_result
 
-    def run_comprehensive_mcp_tests(self) -> Dict[str, Any]:
+    def run_comprehensive_mcp_tests(self) -> dict[str, Any]:
         """Run comprehensive MCP integration tests."""
-
         print("🚀 Starting comprehensive MCP tests...")
 
         test_suite = {
@@ -146,13 +140,12 @@ class MCPTester:
 
         return test_suite
 
-    def _run_claude_command(self, cmd: List[str], timeout: int = 30) -> Dict[str, Any]:
+    def _run_claude_command(self, cmd: list[str], timeout: int = 30) -> dict[str, Any]:
         """Run Claude CLI command and capture result."""
-
         try:
             result = subprocess.run(
                 cmd,
-                cwd=self.project_path,
+                check=False, cwd=self.project_path,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
@@ -175,9 +168,8 @@ class MCPTester:
         except Exception as e:
             return {"success": False, "output": "", "error": str(e), "returncode": -1}
 
-    def _detect_mcp_tool_usage(self, output: str) -> List[str]:
+    def _detect_mcp_tool_usage(self, output: str) -> list[str]:
         """Detect which MCP tools were used in the output."""
-
         mcp_indicators = [
             "mcp__",
             "MCP:",
@@ -201,9 +193,8 @@ class MCPTester:
 
         return used_tools
 
-    def _extract_session_id(self, output: str) -> Optional[str]:
+    def _extract_session_id(self, output: str) -> str | None:
         """Extract session ID from Claude output if available."""
-
         # This is a simplified version - actual implementation would parse
         # Claude's output format for session information
         lines = output.split("\n")
@@ -221,7 +212,6 @@ class MCPTester:
 
     def _check_context_continuity(self, first_output: str, second_output: str) -> bool:
         """Check if context was preserved between commands."""
-
         # Simple heuristic - look for references to previous content
         continuity_indicators = [
             "previous",
@@ -237,10 +227,9 @@ class MCPTester:
         second_lower = second_output.lower()
         return any(indicator in second_lower for indicator in continuity_indicators)
 
-    def _generate_test_summary(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_test_summary(self, test_results: dict[str, Any]) -> dict[str, Any]:
         """Generate summary of test results."""
-
-        total_tests = len([k for k in test_results.keys() if k != "summary"])
+        total_tests = len([k for k in test_results if k != "summary"])
         successful_tests = sum(1 for k, v in test_results.items() if k != "summary" and v.get("success", False))
 
         mcp_tool_usage = []
@@ -257,9 +246,8 @@ class MCPTester:
             "recommendations": self._generate_recommendations(test_results),
         }
 
-    def _generate_recommendations(self, test_results: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, test_results: dict[str, Any]) -> list[str]:
         """Generate recommendations based on test results."""
-
         recommendations = []
 
         # Check if basic MCP functionality works
@@ -267,7 +255,7 @@ class MCPTester:
             recommendations.append("MCP servers may not be properly configured")
 
         # Check if custom prompts affect MCP
-        custom_prompt_tests = [k for k in test_results.keys() if "custom_prompt" in k]
+        custom_prompt_tests = [k for k in test_results if "custom_prompt" in k]
         custom_success = [test_results[k].get("success", False) for k in custom_prompt_tests]
 
         if not any(custom_success):
@@ -283,9 +271,8 @@ class MCPTester:
 
 
 # Test script functions
-def create_test_config() -> Dict[str, Any]:
+def create_test_config() -> dict[str, Any]:
     """Create test configuration for MCP testing."""
-
     return {
         "test_prompts": [
             "Act as a filesystem assistant with full MCP access",
@@ -302,9 +289,8 @@ def create_test_config() -> Dict[str, Any]:
     }
 
 
-async def run_mcp_integration_tests():
+async def run_mcp_integration_tests() -> None:
     """Run comprehensive MCP integration tests."""
-
     print("🧪 Starting MCP Integration Tests...")
 
     # Initialize tester
@@ -315,7 +301,7 @@ async def run_mcp_integration_tests():
 
     # Save results
     results_file = Path("mcp_test_results.json")
-    with open(results_file, "w") as f:
+    with open(results_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, default=str)
 
     print(f"📄 Test results saved to: {results_file}")
@@ -337,9 +323,8 @@ async def run_mcp_integration_tests():
     return results
 
 
-def test_langchain_mcp_integration():
+def test_langchain_mcp_integration() -> None:
     """Test MCP integration specifically for LangChain use case."""
-
     print("🔗 Testing LangChain-MCP Integration...")
 
     # Test command that simulates LangChain calling Claude with MCP
