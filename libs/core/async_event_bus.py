@@ -316,7 +316,7 @@ class AsyncEventBus:
                 if not filter_func(event):
                     self.logger.debug(f"Event {event.type} dropped by filter")
                     return False
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error in event filter")
                 continue
 
@@ -355,7 +355,7 @@ class AsyncEventBus:
             List of handler results
         """
         if not self._is_running:
-            raise RuntimeError("Event bus not running")
+            raise RuntimeError("Bus not running")
 
         # Get handlers for this event type
         handlers = self._subscribers.get(event.type, [])
@@ -406,7 +406,7 @@ class AsyncEventBus:
             except asyncio.CancelledError:
                 self.logger.debug(f"Event processing worker {worker_id} cancelled")
                 break
-            except Exception as e:
+            except Exception:
                 self._metrics.processing_errors += 1
                 self.logger.exception(f"Error in event processing worker {worker_id}")
 
@@ -501,7 +501,7 @@ class AsyncEventBus:
             if dropped_count > 0:
                 self.logger.info(f"Dropped {dropped_count} low priority events to make room")
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error making queue room")
 
     async def _metrics_reporter(self) -> None:
@@ -516,7 +516,7 @@ class AsyncEventBus:
 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error in metrics reporter")
 
     async def _publish_metrics(self) -> None:
@@ -534,7 +534,7 @@ class AsyncEventBus:
             if not self._event_queue.full():
                 self._event_queue.put_nowait(metrics_event)
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error publishing metrics")
 
     def get_metrics(self) -> EventMetrics:

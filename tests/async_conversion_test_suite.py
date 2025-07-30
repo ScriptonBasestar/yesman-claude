@@ -540,7 +540,7 @@ class AsyncConversionTestSuite:
         async def failing_handler(event: Event):
             nonlocal failed_handler_calls
             failed_handler_calls += 1
-            raise RuntimeError("Simulated handler failure")
+            raise RuntimeError("Handler failed")
 
         async def successful_handler(event: Event):
             successful_events.append(event)

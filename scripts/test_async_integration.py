@@ -213,7 +213,7 @@ class AsyncIntegrationTester:
         """Start performance monitoring for the test."""
         success = await self.performance_monitor.start_monitoring()
         if not success:
-            raise RuntimeError("Failed to start performance monitoring")
+            raise RuntimeError("Start failed")
 
     async def _test_monitor_creation(self) -> dict[str, Any]:
         """Test AsyncClaudeMonitor creation and basic functionality."""
@@ -226,18 +226,18 @@ class AsyncIntegrationTester:
 
             # Test basic properties
             if monitor.session_name != "integration_test":
-                raise ValueError(f"Expected session_name 'integration_test', got '{monitor.session_name}'")
+                raise ValueError(f"Wrong session: {monitor.session_name}")
             if not monitor.is_auto_next_enabled:
-                raise ValueError("Expected is_auto_next_enabled to be True")
+                raise ValueError("Auto-next disabled")
             if monitor.is_running:
-                raise ValueError("Expected is_running to be False initially")
+                raise ValueError("Already running")
 
             # Test startup
             startup_success = await monitor.start_monitoring_async()
             if not startup_success:
-                raise RuntimeError("Failed to start async monitoring")
+                raise RuntimeError("Start failed")
             if not monitor.is_running:
-                raise RuntimeError("Monitor should be running after startup")
+                raise RuntimeError("Not running")
 
             # Let it run for a few seconds
             await asyncio.sleep(3)
@@ -245,9 +245,9 @@ class AsyncIntegrationTester:
             # Test shutdown
             shutdown_success = await monitor.stop_monitoring_async()
             if not shutdown_success:
-                raise RuntimeError("Failed to stop async monitoring")
+                raise RuntimeError("Stop failed")
             if monitor.is_running:
-                raise RuntimeError("Monitor should not be running after shutdown")
+                raise RuntimeError("Still running")
 
             return {"success": True, "startup_success": startup_success, "shutdown_success": shutdown_success, "monitor_instance": str(type(monitor))}
 
