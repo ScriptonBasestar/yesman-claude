@@ -70,8 +70,10 @@
       "mcp__filesystem__read_multiple_files",
       "mcp__filesystem__write_file",
       "mcp__sequential-thinking__sequentialthinking",
-      "Bash(bandit:*)"
+      "Bash(bandit:*)",
+      "Bash(mdformat:*)"
     ],
     "deny": []
-  }
+  },
+  "$schema": "https://json.schemastore.org/claude-code-settings.json"
 }

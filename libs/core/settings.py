@@ -73,7 +73,7 @@ class APISettings:
     host: str = "localhost"
     port: int = 10501
     debug: bool = False
-    cors_origins: list = None
+    cors_origins: list[str] | None = None
     request_timeout: int = 30
     max_request_size: int = 1024 * 1024  # 1MB
 
