@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
 		// Proxy API requests to the backend server
 		proxy: {
 			'/api': {
-				target: 'http://localhost:8000',
+				target: 'http://localhost:10501',
 				changeOrigin: true
 			}
 		}

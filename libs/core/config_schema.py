@@ -75,7 +75,7 @@ class ServerConfig(BaseModel):
     """Server configuration settings."""
 
     host: str = "localhost"
-    port: int = Field(default=8000, ge=1, le=65535)
+    port: int = Field(default=10501, ge=1, le=65535)
 
 
 class YesmanConfigSchema(BaseModel):

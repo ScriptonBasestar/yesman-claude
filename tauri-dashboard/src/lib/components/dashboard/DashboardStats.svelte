@@ -1,7 +1,26 @@
 <script lang="ts">
   import { sessions, isLoading } from '$lib/stores/sessions';
   import { onMount } from 'svelte';
-  import { health, healthStatus, formatLastCheck } from '$lib/stores/health';
+  import { health, healthState, isHealthy, isUnhealthy } from '$lib/stores/health';
+
+  // Helper function to format last check time
+  function formatLastCheck(lastCheck: Date | null): string {
+    if (!lastCheck) return 'Never';
+    
+    const now = new Date();
+    const diffMs = now.getTime() - lastCheck.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    
+    if (diffSecs < 60) {
+      return `${diffSecs}s ago`;
+    } else if (diffMins < 60) {
+      return `${diffMins}m ago`;
+    } else {
+      const diffHours = Math.floor(diffMins / 60);
+      return `${diffHours}h ago`;
+    }
+  }
 
   // 통계 데이터 계산
   $: totalSessions = $sessions.length;
@@ -69,11 +88,11 @@
     <!-- API 서버 상태 -->
     <div class="stat-card bg-gradient-to-br from-base-300 to-base-200 border border-base-content/20 rounded-xl p-6">
       <div class="stat-header flex items-center justify-between mb-4">
-        <div class="stat-icon {$health.status === 'healthy' ? 'text-success' : $health.status === 'unhealthy' ? 'text-error' : 'text-warning'}">
-          <span class="text-3xl">{$healthStatus.icon}</span>
+        <div class="stat-icon {$isHealthy ? 'text-success' : $isUnhealthy ? 'text-error' : 'text-warning'}">
+          <span class="text-3xl">{$isHealthy ? '✅' : $isUnhealthy ? '❌' : '⚠️'}</span>
         </div>
-        <div class="stat-trend text-xs {$health.status === 'healthy' ? 'text-success' : $health.status === 'unhealthy' ? 'text-error' : 'text-warning'}">
-          {$healthStatus.text}
+        <div class="stat-trend text-xs {$isHealthy ? 'text-success' : $isUnhealthy ? 'text-error' : 'text-warning'}">
+          {$isHealthy ? 'Healthy' : $isUnhealthy ? 'Unhealthy' : 'Degraded'}
         </div>
       </div>
 
@@ -82,22 +101,22 @@
           API Server
         </div>
         <div class="stat-subtitle text-sm text-base-content/70">
-          {$health.service || 'Backend Service'}
+          Backend Service
         </div>
 
         <div class="stat-breakdown mt-3 space-y-2 text-xs">
           <div class="flex justify-between">
             <span class="text-base-content/60">Version:</span>
-            <span class="font-semibold">{$health.version || 'Unknown'}</span>
+            <span class="font-semibold">v1.0.0</span>
           </div>
           <div class="flex justify-between">
             <span class="text-base-content/60">Last Check:</span>
-            <span class="font-semibold">{formatLastCheck($health.lastCheck)}</span>
+            <span class="font-semibold">{$healthState.lastCheck ? formatLastCheck($healthState.lastCheck) : 'Never'}</span>
           </div>
-          {#if $health.retryCount > 0}
+          {#if $healthState.consecutiveFailures > 0}
             <div class="flex justify-between">
-              <span class="text-base-content/60">Retries:</span>
-              <span class="font-semibold text-warning">{$health.retryCount}</span>
+              <span class="text-base-content/60">Failures:</span>
+              <span class="font-semibold text-warning">{$healthState.consecutiveFailures}</span>
             </div>
           {/if}
         </div>

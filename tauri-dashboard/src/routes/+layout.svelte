@@ -9,7 +9,7 @@
   import { loadConfig } from '$lib/stores/config';
   import { refreshSessions, startAutoRefresh, stopAutoRefresh } from '$lib/stores/sessions';
   import { showNotification, notifySuccess, notifyError, notifyWarning } from '$lib/stores/notifications';
-  import { health, isHealthy } from '$lib/stores/health';
+  import { health, isHealthy, healthState } from '$lib/stores/health';
 
   let isMinimized = false;
 
@@ -22,8 +22,8 @@
           notifyWarning('API Disconnected', 'Unable to connect to backend server. Please check if the API server is running.');
         } else if (status === 'healthy') {
           // 처음 연결되거나 재연결된 경우에만 알림
-          const prevStatus = $health.status;
-          if (prevStatus === 'unhealthy' || prevStatus === 'checking') {
+          const prevStatus = $healthState.status;
+          if (prevStatus === 'unhealthy' || prevStatus === 'unknown') {
             notifySuccess('API Connected', 'Successfully connected to backend server.');
           }
         }

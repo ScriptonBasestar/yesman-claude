@@ -113,7 +113,7 @@ class DashboardRunCommand(BaseCommand):
         self,
         interface: str = "auto",
         host: str = "localhost",
-        port: int = 8000,
+        port: int = 10501,
         theme: str | None = None,
         dev: bool = False,
         detach: bool = False,
@@ -235,7 +235,7 @@ class DashboardRunCommand(BaseCommand):
     def _launch_web_dashboard(
         self,
         host: str = "localhost",
-        port: int = 8000,
+        port: int = 10501,
         theme: str | None = None,
         dev: bool = False,
         detach: bool = False,
@@ -626,7 +626,7 @@ def dashboard_group() -> None:
 @click.option(
     "--port",
     "-p",
-    default=8000,
+    default=10501,
     type=int,
     help="Web dashboard port (web only)",
 )

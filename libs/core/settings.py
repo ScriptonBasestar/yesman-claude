@@ -71,7 +71,7 @@ class APISettings:
     """API server settings."""
 
     host: str = "localhost"
-    port: int = 8000
+    port: int = 10501
     debug: bool = False
     cors_origins: list = None
     request_timeout: int = 30

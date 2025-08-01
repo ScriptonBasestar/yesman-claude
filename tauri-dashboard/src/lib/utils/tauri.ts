@@ -20,24 +20,27 @@ import { api } from './api';
 
 export const pythonBridge = {
 	// Session Management - Use centralized API client
-	get_sessions: () => api.dashboard.sessions(),
-	get_session_details: (sessionId: string) => api.sessions.get(sessionId),
-	create_session: (config: any) => api.sessions.create(config.project_name, config),
-	delete_session: (sessionId: string) => api.sessions.delete(sessionId),
+	get_sessions: async () => {
+		const response = await api.getSessions();
+		return { sessions: response.data || [] };
+	},
+	get_session_details: (sessionId: string) => api.getSession(sessionId),
+	create_session: (config: any) => api.createSession(config),
+	delete_session: (sessionId: string) => api.deleteSession(sessionId),
 
 	// Controller Management - Use centralized API client
-	start_claude: (sessionId: string) => api.controllers.start(sessionId),
-	stop_claude: (sessionId: string) => api.controllers.stop(sessionId),
-	get_claude_status: (sessionId: string) => api.controllers.status(sessionId),
-	restart_claude: (sessionId: string) => api.controllers.restart(sessionId),
+	start_claude: (sessionId: string) => api.post(`/controllers/${sessionId}/start`, {}),
+	stop_claude: (sessionId: string) => api.post(`/controllers/${sessionId}/stop`, {}),
+	get_claude_status: (sessionId: string) => api.get(`/controllers/${sessionId}/status`),
+	restart_claude: (sessionId: string) => api.post(`/controllers/${sessionId}/restart`, {}),
 
 	// Config Management
-	get_app_config: () => api.config.get(),
-	save_app_config: (config: any) => api.config.save(config),
+	get_app_config: () => api.get('/config'),
+	save_app_config: (config: any) => api.post('/config', config),
 
 	// Logs
 	get_logs: (sessionId: string, follow = false, lines = 50) => 
-		api.sessions.logs(sessionId, follow, lines),
+		api.getLogs(lines),
 
 	// Tauri-specific functions
 	send_notification: async (message: string) => {

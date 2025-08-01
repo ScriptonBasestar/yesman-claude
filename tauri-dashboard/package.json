@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "dev:api": "cd .. && source api/venv/bin/activate && python -m uvicorn api.main:app --host 127.0.0.1 --port 8000",
+    "dev:api": "cd .. && source api/venv/bin/activate && python -m uvicorn api.main:app --host 127.0.0.1 --port 10501",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

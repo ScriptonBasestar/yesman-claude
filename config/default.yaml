@@ -41,7 +41,7 @@ ai:
 # Server settings
 server:
   host: localhost
-  port: 8000
+  port: 10501
 
 # Database settings (disabled by default)
 database:
