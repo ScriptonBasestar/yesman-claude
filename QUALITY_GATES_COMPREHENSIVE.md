@@ -1,8 +1,8 @@
 # 🛡️ Quality Gates Report
 
 **Overall Result**: ❌ FAIL
-**Overall Score**: 63.3/100
-**Execution Time**: 310.79s
+**Overall Score**: 66.4/100
+**Execution Time**: 28.36s
 
 ## 📊 Summary
 
@@ -10,7 +10,7 @@
 |------------|-------|--------|--------|
 | 🔴 **Blocking** | 3 | 2 | 1 |
 | 🟡 **Warning** | 3 | 3 | 0 |
-| 🟢 **Advisory** | 2 | 0 | 1 |
+| 🟢 **Advisory** | 2 | 1 | 1 |
 
 ## 🔍 Detailed Results
 
@@ -18,24 +18,24 @@
 
 #### ✅ Linting
 - **Result**: pass
-- **Score**: 69.5/200
-- **Message**: Linting check: 61 violations (threshold: 200)
-- **Execution Time**: 0.033s
-- **Details**: total_violations: 61
+- **Score**: 78.0/200
+- **Message**: Linting check: 44 violations (threshold: 200)
+- **Execution Time**: 0.198s
+- **Details**: total_violations: 44
 
 #### ✅ Security
 - **Result**: pass
 - **Score**: 100.0/0
 - **Message**: Security check: 0 critical issues (threshold: 0)
-- **Execution Time**: 6.338s
+- **Execution Time**: 10.446s
 - **Details**: issues: 0 items
 
 #### ❌ Test Coverage
 - **Result**: fail
 - **Score**: 0.0/35
-- **Message**: Test coverage check timed out (>5 minutes)
-- **Execution Time**: 300.117s
-- **Details**: timeout: True
+- **Message**: Test coverage: 0.0% (threshold: 35%)
+- **Execution Time**: 2.509s
+- **Details**: coverage_data: 0 items
 
 ### 🟡 Warning Gates
 
@@ -43,22 +43,22 @@
 - **Result**: pass
 - **Score**: 78.7/15
 - **Message**: Code complexity: 3.2 average (threshold: 15)
-- **Execution Time**: 1.015s
+- **Execution Time**: 1.100s
 - **Details**: average_complexity: 3.1923076923076925, total_functions: 286, high_complexity_count: 6, high_complexity_functions: 6 items, complexity_distribution: 4 items
 
 #### ✅ Documentation
 - **Result**: pass
 - **Score**: 90.8/60
 - **Message**: Documentation coverage: 90.8% (threshold: 60%)
-- **Execution Time**: 1.159s
+- **Execution Time**: 1.341s
 - **Details**: files_analyzed: 250, total_items: 4843, documented_items: 4396, coverage_percent: 90.77018377039026, low_documentation_modules: 1 items
 
 #### ✅ Performance
 - **Result**: pass
-- **Score**: 84.9/50
-- **Message**: Performance score: 84.9/100 (threshold: 50)
-- **Execution Time**: 0.949s
-- **Details**: import_time: 0.7573352180006623, performance_score: 84.85329563998675
+- **Score**: 75.4/50
+- **Message**: Performance score: 75.4/100 (threshold: 50)
+- **Execution Time**: 1.447s
+- **Details**: import_time: 1.23097917800078, performance_score: 75.3804164399844
 
 ### 🟢 Advisory Gates
 
@@ -66,21 +66,21 @@
 - **Result**: warning
 - **Score**: 18.1/30
 - **Message**: Async adoption: 18.1% (target: 30%)
-- **Execution Time**: 1.173s
+- **Execution Time**: 1.576s
 - **Details**: files_analyzed: 249, total_functions: 4086, async_functions: 740, async_percent: 18.11062163485071
 
-#### ⏭️ Type Annotations
-- **Result**: skip
-- **Score**: 0.0/0
-- **Message**: Type annotation check skipped: mypy not installed
-- **Execution Time**: 0.001s
-- **Details**: See full report for details
+#### ✅ Type Annotations
+- **Result**: pass
+- **Score**: 99.1/80
+- **Message**: Type annotations: 99.1% (target: 80%)
+- **Execution Time**: 9.744s
+- **Details**: files_analyzed: 249, total_functions: 4086, annotated_functions: 4050, annotation_percent: 99.11894273127754, mypy_errors: 539, mypy_available: True
 
 
 ## 🎯 Recommendations
 
 ### 🚨 Critical Actions Required
-- **test_coverage**: Test coverage check timed out (>5 minutes)
+- **test_coverage**: Test coverage: 0.0% (threshold: 35%)
 
 ### 💡 Best Practice Suggestions
 - **async_adoption**: Async adoption: 18.1% (target: 30%)
