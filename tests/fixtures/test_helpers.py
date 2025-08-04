@@ -92,7 +92,7 @@ def create_test_project_structure(base_dir: str) -> None:
             path = Path(base_path) / name
             if isinstance(content, dict):
                 path.mkdir(exist_ok=True)
-                create_structure(path, content)
+                create_structure(str(path), content)
             else:
                 path.write_text(content)
 
@@ -135,7 +135,7 @@ def wait_for_condition(condition_func: Callable[[], bool], timeout: float = 5, i
     return False
 
 
-def generate_test_data(data_type: str, count: int = 10) -> list[dict[str, Any]]:
+def generate_test_data(data_type: str, count: int = 10) -> list[dict[str, Any]] | list[str]:
     """테스트 데이터 생성기."""
     if data_type == "sessions":
         return [

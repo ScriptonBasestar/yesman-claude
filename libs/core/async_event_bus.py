@@ -355,7 +355,7 @@ class AsyncEventBus:
             List of handler results
         """
         if not self._is_running:
-            raise RuntimeError("Bus not running")
+            raise RuntimeError("Bus not running")  # noqa: TRY003
 
         # Get handlers for this event type
         handlers = self._subscribers.get(event.type, [])
@@ -592,7 +592,7 @@ def get_event_bus() -> AsyncEventBus:
     Returns:
         Global AsyncEventBus instance
     """
-    global _global_event_bus
+    global _global_event_bus  # noqa: PLW0603
     if _global_event_bus is None:
         _global_event_bus = AsyncEventBus()
     return _global_event_bus
@@ -607,7 +607,7 @@ async def initialize_global_event_bus(**kwargs) -> AsyncEventBus:
     Returns:
         Initialized global event bus
     """
-    global _global_event_bus
+    global _global_event_bus  # noqa: PLW0603
     if _global_event_bus is None:
         _global_event_bus = AsyncEventBus(**kwargs)
 
@@ -619,7 +619,7 @@ async def initialize_global_event_bus(**kwargs) -> AsyncEventBus:
 
 async def shutdown_global_event_bus() -> None:
     """Shutdown the global event bus."""
-    global _global_event_bus
+    global _global_event_bus  # noqa: PLW0603
     if _global_event_bus is not None:
         await _global_event_bus.stop()
         _global_event_bus = None

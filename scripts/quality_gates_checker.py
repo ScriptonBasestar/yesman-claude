@@ -30,7 +30,7 @@ from typing import Any
 class GateResult(Enum):
     """Quality gate check results."""
 
-    PASS = "pass"
+    PASS = "pass"  # noqa: S105
     FAIL = "fail"
     WARNING = "warning"
     SKIP = "skip"

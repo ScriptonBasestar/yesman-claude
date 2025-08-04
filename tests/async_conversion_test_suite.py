@@ -38,6 +38,7 @@ from libs.core.async_event_bus import AsyncEventBus, Event, EventPriority, Event
 @dataclass
 class TestResult:
     """Individual test result."""
+
     test_name: str
     success: bool
     execution_time: float
@@ -49,6 +50,7 @@ class TestResult:
 @dataclass
 class TestSuiteResult:
     """Complete test suite result."""
+
     suite_name: str
     total_tests: int
     passed_tests: int
@@ -136,7 +138,7 @@ class AsyncConversionTestSuite:
                 execution_time=suite_time,
                 results=self.results,
                 summary_metrics=self._calculate_summary_metrics(),
-                overall_success=failed == 0
+                overall_success=failed == 0,
             )
 
             # Generate and save report
@@ -155,174 +157,86 @@ class AsyncConversionTestSuite:
                 execution_time=time.time() - suite_start,
                 results=self.results,
                 summary_metrics={"error": str(e)},
-                overall_success=False
+                overall_success=False,
             )
 
     async def _run_event_bus_tests(self) -> None:
         """Run comprehensive AsyncEventBus tests."""
         # Test 1: Basic Event Bus Operations
-        await self._run_test(
-            "event_bus_basic_operations",
-            self._test_event_bus_basic_operations,
-            "Basic event publishing and subscription"
-        )
+        await self._run_test("event_bus_basic_operations", self._test_event_bus_basic_operations, "Basic event publishing and subscription")
 
         # Test 2: High Throughput Event Processing
-        await self._run_test(
-            "event_bus_high_throughput",
-            self._test_event_bus_high_throughput,
-            "High throughput event processing"
-        )
+        await self._run_test("event_bus_high_throughput", self._test_event_bus_high_throughput, "High throughput event processing")
 
         # Test 3: Concurrent Event Handling
-        await self._run_test(
-            "event_bus_concurrent_handling",
-            self._test_event_bus_concurrent_handling,
-            "Concurrent event handling"
-        )
+        await self._run_test("event_bus_concurrent_handling", self._test_event_bus_concurrent_handling, "Concurrent event handling")
 
         # Test 4: Error Isolation and Recovery
-        await self._run_test(
-            "event_bus_error_isolation",
-            self._test_event_bus_error_isolation,
-            "Error isolation and recovery"
-        )
+        await self._run_test("event_bus_error_isolation", self._test_event_bus_error_isolation, "Error isolation and recovery")
 
         # Test 5: Event Ordering and Priority
-        await self._run_test(
-            "event_bus_ordering_priority",
-            self._test_event_bus_ordering_priority,
-            "Event ordering and priority handling"
-        )
+        await self._run_test("event_bus_ordering_priority", self._test_event_bus_ordering_priority, "Event ordering and priority handling")
 
     async def _run_async_monitor_tests(self) -> None:
         """Run comprehensive AsyncClaudeMonitor tests."""
         # Test 1: Monitor Lifecycle Management
-        await self._run_test(
-            "monitor_lifecycle",
-            self._test_monitor_lifecycle,
-            "Monitor startup, operation, and shutdown"
-        )
+        await self._run_test("monitor_lifecycle", self._test_monitor_lifecycle, "Monitor startup, operation, and shutdown")
 
         # Test 2: Prompt Detection and Response
-        await self._run_test(
-            "monitor_prompt_handling",
-            self._test_monitor_prompt_handling,
-            "Prompt detection and auto-response"
-        )
+        await self._run_test("monitor_prompt_handling", self._test_monitor_prompt_handling, "Prompt detection and auto-response")
 
         # Test 3: Performance vs Legacy Monitor
-        await self._run_test(
-            "monitor_performance_comparison",
-            self._test_monitor_performance_comparison,
-            "Performance comparison with legacy monitor"
-        )
+        await self._run_test("monitor_performance_comparison", self._test_monitor_performance_comparison, "Performance comparison with legacy monitor")
 
         # Test 4: Error Handling and Recovery
-        await self._run_test(
-            "monitor_error_handling",
-            self._test_monitor_error_handling,
-            "Error handling and recovery mechanisms"
-        )
+        await self._run_test("monitor_error_handling", self._test_monitor_error_handling, "Error handling and recovery mechanisms")
 
         # Test 5: Event Integration
-        await self._run_test(
-            "monitor_event_integration",
-            self._test_monitor_event_integration,
-            "Event bus integration and communication"
-        )
+        await self._run_test("monitor_event_integration", self._test_monitor_event_integration, "Event bus integration and communication")
 
     async def _run_performance_monitoring_tests(self) -> None:
         """Run performance monitoring system tests."""
         # Test 1: Metrics Collection Accuracy
-        await self._run_test(
-            "performance_metrics_accuracy",
-            self._test_performance_metrics_accuracy,
-            "Performance metrics collection accuracy"
-        )
+        await self._run_test("performance_metrics_accuracy", self._test_performance_metrics_accuracy, "Performance metrics collection accuracy")
 
         # Test 2: Baseline Establishment
-        await self._run_test(
-            "performance_baseline_establishment",
-            self._test_performance_baseline_establishment,
-            "Performance baseline establishment"
-        )
+        await self._run_test("performance_baseline_establishment", self._test_performance_baseline_establishment, "Performance baseline establishment")
 
         # Test 3: Real-time Monitoring
-        await self._run_test(
-            "performance_realtime_monitoring",
-            self._test_performance_realtime_monitoring,
-            "Real-time performance monitoring"
-        )
+        await self._run_test("performance_realtime_monitoring", self._test_performance_realtime_monitoring, "Real-time performance monitoring")
 
         # Test 4: Report Generation
-        await self._run_test(
-            "performance_report_generation",
-            self._test_performance_report_generation,
-            "Performance report generation"
-        )
+        await self._run_test("performance_report_generation", self._test_performance_report_generation, "Performance report generation")
 
     async def _run_integration_tests(self) -> None:
         """Run integration and compatibility tests."""
         # Test 1: Component Communication
-        await self._run_test(
-            "integration_component_communication",
-            self._test_integration_component_communication,
-            "Inter-component communication"
-        )
+        await self._run_test("integration_component_communication", self._test_integration_component_communication, "Inter-component communication")
 
         # Test 2: Legacy Compatibility
-        await self._run_test(
-            "integration_legacy_compatibility",
-            self._test_integration_legacy_compatibility,
-            "Legacy system compatibility"
-        )
+        await self._run_test("integration_legacy_compatibility", self._test_integration_legacy_compatibility, "Legacy system compatibility")
 
         # Test 3: Migration Path Validation
-        await self._run_test(
-            "integration_migration_path",
-            self._test_integration_migration_path,
-            "Migration path validation"
-        )
+        await self._run_test("integration_migration_path", self._test_integration_migration_path, "Migration path validation")
 
     async def _run_stress_tests(self) -> None:
         """Run stress tests and edge cases."""
         # Test 1: High Concurrent Load
-        await self._run_test(
-            "stress_concurrent_load",
-            self._test_stress_concurrent_load,
-            "High concurrent session load"
-        )
+        await self._run_test("stress_concurrent_load", self._test_stress_concurrent_load, "High concurrent session load")
 
         # Test 2: Memory Pressure
-        await self._run_test(
-            "stress_memory_pressure",
-            self._test_stress_memory_pressure,
-            "Memory pressure scenarios"
-        )
+        await self._run_test("stress_memory_pressure", self._test_stress_memory_pressure, "Memory pressure scenarios")
 
         # Test 3: Event Bus Saturation
-        await self._run_test(
-            "stress_event_bus_saturation",
-            self._test_stress_event_bus_saturation,
-            "Event bus saturation testing"
-        )
+        await self._run_test("stress_event_bus_saturation", self._test_stress_event_bus_saturation, "Event bus saturation testing")
 
     async def _run_quality_gates_tests(self) -> None:
         """Run quality gates system tests."""
         # Test 1: Quality Gates Execution
-        await self._run_test(
-            "quality_gates_execution",
-            self._test_quality_gates_execution,
-            "Quality gates execution reliability"
-        )
+        await self._run_test("quality_gates_execution", self._test_quality_gates_execution, "Quality gates execution reliability")
 
         # Test 2: Performance Integration
-        await self._run_test(
-            "quality_gates_performance_integration",
-            self._test_quality_gates_performance_integration,
-            "Quality gates performance integration"
-        )
+        await self._run_test("quality_gates_performance_integration", self._test_quality_gates_performance_integration, "Quality gates performance integration")
 
     async def _run_test(self, test_name: str, test_func: Callable, description: str) -> None:
         """Run an individual test with error handling and metrics collection.
@@ -342,13 +256,7 @@ class AsyncConversionTestSuite:
 
             execution_time = time.perf_counter() - start_time
 
-            self.results.append(TestResult(
-                test_name=test_name,
-                success=True,
-                execution_time=execution_time,
-                metrics=result.get("metrics", {}),
-                details=result.get("details", {})
-            ))
+            self.results.append(TestResult(test_name=test_name, success=True, execution_time=execution_time, metrics=result.get("metrics", {}), details=result.get("details", {})))
 
             print(f"    ✅ PASS ({execution_time:.2f}s)")
 
@@ -356,12 +264,7 @@ class AsyncConversionTestSuite:
             execution_time = time.perf_counter() - start_time
             error_msg = f"Test timed out after {self.test_timeout}s"
 
-            self.results.append(TestResult(
-                test_name=test_name,
-                success=False,
-                execution_time=execution_time,
-                error_message=error_msg
-            ))
+            self.results.append(TestResult(test_name=test_name, success=False, execution_time=execution_time, error_message=error_msg))
 
             print(f"    ⏰ TIMEOUT ({execution_time:.2f}s)")
 
@@ -369,13 +272,7 @@ class AsyncConversionTestSuite:
             execution_time = time.perf_counter() - start_time
             error_msg = f"{type(e).__name__}: {str(e)}"
 
-            self.results.append(TestResult(
-                test_name=test_name,
-                success=False,
-                execution_time=execution_time,
-                error_message=error_msg,
-                details={"traceback": traceback.format_exc()}
-            ))
+            self.results.append(TestResult(test_name=test_name, success=False, execution_time=execution_time, error_message=error_msg, details={"traceback": traceback.format_exc()}))
 
             print(f"    ❌ FAIL ({execution_time:.2f}s): {error_msg}")
 
@@ -397,13 +294,7 @@ class AsyncConversionTestSuite:
         # Publish test events
         test_events = []
         for i in range(10):
-            event = Event(
-                type=EventType.SESSION_STARTED,
-                data={"test_id": i},
-                timestamp=time.time(),
-                source="test_suite",
-                priority=EventPriority.NORMAL
-            )
+            event = Event(type=EventType.SESSION_STARTED, data={"test_id": i}, timestamp=time.time(), source="test_suite", priority=EventPriority.NORMAL)
             test_events.append(event)
             await event_bus.publish(event)
 
@@ -413,14 +304,8 @@ class AsyncConversionTestSuite:
         await event_bus.stop()
 
         return {
-            "metrics": {
-                "events_published": len(test_events),
-                "events_received": len(received_events),
-                "success_rate": len(received_events) / len(test_events) * 100
-            },
-            "details": {
-                "all_events_received": len(received_events) == len(test_events)
-            }
+            "metrics": {"events_published": len(test_events), "events_received": len(received_events), "success_rate": len(received_events) / len(test_events) * 100},
+            "details": {"all_events_received": len(received_events) == len(test_events)},
         }
 
     async def _test_event_bus_high_throughput(self) -> dict[str, Any]:
@@ -441,13 +326,7 @@ class AsyncConversionTestSuite:
         start_time = time.perf_counter()
 
         for i in range(num_events):
-            event = Event(
-                type=EventType.PERFORMANCE_METRICS,
-                data={"metric_id": i, "value": i * 1.5},
-                timestamp=time.time(),
-                source="throughput_test",
-                priority=EventPriority.LOW
-            )
+            event = Event(type=EventType.PERFORMANCE_METRICS, data={"metric_id": i, "value": i * 1.5}, timestamp=time.time(), source="throughput_test", priority=EventPriority.LOW)
             await event_bus.publish(event)
 
         publish_time = time.perf_counter() - start_time
@@ -465,11 +344,11 @@ class AsyncConversionTestSuite:
                 "events_received": received_count,
                 "publish_time": publish_time,
                 "events_per_second": events_per_second,
-                "success_rate": received_count / num_events * 100
+                "success_rate": received_count / num_events * 100,
             },
             "details": {
                 "throughput_target_met": events_per_second > 500  # Target: >500 events/sec
-            }
+            },
         }
 
     async def _test_event_bus_concurrent_handling(self) -> dict[str, Any]:
@@ -496,13 +375,7 @@ class AsyncConversionTestSuite:
 
         tasks = []
         for i in range(num_events):
-            event = Event(
-                type=EventType.CLAUDE_RESPONSE,
-                data={"response_id": i},
-                timestamp=time.time(),
-                source="concurrent_test",
-                priority=EventPriority.NORMAL
-            )
+            event = Event(type=EventType.CLAUDE_RESPONSE, data={"response_id": i}, timestamp=time.time(), source="concurrent_test", priority=EventPriority.NORMAL)
             tasks.append(event_bus.publish(event))
 
         await asyncio.gather(*tasks)
@@ -521,12 +394,12 @@ class AsyncConversionTestSuite:
                 "events_processed": len(processed_events),
                 "publish_time": publish_time,
                 "avg_processing_time": avg_processing_time,
-                "concurrent_efficiency": len(processed_events) / num_events * 100
+                "concurrent_efficiency": len(processed_events) / num_events * 100,
             },
             "details": {
                 "all_events_processed": len(processed_events) == num_events,
-                "concurrent_performance_good": avg_processing_time < 0.02  # Should be close to 0.01
-            }
+                "concurrent_performance_good": avg_processing_time < 0.02,  # Should be close to 0.01
+            },
         }
 
     async def _test_event_bus_error_isolation(self) -> dict[str, Any]:
@@ -540,7 +413,7 @@ class AsyncConversionTestSuite:
         async def failing_handler(event: Event):
             nonlocal failed_handler_calls
             failed_handler_calls += 1
-            raise RuntimeError("Handler failed")
+            raise RuntimeError("Handler failed")  # noqa: TRY003
 
         async def successful_handler(event: Event):
             successful_events.append(event)
@@ -552,13 +425,7 @@ class AsyncConversionTestSuite:
         # Publish events that will trigger both handlers
         num_events = 10
         for i in range(num_events):
-            event = Event(
-                type=EventType.DASHBOARD_UPDATE,
-                data={"update_id": i},
-                timestamp=time.time(),
-                source="error_test",
-                priority=EventPriority.NORMAL
-            )
+            event = Event(type=EventType.DASHBOARD_UPDATE, data={"update_id": i}, timestamp=time.time(), source="error_test", priority=EventPriority.NORMAL)
             await event_bus.publish(event)
 
         # Wait for processing
@@ -571,12 +438,9 @@ class AsyncConversionTestSuite:
                 "events_published": num_events,
                 "successful_handler_calls": len(successful_events),
                 "failed_handler_calls": failed_handler_calls,
-                "error_isolation_rate": len(successful_events) / num_events * 100
+                "error_isolation_rate": len(successful_events) / num_events * 100,
             },
-            "details": {
-                "error_isolation_working": len(successful_events) == num_events,
-                "failed_handler_called": failed_handler_calls == num_events
-            }
+            "details": {"error_isolation_working": len(successful_events) == num_events, "failed_handler_called": failed_handler_calls == num_events},
         }
 
     async def _test_event_bus_ordering_priority(self) -> dict[str, Any]:
@@ -601,13 +465,7 @@ class AsyncConversionTestSuite:
         ]
 
         for priority, order in events:
-            event = Event(
-                type=EventType.CUSTOM,
-                data={"order": order},
-                timestamp=time.time(),
-                source="priority_test",
-                priority=priority
-            )
+            event = Event(type=EventType.CUSTOM, data={"order": order}, timestamp=time.time(), source="priority_test", priority=priority)
             await event_bus.publish(event)
 
         # Wait for processing
@@ -619,15 +477,8 @@ class AsyncConversionTestSuite:
         critical_events = [e for e in received_events if e[0] == EventPriority.CRITICAL]
 
         return {
-            "metrics": {
-                "events_published": len(events),
-                "events_received": len(received_events),
-                "critical_events_processed": len(critical_events)
-            },
-            "details": {
-                "all_events_processed": len(received_events) == len(events),
-                "priority_ordering": received_events
-            }
+            "metrics": {"events_published": len(events), "events_received": len(received_events), "critical_events_processed": len(critical_events)},
+            "details": {"all_events_processed": len(received_events) == len(events), "priority_ordering": received_events},
         }
 
     async def _test_monitor_lifecycle(self) -> dict[str, Any]:
@@ -645,12 +496,7 @@ class AsyncConversionTestSuite:
         await event_bus.start()
 
         # Create monitor
-        monitor = AsyncClaudeMonitor(
-            session_manager=session_manager,
-            process_controller=process_controller,
-            status_manager=status_manager,
-            event_bus=event_bus
-        )
+        monitor = AsyncClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager, event_bus=event_bus)
 
         # Test startup
         startup_start = time.perf_counter()
@@ -668,17 +514,8 @@ class AsyncConversionTestSuite:
         await event_bus.stop()
 
         return {
-            "metrics": {
-                "startup_time": startup_time,
-                "shutdown_time": shutdown_time,
-                "startup_success": startup_success,
-                "shutdown_success": shutdown_success
-            },
-            "details": {
-                "lifecycle_complete": startup_success and shutdown_success,
-                "startup_fast": startup_time < 1.0,
-                "shutdown_fast": shutdown_time < 1.0
-            }
+            "metrics": {"startup_time": startup_time, "shutdown_time": shutdown_time, "startup_success": startup_success, "shutdown_success": shutdown_success},
+            "details": {"lifecycle_complete": startup_success and shutdown_success, "startup_fast": startup_time < 1.0, "shutdown_fast": shutdown_time < 1.0},
         }
 
     async def _test_monitor_prompt_handling(self) -> dict[str, Any]:
@@ -706,12 +543,7 @@ Please select an option (1-3):
         await event_bus.start()
 
         # Create monitor
-        monitor = AsyncClaudeMonitor(
-            session_manager=session_manager,
-            process_controller=process_controller,
-            status_manager=status_manager,
-            event_bus=event_bus
-        )
+        monitor = AsyncClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager, event_bus=event_bus)
 
         # Start monitoring
         await monitor.start_monitoring_async()
@@ -726,14 +558,8 @@ Please select an option (1-3):
         await event_bus.stop()
 
         return {
-            "metrics": {
-                "responses_recorded": responses_recorded,
-                "prompt_detected": responses_recorded > 0
-            },
-            "details": {
-                "auto_response_working": responses_recorded > 0,
-                "activity_messages": status_manager._activity_messages
-            }
+            "metrics": {"responses_recorded": responses_recorded, "prompt_detected": responses_recorded > 0},
+            "details": {"auto_response_working": responses_recorded > 0, "activity_messages": status_manager._activity_messages},
         }
 
     async def _test_monitor_performance_comparison(self) -> dict[str, Any]:
@@ -746,15 +572,15 @@ Please select an option (1-3):
                 "async_loops_per_second": 12.5,
                 "legacy_loops_per_second": 10.0,
                 "performance_improvement": 25.0,  # 25% improvement
-                "memory_usage_async": 64.5,      # MB
-                "memory_usage_legacy": 74.2,     # MB
-                "memory_improvement": 13.1       # 13.1% improvement
+                "memory_usage_async": 64.5,  # MB
+                "memory_usage_legacy": 74.2,  # MB
+                "memory_improvement": 13.1,  # 13.1% improvement
             },
             "details": {
                 "performance_improved": True,
                 "memory_improved": True,
-                "target_improvement_met": True   # >20% improvement target
-            }
+                "target_improvement_met": True,  # >20% improvement target
+            },
         }
 
     async def _test_monitor_error_handling(self) -> dict[str, Any]:
@@ -775,12 +601,7 @@ Please select an option (1-3):
         await event_bus.start()
 
         # Create monitor
-        monitor = AsyncClaudeMonitor(
-            session_manager=session_manager,
-            process_controller=process_controller,
-            status_manager=status_manager,
-            event_bus=event_bus
-        )
+        monitor = AsyncClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager, event_bus=event_bus)
 
         # Start monitoring (should trigger restart attempt)
         await monitor.start_monitoring_async()
@@ -793,16 +614,7 @@ Please select an option (1-3):
         await monitor.stop_monitoring_async()
         await event_bus.stop()
 
-        return {
-            "metrics": {
-                "restart_attempts": restart_attempts,
-                "recovery_attempted": restart_attempts > 0
-            },
-            "details": {
-                "error_recovery_working": restart_attempts > 0,
-                "automatic_recovery": True
-            }
-        }
+        return {"metrics": {"restart_attempts": restart_attempts, "recovery_attempted": restart_attempts > 0}, "details": {"error_recovery_working": restart_attempts > 0, "automatic_recovery": True}}
 
     async def _test_monitor_event_integration(self) -> dict[str, Any]:
         """Test event bus integration and communication."""
@@ -828,12 +640,7 @@ Please select an option (1-3):
             event_bus.subscribe(event_type, event_collector)
 
         # Create and run monitor
-        monitor = AsyncClaudeMonitor(
-            session_manager=session_manager,
-            process_controller=process_controller,
-            status_manager=status_manager,
-            event_bus=event_bus
-        )
+        monitor = AsyncClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager, event_bus=event_bus)
 
         await monitor.start_monitoring_async()
         await asyncio.sleep(2)
@@ -849,12 +656,9 @@ Please select an option (1-3):
                 "total_events": len(received_events),
                 "unique_event_types": len(event_types),
                 "session_events": received_events.count("session_started") + received_events.count("session_stopped"),
-                "performance_events": received_events.count("performance_metrics")
+                "performance_events": received_events.count("performance_metrics"),
             },
-            "details": {
-                "event_integration_working": len(received_events) > 0,
-                "event_types_seen": list(event_types)
-            }
+            "details": {"event_integration_working": len(received_events) > 0, "event_types_seen": list(event_types)},
         }
 
     # Additional test implementations would continue here...
@@ -930,8 +734,8 @@ Please select an option (1-3):
                 "performance": len([r for r in self.results if "performance" in r.test_name]),
                 "integration": len([r for r in self.results if "integration" in r.test_name]),
                 "stress": len([r for r in self.results if "stress" in r.test_name]),
-                "quality_gates": len([r for r in self.results if "quality_gates" in r.test_name])
-            }
+                "quality_gates": len([r for r in self.results if "quality_gates" in r.test_name]),
+            },
         }
 
     async def _save_test_report(self, result: TestSuiteResult) -> None:
@@ -964,9 +768,9 @@ Please select an option (1-3):
 - **Execution Time**: {result.execution_time:.2f}s
 
 ## 📈 Summary Metrics
-- **Average Test Time**: {result.summary_metrics.get('average_test_time', 0):.3f}s
-- **Fastest Test**: {result.summary_metrics.get('fastest_test', 0):.3f}s
-- **Slowest Test**: {result.summary_metrics.get('slowest_test', 0):.3f}s
+- **Average Test Time**: {result.summary_metrics.get("average_test_time", 0):.3f}s
+- **Fastest Test**: {result.summary_metrics.get("fastest_test", 0):.3f}s
+- **Slowest Test**: {result.summary_metrics.get("slowest_test", 0):.3f}s
 
 ## 🔍 Test Categories
 """
@@ -1034,7 +838,7 @@ Address these issues before production deployment.
 
         report += f"""
 ---
-*Test report generated at {time.strftime('%Y-%m-%d %H:%M:%S')}*
+*Test report generated at {time.strftime("%Y-%m-%d %H:%M:%S")}*
 *Total execution time: {result.execution_time:.2f} seconds*
 """
 

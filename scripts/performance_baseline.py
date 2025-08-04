@@ -651,7 +651,7 @@ _performance_monitor: PerformanceMonitor | None = None
 
 def get_performance_monitor() -> PerformanceMonitor:
     """Get or create global performance monitor instance."""
-    global _performance_monitor
+    global _performance_monitor  # noqa: PLW0603
     if _performance_monitor is None:
         _performance_monitor = PerformanceMonitor()
     return _performance_monitor

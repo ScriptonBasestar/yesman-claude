@@ -213,7 +213,7 @@ class AsyncIntegrationTester:
         """Start performance monitoring for the test."""
         success = await self.performance_monitor.start_monitoring()
         if not success:
-            raise RuntimeError("Start failed")
+            raise RuntimeError("Start failed")  # noqa: TRY003
 
     async def _test_monitor_creation(self) -> dict[str, Any]:
         """Test AsyncClaudeMonitor creation and basic functionality."""
@@ -226,18 +226,18 @@ class AsyncIntegrationTester:
 
             # Test basic properties
             if monitor.session_name != "integration_test":
-                raise ValueError(f"Wrong session: {monitor.session_name}")
+                raise ValueError(f"Wrong session: {monitor.session_name}")  # noqa: TRY003
             if not monitor.is_auto_next_enabled:
-                raise ValueError("Auto-next disabled")
+                raise ValueError("Auto-next disabled")  # noqa: TRY003
             if monitor.is_running:
-                raise ValueError("Already running")
+                raise ValueError("Already running")  # noqa: TRY003
 
             # Test startup
             startup_success = await monitor.start_monitoring_async()
             if not startup_success:
-                raise RuntimeError("Start failed")
+                raise RuntimeError("Start failed")  # noqa: TRY003
             if not monitor.is_running:
-                raise RuntimeError("Not running")
+                raise RuntimeError("Not running")  # noqa: TRY003
 
             # Let it run for a few seconds
             await asyncio.sleep(3)
@@ -245,9 +245,9 @@ class AsyncIntegrationTester:
             # Test shutdown
             shutdown_success = await monitor.stop_monitoring_async()
             if not shutdown_success:
-                raise RuntimeError("Stop failed")
+                raise RuntimeError("Stop failed")  # noqa: TRY003
             if monitor.is_running:
-                raise RuntimeError("Still running")
+                raise RuntimeError("Still running")  # noqa: TRY003
 
             return {"success": True, "startup_success": startup_success, "shutdown_success": shutdown_success, "monitor_instance": str(type(monitor))}
 

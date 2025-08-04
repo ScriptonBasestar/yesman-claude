@@ -1,10 +1,13 @@
 # Copyright notice.
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
+from unittest.mock import MagicMock
 
 # Import here to avoid circular imports
 # Moved to the end of file to avoid circular imports
+from .mock_factories import ComponentMockFactory, ManagerMockFactory
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -129,7 +132,7 @@ def get_factory_mock(mock_type: str, **kwargs: Any) -> object:
     Returns:
         Configured mock object from factory system
     """
-    factory_map = {
+    factory_map: dict[str, Callable[..., MagicMock]] = {
         "session_manager": ManagerMockFactory.create_session_manager_mock,
         "claude_manager": ManagerMockFactory.create_claude_manager_mock,
         "tmux_manager": ManagerMockFactory.create_tmux_manager_mock,

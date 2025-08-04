@@ -433,7 +433,7 @@ class AsyncClaudeMonitor:
                 # Check if still waiting based on content patterns
                 self.waiting_for_input = await loop.run_in_executor(None, self.prompt_detector.is_waiting_for_input, content)
 
-            return cast(PromptInfo | None, prompt_info)
+            return prompt_info
 
         except Exception as e:
             self.logger.exception("Error checking for prompts")
@@ -584,7 +584,7 @@ class AsyncClaudeMonitor:
             # Run response logic in thread pool
             loop = asyncio.get_event_loop()
             should_respond = await loop.run_in_executor(None, self._should_auto_respond, prompt_info)
-            return cast(bool, should_respond)
+            return should_respond
         except Exception as e:
             self.logger.exception("Error checking auto-response")
             return False
