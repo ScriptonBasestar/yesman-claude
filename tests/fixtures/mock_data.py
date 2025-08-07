@@ -1,13 +1,6 @@
 # Copyright notice.
 
-from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
-from unittest.mock import MagicMock
-
-# Import here to avoid circular imports
-# Moved to the end of file to avoid circular imports
-from .mock_factories import ComponentMockFactory, ManagerMockFactory
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -120,79 +113,12 @@ MOCK_API_RESPONSES = {
 }
 
 
-# Factory Integration - Bridge between old and new systems
-def get_factory_mock(mock_type: str, **kwargs: Any) -> object:
-    """Bridge function to get factory-created mocks Provides backward
-    compatibility while encouraging factory usage.
-
-    Args:
-        mock_type: Type of mock to create ('session_manager', 'claude_manager', etc.)
-        **kwargs: Arguments to pass to the factory
-
-    Returns:
-        Configured mock object from factory system
-    """
-    factory_map: dict[str, Callable[..., MagicMock]] = {
-        "session_manager": ManagerMockFactory.create_session_manager_mock,
-        "claude_manager": ManagerMockFactory.create_claude_manager_mock,
-        "tmux_manager": ManagerMockFactory.create_tmux_manager_mock,
-        "tmux_session": ComponentMockFactory.create_tmux_session_mock,
-        "subprocess": ComponentMockFactory.create_subprocess_mock,
-        "api_response": ComponentMockFactory.create_api_response_mock,
-    }
-
-    if mock_type not in factory_map:
-        msg = f"Unknown mock type: {mock_type}. Available: {list(factory_map.keys())}"
-        raise ValueError(msg)
-
-    return factory_map[mock_type](**kwargs)
-
-
-# Enhanced mock classes with factory integration
+# Simplified versions without factory dependencies
 class EnhancedMockTmuxSession(MockTmuxSession):
-    """Enhanced TmuxSession mock that integrates with factory system."""
-
-    @classmethod
-    def from_factory(cls, name: str = "test-session", **kwargs: Any) -> object:
-        """Create enhanced mock using factory system."""
-        return get_factory_mock("tmux_session", name=name, **kwargs)
+    """Enhanced TmuxSession mock."""
 
     @classmethod
     def with_windows(cls, name: str = "test-session", window_count: int = 2) -> object:
         """Create mock with specified number of windows."""
         windows = [MockTmuxWindow(f"window-{i}") for i in range(window_count)]
-        return cls.from_factory(name=name, windows=windows)
-
-
-# Convenience functions for common mock patterns
-def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str, Any]:
-    """Create a complete mock session with controller for integration tests."""
-    session_mock = get_factory_mock("session_manager", **kwargs)
-    claude_mock = get_factory_mock("claude_manager", **kwargs)
-
-    return {
-        "session_manager": session_mock,
-        "claude_manager": claude_mock,
-        "session_data": MOCK_SESSION_DATA,
-    }
-
-
-def create_api_test_mocks(success: bool = True) -> dict[str, Any]:
-    """Create standard API test mocks."""
-    if success:
-        return {
-            "response": get_factory_mock(
-                "api_response",
-                status_code=200,
-                json_data=MOCK_API_RESPONSES["sessions_list"],
-            ),
-            "session_manager": get_factory_mock("session_manager"),
-        }
-    return {
-        "response": get_factory_mock(
-            "api_response",
-            status_code=500,
-            json_data=MOCK_API_RESPONSES["error_response"],
-        ),
-        "session_manager": get_factory_mock("session_manager", create_session_result=False),
-    }
+        return cls(name=name, windows=windows)

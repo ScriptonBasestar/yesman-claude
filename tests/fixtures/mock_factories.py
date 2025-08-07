@@ -1,8 +1,6 @@
 from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
-from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
-
 # Convenience exports for easy importing
 
 # Copyright notice.
@@ -11,6 +9,39 @@ from .mock_data import MOCK_API_RESPONSES, MOCK_SESSION_DATA
 """Centralized Mock Factory System
 Provides standardized mock objects to reduce duplication across test files.
 """
+
+# Default mock data - duplicated here to avoid circular imports
+MOCK_SESSION_DATA = {
+    "session_name": "test-session",
+    "project_name": "test-project",
+    "status": "active",
+    "windows": [
+        {"name": "main", "panes": 2},
+        {"name": "logs", "panes": 1},
+    ],
+    "controller_status": "running",
+    "controller_pid": 12345,
+    "created_at": "2024-01-08T10:00:00",
+    "last_activity": "2024-01-08T10:30:00",
+}
+
+MOCK_API_RESPONSES = {
+    "sessions_list": {
+        "status": "success",
+        "data": [MOCK_SESSION_DATA],
+        "count": 1,
+    },
+    "controller_start": {
+        "status": "success",
+        "message": "Controller started",
+        "pid": 12345,
+    },
+    "error_response": {
+        "status": "error",
+        "message": "Internal server error",
+        "code": 500,
+    },
+}
 
 
 class ManagerMockFactory:

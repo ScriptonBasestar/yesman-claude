@@ -2,7 +2,9 @@
 
 ## Overview
 
-Yesman-Claude uses Ruff as the primary tool for code formatting, linting, and import organization. This guide documents the code quality tools, their configuration, and best practices for maintaining consistent code quality across the project.
+Yesman-Claude uses Ruff as the primary tool for code formatting, linting, and import organization. This guide documents
+the code quality tools, their configuration, and best practices for maintaining consistent code quality across the
+project.
 
 ## Quick Start
 

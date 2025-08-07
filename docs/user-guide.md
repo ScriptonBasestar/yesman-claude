@@ -227,18 +227,18 @@ uv run ./yesman.py down
 
 ### TUI Dashboard Shortcuts
 
-| Key | Action | Context |
+| Key         | Action           | Context    |
 | ----------- | ---------------- | ---------- |
-| `q` | Quit application | Global |
-| `h` | Show help | Global |
-| `r` | Refresh data | Global |
-| `d` | Toggle dark mode | Global |
-| `1-5` | Switch views | Global |
-| `↑/↓` | Navigate items | Lists |
-| `←/→` | Navigate panes | Horizontal |
-| `Enter` | Select/Activate | Lists |
-| `Tab` | Next focus | Forms |
-| `Shift+Tab` | Previous focus | Forms |
+| `q`         | Quit application | Global     |
+| `h`         | Show help        | Global     |
+| `r`         | Refresh data     | Global     |
+| `d`         | Toggle dark mode | Global     |
+| `1-5`       | Switch views     | Global     |
+| `↑/↓`       | Navigate items   | Lists      |
+| `←/→`       | Navigate panes   | Horizontal |
+| `Enter`     | Select/Activate  | Lists      |
+| `Tab`       | Next focus       | Forms      |
+| `Shift+Tab` | Previous focus   | Forms      |
 
 ### Navigation Contexts
 

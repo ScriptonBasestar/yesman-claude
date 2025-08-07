@@ -1,6 +1,5 @@
 # Copyright notice.
 
-import unittest
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -9,78 +8,78 @@ from commands.ls import ls
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-"""Test for ls command."""
+"""Test for ls command - Fixed for actual ls command."""
 
 
-class TestLsCommand(unittest.TestCase):
-    def setUp(self) -> None:
+class TestLsCommand:
+    """Test ls command functionality."""
+
+    def setup_method(self) -> None:
         self.runner = CliRunner()
 
-    @patch("commands.ls.TmuxManager")
-    def test_ls_shows_templates(self, mock_tmux_manager: object) -> None:
-        """Test that ls command shows available templates."""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.list_templates.return_value = [
-            "template1.yaml",
-            "template2.yaml",
-        ]
-        mock_tmux_manager.return_value = mock_manager_instance
+    @patch("commands.ls.LsCommand")
+    def test_ls_shows_projects_and_templates(self, mock_command_class: MagicMock) -> None:
+        """Test ls command shows projects and templates."""
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
+        mock_command.run.return_value = None
 
         # Run command
         result = self.runner.invoke(ls)
 
         # Assertions
         assert result.exit_code == 0
-        assert "Available templates:" in result.output
-        assert "template1.yaml" in result.output
-        assert "template2.yaml" in result.output
+        mock_command.run.assert_called_once_with(output_format="table")
 
-    @patch("commands.ls.TmuxManager")
-    def test_ls_shows_running_sessions(self, mock_tmux_manager: object) -> None:
-        """Test that ls command shows running sessions."""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.list_sessions.return_value = [
-            {"name": "session1", "windows": 2},
-            {"name": "session2", "windows": 3},
-        ]
-        mock_tmux_manager.return_value = mock_manager_instance
+    @patch("commands.ls.LsCommand")
+    def test_ls_with_json_format(self, mock_command_class: MagicMock) -> None:
+        """Test ls command with JSON format."""
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
+        mock_command.run.return_value = None
 
-        # Run command
-        result = self.runner.invoke(ls)
+        # Run command with JSON format
+        result = self.runner.invoke(ls, ["--format", "json"])
 
         # Assertions
         assert result.exit_code == 0
-        assert "Running sessions:" in result.output
-        assert "session1" in result.output
-        assert "session2" in result.output
+        mock_command.run.assert_called_once_with(output_format="json")
 
-    @patch("commands.ls.TmuxManager")
-    def test_ls_handles_no_templates(self, mock_tmux_manager: object) -> None:
-        """Test ls command when no templates exist."""
-        # Setup mock
-        mock_manager_instance = MagicMock()
-        mock_manager_instance.list_templates.return_value = []
-        mock_manager_instance.list_sessions.return_value = []
-        mock_tmux_manager.return_value = mock_manager_instance
+    @patch("commands.ls.LsCommand")
+    def test_ls_with_yaml_format(self, mock_command_class: MagicMock) -> None:
+        """Test ls command with YAML format."""
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
+        mock_command.run.return_value = None
 
-        # Run command
-        result = self.runner.invoke(ls)
+        # Run command with YAML format
+        result = self.runner.invoke(ls, ["--format", "yaml"])
 
         # Assertions
         assert result.exit_code == 0
-        assert "No templates found" in result.output or "Available templates:" in result.output
+        mock_command.run.assert_called_once_with(output_format="yaml")
 
-    @patch("commands.ls.TmuxManager")
-    def test_ls_handles_tmux_error(self, mock_tmux_manager: object) -> None:
-        """Test ls command handles tmux errors gracefully."""
+    @patch("commands.ls.LsCommand")
+    def test_ls_handles_command_error(self, mock_command_class: MagicMock) -> None:
+        """Test ls handles command errors."""
         # Setup mock to raise exception
-        mock_tmux_manager.side_effect = Exception("Tmux not found")
+        mock_command = MagicMock()
+        mock_command.run.side_effect = Exception("Test error")
+        mock_command_class.return_value = mock_command
 
         # Run command
         result = self.runner.invoke(ls)
 
         # Should handle error gracefully
         assert result.exit_code != 0
-        assert "Error" in result.output or "Tmux not found" in result.output
+
+    def test_ls_help_output(self) -> None:
+        """Test ls command help output."""
+        result = self.runner.invoke(ls, ["--help"])
+
+        assert result.exit_code == 0
+        assert "List all available projects" in result.output
+        assert "--format" in result.output

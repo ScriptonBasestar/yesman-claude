@@ -55,7 +55,8 @@ When updating documentation in this directory:
 
 ## Updating Documentation
 
-This directory is designed for living documentation that evolves with the project. Both developers and AI agents can update these files to:
+This directory is designed for living documentation that evolves with the project. Both developers and AI agents can
+update these files to:
 
 - Reflect new features or changes
 - Improve clarity and examples

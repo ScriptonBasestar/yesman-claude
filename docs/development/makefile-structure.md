@@ -87,7 +87,8 @@ Makefile (main)
 - `hooks-install`, `hooks-uninstall` - Git hooks management
 - `quality-info` - Quality tools information
 
-**Important**: All formatting now uses Ruff exclusively for consistency. See [Code Quality Guide](/docs/development/code-quality-guide.md) for details.
+**Important**: All formatting now uses Ruff exclusively for consistency. See
+[Code Quality Guide](/docs/development/code-quality-guide.md) for details.
 
 ### 🧪 Makefile.test.mk - Testing
 

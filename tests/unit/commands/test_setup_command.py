@@ -1,11 +1,10 @@
 # Copyright notice.
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
 from commands.setup import setup
-from tests.fixtures.mock_factories import PatchContextFactory
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -18,100 +17,86 @@ class TestSetupCommand:
     def setup_method(self) -> None:
         self.runner = CliRunner()
 
-    @patch("commands.setup.YesmanConfig")
-    def test_setup_creates_all_sessions(self, mock_config: object) -> None:
-        """Test setup command creates all sessions from projects.yaml."""
-        projects = {
-            "sessions": {
-                "project1": {"template_name": "template1"},
-                "project2": {"template_name": "template2"},
-            },
-        }
+    @patch("commands.setup.SetupCommand")
+    def test_setup_creates_sessions(self, mock_command_class: MagicMock) -> None:
+        """Test setup command creates sessions."""
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
+        mock_command.run.return_value = None
 
-        with PatchContextFactory.patch_setup_tmux_manager(
-            load_projects_result=projects,
-            create_session_result=True,
-        ) as mock_manager:
-            # Run command
-            result = self.runner.invoke(setup)
+        # Run command
+        result = self.runner.invoke(setup)
 
-            # Assertions
-            assert result.exit_code == 0
-            assert mock_manager.create_session.call_count == 2
-            mock_manager.list_running_sessions.assert_called_once()
+        # Assertions
+        assert result.exit_code == 0
+        mock_command.run.assert_called_once_with(session_name=None)
 
-    @patch("commands.setup.YesmanConfig")
-    def test_setup_with_specific_project(self, mock_config: object) -> None:
+    @patch("commands.setup.SetupCommand")
+    def test_setup_with_specific_project(self, mock_command_class: MagicMock) -> None:
         """Test setup command with specific project name."""
-        projects = {
-            "sessions": {
-                "myproject": {"template_name": "my_template"},
-            },
-        }
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
+        mock_command.run.return_value = None
 
-        with PatchContextFactory.patch_setup_tmux_manager(
-            load_projects_result=projects,
-            create_session_result=True,
-        ) as mock_manager:
-            # Run command with project name
-            result = self.runner.invoke(setup, ["myproject"])
+        # Run command with session name
+        result = self.runner.invoke(setup, ["myproject"])
 
-            # Assertions
-            assert result.exit_code == 0
-            mock_manager.create_session.assert_called_once()
+        # Assertions
+        assert result.exit_code == 0
+        mock_command.run.assert_called_once_with(session_name="myproject")
 
-    @patch("commands.setup.YesmanConfig")
-    def test_setup_handles_session_creation_failure(self, mock_config: object) -> None:
-        """Test setup handles session creation failure gracefully."""
-        projects = {
-            "sessions": {
-                "existing": {"template_name": "my_template"},
-            },
-        }
+    @patch("commands.setup.SetupCommand")
+    def test_setup_with_dry_run(self, mock_command_class: MagicMock) -> None:
+        """Test setup command with dry run flag."""
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
 
-        with PatchContextFactory.patch_setup_tmux_manager(
-            load_projects_result=projects,
-            create_session_result=False,  # Simulate failure
-        ):
-            # Run command
-            result = self.runner.invoke(setup, ["existing"])
+        # Run command with dry run
+        result = self.runner.invoke(setup, ["--dry-run"])
 
-            # Should handle error gracefully
-            assert result.exit_code == 0  # Command completes but reports failure
-            assert "already exists" in result.output or "failed to create" in result.output
+        # Assertions - dry run returns early, so run() is not called
+        assert result.exit_code == 0
+        mock_command.print_info.assert_called_once_with("Dry-run mode: showing what would be done")
+        mock_command.run.assert_not_called()
 
-    @patch("commands.setup.YesmanConfig")
-    def test_setup_with_nonexistent_project(self, mock_config: object) -> None:
-        """Test setup with nonexistent project name."""
-        projects = {
-            "sessions": {
-                "valid_project": {"template_name": "template1"},
-            },
-        }
+    @patch("commands.setup.SetupCommand")
+    def test_setup_with_force(self, mock_command_class: MagicMock) -> None:
+        """Test setup command with force flag."""
+        # Setup mocks
+        mock_command = MagicMock()
+        mock_command_class.return_value = mock_command
+        mock_command.run.return_value = None
 
-        with PatchContextFactory.patch_setup_tmux_manager(
-            load_projects_result=projects,
-        ) as mock_manager:
-            # Run command with nonexistent project
-            result = self.runner.invoke(setup, ["nonexistent"])
+        # Run command with force
+        result = self.runner.invoke(setup, ["--force"])
 
-            # Should show error and not call create_session
-            assert result.exit_code == 0  # Click command completes
-            assert "not defined" in result.output
-            mock_manager.create_session.assert_not_called()
+        # Assertions
+        assert result.exit_code == 0
+        mock_command.print_warning.assert_called_once_with("Force mode: existing sessions will be recreated without prompting")
+        mock_command.run.assert_called_once_with(session_name=None)
 
-    @patch("commands.setup.YesmanConfig")
-    def test_setup_no_projects_found(self, mock_config: object) -> None:
-        """Test setup when no projects are configured."""
-        projects = {"sessions": {}}  # Empty sessions
+    @patch("commands.setup.SetupCommand")
+    def test_setup_handles_command_error(self, mock_command_class: MagicMock) -> None:
+        """Test setup handles command errors."""
+        # Setup mock to raise exception
+        mock_command = MagicMock()
+        mock_command.run.side_effect = Exception("Test error")
+        mock_command_class.return_value = mock_command
 
-        with PatchContextFactory.patch_setup_tmux_manager(
-            load_projects_result=projects,
-        ) as mock_manager:
-            # Run command
-            result = self.runner.invoke(setup)
+        # Run command
+        result = self.runner.invoke(setup)
 
-            # Should show appropriate message
-            assert result.exit_code == 0
-            assert "No sessions defined" in result.output
-            mock_manager.create_session.assert_not_called()
+        # Should handle error gracefully
+        assert result.exit_code != 0
+
+    def test_setup_help_output(self) -> None:
+        """Test setup command help output."""
+        result = self.runner.invoke(setup, ["--help"])
+
+        assert result.exit_code == 0
+        assert "Create all tmux sessions" in result.output
+        assert "--dry-run" in result.output
+        assert "--force" in result.output

@@ -22,7 +22,10 @@ export const pythonBridge = {
 	// Session Management - Use centralized API client
 	get_sessions: async () => {
 		const response = await api.getSessions();
-		return { sessions: response.data || [] };
+		if (response.error) {
+			throw new Error(response.error);
+		}
+		return response.data || [];
 	},
 	get_session_details: (sessionId: string) => api.getSession(sessionId),
 	create_session: (config: any) => api.createSession(config),
