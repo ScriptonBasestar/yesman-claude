@@ -145,11 +145,11 @@ dev-status: ## show current development status
 	@echo -e "$(BLUE)========================$(RESET)"
 	@echo ""
 	@echo -e "$(GREEN)📊 Project Status:$(RESET)"
-	@printf "  %-20s " "Git Status:"; if git status --porcelain | grep -q .; then echo -e "$(YELLOW)Modified files$(RESET)"; else echo -e "$(GREEN)Clean$(RESET)"; fi
-	@printf "  %-20s " "Current Branch:"; git branch --show-current 2>/dev/null || echo -e "$(RED)Unknown$(RESET)"
-	@printf "  %-20s " "Last Commit:"; git log -1 --format="%h %s" 2>/dev/null | cut -c1-50 || echo -e "$(RED)No commits$(RESET)"
+	@echo -n -e "  Git Status:         "; if git status --porcelain | grep -q .; then echo -e "$(YELLOW)Modified files$(RESET)"; else echo -e "$(GREEN)Clean$(RESET)"; fi
+	@echo -n -e "  Current Branch:     "; git branch --show-current 2>/dev/null || echo -e "$(RED)Unknown$(RESET)"
+	@echo -n -e "  Last Commit:        "; git log -1 --format="%h %s" 2>/dev/null | cut -c1-50 || echo -e "$(RED)No commits$(RESET)"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Development Status:$(RESET)"
-	@printf "  %-20s " "Tests Passing:"; if make test-unit > /dev/null 2>&1; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(RED)No$(RESET)"; fi
-	@printf "  %-20s " "Coverage File:"; if [ -f ".coverage" ]; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(YELLOW)No$(RESET)"; fi
-	@printf "  %-20s " "Virtual Env:"; if [ -n "$$VIRTUAL_ENV" ]; then echo -e "$(GREEN)Active$(RESET)"; else echo -e "$(YELLOW)None$(RESET)"; fi
+	@echo -n -e "  Tests Passing:      "; if make test-unit > /dev/null 2>&1; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(RED)No$(RESET)"; fi
+	@echo -n -e "  Coverage File:      "; if [ -f ".coverage" ]; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(YELLOW)No$(RESET)"; fi
+	@echo -n -e "  Virtual Env:        "; if [ -n "$$VIRTUAL_ENV" ]; then echo -e "$(GREEN)Active$(RESET)"; else echo -e "$(YELLOW)None$(RESET)"; fi
