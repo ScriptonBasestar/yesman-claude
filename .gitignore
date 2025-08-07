@@ -7,6 +7,15 @@
 dashboard_test.log
 yesman_claude.egg-info/
 
+# 테스트 및 분석 결과 파일들 (Test and analysis result files)
+*_results.json
+*_analysis.json
+bandit_results.json
+bandit-*.json
+dependency_analysis.json
+integration_test_results.json
+safety-report.json
+
 # =============================================================================
 # PYTHON
 # https://github.com/github/gitignore/blob/main/Python.gitignore
