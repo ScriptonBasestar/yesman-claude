@@ -96,7 +96,7 @@ deps-outdated: ## show outdated dependencies
 deps-security: ## check dependencies for security vulnerabilities
 	@echo -e "$(CYAN)Running security vulnerability check...$(RESET)"
 	@command -v safety >/dev/null 2>&1 || pip install safety
-	@safety check || echo "$(YELLOW)⚠️  Some vulnerabilities found$(RESET)"
+	@safety check || echo -e "$(YELLOW)⚠️  Some vulnerabilities found$(RESET)"
 
 deps-clean: ## remove unused dependencies
 	@echo -e "$(CYAN)Cleaning unused dependencies...$(RESET)"
@@ -169,8 +169,8 @@ venv-create: ## create new virtual environment
 
 venv-activate: ## show how to activate virtual environment
 	@echo -e "$(CYAN)To activate virtual environment:$(RESET)"
-	@echo "  $(YELLOW)source .venv/bin/activate$(RESET)  (Linux/Mac)"
-	@echo "  $(YELLOW).venv\\Scripts\\activate$(RESET)     (Windows)"
+	@echo -e "  $(YELLOW)source .venv/bin/activate$(RESET)  (Linux/Mac)"
+	@echo -e "  $(YELLOW).venv\\Scripts\\activate$(RESET)     (Windows)"
 
 venv-clean: ## remove virtual environment
 	@echo -e "$(CYAN)Removing virtual environment...$(RESET)"
@@ -186,8 +186,8 @@ venv-clean: ## remove virtual environment
 setup-all: install-all install-all-tools setup-hooks ## complete project setup
 	@echo -e "$(GREEN)🎉 Complete project setup finished!$(RESET)"
 	@echo -e "$(YELLOW)Next steps:$(RESET)"
-	@echo "  1. Run $(CYAN)make quick$(RESET) to verify setup"
-	@echo "  2. Run $(CYAN)make help$(RESET) to see available commands"
+	@echo -e "  1. Run $(CYAN)make quick$(RESET) to verify setup"
+	@echo -e "  2. Run $(CYAN)make help$(RESET) to see available commands"
 
 setup-env: ## setup development environment
 	@echo -e "$(CYAN)Setting up development environment...$(RESET)"
@@ -222,8 +222,8 @@ setup-complete: setup-env setup-vscode ## complete development setup
 	@echo ""
 	@echo -e "$(YELLOW)Next steps:$(RESET)"
 	@echo "  1. Activate your virtual environment"
-	@echo "  2. Run $(CYAN)make test$(RESET) to verify setup"
-	@echo "  3. Run $(CYAN)make help$(RESET) to see available commands"
+	@echo -e "  2. Run $(CYAN)make test$(RESET) to verify setup"
+	@echo -e "  3. Run $(CYAN)make help$(RESET) to see available commands"
 
 # ==============================================================================
 # Tool Status and Management
@@ -259,14 +259,14 @@ tools-check: ## verify all required tools are installed
 	@missing=0; \
 	for tool in python pip uv git make; do \
 		if ! command -v $$tool >/dev/null 2>&1; then \
-			echo "$(RED)❌ Missing required tool: $$tool$(RESET)"; \
+		echo -e "$(RED)❌ Missing required tool: $$tool$(RESET)"; \
 			missing=1; \
 		fi; \
 	done; \
 	if [ $$missing -eq 0 ]; then \
-		echo "$(GREEN)✅ All required tools are installed$(RESET)"; \
+		echo -e "$(GREEN)✅ All required tools are installed$(RESET)"; \
 	else \
-		echo "$(RED)Please install missing tools before continuing$(RESET)"; \
+		echo -e "$(RED)Please install missing tools before continuing$(RESET)"; \
 		exit 1; \
 	fi
 
@@ -275,30 +275,30 @@ tools-list: ## list all available tools with descriptions
 	@echo -e "$(BLUE)============================$(RESET)"
 	@echo ""
 	@echo -e "$(YELLOW)🔧 Essential Tools:$(RESET)"
-	@echo "  • $(CYAN)ruff$(RESET)         - Fast Python linter"
-	@echo "  • $(CYAN)mypy$(RESET)         - Static type checker"
-	@echo "  • $(CYAN)black$(RESET)        - Code formatter"
-	@echo "  • $(CYAN)isort$(RESET)        - Import sorter"
-	@echo "  • $(CYAN)pytest$(RESET)       - Testing framework"
+	@echo -e "  • $(CYAN)ruff$(RESET)         - Fast Python linter"
+	@echo -e "  • $(CYAN)mypy$(RESET)         - Static type checker"
+	@echo -e "  • $(CYAN)black$(RESET)        - Code formatter"
+	@echo -e "  • $(CYAN)isort$(RESET)        - Import sorter"
+	@echo -e "  • $(CYAN)pytest$(RESET)       - Testing framework"
 	@echo ""
 	@echo -e "$(YELLOW)🛡️  Security Tools:$(RESET)"
-	@echo "  • $(CYAN)bandit$(RESET)       - Security linter"
-	@echo "  • $(CYAN)safety$(RESET)       - Dependency checker"
-	@echo "  • $(CYAN)pip-audit$(RESET)    - Package auditor"
+	@echo -e "  • $(CYAN)bandit$(RESET)       - Security linter"
+	@echo -e "  • $(CYAN)safety$(RESET)       - Dependency checker"
+	@echo -e "  • $(CYAN)pip-audit$(RESET)    - Package auditor"
 	@echo ""
 	@echo -e "$(YELLOW)📊 Analysis Tools:$(RESET)"
-	@echo "  • $(CYAN)radon$(RESET)        - Code metrics"
-	@echo "  • $(CYAN)vulture$(RESET)      - Dead code finder"
-	@echo "  • $(CYAN)prospector$(RESET)   - Code analyzer"
+	@echo -e "  • $(CYAN)radon$(RESET)        - Code metrics"
+	@echo -e "  • $(CYAN)vulture$(RESET)      - Dead code finder"
+	@echo -e "  • $(CYAN)prospector$(RESET)   - Code analyzer"
 	@echo ""
 	@echo -e "$(YELLOW)📚 Documentation:$(RESET)"
-	@echo "  • $(CYAN)sphinx$(RESET)       - Documentation generator"
-	@echo "  • $(CYAN)mkdocs$(RESET)       - Project documentation"
-	@echo "  • $(CYAN)pdoc$(RESET)         - API documentation"
+	@echo -e "  • $(CYAN)sphinx$(RESET)       - Documentation generator"
+	@echo -e "  • $(CYAN)mkdocs$(RESET)       - Project documentation"
+	@echo -e "  • $(CYAN)pdoc$(RESET)         - API documentation"
 
 tools-outdated: ## show outdated tools
 	@echo -e "$(CYAN)Checking for outdated tools...$(RESET)"
-	@pip list --outdated | grep -E "($(subst $(space),|,$(ALL_TOOLS)))" || echo "$(GREEN)All tools are up to date$(RESET)"
+	@pip list --outdated | grep -E "($(subst $(space),|,$(ALL_TOOLS)))" || echo -e "$(GREEN)All tools are up to date$(RESET)"
 
 # ==============================================================================
 # Environment Information
@@ -309,9 +309,9 @@ tools-outdated: ## show outdated tools
 env-info: ## show environment information
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Environment Information$(CYAN)                         ║"
+	@echo -e "║                         $(YELLOW)Environment Information$(CYAN)                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-	@echo "$(RESET)"
+	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)🐍 Python Environment:$(RESET)"
 	@echo "  Python:         $$(python --version 2>&1)"
 	@echo "  UV:            $$(uv --version 2>&1 || echo 'Not installed')"
@@ -322,10 +322,10 @@ env-info: ## show environment information
 	@pip list --outdated 2>/dev/null | tail -n +3 | wc -l | xargs printf "  Outdated packages:  %d\n"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Available Commands:$(RESET)"
-	@echo "  • $(CYAN)install-all$(RESET)         Install everything"
-	@echo "  • $(CYAN)setup-all$(RESET)           Complete setup"
-	@echo "  • $(CYAN)tools-status$(RESET)        Check tool status"
-	@echo "  • $(CYAN)deps-outdated$(RESET)       Check outdated deps"
-	@echo "  • $(CYAN)deps-security$(RESET)       Security scan"
+	@echo -e "  • $(CYAN)install-all$(RESET)         Install everything"
+	@echo -e "  • $(CYAN)setup-all$(RESET)           Complete setup"
+	@echo -e "  • $(CYAN)tools-status$(RESET)        Check tool status"
+	@echo -e "  • $(CYAN)deps-outdated$(RESET)       Check outdated deps"
+	@echo -e "  • $(CYAN)deps-security$(RESET)       Security scan"
 
 deps-info: env-info ## show dependency information (alias)

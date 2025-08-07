@@ -46,13 +46,13 @@ format-all: ## run all formatters including advanced ones
 format-check: ## check code formatting without fixing
 	@echo -e "$(CYAN)Checking code formatting...$(RESET)"
 	@if ! uv run ruff format --check $(PYTHON_DIRS) $(EXCLUDE_DIRS) 2>/dev/null; then \
-		echo "$(RED)❌ Formatting issues found$(RESET)"; \
-		echo "$(YELLOW)Run 'make fmt' to fix.$(RESET)"; \
+		echo -e "$(RED)❌ Formatting issues found$(RESET)"; \
+		echo -e "$(YELLOW)Run 'make fmt' to fix.$(RESET)"; \
 		exit 1; \
 	fi
 	@if ! uv run ruff check --select I $(PYTHON_DIRS) $(EXCLUDE_DIRS) 2>/dev/null; then \
-		echo "$(RED)❌ Import sorting issues found$(RESET)"; \
-		echo "$(YELLOW)Run 'make fmt' to fix.$(RESET)"; \
+		echo -e "$(RED)❌ Import sorting issues found$(RESET)"; \
+		echo -e "$(YELLOW)Run 'make fmt' to fix.$(RESET)"; \
 		exit 1; \
 	fi
 	@echo -e "$(GREEN)✅ All files are properly formatted$(RESET)"
@@ -564,9 +564,9 @@ imports: ## analyze import statements
 quality-info: ## show quality tools and targets information
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Code Quality Information$(CYAN)                        ║"
+	@echo -e "║                         $(YELLOW)Code Quality Information$(CYAN)                        ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-	@echo "$(RESET)"
+	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)🎨 Formatting Tools:$(RESET)"
 	@echo "  • $(CYAN)black$(RESET)              Python code formatter"
 	@echo "  • $(CYAN)isort$(RESET)              Import statement organizer"

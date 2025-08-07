@@ -17,17 +17,17 @@
 start: run ## quick start: run yesman
 stop: ## stop running yesman processes
 	@echo -e "$(YELLOW)Stopping yesman processes...$(RESET)"
-	@pkill -f "yesman" || echo "$(GREEN)No running yesman processes found$(RESET)"
+	@pkill -f "yesman" || echo -e "$(GREEN)No running yesman processes found$(RESET)"
 
 restart: stop start ## restart yesman
 
 yesman-status: ## check yesman status
 	@echo -e "$(CYAN)Checking for running yesman processes...$(RESET)"
-	@pgrep -f "yesman" > /dev/null && echo "$(GREEN)✅ yesman is running$(RESET)" || echo "$(RED)❌ yesman is not running$(RESET)"
+	@pgrep -f "yesman" > /dev/null && echo -e "$(GREEN)✅ yesman is running$(RESET)" || echo -e "$(RED)❌ yesman is not running$(RESET)"
 
 logs: ## show recent log files
 	@echo -e "$(CYAN)Recent log files:$(RESET)"
-	@find . -name "*.log" -type f -mtime -7 -exec ls -la {} \; 2>/dev/null || echo "$(YELLOW)No recent log files found$(RESET)"
+	@find . -name "*.log" -type f -mtime -7 -exec ls -la {} \; 2>/dev/null || echo -e "$(YELLOW)No recent log files found$(RESET)"
 
 run: ## run yesman.py
 	@echo -e "$(CYAN)Running yesman...$(RESET)"
@@ -109,47 +109,47 @@ commit-helper: ## run commit organization helper script
 dev-info: ## show development environment information
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Development Information$(CYAN)                         ║"
+	@echo -e "║                         $(YELLOW)Development Information$(CYAN)                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-	@echo "$(RESET)"
+	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)🚀 Server Commands:$(RESET)"
-	@echo "  • $(CYAN)start$(RESET)               Start yesman services"
-	@echo "  • $(CYAN)stop$(RESET)                Stop all services"
-	@echo "  • $(CYAN)restart$(RESET)             Restart services"
-	@echo "  • $(CYAN)status$(RESET)              Check service status"
-	@echo "  • $(CYAN)dev-dashboard$(RESET)       Full development environment"
+	@echo -e "  • $(CYAN)start$(RESET)               Start yesman services"
+	@echo -e "  • $(CYAN)stop$(RESET)                Stop all services"
+	@echo -e "  • $(CYAN)restart$(RESET)             Restart services"
+	@echo -e "  • $(CYAN)status$(RESET)              Check service status"
+	@echo -e "  • $(CYAN)dev-dashboard$(RESET)       Full development environment"
 	@echo ""
 	@echo -e "$(GREEN)🛠️  Development Commands:$(RESET)"
-	@echo "  • $(CYAN)dev$(RESET)                 Standard development workflow"
-	@echo "  • $(CYAN)quick$(RESET)               Quick check (alias for dev-fast)"
-	@echo "  • $(CYAN)full$(RESET)                Full quality check"
-	@echo "  • $(CYAN)verify$(RESET)              Complete verification before PR"
+	@echo -e "  • $(CYAN)dev$(RESET)                 Standard development workflow"
+	@echo -e "  • $(CYAN)quick$(RESET)               Quick check (alias for dev-fast)"
+	@echo -e "  • $(CYAN)full$(RESET)                Full quality check"
+	@echo -e "  • $(CYAN)verify$(RESET)              Complete verification before PR"
 	@echo ""
 	@echo -e "$(GREEN)🐛 Debug Commands:$(RESET)"
-	@echo "  • $(CYAN)debug-api$(RESET)           Debug API server"
-	@echo "  • $(CYAN)debug-frontend$(RESET)      Debug frontend"
-	@echo "  • $(CYAN)logs$(RESET)                Show service logs"
+	@echo -e "  • $(CYAN)debug-api$(RESET)           Debug API server"
+	@echo -e "  • $(CYAN)debug-frontend$(RESET)      Debug frontend"
+	@echo -e "  • $(CYAN)logs$(RESET)                Show service logs"
 	@echo ""
 	@echo -e "$(GREEN)📊 Current Status:$(RESET)"
-	@echo "  Python:         $$(python --version 2>&1)"
-	@echo "  Git branch:     $$(git branch --show-current 2>/dev/null || echo 'N/A')"
-	@echo "  Git status:     $$(git status --porcelain 2>/dev/null | wc -l | xargs echo) files changed"
-	@echo "  Last commit:    $$(git log -1 --format='%h %s' 2>/dev/null || echo 'N/A')"
+	@echo -e "  Python:         $$(python --version 2>&1)"
+	@echo -e "  Git branch:     $$(git branch --show-current 2>/dev/null || echo 'N/A')"
+	@echo -e "  Git status:     $$(git status --porcelain 2>/dev/null | wc -l | xargs echo) files changed"
+	@echo -e "  Last commit:    $$(git log -1 --format='%h %s' 2>/dev/null || echo 'N/A')"
 	@echo ""
 	@echo -e "$(GREEN)🌐 Server Ports:$(RESET)"
-	@echo "  API Server:     $(YELLOW)$(API_SERVER_PORT)$(RESET)"
-	@echo "  Dev Server:     $(YELLOW)$(DEV_SERVER_PORT)$(RESET)"
+	@echo -e "  API Server:     $(YELLOW)$(API_SERVER_PORT)$(RESET)"
+	@echo -e "  Dev Server:     $(YELLOW)$(DEV_SERVER_PORT)$(RESET)"
 
 dev-status: ## show current development status
 	@echo -e "$(CYAN)Development Status Check$(RESET)"
 	@echo -e "$(BLUE)========================$(RESET)"
 	@echo ""
 	@echo -e "$(GREEN)📊 Project Status:$(RESET)"
-	@printf "  %-20s " "Git Status:"; if git status --porcelain | grep -q .; then echo "$(YELLOW)Modified files$(RESET)"; else echo "$(GREEN)Clean$(RESET)"; fi
-	@printf "  %-20s " "Current Branch:"; git branch --show-current 2>/dev/null || echo "$(RED)Unknown$(RESET)"
-	@printf "  %-20s " "Last Commit:"; git log -1 --format="%h %s" 2>/dev/null | cut -c1-50 || echo "$(RED)No commits$(RESET)"
+	@printf "  %-20s " "Git Status:"; if git status --porcelain | grep -q .; then echo -e "$(YELLOW)Modified files$(RESET)"; else echo -e "$(GREEN)Clean$(RESET)"; fi
+	@printf "  %-20s " "Current Branch:"; git branch --show-current 2>/dev/null || echo -e "$(RED)Unknown$(RESET)"
+	@printf "  %-20s " "Last Commit:"; git log -1 --format="%h %s" 2>/dev/null | cut -c1-50 || echo -e "$(RED)No commits$(RESET)"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Development Status:$(RESET)"
-	@printf "  %-20s " "Tests Passing:"; if make test-unit > /dev/null 2>&1; then echo "$(GREEN)Yes$(RESET)"; else echo "$(RED)No$(RESET)"; fi
-	@printf "  %-20s " "Coverage File:"; if [ -f ".coverage" ]; then echo "$(GREEN)Yes$(RESET)"; else echo "$(YELLOW)No$(RESET)"; fi
-	@printf "  %-20s " "Virtual Env:"; if [ -n "$$VIRTUAL_ENV" ]; then echo "$(GREEN)Active$(RESET)"; else echo "$(YELLOW)None$(RESET)"; fi
+	@printf "  %-20s " "Tests Passing:"; if make test-unit > /dev/null 2>&1; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(RED)No$(RESET)"; fi
+	@printf "  %-20s " "Coverage File:"; if [ -f ".coverage" ]; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(YELLOW)No$(RESET)"; fi
+	@printf "  %-20s " "Virtual Env:"; if [ -n "$$VIRTUAL_ENV" ]; then echo -e "$(GREEN)Active$(RESET)"; else echo -e "$(YELLOW)None$(RESET)"; fi

@@ -38,7 +38,7 @@ test-integration: ## run integration tests
 	@if [ -d "tests/integration" ]; then \
 		$(PYTEST_CMD) tests/integration/ $(PYTEST_OPTS); \
 	else \
-		echo "$(YELLOW)No integration tests found$(RESET)"; \
+		echo -e "$(YELLOW)No integration tests found$(RESET)"; \
 	fi
 	@echo -e "$(GREEN)✅ Integration tests completed$(RESET)"
 
@@ -47,7 +47,7 @@ test-performance: ## run performance tests
 	@if [ -d "tests/performance" ]; then \
 		$(PYTEST_CMD) tests/performance/ $(PYTEST_OPTS); \
 	else \
-		echo "$(YELLOW)No performance tests found$(RESET)"; \
+		echo -e "$(YELLOW)No performance tests found$(RESET)"; \
 	fi
 	@echo -e "$(GREEN)✅ Performance tests completed$(RESET)"
 
@@ -56,7 +56,7 @@ test-e2e: ## run end-to-end tests
 	@if [ -d "tests/e2e" ]; then \
 		$(PYTEST_CMD) tests/e2e/ $(PYTEST_OPTS); \
 	else \
-		echo "$(YELLOW)No e2e tests found$(RESET)"; \
+		echo -e "$(YELLOW)No e2e tests found$(RESET)"; \
 	fi
 	@echo -e "$(GREEN)✅ E2E tests completed$(RESET)"
 
@@ -101,14 +101,14 @@ cover-html: ## generate HTML coverage report
 	@echo -e "$(CYAN)Generating HTML coverage report...$(RESET)"
 	$(PYTEST_CMD) tests/ $(PYTEST_OPTS) --cov=libs --cov=commands --cov-report=html
 	@echo -e "$(GREEN)✅ Coverage report generated in htmlcov/index.html$(RESET)"
-	@uv run python -m webbrowser htmlcov/index.html 2>/dev/null || echo "$(YELLOW)Open htmlcov/index.html to view the report$(RESET)"
+	@uv run python -m webbrowser htmlcov/index.html 2>/dev/null || echo -e "$(YELLOW)Open htmlcov/index.html to view the report$(RESET)"
 
 cover-report: ## show detailed coverage report
 	@echo -e "$(CYAN)Generating detailed coverage report...$(RESET)"
 	@$(PYTEST_CMD) tests/ --cov=libs --cov=commands --cov-report=term-missing
 	@echo ""
 	@echo -e "$(YELLOW)=== Coverage Summary ===$(RESET)"
-	@uv run python -m coverage report | grep TOTAL || echo "$(YELLOW)No coverage data found$(RESET)"
+	@uv run python -m coverage report | grep TOTAL || echo -e "$(YELLOW)No coverage data found$(RESET)"
 	@echo ""
 	@echo -e "$(BLUE)For HTML report, run: make cover-html$(RESET)"
 
@@ -131,7 +131,7 @@ cover-check: ## check if coverage meets minimum threshold
 
 test-file: ## run specific test file (FILE=path/to/test.py)
 	@if [ -z "$(FILE)" ]; then \
-		echo "$(RED)Usage: make test-file FILE=tests/unit/core/test_prompt_detector.py$(RESET)"; \
+		echo -e "$(RED)Usage: make test-file FILE=tests/unit/core/test_prompt_detector.py$(RESET)"; \
 		exit 1; \
 	fi
 	@echo -e "$(CYAN)Running test file: $(FILE)$(RESET)"
@@ -139,7 +139,7 @@ test-file: ## run specific test file (FILE=path/to/test.py)
 
 test-marker: ## run tests with specific marker (MARKER=slow)
 	@if [ -z "$(MARKER)" ]; then \
-		echo "$(RED)Usage: make test-marker MARKER=slow$(RESET)"; \
+		echo -e "$(RED)Usage: make test-marker MARKER=slow$(RESET)"; \
 		exit 1; \
 	fi
 	@echo -e "$(CYAN)Running tests with marker: $(MARKER)$(RESET)"
@@ -147,7 +147,7 @@ test-marker: ## run tests with specific marker (MARKER=slow)
 
 test-keyword: ## run tests matching keyword (KEYWORD=prompt)
 	@if [ -z "$(KEYWORD)" ]; then \
-		echo "$(RED)Usage: make test-keyword KEYWORD=prompt$(RESET)"; \
+		echo -e "$(RED)Usage: make test-keyword KEYWORD=prompt$(RESET)"; \
 		exit 1; \
 	fi
 	@echo -e "$(CYAN)Running tests matching keyword: $(KEYWORD)$(RESET)"
@@ -175,29 +175,29 @@ test-markers: ## show all available test markers
 test-info: ## show testing information and targets
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Testing Information$(CYAN)                             ║"
+	@echo -e "║                         $(YELLOW)Testing Information$(CYAN)                             ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-	@echo "$(RESET)"
+	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)🧪 Test Categories:$(RESET)"
-	@echo "  • $(CYAN)Unit Tests$(RESET)          Fast, isolated component tests"
-	@echo "  • $(CYAN)Integration Tests$(RESET)   Service integration tests"
-	@echo "  • $(CYAN)Performance Tests$(RESET)   Performance benchmarks"
-	@echo "  • $(CYAN)E2E Tests$(RESET)           End-to-end scenario testing"
-	@echo "  • $(CYAN)Legacy Tests$(RESET)        Backward compatibility tests"
+	@echo -e "  • $(CYAN)Unit Tests$(RESET)          Fast, isolated component tests"
+	@echo -e "  • $(CYAN)Integration Tests$(RESET)   Service integration tests"
+	@echo -e "  • $(CYAN)Performance Tests$(RESET)   Performance benchmarks"
+	@echo -e "  • $(CYAN)E2E Tests$(RESET)           End-to-end scenario testing"
+	@echo -e "  • $(CYAN)Legacy Tests$(RESET)        Backward compatibility tests"
 	@echo ""
 	@echo -e "$(GREEN)📊 Coverage Targets:$(RESET)"
-	@echo "  • $(CYAN)cover$(RESET)               Run tests with coverage"
-	@echo "  • $(CYAN)cover-html$(RESET)          Generate HTML report"
-	@echo "  • $(CYAN)cover-report$(RESET)        Show detailed report"
-	@echo "  • $(CYAN)cover-check$(RESET)         Check coverage threshold"
+	@echo -e "  • $(CYAN)cover$(RESET)               Run tests with coverage"
+	@echo -e "  • $(CYAN)cover-html$(RESET)          Generate HTML report"
+	@echo -e "  • $(CYAN)cover-report$(RESET)        Show detailed report"
+	@echo -e "  • $(CYAN)cover-check$(RESET)         Check coverage threshold"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Test Utilities:$(RESET)"
-	@echo "  • $(CYAN)test-fast$(RESET)           Run only fast tests"
-	@echo "  • $(CYAN)test-failed$(RESET)         Re-run failed tests"
-	@echo "  • $(CYAN)test-watch$(RESET)          Watch mode"
-	@echo "  • $(CYAN)test-file$(RESET)           Run specific file"
-	@echo "  • $(CYAN)test-marker$(RESET)         Run by marker"
-	@echo "  • $(CYAN)test-keyword$(RESET)        Run by keyword"
+	@echo -e "  • $(CYAN)test-fast$(RESET)           Run only fast tests"
+	@echo -e "  • $(CYAN)test-failed$(RESET)         Re-run failed tests"
+	@echo -e "  • $(CYAN)test-watch$(RESET)          Watch mode"
+	@echo -e "  • $(CYAN)test-file$(RESET)           Run specific file"
+	@echo -e "  • $(CYAN)test-marker$(RESET)         Run by marker"
+	@echo -e "  • $(CYAN)test-keyword$(RESET)        Run by keyword"
 
 test-stats: ## show test statistics
 	@echo -e "$(CYAN)Test Statistics$(RESET)"
@@ -210,6 +210,6 @@ test-stats: ## show test statistics
 	@grep -r "def test_" tests --include="*.py" | wc -l | xargs printf "  Total test functions: %d\n"
 	@echo ""
 	@if [ -f ".coverage" ]; then \
-		echo "$(GREEN)📊 Last Coverage:$(RESET)"; \
+		echo -e "$(GREEN)📊 Last Coverage:$(RESET)"; \
 		uv run python -m coverage report | grep TOTAL | awk '{print "  Total coverage: " $$4}'; \
 	fi

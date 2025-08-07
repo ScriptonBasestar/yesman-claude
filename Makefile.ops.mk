@@ -56,9 +56,9 @@ clean-dashboard: ## clean dashboard build artifacts
 	@if [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && rm -rf build/ .svelte-kit/ node_modules/.vite/; \
 		cd tauri-dashboard && rm -rf src-tauri/target/; \
-		echo "$(GREEN)✅ Dashboard artifacts cleaned$(RESET)"; \
+		echo -e "$(GREEN)✅ Dashboard artifacts cleaned$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
+		echo -e "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
 
 clean-tools: ## remove tool caches and temporary files
@@ -129,7 +129,7 @@ docker-scan: ## scan Docker image for vulnerabilities
 		trivy image $(DOCKER_IMAGE_NAME):$(DOCKER_TAG); \
 	else \
 		docker scan $(DOCKER_IMAGE_NAME):$(DOCKER_TAG) 2>/dev/null || \
-		echo "$(YELLOW)Install trivy or enable docker scan for vulnerability scanning$(RESET)"; \
+		echo -e "$(YELLOW)Install trivy or enable docker scan for vulnerability scanning$(RESET)"; \
 	fi
 
 docker-shell: ## open shell in running container
@@ -138,7 +138,7 @@ docker-shell: ## open shell in running container
 	if [ -n "$$container" ]; then \
 		docker exec -it $$container /bin/bash; \
 	else \
-		echo "$(YELLOW)No running container found$(RESET)"; \
+		echo -e "$(YELLOW)No running container found$(RESET)"; \
 	fi
 
 docker-logs: ## show container logs
@@ -147,7 +147,7 @@ docker-logs: ## show container logs
 	if [ -n "$$container" ]; then \
 		docker logs -f $$container; \
 	else \
-		echo "$(YELLOW)No running container found$(RESET)"; \
+		echo -e "$(YELLOW)No running container found$(RESET)"; \
 	fi
 
 docker-status: ## show Docker container status
@@ -190,7 +190,7 @@ ops-info: ## show project information and current configuration
 	@echo "  • Rich CLI interface with Textual"
 
 ops-version: ## show version
-	@echo "$(PROJECT_NAME) version: $(VERSION)"
+	@echo -e "$(PROJECT_NAME) version: $(VERSION)"
 
 status: ## check system and project status
 	@echo -e "$(CYAN)System Status$(RESET)"
@@ -210,9 +210,9 @@ status: ## check system and project status
 	@echo ""
 	@echo -e "$(GREEN)🚀 Services:$(RESET)"
 	@if pgrep -f "yesman.py" >/dev/null; then \
-		echo "  Yesman:        $(GREEN)✅ Running$(RESET)"; \
+		echo -e "  Yesman:        $(GREEN)✅ Running$(RESET)"; \
 	else \
-		echo "  Yesman:        $(YELLOW)⚠️  Not running$(RESET)"; \
+		echo -e "  Yesman:        $(YELLOW)⚠️  Not running$(RESET)"; \
 	fi
 
 system-info: ## show detailed system information
@@ -235,15 +235,15 @@ project-status: ## show project-specific status
 	@echo -e "$(BLUE)===============$(RESET)"
 	@echo ""
 	@echo -e "$(GREEN)📁 Project Structure:$(RESET)"
-	@echo "  Root:          $(PWD)"
-	@if [ -d "libs" ]; then echo "  Libraries:     $(GREEN)✅ Present$(RESET)"; else echo "  Libraries:     $(YELLOW)⚠️  Missing$(RESET)"; fi
-	@if [ -d "commands" ]; then echo "  Commands:      $(GREEN)✅ Present$(RESET)"; else echo "  Commands:      $(YELLOW)⚠️  Missing$(RESET)"; fi
-	@if [ -d "tests" ]; then echo "  Tests:         $(GREEN)✅ Present$(RESET)"; else echo "  Tests:         $(YELLOW)⚠️  Missing$(RESET)"; fi
-	@if [ -d "tauri-dashboard" ]; then echo "  Dashboard:     $(GREEN)✅ Present$(RESET)"; else echo "  Dashboard:     $(YELLOW)⚠️  Missing$(RESET)"; fi
+	@echo -e "  Root:          $(PWD)"
+	@if [ -d "libs" ]; then echo -e "  Libraries:     $(GREEN)✅ Present$(RESET)"; else echo -e "  Libraries:     $(YELLOW)⚠️  Missing$(RESET)"; fi
+	@if [ -d "commands" ]; then echo -e "  Commands:      $(GREEN)✅ Present$(RESET)"; else echo -e "  Commands:      $(YELLOW)⚠️  Missing$(RESET)"; fi
+	@if [ -d "tests" ]; then echo -e "  Tests:         $(GREEN)✅ Present$(RESET)"; else echo -e "  Tests:         $(YELLOW)⚠️  Missing$(RESET)"; fi
+	@if [ -d "tauri-dashboard" ]; then echo -e "  Dashboard:     $(GREEN)✅ Present$(RESET)"; else echo -e "  Dashboard:     $(YELLOW)⚠️  Missing$(RESET)"; fi
 	@echo ""
 	@echo -e "$(GREEN)📄 Configuration:$(RESET)"
-	@if [ -f "pyproject.toml" ]; then echo "  pyproject.toml: $(GREEN)✅ Present$(RESET)"; else echo "  pyproject.toml: $(RED)❌ Missing$(RESET)"; fi
-	@if [ -f "Makefile" ]; then echo "  Makefile:      $(GREEN)✅ Present$(RESET)"; else echo "  Makefile:      $(RED)❌ Missing$(RESET)"; fi
+	@if [ -f "pyproject.toml" ]; then echo -e "  pyproject.toml: $(GREEN)✅ Present$(RESET)"; else echo -e "  pyproject.toml: $(RED)❌ Missing$(RESET)"; fi
+	@if [ -f "Makefile" ]; then echo -e "  Makefile:      $(GREEN)✅ Present$(RESET)"; else echo -e "  Makefile:      $(RED)❌ Missing$(RESET)"; fi
 
 # ==============================================================================
 # Maintenance Operations
@@ -266,7 +266,7 @@ backup: ## create backup of important files
 	@backup_dir=".backups/backup_$(shell date +%Y%m%d_%H%M%S)"; \
 	mkdir -p $$backup_dir; \
 	cp -r libs commands tests pyproject.toml Makefile*.mk $$backup_dir/ 2>/dev/null || true; \
-	echo "$(GREEN)✅ Backup created in $$backup_dir$(RESET)"
+		echo -e "$(GREEN)✅ Backup created in $$backup_dir$(RESET)"
 
 restore: ## restore from latest backup (interactive)
 	@echo -e "$(CYAN)Available backups:$(RESET)"
@@ -276,14 +276,14 @@ restore: ## restore from latest backup (interactive)
 check-health: ## perform health check
 	@echo -e "$(CYAN)Performing health check...$(RESET)"
 	@echo -e "$(YELLOW)Checking Python installation...$(RESET)"
-	@python --version >/dev/null 2>&1 && echo "$(GREEN)✅ Python OK$(RESET)" || echo "$(RED)❌ Python issue$(RESET)"
+	@python --version >/dev/null 2>&1 && echo -e "$(GREEN)✅ Python OK$(RESET)" || echo -e "$(RED)❌ Python issue$(RESET)"
 	@echo -e "$(YELLOW)Checking dependencies...$(RESET)"
-	@pip check >/dev/null 2>&1 && echo "$(GREEN)✅ Dependencies OK$(RESET)" || echo "$(RED)❌ Dependency conflicts$(RESET)"
+	@pip check >/dev/null 2>&1 && echo -e "$(GREEN)✅ Dependencies OK$(RESET)" || echo -e "$(RED)❌ Dependency conflicts$(RESET)"
 	@echo -e "$(YELLOW)Checking project structure...$(RESET)"
 	@if [ -f "pyproject.toml" ] && [ -d "libs" ] && [ -d "commands" ]; then \
-		echo "$(GREEN)✅ Project structure OK$(RESET)"; \
+		echo -e "$(GREEN)✅ Project structure OK$(RESET)"; \
 	else \
-		echo "$(RED)❌ Project structure issues$(RESET)"; \
+		echo -e "$(RED)❌ Project structure issues$(RESET)"; \
 	fi
 	@echo -e "$(GREEN)✅ Health check completed$(RESET)"
 
@@ -297,12 +297,12 @@ generate-api-docs: ## generate API documentation from FastAPI
 	@echo -e "$(CYAN)Generating API documentation...$(RESET)"
 	@if [ -f "scripts/generate-docs.py" ]; then \
 		uv run python scripts/generate-docs.py --api; \
-		echo "$(GREEN)✅ API documentation generated$(RESET)"; \
+		echo -e "$(GREEN)✅ API documentation generated$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠️  Documentation generator not found$(RESET)"; \
-		echo "$(YELLOW)   Creating basic OpenAPI export...$(RESET)"; \
+		echo -e "$(YELLOW)⚠️  Documentation generator not found$(RESET)"; \
+		echo -e "$(YELLOW)   Creating basic OpenAPI export...$(RESET)"; \
 		uv run python -c "from api.main import app; import json; print(json.dumps(app.openapi(), indent=2))" > api-docs/openapi.json 2>/dev/null || \
-		echo "$(RED)❌ Failed to generate API docs$(RESET)"; \
+		echo -e "$(RED)❌ Failed to generate API docs$(RESET)"; \
 	fi
 
 generate-docs: generate-api-docs ## generate all documentation
@@ -310,7 +310,7 @@ generate-docs: generate-api-docs ## generate all documentation
 	@if [ -f "scripts/generate-docs.py" ]; then \
 		uv run python scripts/generate-docs.py --all; \
 	else \
-		echo "$(YELLOW)⚠️  Full documentation generator not implemented yet$(RESET)"; \
+		echo -e "$(YELLOW)⚠️  Full documentation generator not implemented yet$(RESET)"; \
 	fi
 
 docs-clean: ## clean generated documentation
@@ -322,10 +322,10 @@ docs-clean: ## clean generated documentation
 docs-serve: ## serve documentation locally
 	@echo -e "$(CYAN)Starting documentation server...$(RESET)"
 	@if command -v python -m http.server >/dev/null 2>&1; then \
-		echo "$(GREEN)Documentation available at http://localhost:8001$(RESET)"; \
+		echo -e "$(GREEN)Documentation available at http://localhost:8001$(RESET)"; \
 		cd docs && python -m http.server 8001; \
 	else \
-		echo "$(RED)❌ Python http.server not available$(RESET)"; \
+		echo -e "$(RED)❌ Python http.server not available$(RESET)"; \
 	fi
 
 # ==============================================================================
@@ -337,33 +337,33 @@ docs-serve: ## serve documentation locally
 ops-tools-info: ## show operations information
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Operations Information$(CYAN)                           ║"
+	@echo -e "║                         $(YELLOW)Operations Information$(CYAN)                           ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-	@echo "$(RESET)"
+	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)🧹 Cleanup Commands:$(RESET)"
-	@echo "  • $(CYAN)clean$(RESET)               Clean build artifacts"
-	@echo "  • $(CYAN)clean-all$(RESET)           Clean everything"
-	@echo "  • $(CYAN)clean-deep$(RESET)          Deep clean including Docker"
+	@echo -e "  • $(CYAN)clean$(RESET)               Clean build artifacts"
+	@echo -e "  • $(CYAN)clean-all$(RESET)           Clean everything"
+	@echo -e "  • $(CYAN)clean-deep$(RESET)          Deep clean including Docker"
 	@echo ""
 	@echo -e "$(GREEN)🐳 Docker Commands:$(RESET)"
-	@echo "  • $(CYAN)docker-build$(RESET)        Build Docker image"
-	@echo "  • $(CYAN)docker-run$(RESET)          Run container"
-	@echo "  • $(CYAN)docker-status$(RESET)       Show container status"
-	@echo "  • $(CYAN)docker-scan$(RESET)         Security scan"
+	@echo -e "  • $(CYAN)docker-build$(RESET)        Build Docker image"
+	@echo -e "  • $(CYAN)docker-run$(RESET)          Run container"
+	@echo -e "  • $(CYAN)docker-status$(RESET)       Show container status"
+	@echo -e "  • $(CYAN)docker-scan$(RESET)         Security scan"
 	@echo ""
 	@echo -e "$(GREEN)📚 Documentation Commands:$(RESET)"
-	@echo "  • $(CYAN)generate-api-docs$(RESET)   Generate API documentation"
-	@echo "  • $(CYAN)generate-docs$(RESET)       Generate all documentation"
-	@echo "  • $(CYAN)docs-clean$(RESET)          Clean generated docs"
-	@echo "  • $(CYAN)docs-serve$(RESET)          Serve docs locally"
+	@echo -e "  • $(CYAN)generate-api-docs$(RESET)   Generate API documentation"
+	@echo -e "  • $(CYAN)generate-docs$(RESET)       Generate all documentation"
+	@echo -e "  • $(CYAN)docs-clean$(RESET)          Clean generated docs"
+	@echo -e "  • $(CYAN)docs-serve$(RESET)          Serve docs locally"
 	@echo ""
 	@echo -e "$(GREEN)ℹ️  Information Commands:$(RESET)"
-	@echo "  • $(CYAN)info$(RESET)                Project information"
-	@echo "  • $(CYAN)status$(RESET)              System status"
-	@echo "  • $(CYAN)project-status$(RESET)      Project-specific status"
-	@echo "  • $(CYAN)system-info$(RESET)         Detailed system info"
+	@echo -e "  • $(CYAN)info$(RESET)                Project information"
+	@echo -e "  • $(CYAN)status$(RESET)              System status"
+	@echo -e "  • $(CYAN)project-status$(RESET)      Project-specific status"
+	@echo -e "  • $(CYAN)system-info$(RESET)         Detailed system info"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Maintenance Commands:$(RESET)"
-	@echo "  • $(CYAN)maintenance$(RESET)         Routine maintenance"
-	@echo "  • $(CYAN)backup$(RESET)              Create backup"
-	@echo "  • $(CYAN)check-health$(RESET)        Health check"
+	@echo -e "  • $(CYAN)maintenance$(RESET)         Routine maintenance"
+	@echo -e "  • $(CYAN)backup$(RESET)              Create backup"
+	@echo -e "  • $(CYAN)check-health$(RESET)        Health check"

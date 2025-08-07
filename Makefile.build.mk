@@ -28,27 +28,27 @@ build-dashboard: ## build SvelteKit dashboard
 	@echo -e "$(CYAN)Building SvelteKit dashboard...$(RESET)"
 	@if [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && npm run build; \
-		echo "$(GREEN)✅ Dashboard built successfully$(RESET)"; \
+		echo -e "$(GREEN)✅ Dashboard built successfully$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
+		echo -e "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
 
 build-tauri: ## build Tauri for production
 	@echo -e "$(CYAN)Building Tauri for production...$(RESET)"
 	@if [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && npm run tauri build; \
-		echo "$(GREEN)✅ Tauri app built successfully$(RESET)"; \
+		echo -e "$(GREEN)✅ Tauri app built successfully$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
+		echo -e "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
 
 install-dashboard-deps: ## install dashboard dependencies
 	@echo -e "$(CYAN)Installing dashboard dependencies...$(RESET)"
 	@if [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && npm install; \
-		echo "$(GREEN)✅ Dashboard dependencies installed$(RESET)"; \
+		echo -e "$(GREEN)✅ Dashboard dependencies installed$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
+		echo -e "$(YELLOW)⚠️  Dashboard directory not found$(RESET)"; \
 	fi
 
 build-all: build build-dashboard ## build complete project
@@ -62,18 +62,18 @@ build-all: build build-dashboard ## build complete project
 build-info: ## show build information and targets
 	@echo -e "$(CYAN)"
 	@echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-	@echo "║                         $(YELLOW)Build Information$(CYAN)                              ║"
+	@echo -e "║                         $(YELLOW)Build Information$(CYAN)                              ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-	@echo "$(RESET)"
+	@echo -e "$(RESET)"
 	@echo -e "$(GREEN)📋 Build Details:$(RESET)"
-	@echo "  Project:        $(YELLOW)$(PROJECT_NAME)$(RESET)"
-	@echo "  Version:        $(YELLOW)$(VERSION)$(RESET)"
-	@echo "  Python:         $$(python --version 2>&1)"
-	@echo "  UV:            $$(uv --version 2>&1 || echo 'Not installed')"
+	@echo -e "  Project:        $(YELLOW)$(PROJECT_NAME)$(RESET)"
+	@echo -e "  Version:        $(YELLOW)$(VERSION)$(RESET)"
+	@echo -e "  Python:         $$(python --version 2>&1)"
+	@echo -e "  UV:            $$(uv --version 2>&1 || echo 'Not installed')"
 	@echo ""
 	@echo -e "$(GREEN)🎯 Build Targets:$(RESET)"
-	@echo "  • $(CYAN)build$(RESET)               Build Python package"
-	@echo "  • $(CYAN)build-dashboard$(RESET)     Build SvelteKit dashboard"
-	@echo "  • $(CYAN)build-tauri$(RESET)         Build Tauri desktop app"
-	@echo "  • $(CYAN)build-all$(RESET)           Build complete project"
-	@echo "  • $(CYAN)install-dashboard-deps$(RESET) Install dashboard dependencies"
+	@echo -e "  • $(CYAN)build$(RESET)               Build Python package"
+	@echo -e "  • $(CYAN)build-dashboard$(RESET)     Build SvelteKit dashboard"
+	@echo -e "  • $(CYAN)build-tauri$(RESET)         Build Tauri desktop app"
+	@echo -e "  • $(CYAN)build-all$(RESET)           Build complete project"
+	@echo -e "  • $(CYAN)install-dashboard-deps$(RESET) Install dashboard dependencies"
