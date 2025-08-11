@@ -68,7 +68,33 @@ repos:
         args: [-r, -s, B101,B404,B603,B607,B602, --severity-level, medium, --quiet]
         exclude: ^(tests/|scripts/|debug/|docs/examples/|test_style_violation\.py)
         pass_filenames: false
-        files: ^(libs/|commands/)
+        files: ^(libs/|commands/|api/)
+        stages: [pre-push]
+  
+  # Python dependency vulnerability scanning (commented out due to registration requirement)
+  # Note: Safety now requires registration. Alternative: use GitHub Dependabot or pip-audit
+  # - repo: https://github.com/pyupio/safety
+  #   rev: 3.2.9
+  #   hooks:
+  #     - id: safety
+  #       args: [scan, --json, --ignore=70612]  # Use new scan command, ignore jinja2 CVE in dev dependencies
+  #       stages: [pre-push]
+  
+  # Alternative dependency vulnerability checking with pip-audit
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.9.0
+    hooks:
+      - id: pip-audit
+        args: [--desc]
+        stages: [pre-push]
+  
+  # Additional security pattern detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: ^(tests/fixtures/|docs/examples/)
         stages: [pre-push]
 
   # Additional pre-push validations
@@ -104,6 +130,14 @@ repos:
         stages: [pre-push]
         pass_filenames: false
         
+      # Security-specific validation
+      - id: security-validation
+        name: "🔒 Security Validation"
+        entry: python scripts/security_validation.py
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+      
       # Final validation (replaces make lint + make test-fast)
       - id: test-fast-final
         name: "⚡ Fast Tests (final validation)"
