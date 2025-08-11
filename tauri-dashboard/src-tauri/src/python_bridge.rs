@@ -45,6 +45,61 @@ pub struct MetricData {
     pub session_name: String,
 }
 
+// User Experience related structures
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TroubleshootingIssue {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub severity: String,
+    pub category: String,
+    pub auto_fixable: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TroubleshootingStep {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub command: Option<String>,
+    pub safety_level: String,
+    pub estimated_time: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TroubleshootingResult {
+    pub success: bool,
+    pub message: String,
+    pub steps_executed: Vec<String>,
+    pub execution_time: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SetupStep {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub safety_level: String,
+    pub estimated_time: i32,
+    pub dependencies: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SetupResult {
+    pub success: bool,
+    pub message: String,
+    pub details: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DocumentationInfo {
+    pub doc_type: String,
+    pub title: String,
+    pub path: String,
+    pub last_updated: DateTime<Utc>,
+    pub size_kb: i32,
+}
+
 fn execute_python_script(script: &str) -> Result<String, String> {
     let output = Command::new("python")
         .args(["-c", script])
@@ -358,6 +413,261 @@ except Exception as e:
 
     let result = execute_python_script(&script)?;
     Ok(result.trim() == "True")
+}
+
+// User Experience Commands
+#[command]
+pub async fn run_troubleshooting_diagnosis() -> Result<Vec<TroubleshootingIssue>, String> {
+    let script = r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from libs.troubleshooting import IntelligentTroubleshootingEngine
+    engine = IntelligentTroubleshootingEngine()
+    issues = engine.diagnose_issues()
+    
+    import json
+    result = []
+    for issue in issues:
+        result.append({
+            'id': getattr(issue, 'id', ''),
+            'title': getattr(issue, 'title', ''),
+            'description': getattr(issue, 'description', ''),
+            'severity': getattr(issue, 'severity', 'low'),
+            'category': getattr(issue, 'category', 'general'),
+            'auto_fixable': getattr(issue, 'auto_fixable', False)
+        })
+    
+    print(json.dumps(result))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+"#;
+
+    let result = execute_python_script(script)?;
+    
+    if result.contains("\"error\"") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse troubleshooting result: {}", e))
+}
+
+#[command]
+pub async fn get_troubleshooting_guide(issue_id: String) -> Result<Vec<TroubleshootingStep>, String> {
+    let script = format!(r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from libs.troubleshooting import IntelligentTroubleshootingEngine
+    engine = IntelligentTroubleshootingEngine()
+    guide = engine.get_troubleshooting_guide('{}')
+    
+    import json
+    result = []
+    if guide:
+        for step in guide.steps:
+            result.append({{
+                'id': getattr(step, 'id', ''),
+                'title': getattr(step, 'title', ''),
+                'description': getattr(step, 'description', ''),
+                'command': getattr(step, 'command', None),
+                'safety_level': getattr(step, 'safety_level', 'safe'),
+                'estimated_time': getattr(step, 'estimated_time', 30)
+            }})
+    
+    print(json.dumps(result))
+except Exception as e:
+    print(json.dumps({{'error': str(e)}}))
+"#, issue_id);
+
+    let result = execute_python_script(&script)?;
+    
+    if result.contains("\"error\"") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse troubleshooting guide: {}", e))
+}
+
+#[command]
+pub async fn execute_troubleshooting_fix(issue_id: String, auto_approve: bool) -> Result<TroubleshootingResult, String> {
+    let script = format!(r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from libs.troubleshooting import IntelligentTroubleshootingEngine
+    engine = IntelligentTroubleshootingEngine()
+    result = engine.execute_fix('{}', auto_approve={})
+    
+    import json
+    output = {{
+        'success': getattr(result, 'success', False),
+        'message': getattr(result, 'message', ''),
+        'steps_executed': getattr(result, 'steps_executed', []),
+        'execution_time': getattr(result, 'execution_time', 0.0)
+    }}
+    
+    print(json.dumps(output))
+except Exception as e:
+    print(json.dumps({{'error': str(e)}}))
+"#, issue_id, auto_approve);
+
+    let result = execute_python_script(&script)?;
+    
+    if result.contains("\"error\"") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse fix result: {}", e))
+}
+
+#[command]
+pub async fn generate_documentation() -> Result<Vec<DocumentationInfo>, String> {
+    let script = r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from scripts.documentation_generator import LiveDocumentationGenerator
+    generator = LiveDocumentationGenerator()
+    docs = generator.generate_all()
+    
+    import json
+    from datetime import datetime
+    result = []
+    for doc in docs:
+        result.append({
+            'doc_type': getattr(doc, 'doc_type', 'general'),
+            'title': getattr(doc, 'title', ''),
+            'path': getattr(doc, 'path', ''),
+            'last_updated': datetime.now().isoformat() + 'Z',
+            'size_kb': getattr(doc, 'size_kb', 0)
+        })
+    
+    print(json.dumps(result))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+"#;
+
+    let result = execute_python_script(script)?;
+    
+    if result.contains("\"error\"") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse documentation result: {}", e))
+}
+
+#[command]
+pub async fn get_setup_steps() -> Result<Vec<SetupStep>, String> {
+    let script = r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from libs.onboarding import IntelligentSetupAssistant
+    assistant = IntelligentSetupAssistant()
+    steps = assistant.get_available_steps()
+    
+    import json
+    result = []
+    for step in steps:
+        result.append({
+            'id': getattr(step, 'id', ''),
+            'name': getattr(step, 'name', ''),
+            'description': getattr(step, 'description', ''),
+            'safety_level': getattr(step, 'safety_level', 'safe'),
+            'estimated_time': getattr(step, 'estimated_time', 60),
+            'dependencies': getattr(step, 'dependencies', [])
+        })
+    
+    print(json.dumps(result))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+"#;
+
+    let result = execute_python_script(script)?;
+    
+    if result.contains("\"error\"") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse setup steps: {}", e))
+}
+
+#[command]
+pub async fn run_setup_step(step_id: String, interactive: bool) -> Result<SetupResult, String> {
+    let script = format!(r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from libs.onboarding import IntelligentSetupAssistant
+    assistant = IntelligentSetupAssistant()
+    result = assistant.run_setup_step('{}', interactive={})
+    
+    import json
+    output = {{
+        'success': getattr(result, 'success', False),
+        'message': getattr(result, 'message', ''),
+        'details': getattr(result, 'details', '')
+    }}
+    
+    print(json.dumps(output))
+except Exception as e:
+    print(json.dumps({{'error': str(e)}}))
+"#, step_id, interactive);
+
+    let result = execute_python_script(&script)?;
+    
+    if result.contains("\"error\"") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse setup result: {}", e))
+}
+
+#[command]
+pub async fn get_system_health() -> Result<serde_json::Value, String> {
+    let script = r#"
+import sys
+sys.path.append('.')
+sys.path.append('..')
+
+try:
+    from libs.dashboard.monitoring_integration import MonitoringIntegration
+    monitor = MonitoringIntegration()
+    health = monitor.get_system_health()
+    
+    import json
+    print(json.dumps(health))
+except Exception as e:
+    print(json.dumps({'error': str(e), 'status': 'unhealthy'}))
+"#;
+
+    let result = execute_python_script(script)?;
+    
+    if result.contains("\"error\"") && !result.contains("status") {
+        return Err(format!("Python error: {}", result));
+    }
+
+    serde_json::from_str(&result)
+        .map_err(|e| format!("Failed to parse health status: {}", e))
 }
 
 #[allow(dead_code)]

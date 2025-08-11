@@ -122,6 +122,7 @@ static-analysis: ## run static code analysis
 # ==============================================================================
 
 .PHONY: security security-scan bandit safety pip-audit security-all
+.PHONY: security-enhanced security-unified-gates
 
 security: security-scan ## alias for security-scan
 
@@ -130,6 +131,16 @@ security-scan: ## run basic security scan with bandit
 	@command -v bandit >/dev/null 2>&1 || pip install bandit
 	@bandit -r $(PYTHON_DIRS) -ll -i
 	@echo -e "$(GREEN)✅ Security scan completed$(RESET)"
+
+security-enhanced: ## run enhanced security validation with metrics
+	@echo -e "$(CYAN)Running enhanced security validation with metrics...$(RESET)"
+	@python scripts/security_validation_enhanced.py
+	@echo -e "$(GREEN)✅ Enhanced security validation completed$(RESET)"
+
+security-unified-gates: ## run unified security-performance quality gates
+	@echo -e "$(CYAN)Running unified quality gates (security + performance)...$(RESET)"
+	@python scripts/quality_gates_unified.py
+	@echo -e "$(GREEN)✅ Unified quality gates check completed$(RESET)"
 
 bandit: ## run bandit security linter
 	@echo -e "$(CYAN)Running bandit security linter...$(RESET)"
@@ -167,7 +178,7 @@ security-json: ## export security results to JSON
 	@echo -e "  • $(CYAN)bandit-security-report.json$(RESET)"
 	@echo -e "  • $(CYAN)safety-security-report.json$(RESET)"
 
-security-all: security-code security-deps ## run all security checks
+security-all: security-code security-deps security-enhanced ## run all security checks including enhanced validation
 	@echo -e "$(GREEN)✅ All security checks completed$(RESET)"
 
 # ==============================================================================
@@ -496,16 +507,19 @@ lint-help: ## show comprehensive lint system help
 	@echo "    make security-code   🔒 Code security analysis only"
 	@echo "    make security-deps   📦 Dependency vulnerability check only"
 	@echo "    make security-json   📄 Export security results to JSON"
+	@echo "    make security-enhanced 🔐 Enhanced security with metrics"
+	@echo "    make security-unified-gates 🎯 Unified security-performance gates"
 	@echo ""
 	@echo "✨ TIP: Start with 'make lint-fast' for quick checks during development"
 	@echo "✨ TIP: Use 'make hooks-install' once to automate quality checks"
 	@echo "✨ TIP: Run 'make lint-strict' before important releases"
+	@echo "✨ TIP: Use 'make security-unified-gates' for comprehensive quality check"
 
 # ==============================================================================
 # Comprehensive Quality Checks
 # ==============================================================================
 
-.PHONY: quality quality-fix quality-strict quality-minimal
+.PHONY: quality quality-fix quality-strict quality-minimal quality-unified
 
 quality: format-check lint-check type-check security-scan ## run standard quality checks
 	@echo -e "$(GREEN)✅ Standard quality checks completed$(RESET)"
@@ -518,6 +532,9 @@ quality-strict: format-check lint-strict mypy security-all analyze ## run strict
 
 quality-minimal: lint-fast format-check ## run minimal quality checks
 	@echo -e "$(GREEN)✅ Minimal quality checks completed$(RESET)"
+
+quality-unified: security-unified-gates ## run unified security-performance quality gates
+	@echo -e "$(GREEN)✅ Unified quality gates completed$(RESET)"
 
 # ==============================================================================
 # Code Analysis and Comments
@@ -583,11 +600,13 @@ quality-info: ## show quality tools and targets information
 	@echo -e "  • $(CYAN)bandit$(RESET)             Security issue scanner"
 	@echo -e "  • $(CYAN)safety$(RESET)             Dependency vulnerability checker"
 	@echo -e "  • $(CYAN)pip-audit$(RESET)          Pip package auditor"
+	@echo -e "  • $(CYAN)Enhanced Validator$(RESET) Security validation with metrics"
 	@echo ""
 	@echo -e "$(GREEN)📊 Quality Commands:$(RESET)"
 	@echo -e "  • $(CYAN)quality$(RESET)            Run standard checks"
 	@echo -e "  • $(CYAN)quality-fix$(RESET)        Apply automatic fixes"
 	@echo -e "  • $(CYAN)quality-strict$(RESET)     Run comprehensive checks"
+	@echo -e "  • $(CYAN)quality-unified$(RESET)    Run unified security-performance gates"
 	@echo -e "  • $(CYAN)analyze$(RESET)            Run code analysis"
 
 quality-status: ## check installed quality tools
@@ -606,3 +625,7 @@ quality-status: ## check installed quality tools
 	@echo -e "$(YELLOW)Security Tools:$(RESET)"
 	@command -v bandit >/dev/null 2>&1 && echo "  ✅ bandit" || echo "  ❌ bandit"
 	@command -v safety >/dev/null 2>&1 && echo "  ✅ safety" || echo "  ❌ safety"
+	@echo ""
+	@echo -e "$(YELLOW)Enhanced Integration:$(RESET)"
+	@[ -f scripts/security_validation_enhanced.py ] && echo "  ✅ Enhanced Security Validator" || echo "  ❌ Enhanced Security Validator"
+	@[ -f scripts/quality_gates_unified.py ] && echo "  ✅ Unified Quality Gates" || echo "  ❌ Unified Quality Gates"

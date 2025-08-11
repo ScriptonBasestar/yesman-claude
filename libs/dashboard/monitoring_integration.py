@@ -668,6 +668,593 @@ class MonitoringDashboardIntegration:
         
         with open(baseline_path, "w") as f:
             json.dump(self._performance_baselines, f, indent=2)
+    
+    async def publish_test_metrics(self, metrics_data: dict) -> None:
+        """Publish test execution metrics to the monitoring system.
+        
+        Args:
+            metrics_data: Test metrics data dictionary
+        """
+        # Create test metrics event
+        event = Event(
+            type=EventType.CUSTOM,
+            data={
+                'event_subtype': 'test_execution_metrics',
+                'test_metrics': metrics_data,
+                'category': 'test_performance',
+            },
+            timestamp=metrics_data.get('timestamp', time.time()),
+            source='test_runner',
+            priority=EventPriority.LOW,
+        )
+        
+        # Store test metrics for analysis
+        test_name = metrics_data.get('test_name', 'unknown')
+        if 'test_performance' not in self._metrics_storage:
+            self._metrics_storage['test_performance'] = {}
+        
+        if test_name not in self._metrics_storage['test_performance']:
+            self._metrics_storage['test_performance'][test_name] = deque(maxlen=100)
+        
+        # Store test execution metrics
+        self._metrics_storage['test_performance'][test_name].append({
+            'timestamp': time.time(),
+            'duration_ms': metrics_data.get('duration_ms', 0),
+            'memory_delta_mb': metrics_data.get('memory_delta_mb', 0),
+            'status': metrics_data.get('status', 'unknown'),
+            'suite': metrics_data.get('suite', 'unknown'),
+        })
+        
+        # Check for test performance regressions
+        await self._check_test_performance_regression(test_name, metrics_data)
+        
+        # Publish to event bus
+        await self.event_bus.publish(event)
+    
+    async def _check_test_performance_regression(self, test_name: str, metrics_data: dict) -> None:
+        """Check for test performance regression.
+        
+        Args:
+            test_name: Name of the test
+            metrics_data: Current test metrics
+        """
+        if 'test_baselines' not in self._performance_baselines:
+            return
+        
+        test_baselines = self._performance_baselines['test_baselines']
+        if test_name not in test_baselines:
+            return
+        
+        baseline = test_baselines[test_name]
+        current_duration = metrics_data.get('duration_ms', 0)
+        baseline_duration = baseline.get('baseline_duration_ms', 0)
+        
+        if baseline_duration > 0 and current_duration > 0:
+            regression_percent = ((current_duration - baseline_duration) / baseline_duration) * 100
+            
+            # Check if regression exceeds threshold
+            threshold = self.config.performance_regression_threshold
+            if regression_percent > threshold:
+                # Create test performance regression alert
+                alert = PerformanceAlert(
+                    timestamp=time.time(),
+                    severity=AlertSeverity.WARNING if regression_percent < threshold * 2 else AlertSeverity.ERROR,
+                    metric_type=MetricType.RESPONSE_TIME,
+                    component='test_performance',
+                    current_value=current_duration,
+                    threshold=baseline_duration * (1 + threshold / 100),
+                    message=f"Test performance regression detected: {test_name}",
+                    context={
+                        'test_name': test_name,
+                        'regression_percent': regression_percent,
+                        'baseline_duration_ms': baseline_duration,
+                        'current_duration_ms': current_duration,
+                    },
+                )
+                
+                await self._process_alert(alert)
+    
+    def get_test_performance_summary(self) -> dict[str, Any]:
+        """Get test performance summary data.
+        
+        Returns:
+            Dictionary with test performance summary
+        """
+        if 'test_performance' not in self._metrics_storage:
+            return {}
+        
+        summary = {}
+        for test_name, metrics in self._metrics_storage['test_performance'].items():
+            if not metrics:
+                continue
+            
+            durations = [m['duration_ms'] for m in metrics if m['status'] == 'passed']
+            if not durations:
+                continue
+            
+            summary[test_name] = {
+                'total_runs': len(metrics),
+                'passed_runs': sum(1 for m in metrics if m['status'] == 'passed'),
+                'failed_runs': sum(1 for m in metrics if m['status'] == 'failed'),
+                'avg_duration_ms': sum(durations) / len(durations),
+                'min_duration_ms': min(durations),
+                'max_duration_ms': max(durations),
+                'success_rate': sum(1 for m in metrics if m['status'] == 'passed') / len(metrics),
+                'last_run_status': metrics[-1]['status'],
+                'last_run_duration_ms': metrics[-1]['duration_ms'],
+            }
+        
+        return summary
+    
+    # User Experience Integration Methods
+    
+    async def publish_troubleshooting_event(self, event_data: dict) -> None:
+        """Publish troubleshooting-related events to the monitoring system.
+        
+        Args:
+            event_data: Troubleshooting event data
+        """
+        event = Event(
+            type=EventType.CUSTOM,
+            data={
+                'event_subtype': 'troubleshooting_activity',
+                **event_data
+            },
+            timestamp=time.time(),
+            source='troubleshooting_system',
+            priority=EventPriority.NORMAL,
+        )
+        
+        await self.event_bus.publish(event)
+    
+    async def publish_error_handling_metrics(self, error_data: dict) -> None:
+        """Publish error handling metrics and insights.
+        
+        Args:
+            error_data: Error handling metrics data
+        """
+        event = Event(
+            type=EventType.CUSTOM,
+            data={
+                'event_subtype': 'error_handling_metrics',
+                'error_code': error_data.get('error_code'),
+                'category': error_data.get('category'),
+                'severity': error_data.get('severity'),
+                'component': error_data.get('component'),
+                'auto_fix_available': error_data.get('auto_fix_available', False),
+                'user_friendly': True,
+                'context': error_data.get('context', {}),
+                'timestamp': error_data.get('timestamp', time.time())
+            },
+            timestamp=time.time(),
+            source='error_handler',
+            priority=EventPriority.HIGH,
+        )
+        
+        await self.event_bus.publish(event)
+    
+    async def publish_setup_progress(self, setup_data: dict) -> None:
+        """Publish setup/onboarding progress events.
+        
+        Args:
+            setup_data: Setup progress data
+        """
+        event = Event(
+            type=EventType.CUSTOM,
+            data={
+                'event_subtype': 'setup_progress',
+                'step_id': setup_data.get('step_id'),
+                'status': setup_data.get('status'),
+                'progress_percentage': setup_data.get('progress_percentage', 0),
+                'estimated_completion': setup_data.get('estimated_completion'),
+                'automated': setup_data.get('automated', False),
+                'duration': setup_data.get('duration', 0)
+            },
+            timestamp=time.time(),
+            source='setup_assistant',
+            priority=EventPriority.LOW,
+        )
+        
+        await self.event_bus.publish(event)
+    
+    def get_troubleshooting_context(self) -> dict[str, Any]:
+        """Get comprehensive context for troubleshooting systems.
+        
+        Returns:
+            Dictionary with troubleshooting-relevant system context
+        """
+        try:
+            # Get current dashboard data without async
+            current_time = time.time()
+            
+            # Prepare metrics summary for troubleshooting
+            metrics_summary = {}
+            for component, metrics in self._metrics_storage.items():
+                component_summary = {}
+                
+                for metric_type, values in metrics.items():
+                    if values:
+                        recent_values = [
+                            value for timestamp, value in values
+                            if current_time - timestamp <= 300  # Last 5 minutes
+                        ]
+                        
+                        if recent_values:
+                            component_summary[metric_type.value] = {
+                                "current": recent_values[-1],
+                                "average": sum(recent_values) / len(recent_values),
+                                "max": max(recent_values),
+                                "min": min(recent_values),
+                                "trend": self._calculate_trend(recent_values),
+                                "samples": len(recent_values),
+                            }
+                
+                if component_summary:
+                    metrics_summary[component] = component_summary
+            
+            # Calculate health indicators
+            health_score = self._calculate_health_score()
+            
+            # Get active alerts
+            active_alerts = [
+                {
+                    'severity': alert.severity.value,
+                    'component': alert.component,
+                    'metric_type': alert.metric_type.value,
+                    'message': alert.message,
+                    'timestamp': alert.timestamp,
+                    'current_value': alert.current_value,
+                    'threshold': alert.threshold
+                }
+                for alert in self._active_alerts
+            ]
+            
+            return {
+                'health_score': health_score,
+                'metrics': metrics_summary,
+                'active_alerts': active_alerts,
+                'active_alerts_count': len(active_alerts),
+                'components_monitored': len(metrics_summary),
+                'timestamp': current_time,
+                'monitoring_active': self._is_running,
+                'alerts_by_severity': {
+                    'critical': sum(1 for a in active_alerts if a['severity'] == 'critical'),
+                    'error': sum(1 for a in active_alerts if a['severity'] == 'error'),
+                    'warning': sum(1 for a in active_alerts if a['severity'] == 'warning'),
+                    'info': sum(1 for a in active_alerts if a['severity'] == 'info'),
+                },
+                'system_trends': self._get_system_trends(),
+                'recent_performance': self._get_recent_performance_summary()
+            }
+            
+        except Exception as e:
+            # Fallback context if monitoring data is unavailable
+            return {
+                'health_score': 100,
+                'metrics': {},
+                'active_alerts': [],
+                'active_alerts_count': 0,
+                'components_monitored': 0,
+                'timestamp': time.time(),
+                'monitoring_active': False,
+                'error': f'Context unavailable: {str(e)}'
+            }
+    
+    def _calculate_trend(self, values: list) -> str:
+        """Calculate trend direction from a list of values.
+        
+        Args:
+            values: List of metric values in chronological order
+            
+        Returns:
+            Trend direction: 'improving', 'degrading', or 'stable'
+        """
+        if len(values) < 3:
+            return 'stable'
+        
+        # Simple trend calculation using first and last third of values
+        first_third = values[:len(values)//3]
+        last_third = values[-len(values)//3:]
+        
+        first_avg = sum(first_third) / len(first_third)
+        last_avg = sum(last_third) / len(last_third)
+        
+        change_percent = abs(last_avg - first_avg) / first_avg * 100 if first_avg > 0 else 0
+        
+        if change_percent < 5:  # Less than 5% change
+            return 'stable'
+        elif last_avg < first_avg:
+            return 'improving'  # Assuming lower values are better (response time, errors, etc.)
+        else:
+            return 'degrading'
+    
+    def _get_system_trends(self) -> dict[str, Any]:
+        """Get system-wide performance trends.
+        
+        Returns:
+            Dictionary with system trend information
+        """
+        trends = {
+            'overall': 'stable',
+            'components': {},
+            'concerning_trends': []
+        }
+        
+        degrading_count = 0
+        improving_count = 0
+        
+        for component, metrics in self._metrics_storage.items():
+            component_trends = {}
+            for metric_type, values in metrics.items():
+                if values and len(values) >= 3:
+                    recent_values = [v[1] for v in list(values)[-10:]]  # Last 10 values
+                    trend = self._calculate_trend(recent_values)
+                    component_trends[metric_type.value] = trend
+                    
+                    if trend == 'degrading':
+                        degrading_count += 1
+                        trends['concerning_trends'].append({
+                            'component': component,
+                            'metric': metric_type.value,
+                            'trend': trend
+                        })
+                    elif trend == 'improving':
+                        improving_count += 1
+            
+            trends['components'][component] = component_trends
+        
+        # Determine overall trend
+        if degrading_count > improving_count * 1.5:
+            trends['overall'] = 'degrading'
+        elif improving_count > degrading_count * 1.5:
+            trends['overall'] = 'improving'
+        
+        return trends
+    
+    def _get_recent_performance_summary(self) -> dict[str, Any]:
+        """Get recent performance summary for troubleshooting context.
+        
+        Returns:
+            Dictionary with recent performance data
+        """
+        current_time = time.time()
+        summary = {
+            'timeframe_minutes': 5,
+            'avg_response_time': 0,
+            'max_response_time': 0,
+            'total_memory_mb': 0,
+            'avg_cpu_percent': 0,
+            'error_count': 0,
+            'components_with_issues': []
+        }
+        
+        response_times = []
+        memory_values = []
+        cpu_values = []
+        
+        for component, metrics in self._metrics_storage.items():
+            # Get recent response times
+            rt_values = metrics.get(MetricType.RESPONSE_TIME, deque())
+            recent_rt = [
+                value for timestamp, value in rt_values
+                if current_time - timestamp <= 300
+            ]
+            response_times.extend(recent_rt)
+            
+            # Get recent memory usage
+            mem_values = metrics.get(MetricType.MEMORY_USAGE, deque())
+            recent_mem = [
+                value for timestamp, value in mem_values
+                if current_time - timestamp <= 300
+            ]
+            memory_values.extend(recent_mem)
+            
+            # Get recent CPU usage
+            cpu_values_metric = metrics.get(MetricType.CPU_USAGE, deque())
+            recent_cpu = [
+                value for timestamp, value in cpu_values_metric
+                if current_time - timestamp <= 300
+            ]
+            cpu_values.extend(recent_cpu)
+            
+            # Check for component issues
+            has_issues = False
+            if recent_rt and max(recent_rt) > 200:  # High response time
+                has_issues = True
+            if recent_mem and max(recent_mem) > 20:  # High memory usage
+                has_issues = True
+            if recent_cpu and max(recent_cpu) > 90:  # High CPU usage
+                has_issues = True
+            
+            if has_issues:
+                summary['components_with_issues'].append({
+                    'component': component,
+                    'max_response_time': max(recent_rt) if recent_rt else 0,
+                    'max_memory_mb': max(recent_mem) if recent_mem else 0,
+                    'max_cpu_percent': max(recent_cpu) if recent_cpu else 0
+                })
+        
+        # Calculate summary statistics
+        if response_times:
+            summary['avg_response_time'] = sum(response_times) / len(response_times)
+            summary['max_response_time'] = max(response_times)
+        
+        if memory_values:
+            summary['total_memory_mb'] = sum(memory_values)
+        
+        if cpu_values:
+            summary['avg_cpu_percent'] = sum(cpu_values) / len(cpu_values)
+        
+        # Count recent errors (from alerts)
+        summary['error_count'] = sum(
+            1 for alert in self._active_alerts
+            if current_time - alert.timestamp <= 300 and 
+            alert.severity in [AlertSeverity.ERROR, AlertSeverity.CRITICAL]
+        )
+        
+        return summary
+    
+    async def register_user_experience_handlers(self) -> None:
+        """Register event handlers for user experience components."""
+        # Subscribe to troubleshooting events
+        self.event_bus.subscribe(
+            EventType.CUSTOM, 
+            self._handle_troubleshooting_event,
+            filter_func=lambda event: event.data.get('event_subtype') == 'troubleshooting_activity'
+        )
+        
+        # Subscribe to error handling events
+        self.event_bus.subscribe(
+            EventType.CUSTOM,
+            self._handle_error_metrics_event,
+            filter_func=lambda event: event.data.get('event_subtype') == 'error_handling_metrics'
+        )
+        
+        # Subscribe to setup progress events
+        self.event_bus.subscribe(
+            EventType.CUSTOM,
+            self._handle_setup_progress_event,
+            filter_func=lambda event: event.data.get('event_subtype') == 'setup_progress'
+        )
+    
+    async def _handle_troubleshooting_event(self, event: Event) -> None:
+        """Handle troubleshooting activity events.
+        
+        Args:
+            event: Troubleshooting event
+        """
+        data = event.data
+        
+        # Store troubleshooting metrics
+        if 'troubleshooting_metrics' not in self._metrics_storage:
+            self._metrics_storage['troubleshooting_metrics'] = {}
+        
+        guide_id = data.get('guide_id', 'unknown')
+        if guide_id not in self._metrics_storage['troubleshooting_metrics']:
+            self._metrics_storage['troubleshooting_metrics'][guide_id] = deque(maxlen=100)
+        
+        # Store troubleshooting execution data
+        self._metrics_storage['troubleshooting_metrics'][guide_id].append({
+            'timestamp': event.timestamp,
+            'execution_time': data.get('execution_time', 0),
+            'steps_executed': data.get('steps_executed', 0),
+            'steps_failed': data.get('steps_failed', 0),
+            'resolution_status': data.get('resolution_status', 'unknown'),
+            'automated_steps': data.get('automated_steps', 0)
+        })
+    
+    async def _handle_error_metrics_event(self, event: Event) -> None:
+        """Handle error handling metrics events.
+        
+        Args:
+            event: Error metrics event
+        """
+        data = event.data
+        
+        # Store error handling metrics
+        if 'error_handling' not in self._metrics_storage:
+            self._metrics_storage['error_handling'] = deque(maxlen=1000)
+        
+        self._metrics_storage['error_handling'].append({
+            'timestamp': event.timestamp,
+            'error_code': data.get('error_code'),
+            'category': data.get('category'),
+            'severity': data.get('severity'),
+            'component': data.get('component'),
+            'auto_fix_available': data.get('auto_fix_available', False),
+            'context_health_score': data.get('context', {}).get('health_score', 100)
+        })
+    
+    async def _handle_setup_progress_event(self, event: Event) -> None:
+        """Handle setup progress events.
+        
+        Args:
+            event: Setup progress event
+        """
+        data = event.data
+        
+        # Store setup progress metrics
+        if 'setup_progress' not in self._metrics_storage:
+            self._metrics_storage['setup_progress'] = deque(maxlen=200)
+        
+        self._metrics_storage['setup_progress'].append({
+            'timestamp': event.timestamp,
+            'step_id': data.get('step_id'),
+            'status': data.get('status'),
+            'progress_percentage': data.get('progress_percentage', 0),
+            'automated': data.get('automated', False),
+            'duration': data.get('duration', 0)
+        })
+    
+    def get_user_experience_metrics(self) -> dict[str, Any]:
+        """Get user experience related metrics.
+        
+        Returns:
+            Dictionary with UX metrics
+        """
+        ux_metrics = {
+            'troubleshooting': {
+                'total_executions': 0,
+                'success_rate': 0,
+                'avg_execution_time': 0,
+                'most_common_issues': []
+            },
+            'error_handling': {
+                'total_errors_handled': 0,
+                'auto_fix_rate': 0,
+                'error_categories': {},
+                'recent_error_trend': 'stable'
+            },
+            'setup_progress': {
+                'recent_setups': 0,
+                'avg_setup_time': 0,
+                'success_rate': 0,
+                'most_challenging_steps': []
+            }
+        }
+        
+        # Troubleshooting metrics
+        if 'troubleshooting_metrics' in self._metrics_storage:
+            all_executions = []
+            for guide_executions in self._metrics_storage['troubleshooting_metrics'].values():
+                all_executions.extend(guide_executions)
+            
+            if all_executions:
+                ux_metrics['troubleshooting']['total_executions'] = len(all_executions)
+                successful = sum(1 for e in all_executions if e['resolution_status'] in ['resolved', 'manual_intervention_required'])
+                ux_metrics['troubleshooting']['success_rate'] = successful / len(all_executions)
+                ux_metrics['troubleshooting']['avg_execution_time'] = sum(e['execution_time'] for e in all_executions) / len(all_executions)
+        
+        # Error handling metrics
+        if 'error_handling' in self._metrics_storage:
+            error_events = list(self._metrics_storage['error_handling'])
+            ux_metrics['error_handling']['total_errors_handled'] = len(error_events)
+            
+            if error_events:
+                auto_fixable = sum(1 for e in error_events if e['auto_fix_available'])
+                ux_metrics['error_handling']['auto_fix_rate'] = auto_fixable / len(error_events)
+                
+                # Category breakdown
+                categories = {}
+                for error in error_events:
+                    cat = error['category']
+                    categories[cat] = categories.get(cat, 0) + 1
+                ux_metrics['error_handling']['error_categories'] = categories
+        
+        # Setup progress metrics
+        if 'setup_progress' in self._metrics_storage:
+            setup_events = list(self._metrics_storage['setup_progress'])
+            recent_setups = [e for e in setup_events if time.time() - e['timestamp'] < 86400]  # Last 24 hours
+            
+            ux_metrics['setup_progress']['recent_setups'] = len(set(
+                e['timestamp'] for e in recent_setups if e['step_id'] == 'system_requirements'
+            ))  # Count unique setup sessions
+            
+            completed_steps = [e for e in recent_setups if e['status'] == 'completed']
+            if completed_steps:
+                ux_metrics['setup_progress']['avg_setup_time'] = sum(e['duration'] for e in completed_steps) / len(completed_steps)
+        
+        return ux_metrics
 
 
 # Singleton instance

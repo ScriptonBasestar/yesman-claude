@@ -69,6 +69,56 @@ export const pythonBridge = {
 		return Promise.resolve(null);
 	},
 
+	// User Experience Commands
+	run_troubleshooting_diagnosis: async () => {
+		if (isTauri) {
+			return await safeTauriInvoke('run_troubleshooting_diagnosis');
+		}
+		return api.userExperience.troubleshooting.diagnose();
+	},
+	get_troubleshooting_guide: async (issueId: string) => {
+		if (isTauri) {
+			return await safeTauriInvoke('get_troubleshooting_guide', { issue_id: issueId });
+		}
+		return api.userExperience.troubleshooting.getGuide(issueId);
+	},
+	execute_troubleshooting_fix: async (issueId: string, autoApprove: boolean = false) => {
+		if (isTauri) {
+			return await safeTauriInvoke('execute_troubleshooting_fix', { 
+				issue_id: issueId, 
+				auto_approve: autoApprove 
+			});
+		}
+		return api.userExperience.troubleshooting.executeFix(issueId, autoApprove);
+	},
+	generate_documentation: async () => {
+		if (isTauri) {
+			return await safeTauriInvoke('generate_documentation');
+		}
+		return api.userExperience.documentation.generate();
+	},
+	get_setup_steps: async () => {
+		if (isTauri) {
+			return await safeTauriInvoke('get_setup_steps');
+		}
+		return api.userExperience.onboarding.getSteps();
+	},
+	run_setup_step: async (stepId: string, interactive: boolean = true) => {
+		if (isTauri) {
+			return await safeTauriInvoke('run_setup_step', { 
+				step_id: stepId, 
+				interactive 
+			});
+		}
+		return api.userExperience.onboarding.runStep(stepId, interactive);
+	},
+	get_system_health: async () => {
+		if (isTauri) {
+			return await safeTauriInvoke('get_system_health');
+		}
+		return api.userExperience.health.getStatus();
+	},
+
 	// Deprecated functions
 	get_session_info: () => {
 		console.warn('get_session_info is deprecated. Use get_sessions instead.');

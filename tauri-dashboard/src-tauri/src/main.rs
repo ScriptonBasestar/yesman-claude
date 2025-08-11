@@ -24,7 +24,15 @@ fn main() {
             get_metrics_data,
             setup_tmux_session,
             teardown_tmux_session,
-            show_notification
+            show_notification,
+            // User Experience Commands
+            run_troubleshooting_diagnosis,
+            get_troubleshooting_guide,
+            execute_troubleshooting_fix,
+            generate_documentation,
+            get_setup_steps,
+            run_setup_step,
+            get_system_health
         ])
         .setup(|_app| {
             // 초기 설정

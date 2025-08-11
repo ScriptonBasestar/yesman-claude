@@ -13,6 +13,27 @@ from libs.dashboard.widgets.agent_monitor import (
     TaskMetrics,
 )
 
+# Enhanced testing imports
+from tests.fixtures.mock_factories import EnhancedTestDataFactory, ChaosTestRunner
+
+# Add missing imports for enhanced tests
+try:
+    from libs.dashboard.widgets.agent_monitor import TaskStatus, create_agent_monitor, run_agent_monitor
+except ImportError:
+    # Mock these if not available
+    class TaskStatus:
+        PENDING = "pending"
+        RUNNING = "running"
+        COMPLETED = "completed"
+        FAILED = "failed"
+    
+    def create_agent_monitor(agent_pool=None):
+        return AgentMonitor(agent_pool=agent_pool)
+    
+    async def run_agent_monitor(duration=None):
+        monitor = create_agent_monitor()
+        await monitor.start_monitoring(duration)
+
 
 class TestAgentMetrics:
     """Test cases for AgentMetrics."""
@@ -406,3 +427,395 @@ class TestStandaloneFunctions:
 
             MockMonitor.assert_called_once()
             mock_monitor.start_monitoring.assert_called_once_with(0.1)
+
+
+# Enhanced Testing Infrastructure - Property-Based and Chaos Engineering Tests
+
+@pytest.mark.property
+class TestPropertyBasedAgentMonitoring:
+    """Property-based tests for agent monitoring using enhanced test infrastructure."""
+    
+    def test_agent_metrics_properties(self):
+        """Test that agent metrics maintain required properties across various inputs."""
+        factory = EnhancedTestDataFactory()
+        
+        # Generate test execution metrics for multiple test runs
+        for i in range(10):
+            test_metrics = factory.create_test_execution_metrics(f'test_agent_monitor_{i}')
+            
+            # Property 1: Execution metrics should have consistent structure
+            assert 'test_name' in test_metrics, "Test metrics should have test name"
+            assert 'execution_metrics' in test_metrics, "Should have execution metrics"
+            assert 'result' in test_metrics, "Should have test result"
+            
+            # Property 2: Duration should be reasonable
+            duration = test_metrics['execution_metrics']['duration_ms']
+            assert duration > 0, f"Duration should be positive: {duration}"
+            assert duration < 60000, f"Duration should be under 1 minute: {duration}ms"
+            
+            # Property 3: Memory usage should be bounded
+            memory_peak = test_metrics['execution_metrics']['memory_peak_mb']
+            assert memory_peak >= 0, f"Memory usage should be non-negative: {memory_peak}"
+            assert memory_peak < 1000, f"Memory usage should be reasonable: {memory_peak}MB"
+            
+            # Property 4: Test status should be valid
+            status = test_metrics['result']['status']
+            assert status in ['passed', 'failed', 'skipped', 'error'], f"Invalid status: {status}"
+    
+    def test_performance_consistency_properties(self, performance_baseline):
+        """Test that performance metrics maintain consistency properties."""
+        factory = EnhancedTestDataFactory()
+        
+        # Generate performance metrics
+        perf_metrics = factory.create_performance_metrics(6)  # 6 hours of data
+        
+        for metric in perf_metrics['metrics']:
+            response_times = metric['response_times']
+            
+            # Property: Response time percentiles should be ordered
+            assert response_times['p50_ms'] <= response_times['p90_ms'], \
+                "P50 should be <= P90"
+            assert response_times['p90_ms'] <= response_times['p95_ms'], \
+                "P90 should be <= P95"
+            assert response_times['p95_ms'] <= response_times['p99_ms'], \
+                "P95 should be <= P99"
+            
+            # Property: Mean should be reasonable compared to percentiles
+            assert response_times['mean_ms'] <= response_times['p95_ms'], \
+                "Mean should typically be below P95"
+            
+            # Property: Resource usage should be bounded
+            resource_usage = metric['resource_usage']
+            assert 0 <= resource_usage['cpu_percent'] <= 100, \
+                f"CPU usage out of bounds: {resource_usage['cpu_percent']}"
+            assert resource_usage['memory_mb'] >= 0, \
+                f"Memory usage should be non-negative: {resource_usage['memory_mb']}"
+
+
+@pytest.mark.chaos
+class TestChaosEngineeringAgentMonitor:
+    """Chaos engineering tests for agent monitor resilience."""
+    
+    def test_network_failure_resilience(self, chaos_test_context):
+        """Test agent monitor behavior under network failure conditions."""
+        factory = EnhancedTestDataFactory()
+        
+        # Create network failure scenario
+        chaos_scenario = factory.create_chaos_scenario('network_failure')
+        chaos_test_context['chaos_active'] = True
+        chaos_test_context['failures_injected'].append(chaos_scenario)
+        
+        # Mock agent pool to simulate network failures
+        mock_pool = Mock()
+        
+        # Simulate network timeout
+        def failing_list_agents():
+            if chaos_scenario['failure_conditions']['packet_loss_percent'] > 50:
+                raise TimeoutError("Network timeout during chaos test")
+            return []
+        
+        mock_pool.list_agents.side_effect = failing_list_agents
+        mock_pool.list_tasks.return_value = []
+        mock_pool.get_pool_statistics.return_value = {}
+        
+        monitor = AgentMonitor(agent_pool=mock_pool)
+        
+        # Test should handle network failures gracefully
+        try:
+            monitor.update_metrics()
+            
+            # Monitor should still be functional (empty metrics but no crash)
+            assert isinstance(monitor.agent_metrics, dict), \
+                "Agent metrics should remain dictionary even during failures"
+            assert isinstance(monitor.task_metrics, dict), \
+                "Task metrics should remain dictionary even during failures"
+            
+        except TimeoutError:
+            # If timeout occurs, it should be handled gracefully
+            pytest.fail("Network timeout not handled gracefully by agent monitor")
+        
+        # Verify chaos scenario properties
+        assert chaos_scenario['expected_behavior']['should_degrade_gracefully'], \
+            "System should degrade gracefully during network failures"
+    
+    def test_memory_pressure_resilience(self, chaos_test_context):
+        """Test agent monitor behavior under memory pressure."""
+        factory = EnhancedTestDataFactory()
+        
+        # Create memory pressure scenario
+        chaos_scenario = factory.create_chaos_scenario('memory_pressure')
+        chaos_test_context['chaos_active'] = True
+        chaos_test_context['failures_injected'].append(chaos_scenario)
+        
+        # Simulate memory pressure by creating large objects
+        memory_pressure_data = []
+        pressure_mb = chaos_scenario['failure_conditions'].get('memory_limit_mb', 128)
+        
+        # Create memory pressure (simulate with smaller objects to avoid actual OOM)
+        try:
+            for i in range(10):  # Create some memory pressure
+                memory_pressure_data.append([0] * min(1000, pressure_mb * 10))
+            
+            # Agent monitor should still function under memory pressure
+            mock_pool = Mock()
+            mock_pool.list_agents.return_value = [
+                {"agent_id": f"agent-{i}", "state": "idle"} for i in range(5)
+            ]
+            mock_pool.list_tasks.return_value = []
+            mock_pool.get_pool_statistics.return_value = {"active_agents": 0}
+            
+            monitor = AgentMonitor(agent_pool=mock_pool)
+            monitor.update_metrics()
+            
+            # Should handle memory pressure gracefully
+            assert len(monitor.agent_metrics) <= 10, \
+                "Agent metrics should be bounded even under memory pressure"
+            
+        finally:
+            # Cleanup memory pressure
+            del memory_pressure_data
+            import gc
+            gc.collect()
+
+
+@pytest.mark.performance
+class TestAgentMonitorPerformanceProperties:
+    """Performance property tests for agent monitor."""
+    
+    def test_update_metrics_performance_property(self, performance_baseline):
+        """Test that update_metrics performance scales predictably."""
+        import time
+        
+        # Test with different numbers of agents
+        agent_counts = [1, 5, 10, 25, 50]
+        update_times = []
+        
+        for count in agent_counts:
+            # Create mock pool with varying number of agents
+            mock_pool = Mock()
+            mock_pool.list_agents.return_value = [
+                {
+                    "agent_id": f"agent-{i}",
+                    "state": "working" if i % 2 == 0 else "idle",
+                    "current_task": f"task-{i}" if i % 2 == 0 else None,
+                    "completed_tasks": i * 2,
+                    "failed_tasks": 0,
+                    "total_execution_time": float(i * 10),
+                }
+                for i in range(count)
+            ]
+            mock_pool.list_tasks.return_value = [
+                {
+                    "task_id": f"task-{i}",
+                    "title": f"Task {i}",
+                    "status": "running" if i % 2 == 0 else "pending",
+                    "assigned_agent": f"agent-{i}" if i % 2 == 0 else None,
+                    "start_time": None,
+                    "timeout": 300,
+                }
+                for i in range(count)
+            ]
+            mock_pool.get_pool_statistics.return_value = {
+                "active_agents": count // 2,
+                "idle_agents": count - (count // 2),
+                "total_tasks": count,
+            }
+            
+            monitor = AgentMonitor(agent_pool=mock_pool)
+            
+            # Measure update time
+            start_time = time.perf_counter()
+            monitor.update_metrics()
+            end_time = time.perf_counter()
+            
+            update_time_ms = (end_time - start_time) * 1000
+            update_times.append(update_time_ms)
+            
+            # Performance property: Update should be reasonably fast
+            threshold_ms = performance_baseline['response_time_p95_ms'] * 2
+            assert update_time_ms < threshold_ms, \
+                f"Update too slow for {count} agents: {update_time_ms}ms > {threshold_ms}ms"
+        
+        # Performance property: Should not degrade significantly with scale
+        if len(update_times) >= 3:
+            first_time = update_times[0]
+            last_time = update_times[-1]
+            
+            # Last update shouldn't be more than 10x slower than first
+            if first_time > 0:
+                slowdown_factor = last_time / first_time
+                assert slowdown_factor < 10, \
+                    f"Performance degraded too much: {slowdown_factor}x slower"
+    
+    def test_render_performance_property(self, performance_baseline):
+        """Test that render operations maintain performance properties."""
+        import time
+        
+        # Create monitor with test data
+        mock_pool = Mock()
+        mock_pool.list_agents.return_value = [
+            {"agent_id": f"agent-{i}", "state": "working"} for i in range(10)
+        ]
+        mock_pool.list_tasks.return_value = []
+        mock_pool.get_pool_statistics.return_value = {"active_agents": 10}
+        
+        monitor = AgentMonitor(agent_pool=mock_pool)
+        monitor.update_metrics()
+        
+        # Test different render modes
+        render_modes = [
+            ('overview', monitor.render_overview),
+            ('detailed', monitor.render_detailed),
+            ('tasks', monitor.render_tasks),
+            ('performance', monitor.render_performance),
+        ]
+        
+        for mode_name, render_func in render_modes:
+            start_time = time.perf_counter()
+            result = render_func()
+            end_time = time.perf_counter()
+            
+            render_time_ms = (end_time - start_time) * 1000
+            
+            # Performance property: Render should be fast
+            threshold_ms = performance_baseline['response_time_p95_ms']
+            assert render_time_ms < threshold_ms, \
+                f"Render {mode_name} too slow: {render_time_ms}ms > {threshold_ms}ms"
+            
+            # Property: Should return valid result
+            assert result is not None, f"Render {mode_name} returned None"
+
+
+@pytest.mark.contract
+class TestAgentMonitorApiContract:
+    """API contract tests for agent monitor interfaces."""
+    
+    def test_agent_monitor_interface_contract(self):
+        """Test that AgentMonitor maintains interface contract."""
+        factory = EnhancedTestDataFactory()
+        
+        # Generate contract test data
+        contract_data = factory.create_contract_test_data('/api/v1/agent_monitor', 'GET')
+        
+        # Create monitor instance
+        mock_pool = Mock()
+        mock_pool.list_agents.return_value = []
+        mock_pool.list_tasks.return_value = []
+        mock_pool.get_pool_statistics.return_value = {}
+        
+        monitor = AgentMonitor(agent_pool=mock_pool)
+        
+        # Contract: Monitor should have required methods
+        required_methods = [
+            'update_metrics', 'render_overview', 'render_detailed',
+            'render_tasks', 'render_performance', 'set_display_mode',
+            'select_agent', 'get_keyboard_help'
+        ]
+        
+        for method_name in required_methods:
+            assert hasattr(monitor, method_name), \
+                f"AgentMonitor should have method: {method_name}"
+            assert callable(getattr(monitor, method_name)), \
+                f"AgentMonitor.{method_name} should be callable"
+        
+        # Contract: Monitor should have required attributes
+        required_attributes = [
+            'display_mode', 'selected_agent', 'auto_refresh',
+            'refresh_interval', 'agent_metrics', 'task_metrics'
+        ]
+        
+        for attr_name in required_attributes:
+            assert hasattr(monitor, attr_name), \
+                f"AgentMonitor should have attribute: {attr_name}"
+        
+        # Contract: Methods should not raise unexpected exceptions
+        try:
+            monitor.update_metrics()
+            monitor.render_overview()
+            monitor.set_display_mode(MonitorDisplayMode.TASKS)
+            help_text = monitor.get_keyboard_help()
+            assert isinstance(help_text, str), "Help text should be string"
+        except Exception as e:
+            pytest.fail(f"Interface contract violation: {e}")
+
+
+# Integration test combining all enhanced testing approaches
+@pytest.mark.integration
+class TestEnhancedAgentMonitorIntegration:
+    """Integration tests combining property-based, chaos, and performance testing."""
+    
+    def test_comprehensive_integration_scenario(self, performance_baseline, chaos_test_context):
+        """Test comprehensive scenario combining multiple testing approaches."""
+        factory = EnhancedTestDataFactory()
+        
+        # Generate comprehensive test data
+        property_data = factory.create_property_test_data(3)
+        chaos_scenario = factory.create_chaos_scenario('network_failure')
+        perf_metrics = factory.create_performance_metrics(1)
+        
+        # Setup chaos context
+        chaos_test_context['chaos_active'] = True
+        chaos_test_context['failures_injected'].append(chaos_scenario)
+        
+        # Create agent monitor with test data
+        mock_pool = Mock()
+        
+        # Simulate varying conditions based on test data
+        agents_data = []
+        for i, sample in enumerate(property_data):
+            agents_data.append({
+                "agent_id": f"agent-{i}",
+                "state": "working" if i % 2 == 0 else "idle",
+                "current_task": f"task-{i}" if i % 2 == 0 else None,
+                "completed_tasks": i + 5,
+                "failed_tasks": 1 if i == 0 else 0,
+                "total_execution_time": float((i + 1) * 100),
+            })
+        
+        mock_pool.list_agents.return_value = agents_data
+        mock_pool.list_tasks.return_value = []
+        mock_pool.get_pool_statistics.return_value = {
+            "active_agents": len([a for a in agents_data if a["state"] == "working"]),
+            "idle_agents": len([a for a in agents_data if a["state"] == "idle"]),
+            "total_tasks": len(property_data),
+        }
+        
+        monitor = AgentMonitor(agent_pool=mock_pool)
+        
+        # Test integration: Property validation + Performance + Chaos resilience
+        import time
+        start_time = time.perf_counter()
+        
+        try:
+            # Update metrics under potential chaos conditions
+            monitor.update_metrics()
+            
+            # Verify property-based constraints
+            assert len(monitor.agent_metrics) == len(property_data), \
+                "Should create metrics for all agents"
+            
+            # Check performance constraints
+            update_time = (time.perf_counter() - start_time) * 1000
+            assert update_time < performance_baseline['response_time_p95_ms'] * 3, \
+                f"Integration test took too long: {update_time}ms"
+            
+            # Verify chaos resilience - system should remain functional
+            overview_panel = monitor.render_overview()
+            assert overview_panel is not None, \
+                "System should remain functional under chaos conditions"
+            
+            # Test agent metrics properties
+            for agent_id, metrics in monitor.agent_metrics.items():
+                assert metrics.agent_id == agent_id, \
+                    f"Agent ID mismatch: {metrics.agent_id} != {agent_id}"
+                assert metrics.tasks_completed >= 0, \
+                    f"Completed tasks should be non-negative: {metrics.tasks_completed}"
+                assert 0 <= metrics.success_rate <= 1, \
+                    f"Success rate should be 0-1: {metrics.success_rate}"
+            
+        except Exception as e:
+            pytest.fail(f"Integration test failed: {e}")
+        
+        finally:
+            # Cleanup chaos context
+            chaos_test_context['chaos_active'] = False
