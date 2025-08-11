@@ -206,7 +206,7 @@ status: ## check system and project status
 	@echo "  Location:      $$(which python)"
 	@echo ""
 	@echo -e "$(GREEN)📦 Dependencies:$(RESET)"
-	@pip list | tail -n +3 | wc -l | xargs printf "  Packages:      %d installed\\n"
+	@echo -e "  Packages:      $(pip list | tail -n +3 | wc -l) installed"
 	@echo ""
 	@echo -e "$(GREEN)🚀 Services:$(RESET)"
 	@if pgrep -f "yesman.py" >/dev/null; then \

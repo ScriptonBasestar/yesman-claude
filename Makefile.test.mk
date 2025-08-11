@@ -204,10 +204,10 @@ test-stats: ## show test statistics
 	@echo -e "$(BLUE)===============$(RESET)"
 	@echo ""
 	@echo -e "$(GREEN)📊 Test Files:$(RESET)"
-	@find tests -name "test_*.py" -o -name "*_test.py" | wc -l | xargs printf "  Total test files: %d\n"
+	@echo -e "  Total test files: $(find tests -name \"test_*.py\" -o -name \"*_test.py\" | wc -l)"
 	@echo ""
 	@echo -e "$(GREEN)📊 Test Functions:$(RESET)"
-	@grep -r "def test_" tests --include="*.py" | wc -l | xargs printf "  Total test functions: %d\n"
+	@echo -e "  Total test functions: $(grep -r \"def test_\" tests --include=\"*.py\" | wc -l)"
 	@echo ""
 	@if [ -f ".coverage" ]; then \
 		echo -e "$(GREEN)📊 Last Coverage:$(RESET)"; \

@@ -238,21 +238,21 @@ tools-status: ## check status of installed tools
 	@echo -e "$(YELLOW)Essential Tools:$(RESET)"
 	@for tool in ruff mypy black isort pytest; do \
 		if command -v $$tool >/dev/null 2>&1; then \
-			printf "  %-15s $(GREEN)✅ Installed$(RESET) - " "$$tool"; \
+			echo -n -e "  $$(printf "%-15s" "$$tool") $(GREEN)✅ Installed$(RESET) - "; \
 			$$tool --version 2>/dev/null | head -1 || echo "version unknown"; \
-		else \
-			printf "  %-15s $(RED)❌ Not installed$(RESET)\n" "$$tool"; \
-		fi; \
-	done
+			else \
+			echo -e "  $$(printf "%-15s" "$$tool") $(RED)❌ Not installed$(RESET)"; \
+			fi; \
+			done
 	@echo ""
 	@echo -e "$(YELLOW)Quality Tools:$(RESET)"
 	@for tool in bandit safety radon vulture; do \
 		if command -v $$tool >/dev/null 2>&1; then \
-			printf "  %-15s $(GREEN)✅ Installed$(RESET)\n" "$$tool"; \
-		else \
-			printf "  %-15s $(RED)❌ Not installed$(RESET)\n" "$$tool"; \
-		fi; \
-	done
+			echo -e "  $$(printf "%-15s" "$$tool") $(GREEN)✅ Installed$(RESET)"; \
+			else \
+			echo -e "  $$(printf "%-15s" "$$tool") $(RED)❌ Not installed$(RESET)"; \
+			fi; \
+			done
 
 tools-check: ## verify all required tools are installed
 	@echo -e "$(CYAN)Checking required tools...$(RESET)"
@@ -318,8 +318,8 @@ env-info: ## show environment information
 	@echo "  pip:           $$(pip --version | cut -d' ' -f2)"
 	@echo ""
 	@echo -e "$(GREEN)📦 Dependencies:$(RESET)"
-	@pip list | tail -n +3 | wc -l | xargs printf "  Installed packages: %d\n"
-	@pip list --outdated 2>/dev/null | tail -n +3 | wc -l | xargs printf "  Outdated packages:  %d\n"
+	@echo -e "  Installed packages: $(pip list | tail -n +3 | wc -l)"
+	@echo -e "  Outdated packages:  $(pip list --outdated 2>/dev/null | tail -n +3 | wc -l)"
 	@echo ""
 	@echo -e "$(GREEN)🔧 Available Commands:$(RESET)"
 	@echo -e "  • $(CYAN)install-all$(RESET)         Install everything"
