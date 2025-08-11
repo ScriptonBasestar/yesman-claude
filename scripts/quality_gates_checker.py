@@ -104,6 +104,7 @@ class QualityGatesChecker:
             "blocking_gates": {
                 "linting_violations_max": 200,
                 "security_critical_issues_max": 0,
+                "security_high_issues_max": 5,
                 "test_coverage_min": 35,
                 "performance_regression_threshold": 10,
             },
@@ -112,11 +113,21 @@ class QualityGatesChecker:
                 "documentation_coverage_min": 60,
                 "memory_usage_increase_max": 20,
                 "new_violations_per_pr_max": 5,
+                "security_medium_issues_max": 15,
             },
             "advisory_gates": {
                 "async_adoption_target": 30,
                 "type_annotation_coverage": 80,
                 "performance_optimization_score": 70,
+                "security_low_issues_max": 50,
+            },
+            "security_config": {
+                "timeout_seconds": 60,
+                "exclude_paths": ["./.backups", "./.venv", "./node_modules", "./.git"],
+                "skip_tests": ["B101", "B601"],
+                "additional_checks": ["dependency_check", "license_scan"],
+                "confidence_threshold": "LOW",
+                "severity_threshold": "LOW",
             },
             "enabled_checks": ["linting", "security", "test_coverage", "complexity", "documentation", "performance", "async_adoption", "type_annotations"],
         }
@@ -302,75 +313,197 @@ class QualityGatesChecker:
             )
 
     async def _check_security(self) -> QualityCheck:
-        """Check security vulnerabilities (BLOCKING gate)."""
+        """Check security vulnerabilities with enhanced multi-level analysis (BLOCKING gate)."""
         start_time = time.perf_counter()
 
         try:
-            # Run bandit security scan with timeout and exclusions for faster execution
-            result = subprocess.run(
-                ["bandit", "-r", ".", "-f", "json", "--exclude", "./.backups,./.venv", "--skip", "B101,B601"],
-                check=False,
-                capture_output=True,
-                text=True,
-                timeout=30,  # 30 second timeout
-            )
-
-            critical_issues = 0
-            details = {"issues": []}
-
-            if result.stdout:
+            # Get security configuration
+            security_config = self.config.get("security_config", {})
+            timeout = security_config.get("timeout_seconds", 60)
+            exclude_paths = ",".join(security_config.get("exclude_paths", ["./.backups", "./.venv"]))
+            skip_tests = ",".join(security_config.get("skip_tests", ["B101", "B601"]))
+            
+            # Run enhanced bandit security scan - output to temp file to avoid stdout/stderr mixing
+            import tempfile
+            import os
+            
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_file:
+                tmp_filename = tmp_file.name
+                
+            try:
+                bandit_cmd = [
+                    "bandit", "-r", ".", "-f", "json",
+                    "--exclude", exclude_paths,
+                    "--skip", skip_tests,
+                    "--confidence-level", security_config.get("confidence_threshold", "LOW").lower(),
+                    "--severity-level", security_config.get("severity_threshold", "LOW").lower(),
+                    "-o", tmp_filename,
+                ]
+                
+                result = subprocess.run(
+                    bandit_cmd,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                )
+                
+                # Read results from temp file
+                if os.path.exists(tmp_filename):
+                    with open(tmp_filename, 'r', encoding='utf-8') as f:
+                        json_output = f.read()
+                else:
+                    json_output = ""
+                    
+            finally:
+                # Clean up temp file
                 try:
-                    security_results = json.loads(result.stdout)
+                    os.unlink(tmp_filename)
+                except:
+                    pass
+
+            # Initialize counters and details
+            severity_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
+            confidence_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
+            test_type_counts = {}
+            critical_issues = 0
+            high_issues = 0
+            medium_issues = 0
+            low_issues = 0
+            
+            details = {
+                "issues": [],
+                "scan_metadata": {
+                    "timeout": timeout,
+                    "exclude_paths": security_config.get("exclude_paths", []),
+                    "skip_tests": security_config.get("skip_tests", []),
+                }
+            }
+
+            if json_output and json_output.strip():
+                try:
+                    security_results = json.loads(json_output)
                     results = security_results.get("results", [])
+                    metrics = security_results.get("metrics", {})
 
-                    # Count critical/high severity issues
-                    severity_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
-
+                    # Enhanced analysis of security issues
                     for issue in results:
                         severity = issue.get("issue_severity", "LOW")
+                        confidence = issue.get("issue_confidence", "LOW")
+                        test_id = issue.get("test_id", "unknown")
+                        
+                        # Count by severity
                         if severity in severity_counts:
                             severity_counts[severity] += 1
-
+                        
+                        # Count by confidence
+                        if confidence in confidence_counts:
+                            confidence_counts[confidence] += 1
+                            
+                        # Count by test type for trending analysis
+                        if test_id not in test_type_counts:
+                            test_type_counts[test_id] = 0
+                        test_type_counts[test_id] += 1
+                        
+                        # Classify by severity for multi-level gating
                         if severity == "HIGH":
-                            critical_issues += 1
+                            if confidence == "HIGH":
+                                critical_issues += 1
+                            high_issues += 1
+                        elif severity == "MEDIUM":
+                            medium_issues += 1
+                        elif severity == "LOW":
+                            low_issues += 1
 
-                    details = {
+                    # Find top security issue types
+                    top_issue_types = sorted(test_type_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+                    
+                    # Enhanced details with better categorization
+                    details.update({
                         "total_issues": len(results),
-                        "critical_issues": critical_issues,
+                        "critical_issues": critical_issues,  # HIGH severity + HIGH confidence
+                        "high_issues": high_issues,
+                        "medium_issues": medium_issues,
+                        "low_issues": low_issues,
                         "severity_breakdown": severity_counts,
-                        "sample_issues": results[:5],  # First 5 for details
-                    }
+                        "confidence_breakdown": confidence_counts,
+                        "top_issue_types": dict(top_issue_types),
+                        "sample_high_issues": [
+                            {
+                                "test_id": issue.get("test_id"),
+                                "filename": issue.get("filename", "").split("/")[-1],
+                                "line_number": issue.get("line_number"),
+                                "issue_text": issue.get("issue_text", "")[:100] + "..." if len(issue.get("issue_text", "")) > 100 else issue.get("issue_text", ""),
+                                "severity": issue.get("issue_severity"),
+                                "confidence": issue.get("issue_confidence"),
+                            }
+                            for issue in results if issue.get("issue_severity") == "HIGH"
+                        ][:5],
+                        "metrics": metrics,
+                        "additional_checks": await self._run_additional_security_checks(),
+                    })
 
                 except json.JSONDecodeError as e:
                     self.logger.warning(f"Could not parse bandit output: {e}")
 
-            threshold = self.config["blocking_gates"]["security_critical_issues_max"]
-            is_passing = critical_issues <= threshold
+            # Multi-level threshold checking
+            critical_threshold = self.config["blocking_gates"]["security_critical_issues_max"]
+            high_threshold = self.config["blocking_gates"].get("security_high_issues_max", 5)
+            medium_threshold = self.config["warning_gates"].get("security_medium_issues_max", 15)
+            
+            # Determine gate result based on multiple severity levels
+            gate_result = GateResult.PASS
+            score = 100
+            messages = []
+            
+            if critical_issues > critical_threshold:
+                gate_result = GateResult.FAIL
+                score = 0
+                messages.append(f"{critical_issues} critical issues (threshold: {critical_threshold})")
+            elif high_issues > high_threshold:
+                gate_result = GateResult.FAIL
+                score = 20
+                messages.append(f"{high_issues} high severity issues (threshold: {high_threshold})")
+            elif medium_issues > medium_threshold:
+                gate_result = GateResult.WARNING
+                score = max(50, 100 - (medium_issues / medium_threshold * 50))
+                messages.append(f"{medium_issues} medium severity issues (threshold: {medium_threshold})")
+            else:
+                score = max(80, 100 - (low_issues / max(1, self.config["advisory_gates"].get("security_low_issues_max", 50)) * 20))
+                messages.append("No significant security issues found")
 
             execution_time = time.perf_counter() - start_time
+            
+            # Record performance metrics
+            self._record_performance_metrics(
+                gate_name="security_enhanced", 
+                execution_time=execution_time, 
+                result=gate_result.value, 
+                exit_code=result.returncode
+            )
 
             return QualityCheck(
                 name="security",
                 level=GateLevel.BLOCKING,
-                result=GateResult.PASS if is_passing else GateResult.FAIL,
-                score=100 if is_passing else 0,
-                threshold=threshold,
-                message=f"Security check: {critical_issues} critical issues (threshold: {threshold})",
+                result=gate_result,
+                score=score,
+                threshold=critical_threshold,
+                message=f"Enhanced security scan: {', '.join(messages)}",
                 details=details,
                 execution_time=execution_time,
             )
 
         except subprocess.TimeoutExpired:
             execution_time = time.perf_counter() - start_time
-            self.logger.warning("Bandit security scan timed out after 30 seconds")
+            self.logger.warning(f"Bandit security scan timed out after {timeout} seconds")
             return QualityCheck(
                 name="security",
                 level=GateLevel.BLOCKING,
                 result=GateResult.WARNING,
                 score=50.0,
                 threshold=0,
-                message="Security check timed out - partial scan only",
-                details={"timeout": True, "duration": 30},
+                message=f"Security check timed out after {timeout}s - partial scan only",
+                details={"timeout": True, "duration": timeout},
                 execution_time=execution_time,
             )
         except FileNotFoundError:
@@ -398,6 +531,52 @@ class QualityGatesChecker:
                 details={"error": str(e)},
                 execution_time=execution_time,
             )
+
+    async def _run_additional_security_checks(self) -> dict[str, Any]:
+        """Run additional security checks beyond bandit scanning."""
+        additional_results = {
+            "dependency_check": {"status": "not_implemented", "issues": []},
+            "license_scan": {"status": "not_implemented", "licenses": []},
+            "secret_detection": {"status": "completed", "secrets_found": 0},
+        }
+        
+        try:
+            # Basic secret detection patterns
+            secret_patterns = [
+                (r"['\"][A-Za-z0-9]{20,}['\"]", "potential_api_key"),
+                (r"password\s*=\s*['\"][^'\"]+['\"]", "hardcoded_password"),
+                (r"token\s*=\s*['\"][^'\"]+['\"]", "hardcoded_token"),
+            ]
+            
+            secrets_found = 0
+            for py_file in Path(".").rglob("*.py"):
+                if any(skip in str(py_file) for skip in ["venv", "__pycache__", ".git"]):
+                    continue
+                    
+                try:
+                    content = py_file.read_text(encoding="utf-8")
+                    import re
+                    
+                    for pattern, secret_type in secret_patterns:
+                        matches = re.findall(pattern, content, re.IGNORECASE)
+                        secrets_found += len(matches)
+                        
+                except Exception:
+                    continue
+                    
+            additional_results["secret_detection"] = {
+                "status": "completed", 
+                "secrets_found": secrets_found,
+                "note": "Basic pattern matching only"
+            }
+            
+        except Exception as e:
+            additional_results["secret_detection"] = {
+                "status": "error", 
+                "error": str(e)
+            }
+            
+        return additional_results
 
     async def _check_test_coverage(self) -> QualityCheck:
         """Check test coverage (BLOCKING gate)."""

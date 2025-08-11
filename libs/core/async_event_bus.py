@@ -124,6 +124,19 @@ class EventMetrics:
     average_processing_time: float = 0.0
     queue_size: int = 0
     active_handlers: int = 0
+    
+    # Enhanced queue depth monitoring
+    max_queue_depth: int = 0
+    queue_depth_history: list[int] = None
+    queue_utilization_percent: float = 0.0
+    queue_backlog_duration_ms: float = 0.0
+    peak_queue_depth: int = 0
+    queue_overflow_events: int = 0
+
+    def __post_init__(self) -> None:
+        """Initialize queue depth history after object creation."""
+        if self.queue_depth_history is None:
+            self.queue_depth_history = []
 
     def reset(self) -> None:
         """Reset all metrics to zero."""
@@ -135,6 +148,14 @@ class EventMetrics:
         self.average_processing_time = 0.0
         self.queue_size = 0
         self.active_handlers = 0
+        
+        # Reset enhanced metrics
+        self.max_queue_depth = 0
+        self.queue_depth_history = []
+        self.queue_utilization_percent = 0.0
+        self.queue_backlog_duration_ms = 0.0
+        self.peak_queue_depth = 0
+        self.queue_overflow_events = 0
 
 
 class AsyncEventBus:
@@ -174,6 +195,11 @@ class AsyncEventBus:
         # Performance monitoring
         self._last_metrics_report = time.time()
         self._metrics_interval = 60.0  # Report metrics every 60 seconds
+        
+        # Enhanced queue depth monitoring
+        self._queue_depth_samples: deque = deque(maxlen=100)  # Keep last 100 samples
+        self._last_queue_update = time.time()
+        self._queue_update_interval = 1.0  # Update queue metrics every second
 
     async def start(self) -> None:
         """Start the event bus processing.
@@ -324,7 +350,9 @@ class AsyncEventBus:
             # Try to put event in queue immediately (non-blocking)
             self._event_queue.put_nowait(event)
             self._metrics.events_published += 1
-            self._metrics.queue_size = self._event_queue.qsize()
+            
+            # Update enhanced queue depth metrics
+            self._update_queue_depth_metrics()
             return True
 
         except asyncio.QueueFull:
@@ -394,7 +422,9 @@ class AsyncEventBus:
                 # Update metrics
                 self._processing_times.append(processing_time)
                 self._metrics.events_processed += 1
-                self._metrics.queue_size = self._event_queue.qsize()
+                
+                # Update enhanced queue depth metrics
+                self._update_queue_depth_metrics()
 
                 # Calculate rolling average processing time
                 if self._processing_times:
@@ -537,14 +567,50 @@ class AsyncEventBus:
         except Exception:
             self.logger.exception("Error publishing metrics")
 
+    def _update_queue_depth_metrics(self) -> None:
+        """Update enhanced queue depth monitoring metrics."""
+        current_time = time.time()
+        current_depth = self._event_queue.qsize()
+        max_size = self._event_queue.maxsize
+        
+        # Update basic metrics
+        self._metrics.queue_size = current_depth
+        
+        # Update peak tracking
+        if current_depth > self._metrics.peak_queue_depth:
+            self._metrics.peak_queue_depth = current_depth
+            
+        # Update max depth for this interval
+        if current_depth > self._metrics.max_queue_depth:
+            self._metrics.max_queue_depth = current_depth
+            
+        # Calculate utilization percentage
+        if max_size > 0:
+            self._metrics.queue_utilization_percent = (current_depth / max_size) * 100
+        
+        # Update queue depth history (every second)
+        if current_time - self._last_queue_update >= self._queue_update_interval:
+            self._queue_depth_samples.append(current_depth)
+            self._metrics.queue_depth_history = list(self._queue_depth_samples)
+            self._last_queue_update = current_time
+            
+            # Estimate backlog processing duration based on recent processing rate
+            if self._processing_times and current_depth > 0:
+                avg_processing_time = sum(self._processing_times) / len(self._processing_times)
+                self._metrics.queue_backlog_duration_ms = current_depth * avg_processing_time * 1000
+            
+            # Track overflow events
+            if current_depth >= max_size * 0.9:  # 90% full
+                self._metrics.queue_overflow_events += 1
+
     def get_metrics(self) -> EventMetrics:
         """Get current event bus metrics.
 
         Returns:
             Current metrics snapshot
         """
-        # Update queue size
-        self._metrics.queue_size = self._event_queue.qsize()
+        # Update enhanced queue depth metrics
+        self._update_queue_depth_metrics()
         return self._metrics
 
     def get_subscriber_count(self, event_type: EventType | str = None) -> int:
