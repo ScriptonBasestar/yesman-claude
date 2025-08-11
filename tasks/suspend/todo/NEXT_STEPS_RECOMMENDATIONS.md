@@ -1,5 +1,16 @@
 # Next Steps and Recommendations for Yesman-Claude
 
+---
+status: suspended
+reason: 파일이 16개의 활성 작업을 포함하여 과밀함. 시간대별로 분할됨 - immediate-code-quality.md, short-term-monitoring.md, quality-gates-expansion.md로 분리됨
+original_location: /tasks/todo/NEXT_STEPS_RECOMMENDATIONS.md
+split_files:
+  - immediate-code-quality.md (4 tasks - Critical priority)
+  - short-term-monitoring.md (5 tasks - Medium priority)  
+  - quality-gates-expansion.md (5 tasks - Medium priority)
+total_active_tasks_moved: 14
+---
+
 ## 📋 Current Status Assessment (Updated July 2025)
 
 ### ✅ Completed Infrastructure
@@ -21,10 +32,10 @@
 ## 🎯 Immediate Action Items (Next 1-2 weeks)
 
 ### 1. Code Quality Stabilization
-- [ ] **Fix linting violations** - reduce from 651 to under 200 threshold
-- [ ] **Install and configure Bandit** for security scanning
-- [ ] **Resolve event bus integration issues** in quality gates system
-- [ ] **Run comprehensive quality gates** to establish clean baseline
+- [x] **Fix linting violations** - reduce from 651 to under 200 threshold [MOVED to immediate-code-quality.md]
+- [x] **Install and configure Bandit** for security scanning [MOVED to immediate-code-quality.md]
+- [x] **Resolve event bus integration issues** in quality gates system [MOVED to immediate-code-quality.md]
+- [x] **Run comprehensive quality gates** to establish clean baseline [MOVED to immediate-code-quality.md]
 
 ### 2. Production Readiness Assessment
 ```bash
@@ -306,20 +317,20 @@ Focus on stabilizing existing async architecture rather than expanding:
 ## 🎯 Realistic Success Measurements (Updated)
 
 ### 1-Month Goals (Critical)
-- [ ] **Code Quality**: Reduce linting violations from 651 to under 200
-- [ ] **Security**: Install and configure Bandit security scanner
-- [ ] **Quality Gates**: Achieve 100% quality gate pass rate
+- [x] **Code Quality**: Reduce linting violations from 651 to under 200 [MOVED to immediate-code-quality.md]
+- [x] **Security**: Install and configure Bandit security scanner [MOVED to immediate-code-quality.md]
+- [x] **Quality Gates**: Achieve 100% quality gate pass rate [MOVED to immediate-code-quality.md]
 - [ ] **Documentation**: Create troubleshooting guide for async components
 
 ### 3-Month Goals (Stabilization)
-- [ ] **Performance**: Establish reliable performance baseline monitoring
-- [ ] **Integration**: Resolve all event bus integration warnings
+- [x] **Performance**: Establish reliable performance baseline monitoring [MOVED to short-term-monitoring.md]
+- [x] **Integration**: Resolve all event bus integration warnings [MOVED to immediate-code-quality.md]
 - [ ] **Testing**: Achieve 90%+ test pass rate for async components
 - [ ] **Standards**: Document and enforce async coding patterns
 
 ### 6-Month Goals (Enhancement)
-- [ ] **Monitoring**: Add comprehensive performance metrics dashboard
-- [ ] **Automation**: Fully automated quality gates in CI/CD
+- [x] **Monitoring**: Add comprehensive performance metrics dashboard [MOVED to short-term-monitoring.md]
+- [x] **Automation**: Fully automated quality gates in CI/CD [MOVED to quality-gates-expansion.md]
 - [ ] **Performance**: Achieve consistent <10ms async operation response times
 - [ ] **Reliability**: 99%+ uptime for async monitoring systems
 

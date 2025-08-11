@@ -91,6 +91,7 @@ class QualityGatesChecker:
             # Only enable performance monitoring if explicitly requested
             if config_path and "enable_performance_monitoring" in (config_path.read_text() if config_path.exists() else ""):
                 from scripts.performance_baseline import create_quality_gates_metrics, get_performance_monitor
+
                 self.performance_monitor = get_performance_monitor()
                 self._create_quality_gates_metrics = create_quality_gates_metrics
                 self._performance_monitoring_enabled = True
@@ -169,6 +170,18 @@ class QualityGatesChecker:
             Complete quality gate results
         """
         self.logger.info("🛡️ Running Yesman-Claude Quality Gates...")
+
+        # Initialize event bus for components that may need it
+        try:
+            from libs.core.async_event_bus import get_event_bus
+
+            event_bus = get_event_bus()
+            if not event_bus._is_running:
+                await event_bus.start()
+                self.logger.debug("Event bus initialized for quality gates")
+        except Exception as e:
+            self.logger.debug(f"Event bus initialization skipped: {e}")
+
         start_time = time.perf_counter()
 
         self.results = []
@@ -299,7 +312,7 @@ class QualityGatesChecker:
                 check=False,
                 capture_output=True,
                 text=True,
-                timeout=30  # 30 second timeout
+                timeout=30,  # 30 second timeout
             )
 
             critical_issues = 0
@@ -392,12 +405,12 @@ class QualityGatesChecker:
 
         try:
             # Run pytest with coverage
-            result = subprocess.run(
-                [
-                    "python", "-m", "pytest", "--cov=libs", "--cov=commands", "--cov=api",
-                    "--cov-report=json", "--cov-report=term-missing", "--quiet"
-                ],
-                check=False, capture_output=True, text=True, timeout=300
+            subprocess.run(
+                ["python", "-m", "pytest", "--cov=libs", "--cov=commands", "--cov=api", "--cov-report=json", "--cov-report=term-missing", "--quiet"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=300,
             )
 
             coverage_percent = 0.0

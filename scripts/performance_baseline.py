@@ -266,7 +266,7 @@ class PerformanceMonitor:
             self.logger.info("Performance monitoring started")
             return True
 
-        except Exception as e:
+        except Exception:
             self.is_monitoring = False
             self.logger.exception("Failed to start performance monitoring")
             return False
@@ -310,7 +310,7 @@ class PerformanceMonitor:
                     # Limit sample history to prevent memory bloat
                     self._limit_sample_history()
 
-                except Exception as e:
+                except Exception:
                     self.logger.exception("Error collecting performance samples")
 
                 # Calculate sleep time to maintain consistent interval
@@ -320,7 +320,7 @@ class PerformanceMonitor:
 
         except asyncio.CancelledError:
             self.logger.info("Performance monitoring loop cancelled")
-        except Exception as e:
+        except Exception:
             self.logger.exception("Critical error in monitoring loop")
 
     def _collect_system_metrics(self) -> SystemMetrics:
@@ -363,7 +363,7 @@ class PerformanceMonitor:
                 system_platform=platform.platform(),
             )
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error collecting system metrics")
             # Return minimal metrics on error
             return SystemMetrics(
@@ -403,7 +403,7 @@ class PerformanceMonitor:
 
             return None
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error collecting event bus metrics")
             return None
 
@@ -468,7 +468,7 @@ class PerformanceMonitor:
 
             self.logger.info(f"Baseline saved to: {filepath}")
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to save baseline")
 
     async def load_baseline(self, filename: str | None = None) -> PerformanceBaseline | None:
@@ -495,7 +495,7 @@ class PerformanceMonitor:
 
             return baseline
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to load baseline")
             return None
 

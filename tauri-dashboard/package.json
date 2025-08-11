@@ -16,8 +16,8 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.8",
-    "@sveltejs/kit": "^2.22.2",
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/kit": "^2.27.3",
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
     "@tailwindcss/typography": "^0.5.16",
     "@tauri-apps/cli": "^1.6.3",
     "@types/d3-format": "^3.0.4",
@@ -29,7 +29,7 @@
     "concurrently": "^8.2.2",
     "daisyui": "^4.12.24",
     "postcss": "^8.5.6",
-    "svelte": "^4.2.20",
+    "svelte": "^5.38.0",
     "svelte-check": "^3.8.6",
     "tailwindcss": "^3.4.17",
     "tslib": "^2.8.1",
@@ -48,7 +48,7 @@
     "d3-selection": "^3.0.0",
     "d3-time-format": "^4.1.0",
     "date-fns": "^2.30.0",
-    "lucide-svelte": "^0.292.0"
+    "lucide-svelte": "^0.539.0"
   },
   "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac",
   "pnpm": {

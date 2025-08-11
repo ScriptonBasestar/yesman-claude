@@ -308,7 +308,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             content = await loop.run_in_executor(None, cast("Any", self.session_manager).capture_pane_content)
             return cast(str, content)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error capturing pane content")
             return ""
 
@@ -323,7 +323,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             is_running = await loop.run_in_executor(None, cast("Any", self.process_controller).is_claude_running)
             return cast(bool, is_running)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error checking Claude status")
             return False
 
@@ -435,7 +435,7 @@ class AsyncClaudeMonitor:
 
             return prompt_info
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error checking for prompts")
             return None
 
@@ -520,7 +520,7 @@ class AsyncClaudeMonitor:
                 self._clear_prompt_state()
                 return True
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error sending AI response")
 
         return False
@@ -555,7 +555,7 @@ class AsyncClaudeMonitor:
 
             self._clear_prompt_state()
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error sending legacy response")
 
     async def _send_input_async(self, input_text: str) -> None:
@@ -563,7 +563,7 @@ class AsyncClaudeMonitor:
         try:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.process_controller).send_input, input_text)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error sending input")
             raise
 
@@ -572,7 +572,7 @@ class AsyncClaudeMonitor:
         try:
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.status_manager).record_response, prompt_type, response, question)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error recording response")
 
     async def _auto_respond_to_selection_async(self, prompt_info: PromptInfo) -> bool:
@@ -585,7 +585,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             should_respond = await loop.run_in_executor(None, self._should_auto_respond, prompt_info)
             return should_respond
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error checking auto-response")
             return False
 
@@ -632,7 +632,7 @@ class AsyncClaudeMonitor:
                         )
                     )
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error analyzing automation context")
 
     async def _collect_content_interaction(self, content: str, prompt_info: PromptInfo | None) -> None:
@@ -650,7 +650,7 @@ class AsyncClaudeMonitor:
 
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, self.content_collector.collect_interaction, content, prompt_dict, None)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error collecting content interaction")
 
     async def _maintenance_loop(self) -> None:
@@ -688,7 +688,7 @@ class AsyncClaudeMonitor:
                         if idle_context and hasattr(idle_context, "confidence"):
                             self.logger.debug("Claude idle context: %.2f", idle_context.confidence)
 
-                except Exception as e:
+                except Exception:
                     self.logger.exception("Error in maintenance loop")
 
         except asyncio.CancelledError:
@@ -724,7 +724,7 @@ class AsyncClaudeMonitor:
 
             self.logger.debug("Performance: %.2f loops/sec, %d total loops", loops_per_second, self._loop_count)
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error reporting performance metrics")
 
     # Event publishing helpers
@@ -745,7 +745,7 @@ class AsyncClaudeMonitor:
             # Also update status manager for backward compatibility
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.status_manager).update_status, f"[{status_type}]{message}[/]")
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error publishing status event")
 
     async def _publish_activity_event(self, message: str) -> None:
@@ -765,7 +765,7 @@ class AsyncClaudeMonitor:
             # Also update status manager for backward compatibility
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, cast("Any", self.status_manager).update_activity, message)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error publishing activity event")
 
     # Utility methods (maintaining backward compatibility)
@@ -800,7 +800,7 @@ class AsyncClaudeMonitor:
                 if "continue" in question or "press enter" in question:
                     return ""  # Just press Enter
 
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error getting legacy response")
 
         return "1"  # Safe fallback
@@ -826,7 +826,7 @@ class AsyncClaudeMonitor:
             self.async_logger = AsyncLogger(config)
             await self.async_logger.start()
             self.logger.info("Async logging system started")
-        except Exception as e:
+        except Exception:
             self.logger.exception("Failed to start async logging")
 
     async def _stop_async_logging(self) -> None:
@@ -836,7 +836,7 @@ class AsyncClaudeMonitor:
                 await self.async_logger.stop()
                 self.async_logger = None
                 self.logger.info("Async logging system stopped")
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error stopping async logging")
 
     # Public interface methods (backward compatibility)

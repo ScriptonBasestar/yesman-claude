@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { health, isHealthy, healthStatus, formatLastCheck } from '$lib/stores/health';
+  import { health, health$, isHealthy, healthStatus, formatLastCheck } from '$lib/stores/health';
   import { api } from '$lib/utils/api';
   
   async function manualCheck() {
@@ -36,8 +36,8 @@
             {$healthStatus.text}
           </div>
           <div class="stat-desc">
-            {#if $health.lastCheck}
-              Last checked: {formatLastCheck($health.lastCheck)}
+            {#if $health$.lastCheck}
+              Last checked: {formatLastCheck($health$.lastCheck)}
             {:else}
               Never checked
             {/if}
@@ -47,23 +47,23 @@
         <div class="stat">
           <div class="stat-title">API Details</div>
           <div class="stat-value text-sm">
-            {#if $health.service}
-              {$health.service}
+            {#if $health$.service}
+              {$health$.service}
             {:else}
               Unknown
             {/if}
           </div>
           <div class="stat-desc">
-            Version: {$health.version || 'Unknown'}
+            Version: {$health$.version || 'Unknown'}
           </div>
         </div>
         
         <div class="stat">
           <div class="stat-title">Retry Count</div>
-          <div class="stat-value">{$health.retryCount}</div>
+          <div class="stat-value">{$health$.consecutiveFailures}</div>
           <div class="stat-desc">
-            {#if $health.error}
-              Error: {$health.error}
+            {#if $health$.error}
+              Error: {$health$.error}
             {:else}
               No errors
             {/if}
@@ -85,7 +85,7 @@
   <div class="card bg-base-200 shadow-xl">
     <div class="card-body">
       <h2 class="card-title">Raw State</h2>
-      <pre class="bg-base-300 p-4 rounded overflow-auto">{JSON.stringify($health, null, 2)}</pre>
+      <pre class="bg-base-300 p-4 rounded overflow-auto">{JSON.stringify($health$, null, 2)}</pre>
     </div>
   </div>
   

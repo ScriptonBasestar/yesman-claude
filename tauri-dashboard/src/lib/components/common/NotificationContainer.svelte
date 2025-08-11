@@ -130,7 +130,7 @@
           <div 
             class="h-full bg-base-content/40 transition-all duration-300"
             style="animation: shrink {notification.type === 'error' ? $notificationSettings.errorHideDelay : $notificationSettings.autoHideDelay}ms linear forwards"
-          />
+          ></div>
         </div>
       {/if}
     </div>

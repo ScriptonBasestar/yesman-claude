@@ -1,5 +1,13 @@
 # Security Issues Review and Prioritization
 
+---
+status: suspended  
+reason: 기존 보안 리뷰 내용이 security-priorities.md로 구조화되어 이동됨. 8개 활성 작업이 우선순위별로 정리됨
+original_location: /tasks/todo/SECURITY_REVIEW.md
+split_into: security-priorities.md
+total_active_tasks_moved: 8
+---
+
 ## ✅ Completed: High Severity Issues (0 remaining)
 
 - **B602**: Fixed `shell=True` usage in `scripts/validate-lint-config.py`
@@ -20,20 +28,20 @@
 
 #### Priority 1: Production Code (Immediate)
 
-- [ ] Review production code for any hardcoded temp paths
-- [ ] Ensure no hardcoded paths in libs/ or commands/ directories
+- [x] Review production code for any hardcoded temp paths [MOVED to security-priorities.md]
+- [x] Ensure no hardcoded paths in libs/ or commands/ directories [MOVED to security-priorities.md]
 
 #### Priority 2: Test Infrastructure (Medium term)
 
-- [ ] Replace hardcoded `/tmp` with `tempfile.mkdtemp()` or `pytest.TempPathFactory`
-- [ ] Update test configuration to use platform-appropriate temp directories
-- [ ] Estimated effort: 2-3 hours
+- [x] Replace hardcoded `/tmp` with `tempfile.mkdtemp()` or `pytest.TempPathFactory` [MOVED to security-priorities.md]
+- [x] Update test configuration to use platform-appropriate temp directories [MOVED to security-priorities.md]
+- [x] Estimated effort: 2-3 hours [MOVED to security-priorities.md]
 
 #### Priority 3: Documentation and Standards (Long term)
 
-- [ ] Create security coding standards document
-- [ ] Add security checks to pre-commit hooks
-- [ ] Regular security audit schedule
+- [x] Create security coding standards document [MOVED to security-priorities.md]
+- [x] Add security checks to pre-commit hooks [MOVED to security-priorities.md]
+- [x] Regular security audit schedule [MOVED to security-priorities.md]
 
 ## 🎯 Immediate Action Plan
 
