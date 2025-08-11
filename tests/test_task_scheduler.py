@@ -1,5 +1,6 @@
 # Copyright notice.
 
+import tempfile
 import pytest
 
 from libs.multi_agent.task_scheduler import AgentCapability, PriorityTask, TaskScheduler
@@ -39,7 +40,7 @@ class TestAgentCapability:
             task_id="test-task",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             complexity=5,
         )
 
@@ -59,7 +60,7 @@ class TestAgentCapability:
             task_id="test-task",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             metadata={"tags": ["python", "development"]},
         )
 
@@ -70,7 +71,7 @@ class TestAgentCapability:
             task_id="test-task-2",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             metadata={"tags": ["javascript"]},
         )
 
@@ -90,7 +91,7 @@ class TestAgentCapability:
             task_id="test-task",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
 
         score_high_load = capability.get_efficiency_score(task)
@@ -112,13 +113,13 @@ class TestPriorityTask:
             task_id="task-1",
             title="Task 1",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
         task2 = Task(
             task_id="task-2",
             title="Task 2",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
 
         pt1 = PriorityTask(priority_score=0.8, task=task1)
@@ -165,7 +166,7 @@ class TestTaskScheduler:
             title="Test Task",
             description="A test task",
             command=["echo", "test"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             priority=7,
             complexity=5,
         )
@@ -224,7 +225,7 @@ class TestTaskScheduler:
             task_id="test",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             priority=8,  # High priority
             complexity=6,  # Medium-high complexity
             metadata={"blocks_tasks": 3},  # Blocks other tasks
@@ -299,7 +300,7 @@ class TestTaskScheduler:
             task_id="task-1",
             title="Python Task",
             command=["python", "script.py"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             priority=8,
             metadata={"tags": ["python"]},
         )
@@ -307,7 +308,7 @@ class TestTaskScheduler:
             task_id="task-2",
             title="JS Task",
             command=["node", "script.js"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             priority=6,
             metadata={"tags": ["javascript"]},
         )
@@ -379,7 +380,7 @@ class TestTaskScheduler:
             task_id="test",
             title="Test",
             command=["python", "test.py"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             complexity=5,
             metadata={"tags": ["python"]},
         )
@@ -399,7 +400,7 @@ class TestTaskScheduler:
             task_id="test",
             title="Test",
             command=["pytest", "tests/"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             complexity=5,
         )
 
@@ -410,7 +411,7 @@ class TestTaskScheduler:
             task_id="build",
             title="Build",
             command=["make", "build"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             complexity=5,
         )
 
@@ -421,7 +422,7 @@ class TestTaskScheduler:
             task_id="lint",
             title="Lint",
             command=["ruff", "check"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             complexity=5,
         )
 
@@ -504,7 +505,7 @@ class TestTaskScheduler:
             task_id="no-deps",
             title="No Dependencies",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
 
         assert scheduler._are_dependencies_met(task_no_deps) is True
@@ -514,7 +515,7 @@ class TestTaskScheduler:
             task_id="with-deps",
             title="With Dependencies",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             dependencies=["other-task"],
         )
 
@@ -531,7 +532,7 @@ class TestTaskScheduler:
                 task_id=f"task-{i}",
                 title=f"Task {i}",
                 command=["echo"],
-                working_directory="/tmp",
+                working_directory=tempfile.mkdtemp(),
             )
             scheduler.update_agent_performance(
                 sample_agent.agent_id,

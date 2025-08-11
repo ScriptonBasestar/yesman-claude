@@ -60,26 +60,44 @@ class TaskProgress:
     def _recalculate_overall_progress(self) -> None:
         """Recalculate overall progress based on phase."""
         phase_weights = {
+            TaskPhase.IDLE: 0.0,
             TaskPhase.STARTING: 0.1,
             TaskPhase.ANALYZING: 0.2,
             TaskPhase.IMPLEMENTING: 0.5,
             TaskPhase.TESTING: 0.15,
             TaskPhase.COMPLETING: 0.05,
             TaskPhase.COMPLETED: 1.0,
-            TaskPhase.IDLE: 0.0,
         }
 
-        base_progress = 0.0
-        phase_list = list(TaskPhase)
-        current_phase_index = phase_list.index(self.phase)
+        # Get ordered phases (excluding IDLE for progress calculation)
+        progress_phases = [
+            TaskPhase.STARTING, 
+            TaskPhase.ANALYZING, 
+            TaskPhase.IMPLEMENTING, 
+            TaskPhase.TESTING, 
+            TaskPhase.COMPLETING, 
+            TaskPhase.COMPLETED
+        ]
+        
+        if self.phase == TaskPhase.IDLE:
+            self.overall_progress = 0.0
+            return
+            
+        if self.phase == TaskPhase.COMPLETED:
+            self.overall_progress = 100.0
+            return
 
-        for phase, weight in phase_weights.items():
-            phase_index = phase_list.index(phase)
-            if phase_index < current_phase_index:
-                base_progress += weight
-            elif phase_index == current_phase_index:
-                base_progress += weight * (self.phase_progress / 100.0)
-                break
+        base_progress = 0.0
+        current_phase_index = progress_phases.index(self.phase)
+
+        # Add completed phases
+        for i in range(current_phase_index):
+            phase = progress_phases[i]
+            base_progress += phase_weights[phase]
+
+        # Add current phase progress
+        current_weight = phase_weights[self.phase]
+        base_progress += current_weight * (self.phase_progress / 100.0)
 
         self.overall_progress = round(min(100.0, base_progress * 100), 1)
 

@@ -1,5 +1,6 @@
 # Copyright notice.
 
+import importlib
 import os
 import platform
 import shutil
@@ -274,7 +275,7 @@ class DashboardLauncher:
         Boolean indicating.
         """
         try:
-            __import__(package)
+            importlib.import_module(package)
             return True
         except ImportError:
             return False

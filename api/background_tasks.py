@@ -111,7 +111,7 @@ class BackgroundTaskRunner:
         str: Description of return value.
         """
         json_str = json.dumps(data, sort_keys=True, default=str)
-        return hashlib.md5(json_str.encode(), usedforsecurity=False).hexdigest()
+        return hashlib.sha256(json_str.encode()).hexdigest()
 
     async def _run_task_safely(
         self,

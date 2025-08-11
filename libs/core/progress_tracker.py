@@ -110,16 +110,28 @@ class ProgressAnalyzer:
         Returns:
         TaskPhase: Description of return value.
         """
-        # Check for phase transitions
-        for phase, patterns in self.PHASE_PATTERNS.items():
-            for pattern in patterns:
-                if re.search(pattern, output_text, re.IGNORECASE):
-                    # Only transition to a later phase (except IDLE)
-                    if phase == TaskPhase.IDLE:
-                        continue
-                    phase_order = list(TaskPhase)
-                    if phase_order.index(phase) >= phase_order.index(current_phase):
+        # Check for phase transitions in order of priority
+        phase_order = [TaskPhase.STARTING, TaskPhase.ANALYZING, TaskPhase.IMPLEMENTING, TaskPhase.TESTING, TaskPhase.COMPLETING]
+        
+        # For IDLE, check in order and return the first match
+        if current_phase == TaskPhase.IDLE:
+            for phase in phase_order:
+                patterns = self.PHASE_PATTERNS.get(phase, [])
+                for pattern in patterns:
+                    if re.search(pattern, output_text, re.IGNORECASE):
                         return phase
+        else:
+            # For non-IDLE phases, check from current phase onwards, but prioritize higher phases
+            current_index = phase_order.index(current_phase) if current_phase in phase_order else 0
+            
+            # Check for later phases first (higher priority for progression)
+            for i in range(len(phase_order) - 1, current_index - 1, -1):
+                phase = phase_order[i]
+                patterns = self.PHASE_PATTERNS.get(phase, [])
+                for pattern in patterns:
+                    if re.search(pattern, output_text, re.IGNORECASE):
+                        if i >= current_index:  # Only allow forward progression
+                            return phase
 
         return current_phase
 

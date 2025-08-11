@@ -26,8 +26,8 @@ class TestTaskProgress:
         # Set phase progress
         task.phase_progress = 50.0
         task._recalculate_overall_progress()
-        # Analyzing phase has 0.2 weight, so 50% of 0.2 = 0.1 = 10%
-        assert task.overall_progress == 10.0
+        # Analyzing phase: STARTING (0.1) + 50% of ANALYZING (0.2) = 0.1 + 0.1 = 0.2 = 20%
+        assert task.overall_progress == 20.0
 
     @staticmethod
     def test_phase_progression() -> None:

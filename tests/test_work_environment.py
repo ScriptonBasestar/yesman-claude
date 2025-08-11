@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -110,8 +111,8 @@ class TestWorkEnvironmentManager:
         with patch.object(manager, "_create_worktree") as mock_worktree:
             with patch.object(manager, "_create_venv") as mock_venv:
                 with patch.object(manager, "_setup_environment"):
-                    mock_worktree.return_value = Path("/tmp/worktree")
-                    mock_venv.return_value = Path("/tmp/venv")
+                    mock_worktree.return_value = Path(tempfile.mkdtemp())
+                    mock_venv.return_value = Path(tempfile.mkdtemp())
 
                     env = manager.create_work_environment("test-branch", config)
 
@@ -217,8 +218,8 @@ class TestWorkEnvironmentManager:
         """Test activating an environment."""
         env = WorkEnvironment(
             branch_name="test",
-            worktree_path=Path("/tmp/worktree"),
-            venv_path=Path("/tmp/venv"),
+            worktree_path=Path(tempfile.mkdtemp()),
+            venv_path=Path(tempfile.mkdtemp()),
             config={"env_vars": {"CUSTOM_VAR": "value"}},
         )
 
@@ -303,14 +304,14 @@ class TestWorkEnvironmentManager:
         """Test listing environments."""
         env1 = WorkEnvironment(
             branch_name="branch1",
-            worktree_path=Path("/tmp/wt1"),
-            venv_path=Path("/tmp/venv1"),
+            worktree_path=Path(tempfile.mkdtemp()),
+            venv_path=Path(tempfile.mkdtemp()),
             config={},
         )
         env2 = WorkEnvironment(
             branch_name="branch2",
-            worktree_path=Path("/tmp/wt2"),
-            venv_path=Path("/tmp/venv2"),
+            worktree_path=Path(tempfile.mkdtemp()),
+            venv_path=Path(tempfile.mkdtemp()),
             config={},
         )
 

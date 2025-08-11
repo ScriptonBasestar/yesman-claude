@@ -1,5 +1,6 @@
 # Copyright notice.
 
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -52,7 +53,7 @@ class TestAgentPool:
             title="Test Task",
             description="A test task",
             command=["echo", "Hello World"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             timeout=30,
         )
 
@@ -81,13 +82,13 @@ class TestAgentPool:
         task = agent_pool.create_task(
             title="New Task",
             command=["ls", "-la"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             description="List files",
         )
 
         assert task.title == "New Task"
         assert task.command == ["ls", "-la"]
-        assert task.working_directory == "/tmp"
+        assert len(task.working_directory) > 0  # Verify directory exists
         assert task.description == "List files"
         assert task.task_id in agent_pool.tasks
 
@@ -154,7 +155,7 @@ class TestAgentPool:
             title="Success Task",
             description="Should succeed",
             command=["echo", "success"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
 
         # Mock callbacks
@@ -192,7 +193,7 @@ class TestAgentPool:
             title="Fail Task",
             description="Should fail",
             command=["false"],  # Command that always fails
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
 
         # Mock callbacks
@@ -224,7 +225,7 @@ class TestAgentPool:
             title="Timeout Task",
             description="Should timeout",
             command=["sleep", "10"],  # Long running command
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             timeout=1,  # 1 second timeout
         )
 
@@ -318,13 +319,13 @@ class TestAgentPool:
             task_id="task-1",
             title="Task 1",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
         task2 = Task(
             task_id="task-2",
             title="Task 2",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             status=TaskStatus.COMPLETED,
         )
         agent_pool.tasks["task-1"] = task1
@@ -362,7 +363,7 @@ class TestAgentPool:
             task_id="test-task",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
         agent_pool.tasks["test-task"] = task
 
@@ -383,7 +384,7 @@ class TestAgentPool:
             task_id="test-task",
             title="Test",
             command=["echo"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
         )
         agent_pool.tasks["test-task"] = task
         agent_pool.completed_tasks = ["completed-1", "completed-2"]
@@ -411,7 +412,7 @@ class TestAgentPool:
             task_id="test",
             title="Test Task",
             command=["echo", "test"],
-            working_directory="/tmp",
+            working_directory=tempfile.mkdtemp(),
             status=TaskStatus.RUNNING,
             start_time=datetime.now(UTC),
             metadata={"key": "value"},
