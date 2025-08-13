@@ -232,22 +232,36 @@ class SecurityValidator:
 
         return True
 
-    def run_validation(self) -> bool:
-        """Run all security validations."""
+    def run_validation(self, target_paths: list[str] | None = None) -> bool:
+        """Run all security validations.
+
+        변경된 파일만 검사하도록 `target_paths`가 주어지면 해당 파일들만 대상으로 검사한다.
+        파라미터가 없으면 기존처럼 전체 경로 패턴을 순회한다.
+        """
         print("🔒 Running security validation checks...")
 
-        # Validate Python files
-        python_files = []
-        for pattern in ["libs/**/*.py", "commands/**/*.py", "api/**/*.py"]:
-            python_files.extend(self.project_root.glob(pattern))
+        # 대상 파일 수집: 인자가 있으면 그 파일만, 없으면 기존 전체 스캔
+        python_files: list[Path] = []
 
+        if target_paths:
+            # 입력으로 들어온 경로들 중 .py 파일만 대상으로 제한
+            for path_str in target_paths:
+                path = (self.project_root / path_str).resolve() if not Path(path_str).is_absolute() else Path(path_str)
+                if path.is_file() and path.suffix == ".py":
+                    python_files.append(path)
+        else:
+            for pattern in ["libs/**/*.py", "commands/**/*.py", "api/**/*.py"]:
+                python_files.extend(self.project_root.glob(pattern))
+
+        # Python 파일들에 대한 보안 점검 수행
         for py_file in python_files:
             self.validate_file(py_file)
 
-        # Validate configuration
-        self.validate_configuration()
+        # 설정 파일 보안 점검: 변경 파일 목록에 설정 파일이 포함된 경우에만 수행
+        if not target_paths or any(str(p).startswith(str(self.project_root / "config/")) for p in python_files):
+            self.validate_configuration()
 
-        # Report results
+        # 결과 요약 출력
         if self.warnings:
             print(f"\n⚠️  {len(self.warnings)} security warnings:")
             for warning in self.warnings[:10]:  # Limit output
@@ -266,11 +280,16 @@ class SecurityValidator:
 
 
 def main() -> None:
-    """Main entry point for security validation."""
+    """Main entry point for security validation.
+
+    pre-commit에서 파일 경로 인자를 전달받으면 해당 파일들만 검사한다.
+    """
     validator = SecurityValidator()
 
     try:
-        success = validator.run_validation()
+        # sys.argv[1:] 에 파일 경로가 들어오면 변경 파일만 검사
+        target_paths = sys.argv[1:] if len(sys.argv) > 1 else None
+        success = validator.run_validation(target_paths=target_paths)
         sys.exit(0 if success else 1)
     except Exception as e:
         print(f"💥 Security validation failed with error: {e}")

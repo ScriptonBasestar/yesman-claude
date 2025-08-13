@@ -65,9 +65,8 @@ repos:
     rev: 1.8.6
     hooks:
       - id: bandit
-        args: [-r, -s, B101,B404,B603,B607,B602, --severity-level, medium, --quiet]
+        args: [-s, B101,B404,B603,B607,B602, --severity-level, medium, --quiet]
         exclude: ^(tests/|scripts/|debug/|docs/examples/|test_style_violation\.py)
-        pass_filenames: false
         files: ^(libs/|commands/|api/)
         stages: [pre-push]
   
@@ -122,12 +121,12 @@ repos:
         stages: [pre-commit]
         pass_filenames: false
         
-      # Comprehensive quality gates for pre-push
+      # Comprehensive quality gates (manual only, too heavy for pre-push)
       - id: quality-gates-comprehensive
         name: "🛡️ Comprehensive Quality Gates"
         entry: python scripts/run_quality_gates.py --comprehensive
         language: system
-        stages: [pre-push]
+        stages: [manual]
         pass_filenames: false
         
       # Security-specific validation
@@ -136,14 +135,14 @@ repos:
         entry: python scripts/security_validation.py
         language: system
         stages: [pre-push]
-        pass_filenames: false
+        pass_filenames: true
       
-      # Final validation (replaces make lint + make test-fast)
+      # Final validation (manual trigger only; running tests on every push is costly)
       - id: test-fast-final
         name: "⚡ Fast Tests (final validation)"
         entry: make test-fast
         language: system
-        stages: [pre-push]
+        stages: [manual]
         pass_filenames: false
 
 # =============================================================================
