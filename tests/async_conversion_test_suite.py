@@ -26,7 +26,7 @@ import traceback
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Never
 
 # Add the project root to sys.path so we can import our modules
 project_root = Path(__file__).parent.parent
@@ -285,7 +285,7 @@ class AsyncConversionTestSuite:
 
         received_events = []
 
-        async def event_handler(event: Event):
+        async def event_handler(event: Event) -> None:
             received_events.append(event)
 
         # Subscribe to events
@@ -315,7 +315,7 @@ class AsyncConversionTestSuite:
 
         received_count = 0
 
-        async def event_handler(event: Event):
+        async def event_handler(event: Event) -> None:
             nonlocal received_count
             received_count += 1
 
@@ -359,7 +359,7 @@ class AsyncConversionTestSuite:
         processed_events = []
         processing_times = []
 
-        async def slow_handler(event: Event):
+        async def slow_handler(event: Event) -> None:
             start = time.perf_counter()
             await asyncio.sleep(0.01)  # Simulate processing time
             end = time.perf_counter()
@@ -410,12 +410,12 @@ class AsyncConversionTestSuite:
         successful_events = []
         failed_handler_calls = 0
 
-        async def failing_handler(event: Event):
+        async def failing_handler(event: Event) -> Never:
             nonlocal failed_handler_calls
             failed_handler_calls += 1
             raise RuntimeError("Handler failed")  # noqa: TRY003
 
-        async def successful_handler(event: Event):
+        async def successful_handler(event: Event) -> None:
             successful_events.append(event)
 
         # Subscribe both handlers to the same event type
@@ -450,7 +450,7 @@ class AsyncConversionTestSuite:
 
         received_events = []
 
-        async def priority_handler(event: Event):
+        async def priority_handler(event: Event) -> None:
             received_events.append((event.priority, event.data["order"]))
 
         event_bus.subscribe(EventType.CUSTOM, priority_handler)
@@ -632,7 +632,7 @@ Please select an option (1-3):
 
         received_events = []
 
-        async def event_collector(event: Event):
+        async def event_collector(event: Event) -> None:
             received_events.append(event.type.value)
 
         # Subscribe to all events

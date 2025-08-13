@@ -319,7 +319,7 @@ class TestSecurityPerformanceIntegration(unittest.TestCase):
         alert_received = False
         alert_data = None
 
-        def alert_handler(event: Event):
+        def alert_handler(event: Event) -> None:
             nonlocal alert_received, alert_data
             if event.data.get("event_subtype") == "performance_alert":
                 alert_received = True
@@ -373,7 +373,7 @@ class TestSecurityPerformanceIntegration(unittest.TestCase):
         insight_received = False
         insight_data = None
 
-        def insight_handler(event: Event):
+        def insight_handler(event: Event) -> None:
             nonlocal insight_received, insight_data
             if event.data.get("event_subtype") == "correlation_insight":
                 insight_received = True
