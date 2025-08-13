@@ -327,7 +327,7 @@ class QualityGatesChecker:
             import os
             import tempfile
 
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp_file:
+            with tempfile.NamedTemporaryFile(encoding="utf-8", mode="w", suffix=".json", delete=False) as tmp_file:
                 tmp_filename = tmp_file.name
 
             try:
@@ -359,7 +359,7 @@ class QualityGatesChecker:
 
                 # Read results from temp file
                 if os.path.exists(tmp_filename):
-                    with open(tmp_filename, "r", encoding="utf-8") as f:
+                    with open(tmp_filename, encoding="utf-8") as f:
                         json_output = f.read()
                 else:
                     json_output = ""

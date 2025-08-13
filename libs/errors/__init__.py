@@ -11,14 +11,14 @@ This package provides intelligent error handling capabilities including:
 
 from .contextual_error_handler import (
     ContextualErrorHandler,
-    UserFriendlyError,
-    ErrorSeverity,
     ErrorCategory,
+    ErrorSeverity,
+    UserFriendlyError,
 )
 
 __all__ = [
-    'ContextualErrorHandler',
-    'UserFriendlyError',
-    'ErrorSeverity',
-    'ErrorCategory',
+    "ContextualErrorHandler",
+    "UserFriendlyError",
+    "ErrorSeverity",
+    "ErrorCategory",
 ]

@@ -20,10 +20,11 @@ Key Improvements:
 
 import asyncio
 import logging
-import psutil
 import time
 from collections import deque
 from typing import Any, cast
+
+import psutil
 
 from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
 from libs.automation.automation_manager import AutomationManager
@@ -75,46 +76,40 @@ class AsyncClaudeMonitor:
         self._start_time = 0.0
         self._last_performance_report = 0.0
         self._performance_interval = 60.0  # Report performance every 60 seconds
-        
+
         # Enhanced component response time tracking
         self._component_timings: dict[str, deque] = {
-            'content_capture': deque(maxlen=100),
-            'claude_status_check': deque(maxlen=100),
-            'prompt_detection': deque(maxlen=100),
-            'content_processing': deque(maxlen=100),
-            'response_sending': deque(maxlen=100),
-            'automation_analysis': deque(maxlen=100),
+            "content_capture": deque(maxlen=100),
+            "claude_status_check": deque(maxlen=100),
+            "prompt_detection": deque(maxlen=100),
+            "content_processing": deque(maxlen=100),
+            "response_sending": deque(maxlen=100),
+            "automation_analysis": deque(maxlen=100),
         }
         self._component_peak_times: dict[str, float] = {}
         self._component_error_counts: dict[str, int] = {component: 0 for component in self._component_timings}
-        
+
         # Enhanced memory usage tracking per component
-        self._component_memory_usage: dict[str, deque] = {
-            component: deque(maxlen=50) for component in self._component_timings
-        }
+        self._component_memory_usage: dict[str, deque] = {component: deque(maxlen=50) for component in self._component_timings}
         self._component_peak_memory: dict[str, float] = {}
         self._baseline_memory_mb: float = 0.0
-        
+
         # Enhanced CPU utilization tracking per component
-        self._component_cpu_usage: dict[str, deque] = {
-            component: deque(maxlen=50) for component in self._component_timings
-        }
+        self._component_cpu_usage: dict[str, deque] = {component: deque(maxlen=50) for component in self._component_timings}
         self._component_peak_cpu: dict[str, float] = {}
         self._baseline_cpu_percent: float = 0.0
         self._last_cpu_times: dict = {}
-        
+
         # Process monitoring for memory and CPU tracking
         self._process = psutil.Process()
         self._system_cpu_count = psutil.cpu_count()
-        
+
         # Thread pool monitoring for async task CPU usage
         self._thread_pool_executor = None
         self._async_task_cpu_usage: dict[str, list[float]] = {}
-        
+
         # Network I/O pattern tracking
-        self._component_network_io: dict[str, deque] = {
-            component: deque(maxlen=50) for component in self._component_timings
-        }
+        self._component_network_io: dict[str, deque] = {component: deque(maxlen=50) for component in self._component_timings}
         self._component_network_patterns: dict[str, dict] = {}
         self._baseline_network_counters = None
         self._last_network_counters = None
@@ -166,7 +161,7 @@ class AsyncClaudeMonitor:
 
     def _record_component_timing(self, component: str, duration_ms: float, success: bool = True) -> None:
         """Record timing metrics for a specific component.
-        
+
         Args:
             component: Component name
             duration_ms: Duration in milliseconds
@@ -174,46 +169,46 @@ class AsyncClaudeMonitor:
         """
         if component in self._component_timings:
             self._component_timings[component].append(duration_ms)
-            
+
             # Update peak time
             if duration_ms > self._component_peak_times.get(component, 0):
                 self._component_peak_times[component] = duration_ms
-                
+
             # Track errors
             if not success:
                 self._component_error_counts[component] += 1
-    
+
     def _record_component_memory(self, component: str, memory_delta_mb: float) -> None:
         """Record memory usage for a specific component.
-        
+
         Args:
             component: Component name
             memory_delta_mb: Memory change in MB (positive for increase, negative for decrease)
         """
         if component in self._component_memory_usage:
             self._component_memory_usage[component].append(memory_delta_mb)
-            
+
             # Update peak memory usage
             if abs(memory_delta_mb) > abs(self._component_peak_memory.get(component, 0)):
                 self._component_peak_memory[component] = memory_delta_mb
-    
+
     def _record_component_cpu(self, component: str, cpu_percent: float) -> None:
         """Record CPU usage for a specific component.
-        
+
         Args:
             component: Component name
             cpu_percent: CPU usage percentage for this component
         """
         if component in self._component_cpu_usage:
             self._component_cpu_usage[component].append(cpu_percent)
-            
+
             # Update peak CPU usage
             if cpu_percent > self._component_peak_cpu.get(component, 0):
                 self._component_peak_cpu[component] = cpu_percent
-    
+
     def _record_component_network_io(self, component: str, bytes_sent: int, bytes_recv: int, duration_ms: float) -> None:
         """Record network I/O metrics for a specific component.
-        
+
         Args:
             component: Component name
             bytes_sent: Bytes sent during component execution
@@ -222,37 +217,31 @@ class AsyncClaudeMonitor:
         """
         if component in self._component_network_io:
             io_data = {
-                'bytes_sent': bytes_sent,
-                'bytes_recv': bytes_recv,
-                'total_bytes': bytes_sent + bytes_recv,
-                'duration_ms': duration_ms,
-                'throughput_mbps': ((bytes_sent + bytes_recv) / (1024 * 1024)) / (duration_ms / 1000) if duration_ms > 0 else 0,
-                'timestamp': time.time()
+                "bytes_sent": bytes_sent,
+                "bytes_recv": bytes_recv,
+                "total_bytes": bytes_sent + bytes_recv,
+                "duration_ms": duration_ms,
+                "throughput_mbps": ((bytes_sent + bytes_recv) / (1024 * 1024)) / (duration_ms / 1000) if duration_ms > 0 else 0,
+                "timestamp": time.time(),
             }
             self._component_network_io[component].append(io_data)
-            
+
             # Update network patterns for this component
             if component not in self._component_network_patterns:
-                self._component_network_patterns[component] = {
-                    'peak_throughput_mbps': 0,
-                    'total_bytes_sent': 0,
-                    'total_bytes_recv': 0,
-                    'network_active_operations': 0
-                }
-            
+                self._component_network_patterns[component] = {"peak_throughput_mbps": 0, "total_bytes_sent": 0, "total_bytes_recv": 0, "network_active_operations": 0}
+
             patterns = self._component_network_patterns[component]
-            patterns['total_bytes_sent'] += bytes_sent
-            patterns['total_bytes_recv'] += bytes_recv
-            
-            if io_data['throughput_mbps'] > patterns['peak_throughput_mbps']:
-                patterns['peak_throughput_mbps'] = io_data['throughput_mbps']
-            
+            patterns["total_bytes_sent"] += bytes_sent
+            patterns["total_bytes_recv"] += bytes_recv
+
+            patterns["peak_throughput_mbps"] = max(patterns["peak_throughput_mbps"], io_data["throughput_mbps"])
+
             if bytes_sent > 0 or bytes_recv > 0:
-                patterns['network_active_operations'] += 1
-    
+                patterns["network_active_operations"] += 1
+
     def _measure_memory_usage(self) -> float:
         """Measure current memory usage in MB.
-        
+
         Returns:
             Current memory usage in MB
         """
@@ -262,10 +251,10 @@ class AsyncClaudeMonitor:
         except Exception:
             self.logger.exception("Error measuring memory usage")
             return 0.0
-    
+
     def _measure_cpu_usage(self) -> float:
         """Measure current CPU usage percentage.
-        
+
         Returns:
             Current CPU usage percentage (0-100, can exceed 100 for multi-core)
         """
@@ -276,56 +265,56 @@ class AsyncClaudeMonitor:
         except Exception:
             self.logger.exception("Error measuring CPU usage")
             return 0.0
-    
+
     def _calculate_component_cpu_delta(self, component: str, start_time: float, end_time: float) -> float:
         """Calculate CPU usage delta for a component based on execution time.
-        
+
         Args:
             component: Component name
             start_time: Start time (perf_counter)
             end_time: End time (perf_counter)
-        
+
         Returns:
             Estimated CPU usage percentage for this component
         """
         try:
             # Simple estimation: CPU usage = (execution_time / total_time) * system_cpu_usage
             execution_duration = end_time - start_time
-            
+
             # Get system-wide CPU usage as baseline
             system_cpu = psutil.cpu_percent(interval=None)
-            
+
             # Estimate component CPU usage
             # This is a rough approximation - actual CPU usage depends on thread scheduling
             if execution_duration > 0.001:  # Only calculate for operations taking > 1ms
                 estimated_cpu = min(system_cpu, (execution_duration / 1.0) * system_cpu)
                 return estimated_cpu
-            
+
             return 0.0
         except Exception:
             self.logger.exception("Error calculating component CPU delta")
             return 0.0
-    
+
     def _measure_network_io_delta(self) -> tuple[int, int]:
         """Measure network I/O delta since last measurement.
-        
+
         Returns:
             Tuple of (bytes_sent_delta, bytes_recv_delta)
         """
         try:
             current_counters = psutil.net_io_counters()
-            
+
             if self._last_network_counters is None:
                 self._last_network_counters = current_counters
                 return (0, 0)
-            
+
             bytes_sent_delta = current_counters.bytes_sent - self._last_network_counters.bytes_sent
             bytes_recv_delta = current_counters.bytes_recv - self._last_network_counters.bytes_recv
-            
+
             self._last_network_counters = current_counters
-            
+
             return (max(0, bytes_sent_delta), max(0, bytes_recv_delta))
-            
+
         except Exception:
             self.logger.exception("Error measuring network I/O delta")
             return (0, 0)
@@ -333,91 +322,108 @@ class AsyncClaudeMonitor:
     def _get_component_metrics(self) -> dict[str, dict[str, float]]:
         """Get comprehensive component timing and memory metrics."""
         metrics = {}
-        
+
         for component, timings in self._component_timings.items():
             # Timing metrics
             if timings:
                 timings_list = list(timings)
                 timing_metrics = {
-                    'average_ms': sum(timings_list) / len(timings_list),
-                    'median_ms': sorted(timings_list)[len(timings_list) // 2],
-                    'p95_ms': sorted(timings_list)[int(len(timings_list) * 0.95)],
-                    'p99_ms': sorted(timings_list)[int(len(timings_list) * 0.99)] if len(timings_list) > 10 else timings_list[-1],
-                    'peak_ms': self._component_peak_times.get(component, 0),
-                    'sample_count': len(timings_list),
-                    'error_count': self._component_error_counts[component],
-                    'error_rate': self._component_error_counts[component] / len(timings_list) if timings_list else 0,
+                    "average_ms": sum(timings_list) / len(timings_list),
+                    "median_ms": sorted(timings_list)[len(timings_list) // 2],
+                    "p95_ms": sorted(timings_list)[int(len(timings_list) * 0.95)],
+                    "p99_ms": sorted(timings_list)[int(len(timings_list) * 0.99)] if len(timings_list) > 10 else timings_list[-1],
+                    "peak_ms": self._component_peak_times.get(component, 0),
+                    "sample_count": len(timings_list),
+                    "error_count": self._component_error_counts[component],
+                    "error_rate": self._component_error_counts[component] / len(timings_list) if timings_list else 0,
                 }
             else:
                 timing_metrics = {
-                    'average_ms': 0, 'median_ms': 0, 'p95_ms': 0, 'p99_ms': 0,
-                    'peak_ms': 0, 'sample_count': 0, 'error_count': 0, 'error_rate': 0,
+                    "average_ms": 0,
+                    "median_ms": 0,
+                    "p95_ms": 0,
+                    "p99_ms": 0,
+                    "peak_ms": 0,
+                    "sample_count": 0,
+                    "error_count": 0,
+                    "error_rate": 0,
                 }
-            
+
             # Memory metrics
             memory_deltas = self._component_memory_usage.get(component, [])
             if memory_deltas:
                 memory_list = list(memory_deltas)
                 positive_deltas = [m for m in memory_list if m > 0]
                 memory_metrics = {
-                    'avg_memory_delta_mb': sum(memory_list) / len(memory_list),
-                    'peak_memory_delta_mb': self._component_peak_memory.get(component, 0),
-                    'memory_allocations': len(positive_deltas),
-                    'avg_allocation_size_mb': sum(positive_deltas) / len(positive_deltas) if positive_deltas else 0,
-                    'memory_sample_count': len(memory_list),
+                    "avg_memory_delta_mb": sum(memory_list) / len(memory_list),
+                    "peak_memory_delta_mb": self._component_peak_memory.get(component, 0),
+                    "memory_allocations": len(positive_deltas),
+                    "avg_allocation_size_mb": sum(positive_deltas) / len(positive_deltas) if positive_deltas else 0,
+                    "memory_sample_count": len(memory_list),
                 }
             else:
                 memory_metrics = {
-                    'avg_memory_delta_mb': 0, 'peak_memory_delta_mb': 0,
-                    'memory_allocations': 0, 'avg_allocation_size_mb': 0, 'memory_sample_count': 0,
+                    "avg_memory_delta_mb": 0,
+                    "peak_memory_delta_mb": 0,
+                    "memory_allocations": 0,
+                    "avg_allocation_size_mb": 0,
+                    "memory_sample_count": 0,
                 }
-            
+
             # CPU metrics
             cpu_usage = self._component_cpu_usage.get(component, [])
             if cpu_usage:
                 cpu_list = list(cpu_usage)
                 cpu_metrics = {
-                    'avg_cpu_percent': sum(cpu_list) / len(cpu_list),
-                    'peak_cpu_percent': self._component_peak_cpu.get(component, 0),
-                    'cpu_utilization_p95': sorted(cpu_list)[int(len(cpu_list) * 0.95)] if len(cpu_list) > 5 else max(cpu_list) if cpu_list else 0,
-                    'cpu_sample_count': len(cpu_list),
-                    'cpu_efficiency': (sum(cpu_list) / len(cpu_list)) / self._system_cpu_count if cpu_list and self._system_cpu_count else 0,
+                    "avg_cpu_percent": sum(cpu_list) / len(cpu_list),
+                    "peak_cpu_percent": self._component_peak_cpu.get(component, 0),
+                    "cpu_utilization_p95": sorted(cpu_list)[int(len(cpu_list) * 0.95)] if len(cpu_list) > 5 else max(cpu_list) if cpu_list else 0,
+                    "cpu_sample_count": len(cpu_list),
+                    "cpu_efficiency": (sum(cpu_list) / len(cpu_list)) / self._system_cpu_count if cpu_list and self._system_cpu_count else 0,
                 }
             else:
                 cpu_metrics = {
-                    'avg_cpu_percent': 0, 'peak_cpu_percent': 0,
-                    'cpu_utilization_p95': 0, 'cpu_sample_count': 0, 'cpu_efficiency': 0,
+                    "avg_cpu_percent": 0,
+                    "peak_cpu_percent": 0,
+                    "cpu_utilization_p95": 0,
+                    "cpu_sample_count": 0,
+                    "cpu_efficiency": 0,
                 }
-            
+
             # Network I/O metrics
             network_io_data = self._component_network_io.get(component, [])
             network_patterns = self._component_network_patterns.get(component, {})
             if network_io_data:
                 io_list = list(network_io_data)
-                total_sent = sum(io['bytes_sent'] for io in io_list)
-                total_recv = sum(io['bytes_recv'] for io in io_list)
-                throughputs = [io['throughput_mbps'] for io in io_list if io['throughput_mbps'] > 0]
-                
+                total_sent = sum(io["bytes_sent"] for io in io_list)
+                total_recv = sum(io["bytes_recv"] for io in io_list)
+                throughputs = [io["throughput_mbps"] for io in io_list if io["throughput_mbps"] > 0]
+
                 network_metrics = {
-                    'total_bytes_sent': total_sent,
-                    'total_bytes_recv': total_recv,
-                    'total_network_bytes': total_sent + total_recv,
-                    'avg_throughput_mbps': sum(throughputs) / len(throughputs) if throughputs else 0,
-                    'peak_throughput_mbps': network_patterns.get('peak_throughput_mbps', 0),
-                    'network_operations': len(io_list),
-                    'network_active_ops': network_patterns.get('network_active_operations', 0),
-                    'network_utilization': (len(throughputs) / len(io_list)) * 100 if io_list else 0,
+                    "total_bytes_sent": total_sent,
+                    "total_bytes_recv": total_recv,
+                    "total_network_bytes": total_sent + total_recv,
+                    "avg_throughput_mbps": sum(throughputs) / len(throughputs) if throughputs else 0,
+                    "peak_throughput_mbps": network_patterns.get("peak_throughput_mbps", 0),
+                    "network_operations": len(io_list),
+                    "network_active_ops": network_patterns.get("network_active_operations", 0),
+                    "network_utilization": (len(throughputs) / len(io_list)) * 100 if io_list else 0,
                 }
             else:
                 network_metrics = {
-                    'total_bytes_sent': 0, 'total_bytes_recv': 0, 'total_network_bytes': 0,
-                    'avg_throughput_mbps': 0, 'peak_throughput_mbps': 0, 'network_operations': 0,
-                    'network_active_ops': 0, 'network_utilization': 0,
+                    "total_bytes_sent": 0,
+                    "total_bytes_recv": 0,
+                    "total_network_bytes": 0,
+                    "avg_throughput_mbps": 0,
+                    "peak_throughput_mbps": 0,
+                    "network_operations": 0,
+                    "network_active_ops": 0,
+                    "network_utilization": 0,
                 }
-            
+
             # Combine timing, memory, CPU, and network metrics
             metrics[component] = {**timing_metrics, **memory_metrics, **cpu_metrics, **network_metrics}
-                
+
         return metrics
 
     async def _handle_system_shutdown(self, event: Event) -> None:
@@ -444,7 +450,7 @@ class AsyncClaudeMonitor:
             self.is_running = True
             self._start_time = time.time()
             self._loop_count = 0
-            
+
             # Establish baseline memory, CPU, and network usage
             self._baseline_memory_mb = self._measure_memory_usage()
             self._baseline_cpu_percent = psutil.cpu_percent(interval=1.0)  # Get initial CPU reading
@@ -556,15 +562,15 @@ class AsyncClaudeMonitor:
                     content_end = time.perf_counter()
                     memory_after = self._measure_memory_usage()
                     net_sent_after, net_recv_after = self._measure_network_io_delta()
-                    
+
                     content_duration = (content_end - content_start) * 1000
                     memory_delta = memory_after - memory_before
-                    cpu_usage = self._calculate_component_cpu_delta('content_capture', content_start, content_end)
-                    
-                    self._record_component_timing('content_capture', content_duration, True)
-                    self._record_component_memory('content_capture', memory_delta)
-                    self._record_component_cpu('content_capture', cpu_usage)
-                    self._record_component_network_io('content_capture', net_sent_after, net_recv_after, content_duration)
+                    cpu_usage = self._calculate_component_cpu_delta("content_capture", content_start, content_end)
+
+                    self._record_component_timing("content_capture", content_duration, True)
+                    self._record_component_memory("content_capture", memory_delta)
+                    self._record_component_cpu("content_capture", cpu_usage)
+                    self._record_component_network_io("content_capture", net_sent_after, net_recv_after, content_duration)
 
                     # Check Claude process status asynchronously with comprehensive monitoring
                     status_start = time.perf_counter()
@@ -574,15 +580,15 @@ class AsyncClaudeMonitor:
                     status_end = time.perf_counter()
                     memory_after = self._measure_memory_usage()
                     net_sent_after, net_recv_after = self._measure_network_io_delta()
-                    
+
                     status_duration = (status_end - status_start) * 1000
                     memory_delta = memory_after - memory_before
-                    cpu_usage = self._calculate_component_cpu_delta('claude_status_check', status_start, status_end)
-                    
-                    self._record_component_timing('claude_status_check', status_duration, claude_running)
-                    self._record_component_memory('claude_status_check', memory_delta)
-                    self._record_component_cpu('claude_status_check', cpu_usage)
-                    self._record_component_network_io('claude_status_check', net_sent_after, net_recv_after, status_duration)
+                    cpu_usage = self._calculate_component_cpu_delta("claude_status_check", status_start, status_end)
+
+                    self._record_component_timing("claude_status_check", status_duration, claude_running)
+                    self._record_component_memory("claude_status_check", memory_delta)
+                    self._record_component_cpu("claude_status_check", cpu_usage)
+                    self._record_component_network_io("claude_status_check", net_sent_after, net_recv_after, status_duration)
 
                     if not claude_running:
                         await self._handle_claude_not_running()
@@ -596,15 +602,15 @@ class AsyncClaudeMonitor:
                     process_end = time.perf_counter()
                     memory_after = self._measure_memory_usage()
                     net_sent_after, net_recv_after = self._measure_network_io_delta()
-                    
+
                     process_duration = (process_end - process_start) * 1000
                     memory_delta = memory_after - memory_before
-                    cpu_usage = self._calculate_component_cpu_delta('content_processing', process_start, process_end)
-                    
-                    self._record_component_timing('content_processing', process_duration, True)
-                    self._record_component_memory('content_processing', memory_delta)
-                    self._record_component_cpu('content_processing', cpu_usage)
-                    self._record_component_network_io('content_processing', net_sent_after, net_recv_after, process_duration)
+                    cpu_usage = self._calculate_component_cpu_delta("content_processing", process_start, process_end)
+
+                    self._record_component_timing("content_processing", process_duration, True)
+                    self._record_component_memory("content_processing", memory_delta)
+                    self._record_component_cpu("content_processing", cpu_usage)
+                    self._record_component_network_io("content_processing", net_sent_after, net_recv_after, process_duration)
 
                     # Update performance metrics
                     self._loop_count += 1
@@ -732,15 +738,15 @@ class AsyncClaudeMonitor:
         prompt_end = time.perf_counter()
         memory_after = self._measure_memory_usage()
         net_sent_after, net_recv_after = self._measure_network_io_delta()
-        
+
         prompt_duration = (prompt_end - prompt_start) * 1000
         memory_delta = memory_after - memory_before
-        cpu_usage = self._calculate_component_cpu_delta('prompt_detection', prompt_start, prompt_end)
-        
-        self._record_component_timing('prompt_detection', prompt_duration, prompt_info is not None)
-        self._record_component_memory('prompt_detection', memory_delta)
-        self._record_component_cpu('prompt_detection', cpu_usage)
-        self._record_component_network_io('prompt_detection', net_sent_after, net_recv_after, prompt_duration)
+        cpu_usage = self._calculate_component_cpu_delta("prompt_detection", prompt_start, prompt_end)
+
+        self._record_component_timing("prompt_detection", prompt_duration, prompt_info is not None)
+        self._record_component_memory("prompt_detection", memory_delta)
+        self._record_component_cpu("prompt_detection", cpu_usage)
+        self._record_component_network_io("prompt_detection", net_sent_after, net_recv_after, prompt_duration)
 
         if prompt_info:
             # Handle prompt response with comprehensive monitoring
@@ -751,15 +757,15 @@ class AsyncClaudeMonitor:
             response_end = time.perf_counter()
             memory_after = self._measure_memory_usage()
             net_sent_after, net_recv_after = self._measure_network_io_delta()
-            
+
             response_duration = (response_end - response_start) * 1000
             memory_delta = memory_after - memory_before
-            cpu_usage = self._calculate_component_cpu_delta('response_sending', response_start, response_end)
-            
-            self._record_component_timing('response_sending', response_duration, True)
-            self._record_component_memory('response_sending', memory_delta)
-            self._record_component_cpu('response_sending', cpu_usage)
-            self._record_component_network_io('response_sending', net_sent_after, net_recv_after, response_duration)
+            cpu_usage = self._calculate_component_cpu_delta("response_sending", response_start, response_end)
+
+            self._record_component_timing("response_sending", response_duration, True)
+            self._record_component_memory("response_sending", memory_delta)
+            self._record_component_cpu("response_sending", cpu_usage)
+            self._record_component_network_io("response_sending", net_sent_after, net_recv_after, response_duration)
         elif self.waiting_for_input:
             await self._publish_activity_event("⏳ Waiting for user input...")
         else:
@@ -779,15 +785,15 @@ class AsyncClaudeMonitor:
             automation_end = time.perf_counter()
             memory_after = self._measure_memory_usage()
             net_sent_after, net_recv_after = self._measure_network_io_delta()
-            
+
             automation_duration = (automation_end - automation_start) * 1000
             memory_delta = memory_after - memory_before
-            cpu_usage = self._calculate_component_cpu_delta('automation_analysis', automation_start, automation_end)
-            
-            self._record_component_timing('automation_analysis', automation_duration, True)
-            self._record_component_memory('automation_analysis', memory_delta)
-            self._record_component_cpu('automation_analysis', cpu_usage)
-            self._record_component_network_io('automation_analysis', net_sent_after, net_recv_after, automation_duration)
+            cpu_usage = self._calculate_component_cpu_delta("automation_analysis", automation_start, automation_end)
+
+            self._record_component_timing("automation_analysis", automation_duration, True)
+            self._record_component_memory("automation_analysis", memory_delta)
+            self._record_component_cpu("automation_analysis", cpu_usage)
+            self._record_component_network_io("automation_analysis", net_sent_after, net_recv_after, automation_duration)
             await self._publish_activity_event("📝 Content updated")
             self._last_content = content
 
@@ -1136,21 +1142,20 @@ class AsyncClaudeMonitor:
             # Log detailed component performance
             current_memory_mb = self._measure_memory_usage()
             total_memory_growth = current_memory_mb - self._baseline_memory_mb
-            self.logger.debug(
-                "Performance: %.2f loops/sec, %d loops, memory: %.1fMB (+%.1fMB from baseline)", 
-                loops_per_second, self._loop_count, current_memory_mb, total_memory_growth
-            )
-            
+            self.logger.debug("Performance: %.2f loops/sec, %d loops, memory: %.1fMB (+%.1fMB from baseline)", loops_per_second, self._loop_count, current_memory_mb, total_memory_growth)
+
             # Log component bottlenecks (performance, memory, CPU, or network intensive)
             for component, stats in component_metrics.items():
-                if (stats['average_ms'] > 100 or 
-                    abs(stats['avg_memory_delta_mb']) > 5.0 or 
-                    stats['avg_cpu_percent'] > 50.0 or
-                    stats['avg_throughput_mbps'] > 1.0):
+                if stats["average_ms"] > 100 or abs(stats["avg_memory_delta_mb"]) > 5.0 or stats["avg_cpu_percent"] > 50.0 or stats["avg_throughput_mbps"] > 1.0:
                     self.logger.warning(
-                        "Bottleneck in %s: avg=%.1fms, p95=%.1fms, errors=%d, mem=%.2fMB, cpu=%.1f%%, net=%.2fMB/s", 
-                        component, stats['average_ms'], stats['p95_ms'], stats['error_count'],
-                        stats['avg_memory_delta_mb'], stats['avg_cpu_percent'], stats['avg_throughput_mbps']
+                        "Bottleneck in %s: avg=%.1fms, p95=%.1fms, errors=%d, mem=%.2fMB, cpu=%.1f%%, net=%.2fMB/s",
+                        component,
+                        stats["average_ms"],
+                        stats["p95_ms"],
+                        stats["error_count"],
+                        stats["avg_memory_delta_mb"],
+                        stats["avg_cpu_percent"],
+                        stats["avg_throughput_mbps"],
                     )
 
         except Exception:

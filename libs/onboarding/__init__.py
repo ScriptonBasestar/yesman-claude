@@ -11,14 +11,14 @@ This package provides intelligent onboarding and setup capabilities including:
 
 from .setup_assistant import (
     IntelligentSetupAssistant,
-    SetupStep,
     SetupResult,
     SetupStatus,
+    SetupStep,
 )
 
 __all__ = [
-    'IntelligentSetupAssistant',
-    'SetupStep',
-    'SetupResult',
-    'SetupStatus',
+    "IntelligentSetupAssistant",
+    "SetupStep",
+    "SetupResult",
+    "SetupStatus",
 ]

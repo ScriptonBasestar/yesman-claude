@@ -403,7 +403,7 @@ class AgentPool:
                 try:
                     process.terminate()
                     await asyncio.wait_for(process.wait(), timeout=5)
-                except:
+                except Exception:
                     # Force kill if terminate doesn't work
                     with contextlib.suppress(Exception):
                         process.kill()
@@ -493,7 +493,7 @@ class AgentPool:
             try:
                 agent.process.terminate()
                 await asyncio.wait_for(agent.process.wait(), timeout=5.0)  # type: ignore[arg-type]
-            except:
+            except Exception:
                 with contextlib.suppress(Exception):
                     agent.process.kill()
 

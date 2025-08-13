@@ -1,16 +1,16 @@
 # 🛡️ Quality Gates Report
 
 **Overall Result**: ❌ FAIL
-**Overall Score**: 34.0/100
-**Execution Time**: 3.24s
+**Overall Score**: 41.2/100
+**Execution Time**: 20.27s
 
 ## 📊 Summary
 
 | Gate Level | Total | Passed | Failed |
 |------------|-------|--------|--------|
-| 🔴 **Blocking** | 3 | 0 | 2 |
+| 🔴 **Blocking** | 3 | 1 | 2 |
 | 🟡 **Warning** | 3 | 2 | 0 |
-| 🟢 **Advisory** | 2 | 0 | 1 |
+| 🟢 **Advisory** | 2 | 1 | 1 |
 
 ## 🔍 Detailed Results
 
@@ -19,46 +19,45 @@
 #### ❌ Linting
 - **Result**: fail
 - **Score**: 0.0/200
-- **Message**: Linting check: 5996 violations (threshold: 200)
-- **Execution Time**: 0.274s
-- **Details**: total_violations: 5996
+- **Message**: Linting check: 5969 violations (threshold: 200)
+- **Execution Time**: 0.157s
+- **Details**: total_violations: 5969
 
-#### ⏭️ Security
-- **Result**: skip
-- **Score**: 0.0/0
-- **Message**: Security check skipped: bandit not installed
-- **Execution Time**: 0.005s
-- **Details**: See full report for details
+#### ✅ Security
+- **Result**: pass
+- **Score**: 80.0/0
+- **Message**: Enhanced security scan: No significant security issues found
+- **Execution Time**: 8.123s
+- **Details**: issues: 0 items, scan_metadata: 3 items, total_issues: 279, critical_issues: 0, high_issues: 0, medium_issues: 8, low_issues: 271, severity_breakdown: 3 items, confidence_breakdown: 3 items, sample_high_issues: 0 items, additional_checks: 3 items
 
 #### ❌ Test Coverage
 - **Result**: fail
 - **Score**: 0.0/35
 - **Message**: Test coverage: 0.0% (threshold: 35%)
-- **Execution Time**: 0.026s
+- **Execution Time**: 3.223s
 - **Details**: coverage_data: 0 items
 
 ### 🟡 Warning Gates
 
-#### ⏭️ Complexity
-- **Result**: skip
-- **Score**: 0.0/0
-- **Message**: Complexity check skipped: radon not installed
-- **Execution Time**: 0.001s
-- **Details**: See full report for details
+#### ❌ Complexity
+- **Result**: fail
+- **Score**: 0.0/15
+- **Message**: Complexity check failed: 'str' object has no attribute 'get'
+- **Execution Time**: 1.856s
 
 #### ✅ Documentation
 - **Result**: pass
 - **Score**: 91.5/60
 - **Message**: Documentation coverage: 91.5% (threshold: 60%)
-- **Execution Time**: 1.369s
+- **Execution Time**: 1.519s
 - **Details**: files_analyzed: 273, total_items: 5426, documented_items: 4965, coverage_percent: 91.503870254331, low_documentation_modules: 2 items
 
 #### ✅ Performance
 - **Result**: pass
-- **Score**: 98.0/50
-- **Message**: Performance score: 98.0/100 (threshold: 50)
-- **Execution Time**: 0.294s
-- **Details**: import_time: 0.10141744899738114, performance_score: 97.97165102005238
+- **Score**: 80.1/50
+- **Message**: Performance score: 80.1/100 (threshold: 50)
+- **Execution Time**: 1.229s
+- **Details**: import_time: 0.9937425409989373, performance_score: 80.12514918002125
 
 ### 🟢 Advisory Gates
 
@@ -66,21 +65,21 @@
 - **Result**: warning
 - **Score**: 21.7/30
 - **Message**: Async adoption: 21.7% (target: 30%)
-- **Execution Time**: 1.256s
+- **Execution Time**: 1.656s
 - **Details**: files_analyzed: 272, total_functions: 4577, async_functions: 991, async_percent: 21.651736945597552
 
-#### ⏭️ Type Annotations
-- **Result**: skip
-- **Score**: 0.0/0
-- **Message**: Type annotation check skipped: mypy not installed
-- **Execution Time**: 0.000s
-- **Details**: See full report for details
+#### ✅ Type Annotations
+- **Result**: pass
+- **Score**: 97.7/80
+- **Message**: Type annotations: 97.7% (target: 80%)
+- **Execution Time**: 2.495s
+- **Details**: files_analyzed: 272, total_functions: 4577, annotated_functions: 4473, annotation_percent: 97.72776928118854, mypy_errors: 1, mypy_available: True
 
 
 ## 🎯 Recommendations
 
 ### 🚨 Critical Actions Required
-- **linting**: Linting check: 5996 violations (threshold: 200)
+- **linting**: Linting check: 5969 violations (threshold: 200)
 - **test_coverage**: Test coverage: 0.0% (threshold: 35%)
 
 ### 💡 Best Practice Suggestions

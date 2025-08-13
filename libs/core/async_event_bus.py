@@ -124,7 +124,7 @@ class EventMetrics:
     average_processing_time: float = 0.0
     queue_size: int = 0
     active_handlers: int = 0
-    
+
     # Enhanced queue depth monitoring
     max_queue_depth: int = 0
     queue_depth_history: list[int] = None
@@ -148,7 +148,7 @@ class EventMetrics:
         self.average_processing_time = 0.0
         self.queue_size = 0
         self.active_handlers = 0
-        
+
         # Reset enhanced metrics
         self.max_queue_depth = 0
         self.queue_depth_history = []
@@ -195,7 +195,7 @@ class AsyncEventBus:
         # Performance monitoring
         self._last_metrics_report = time.time()
         self._metrics_interval = 60.0  # Report metrics every 60 seconds
-        
+
         # Enhanced queue depth monitoring
         self._queue_depth_samples: deque = deque(maxlen=100)  # Keep last 100 samples
         self._last_queue_update = time.time()
@@ -350,7 +350,7 @@ class AsyncEventBus:
             # Try to put event in queue immediately (non-blocking)
             self._event_queue.put_nowait(event)
             self._metrics.events_published += 1
-            
+
             # Update enhanced queue depth metrics
             self._update_queue_depth_metrics()
             return True
@@ -422,7 +422,7 @@ class AsyncEventBus:
                 # Update metrics
                 self._processing_times.append(processing_time)
                 self._metrics.events_processed += 1
-                
+
                 # Update enhanced queue depth metrics
                 self._update_queue_depth_metrics()
 
@@ -572,33 +572,31 @@ class AsyncEventBus:
         current_time = time.time()
         current_depth = self._event_queue.qsize()
         max_size = self._event_queue.maxsize
-        
+
         # Update basic metrics
         self._metrics.queue_size = current_depth
-        
+
         # Update peak tracking
-        if current_depth > self._metrics.peak_queue_depth:
-            self._metrics.peak_queue_depth = current_depth
-            
+        self._metrics.peak_queue_depth = max(self._metrics.peak_queue_depth, current_depth)
+
         # Update max depth for this interval
-        if current_depth > self._metrics.max_queue_depth:
-            self._metrics.max_queue_depth = current_depth
-            
+        self._metrics.max_queue_depth = max(self._metrics.max_queue_depth, current_depth)
+
         # Calculate utilization percentage
         if max_size > 0:
             self._metrics.queue_utilization_percent = (current_depth / max_size) * 100
-        
+
         # Update queue depth history (every second)
         if current_time - self._last_queue_update >= self._queue_update_interval:
             self._queue_depth_samples.append(current_depth)
             self._metrics.queue_depth_history = list(self._queue_depth_samples)
             self._last_queue_update = current_time
-            
+
             # Estimate backlog processing duration based on recent processing rate
             if self._processing_times and current_depth > 0:
                 avg_processing_time = sum(self._processing_times) / len(self._processing_times)
                 self._metrics.queue_backlog_duration_ms = current_depth * avg_processing_time * 1000
-            
+
             # Track overflow events
             if current_depth >= max_size * 0.9:  # 90% full
                 self._metrics.queue_overflow_events += 1

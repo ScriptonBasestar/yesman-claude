@@ -165,61 +165,62 @@ def performance_optimizer() -> object:
 
 # Enhanced pytest configuration with performance monitoring
 import asyncio
-import time
-import psutil
 import threading
+import time
 from collections import deque
-from typing import Dict, Any, Optional
+from typing import Any
+
+import psutil
 
 # Performance monitoring storage
-_test_performance_data: Dict[str, deque] = {}
+_test_performance_data: dict[str, deque] = {}
 _monitoring_enabled = True
 _performance_lock = threading.Lock()
 
 
 @pytest.fixture(autouse=True)
-def test_performance_monitoring(request):
+def test_performance_monitoring(request) -> None:
     """Automatically track test performance with minimal overhead."""
     if not _monitoring_enabled:
         yield
         return
-    
+
     # Start performance monitoring
     start_time = time.perf_counter()
     start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-    
+
     test_name = f"{request.module.__name__}::{request.function.__name__}"
-    
+
     yield
-    
+
     # Calculate metrics
     duration = time.perf_counter() - start_time
     end_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
     memory_delta = end_memory - start_memory
-    
+
     # Determine test status
-    status = 'passed'
-    if hasattr(request.session, 'testsfailed') and request.session.testsfailed > 0:
-        status = 'failed'
-    elif hasattr(request.node, 'rep_call') and hasattr(request.node.rep_call, 'skipped'):
-        status = 'skipped'
-    
+    status = "passed"
+    if hasattr(request.session, "testsfailed") and request.session.testsfailed > 0:
+        status = "failed"
+    elif hasattr(request.node, "rep_call") and hasattr(request.node.rep_call, "skipped"):
+        status = "skipped"
+
     # Store performance data
     performance_data = {
-        'test_name': test_name,
-        'duration_ms': duration * 1000,
-        'memory_delta_mb': memory_delta,
-        'status': status,
-        'timestamp': time.time(),
-        'suite': request.module.__name__.split('.')[0] if '.' in request.module.__name__ else 'root',
+        "test_name": test_name,
+        "duration_ms": duration * 1000,
+        "memory_delta_mb": memory_delta,
+        "status": status,
+        "timestamp": time.time(),
+        "suite": request.module.__name__.split(".")[0] if "." in request.module.__name__ else "root",
     }
-    
+
     # Thread-safe storage update
     with _performance_lock:
         if test_name not in _test_performance_data:
             _test_performance_data[test_name] = deque(maxlen=100)  # Keep last 100 runs
         _test_performance_data[test_name].append(performance_data)
-    
+
     # Publish metrics to monitoring system (async, non-blocking)
     if duration > 0.001:  # Only if overhead is minimal
         try:
@@ -228,13 +229,14 @@ def test_performance_monitoring(request):
             pass  # Don't let monitoring failures break tests
 
 
-def _publish_test_metrics_async(metrics_data: Dict[str, Any]) -> None:
+def _publish_test_metrics_async(metrics_data: dict[str, Any]) -> None:
     """Publish test metrics to monitoring system asynchronously."""
     try:
         # Try to get monitoring dashboard integration
         from libs.dashboard.monitoring_integration import get_monitoring_dashboard
+
         monitoring = get_monitoring_dashboard()
-        
+
         # Create async task to publish metrics (non-blocking)
         loop = None
         try:
@@ -242,58 +244,58 @@ def _publish_test_metrics_async(metrics_data: Dict[str, Any]) -> None:
         except RuntimeError:
             # No event loop in current thread, skip async publishing
             return
-            
+
         if loop and not loop.is_closed():
             # Publish as background task
             task = loop.create_task(_async_publish_metrics(monitoring, metrics_data))
             # Don't wait for completion to avoid test delays
-            
+
     except Exception:
         # Monitoring integration not available or failed, continue silently
         pass
 
 
-async def _async_publish_metrics(monitoring, metrics_data: Dict[str, Any]) -> None:
+async def _async_publish_metrics(monitoring, metrics_data: dict[str, Any]) -> None:
     """Async helper to publish metrics data."""
     try:
-        from libs.core.async_event_bus import Event, EventType, EventPriority
-        
+        from libs.core.async_event_bus import Event, EventPriority, EventType
+
         # Create test metrics event
         event = Event(
             type=EventType.CUSTOM,
             data={
-                'event_subtype': 'test_execution_metrics',
-                'test_metrics': metrics_data,
-                'category': 'test_performance',
+                "event_subtype": "test_execution_metrics",
+                "test_metrics": metrics_data,
+                "category": "test_performance",
             },
-            timestamp=metrics_data['timestamp'],
-            source='test_runner',
+            timestamp=metrics_data["timestamp"],
+            source="test_runner",
             priority=EventPriority.LOW,
         )
-        
+
         # Publish to event bus
         await monitoring.event_bus.publish(event)
-        
+
     except Exception:
         # Fail silently to not impact test execution
         pass
 
 
 @pytest.fixture
-def chaos_test_context():
+def chaos_test_context() -> dict[str, Any]:
     """Context fixture for chaos engineering tests."""
     context = {
-        'failures_injected': [],
-        'recovery_times': [],
-        'system_state_before': None,
-        'system_state_after': None,
-        'chaos_active': False,
+        "failures_injected": [],
+        "recovery_times": [],
+        "system_state_before": None,
+        "system_state_after": None,
+        "chaos_active": False,
     }
-    
+
     yield context
-    
+
     # Cleanup after chaos test
-    if context.get('chaos_active'):
+    if context.get("chaos_active"):
         try:
             # Restore normal system state
             _cleanup_chaos_test(context)
@@ -301,7 +303,7 @@ def chaos_test_context():
             print(f"Warning: Chaos test cleanup failed: {e}")
 
 
-def _cleanup_chaos_test(context: Dict[str, Any]) -> None:
+def _cleanup_chaos_test(context: dict[str, Any]) -> None:
     """Clean up after chaos engineering test."""
     # Reset any system modifications made during chaos test
     # This would include network settings, resource limits, etc.
@@ -309,36 +311,36 @@ def _cleanup_chaos_test(context: Dict[str, Any]) -> None:
 
 
 @pytest.fixture
-def performance_baseline():
+def performance_baseline() -> dict[str, Any]:
     """Fixture to provide performance baseline data for regression testing."""
     from tests.fixtures.mock_factories import EnhancedTestDataFactory
-    
+
     # Load or create baseline data
     baseline_data = EnhancedTestDataFactory.create_performance_metrics(24)
-    
+
     return {
-        'response_time_p95_ms': 200,
-        'memory_usage_mb': 100,
-        'cpu_usage_percent': 30,
-        'error_rate_percent': 1.0,
-        'baseline_data': baseline_data,
-        'thresholds': {
-            'response_time_regression': 1.5,  # 50% increase triggers regression
-            'memory_regression': 2.0,  # 100% increase triggers regression
-            'error_rate_regression': 2.0,  # 100% increase triggers regression
-        }
+        "response_time_p95_ms": 200,
+        "memory_usage_mb": 100,
+        "cpu_usage_percent": 30,
+        "error_rate_percent": 1.0,
+        "baseline_data": baseline_data,
+        "thresholds": {
+            "response_time_regression": 1.5,  # 50% increase triggers regression
+            "memory_regression": 2.0,  # 100% increase triggers regression
+            "error_rate_regression": 2.0,  # 100% increase triggers regression
+        },
     }
 
 
 @pytest.fixture
-def property_test_config():
+def property_test_config() -> dict[str, Any]:
     """Configuration fixture for property-based tests."""
     return {
-        'max_examples': 100,
-        'deadline': 5000,  # 5 seconds max per property test
-        'suppress_health_check': [],
-        'verbosity': 1,
-        'database': None,  # Disable example database for CI
+        "max_examples": 100,
+        "deadline": 5000,  # 5 seconds max per property test
+        "suppress_health_check": [],
+        "verbosity": 1,
+        "database": None,  # Disable example database for CI
     }
 
 

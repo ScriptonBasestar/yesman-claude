@@ -112,7 +112,7 @@ class ProgressAnalyzer:
         """
         # Check for phase transitions in order of priority
         phase_order = [TaskPhase.STARTING, TaskPhase.ANALYZING, TaskPhase.IMPLEMENTING, TaskPhase.TESTING, TaskPhase.COMPLETING]
-        
+
         # For IDLE, check in order and return the first match
         if current_phase == TaskPhase.IDLE:
             for phase in phase_order:
@@ -123,7 +123,7 @@ class ProgressAnalyzer:
         else:
             # For non-IDLE phases, check from current phase onwards, but prioritize higher phases
             current_index = phase_order.index(current_phase) if current_phase in phase_order else 0
-            
+
             # Check for later phases first (higher priority for progression)
             for i in range(len(phase_order) - 1, current_index - 1, -1):
                 phase = phase_order[i]

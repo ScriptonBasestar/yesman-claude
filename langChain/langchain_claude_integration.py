@@ -59,7 +59,8 @@ class ClaudeCliTool(BaseTool):
         try:
             result = subprocess.run(
                 cmd,
-                check=False, cwd=self.session.project_path,
+                check=False,
+                cwd=self.session.project_path,
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 minutes timeout

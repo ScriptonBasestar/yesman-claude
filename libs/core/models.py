@@ -70,19 +70,12 @@ class TaskProgress:
         }
 
         # Get ordered phases (excluding IDLE for progress calculation)
-        progress_phases = [
-            TaskPhase.STARTING, 
-            TaskPhase.ANALYZING, 
-            TaskPhase.IMPLEMENTING, 
-            TaskPhase.TESTING, 
-            TaskPhase.COMPLETING, 
-            TaskPhase.COMPLETED
-        ]
-        
+        progress_phases = [TaskPhase.STARTING, TaskPhase.ANALYZING, TaskPhase.IMPLEMENTING, TaskPhase.TESTING, TaskPhase.COMPLETING, TaskPhase.COMPLETED]
+
         if self.phase == TaskPhase.IDLE:
             self.overall_progress = 0.0
             return
-            
+
         if self.phase == TaskPhase.COMPLETED:
             self.overall_progress = 100.0
             return
