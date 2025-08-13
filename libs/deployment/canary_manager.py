@@ -13,12 +13,24 @@ automatic rollback on failure detection.
 
 class CanaryDeploymentError(Exception):
     """Base exception for canary deployment failures."""
-    pass
+
+    def __init__(self, message: str = "Canary deployment failed", cause: Exception = None) -> None:
+        if cause:
+            full_message = f"{message}: {cause}"
+        else:
+            full_message = message
+        super().__init__(full_message)
+        self.__cause__ = cause
 
 
 class DeploymentAlreadyActiveError(CanaryDeploymentError):
     """Exception raised when attempting to start a deployment while another is active."""
-    pass
+
+    def __init__(self, deployment_id: str = None) -> None:
+        if deployment_id:
+            super().__init__(f"Canary deployment {deployment_id} is already active")
+        else:
+            super().__init__("A canary deployment is already active")
 
 
 class DeploymentValidationError(CanaryDeploymentError):
@@ -28,6 +40,7 @@ class DeploymentValidationError(CanaryDeploymentError):
 
 import asyncio
 import json
+import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -36,6 +49,8 @@ from typing import Any
 
 from libs.core.async_event_bus import Event, EventPriority, EventType, get_event_bus
 from libs.dashboard.monitoring_integration import get_monitoring_dashboard
+
+logger = logging.getLogger(__name__)
 
 
 class DeploymentStatus(Enum):
@@ -153,7 +168,7 @@ class CanaryDeploymentManager:
             Dictionary with deployment start results
         """
         if self.active_deployment:
-            raise DeploymentAlreadyActiveError(f"Canary deployment {self.active_deployment.deployment_id} is already active")
+            raise DeploymentAlreadyActiveError(self.active_deployment.deployment_id)
 
         deployment_config = config or self.config
 
@@ -219,7 +234,7 @@ class CanaryDeploymentManager:
 
             await self._publish_deployment_event("deployment_failed", {"deployment_id": deployment_id, "error": str(e), "duration_seconds": deployment.completion_time - deployment.start_time})
 
-            raise CanaryDeploymentError(f"Failed to start canary deployment: {e}")
+            raise CanaryDeploymentError(cause=e) from e
 
     async def _capture_baseline_metrics(self) -> CanaryMetrics:
         """Capture baseline metrics before canary deployment.
@@ -734,8 +749,9 @@ class CanaryDeploymentManager:
 
             with open(self.deployment_data_path, "w", encoding="utf-8") as f:
                 json.dump(state_data, f, indent=2)
-        except Exception:
-            pass  # Don't let state saving failures affect deployments
+        except Exception as e:
+            # Don't let state saving failures affect deployments
+            logger.debug("Failed to save deployment state: %s", e)
 
     async def _publish_deployment_event(self, event_subtype: str, data: dict[str, Any]) -> None:
         """Publish a canary deployment event.

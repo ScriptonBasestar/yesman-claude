@@ -52,7 +52,7 @@ class AgentPool:
         if len(self.agents) < self.max_agents:
             self.agents[agent_id] = Agent(id=agent_id)
         else:
-            raise ValueError(f"Pool already has maximum {self.max_agents} agents")
+            raise ValueError("Agent pool at maximum capacity")
 
     def remove_agent(self, agent_id: str) -> bool:
         """Remove an agent from the pool."""

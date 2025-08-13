@@ -11,6 +11,7 @@ escalation procedures, and integration with monitoring and alerting systems.
 
 import asyncio
 import json
+import logging
 import time
 from collections import deque
 from collections.abc import Callable
@@ -21,6 +22,8 @@ from typing import Any
 
 from libs.core.async_event_bus import Event, EventPriority, EventType, get_event_bus
 from libs.dashboard.monitoring_integration import AlertSeverity, PerformanceAlert, get_monitoring_dashboard
+
+logger = logging.getLogger(__name__)
 
 
 class IncidentSeverity(Enum):
@@ -399,8 +402,8 @@ class IncidentResponseSystem:
                 "active_alerts": dashboard_data.get("alerts", {}).get("active", 0),
                 "metrics_summary": dashboard_data.get("metrics", {}),
             }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to collect context data: %s", e)
 
         incident = Incident(
             incident_id=incident_id,
@@ -509,8 +512,8 @@ class IncidentResponseSystem:
         for callback in self._notification_callbacks:
             try:
                 callback(incident)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Notification callback failed: %s", e)
 
         # Publish notification event
         await self._publish_incident_event("notifications_sent", {"incident_id": incident.incident_id, "channels": incident.definition.notification_channels, "notification_data": notification_data})
@@ -571,8 +574,8 @@ class IncidentResponseSystem:
                 if health_score > 80 and active_alerts == 0:
                     await self._resolve_incident(incident, "System health restored")
 
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Auto resolution check failed: %s", e)
 
     async def _escalate_incident(self, incident: Incident) -> None:
         """Escalate an incident to higher priority.
@@ -619,8 +622,8 @@ class IncidentResponseSystem:
                 "active_alerts": dashboard_data.get("alerts", {}).get("active", 0),
                 "metrics_summary": dashboard_data.get("metrics", {}),
             }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Context collection failed: %s", e)
 
         await self._publish_incident_event(
             "incident_resolved",
@@ -816,8 +819,8 @@ class IncidentResponseSystem:
 
             with open(incident_file, "w", encoding="utf-8") as f:
                 json.dump(incident_data, f, indent=2)
-        except Exception:
-            pass  # Don't let save failures affect incident handling
+        except Exception as e:
+            logger.debug("Context collection failed: %s", e)  # Don't let save failures affect incident handling
 
     async def _publish_incident_event(self, event_subtype: str, data: dict[str, Any]) -> None:
         """Publish an incident response event.

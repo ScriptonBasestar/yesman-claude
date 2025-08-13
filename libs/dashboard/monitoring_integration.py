@@ -12,6 +12,7 @@ automated alerting, and quality gates integration.
 
 import asyncio
 import json
+import logging
 import time
 from collections import deque
 from collections.abc import Callable
@@ -21,6 +22,8 @@ from pathlib import Path
 from typing import Any
 
 from libs.core.async_event_bus import AsyncEventBus, Event, EventPriority, EventType, get_event_bus
+
+logger = logging.getLogger(__name__)
 
 
 class AlertSeverity(Enum):
@@ -478,8 +481,8 @@ class MonitoringDashboardIntegration:
         for callback in self._alert_callbacks:
             try:
                 callback(alert)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Alert callback failed: %s", e)
 
         # Publish alert event
         await self.event_bus.publish(

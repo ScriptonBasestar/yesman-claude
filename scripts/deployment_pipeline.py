@@ -17,12 +17,26 @@ class DeploymentPipelineError(Exception):
 
 class DeploymentTimeoutError(DeploymentPipelineError):
     """Exception raised when deployment operations timeout."""
-    pass
+    
+    def __init__(self, phase: str = None) -> None:
+        if phase:
+            message = f"Deployment timeout during {phase} phase"
+        else:
+            message = "Deployment operation timed out"
+        super().__init__(message)
+        self.phase = phase
 
 
 class DeploymentValidationError(DeploymentPipelineError):
     """Exception raised when deployment validation fails."""
-    pass
+    
+    def __init__(self, reason: str = None) -> None:
+        if reason:
+            message = f"Deployment validation failed: {reason}"
+        else:
+            message = "Deployment validation failed"
+        super().__init__(message)
+        self.reason = reason
 
 
 import asyncio
@@ -272,7 +286,7 @@ class DeploymentPipeline:
             pipeline_state.current_phase = DeploymentPhase.VALIDATION
 
             if time.time() > deployment_timeout:
-                raise DeploymentTimeoutError("Deployment timeout during validation phase")
+                raise DeploymentTimeoutError("validation")
 
             if not await self._execute_validation_phase(pipeline_state):
                 pipeline_state.final_result = DeploymentResult.FAILED_VALIDATION
@@ -283,7 +297,7 @@ class DeploymentPipeline:
             pipeline_state.current_phase = DeploymentPhase.CANARY
 
             if time.time() > deployment_timeout:
-                raise DeploymentTimeoutError("Deployment timeout during canary phase")
+                raise DeploymentTimeoutError("canary")
 
             if not await self._execute_canary_phase(pipeline_state):
                 pipeline_state.final_result = DeploymentResult.FAILED_CANARY
@@ -295,7 +309,7 @@ class DeploymentPipeline:
         pipeline_state.current_phase = DeploymentPhase.MONITORING
 
         if time.time() > deployment_timeout:
-            raise DeploymentTimeoutError("Deployment timeout during monitoring phase")
+            raise DeploymentTimeoutError("monitoring")
 
         if not await self._execute_monitoring_phase(pipeline_state):
             if config.auto_rollback_enabled:
@@ -313,7 +327,7 @@ class DeploymentPipeline:
             while time.time() < approval_timeout and pipeline_state.manual_approval_required:
                 await asyncio.sleep(10)
                 if time.time() > deployment_timeout:
-                    raise DeploymentTimeoutError("Deployment timeout waiting for manual approval")
+                    raise DeploymentTimeoutError("manual_approval")
 
             if pipeline_state.manual_approval_required:
                 await self._publish_deployment_event("manual_approval_timeout", {"deployment_id": pipeline_state.deployment_id})
@@ -570,7 +584,7 @@ class DeploymentPipeline:
             deployment_status = await self.canary_manager.get_deployment_status()
 
             if not deployment_status.get("active_deployment"):
-                raise DeploymentValidationError("No active canary deployment to promote")
+                raise DeploymentValidationError("no_active_canary")
 
             # In a real implementation, promotion would involve:
             # - Routing 100% traffic to the new version

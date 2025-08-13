@@ -612,9 +612,11 @@ class ContextualErrorHandler:
             # Publish to event bus
             await self.monitoring.event_bus.publish(event)
 
-        except Exception:
+        except Exception as e:
             # Don't let logging failures break error handling
-            pass
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug("Failed to publish error event: %s", e)
 
     # Context enhancer methods
     async def _enhance_with_system_health(self, context: dict[str, Any]) -> dict[str, Any]:

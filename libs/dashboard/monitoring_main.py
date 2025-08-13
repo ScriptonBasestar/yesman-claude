@@ -280,8 +280,8 @@ class MonitoringDashboardSystem:
                 return True
             if "regression" in condition and "regression" in alert.context:
                 return True
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.debug("Error evaluating alert condition: %s", e)
 
         return False
 

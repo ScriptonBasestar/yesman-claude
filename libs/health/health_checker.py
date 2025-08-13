@@ -136,7 +136,7 @@ class HealthChecker:
             error_result = {"status": "timeout", "timestamp": time.time(), "response_time_ms": response_time, "error": f"Readiness check timed out after {self.readiness_timeout}s"}
 
             if FASTAPI_AVAILABLE:
-                raise HTTPException(503, error_result)
+                raise HTTPException(503, error_result) from None
             else:
                 error_result["http_status"] = 503
                 return error_result
@@ -146,7 +146,7 @@ class HealthChecker:
             error_result = {"status": "error", "timestamp": time.time(), "response_time_ms": response_time, "error": str(e)}
 
             if FASTAPI_AVAILABLE:
-                raise HTTPException(500, error_result)
+                raise HTTPException(500, error_result) from e
             else:
                 error_result["http_status"] = 500
                 return error_result
@@ -180,7 +180,7 @@ class HealthChecker:
             error_result = {"status": "timeout", "timestamp": time.time(), "response_time_ms": response_time, "error": f"Liveness check timed out after {self.liveness_timeout}s"}
 
             if FASTAPI_AVAILABLE:
-                raise HTTPException(500, error_result)
+                raise HTTPException(500, error_result) from None
             else:
                 error_result["http_status"] = 500
                 return error_result
@@ -190,7 +190,7 @@ class HealthChecker:
             error_result = {"status": "dead", "timestamp": time.time(), "response_time_ms": response_time, "error": str(e)}
 
             if FASTAPI_AVAILABLE:
-                raise HTTPException(500, error_result)
+                raise HTTPException(500, error_result) from e
             else:
                 error_result["http_status"] = 500
                 return error_result
@@ -300,12 +300,12 @@ class HealthChecker:
         # Test basic arithmetic
         result = 2 + 2
         if result != 4:
-            raise LivenessTestError("Basic arithmetic failed")
+            raise LivenessTestError("Arithmetic failed")
 
         # Test time functionality
         current_time = time.time()
         if current_time <= 0:
-            raise LivenessTestError("Time functionality failed")
+            raise LivenessTestError("Time failed")
 
     async def _collect_health_metrics(self) -> dict[str, Any]:
         """Collect comprehensive health metrics.
@@ -380,9 +380,9 @@ class HealthChecker:
             await self.event_bus.publish(
                 Event(type=EventType.CUSTOM, data={"event_subtype": f"health_{event_subtype}", **data}, timestamp=time.time(), source="health_checker", priority=EventPriority.LOW)
             )
-        except Exception:
+        except Exception as e:
             # Don't let event publishing failure affect health checks
-            pass
+            logger.debug("Failed to publish health event: %s", e)
 
 
 # FastAPI Router (if FastAPI is available)
