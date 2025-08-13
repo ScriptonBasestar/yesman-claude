@@ -78,7 +78,7 @@ class ClaudeCliTool(BaseTool):
         except Exception as e:
             return f"Error: {str(e)}"
 
-    def _update_session_context(self, output: str):
+    def _update_session_context(self, output: str) -> None:
         """Update session context based on Claude output."""
         # Parse output for todo updates, file changes, etc.
         # This is a simplified version - actual implementation would be more sophisticated
@@ -99,7 +99,7 @@ class ClaudeAgent:
         self.claude_tool = ClaudeCliTool(self.session)
         self._setup_agent()
 
-    def _setup_agent(self):
+    def _setup_agent(self) -> None:
         """Setup LangChain agent with Claude CLI tool."""
         tools = [self.claude_tool]
 

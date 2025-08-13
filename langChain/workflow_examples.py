@@ -200,7 +200,7 @@ class WorkflowExecutor:
 
         return result
 
-    async def _save_checkpoint(self, step_index: int, results: dict[str, Any], workflow: list[dict[str, Any]]):
+    async def _save_checkpoint(self, step_index: int, results: dict[str, Any], workflow: list[dict[str, Any]]) -> None:
         """Save execution checkpoint."""
         checkpoint = {
             "step_index": step_index,
@@ -265,7 +265,7 @@ class WorkflowExecutor:
         failed_step: dict[str, Any],
         error: Exception,
         partial_results: dict[str, Any],
-    ):
+    ) -> None:
         """Save failure state for debugging."""
         failure_state = {
             "failed_step": failed_step,
@@ -281,7 +281,7 @@ class WorkflowExecutor:
         with open("workflow_failure.json", "w", encoding="utf-8") as f:
             json.dump(failure_state, f, indent=2, default=str)
 
-    def _log_progress(self, step: dict[str, Any], result: str):
+    def _log_progress(self, step: dict[str, Any], result: str) -> None:
         """Log workflow progress."""
         progress_info = {
             "step_id": step["id"],
