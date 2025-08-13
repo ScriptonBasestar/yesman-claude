@@ -37,7 +37,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ - commented out to allow tauri-dashboard/src/lib/
+# Use specific patterns instead of global lib/ ignore
+/lib/
+**/python/lib/
 lib64/
 parts/
 sdist/
@@ -506,3 +509,4 @@ nohup.out
 results/
 refactoring/
 performance_data/
+requirements.txt
