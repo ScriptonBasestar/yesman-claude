@@ -130,44 +130,61 @@ export async function refreshSessions(isInitial: boolean = false): Promise<void>
   error.set(null);
 
   try {
-    // 1) 백엔드 세션 목록 로드
-    const sessionData = await pythonBridge.get_sessions();
-
-    // 2) 폴백: 설정에 정의된 프로젝트를 병합하여 표시
-    let configuredProjects: string[] = [];
-    try {
-      configuredProjects = await getAvailableProjects();
-    } catch (_) {
-      configuredProjects = [];
-    }
-
-    // 3) API 응답 가공
-    const processedFromApi: Session[] = (sessionData || []).map((s: Session) => ({
-      ...s,
-      total_panes: s.windows?.reduce((acc, w) => acc + w.panes.length, 0) || 0,
-      description: s.template,
-    }));
-
-    // 4) 설정 기반 플레이스홀더 생성 (API에 없는 항목 추가)
-    const existingNames = new Set<string>(
-      processedFromApi.flatMap((s) => [s.session_name, s.project_name].filter(Boolean) as string[]),
-    );
-
-    const placeholders: Session[] = configuredProjects
-      .filter((name) => !existingNames.has(name))
-      .map((name) => ({
-        // 누가 봐도 알 수 있도록 필드 채움
-        session_name: name,
-        project_name: name,
-        status: 'stopped',
-        controller_status: 'unknown',
-        template: undefined as unknown as string,
-        windows: [],
-        total_panes: 0,
-        description: undefined as unknown as string,
-      } as unknown as Session));
-
-    const merged = [...processedFromApi, ...placeholders];
+		// 1) 백엔드 세션 목록 로드
+		const sessionData = await pythonBridge.get_sessions();
+ 
+		// 2) 폴백: 설정에 정의된 프로젝트를 병합하여 표시
+		let configuredProjects: string[] = [];
+		try {
+			configuredProjects = await getAvailableProjects();
+		} catch (_) {
+			configuredProjects = [];
+		}
+ 
+		// 3) API 응답 가공: 우리 Session 타입으로 정규화
+		const processedFromApi: Session[] = (sessionData || []).map((raw: any) => {
+			const rawWindows = Array.isArray(raw.windows) ? raw.windows : [];
+			const totalPanes = rawWindows.reduce((acc: number, w: any) => acc + (Array.isArray(w.panes) ? w.panes.length : 0), 0);
+			const normalizedStatus: 'running' | 'stopped' = raw.status === 'running' ? 'running' : 'stopped';
+			return {
+				project_name: typeof raw.project_name === 'string' && raw.project_name ? raw.project_name : String(raw.session_name || ''),
+				session_name: String(raw.session_name || ''),
+				template: typeof raw.template === 'string' ? raw.template : '',
+				exists: normalizedStatus === 'running',
+				status: normalizedStatus,
+				windows: rawWindows,
+				controller_status: 'unknown',
+				description: typeof raw.template === 'string' && raw.template ? raw.template : undefined,
+				controller_error: null,
+				uptime: undefined,
+				last_activity_timestamp: undefined,
+				total_panes: totalPanes,
+			};
+		});
+ 
+		// 4) 설정 기반 플레이스홀더 생성 (API에 없는 항목 추가)
+		const existingNames = new Set<string>(
+			processedFromApi.flatMap((s) => [s.session_name, s.project_name].filter(Boolean) as string[]),
+		);
+ 
+		const placeholders: Session[] = configuredProjects
+			.filter((name) => !existingNames.has(name))
+			.map((name) => ({
+				project_name: name,
+				session_name: name,
+				template: '',
+				exists: false,
+				status: 'stopped',
+				windows: [],
+				controller_status: 'unknown',
+				description: undefined,
+				controller_error: null,
+				uptime: undefined,
+				last_activity_timestamp: undefined,
+				total_panes: 0,
+			}));
+ 
+		const merged = [...processedFromApi, ...placeholders];
 
     // 5) 스마트 업데이트: 기존 데이터와 비교하여 변경된 경우만 업데이트
     const currentSessions = get(sessions);
@@ -557,7 +574,11 @@ export async function viewSessionLogs(sessionName: string): Promise<void> {
 
 export async function getSessionLogs(sessionName: string): Promise<string[]> {
   try {
-    return await pythonBridge.get_logs(sessionName, false, 500);
+    const response = await pythonBridge.get_logs(sessionName, false, 500);
+    if (response && (response as any).success) {
+      return ((response as any).data as string[]) || [];
+    }
+    return [];
   } catch (err) {
     console.error(`Failed to get logs for ${sessionName}:`, err);
     return [];

@@ -7,54 +7,78 @@
   import Header from '$lib/components/layout/Header.svelte';
   import NotificationContainer from '$lib/components/common/NotificationContainer.svelte';
   import { loadConfig } from '$lib/stores/config';
-  import { refreshSessions, startAutoRefresh, stopAutoRefresh } from '$lib/stores/sessions';
+  import { refreshSessions, startAutoRefresh, stopAutoRefresh, getAvailableProjects } from '$lib/stores/sessions';
   import { showNotification, notifySuccess, notifyError, notifyWarning } from '$lib/stores/notifications';
   import { health } from '$lib/stores/health';
 
   let isMinimized = false;
   let currentRoute: string | null = null;
 
+  // 연결 가능 상태 판단 헬퍼
+  function isServiceReachable(status: 'healthy' | 'warning' | 'error' | 'unknown'): boolean {
+    return status === 'healthy' || status === 'warning';
+  }
+
   onMount(() => {
     let unlistenSessionUpdate: (() => void) | undefined;
     let unlistenLogUpdate: (() => void) | undefined;
     let unlistenNotification: (() => void) | undefined;
+    let unsubscribeHealthStore: (() => void) | undefined;
 
     // 최근 상태를 추적하여 재연결 알림/초기화 제어
     let lastStatus: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown';
-    let initializedAfterHealthy = false; // healthy 전환 후 초기화 수행 여부
+    let initializedAfterHealthy = false; // healthy/ warning 전환 후 초기화 수행 여부
 
-    // 헬스 모니터링 시작: healthy일 때만 초기 로딩/자동 새로고침 시작
+    // 초기화 실행 함수 (중복 방지)
+    const runInitialization = async (isFirst: boolean) => {
+      if (initializedAfterHealthy) return;
+      try {
+        await loadConfig();
+        await refreshSessions(isFirst);
+        void getAvailableProjects(); // 프로젝트 목록도 미리 로드
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Unknown error';
+        notifyError('Initialization Failed', `Failed to load initial data: ${msg}`);
+      }
+      startAutoRefresh();
+      initializedAfterHealthy = true;
+    };
+
+    // 헬스 모니터링 시작: 연결 가능 상태일 때 초기 로딩/자동 새로고침 시작
     health.startChecking({
       interval: 30000,
       onStatusChange: (status) => {
-        // 연결 문제 시 자동 새로고침 정지 및 경고 안내
-        if (status === 'error' || status === 'warning') {
+        if (status === 'error') {
           stopAutoRefresh();
           notifyWarning('API Disconnected', 'Unable to connect to backend server. Please check if the API server is running.');
-        } else if (status === 'healthy') {
-          // 처음 healthy로 전환되거나, 끊겼다가 재연결된 경우에만 초기화 수행
-          const isReconnected = lastStatus === 'unknown' || lastStatus === 'error' || lastStatus === 'warning';
+        } else if (isServiceReachable(status)) {
+          const isReconnected = lastStatus === 'unknown' || lastStatus === 'error';
           if (isReconnected) {
             notifySuccess('API Connected', 'Successfully connected to backend server.');
           }
-
-          // 초기화는 healthy 전환 시에만 수행
-          (async () => {
-            if (!initializedAfterHealthy || isReconnected) {
-              try {
-                await loadConfig();
-                await refreshSessions(!initializedAfterHealthy); // 최초는 초기 로딩 플래그
-              } catch (e) {
-                // 로딩 중 오류는 알림만 표시
-                const msg = e instanceof Error ? e.message : 'Unknown error';
-                notifyError('Initialization Failed', `Failed to load initial data: ${msg}`);
-              }
-            }
-            startAutoRefresh();
-            initializedAfterHealthy = true;
-          })();
+          void runInitialization(!initializedAfterHealthy);
         }
         lastStatus = status;
+      }
+    });
+
+    // 즉시 1회 헬스 체크 후 연결 가능하면 초기화 실행 (타이밍 이슈 대비)
+    (async () => {
+      await health.check();
+      if (!initializedAfterHealthy) {
+        let currentOverall: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown';
+        const tmpUnsub = health.subscribe(($h) => { currentOverall = $h.overall; });
+        tmpUnsub();
+        if (isServiceReachable(currentOverall)) {
+          void runInitialization(true);
+        }
+      }
+    })();
+
+    // 헬스 상태 구독: 콜백 타이밍을 놓쳐도 연결 가능해지면 초기화
+    unsubscribeHealthStore = health.subscribe(($h) => {
+      if (isServiceReachable($h.overall) && !initializedAfterHealthy) {
+        void runInitialization(true);
       }
     });
 
@@ -85,6 +109,7 @@
     return () => {
       health.stopChecking();
       stopAutoRefresh();
+      if (unsubscribeHealthStore) unsubscribeHealthStore();
       if (unlistenSessionUpdate) unlistenSessionUpdate();
       if (unlistenLogUpdate) unlistenLogUpdate();
       if (unlistenNotification) unlistenNotification();

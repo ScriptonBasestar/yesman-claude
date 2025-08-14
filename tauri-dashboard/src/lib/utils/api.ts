@@ -153,6 +153,24 @@ export class ApiClient {
     return this.fetchJson<any[]>('/api/sessions');
   }
 
+  // 세션 조작 네임스페이스 (호환용)
+  get sessions() {
+    return {
+      start: async (sessionName: string): Promise<ApiResponse<any>> => {
+        return this.fetchJson(`/api/sessions/${encodeURIComponent(sessionName)}/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      },
+      stop: async (sessionName: string): Promise<ApiResponse<any>> => {
+        return this.fetchJson(`/api/sessions/${encodeURIComponent(sessionName)}/stop`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    };
+  }
+
   // Performance monitoring
   async getPerformanceMetrics(): Promise<ApiResponse<PerformanceMetrics>> {
     return this.invoke<PerformanceMetrics>('get_performance_metrics');
@@ -235,32 +253,8 @@ export class ApiClient {
 // Singleton instance for easy access
 export const api = ApiClient.getInstance();
 
-// React hooks for API calls (if using React)
-export function useApiCall<T>(command: string, args?: Record<string, any>) {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// (Removed React-only hook to avoid unresolved identifiers in Svelte project)
 
-  const execute = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await api.invoke<T>(command, args);
-      if (response.success) {
-        setData(response.data!);
-      } else {
-        setError(response.error || 'Unknown error');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [command, args]);
-
-  return { data, loading, error, execute };
-}
 
 // Helper functions for common operations
 export async function fetchWithRetry<T>(

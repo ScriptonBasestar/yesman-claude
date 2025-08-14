@@ -179,9 +179,11 @@ export function stopChecking(): void {
 
 // 외부로 export 되는 health: store 계약(subscribe) + 메서드 제공
 export const health = {
-  subscribe: healthStore.subscribe,
-  // 선택적으로 set/update를 노출하지 않음 (외부에서 변경 방지)
-  startChecking,
-  stopChecking,
-  check,
+	subscribe: healthStore.subscribe,
+	set: healthStore.set,
+	update: healthStore.update,
+	// 선택적으로 set/update를 노출하지 않음 (외부에서 변경 방지)
+	startChecking,
+	stopChecking,
+	check,
 };
