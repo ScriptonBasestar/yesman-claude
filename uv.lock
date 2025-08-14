@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
 
 [[package]]
@@ -1589,12 +1589,14 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "bandit" },
+    { name = "faker" },
     { name = "httpx" },
     { name = "mdformat" },
     { name = "mdformat-gfm" },
     { name = "mdformat-tables" },
     { name = "mypy" },
     { name = "pre-commit" },
+    { name = "pytest" },
     { name = "ruff" },
     { name = "types-pyyaml" },
     { name = "types-requests" },
@@ -1639,12 +1641,14 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "bandit", extras = ["toml"], specifier = ">=1.8.6" },
+    { name = "faker", specifier = ">=37.5.3" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "mdformat", specifier = ">=0.7.0" },
     { name = "mdformat-gfm", specifier = ">=0.3.0" },
     { name = "mdformat-tables", specifier = ">=0.4.0" },
     { name = "mypy", specifier = ">=1.13.0" },
     { name = "pre-commit", specifier = ">=4.0.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
     { name = "ruff", specifier = ">=0.12.3" },
     { name = "types-pyyaml", specifier = ">=6.0.0" },
     { name = "types-requests", specifier = ">=2.32.4.20250611" },
