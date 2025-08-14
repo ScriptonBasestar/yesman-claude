@@ -662,7 +662,7 @@ class IncidentResponseSystem:
 
             try:
                 health_score = self.monitoring._calculate_health_score()
-                active_alerts = len(self.monitoring.get_active_alerts())
+                len(self.monitoring.get_active_alerts())
 
                 if health_score > 70:  # Improved health
                     await self._resolve_incident(incident, "All automated actions completed successfully and system health improved")

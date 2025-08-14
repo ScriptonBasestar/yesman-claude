@@ -339,12 +339,6 @@ class EnhancedSecurityValidator:
             severity: Issue severity
             message: Issue message
         """
-        severity_map = {
-            "low": VulnerabilitySeverity.LOW,
-            "medium": VulnerabilitySeverity.MEDIUM,
-            "high": VulnerabilitySeverity.HIGH,
-            "critical": VulnerabilitySeverity.CRITICAL,
-        }
 
         event = Event(
             type=EventType.CUSTOM,

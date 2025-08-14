@@ -332,7 +332,7 @@ class ProductionTelemetryCollector:
                 error_rate=app_metrics.get("error_rate", 0.1),
                 throughput_rps=app_metrics.get("throughput_rps", 100.0),
             )
-        except Exception as e:
+        except Exception:
             # Return error metrics
             return SystemMetrics(
                 timestamp=time.time(),

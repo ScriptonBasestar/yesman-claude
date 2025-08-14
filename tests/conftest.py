@@ -247,7 +247,7 @@ def _publish_test_metrics_async(metrics_data: dict[str, Any]) -> None:
 
         if loop and not loop.is_closed():
             # Publish as background task
-            task = loop.create_task(_async_publish_metrics(monitoring, metrics_data))
+            loop.create_task(_async_publish_metrics(monitoring, metrics_data))
             # Don't wait for completion to avoid test delays
 
     except Exception:

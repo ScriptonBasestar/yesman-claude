@@ -92,8 +92,8 @@ class BaseBatchProcessor(StatisticsProviderMixin, ABC, Generic[T, B]):
         # Logger
         self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def create_batch(items: list[T]) -> B:
         """Create a batch container from a list of items.
 
@@ -105,8 +105,8 @@ class BaseBatchProcessor(StatisticsProviderMixin, ABC, Generic[T, B]):
         """
         raise NotImplementedError
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     async def process_batch(batch: B) -> None:
         """Process a single batch.
 

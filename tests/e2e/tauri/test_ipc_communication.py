@@ -196,7 +196,7 @@ class TestTauriIPCPerformance(unittest.TestCase):
         assert all(r["success"] for r in results)
 
 
-# TODO: Add actual Tauri test environment setup instructions
+# Tauri test environment setup instructions
 """
 To run these tests with actual Tauri:
 

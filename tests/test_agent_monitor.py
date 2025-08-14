@@ -680,7 +680,7 @@ class TestAgentMonitorApiContract:
         factory = EnhancedTestDataFactory()
 
         # Generate contract test data
-        contract_data = factory.create_contract_test_data("/api/v1/agent_monitor", "GET")
+        factory.create_contract_test_data("/api/v1/agent_monitor", "GET")
 
         # Create monitor instance
         mock_pool = Mock()
@@ -726,7 +726,7 @@ class TestEnhancedAgentMonitorIntegration:
         # Generate comprehensive test data
         property_data = factory.create_property_test_data(3)
         chaos_scenario = factory.create_chaos_scenario("network_failure")
-        perf_metrics = factory.create_performance_metrics(1)
+        factory.create_performance_metrics(1)
 
         # Setup chaos context
         chaos_test_context["chaos_active"] = True

@@ -257,7 +257,6 @@ class CanaryDeploymentManager:
 
             # Extract metrics from monitoring dashboard
             if dashboard_data.get("metrics"):
-                total_response_time = 0.0
                 total_samples = 0
 
                 for component, metrics in dashboard_data["metrics"].items():
@@ -289,7 +288,7 @@ class CanaryDeploymentManager:
                     "disk_percent": system_metrics.get("disk_percent", 0),
                 },
             )
-        except Exception as e:
+        except Exception:
             # Return default baseline if metrics collection fails
             return CanaryMetrics(
                 timestamp=time.time(),
@@ -413,7 +412,6 @@ class CanaryDeploymentManager:
             error_rate = 0.0
 
             if dashboard_data.get("metrics"):
-                total_response_time = 0.0
                 total_samples = 0
 
                 for component, metrics in dashboard_data["metrics"].items():
@@ -720,7 +718,7 @@ class CanaryDeploymentManager:
         if self.deployment_data_path.exists():
             try:
                 with open(self.deployment_data_path, encoding="utf-8") as f:
-                    data = json.load(f)
+                    json.load(f)
                     # Note: In a real implementation, you'd deserialize the deployment objects
                     # For now, we'll start with empty history
                     self.deployment_history = []

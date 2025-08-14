@@ -183,7 +183,7 @@ class WorkflowExecutor:
         """Execute a single workflow step."""
         step_type = step.get("type", "general")
         prompt = step["prompt"]
-        context = step.get("context", {})
+        step.get("context", {})
 
         # Prepare custom prompt based on step type
         custom_prompts = {

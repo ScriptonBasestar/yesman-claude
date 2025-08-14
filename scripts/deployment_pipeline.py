@@ -17,7 +17,7 @@ class DeploymentPipelineError(Exception):
 
 class DeploymentTimeoutError(DeploymentPipelineError):
     """Exception raised when deployment operations timeout."""
-    
+
     def __init__(self, phase: str = None) -> None:
         if phase:
             message = f"Deployment timeout during {phase} phase"
@@ -29,7 +29,7 @@ class DeploymentTimeoutError(DeploymentPipelineError):
 
 class DeploymentValidationError(DeploymentPipelineError):
     """Exception raised when deployment validation fails."""
-    
+
     def __init__(self, reason: str = None) -> None:
         if reason:
             message = f"Deployment validation failed: {reason}"

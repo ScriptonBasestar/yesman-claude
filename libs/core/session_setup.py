@@ -2,29 +2,33 @@
 
 # Copyright notice.
 
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-"""Session setup logic extracted from setup command."""
-
 import os
 import pathlib
-import re
 import subprocess
 from typing import TYPE_CHECKING, Any
 
 import click
 import yaml
-from rich.progress import track
+
+from libs.validation import (
+    validate_directory_path,
+    validate_session_name,
+    validate_window_name,
+)
 
 from .base_command import CommandError
-from .settings import ValidationPatterns, settings
+from .settings import settings
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+"""Session setup logic extracted from setup command - Refactored version."""
+
 
 class SessionValidator:
-    """Validates session configuration."""
+    """Validates session configuration using centralized validation."""
 
     def __init__(self) -> None:
         self.validation_errors: list[str] = []
@@ -41,8 +45,10 @@ class SessionValidator:
         """
         self.validation_errors.clear()
 
-        # Validate session name
-        if not self._validate_session_name(session_name):
+        # Validate session name using centralized validation
+        is_valid, error = validate_session_name(session_name)
+        if not is_valid:
+            self.validation_errors.append(error or "Invalid session name")
             return False
 
         # Validate start directory
@@ -55,26 +61,6 @@ class SessionValidator:
 
         return len(self.validation_errors) == 0
 
-    def _validate_session_name(self, session_name: str) -> bool:
-        """Validate session name format."""
-        if not session_name:
-            self.validation_errors.append("Session name cannot be empty")
-            return False
-
-        if len(session_name) > settings.sessions.session_name_max_length:
-            self.validation_errors.append(
-                f"Session name '{session_name}' too long (max {settings.sessions.session_name_max_length} characters)",
-            )
-            return False
-
-        if not re.match(ValidationPatterns.SESSION_NAME, session_name):
-            self.validation_errors.append(
-                f"Session name '{session_name}' contains invalid characters",
-            )
-            return False
-
-        return True
-
     def _validate_start_directory(self, session_name: str, config_dict: dict[str, Any]) -> bool:
         """Validate and potentially create start directory."""
         start_dir = config_dict.get("start_directory")
@@ -83,7 +69,11 @@ class SessionValidator:
 
         expanded_dir = pathlib.Path(start_dir).expanduser()
 
-        if not pathlib.Path(expanded_dir).exists():
+        # Use centralized directory validation
+        is_valid, _error = validate_directory_path(str(expanded_dir))
+
+        if not is_valid:
+            # Directory doesn't exist, offer to create it
             click.echo(f"❌ Error: start_directory '{start_dir}' does not exist for session '{session_name}'")
             click.echo(f"   Resolved path: {expanded_dir}")
 
@@ -99,12 +89,6 @@ class SessionValidator:
             else:
                 self.validation_errors.append(f"Missing start_directory: {expanded_dir}")
                 return False
-
-        elif not pathlib.Path(expanded_dir).is_dir():
-            self.validation_errors.append(
-                f"start_directory '{start_dir}' is not a directory for session '{session_name}'",
-            )
-            return False
 
         # Update with expanded path
         config_dict["start_directory"] = expanded_dir
@@ -130,18 +114,19 @@ class SessionValidator:
         config_dict: dict[str, Any],
     ) -> bool:
         """Validate individual window configuration."""
-        window_name = window.get("window_name", f"window_{window_index}")
+        window_name_str = window.get("window_name", f"window_{window_index}")
 
-        # Validate window name
-        if len(window_name) > settings.sessions.max_windows_per_session:
-            self.validation_errors.append(f"Window name '{window_name}' too long")
+        # Validate window name using centralized validation
+        is_valid, error = validate_window_name(window_name_str)
+        if not is_valid:
+            self.validation_errors.append(error or f"Invalid window name: {window_name_str}")
             return False
 
         # Validate window start directory
         window_start_dir = window.get("start_directory")
         if window_start_dir and not self._validate_window_start_directory(
             session_name,
-            window_name,
+            window_name_str,
             window_start_dir,
             config_dict,
         ):
@@ -151,7 +136,7 @@ class SessionValidator:
         panes = window.get("panes", [])
         if len(panes) > settings.sessions.max_panes_per_window:
             self.validation_errors.append(
-                f"Too many panes ({len(panes)}) in window '{window_name}' (max {settings.sessions.max_panes_per_window})",
+                f"Too many panes ({len(panes)}) in window '{window_name_str}' (max {settings.sessions.max_panes_per_window})",
             )
             return False
 
@@ -172,7 +157,10 @@ class SessionValidator:
 
         expanded_window_dir = pathlib.Path(window_start_dir).expanduser()
 
-        if not pathlib.Path(expanded_window_dir).exists():
+        # Use centralized directory validation
+        is_valid, _error = validate_directory_path(str(expanded_window_dir))
+
+        if not is_valid:
             click.echo(f"❌ Error: Window '{window_name}' start_directory does not exist")
             click.echo(f"   Resolved path: {expanded_window_dir}")
 
@@ -189,12 +177,6 @@ class SessionValidator:
             else:
                 self.validation_errors.append(f"Missing window directory: {expanded_window_dir}")
                 return False
-
-        elif not pathlib.Path(expanded_window_dir).is_dir():
-            self.validation_errors.append(
-                f"Window '{window_name}' start_directory is not a directory: {expanded_window_dir}",
-            )
-            return False
 
         return True
 
@@ -299,9 +281,7 @@ class SessionSetupService:
         successful_count = 0
         failed_count = 0
 
-        # Use progress bar for session setup
-        session_items = list(sessions.items())
-        for session_name, session_conf in track(session_items, description="🔧 Setting up sessions...", style="bold blue"):
+        for session_name, session_conf in sessions.items():
             try:
                 if self._setup_single_session(session_name, session_conf):
                     successful_count += 1
@@ -322,7 +302,7 @@ class SessionSetupService:
     def _load_sessions_config(self, session_filter: str | None = None) -> dict[str, Any]:
         """Load sessions configuration with optional filter."""
         projects_data = getattr(self.tmux_manager, "load_projects", dict)() or {}
-        all_sessions: dict[str, Any] = projects_data.get("sessions", {}) if isinstance(projects_data, dict) else {}
+        all_sessions = projects_data.get("sessions", {}) if isinstance(projects_data, dict) else {}
 
         if not all_sessions:
             return {}
@@ -333,7 +313,7 @@ class SessionSetupService:
                 raise CommandError(msg)
             return {session_filter: all_sessions[session_filter]}
 
-        return all_sessions
+        return dict(all_sessions)
 
     def _setup_single_session(self, session_name: str, session_conf: dict[str, Any]) -> bool:
         """Set up a single tmux session.

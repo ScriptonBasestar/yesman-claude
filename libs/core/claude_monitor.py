@@ -9,7 +9,7 @@ from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
 from libs.automation.automation_manager import AutomationManager
 from libs.automation.context_detector import ContextType
 from libs.dashboard.health_calculator import HealthCalculator
-from libs.logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
+from libs.logging.async_logger import AsyncLogger, LogLevel
 
 from .content_collector import ClaudeContentCollector
 from .prompt_detector import ClaudePromptDetector, PromptInfo, PromptType

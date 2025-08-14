@@ -141,7 +141,7 @@ class ClaudeAgent:
         for step in workflow_steps:
             step_type = step.get("type")
             step_prompt = step.get("prompt")
-            step_context = step.get("context", {})
+            step.get("context", {})
 
             # Execute step through Claude CLI
             if step_type == "analysis":
@@ -172,7 +172,7 @@ class ClaudeAgent:
     def sync_todo_state(self) -> list[dict[str, Any]]:
         """Synchronize todo state between LangChain and Claude."""
         # Get current todo state from Claude
-        result = self.claude_tool._run("Show current todo list")
+        self.claude_tool._run("Show current todo list")
 
         # Parse and update session state
         # Implementation would parse Claude's todo output
@@ -180,7 +180,7 @@ class ClaudeAgent:
 
     def get_mcp_tools(self) -> list[str]:
         """Get available MCP tools from Claude session."""
-        result = self.claude_tool._run("List available MCP servers and tools")
+        self.claude_tool._run("List available MCP servers and tools")
 
         # Parse MCP server information
         # Implementation would extract available tools

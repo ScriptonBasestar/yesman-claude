@@ -99,12 +99,12 @@ def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
 
     if dry_run:
         command.print_info("Dry-run mode: showing what would be done")
-        # TODO: Implement dry-run logic
+        command.print_warning("Dry-run mode not yet implemented")
         return
 
     if force:
         command.print_warning("Force mode: existing sessions will be recreated without prompting")
-        # TODO: Pass force flag to setup service
+        command.print_warning("Force mode not yet implemented")
 
     command.run(session_name=session_name)
 

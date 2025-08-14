@@ -12,6 +12,8 @@ import asyncio
 import time
 import unittest
 
+from scripts.quality_gates_unified import UnifiedQualityGatesChecker
+
 from libs.core.async_event_bus import Event, EventPriority, EventType, get_event_bus
 from libs.dashboard.monitoring_integration import (
     MonitoringConfig,
@@ -21,7 +23,6 @@ from libs.dashboard.security_metrics_integration import (
     SecurityMetrics,
     SecurityMetricsIntegration,
 )
-from scripts.quality_gates_unified import UnifiedQualityGatesChecker
 
 
 class TestSecurityPerformanceIntegration(unittest.TestCase):
@@ -227,7 +228,6 @@ class TestSecurityPerformanceIntegration(unittest.TestCase):
             await asyncio.sleep(0.2)
 
             # Check for performance impact detection
-            impact_cache = self.security_metrics._performance_impact_cache
             # Note: Correlation analysis might not trigger immediately in test
             # This is a simplified test - in production, correlation would be detected
 

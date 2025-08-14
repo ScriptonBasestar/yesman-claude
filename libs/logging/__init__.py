@@ -1,6 +1,6 @@
 # Copyright notice.
 
-from .async_logger import AsyncLogger, AsyncLoggerConfig, LogEntry, LogLevel
+from .async_logger import AsyncLogger, LogEntry, LogLevel
 from .batch_processor import BatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
@@ -10,7 +10,6 @@ from .batch_processor import BatchProcessor
 
 __all__ = [
     "AsyncLogger",
-    "AsyncLoggerConfig",
     "BatchProcessor",
     "LogEntry",
     "LogLevel",

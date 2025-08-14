@@ -228,7 +228,7 @@ class MonitoringDashboardSystem:
 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Error in quality gates monitoring loop")
                 await asyncio.sleep(check_interval)
 

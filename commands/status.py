@@ -1,380 +1,334 @@
+#!/usr/bin/env python3
+
 # Copyright notice.
 
-# Copyright (c) 2024 Yesman Claude Project
-# Licensed under the MIT License
-"""Comprehensive project status dashboard command."""
 
-import time
-from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import click
 from rich.console import Console
-from rich.layout import Layout
-from rich.live import Live
 from rich.panel import Panel
+from rich.table import Table
 
-from libs.core.base_command import BaseCommand, CommandError, SessionCommandMixin
-from libs.core.session_manager import SessionManager
-from libs.dashboard.widgets import (
-    ActivityHeatmapGenerator,
-    GitActivityWidget,
-    ProgressTracker,
-    ProjectHealth,
-)
-from libs.dashboard.widgets.session_progress import SessionProgressWidget
-from libs.tmux_manager import TmuxManager
-from libs.yesman_config import YesmanConfig
+from libs.core.base_command import BaseCommand
+from libs.core.mixins import LayoutManagerMixin, StatusManagerMixin
+
+# Copyright (c) 2024 Yesman Claude Project
+# Licensed under the MIT License
+"""Status command - Refactored version using base command and mixins."""
 
 
-class StatusDashboard:
-    """Comprehensive status dashboard."""
+class StatusCommand(BaseCommand, StatusManagerMixin, LayoutManagerMixin):
+    """Show status of all or specific tmux sessions."""
 
-    def __init__(
-        self,
-        project_path: str = ".",
-        update_interval: float = 5.0,
-        config: YesmanConfig | None = None,
-        tmux_manager: TmuxManager | None = None,
-    ) -> None:
+    def __init__(self) -> None:
+        """Initialize status command."""
+        super().__init__()
         self.console = Console()
-        self.project_path = Path(project_path).resolve()
-        self.project_name = self.project_path.name
-        self.update_interval = update_interval
+        self._current_status = "idle"
+        self._layout_config = {
+            "format": "table",  # table, grid, or list
+            "columns": ["project", "session", "status", "windows", "panes"],
+            "show_details": True,
+        }
 
-        # Use provided dependencies or create defaults
-        self.config = config if config is not None else YesmanConfig()
-        self.tmux_manager = tmux_manager if tmux_manager is not None else TmuxManager(self.config)
-
-        # Initialize widgets
-        self.activity_heatmap = ActivityHeatmapGenerator(self.config)
-        self.project_health = ProjectHealth(str(self.project_path))
-        self.git_activity = GitActivityWidget(self.console, str(self.project_path))
-        self.progress_tracker = ProgressTracker(self.console)
-        self.session_progress = SessionProgressWidget(self.console)
-
-        # Initialize session manager
-        self.session_manager = SessionManager()
-
-        # Load initial data
-        self._load_todo_data()
-        self.progress_data: dict[str, Any] | None = None
-
-    def _load_todo_data(self) -> None:
-        """Load TODO data from various sources."""
-        # Try to load from common TODO file locations
-        todo_files = [
-            self.project_path / "TODO.md",
-            self.project_path / "BACKLOG.md",
-            self.project_path / "results" / "todos" / "high-priority-improvements.md",
-            self.project_path / "results" / "todos" / "medium-priority-tasks.md",
-        ]
-
-        for todo_file in todo_files:
-            if todo_file.exists() and self.progress_tracker.load_todos_from_file(str(todo_file)):
-                break
-
-    def update_data(self) -> None:
-        """Update all dashboard data."""
-        try:
-            # Update session data
-            sessions_list = self.tmux_manager.get_cached_sessions_list()
-            detailed_sessions = []
-
-            for session_info in sessions_list:
-                session_name_obj = session_info.get("session_name", "unknown")
-                session_name = str(session_name_obj)
-                detailed_info = self.tmux_manager.get_session_info(session_name)
-                detailed_sessions.append(detailed_info)
-
-                # Calculate activity for heatmap
-                self._calculate_session_activity(detailed_info)
-                # Note: add_activity_point method not available, skip heatmap update
-
-            # Note: SessionBrowser was removed
-
-            # Update project health - calculate health directly since update method not available
-            self.project_health.calculate_health()
-
-            # Update session progress
-            self.progress_data = self.session_manager.get_progress_overview()
-
-            # Git and progress data updates happen automatically in their respective widgets
-
-        except Exception as e:
-            self.console.print(f"[red]Error updating data: {e}[/]")
-
-    @staticmethod
-    def _calculate_session_activity(session_info: dict) -> float:
-        """Calculate activity level for a session.
-
-        Args:
-            session_info: Dictionary containing session information.
-
-        Returns:
-            float: Activity level between 0.0 and 1.0.
-        """
-        if not session_info.get("exists", True):
-            return 0.0
-
-        activity = 0.0
-        windows = session_info.get("windows", [])
-
-        for window in windows:
-            for pane in window.get("panes", []):
-                command = pane.get("pane_current_command", "")
-
-                if command and command not in {"zsh", "bash", "sh"}:
-                    activity += 0.2
-
-                if "claude" in command.lower():
-                    activity += 0.4
-
-                if pane.get("pane_active"):
-                    activity += 0.1
-
-        return min(activity, 1.0)
-
-    @staticmethod
-    def create_layout() -> Layout:
-        """Create the dashboard layout.
-
-        Returns:
-            Layout: The created dashboard layout object.
-        """
-        layout = Layout()
-
-        # Main layout structure
-        layout.split_column(
-            Layout(name="header", size=3),
-            Layout(name="main"),
-            Layout(name="footer", size=3),
-        )
-
-        # Split main area
-        layout["main"].split_row(
-            Layout(name="left", ratio=2),
-            Layout(name="right", ratio=2),
-        )
-
-        # Split left column
-        layout["left"].split_column(
-            Layout(name="sessions", ratio=3),
-            Layout(name="health", ratio=2),
-        )
-
-        # Split right column
-        layout["right"].split_column(
-            Layout(name="activity", ratio=2),
-            Layout(name="progress", ratio=2),
-            Layout(name="session_progress", ratio=2),
-        )
-
-        return layout
-
-    def update_layout(self, layout: Layout) -> None:
-        """Update layout with current data."""
-        # Header
-        cache_hit_rate = self.tmux_manager.get_cache_stats().get("hit_rate", 0)
-        header_text = f"🚀 Yesman Project Dashboard - {self.project_name} | {time.strftime('%H:%M:%S')} | Cache Hit Rate: {cache_hit_rate:.1%}"
-        layout["header"].update(Panel(header_text, style="bold blue"))
-
-        # Sessions - removed SessionBrowser
-        layout["sessions"].update(Panel("Session browser removed", title="Sessions"))
-
-        # Project health - use available method or create fallback
-        try:
-            health_data = self.project_health.calculate_health()
-            health_content = Panel(
-                f"Project Health: {health_data.get('overall_score', 'Unknown')}",
-                title="Health",
-            )
-        except Exception:
-            health_content = Panel("Health data unavailable", title="Health")
-        layout["health"].update(health_content)
-
-        # Activity heatmap - create fallback since render method not available
-        activity_content = Panel("Activity heatmap not available", title="Activity")
-        layout["activity"].update(activity_content)
-
-        # Progress tracking
-        progress_content = self.progress_tracker.render_progress_overview()
-        layout["progress"].update(progress_content)
-
-        # Session progress
-        if self.progress_data:
-            session_progress_content = self.session_progress.render_progress_overview(self.progress_data)
-            layout["session_progress"].update(session_progress_content)
-        else:
-            layout["session_progress"].update(
-                Panel(
-                    "[dim]Loading session progress...[/dim]",
-                    title="📊 Session Progress",
-                )
-            )
-
-        # Footer with compact status
-        footer_parts = []
-        # Use fallback for project health since render method not available
-        try:
-            health_data = self.project_health.calculate_health()
-            footer_parts.append(f"Health: {health_data.get('overall_score', 'N/A')}")
-        except Exception:
-            footer_parts.append("Health: N/A")
-        footer_parts.extend(
-            (
-                str(self.git_activity.render_compact_status()),
-                str(self.progress_tracker.render_compact_progress()),
-                "Activity: N/A",
-            )
-        )  # render_compact_overview not available
-
-        footer_text = " | ".join(str(part) for part in footer_parts)
-        layout["footer"].update(Panel(footer_text, style="dim"))
-
-    def run_interactive(self) -> None:
-        """Run interactive dashboard."""
-        layout = self.create_layout()
-
-        try:
-            with Live(layout, console=self.console, refresh_per_second=2):
-                while True:
-                    self.update_data()
-                    self.update_layout(layout)
-                    time.sleep(self.update_interval)
-
-        except KeyboardInterrupt:
-            self.console.print("\\n[yellow]Dashboard stopped[/]")
-
-    def render_detailed_view(self) -> None:
-        """Render detailed view with all components."""
-        self.update_data()
-
-        # Create detailed panels
-        panels = []
-
-        # Session browser - removed
-        panels.append(Panel("Session browser removed", title="Sessions"))
-
-        # Project health detailed - use fallback since render method not available
-        try:
-            health_data = self.project_health.calculate_health()
-            health_detailed = Panel(f"Project Health Details: {health_data}", title="Health Details")
-        except Exception:
-            health_detailed = Panel("Health details unavailable", title="Health Details")
-        panels.append(health_detailed)
-
-        # Git activity
-        git_overview = self.git_activity.render_activity_overview()
-        git_commits = self.git_activity.render_recent_commits()
-        panels.extend([git_overview, git_commits])
-
-        # Progress tracking
-        progress_overview = self.progress_tracker.render_progress_overview()
-        todo_list = self.progress_tracker.render_todo_list(limit=8)
-        panels.extend([progress_overview, todo_list])
-
-        # Activity heatmap - create fallback since render method not available
-        activity_heatmap = Panel("Activity heatmap not available", title="Activity Heatmap")
-        panels.append(activity_heatmap)
-
-        # Display all panels
-        for panel in panels:
-            self.console.print(panel)
-            self.console.print()
-
-
-class StatusCommand(BaseCommand, SessionCommandMixin):
-    """Comprehensive project status dashboard."""
-
-    def execute(
-        self,
-        project_path: str = ".",
-        interactive: bool = False,
-        update_interval: float = 5.0,
-        detailed: bool = False,
-        **kwargs: Any,
-    ) -> dict:
+    def execute(self, **kwargs: Any) -> dict[str, object]:
         """Execute the status command.
 
         Args:
-            project_path: Path to project for status monitoring.
-            update_interval: Refresh interval in seconds.
-            **kwargs: Additional command arguments.
+            session_name: Optional specific session to check
 
         Returns:
-            dict: Dictionary containing execution results and status.
+            Dictionary with session status information
         """
+        session_name = kwargs.get("session_name")
+        self.update_status("checking")
+
         try:
-            dashboard = StatusDashboard(project_path, update_interval, self.config, self.tmux_manager)
+            if session_name:
+                # Check specific session
+                result = self._check_single_session(session_name)
+            else:
+                # Check all sessions
+                result = self._check_all_sessions()
 
-            if interactive:
-                self.print_info("Starting interactive project status dashboard...")
-                self.print_info("Press Ctrl+C to exit")
-                dashboard.run_interactive()
-                return {
-                    "success": True,
-                    "mode": "interactive",
-                    "project_path": project_path,
-                }
-            if detailed:
-                dashboard.render_detailed_view()
-                return {
-                    "success": True,
-                    "mode": "detailed",
-                    "project_path": project_path,
-                }
-            # Quick status overview
-            dashboard.update_data()
+            self.update_status("idle")
+            return result
 
-            console = Console()
+        except Exception:
+            self.update_status("error")
+            self.logger.exception("Error checking status")
+            raise
 
-            # Quick summary
-            console.print(f"🎯 Project: {dashboard.project_name}", style="bold cyan")
-            console.print()
+    def update_status(self, status: str) -> None:
+        """Update the current status - implements StatusManagerMixin interface."""
+        self._current_status = status
+        self.logger.debug(f"Status updated to: {status}")
 
-            # Compact status from each widget
-            try:
-                health_data = dashboard.project_health.calculate_health()
-                health_status = f"Health: {health_data.get('overall_score', 'N/A')}"
-            except Exception:
-                health_status = "Health: N/A"
-            git_status = str(dashboard.git_activity.render_compact_status())
-            progress_status = str(dashboard.progress_tracker.render_compact_progress())
+    def update_activity(self, activity: str) -> None:
+        """Update the current activity - implements StatusManagerMixin interface."""
+        self.logger.debug(f"Activity: {activity}")
 
-            console.print("📊 Quick Status:")
-            console.print(f"  Health: {health_status}")
-            console.print(f"  Git: {git_status}")
-            console.print(f"  Progress: {progress_status}")
+    def create_layout(self) -> dict[str, object]:
+        """Create and return layout configuration - implements LayoutManagerMixin interface.
 
-            console.print("\n💡 Use --interactive for live dashboard or --detailed for full view")
-            return {"success": True, "mode": "quick", "project_path": project_path}
+        Returns:
+        object: Description of return value.
+        """
+        return self._layout_config.copy()
 
-        except KeyboardInterrupt:
-            self.print_warning("\nStatus dashboard stopped.")
-            return {"success": True, "stopped_by_user": True}
-        except Exception as e:
-            msg = f"Error running status dashboard: {e}"
-            raise CommandError(msg) from e
+    def update_layout(self, layout_config: object) -> None:
+        """Update layout configuration - implements LayoutManagerMixin interface."""
+        self._layout_config.update(cast("dict", layout_config))
+        self.logger.debug(f"Layout updated: {layout_config}")
+
+    def _check_single_session(self, session_name: str) -> dict[str, object]:
+        """Check status of a single session.
+
+        Returns:
+        object: Description of return value.
+        """
+        self.update_status("checking_session")
+
+        # Load projects configuration
+        projects = self.tmux_manager.load_projects()
+        sessions_config = cast("dict", projects.get("sessions", {}))
+
+        if session_name not in sessions_config:
+            self.print_error(f"Session '{session_name}' not found in configuration")
+            return {"error": "session_not_found"}
+
+        # Get session info
+        session_info = self._get_session_info(session_name, cast("dict", sessions_config[session_name]))
+
+        # Display based on layout
+        self._display_session_status([session_info])
+
+        return {"sessions": [session_info]}
+
+    def _check_all_sessions(self) -> dict[str, object]:
+        """Check status of all sessions.
+
+        Returns:
+        object: Description of return value.
+        """
+        self.update_status("checking_all")
+
+        # Load projects configuration
+        projects = self.tmux_manager.load_projects()
+        sessions_config = cast("dict", projects.get("sessions", {}))
+
+        if not sessions_config:
+            self.print_warning("No sessions configured in projects.yaml")
+            return {"sessions": []}
+
+        # Get info for all sessions
+        session_infos = []
+        for name, config in sessions_config.items():
+            session_infos.append(self._get_session_info(name, cast("dict", config)))
+
+        # Display based on layout
+        self._display_session_status(session_infos)
+
+        return {"sessions": session_infos}
+
+    def _get_session_info(self, session_name: str, session_config: dict[str, object]) -> dict[str, object]:
+        """Get detailed information about a session.
+
+        Returns:
+        object: Description of return value.
+        """
+        info = {
+            "name": session_name,
+            "project": session_config.get("project_name", session_name),
+            "template": session_config.get("template_name", "none"),
+            "exists": False,
+            "status": "stopped",
+            "windows": 0,
+            "panes": 0,
+            "attached": False,
+            "created_time": None,
+        }
+
+        # Check if session exists
+        try:
+            tmux_sessions = self.tmux_manager.get_cached_sessions_list()
+            for tmux_session in tmux_sessions:
+                if tmux_session.get("session_name") == session_name:
+                    info["exists"] = True
+                    info["status"] = "running"
+                    info["attached"] = tmux_session.get("attached", "0") != "0"
+                    info["created_time"] = tmux_session.get("created")
+
+                    # Get window and pane count
+                    session_info = self.tmux_manager.get_session_info(session_name)
+                    windows = cast("list", session_info.get("windows", []))
+                    info["windows"] = len(windows)
+                    info["panes"] = sum(len(cast("list", w.get("panes", []))) for w in windows)
+                    break
+
+        except Exception:
+            self.logger.exception("Error getting tmux info for {session_name}")
+            info["status"] = "error"
+
+        return info
+
+    def _display_session_status(self, sessions: list[dict[str, object]]) -> None:
+        """Display session status based on current layout configuration."""
+        layout_format = self._layout_config.get("format", "table")
+
+        if layout_format == "table":
+            self._display_as_table(sessions)
+        elif layout_format == "grid":
+            self._display_as_grid(sessions)
+        else:  # list
+            self._display_as_list(sessions)
+
+    def _display_as_table(self, sessions: list[dict[str, object]]) -> None:
+        """Display sessions in table format."""
+        table = Table(
+            title="Tmux Session Status",
+            show_header=True,
+            header_style="bold magenta",
+        )
+
+        # Add columns based on layout config
+        columns = self._layout_config.get("columns", ["project", "session", "status"])
+        if not isinstance(columns, list):
+            columns = ["project", "session", "status"]
+        column_map = {
+            "project": ("Project", "cyan"),
+            "session": ("Session", "green"),
+            "status": ("Status", "yellow"),
+            "windows": ("Windows", "blue"),
+            "panes": ("Panes", "blue"),
+            "template": ("Template", "magenta"),
+            "attached": ("Attached", "green"),
+        }
+
+        for col in columns:
+            if col in column_map:
+                table.add_column(column_map[col][0], style=column_map[col][1])
+
+        # Add rows
+        for session in sessions:
+            row = []
+            for col in columns:
+                if col == "project":
+                    row.append(session["project"])
+                elif col == "session":
+                    row.append(session["name"])
+                elif col == "status":
+                    status = session["status"]
+                    if status == "running":
+                        row.append("[green]● running[/green]")
+                    elif status == "stopped":
+                        row.append("[red]○ stopped[/red]")
+                    else:
+                        row.append("[yellow]? error[/yellow]")
+                elif col == "windows":
+                    row.append(str(session["windows"]))
+                elif col == "panes":
+                    row.append(str(session["panes"]))
+                elif col == "template":
+                    row.append(session["template"])
+                elif col == "attached":
+                    row.append("✓" if session["attached"] else "")
+
+            table.add_row(*[str(item) for item in row])
+
+        self.console.print(table)
+
+        # Summary
+        running = sum(1 for s in sessions if s["status"] == "running")
+        total = len(sessions)
+        self.console.print(f"\n[dim]Total: {total} sessions, {running} running[/dim]")
+
+    def _display_as_grid(self, sessions: list[dict[str, object]]) -> None:
+        """Display sessions in grid format."""
+        for i, session in enumerate(sessions):
+            # Create panel for each session
+            content: list[str] = []
+            content.extend(
+                (
+                    f"[bold]Project:[/bold] {session['project']}",
+                    f"[bold]Template:[/bold] {session['template']}",
+                )
+            )
+
+            if session["status"] == "running":
+                content.extend(
+                    (
+                        "[bold]Status:[/bold] [green]● running[/green]",
+                        f"[bold]Windows:[/bold] {session['windows']}",
+                        f"[bold]Panes:[/bold] {session['panes']}",
+                    )
+                )
+                if session["attached"]:
+                    content.append("[bold]Attached:[/bold] ✓")
+            else:
+                content.append("[bold]Status:[/bold] [red]○ stopped[/red]")
+
+            panel = Panel(
+                "\n".join(content),
+                title=f"[cyan]{session['name']}[/cyan]",
+                border_style="blue" if session["status"] == "running" else "red",
+            )
+
+            self.console.print(panel)
+            if i < len(sessions) - 1:
+                self.console.print()
+
+    def _display_as_list(self, sessions: list[dict[str, object]]) -> None:
+        """Display sessions in simple list format."""
+        for session in sessions:
+            status_icon = "●" if session["status"] == "running" else "○"
+            status_color = "green" if session["status"] == "running" else "red"
+
+            line = f"[{status_color}]{status_icon}[/{status_color}] {session['name']}"
+
+            if self._layout_config.get("show_details", True):
+                details = []
+                if session["status"] == "running":
+                    details.append(f"{session['windows']}w/{session['panes']}p")
+                    if session["attached"]:
+                        details.append("attached")
+                details.append(f"template: {session['template']}")
+
+                if details:
+                    line += f" [dim]({', '.join(details)})[/dim]"
+
+            self.console.print(line)
 
 
 @click.command()
-@click.option("--project-path", "-p", default=".", help="Project directory path")
-@click.option("--interactive", "-i", is_flag=True, help="Run interactive dashboard")
+@click.argument("session_name", required=False)
 @click.option(
-    "--update-interval",
-    "-u",
-    default=5.0,
-    type=float,
-    help="Update interval in seconds",
+    "--format",
+    type=click.Choice(["table", "grid", "list"]),
+    default="table",
+    help="Display format",
 )
-@click.option("--detailed", "-d", is_flag=True, help="Show detailed view")
-def status(project_path: str, interactive: bool, update_interval: float, detailed: bool) -> None:
-    """Comprehensive project status dashboard."""
+@click.option(
+    "--details/--no-details",
+    default=True,
+    help="Show detailed information",
+)
+def status(session_name: str | None, format: str, details: bool) -> None:
+    """Show status of all or specific tmux sessions."""
     command = StatusCommand()
-    command.run(
-        project_path=project_path,
-        interactive=interactive,
-        update_interval=update_interval,
-        detailed=detailed,
+
+    # Update layout configuration
+    command.update_layout(
+        {
+            "format": format,
+            "show_details": details,
+        }
     )
+
+    # Execute command
+    command.run(session_name=session_name)
+
+
+if __name__ == "__main__":
+    status()

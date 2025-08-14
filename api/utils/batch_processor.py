@@ -4,15 +4,17 @@ import asyncio
 import json
 import logging
 import time
-from collections import deque
-from collections.abc import Awaitable, Callable
+from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, cast
 
+from libs.core.base_batch_processor import BaseBatchProcessor
+
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-"""WebSocket message batch processor for optimized real-time updates."""
+"""WebSocket message batch processor for optimized real-time updates - Refactored version."""
 
 
 @dataclass
@@ -41,204 +43,52 @@ class BatchConfig:
     compression_threshold: int = 5  # Start batching after 5 messages
 
 
-class WebSocketBatchProcessor:
-    """Processes WebSocket messages in batches for optimized performance."""
+class ChannelBatchProcessor(BaseBatchProcessor[dict[str, object], MessageBatch]):
+    """Batch processor for a single channel."""
 
-    def __init__(self, config: BatchConfig | None = None) -> None:
-        self.config = config or BatchConfig()
-
-        # Message queues per channel
-        self.pending_messages: dict[str, deque] = {}
-        self.last_flush_time: dict[str, float] = {}
-        self.batch_counter = 0
-
-        # Statistics tracking
-        self.stats = {
-            "batches_sent": 0,
-            "messages_processed": 0,
-            "bytes_saved": 0,
-            "avg_batch_size": 0,
-            "compression_ratio": 1.0,
-            "channels_active": 0,
-        }
-
-        # Processing control
-        self._processing_task: asyncio.Task | None = None
-        self._stop_event = asyncio.Event()
-        self._message_handlers: dict[str, Callable[[list[dict[str, object]]], Awaitable[None]]] = {}
-
-        self.logger = logging.getLogger("yesman.websocket_batch")
-
-    def register_message_handler(
+    def __init__(
         self,
         channel: str,
-        handler: Callable[[list[dict[str, object]]], Awaitable[None]],
+        handler: Callable,
+        config: BatchConfig,
+        parent_stats: dict[str, object],
     ) -> None:
-        """Register a message handler for a specific channel."""
-        self._message_handlers[channel] = handler
-        self.logger.info("Registered message handler for channel: %s", channel)
+        """Initialize channel-specific batch processor."""
+        super().__init__(
+            batch_size=config.max_batch_size,
+            flush_interval=config.max_batch_time,
+        )
+        self.channel = channel
+        self.handler = handler
+        self.config = config
+        self.parent_stats = parent_stats  # Reference to parent statistics
+        self.batch_counter = 0
 
-    async def start(self) -> None:
-        """Start the batch processing system."""
-        if self._processing_task and not self._processing_task.done():
-            self.logger.warning("Batch processor already running")
-            return
+    def create_batch(self, items: list[dict[str, object]]) -> MessageBatch:  # type: ignore[override]
+        """Create a MessageBatch from messages.
 
-        self._stop_event.clear()
-        self._processing_task = asyncio.create_task(self._processing_loop())
-        self.logger.info("WebSocket batch processor started")
-
-    async def stop(self) -> None:
-        """Stop the batch processing system."""
-        if not self._processing_task:
-            return
-
-        self._stop_event.set()
-
-        try:
-            await asyncio.wait_for(self._processing_task, timeout=5.0)
-        except TimeoutError:
-            self.logger.warning("Batch processor stop timeout, cancelling task")
-            self._processing_task.cancel()
-
-        # Flush any remaining messages
-        await self._flush_all_channels()
-
-        self.logger.info("WebSocket batch processor stopped")
-
-    def queue_message(self, channel: str, message: dict[str, object]) -> None:
-        """Queue a message for batch processing."""
-        # Initialize channel if not exists
-        if channel not in self.pending_messages:
-            self.pending_messages[channel] = deque()
-            self.last_flush_time[channel] = time.time()
-
-        # Add message to queue
-        message_with_metadata = {
-            **message,
-            "queued_at": time.time(),
-            "batch_eligible": True,
-        }
-
-        self.pending_messages[channel].append(message_with_metadata)
-
-        # Check if immediate flush is needed
-        queue_size = len(self.pending_messages[channel])
-        if queue_size >= self.config.max_batch_size:
-            # Schedule immediate flush for this channel
-            asyncio.create_task(self._flush_channel(channel))
-
-    async def send_immediate(self, channel: str, message: dict[str, object]) -> None:
-        """Send a message immediately without batching (for urgent
-        messages).
+        Returns:
+        Messagebatch object the created item.
         """
-        handler = self._message_handlers.get(channel)
-        if handler:
-            try:
-                await handler([message])
-                self.stats["messages_processed"] += 1
-            except Exception:
-                self.logger.exception("Error sending immediate message to %s", channel)
-        else:
-            self.logger.warning("No handler registered for channel: %s", channel)
+        # Add metadata to messages
+        for msg in items:
+            if "queued_at" not in msg:
+                msg["queued_at"] = time.time()
+            msg["batch_eligible"] = True
 
-    async def _processing_loop(self) -> None:
-        """Main processing loop for batch management."""
-        try:
-            while not self._stop_event.is_set():
-                await asyncio.sleep(0.01)  # Check every 10ms
-
-                current_time = time.time()
-                channels_to_flush = []
-
-                # Check each channel for flush conditions
-                for channel in list(self.pending_messages.keys()):
-                    queue = self.pending_messages[channel]
-                    last_flush = self.last_flush_time[channel]
-
-                    should_flush = (
-                        len(queue) >= self.config.max_batch_size
-                        or (len(queue) > 0 and current_time - last_flush >= self.config.max_batch_time)
-                        or self._get_queue_memory_size(queue) >= self.config.max_memory_size
-                    )
-
-                    if should_flush:
-                        channels_to_flush.append(channel)
-
-                # Flush channels that need it
-                for channel in channels_to_flush:
-                    await self._flush_channel(channel)
-
-        except Exception:
-            self.logger.error("Error in batch processing loop", exc_info=True)
-
-    async def _flush_channel(self, channel: str) -> None:
-        """Flush pending messages for a specific channel."""
-        if channel not in self.pending_messages:
-            return
-
-        queue = self.pending_messages[channel]
-        if not queue:
-            return
-
-        # Collect messages for this batch
-        batch_size = min(len(queue), self.config.max_batch_size)
-
-        messages = [queue.popleft() for _ in range(batch_size) if queue]
-
-        if not messages:
-            return
-
-        # Create batch
         batch = MessageBatch(
-            messages=messages,
+            messages=items,
             timestamp=time.time(),
-            batch_id=f"batch_{self.batch_counter:06d}",
-            channel=channel,
+            batch_id=f"{self.channel}_batch_{self.batch_counter:06d}",
+            channel=self.channel,
         )
 
-        try:
-            await self._send_batch(batch)
+        self.batch_counter += 1
+        return batch
 
-            # Update statistics
-            self.stats["batches_sent"] += 1
-            self.stats["messages_processed"] += len(messages)
-            self.stats["avg_batch_size"] = self.stats["messages_processed"] / self.stats["batches_sent"]
-
-            self.last_flush_time[channel] = time.time()
-            self.batch_counter += 1
-
-            self.logger.debug(
-                "Flushed batch %s to %s: %d messages",
-                batch.batch_id,
-                channel,
-                len(messages),
-            )
-
-        except Exception:
-            self.logger.exception("Failed to send batch %s to %s", batch.batch_id, channel)
-            # Re-queue messages for retry (with retry limit to prevent infinite loops)
-            max_retries = 3
-            retry_messages = []
-            for msg in messages:
-                retry_count = msg.get("retry_count", 0)
-                if retry_count < max_retries:
-                    msg["retry_count"] = retry_count + 1
-                    retry_messages.append(msg)
-                else:
-                    self.logger.warning("Dropping message after %d failed retries: %s", max_retries, msg)
-
-            if retry_messages:
-                self.pending_messages[channel].extendleft(reversed(retry_messages))
-
-    async def _send_batch(self, batch: MessageBatch) -> None:
-        """Send a batch of messages using the registered handler."""
-        handler = self._message_handlers.get(batch.channel)
-        if not handler:
-            self.logger.error("No handler registered for channel: %s", batch.channel)
-            return
-
-        # Optimize batch if it's large enough
+    async def process_batch(self, batch: MessageBatch) -> None:  # type: ignore[override]
+        """Process a batch by sending through the handler."""
+        # Optimize batch if large enough
         optimized_messages = self._optimize_messages(batch.messages) if len(batch.messages) >= self.config.compression_threshold else batch.messages
 
         # Calculate compression savings
@@ -246,31 +96,37 @@ class WebSocketBatchProcessor:
         optimized_size = sum(len(json.dumps(msg)) for msg in optimized_messages)
 
         if original_size > optimized_size:
-            self.stats["bytes_saved"] += original_size - optimized_size
+            bytes_saved = original_size - optimized_size
+            self.parent_stats["bytes_saved"] = cast("float", self.parent_stats["bytes_saved"]) + bytes_saved
+
+            # Update compression ratio
             compression_ratio = optimized_size / original_size if original_size > 0 else 1.0
-            self.stats["compression_ratio"] = (self.stats["compression_ratio"] * (self.stats["batches_sent"] - 1) + compression_ratio) / self.stats["batches_sent"]
+            batches_sent = cast("int", self.parent_stats["batches_sent"])
+            if batches_sent > 0:
+                current_ratio = cast("float", self.parent_stats["compression_ratio"])
+                self.parent_stats["compression_ratio"] = (current_ratio * (batches_sent - 1) + compression_ratio) / batches_sent
 
         # Send optimized batch
-        try:
-            await handler(optimized_messages)
-        except Exception:
-            self.logger.exception("Handler error for channel %s", batch.channel)
-            raise
+        await self.handler(optimized_messages)
+
+        # Update parent statistics
+        self.parent_stats["batches_sent"] = cast("int", self.parent_stats["batches_sent"]) + 1
+        self.parent_stats["messages_processed"] = cast("int", self.parent_stats["messages_processed"]) + len(batch.messages)
+
+        self.logger.debug("Sent batch %s: %d messages", batch.batch_id, len(batch.messages))
 
     def _optimize_messages(self, messages: list[dict[str, object]]) -> list[dict[str, object]]:
         """Optimize a batch of messages by combining similar ones.
 
         Returns:
-        object: Description of return value.
+        Dict containing.
         """
         optimized = []
 
         # Group messages by type for potential combination
-        message_groups: dict[str, list[dict[str, object]]] = {}
+        message_groups = defaultdict(list)
         for msg in messages:
-            msg_type = cast("str", msg.get("type", "unknown"))
-            if msg_type not in message_groups:
-                message_groups[msg_type] = []
+            msg_type = msg.get("type", "unknown")
             message_groups[msg_type].append(msg)
 
         for msg_type, group in message_groups.items():
@@ -301,7 +157,7 @@ class WebSocketBatchProcessor:
         """Combine multiple update messages into a single message.
 
         Returns:
-        object: Description of return value.
+        Dict containing the updated item.
         """
         if not messages:
             return {}
@@ -331,7 +187,7 @@ class WebSocketBatchProcessor:
         """Combine multiple log messages into a batched log message.
 
         Returns:
-        object: Description of return value.
+        Dict containing.
         """
         if not messages:
             return {}
@@ -349,34 +205,130 @@ class WebSocketBatchProcessor:
             },
         }
 
-    @staticmethod
-    def _get_queue_memory_size(queue: deque) -> int:
-        """Estimate memory usage of a message queue.
 
-        Returns:
-        int: Description of return value.
+class WebSocketBatchProcessor:
+    """Manages batch processors for multiple WebSocket channels."""
+
+    def __init__(self, config: BatchConfig | None = None) -> None:
+        """Initialize the WebSocket batch processor."""
+        self.config = config or BatchConfig()
+
+        # Channel processors
+        self._channel_processors: dict[str, ChannelBatchProcessor] = {}
+        self._message_handlers: dict[str, Callable] = {}
+
+        # Shared statistics
+        self.stats = {
+            "batches_sent": 0,
+            "messages_processed": 0,
+            "bytes_saved": 0,
+            "avg_batch_size": 0,
+            "compression_ratio": 1.0,
+            "channels_active": 0,
+        }
+
+        # Control flags
+        self._running = False
+
+        self.logger = logging.getLogger("yesman.websocket_batch")
+
+    def register_message_handler(self, channel: str, handler: Callable) -> None:
+        """Register a message handler for a specific channel."""
+        self._message_handlers[channel] = handler
+        self.logger.info("Registered message handler for channel: %s", channel)
+
+    async def start(self) -> None:
+        """Start the batch processing system."""
+        if self._running:
+            self.logger.warning("Batch processor already running")
+            return
+
+        self._running = True
+
+        # Start any existing channel processors
+        for processor in self._channel_processors.values():
+            await processor.start()
+
+        self.logger.info("WebSocket batch processor started")
+
+    async def stop(self) -> None:
+        """Stop the batch processing system."""
+        if not self._running:
+            return
+
+        self._running = False
+
+        # Stop all channel processors
+        for processor in self._channel_processors.values():
+            await processor.stop()
+
+        self.logger.info("WebSocket batch processor stopped")
+
+    def queue_message(self, channel: str, message: dict[str, object]) -> None:
+        """Queue a message for batch processing."""
+        # Create channel processor if it doesn't exist
+        if channel not in self._channel_processors:
+            handler = self._message_handlers.get(channel)
+            if not handler:
+                self.logger.error("No handler registered for channel: %s", channel)
+                return
+
+            processor = ChannelBatchProcessor(
+                channel=channel,
+                handler=handler,
+                config=self.config,
+                parent_stats=cast("dict[str, object]", self.stats),
+            )
+            self._channel_processors[channel] = processor
+
+            # Start processor if we're running
+            if self._running:
+                asyncio.create_task(processor.start())
+
+        # Add message to channel processor
+        self._channel_processors[channel].add(message)
+
+    async def send_immediate(self, channel: str, message: dict[str, object]) -> None:
+        """Send a message immediately without batching (for urgent
+        messages).
         """
-        return sum(len(json.dumps(msg)) for msg in queue)
-
-    async def _flush_all_channels(self) -> None:
-        """Flush all pending messages from all channels."""
-        for channel in list(self.pending_messages.keys()):
-            await self._flush_channel(channel)
+        handler = self._message_handlers.get(channel)
+        if handler:
+            try:
+                await handler([message])
+                self.stats["messages_processed"] += 1
+            except Exception:
+                self.logger.exception("Error sending immediate message to {channel}")
+        else:
+            self.logger.warning("No handler registered for channel: %s", channel)
 
     def get_statistics(self) -> dict[str, object]:
         """Get processing statistics.
 
         Returns:
-        object: Description of return value.
+        Dict containing the requested data.
         """
-        active_channels = len([ch for ch, queue in self.pending_messages.items() if queue])
-        total_pending = sum(len(queue) for queue in self.pending_messages.values())
+        # Collect statistics from all channel processors
+        channel_stats = {}
+        total_pending = 0
+        active_channels = 0
+
+        for channel, processor in self._channel_processors.items():
+            proc_stats = processor.get_statistics()
+            channel_stats[channel] = proc_stats
+            total_pending += cast("int", proc_stats["pending_items"]) + cast("int", proc_stats["pending_batches"])
+            if cast("int", proc_stats["pending_items"]) > 0 or cast("int", proc_stats["pending_batches"]) > 0:
+                active_channels += 1
+
+        # Calculate average batch size
+        if self.stats["batches_sent"] > 0:
+            self.stats["avg_batch_size"] = self.stats["messages_processed"] / self.stats["batches_sent"]
 
         return {
             **self.stats,
             "active_channels": active_channels,
             "total_pending_messages": total_pending,
-            "pending_by_channel": {ch: len(queue) for ch, queue in self.pending_messages.items()},
+            "channel_statistics": channel_stats,
             "config": {
                 "max_batch_size": self.config.max_batch_size,
                 "max_batch_time": self.config.max_batch_time,
@@ -390,12 +342,27 @@ class WebSocketBatchProcessor:
             if hasattr(self.config, key):
                 setattr(self.config, key, value)
                 self.logger.info("Updated config %s = %s", key, value)
+
+                # Update config for all channel processors
+                for processor in self._channel_processors.values():
+                    processor.batch_size = self.config.max_batch_size
+                    processor.flush_interval = self.config.max_batch_time
             else:
                 self.logger.warning("Unknown config key: %s", key)
 
     def clear_channel(self, channel: str) -> None:
         """Clear all pending messages for a specific channel."""
-        if channel in self.pending_messages:
-            cleared_count = len(self.pending_messages[channel])
-            self.pending_messages[channel].clear()
+        if channel in self._channel_processors:
+            processor = self._channel_processors[channel]
+            stats = processor.get_statistics()
+            cleared_count = stats["pending_items"]
+
+            # Reset the processor's pending items
+            with processor._lock:
+                processor._pending_items.clear()
+
             self.logger.info("Cleared %d pending messages from %s", cleared_count, channel)
+
+    async def get_channel_processor(self, channel: str) -> ChannelBatchProcessor | None:
+        """Get the batch processor for a specific channel."""
+        return self._channel_processors.get(channel)

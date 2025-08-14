@@ -384,8 +384,7 @@ Please enter your choice (1-3):
 
             # Verify baseline components
             has_system_metrics = baseline.system_metrics is not None
-            has_monitoring_metrics = len(baseline.monitoring_metrics) > 0
-            has_execution_time = baseline.benchmark_duration_seconds > 0
+            len(baseline.monitoring_metrics) > 0
 
             # Test baseline loading
             loaded_baseline = await self.performance_monitor.load_baseline()

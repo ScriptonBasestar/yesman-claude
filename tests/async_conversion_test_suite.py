@@ -483,8 +483,9 @@ class AsyncConversionTestSuite:
 
     async def _test_monitor_lifecycle(self) -> dict[str, Any]:
         """Test monitor lifecycle management."""
-        from libs.core.claude_monitor_async import AsyncClaudeMonitor
         from scripts.test_async_integration import MockProcessController, MockSessionManager, MockStatusManager
+
+        from libs.core.claude_monitor_async import AsyncClaudeMonitor
 
         # Create mock components
         session_manager = MockSessionManager("lifecycle_test")
@@ -520,8 +521,9 @@ class AsyncConversionTestSuite:
 
     async def _test_monitor_prompt_handling(self) -> dict[str, Any]:
         """Test prompt detection and auto-response."""
-        from libs.core.claude_monitor_async import AsyncClaudeMonitor
         from scripts.test_async_integration import MockProcessController, MockSessionManager, MockStatusManager
+
+        from libs.core.claude_monitor_async import AsyncClaudeMonitor
 
         # Create mock components
         session_manager = MockSessionManager("prompt_test")
@@ -585,8 +587,9 @@ Please select an option (1-3):
 
     async def _test_monitor_error_handling(self) -> dict[str, Any]:
         """Test error handling and recovery mechanisms."""
-        from libs.core.claude_monitor_async import AsyncClaudeMonitor
         from scripts.test_async_integration import MockProcessController, MockSessionManager, MockStatusManager
+
+        from libs.core.claude_monitor_async import AsyncClaudeMonitor
 
         # Create mock components
         session_manager = MockSessionManager("error_test")
@@ -618,8 +621,9 @@ Please select an option (1-3):
 
     async def _test_monitor_event_integration(self) -> dict[str, Any]:
         """Test event bus integration and communication."""
-        from libs.core.claude_monitor_async import AsyncClaudeMonitor
         from scripts.test_async_integration import MockProcessController, MockSessionManager, MockStatusManager
+
+        from libs.core.claude_monitor_async import AsyncClaudeMonitor
 
         # Create mock components
         session_manager = MockSessionManager("event_integration_test")

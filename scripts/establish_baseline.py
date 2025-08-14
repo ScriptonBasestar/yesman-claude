@@ -48,7 +48,7 @@ async def establish_baseline(duration: int = 60, run_quality_gates: bool = True)
             quality_task = asyncio.create_task(run_quality_gates_baseline())
 
         # Establish the baseline
-        baseline = await perf_monitor.establish_baseline(duration)
+        await perf_monitor.establish_baseline(duration)
 
         # Wait for quality gates to complete if running
         if quality_task:
@@ -80,14 +80,14 @@ async def run_quality_gates_baseline() -> None:
 
         # Run essential gates (lighter load)
         print("  🔍 Running essential quality gates...")
-        essential_results = await checker.run_essential_gates()
+        await checker.run_essential_gates()
 
         # Wait a bit
         await asyncio.sleep(10)
 
         # Run comprehensive gates
         print("  🔍 Running comprehensive quality gates...")
-        comprehensive_results = await checker.run_comprehensive_gates()
+        await checker.run_comprehensive_gates()
 
         print("  ✅ Quality gates completed during baseline")
 

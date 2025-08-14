@@ -553,7 +553,7 @@ class IntelligentSetupAssistant:
         """Validate database setup."""
         # For SQLite (default), check if database file can be created
         try:
-            db_path = self.data_dir / "yesman.db"
+            self.data_dir / "yesman.db"
             # Try creating a temporary database connection
             import sqlite3
 

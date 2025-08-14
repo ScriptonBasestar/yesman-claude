@@ -1,10 +1,10 @@
 # Copyright notice.
 
 import asyncio
+import contextlib
 import inspect
 import logging
 import os
-import sys
 import threading
 import time
 import traceback
@@ -12,13 +12,15 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
+
+from libs.core.mixins import StatisticsProviderMixin
 
 from .batch_processor import BatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-"""Asynchronous logger with queue-based processing for high performance."""
+"""Asynchronous logger with queue-based processing for high performance - Refactored version."""
 
 
 class LogLevel(Enum):
@@ -50,16 +52,16 @@ class LogEntry:
     line_number: int = 0
     thread_id: int = field(default_factory=threading.get_ident)
     process_id: int = field(default_factory=os.getpid)
-    extra_data: dict[str, object] = field(default_factory=dict)
+    extra_data: dict[str, Any] = field(default_factory=dict)
     exception_info: str | None = None
 
-    def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary for serialization."""
+    def to_dict(self) -> dict[str, Any]:
+        """Convert log entry to dictionary for serialization."""
         return {
-            "timestamp": self.timestamp,
             "level": self.level.level_name,
             "level_value": self.level.level_value,
             "message": self.message,
+            "timestamp": self.timestamp,
             "logger_name": self.logger_name,
             "module": self.module,
             "function": self.function,
@@ -71,109 +73,94 @@ class LogEntry:
         }
 
 
-class AsyncLoggerConfig:
-    """Configuration for AsyncLogger."""
+class AsyncLogger(StatisticsProviderMixin):
+    """High-performance asynchronous logger with batch processing."""
 
     def __init__(
         self,
-        name: str = "yesman_async",
-        level: LogLevel = LogLevel.INFO,
-        max_queue_size: int = 10000,
-        batch_size: int = 50,
-        flush_interval: float = 2.0,
-        enable_console: bool = True,
-        enable_file: bool = True,
-        enable_batch_processor: bool = True,
-        log_format: str = "{timestamp} [{level}] {logger_name}: {message}",
+        name: str = "async_logger",
+        min_level: LogLevel = LogLevel.INFO,
+        enable_batch_processing: bool = True,
+        batch_size: int = 100,
+        batch_timeout: float = 5.0,
         output_dir: Path | None = None,
+        max_queue_size: int = 10000,
+        thread_pool_size: int = 2,
     ) -> None:
-        """Initialize the async logger configuration."""
+        """Initialize async logger.
+
+        Args:
+            name: Logger name
+            min_level: Minimum log level to process
+            enable_batch_processing: Whether to enable batch processing
+            batch_size: Number of entries per batch
+            batch_timeout: Maximum time before flushing a batch
+            output_dir: Directory for batch processor output
+            max_queue_size: Maximum number of queued log entries
+            thread_pool_size: Number of threads for I/O operations
+        """
         self.name = name
-        self.level = level
-        self.max_queue_size = max_queue_size
-        self.batch_size = batch_size
-        self.flush_interval = flush_interval
-        self.enable_console = enable_console
-        self.enable_file = enable_file
-        self.enable_batch_processor = enable_batch_processor
-        self.log_format = log_format
-        self.output_dir = output_dir or Path.home() / ".scripton" / "yesman" / "logs"
+        self.min_level = min_level
+        self.enable_batch_processing = enable_batch_processing
 
+        # Async queue for log entries
+        self.log_queue: asyncio.Queue[LogEntry | None] = asyncio.Queue(maxsize=max_queue_size)
 
-class AsyncLogger:
-    """High-performance asynchronous logger with queue-based processing."""
-
-    _instance: Optional["AsyncLogger"] = None
-
-    @classmethod
-    def get_instance(cls, config: AsyncLoggerConfig = None) -> "AsyncLogger":
-        """Get the singleton instance of the async logger."""
-        if cls._instance is None:
-            cls._instance = cls(config=config)
-        elif config and cls._instance.config != config:
-            # Re-initialize if config is different
-            # Note: This might not be ideal for all singleton patterns
-            cls._instance = cls(config=config)
-        return cls._instance
-
-    @classmethod
-    async def reset_instance(cls) -> None:
-        """Reset and stop the singleton instance."""
-        if cls._instance:
-            await cls._instance.stop()
-        cls._instance = None
-
-    def __init__(self, config: AsyncLoggerConfig = None) -> None:
-        """Initialize the async logger singleton instance."""
-        if AsyncLogger._instance is not None:
-            msg = "AsyncLogger is a singleton. Use get_instance()."
-            raise RuntimeError(msg)
-
-        self.config = config or AsyncLoggerConfig()
-
-        # Queue for log entries
-        self.log_queue: asyncio.Queue = asyncio.Queue(maxsize=self.config.max_queue_size)
-
-        # Processing components
+        # Batch processor
         self.batch_processor: BatchProcessor | None = None
-        if self.config.enable_batch_processor:
+        if enable_batch_processing:
             self.batch_processor = BatchProcessor(
-                max_batch_size=self.config.batch_size,
-                max_batch_time=self.config.flush_interval,
-                output_dir=self.config.output_dir,
+                max_batch_size=batch_size,
+                max_batch_time=batch_timeout,
+                output_dir=output_dir,
             )
 
-        # Standard logging integration
-        self.standard_logger = logging.getLogger(self.config.name)
-        self.standard_logger.setLevel(self.config.level.level_value)
-
-        # Setup standard logging handlers if needed
-        if self.config.enable_console and not self.standard_logger.handlers:
-            console_handler = logging.StreamHandler()
-            console_handler.setLevel(self.config.level.level_value)
-            formatter = logging.Formatter(
-                "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-            )
-            console_handler.setFormatter(formatter)
-            self.standard_logger.addHandler(console_handler)
-
-        # Statistics and monitoring
-        self.stats = {
-            "entries_queued": 0,
-            "entries_processed": 0,
-            "entries_dropped": 0,
-            "queue_full_events": 0,
-            "start_time": time.time(),
-            "last_log_time": None,
-        }
+        # Thread pool for I/O operations
+        self.thread_pool = ThreadPoolExecutor(max_workers=thread_pool_size)
 
         # Processing task
         self._processing_task: asyncio.Task | None = None
         self._stop_event = asyncio.Event()
-        self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="async_logger")
 
-        # Thread-safe logging from sync code
-        self._sync_queue: asyncio.Queue[dict[str, object]] = asyncio.Queue()
+        # Standard logger for fallback
+        self.fallback_logger = logging.getLogger(name)
+
+        # Statistics
+        self.stats = {
+            "start_time": time.time(),
+            "entries_logged": 0,
+            "entries_processed": 0,
+            "entries_dropped": 0,
+            "errors": 0,
+            "queue_full_count": 0,
+            "current_queue_size": 0,
+            "peak_queue_size": 0,
+            "processing_time_ms": 0.0,
+        }
+
+        # Lock for thread-safe operations
+        self._stats_lock = threading.Lock()
+
+    def get_statistics(self) -> dict[str, Any]:
+        """Get logger statistics - implements StatisticsProviderMixin interface."""
+        batch_stats = {}
+        if self.batch_processor:
+            batch_stats = self.batch_processor.get_statistics()
+
+        with self._stats_lock:
+            uptime = time.time() - self.stats["start_time"]
+            processing_rate = self.stats["entries_processed"] / uptime if uptime > 0 else 0
+
+            return {
+                **self.stats,
+                "uptime_seconds": uptime,
+                "processing_rate": processing_rate,
+                "min_level": self.min_level.level_name,
+                "batch_processing_enabled": self.enable_batch_processing,
+                "batch_processor_stats": batch_stats,
+                "thread_pool_size": self.thread_pool._max_workers,
+                "is_running": (self._processing_task is not None and not self._processing_task.done()),
+            }
 
     async def start(self) -> None:
         """Start the async logger."""
@@ -182,33 +169,31 @@ class AsyncLogger:
 
         self._stop_event.clear()
 
-        # Start batch processor
+        # Start batch processor if enabled
         if self.batch_processor:
             await self.batch_processor.start()
 
         # Start processing task
         self._processing_task = asyncio.create_task(self._processing_loop())
 
-        self.standard_logger.info("AsyncLogger '%s' started", self.config.name)
+        # Log startup
+        await self.info(f"AsyncLogger '{self.name}' started")
 
     async def stop(self) -> None:
-        """Stop the async logger."""
+        """Stop the async logger gracefully."""
         if not self._processing_task:
             return
 
+        # Signal stop
         self._stop_event.set()
 
-        # Process remaining items in queue
-        while not self.log_queue.empty():
-            try:
-                entry = self.log_queue.get_nowait()
-                await self._process_entry(entry)
-            except asyncio.QueueEmpty:
-                break
+        # Put sentinel value to unblock queue
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(self.log_queue.put(None), timeout=1.0)
 
-        # Wait for processing task to complete
+        # Wait for processing to complete
         try:
-            await asyncio.wait_for(self._processing_task, timeout=5.0)
+            await asyncio.wait_for(self._processing_task, timeout=10.0)
         except TimeoutError:
             self._processing_task.cancel()
 
@@ -216,190 +201,177 @@ class AsyncLogger:
         if self.batch_processor:
             await self.batch_processor.stop()
 
-        # Cleanup executor
-        self._executor.shutdown(wait=True)
+        # Shutdown thread pool
+        self.thread_pool.shutdown(wait=True)
 
-        self.standard_logger.info("AsyncLogger '%s' stopped", self.config.name)
+        # Log shutdown
+        self.fallback_logger.info(f"AsyncLogger '{self.name}' stopped")
 
     async def _processing_loop(self) -> None:
-        """Main processing loop."""
+        """Main processing loop for log entries."""
         try:
             while not self._stop_event.is_set():
                 try:
-                    # Wait for log entry or timeout
-                    entry = await asyncio.wait_for(
-                        self.log_queue.get(),
-                        timeout=self.config.flush_interval,
-                    )
+                    # Get entry from queue with timeout
+                    entry = await asyncio.wait_for(self.log_queue.get(), timeout=1.0)
+
+                    if entry is None:  # Sentinel value
+                        break
+
+                    # Process the entry
                     await self._process_entry(entry)
-                    self.log_queue.task_done()
+
+                    # Update statistics
+                    with self._stats_lock:
+                        self.stats["entries_processed"] += 1
+                        self.stats["current_queue_size"] = self.log_queue.qsize()
 
                 except TimeoutError:
-                    # Timeout is normal, continue processing
                     continue
+                except Exception:
+                    self.fallback_logger.exception("Error processing log entry")
+                    with self._stats_lock:
+                        self.stats["errors"] += 1
 
-        except Exception as e:
-            self.standard_logger.error("Error in async logger processing loop: %s", e, exc_info=True)
+        except Exception:
+            self.fallback_logger.exception("Fatal error in processing loop")
 
     async def _process_entry(self, entry: LogEntry) -> None:
         """Process a single log entry."""
+        start_time = time.time()
+
         try:
-            self.stats["entries_processed"] += 1
-            self.stats["last_log_time"] = time.time()
+            # Convert to dict for processing
+            entry_dict = entry.to_dict()
 
-            # Send to standard logger (console/file)
-            if self.config.enable_console or self.config.enable_file:
-                await self._log_to_standard(entry)
-
-            # Send to batch processor
+            # Send to batch processor if enabled
             if self.batch_processor:
-                self.batch_processor.add_entry(entry.to_dict())
+                self.batch_processor.add_entry(entry_dict)
+
+            # Also log to standard logger
+            self._log_to_standard(entry)
+
+            # Update processing time
+            processing_time = (time.time() - start_time) * 1000
+            with self._stats_lock:
+                self.stats["processing_time_ms"] += processing_time
 
         except Exception:
-            self.standard_logger.exception("Error processing log entry")
+            self.fallback_logger.exception("Error processing entry")
+            with self._stats_lock:
+                self.stats["errors"] += 1
 
-    async def _log_to_standard(self, entry: LogEntry) -> None:
-        """Log entry to standard Python logging."""
-        # Format message
-        message = entry.message
+    def _log_to_standard(self, entry: LogEntry) -> None:
+        """Log entry to standard Python logger."""
+        # Format message with context
+        formatted_message = f"[{entry.module}:{entry.function}:{entry.line_number}] {entry.message}"
+
+        # Add extra data if present
         if entry.extra_data:
-            extra_str = " | ".join([f"{k}={v}" for k, v in entry.extra_data.items()])
-            message = f"{message} | {extra_str}"
+            formatted_message += f" | Extra: {entry.extra_data}"
 
-        # Add exception info if present
-        if entry.exception_info:
-            message = f"{message}\n{entry.exception_info}"
+        # Log at appropriate level
+        log_func = getattr(self.fallback_logger, entry.level.level_name.lower(), None)
+        if log_func:
+            if entry.exception_info:
+                log_func(formatted_message + f"\n{entry.exception_info}")
+            else:
+                log_func(formatted_message)
 
-        # Log to standard logger
-        standard_level = entry.level.level_value
-        self.standard_logger.log(standard_level, message)
+    async def _log(
+        self,
+        level: LogLevel,
+        message: str,
+        exc_info: Exception | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Internal method to queue a log entry."""
+        if level.level_value < self.min_level.level_value:
+            return
 
-    def _queue_entry(self, entry: LogEntry) -> None:
-        """Queue a log entry (thread-safe)."""
-        try:
-            # Try to put entry in queue
-            if self.log_queue.full():
-                self.stats["queue_full_events"] += 1
-                # Drop oldest entry to make room
-                try:
-                    self.log_queue.get_nowait()
-                    self.stats["entries_dropped"] += 1
-                except asyncio.QueueEmpty:
-                    pass
-
-            self.log_queue.put_nowait(entry)
-            self.stats["entries_queued"] += 1
-
-        except Exception:
-            # Fallback to standard logging
-            self.standard_logger.exception("Failed to queue log entry")
-
-    def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
-        """Log a message at specified level."""
-        # Extract caller information
-        frame = None
-        try:
-            frame = inspect.currentframe().f_back
-            module = frame.f_globals.get("__name__", "")
-            function = frame.f_code.co_name
-            line_number = frame.f_lineno
-        except (AttributeError, KeyError, IndexError):
-            # Handle frame inspection errors gracefully
-            module = function = ""
+        # Get caller info
+        frame = inspect.currentframe()
+        if frame and frame.f_back and frame.f_back.f_back:
+            caller_frame = frame.f_back.f_back
+            module = Path(caller_frame.f_code.co_filename).name
+            function = caller_frame.f_code.co_name
+            line_number = caller_frame.f_lineno
+        else:
+            module = function = "unknown"
             line_number = 0
-        finally:
-            del frame  # Prevent reference cycles
 
         # Create log entry
         entry = LogEntry(
             level=level,
-            message=str(message),
-            logger_name=self.config.name,
+            message=message,
+            logger_name=self.name,
             module=module,
             function=function,
             line_number=line_number,
             extra_data=kwargs,
+            exception_info=traceback.format_exc() if exc_info else None,
         )
 
-        # Add exception info if logging an exception
-        if level in {LogLevel.ERROR, LogLevel.CRITICAL}:
-            try:
-                if sys.exc_info()[0] is not None:
-                    entry.exception_info = traceback.format_exc()
-            except Exception as e:
-                # Ignore errors in exception info collection
-                self.standard_logger.debug("Failed to capture exception info: %s", e, exc_info=False)
+        # Try to queue the entry
+        try:
+            self.log_queue.put_nowait(entry)
+            with self._stats_lock:
+                self.stats["entries_logged"] += 1
+                current_size = self.log_queue.qsize()
+                self.stats["current_queue_size"] = current_size
+                self.stats["peak_queue_size"] = max(self.stats["peak_queue_size"], current_size)
+        except asyncio.QueueFull:
+            # Queue is full, drop the entry
+            with self._stats_lock:
+                self.stats["entries_dropped"] += 1
+                self.stats["queue_full_count"] += 1
 
-        # Queue the entry
-        self._queue_entry(entry)
+            # Fallback to standard logger
+            self.fallback_logger.warning(f"Log queue full, dropping entry: {message}")
 
     # Convenience methods for different log levels
-    def trace(self, message: str, **kwargs: Any) -> None:
+    async def trace(self, message: str, **kwargs: Any) -> None:
         """Log a trace message."""
-        self.log(LogLevel.TRACE, message, **kwargs)
+        await self._log(LogLevel.TRACE, message, **kwargs)
 
-    def debug(self, message: str, **kwargs: Any) -> None:
+    async def debug(self, message: str, **kwargs: Any) -> None:
         """Log a debug message."""
-        self.log(LogLevel.DEBUG, message, **kwargs)
+        await self._log(LogLevel.DEBUG, message, **kwargs)
 
-    def info(self, message: str, **kwargs: Any) -> None:
+    async def info(self, message: str, **kwargs: Any) -> None:
         """Log an info message."""
-        self.log(LogLevel.INFO, message, **kwargs)
+        await self._log(LogLevel.INFO, message, **kwargs)
 
-    def warning(self, message: str, **kwargs: Any) -> None:
+    async def warning(self, message: str, **kwargs: Any) -> None:
         """Log a warning message."""
-        self.log(LogLevel.WARNING, message, **kwargs)
+        await self._log(LogLevel.WARNING, message, **kwargs)
 
-    def error(self, message: str, **kwargs: Any) -> None:
+    async def error(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
         """Log an error message."""
-        self.log(LogLevel.ERROR, message, **kwargs)
+        await self._log(LogLevel.ERROR, message, exc_info=exc_info, **kwargs)
 
-    def critical(self, message: str, **kwargs: Any) -> None:
+    async def critical(self, message: str, exc_info: Exception | None = None, **kwargs: Any) -> None:
         """Log a critical message."""
-        self.log(LogLevel.CRITICAL, message, **kwargs)
+        await self._log(LogLevel.CRITICAL, message, exc_info=exc_info, **kwargs)
 
-    # Context manager support
-    async def __aenter__(self) -> "AsyncLogger":
-        """Async context manager entry."""
-        await self.start()
-        return self
-
-    async def __aexit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: object,
-    ) -> None:
-        """Async context manager exit."""
-        await self.stop()
-
-    def get_statistics(self) -> dict[str, object]:
-        """Get logger statistics."""
-        batch_stats = {}
-        if self.batch_processor:
-            batch_stats = self.batch_processor.get_statistics()
-
-        uptime = time.time() - self.stats["start_time"]
-        processing_rate = self.stats["entries_processed"] / uptime if uptime > 0 else 0
-
-        return {
-            **self.stats,
-            "current_queue_size": self.log_queue.qsize(),
-            "uptime_seconds": uptime,
-            "processing_rate_eps": processing_rate,
-            "batch_processor_stats": batch_stats,
-        }
-
-    def set_level(self, level: LogLevel) -> None:
-        """Change the logging level."""
-        self.config.level = level
-        self.standard_logger.setLevel(level.level_value)
+    def set_min_level(self, level: LogLevel) -> None:
+        """Set minimum log level."""
+        self.min_level = level
 
     async def flush(self) -> None:
-        """Force flush all pending log entries."""
-        # Wait for queue to be empty
-        await self.log_queue.join()
+        """Flush any pending log entries."""
+        # Wait for queue to empty
+        while not self.log_queue.empty():
+            await asyncio.sleep(0.1)
 
-        # Flush batch processor if available
+        # Flush batch processor if enabled
         if self.batch_processor:
-            await self.batch_processor._flush_pending_entries()
+            # Note: BatchProcessor doesn't have wait_for_pending method
+            # The queue will be processed automatically
+            pass
+
+    async def cleanup_old_logs(self, days_to_keep: int = 7) -> int:
+        """Clean up old log files if batch processing is enabled."""
+        if self.batch_processor:
+            return await self.batch_processor.cleanup_old_files(days_to_keep)
+        return 0

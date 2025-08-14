@@ -29,7 +29,7 @@ import psutil
 from libs.ai.adaptive_response import AdaptiveConfig, AdaptiveResponse
 from libs.automation.automation_manager import AutomationManager
 from libs.dashboard.health_calculator import HealthCalculator
-from libs.logging.async_logger import AsyncLogger, AsyncLoggerConfig, LogLevel
+from libs.logging.async_logger import AsyncLogger, LogLevel
 
 from .async_event_bus import AsyncEventBus, Event, EventPriority, EventType, get_event_bus
 from .content_collector import ClaudeContentCollector
@@ -666,7 +666,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             content = await loop.run_in_executor(None, cast("Any", self.session_manager).capture_pane_content)
             return cast(str, content)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error capturing pane content")
             return ""
 
@@ -681,7 +681,7 @@ class AsyncClaudeMonitor:
             loop = asyncio.get_event_loop()
             is_running = await loop.run_in_executor(None, cast("Any", self.process_controller).is_claude_running)
             return cast(bool, is_running)
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error checking Claude status")
             return False
 
@@ -1246,18 +1246,14 @@ class AsyncClaudeMonitor:
             return
 
         try:
-            config = AsyncLoggerConfig(
+            self.async_logger = AsyncLogger(
                 name=f"yesman.async_claude_monitor.{self.session_name}",
-                level=LogLevel.INFO,
-                max_queue_size=5000,
+                min_level=LogLevel.INFO,
+                enable_batch_processing=True,
                 batch_size=25,
-                flush_interval=3.0,
                 enable_console=False,
                 enable_file=True,
-                enable_batch_processor=True,
             )
-
-            self.async_logger = AsyncLogger(config)
             await self.async_logger.start()
             self.logger.info("Async logging system started")
         except Exception:

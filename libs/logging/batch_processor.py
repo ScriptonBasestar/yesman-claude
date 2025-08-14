@@ -1,17 +1,18 @@
 # Copyright notice.
 
-import asyncio
 import gzip
 import json
 import logging
 import time
-from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
+
+from libs.core.base_batch_processor import BaseBatchProcessor
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
-"""Batch log processor for optimized I/O operations."""
+"""Batch log processor for optimized I/O operations - Refactored version."""
 
 
 @dataclass
@@ -29,7 +30,7 @@ class LogBatch:
             self.size_bytes = sum(len(str(entry)) for entry in self.entries)
 
 
-class BatchProcessor:
+class BatchProcessor(BaseBatchProcessor[dict[str, object], LogBatch]):
     """Processes log entries in batches for optimized I/O."""
 
     def __init__(
@@ -40,8 +41,25 @@ class BatchProcessor:
         compression_enabled: bool = True,
         output_dir: Path | None = None,
     ) -> None:
-        self.max_batch_size = max_batch_size
-        self.max_batch_time = max_batch_time
+        """Initialize the batch processor.
+
+        Args:
+            max_batch_size: Maximum number of log entries per batch
+            max_batch_time: Maximum time before flushing a batch
+            max_file_size: Maximum size of a single log file
+            compression_enabled: Whether to enable gzip compression
+            output_dir: Directory to write log files
+
+        Returns:
+        None: Description of return value.
+        """
+        # Initialize base class
+        super().__init__(
+            batch_size=max_batch_size,
+            flush_interval=max_batch_time,
+        )
+
+        # Additional configuration
         self.max_file_size = max_file_size
         self.compression_enabled = compression_enabled
         self.output_dir = output_dir or Path.home() / ".scripton" / "yesman" / "logs"
@@ -49,118 +67,50 @@ class BatchProcessor:
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Batch management
-        self.pending_entries: deque[dict[str, object]] = deque()
-        self.last_flush_time = time.time()
+        # File management
         self.batch_counter = 0
         self.current_file_size = 0
         self.current_log_file: Path | None = None
 
-        # Statistics
-        self.stats = {
-            "batches_processed": 0,
-            "entries_processed": 0,
+        # Extended statistics
+        self.extended_stats = {
             "bytes_written": 0,
             "compression_ratio": 1.0,
-            "avg_batch_size": 0,
             "files_created": 0,
         }
 
-        # Processing task
-        self._processing_task: asyncio.Task | None = None
-        self._stop_event = asyncio.Event()
-
         self.logger = logging.getLogger("yesman.batch_processor")
 
-    async def start(self) -> None:
-        """Start the batch processing task."""
-        if self._processing_task and not self._processing_task.done():
-            self.logger.warning("Batch processor already running")
-            return
+    def create_batch(self, items: list[dict[str, object]]) -> LogBatch:  # type: ignore[override]
+        """Create a LogBatch from log entries.
 
-        self._stop_event.clear()
-        self._processing_task = asyncio.create_task(self._processing_loop())
-        self.logger.info("Batch processor started")
-
-    async def stop(self) -> None:
-        """Stop the batch processing task."""
-        if not self._processing_task:
-            return
-
-        self._stop_event.set()
-
-        try:
-            await asyncio.wait_for(self._processing_task, timeout=10.0)
-        except TimeoutError:
-            self.logger.warning("Batch processor stop timeout, cancelling task")
-            self._processing_task.cancel()
-
-        # Flush any remaining entries
-        await self._flush_pending_entries()
-
-        self.logger.info("Batch processor stopped")
-
-    def add_entry(self, entry: dict[str, object]) -> None:
-        """Add a log entry to the processing queue."""
+        Returns:
+        LogBatch: Description of return value.
+        """
         # Add timestamp if not present
-        if "timestamp" not in entry:
-            entry["timestamp"] = time.time()
-
-        self.pending_entries.append(entry)
-
-        # Check if we should flush immediately
-        if len(self.pending_entries) >= self.max_batch_size:
-            # We can't await here, so we'll let the processing loop handle it
-            pass
-
-    async def _processing_loop(self) -> None:
-        """Main processing loop that handles batching and flushing."""
-        try:
-            while not self._stop_event.is_set():
-                await asyncio.sleep(0.1)  # Small delay to prevent CPU spinning
-
-                should_flush = len(self.pending_entries) >= self.max_batch_size or (len(self.pending_entries) > 0 and time.time() - self.last_flush_time >= self.max_batch_time)
-
-                if should_flush:
-                    await self._flush_pending_entries()
-
-        except Exception as e:
-            self.logger.error("Error in batch processing loop: %s", e, exc_info=True)
-
-    async def _flush_pending_entries(self) -> None:
-        """Flush pending entries to storage."""
-        if not self.pending_entries:
-            return
-
-        # Create batch
-        entries: list[dict[str, object]] = []
-        while self.pending_entries and len(entries) < self.max_batch_size:
-            entries.append(self.pending_entries.popleft())
-
-        if not entries:
-            return
+        for entry in items:
+            if "timestamp" not in entry:
+                entry["timestamp"] = time.time()
 
         batch = LogBatch(
-            entries=entries,
+            entries=items,
             timestamp=time.time(),
             batch_id=f"batch_{self.batch_counter:06d}",
         )
 
-        try:
-            await self._write_batch(batch)
+        self.batch_counter += 1
+        return batch
 
-            # Update statistics
-            self.stats["batches_processed"] += 1
-            self.stats["entries_processed"] += len(entries)
-            self.stats["avg_batch_size"] = self.stats["entries_processed"] / self.stats["batches_processed"]
+    async def process_batch(self, batch: LogBatch) -> None:  # type: ignore[override]
+        """Process a batch by writing to log file."""
+        await self._write_batch(batch)
 
-            self.last_flush_time = time.time()
-            self.batch_counter += 1
-
-        except Exception:
-            self.logger.exception("Failed to write batch {batch.batch_id}")
-            # Re-queue entries for retry
-            self.pending_entries.extendleft(reversed(entries))
+        # Update extended statistics
+        if self.compression_enabled:
+            # Calculate compression ratio from last write
+            if hasattr(self, "_last_compression_ratio"):
+                total_batches = self._stats.total_batches
+                self.extended_stats["compression_ratio"] = (self.extended_stats["compression_ratio"] * (total_batches - 1) + self._last_compression_ratio) / total_batches
 
     async def _write_batch(self, batch: LogBatch) -> None:
         """Write a batch to storage."""
@@ -183,27 +133,29 @@ class BatchProcessor:
         # Write to file (with optional compression)
         if self.compression_enabled and self.current_log_file.suffix == ".gz":
             compressed_data = gzip.compress(json_data.encode("utf-8"))
-            self.current_log_file.write_bytes(compressed_data)
+
+            # Write compressed data
+            with open(self.current_log_file, "ab") as f:
+                f.write(compressed_data)
+
             written_size = len(compressed_data)
 
-            # Update compression ratio
-            compression_ratio = written_size / raw_size if raw_size > 0 else 1.0
-            self.stats["compression_ratio"] = (self.stats["compression_ratio"] * (self.stats["batches_processed"] - 1) + compression_ratio) / self.stats["batches_processed"]
+            # Store compression ratio for statistics
+            self._last_compression_ratio = written_size / raw_size if raw_size > 0 else 1.0
         else:
-            # Write uncompressed
-            json_data += "\n"  # Add newline for easier reading
-            self.current_log_file.write_text(json_data, encoding="utf-8")
+            # Write uncompressed with newline
+            json_data += "\n"
+
+            # Append to file
+            with open(self.current_log_file, "a", encoding="utf-8") as f:
+                f.write(json_data)
+
             written_size = len(json_data.encode("utf-8"))
 
         self.current_file_size += written_size
-        self.stats["bytes_written"] += written_size
+        self.extended_stats["bytes_written"] += written_size
 
-        self.logger.debug(
-            "Wrote batch %s: %d entries, %d bytes",
-            batch.batch_id,
-            len(batch.entries),
-            written_size,
-        )
+        self.logger.debug(f"Wrote batch {batch.batch_id}: {len(batch.entries)} entries, {written_size} bytes")
 
     async def _rotate_log_file(self) -> None:
         """Rotate to a new log file."""
@@ -212,9 +164,13 @@ class BatchProcessor:
 
         self.current_log_file = self.output_dir / f"yesman_logs_{timestamp}{file_extension}"
         self.current_file_size = 0
-        self.stats["files_created"] += 1
+        self.extended_stats["files_created"] += 1
 
-        self.logger.info("Rotated to new log file: %s", self.current_log_file)
+        self.logger.info(f"Rotated to new log file: {self.current_log_file}")
+
+    def add_entry(self, entry: dict[str, object]) -> None:
+        """Add a log entry to the processing queue."""
+        self.add(entry)
 
     def get_statistics(self) -> dict[str, object]:
         """Get processing statistics.
@@ -222,18 +178,18 @@ class BatchProcessor:
         Returns:
         object: Description of return value.
         """
-        uptime = time.time() - (self.last_flush_time if self.stats["batches_processed"] > 0 else time.time())
+        # Get base statistics
+        base_stats = super().get_statistics()
 
+        # Add extended statistics
         return {
-            **self.stats,
-            "pending_entries": len(self.pending_entries),
+            **base_stats,
+            **self.extended_stats,
             "current_file_size": self.current_file_size,
-            "max_batch_size": self.max_batch_size,
-            "max_batch_time": self.max_batch_time,
+            "max_file_size": self.max_file_size,
             "compression_enabled": self.compression_enabled,
-            "uptime_seconds": uptime,
-            "entries_per_second": self.stats["entries_processed"] / max(uptime, 1),
             "output_directory": str(self.output_dir),
+            "entries_per_second": (cast("float", base_stats["total_items"]) / max(time.time() - self._stats.last_batch_time.timestamp(), 1) if self._stats.last_batch_time else 0),
         }
 
     async def cleanup_old_files(self, days_to_keep: int = 7) -> int:
@@ -248,7 +204,7 @@ class BatchProcessor:
                     removed_count += 1
 
             if removed_count > 0:
-                self.logger.info("Cleaned up %d old log files", removed_count)
+                self.logger.info(f"Cleaned up {removed_count} old log files")
 
         except Exception:
             self.logger.exception("Error cleaning up old log files")
@@ -290,5 +246,6 @@ class BatchProcessor:
         Returns:
         object: Description of return value.
         """
-        recent = list(self.pending_entries)
-        return recent[-limit:] if len(recent) > limit else recent
+        with self._lock:
+            recent = list(self._pending_items)
+            return recent[-limit:] if len(recent) > limit else recent
