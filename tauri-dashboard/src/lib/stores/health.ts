@@ -20,23 +20,23 @@ const initialHealth: HealthStatus = {
   lastUpdated: new Date()
 };
 
-// Health store
-export const health: Writable<HealthStatus> = writable(initialHealth);
+// 내부 writable 스토어 (외부엔 래퍼를 export)
+const healthStore: Writable<HealthStatus> = writable(initialHealth);
 
 // Health state derivations
-export const healthState = derived(health, $health => $health.overall);
+export const healthState = derived(healthStore, $health => $health.overall);
 
-export const isHealthy = derived(health, $health => $health.overall === 'healthy');
+export const isHealthy = derived(healthStore, $health => $health.overall === 'healthy');
 
-export const isUnhealthy = derived(health, $health => 
+export const isUnhealthy = derived(healthStore, $health => 
   $health.overall === 'error' || $health.overall === 'warning'
 );
 
 // Health observable (reactive stream)
-export const health$ = derived(health, $health => $health);
+export const health$ = derived(healthStore, $health => $health);
 
 // Health status string
-export const healthStatus = derived(health, $health => {
+export const healthStatus = derived(healthStore, $health => {
   switch ($health.overall) {
     case 'healthy': return '시스템 정상';
     case 'warning': return '주의 필요';
@@ -46,7 +46,7 @@ export const healthStatus = derived(health, $health => {
 });
 
 // Format last check time
-export const formatLastCheck = derived(health, $health => {
+export const formatLastCheck = derived(healthStore, $health => {
   const now = new Date();
   const diff = now.getTime() - $health.lastUpdated.getTime();
   const minutes = Math.floor(diff / 60000);
@@ -61,7 +61,7 @@ export const formatLastCheck = derived(health, $health => {
 
 // Health update functions
 export function updateHealthStatus(componentName: string, status: 'healthy' | 'warning' | 'error', message?: string) {
-  health.update(current => {
+  healthStore.update(current => {
     const updated = {
       ...current,
       components: {
@@ -92,7 +92,7 @@ export function updateHealthStatus(componentName: string, status: 'healthy' | 'w
 }
 
 export function resetHealth() {
-  health.set(initialHealth);
+  healthStore.set(initialHealth);
 }
 
 // Auto-refresh health status
@@ -106,7 +106,7 @@ export function startHealthMonitoring(intervalMs: number = 30000) {
   healthCheckInterval = setInterval(() => {
     // In a real implementation, this would call actual health check APIs
     // For now, we'll just update the timestamp
-    health.update(current => ({
+    healthStore.update(current => ({
       ...current,
       lastUpdated: new Date()
     }));
@@ -139,7 +139,7 @@ export async function check(): Promise<void> {
       unsubscribe();
 
       // 최신 상태 반영
-      health.set({ ...res.data, lastUpdated: new Date(res.timestamp) });
+      healthStore.set({ ...res.data, lastUpdated: new Date(res.timestamp) });
 
       // 상태 변경 콜백 호출
       if (onStatusChangeCallback) {
@@ -155,7 +155,7 @@ export async function check(): Promise<void> {
     const unsubscribe = healthState.subscribe(v => (previous = v));
     unsubscribe();
 
-    health.update(cur => ({ ...cur, overall: 'warning', lastUpdated: new Date() }));
+    healthStore.update(cur => ({ ...cur, overall: 'warning', lastUpdated: new Date() }));
     if (onStatusChangeCallback) onStatusChangeCallback('warning');
   }
 }
@@ -177,7 +177,11 @@ export function stopChecking(): void {
   stopHealthMonitoring();
 }
 
-// 기존 호출부 호환: health.startChecking / health.check / health.stopChecking 지원
-(health as unknown as Record<string, unknown>).startChecking = startChecking;
-(health as unknown as Record<string, unknown>).check = check;
-(health as unknown as Record<string, unknown>).stopChecking = stopChecking;
+// 외부로 export 되는 health: store 계약(subscribe) + 메서드 제공
+export const health = {
+  subscribe: healthStore.subscribe,
+  // 선택적으로 set/update를 노출하지 않음 (외부에서 변경 방지)
+  startChecking,
+  stopChecking,
+  check,
+};

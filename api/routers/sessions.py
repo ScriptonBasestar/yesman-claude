@@ -47,8 +47,31 @@ class SessionService:
             YesmanError: If sessions cannot be retrieved.
         """
         try:
+            # 1) SessionManager를 통해 세션 정보 수집
             sessions_data = self.session_manager.get_all_sessions()
-            return [self._convert_session_to_api_data(session) for session in sessions_data]
+            api_list = [self._convert_session_to_api_data(session) for session in sessions_data]
+
+            # 2) 폴백: session_manager가 빈 목록을 줄 경우 설정 기반 목록 노출
+            if not api_list:
+                self.logger.info("No active tmux sessions found; falling back to configured sessions list")
+                projects = cast("dict", self.tmux_manager.load_projects().get("sessions", {}))
+                for project_name, project_conf in projects.items():
+                    # override.session_name 우선, 없으면 project_name 사용
+                    override = cast("dict", project_conf.get("override", {})) if isinstance(project_conf, dict) else {}
+                    session_name = cast("str", override.get("session_name", project_name))
+
+                    # SessionAPIData 스펙에 맞춘 플레이스홀더 구성
+                    api_list.append(
+                        {
+                            "session_name": session_name,
+                            "status": cast("SessionStatusType", "stopped"),
+                            "windows": [],
+                            "created_at": None,
+                            "last_activity": None,
+                        },
+                    )
+
+            return api_list
         except Exception as e:
             self.logger.exception("Failed to get sessions")
             msg = "Failed to retrieve sessions"

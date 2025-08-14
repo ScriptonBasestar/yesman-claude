@@ -130,41 +130,72 @@ export async function refreshSessions(isInitial: boolean = false): Promise<void>
   error.set(null);
 
   try {
-    // 1. API 함수 이름 변경
+    // 1) 백엔드 세션 목록 로드
     const sessionData = await pythonBridge.get_sessions();
 
-    // 데이터 가공 (필요 시)
-    const processedData = sessionData.map((s: Session) => ({
+    // 2) 폴백: 설정에 정의된 프로젝트를 병합하여 표시
+    let configuredProjects: string[] = [];
+    try {
+      configuredProjects = await getAvailableProjects();
+    } catch (_) {
+      configuredProjects = [];
+    }
+
+    // 3) API 응답 가공
+    const processedFromApi: Session[] = (sessionData || []).map((s: Session) => ({
       ...s,
-      // 2. 누락된 필드 임시 처리
       total_panes: s.windows?.reduce((acc, w) => acc + w.panes.length, 0) || 0,
-      description: s.template, // template을 임시로 description으로 사용
+      description: s.template,
     }));
 
-    // 스마트 업데이트: 기존 데이터와 비교하여 변경된 경우만 업데이트
+    // 4) 설정 기반 플레이스홀더 생성 (API에 없는 항목 추가)
+    const existingNames = new Set<string>(
+      processedFromApi.flatMap((s) => [s.session_name, s.project_name].filter(Boolean) as string[]),
+    );
+
+    const placeholders: Session[] = configuredProjects
+      .filter((name) => !existingNames.has(name))
+      .map((name) => ({
+        // 누가 봐도 알 수 있도록 필드 채움
+        session_name: name,
+        project_name: name,
+        status: 'stopped',
+        controller_status: 'unknown',
+        template: undefined as unknown as string,
+        windows: [],
+        total_panes: 0,
+        description: undefined as unknown as string,
+      } as unknown as Session));
+
+    const merged = [...processedFromApi, ...placeholders];
+
+    // 5) 스마트 업데이트: 기존 데이터와 비교하여 변경된 경우만 업데이트
     const currentSessions = get(sessions);
-    const hasChanged = isInitial || !currentSessions || currentSessions.length !== processedData.length ||
+    const hasChanged =
+      isInitial ||
+      !currentSessions ||
+      currentSessions.length !== merged.length ||
       currentSessions.some((current, index) => {
-        const newSession = processedData[index];
-        return !newSession ||
-               current.session_name !== newSession.session_name ||
-               current.status !== newSession.status ||
-               current.controller_status !== newSession.controller_status ||
-               current.windows?.length !== newSession.windows?.length;
+        const next = merged[index];
+        return (
+          !next ||
+          current.session_name !== next.session_name ||
+          current.status !== next.status ||
+          current.controller_status !== next.controller_status ||
+          (current.windows?.length || 0) !== (next.windows?.length || 0)
+        );
       });
 
     if (hasChanged) {
-      sessions.set(processedData);
+      sessions.set(merged);
     }
 
-    if (isInitial && processedData.length === 0) {
-      // Fix: Correct argument order for showNotification
+    if (isInitial && merged.length === 0) {
       showNotification('warning', 'No Sessions', 'No tmux sessions found.');
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
     error.set(errorMessage);
-    // Fix: Correct argument order
     showNotification('error', 'Error', `Failed to refresh sessions: ${errorMessage}`);
     console.error('Failed to refresh sessions:', err);
   } finally {
@@ -241,12 +272,11 @@ export function resetFilters(): void {
  * 세션 선택 관리
  */
 export function toggleSessionSelection(sessionName: string): void {
-  selectedSessions.update(selected => {
-    if (selected.includes(sessionName)) {
-      return selected.filter(name => name !== sessionName);
-    } else {
-      return [...selected, sessionName];
+  selectedSessions.update(current => {
+    if (current.includes(sessionName)) {
+      return current.filter(s => s !== sessionName);
     }
+    return [...current, sessionName];
   });
 }
 
@@ -520,7 +550,8 @@ export async function viewSessionLogs(sessionName: string): Promise<void> {
         showNotification('info', 'Logs Fetched', `Check console for logs of ${sessionName}.`);
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        showNotification('error', 'Error', `Failed to get logs: ${errorMessage}`);
+        showNotification('error', 'Error', `Failed to fetch logs: ${errorMessage}`);
+        throw err;
     }
 }
 

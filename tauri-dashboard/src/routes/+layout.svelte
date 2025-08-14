@@ -9,70 +9,79 @@
   import { loadConfig } from '$lib/stores/config';
   import { refreshSessions, startAutoRefresh, stopAutoRefresh } from '$lib/stores/sessions';
   import { showNotification, notifySuccess, notifyError, notifyWarning } from '$lib/stores/notifications';
-  import { health, isHealthy, healthState } from '$lib/stores/health';
+  import { health } from '$lib/stores/health';
 
   let isMinimized = false;
+  let currentRoute: string | null = null;
 
-  onMount(async () => {
-    // API 헬스체크 시작
-    health.startChecking({
-      interval: 30000, // 30초마다 체크
-      onStatusChange: (status) => {
-        if (status === 'unhealthy') {
-          notifyWarning('API Disconnected', 'Unable to connect to backend server. Please check if the API server is running.');
-        } else if (status === 'healthy') {
-          // 처음 연결되거나 재연결된 경우에만 알림
-          const prevStatus = $healthState.status;
-          if (prevStatus === 'unhealthy' || prevStatus === 'unknown') {
-            notifySuccess('API Connected', 'Successfully connected to backend server.');
-          }
-        }
-      }
-    });
-
-    // 초기 헬스체크 대기
-    await health.check();
-    
-    // API가 건강한 상태일 때만 데이터 로드
-    if ($isHealthy) {
-      // 초기 데이터 로드
-      await loadConfig();
-      await refreshSessions(true); // 초기 로딩임을 명시
-
-      // 자동 새로고침 시작
-      startAutoRefresh();
-    } else {
-      notifyError('Connection Failed', 'Could not connect to the API server. Please ensure the backend is running.');
-    }
-
-    // 실시간 이벤트 리스너 설정 (Tauri 환경에서만)
+  onMount(() => {
     let unlistenSessionUpdate: (() => void) | undefined;
     let unlistenLogUpdate: (() => void) | undefined;
     let unlistenNotification: (() => void) | undefined;
 
-    try {
-      unlistenSessionUpdate = await listen('session-update', (event) => {
-        const { session, status, controller_status } = event.payload as any;
-        // 세션 상태 업데이트 처리
-        refreshSessions();
-      });
+    // 최근 상태를 추적하여 재연결 알림/초기화 제어
+    let lastStatus: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown';
+    let initializedAfterHealthy = false; // healthy 전환 후 초기화 수행 여부
 
-      unlistenLogUpdate = await listen('log-update', (event) => {
-        const { session, log, timestamp } = event.payload as any;
-        // 로그 업데이트 처리 (필요시)
-        console.log(`[${session}] ${log}`);
-      });
+    // 헬스 모니터링 시작: healthy일 때만 초기 로딩/자동 새로고침 시작
+    health.startChecking({
+      interval: 30000,
+      onStatusChange: (status) => {
+        // 연결 문제 시 자동 새로고침 정지 및 경고 안내
+        if (status === 'error' || status === 'warning') {
+          stopAutoRefresh();
+          notifyWarning('API Disconnected', 'Unable to connect to backend server. Please check if the API server is running.');
+        } else if (status === 'healthy') {
+          // 처음 healthy로 전환되거나, 끊겼다가 재연결된 경우에만 초기화 수행
+          const isReconnected = lastStatus === 'unknown' || lastStatus === 'error' || lastStatus === 'warning';
+          if (isReconnected) {
+            notifySuccess('API Connected', 'Successfully connected to backend server.');
+          }
 
-      unlistenNotification = await listen('notification', (event) => {
-        const { title, message, level } = event.payload as any;
-        showNotification(level, title, message, false); // 시스템 알림은 이미 표시됨
-      });
-    } catch (error) {
-      // 웹 환경에서는 이벤트 리스너가 작동하지 않으므로 무시
-      // console.warn('Event listeners are not available in web environment');
-    }
+          // 초기화는 healthy 전환 시에만 수행
+          (async () => {
+            if (!initializedAfterHealthy || isReconnected) {
+              try {
+                await loadConfig();
+                await refreshSessions(!initializedAfterHealthy); // 최초는 초기 로딩 플래그
+              } catch (e) {
+                // 로딩 중 오류는 알림만 표시
+                const msg = e instanceof Error ? e.message : 'Unknown error';
+                notifyError('Initialization Failed', `Failed to load initial data: ${msg}`);
+              }
+            }
+            startAutoRefresh();
+            initializedAfterHealthy = true;
+          })();
+        }
+        lastStatus = status;
+      }
+    });
 
-    // 컴포넌트 언마운트 시 정리
+    // 실시간 이벤트 리스너 설정 (Tauri 환경에서만)
+    (async () => {
+      try {
+        unlistenSessionUpdate = await listen('session-update', (event) => {
+          const { session, status, controller_status } = event.payload as any;
+          void session; void status; void controller_status;
+          refreshSessions();
+        });
+
+        unlistenLogUpdate = await listen('log-update', (event) => {
+          const { session, log, timestamp } = event.payload as any;
+          void session; void log; void timestamp;
+        });
+
+        unlistenNotification = await listen('notification', (event) => {
+          const { title, message, level } = event.payload as any;
+          showNotification(level, title, message, false);
+        });
+      } catch (error) {
+        // 웹 환경에서는 이벤트 리스너가 동작하지 않을 수 있음
+      }
+    })();
+
+    // cleanup 반환
     return () => {
       health.stopChecking();
       stopAutoRefresh();
@@ -85,7 +94,6 @@
   // 페이지 변경 감지
   $: currentRoute = $page.route.id;
 
-  // 빠른 액션 핸들러
   async function handleQuickAction(event: CustomEvent) {
     const { action } = event.detail;
 
@@ -118,7 +126,7 @@
           await startAllControllers();
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          notifyError('Start Failed', `Failed to start controllers: ${errorMessage}`);
+          notifyError('Start Failed', `Failed to start all controllers: ${errorMessage}`);
         }
         break;
       case 'stop_all':
@@ -127,11 +135,9 @@
           await stopAllControllers();
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          notifyError('Stop Failed', `Failed to stop controllers: ${errorMessage}`);
+          notifyError('Stop Failed', `Failed to stop all controllers: ${errorMessage}`);
         }
         break;
-      default:
-        console.warn('Unknown action:', action);
     }
   }
 </script>
