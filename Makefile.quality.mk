@@ -11,6 +11,12 @@
 PYTHON_DIRS ?= libs commands api tests
 PYTHON_FILES = $(shell find $(PYTHON_DIRS) -name "*.py" 2>/dev/null)
 
+# Vulture configuration (dead code finder)
+VULTURE_MIN_CONFIDENCE ?= 80
+VULTURE_EXCLUDES ?= "migrations/*,node_modules/*,examples/*,tests/*"
+VULTURE_IGNORE_NAMES ?=
+VULTURE_WHITELIST ?=
+
 # ==============================================================================
 # Code Formatting Targets
 # ==============================================================================
@@ -245,7 +251,7 @@ analyze: ## run comprehensive code analysis
 dead-code: ## find dead code with vulture
 	@echo -e "$(CYAN)Finding dead code...$(RESET)"
 	@command -v vulture >/dev/null 2>&1 || pip install vulture
-	@vulture $(PYTHON_DIRS) --min-confidence 80
+	@vulture $(PYTHON_DIRS) --min-confidence $(VULTURE_MIN_CONFIDENCE) --exclude $(VULTURE_EXCLUDES) $(if $(VULTURE_IGNORE_NAMES),--ignore-names "$(VULTURE_IGNORE_NAMES)",) $(VULTURE_WHITELIST)
 	@echo -e "$(GREEN)✅ Dead code analysis completed$(RESET)"
 
 duplicates: ## find duplicate code
@@ -324,7 +330,7 @@ lint-strict: ## comprehensive lint checks (Level 3)
 
 lint-summary: ## show lint issues summary by linter and problematic files
 	@echo -e "$(CYAN)📊 Lint Issues Summary$(RESET)"
-	@echo -e "$(CYAN)=====================$(RESET)"
+	@echo -e "$(CYAN)===================== $(RESET)"
 	@echo ""
 	@TOTAL=$$(uv run ruff check $(LINT_DIRS) $(EXCLUDE_DIRS) --output-format=json 2>/dev/null | jq -r '.[] | length' | awk '{sum += $$1} END {print sum+0}' 2>/dev/null || echo "0"); \
 	echo -e "$(YELLOW)Total Issues: $$TOTAL$(RESET)"; \
@@ -362,7 +368,7 @@ lint-status: ## comprehensive lint status report with detailed analysis
 	awk '{printf "  $(MAGENTA)%-50s$(RESET) %d issues\\n", $$2, $$1}' || echo "  No issues found"
 	@echo ""
 	@echo -e "$(GREEN)💡 Recommendations:$(RESET)"
-	@TOTAL=$$(uv run ruff check $(LINT_DIRS) $(EXCLUDE_DIRS) --output-format=json 2>/dev/null | jq -r '.[] | length' | awk '{sum += $$1} END {print sum+0}' 2>/dev/null || echo "0"); \
+	@TOTAL=$$(uv run ruff check $(LINT_DIRS) $(EXCLUDE_DIRS) --output-format=json 2>/dev/null | jq -r '.[] | length' 2>/dev/null | awk '{sum += $$1} END {print sum+0}' || echo "0"); \
 	if [ $$TOTAL -eq 0 ]; then \
 		echo -e "  $(GREEN)✅ Perfect! No lint issues found.$(RESET)"; \
 	elif [ $$TOTAL -le 10 ]; then \
@@ -436,7 +442,7 @@ lint-new: ## run lint on new/changed code only (git diff based)
 		for file in $$CHANGED_FILES; do \
 			if [ -f "$$file" ]; then \
 				echo "$(CYAN)📝 Linting: $$file$(RESET)"; \
-				uv run ruff check "$$file" || echo "$(RED)❌ Issues found in $$file$(RESET)"; \
+				uv run ruff check "$$file" || echo "$(RED)❌ issues found in $$file$(RESET)"; \
 			fi; \
 		done; \
 	else \
