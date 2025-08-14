@@ -232,6 +232,39 @@ class DashboardRunCommand(BaseCommand):
             msg = f"TUI dependencies not available: {e}"
             raise CommandError(msg) from e
 
+    def _wait_for_port(self, host: str, port: int, timeout: float = 30.0, poll_interval: float = 0.2) -> bool:
+        """서버 소켓이 실제로 리스닝 상태가 될 때까지 대기한다.
+
+        - host가 0.0.0.0 또는 :: 인 경우, 브라우저 접속 확인은 127.0.0.1로 시도한다.
+        """
+        end_time = time.time() + timeout
+        target_host = "127.0.0.1" if host in ("0.0.0.0", "::") else host
+        while time.time() < end_time:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(poll_interval)
+                result = sock.connect_ex((target_host, port))
+                sock.close()
+                if result == 0:
+                    return True
+            except Exception:
+                pass
+            time.sleep(poll_interval)
+        return False
+
+    def _open_browser_when_ready(self, url: str, host: str, port: int) -> None:
+        """포트가 열리면 브라우저를 연다. 실패 시 수동 안내 메시지를 출력한다."""
+        if self._wait_for_port(host, port):
+            try:
+                webbrowser.open(url)
+                self.print_info(f"🔗 Opening browser to {url}")
+            except Exception as e:
+                self.print_warning(f"Could not open browser automatically: {e}")
+                self.print_info(f"Please open {url} manually in your browser")
+        else:
+            self.print_warning("Server did not become ready within timeout. Please refresh manually if needed.")
+            self.print_info(f"You can open: {url}")
+
     def _launch_web_dashboard(
         self,
         host: str = "localhost",
@@ -297,8 +330,12 @@ class DashboardRunCommand(BaseCommand):
                     server_thread.start()
                     self.print_info(f"Web dashboard started in background at http://{host}:{port}")
 
-                    # Open browser
-                    webbrowser.open(f"http://{host}:{port}")
+                    # Ready 후 브라우저 오픈
+                    threading.Thread(
+                        target=self._open_browser_when_ready,
+                        args=(f"http://{host}:{port}", host, port),
+                        daemon=True,
+                    ).start()
 
                     # Keep main thread alive
                     try:
@@ -310,8 +347,12 @@ class DashboardRunCommand(BaseCommand):
                     self.print_info(f"Web dashboard running at http://{host}:{port}")
                     self.print_info("Press Ctrl+C to stop")
 
-                    # Open browser
-                    webbrowser.open(f"http://{host}:{port}")
+                    # Ready 후 브라우저 오픈 (별도 스레드)
+                    threading.Thread(
+                        target=self._open_browser_when_ready,
+                        args=(f"http://{host}:{port}", host, port),
+                        daemon=True,
+                    ).start()
 
                     try:
                         run_server()
@@ -398,17 +439,12 @@ class DashboardRunCommand(BaseCommand):
                                 self.print_info("")
 
                     if not detach and not dev:
-                        # Open browser after a short delay in a separate thread
-                        def open_browser() -> None:
-                            time.sleep(2)  # Wait for server to start
-                            try:
-                                webbrowser.open(dashboard_url)
-                                self.print_info(f"🔗 Opening browser to {dashboard_url}")
-                            except Exception as e:
-                                self.print_warning(f"Could not open browser automatically: {e}")
-                                self.print_info(f"Please open {dashboard_url} manually in your browser")
-
-                        threading.Thread(target=open_browser, daemon=True).start()
+                        # 서버 준비 완료 후 브라우저를 여는 스레드 실행
+                        threading.Thread(
+                            target=self._open_browser_when_ready,
+                            args=(dashboard_url, host, port),
+                            daemon=True,
+                        ).start()
 
                     try:
                         uvicorn.run("api.main:app", host=host, port=port, reload=dev)
