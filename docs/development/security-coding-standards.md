@@ -2,26 +2,31 @@
 
 ## Overview
 
-This document establishes security coding standards for the Yesman-Claude project to prevent vulnerabilities and ensure secure development practices. All team members must follow these guidelines to maintain a strong security posture.
+This document establishes security coding standards for the Yesman-Claude project to prevent vulnerabilities and ensure
+secure development practices. All team members must follow these guidelines to maintain a strong security posture.
 
 ## 🎯 Core Security Principles
 
 ### 1. Defense in Depth
+
 - Implement multiple security layers
 - Never rely on a single security control
 - Assume any component can be compromised
 
 ### 2. Principle of Least Privilege
+
 - Grant minimum necessary permissions
 - Use role-based access control (RBAC)
 - Regularly audit permissions
 
 ### 3. Input Validation and Sanitization
+
 - Validate all user inputs
 - Sanitize data before processing
 - Use allowlists over denylists
 
 ### 4. Secure by Default
+
 - Default configurations must be secure
 - Fail securely when errors occur
 - Security features should be enabled by default
@@ -31,6 +36,7 @@ This document establishes security coding standards for the Yesman-Claude projec
 ### Input Validation
 
 #### Required Validations
+
 ```python
 # ✅ GOOD: Proper input validation
 import re
@@ -66,6 +72,7 @@ def unsafe_session_name(name: str):
 ```
 
 #### File Path Validation
+
 ```python
 # ✅ GOOD: Secure path handling
 import os
@@ -93,6 +100,7 @@ def unsafe_path(user_path: str, base_dir: str):
 ### Authentication and Authorization
 
 #### Secure Token Handling
+
 ```python
 # ✅ GOOD: Secure JWT implementation
 from datetime import datetime, timedelta
@@ -132,6 +140,7 @@ def bad_token(user_data: dict):
 ```
 
 #### Permission Checks
+
 ```python
 # ✅ GOOD: Proper authorization
 from functools import wraps
@@ -169,6 +178,7 @@ async def unsafe_create_session(request: Request):
 ### SQL Injection Prevention
 
 #### Parameterized Queries
+
 ```python
 # ✅ GOOD: Parameterized queries
 async def get_user_sessions(user_id: int) -> List[dict]:
@@ -199,6 +209,7 @@ async def unsafe_get_sessions(user_id: str):
 ### Cross-Site Scripting (XSS) Prevention
 
 #### Output Encoding
+
 ```python
 # ✅ GOOD: Proper output encoding
 import html
@@ -227,6 +238,7 @@ def unsafe_template():
 ### Error Handling
 
 #### Secure Error Messages
+
 ```python
 # ✅ GOOD: Generic error messages
 import logging
@@ -261,6 +273,7 @@ async def unsafe_login(username: str, password: str):
 ### Cryptographic Practices
 
 #### Password Hashing
+
 ```python
 # ✅ GOOD: Secure password hashing
 from passlib.context import CryptContext
@@ -288,6 +301,7 @@ def unsafe_hash(password: str):
 ```
 
 #### Data Encryption
+
 ```python
 # ✅ GOOD: Proper encryption
 from cryptography.fernet import Fernet
@@ -320,6 +334,7 @@ def store_sensitive_data(data: str):
 ### 1. Path Traversal (Directory Traversal)
 
 **Vulnerability Example:**
+
 ```python
 # ❌ VULNERABLE
 @app.get("/files/{filename}")
@@ -331,6 +346,7 @@ async def get_file(filename: str):
 ```
 
 **Prevention:**
+
 ```python
 # ✅ SECURE
 @app.get("/files/{filename}")
@@ -358,6 +374,7 @@ async def get_file(filename: str):
 ### 2. Command Injection
 
 **Vulnerability Example:**
+
 ```python
 # ❌ VULNERABLE
 import subprocess
@@ -372,6 +389,7 @@ async def process_file(filename: str):
 ```
 
 **Prevention:**
+
 ```python
 # ✅ SECURE
 import subprocess
@@ -398,6 +416,7 @@ async def process_file(filename: str):
 ### 3. Insecure Direct Object Reference (IDOR)
 
 **Vulnerability Example:**
+
 ```python
 # ❌ VULNERABLE
 @app.get("/sessions/{session_id}")
@@ -409,6 +428,7 @@ async def get_session(session_id: int):
 ```
 
 **Prevention:**
+
 ```python
 # ✅ SECURE
 @app.get("/sessions/{session_id}")
@@ -429,6 +449,7 @@ async def get_session(session_id: int, current_user: User = Depends(get_current_
 ### Environment Variables
 
 #### Required Security Variables
+
 ```bash
 # .env.production
 JWT_SECRET_KEY=<strong-random-key-256-bits>
@@ -447,6 +468,7 @@ HSTS_MAX_AGE=31536000
 ```
 
 #### Secret Management
+
 ```python
 # ✅ GOOD: Environment-based secrets
 import os
@@ -471,6 +493,7 @@ JWT_SECRET = "hardcoded-secret-key"  # Never do this
 ### Security Headers
 
 #### FastAPI Security Headers
+
 ```python
 # ✅ GOOD: Security middleware
 from fastapi import FastAPI, Request
@@ -495,6 +518,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 ```
 
 ### CORS Configuration
+
 ```python
 # ✅ GOOD: Restrictive CORS
 from fastapi.middleware.cors import CORSMiddleware
@@ -520,6 +544,7 @@ app.add_middleware(
 ## 📋 Security Code Review Checklist
 
 ### Input Validation
+
 - [ ] All user inputs are validated
 - [ ] Input length limits are enforced
 - [ ] Character allowlists are used where appropriate
@@ -527,6 +552,7 @@ app.add_middleware(
 - [ ] Path traversal protection is in place
 
 ### Authentication & Authorization
+
 - [ ] Authentication is required for protected endpoints
 - [ ] Authorization checks are performed before actions
 - [ ] Tokens have appropriate expiration times
@@ -534,6 +560,7 @@ app.add_middleware(
 - [ ] Password policies are enforced
 
 ### Data Protection
+
 - [ ] Sensitive data is encrypted at rest
 - [ ] TLS/SSL is used for data in transit
 - [ ] Database credentials are protected
@@ -541,6 +568,7 @@ app.add_middleware(
 - [ ] Logs don't contain sensitive information
 
 ### Error Handling
+
 - [ ] Error messages don't reveal sensitive information
 - [ ] Stack traces are not exposed to users
 - [ ] Proper logging is implemented
@@ -548,6 +576,7 @@ app.add_middleware(
 - [ ] Rate limiting is implemented
 
 ### Dependencies
+
 - [ ] Third-party libraries are up-to-date
 - [ ] Vulnerability scans are performed
 - [ ] Dependency sources are trusted
@@ -557,16 +586,19 @@ app.add_middleware(
 ## 🛠️ Security Tools Integration
 
 ### Static Code Analysis
+
 - **Bandit**: Python security linting (integrated in pre-commit hooks)
 - **Semgrep**: Additional security pattern detection
 - **Safety**: Python dependency vulnerability checking
 
 ### Dynamic Testing
+
 - **OWASP ZAP**: Web application security testing
 - **Postman/Newman**: API security testing
 - **Custom security test suite**: Project-specific tests
 
 ### Dependency Monitoring
+
 - **GitHub Dependabot**: Automated dependency updates
 - **Snyk**: Continuous vulnerability monitoring
 - **pip-audit**: Python package vulnerability scanning
@@ -574,46 +606,54 @@ app.add_middleware(
 ## 📚 Additional Resources
 
 ### Security Standards
+
 - [OWASP Top 10](https://owasp.org/Top10/)
 - [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
 - [CWE - Common Weakness Enumeration](https://cwe.mitre.org/)
 
 ### Python Security
+
 - [Python Security Best Practices](https://python.org/dev/security/)
 - [Bandit Security Linter](https://bandit.readthedocs.io/)
 - [Python Cryptographic Authority](https://cryptography.io/)
 
 ### FastAPI Security
+
 - [FastAPI Security Documentation](https://fastapi.tiangolo.com/tutorial/security/)
 - [FastAPI OAuth2](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/)
 
 ## 🚨 Incident Response
 
 ### Security Incident Escalation
+
 1. **Immediate Response** (0-15 minutes)
+
    - Contain the threat
    - Document initial findings
    - Notify security team lead
 
-2. **Assessment** (15-60 minutes)
+1. **Assessment** (15-60 minutes)
+
    - Determine scope and impact
    - Identify affected systems
    - Begin forensic collection
 
-3. **Communication** (1-4 hours)
+1. **Communication** (1-4 hours)
+
    - Notify stakeholders
    - Prepare public communications if needed
    - Contact law enforcement if required
 
 ### Post-Incident Review
+
 - Root cause analysis
 - Security control improvements
 - Process refinements
 - Team training updates
 
----
+______________________________________________________________________
 
-**Last Updated**: 2025-01-11  
-**Version**: 1.0  
-**Review Schedule**: Quarterly  
+**Last Updated**: 2025-01-11\
+**Version**: 1.0\
+**Review Schedule**: Quarterly\
 **Next Review**: 2025-04-11

@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide explains how to configure and optimize the enhanced performance monitoring system in Yesman-Claude for different deployment scenarios and monitoring requirements.
+This guide explains how to configure and optimize the enhanced performance monitoring system in Yesman-Claude for
+different deployment scenarios and monitoring requirements.
 
 ## Configuration Options
 
@@ -339,6 +340,7 @@ def check_performance_thresholds(metrics: dict) -> bool:
 ### Common Configuration Problems
 
 1. **High Memory Usage**
+
    ```python
    # Problem: Too many samples retained
    # Solution: Reduce maxlen values
@@ -347,7 +349,8 @@ def check_performance_thresholds(metrics: dict) -> bool:
    }
    ```
 
-2. **CPU Overhead**
+1. **CPU Overhead**
+
    ```python
    # Problem: Too frequent measurements
    # Solution: Increase intervals
@@ -355,7 +358,8 @@ def check_performance_thresholds(metrics: dict) -> bool:
    event_bus._metrics_interval = 180.0    # 3 minutes
    ```
 
-3. **Queue Overflow**
+1. **Queue Overflow**
+
    ```python
    # Problem: Queue too small for event volume
    # Solution: Increase queue size or add workers
@@ -405,7 +409,7 @@ if DIAGNOSTIC_CONFIG['enable_detailed_logging']:
 - Monitor event bus queue health
 - Regular performance baseline comparisons
 
----
+______________________________________________________________________
 
 ## Configuration Reference
 
@@ -435,4 +439,5 @@ DEFAULT_CONFIG = {
 }
 ```
 
-This configuration guide provides comprehensive options for optimizing the monitoring system based on your specific deployment requirements and resource constraints.
+This configuration guide provides comprehensive options for optimizing the monitoring system based on your specific
+deployment requirements and resource constraints.

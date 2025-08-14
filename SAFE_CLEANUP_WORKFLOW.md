@@ -7,6 +7,7 @@
 2025년 8월 13일, `git clean -dfx` 명령으로 인해 다음 파일들이 삭제되었습니다:
 
 ### 삭제된 중요 파일들
+
 - `tauri-dashboard/src/lib/**` - Tauri 대시보드 핵심 라이브러리
 - `tauri-dashboard/static/` - 정적 자원
 - `tauri-dashboard/tests/` - 테스트 파일
@@ -14,12 +15,14 @@
 - 기타 임시 및 빌드 파일들
 
 ### 근본 원인
+
 - `.gitignore`의 글로벌 `lib/` 패턴이 Tauri의 `src/lib/` 디렉토리까지 영향을 미침
 - 안전한 정리 프로세스 없이 `git clean -dfx` 사용
 
 ## 🛡️ 예방 조치
 
 ### 1. .gitignore 개선 완료
+
 ```gitignore
 # =============================================================================
 # TAURI DASHBOARD PROTECTION
@@ -50,6 +53,7 @@
 ```
 
 ### 2. 안전한 Python lib 패턴
+
 ```gitignore
 # Python lib directories (SPECIFIC PATTERNS ONLY - DO NOT USE GLOBAL lib/)
 # IMPORTANT: Global lib/ pattern was causing Tauri dashboard files to be ignored
@@ -67,6 +71,7 @@ libs/**/lib/  # Python lib inside libs directory
 ## 📋 안전한 정리 프로세스
 
 ### 🔍 1단계: 사전 확인
+
 ```bash
 # 현재 git 상태 확인
 git status
@@ -79,6 +84,7 @@ git clean -n -d -x tauri-dashboard/
 ```
 
 ### 🎯 2단계: 선택적 정리
+
 ```bash
 # 안전한 선택적 정리 (권장)
 git clean -f -d -x --exclude=tauri-dashboard/
@@ -91,6 +97,7 @@ git clean -f -d -x "**/python/" "**/__pycache__/" "**/lib/" --exclude=tauri-dash
 ```
 
 ### ⚡ 3단계: 단계별 정리 (가장 안전)
+
 ```bash
 # 1. 로그 파일만 정리
 git clean -f -x "*.log"
@@ -143,12 +150,14 @@ find . -name "__pycache__" -not -path "./tauri-dashboard/*" -type d -exec rm -rf
 ### 즉시 복구 체크리스트
 
 1. **빌드 테스트**
+
    ```bash
    cd tauri-dashboard
    pnpm run build
    ```
 
-2. **누락 파일 확인**
+1. **누락 파일 확인**
+
    ```bash
    # 필수 디렉토리 확인
    ls -la src/lib/
@@ -157,11 +166,12 @@ find . -name "__pycache__" -not -path "./tauri-dashboard/*" -type d -exec rm -rf
    ls -la docs/
    ```
 
-3. **Git 히스토리에서 복구**
+1. **Git 히스토리에서 복구**
+
    ```bash
    # 특정 파일 복구
    git checkout HEAD -- tauri-dashboard/src/lib/
-   
+
    # 특정 커밋에서 복구
    git checkout <commit-hash> -- tauri-dashboard/src/lib/
    ```
@@ -169,16 +179,19 @@ find . -name "__pycache__" -not -path "./tauri-dashboard/*" -type d -exec rm -rf
 ### 완전 복구 프로세스
 
 1. **git log 확인**
+
    ```bash
    git log --oneline --name-only -- tauri-dashboard/src/lib/
    ```
 
-2. **마지막 정상 커밋 찾기**
+1. **마지막 정상 커밋 찾기**
+
    ```bash
    git show --name-only <commit-hash>
    ```
 
-3. **파일별 복구**
+1. **파일별 복구**
+
    ```bash
    git checkout <commit-hash> -- tauri-dashboard/src/lib/stores/health.ts
    git checkout <commit-hash> -- tauri-dashboard/src/lib/utils/api.ts
@@ -188,6 +201,7 @@ find . -name "__pycache__" -not -path "./tauri-dashboard/*" -type d -exec rm -rf
 ## 🔍 모니터링 및 검증
 
 ### 정기 검증 스크립트
+
 ```bash
 #!/bin/bash
 # check_tauri_integrity.sh
@@ -225,6 +239,7 @@ fi
 ```
 
 ### 자동화된 백업
+
 ```bash
 #!/bin/bash
 # backup_critical_files.sh
@@ -245,6 +260,7 @@ echo "백업 완료: $BACKUP_DIR"
 ## 📚 참고 자료
 
 ### Git Clean 옵션 설명
+
 - `-n, --dry-run`: 미리보기 (실제 삭제 안함)
 - `-f, --force`: 강제 실행
 - `-d`: 디렉토리도 포함
@@ -253,6 +269,7 @@ echo "백업 완료: $BACKUP_DIR"
 - `--exclude=pattern`: 특정 패턴 제외
 
 ### 안전한 대안 도구
+
 - `find` 명령어로 선택적 삭제
 - IDE의 정리 기능 사용
 - 프로젝트별 정리 스크립트 작성
@@ -260,10 +277,10 @@ echo "백업 완료: $BACKUP_DIR"
 ## 🚀 미래 개선 사항
 
 1. **CI/CD 파이프라인에 무결성 체크 추가**
-2. **Pre-commit hook으로 중요 파일 보호**
-3. **자동 백업 시스템 구축**
-4. **정리 작업 전 자동 알림 시스템**
+1. **Pre-commit hook으로 중요 파일 보호**
+1. **자동 백업 시스템 구축**
+1. **정리 작업 전 자동 알림 시스템**
 
----
+______________________________________________________________________
 
 **⚠️ 기억하세요**: `git clean -dfx`는 복구 불가능한 파일 삭제를 수행합니다. 항상 `-n` 옵션으로 미리 확인하고, 중요 파일은 백업하세요!

@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Yesman-Claude project includes a comprehensive performance monitoring system that provides detailed insights into system resource usage, component performance, and bottleneck identification. This document describes the enhanced monitoring capabilities implemented in the AsyncEventBus and AsyncClaudeMonitor components.
+The Yesman-Claude project includes a comprehensive performance monitoring system that provides detailed insights into
+system resource usage, component performance, and bottleneck identification. This document describes the enhanced
+monitoring capabilities implemented in the AsyncEventBus and AsyncClaudeMonitor components.
 
 ## Key Features
 
@@ -31,13 +33,14 @@ print(f"Overflow events: {metrics.queue_overflow_events}")
 The `AsyncClaudeMonitor` tracks detailed timing metrics for each component:
 
 - **Content Capture**: Time spent capturing pane content
-- **Claude Status Check**: Process status verification timing  
+- **Claude Status Check**: Process status verification timing
 - **Prompt Detection**: Time to analyze content for prompts
 - **Content Processing**: Overall content processing duration
 - **Response Sending**: Time to send responses to Claude
 - **Automation Analysis**: Context analysis and automation detection
 
 Each component tracks:
+
 - Average, median, P95, and P99 response times
 - Peak response times
 - Error rates and success/failure tracking
@@ -128,9 +131,9 @@ self._component_network_io: dict[str, deque] = {
 The monitoring system automatically tracks performance during normal operation:
 
 1. **Timing Measurement**: Each component operation is timed using `time.perf_counter()`
-2. **Memory Measurement**: Memory usage measured before/after operations using `psutil`
-3. **CPU Estimation**: CPU usage estimated based on execution time and system load
-4. **Network Tracking**: Network I/O deltas measured using `psutil.net_io_counters()`
+1. **Memory Measurement**: Memory usage measured before/after operations using `psutil`
+1. **CPU Estimation**: CPU usage estimated based on execution time and system load
+1. **Network Tracking**: Network I/O deltas measured using `psutil.net_io_counters()`
 
 ### Metrics Reporting
 
@@ -164,6 +167,7 @@ The system automatically detects performance bottlenecks and logs warnings for:
 - **Network Usage**: Components with > 1MB/s network throughput
 
 Example log output:
+
 ```
 WARNING - Bottleneck in content_capture: avg=150.5ms, p95=200.1ms, errors=0, mem=2.5MB, cpu=25.3%, net=1.2MB/s
 ```
@@ -264,24 +268,24 @@ Performance metrics are included in the quality gates report for continuous moni
 If components show high memory usage:
 
 1. Check for memory leaks in component logic
-2. Review deque maxlen settings to prevent excessive sample retention
-3. Monitor memory growth over time using baseline comparison
+1. Review deque maxlen settings to prevent excessive sample retention
+1. Monitor memory growth over time using baseline comparison
 
 ### High CPU Usage
 
 For high CPU usage components:
 
 1. Profile the component code for CPU-intensive operations
-2. Consider moving blocking operations to thread pools
-3. Review async/await usage for proper non-blocking patterns
+1. Consider moving blocking operations to thread pools
+1. Review async/await usage for proper non-blocking patterns
 
 ### Network Performance Issues
 
 For network-related bottlenecks:
 
 1. Monitor network I/O patterns for inefficient operations
-2. Check for excessive network calls in automation components
-3. Review prompt detection logic for network dependencies
+1. Check for excessive network calls in automation components
+1. Review prompt detection logic for network dependencies
 
 ## Future Enhancements
 
@@ -293,7 +297,7 @@ Planned improvements include:
 - **Comparative Analysis**: Performance comparison across different sessions
 - **Resource Optimization**: Automatic resource usage optimization suggestions
 
----
+______________________________________________________________________
 
 ## API Reference
 
@@ -315,15 +319,16 @@ Planned improvements include:
 
 ### EventMetrics Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `max_queue_depth` | int | Maximum queue depth in current interval |
-| `queue_depth_history` | list[int] | Historical queue depth samples |
-| `queue_utilization_percent` | float | Current queue utilization percentage |
-| `queue_backlog_duration_ms` | float | Estimated time to process current backlog |
-| `peak_queue_depth` | int | Peak queue depth since monitoring started |
-| `queue_overflow_events` | int | Number of queue overflow events |
+| Field                       | Type      | Description                               |
+| --------------------------- | --------- | ----------------------------------------- |
+| `max_queue_depth`           | int       | Maximum queue depth in current interval   |
+| `queue_depth_history`       | list[int] | Historical queue depth samples            |
+| `queue_utilization_percent` | float     | Current queue utilization percentage      |
+| `queue_backlog_duration_ms` | float     | Estimated time to process current backlog |
+| `peak_queue_depth`          | int       | Peak queue depth since monitoring started |
+| `queue_overflow_events`     | int       | Number of queue overflow events           |
 
----
+______________________________________________________________________
 
-This enhanced monitoring system provides comprehensive visibility into system performance, enabling proactive optimization and bottleneck identification in the Yesman-Claude project.
+This enhanced monitoring system provides comprehensive visibility into system performance, enabling proactive
+optimization and bottleneck identification in the Yesman-Claude project.
