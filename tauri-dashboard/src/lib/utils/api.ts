@@ -43,6 +43,10 @@ export interface PerformanceMetrics {
   };
 }
 
+// Tauri 환경 감지 (웹에선 false)
+// @ts-ignore
+const isTauri = typeof window !== 'undefined' && typeof window.__TAURI_IPC__ === 'function' && typeof window.__TAURI__ === 'object';
+
 // API utility class
 export class ApiClient {
   private static instance: ApiClient;
@@ -54,8 +58,35 @@ export class ApiClient {
     return ApiClient.instance;
   }
 
+  // 공통 fetch 래퍼 (웹 전용)
+  private async fetchJson<T>(url: string, init?: RequestInit): Promise<ApiResponse<T>> {
+    try {
+      const res = await fetch(url, init);
+      if (!res.ok) {
+        const text = await res.text();
+        return { success: false, error: text || `HTTP ${res.status}`, timestamp: Date.now() };
+      }
+      const data = (await res.json()) as T;
+      return { success: true, data, timestamp: Date.now() };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: Date.now(),
+      };
+    }
+  }
+
   // Generic Tauri command invocation with error handling
   async invoke<T>(command: string, args?: Record<string, any>): Promise<ApiResponse<T>> {
+    if (!isTauri) {
+      // 웹 환경에서는 Tauri invoke를 호출할 수 없음
+      return {
+        success: false,
+        error: 'Not running in Tauri environment',
+        timestamp: Date.now(),
+      };
+    }
     try {
       const result = await invoke(command, args);
       return {
@@ -75,11 +106,51 @@ export class ApiClient {
 
   // Health check endpoints
   async getHealthStatus(): Promise<ApiResponse<HealthStatus>> {
-    return this.invoke<HealthStatus>('get_health_status');
+    if (isTauri) {
+      // Tauri 환경에서는 기존 명령 사용 (정의되어 있다면)
+      return this.invoke<HealthStatus>('get_health_status');
+    }
+    // 웹 환경: FastAPI 대시보드 헬스 엔드포인트로 폴백하고 HealthStatus 형태로 매핑
+    const res = await this.fetchJson<any>('/api/dashboard/health');
+    if (!res.success || !res.data) return { success: false, error: res.error || 'Failed to fetch health', timestamp: Date.now() };
+
+    // 매핑 로직: overall_score와 categories.status를 HealthStatus로 변환
+    const score: number = Number(res.data.overall_score ?? 0);
+    const overall: HealthStatus['overall'] = score >= 80 ? 'healthy' : score >= 50 ? 'warning' : 'error';
+
+    const components: HealthStatus['components'] = {};
+    const categories = res.data.categories || {};
+    const mapStatus = (s: string): 'healthy' | 'warning' | 'error' => {
+      const v = String(s || '').toLowerCase();
+      if (v === 'good' || v === 'excellent' || v === 'ok') return 'healthy';
+      if (v === 'warning' || v === 'warn') return 'warning';
+      if (v === 'error' || v === 'critical' || v === 'bad') return 'error';
+      return 'healthy';
+    };
+    for (const key of Object.keys(categories)) {
+      const st = mapStatus(categories[key]?.status);
+      components[key] = {
+        status: st,
+        message: categories[key]?.message,
+        lastCheck: new Date(),
+      };
+    }
+
+    return {
+      success: true,
+      data: { overall, components, lastUpdated: new Date() },
+      timestamp: Date.now(),
+    };
   }
 
-  async runHealthCheck(): Promise<ApiResponse<any>> {
-    return this.invoke('run_health_check');
+  // 세션 목록 (웹: REST, Tauri: 가능 시 invoke)
+  async getSessions(): Promise<ApiResponse<any[]>> {
+    if (isTauri) {
+      // Tauri 측에 명령이 없을 수 있으므로 우선 REST 사용
+      // return this.invoke<any[]>('get_sessions');
+      return this.fetchJson<any[]>('/api/sessions');
+    }
+    return this.fetchJson<any[]>('/api/sessions');
   }
 
   // Performance monitoring

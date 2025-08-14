@@ -124,3 +124,60 @@ export function stopHealthMonitoring() {
 if (typeof window !== 'undefined') {
   startHealthMonitoring();
 }
+
+// --- Backward-compatibility wrappers for layout usage ---
+import { api } from '$lib/utils/api';
+
+let onStatusChangeCallback: ((status: 'healthy' | 'warning' | 'error' | 'unknown') => void) | null = null;
+
+export async function check(): Promise<void> {
+  try {
+    const res = await api.getHealthStatus();
+    if (res.success && res.data) {
+      let previous: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown';
+      const unsubscribe = healthState.subscribe(v => (previous = v));
+      unsubscribe();
+
+      // 최신 상태 반영
+      health.set({ ...res.data, lastUpdated: new Date(res.timestamp) });
+
+      // 상태 변경 콜백 호출
+      if (onStatusChangeCallback) {
+        let current: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown';
+        const unsub2 = healthState.subscribe(v => (current = v));
+        unsub2();
+        if (current !== previous) onStatusChangeCallback(current);
+      }
+    }
+  } catch {
+    // 오류 시 상태를 warning으로 표시하고 콜백 알림
+    let previous: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown';
+    const unsubscribe = healthState.subscribe(v => (previous = v));
+    unsubscribe();
+
+    health.update(cur => ({ ...cur, overall: 'warning', lastUpdated: new Date() }));
+    if (onStatusChangeCallback) onStatusChangeCallback('warning');
+  }
+}
+
+export function startChecking(options?: { interval?: number; onStatusChange?: (status: 'healthy' | 'warning' | 'error' | 'unknown') => void }): void {
+  const interval = options?.interval ?? 30000;
+  onStatusChangeCallback = options?.onStatusChange ?? null;
+
+  // 즉시 한 번 체크
+  void check();
+
+  // 주기적 체크
+  if (healthCheckInterval) clearInterval(healthCheckInterval);
+  healthCheckInterval = setInterval(() => void check(), interval);
+}
+
+export function stopChecking(): void {
+  onStatusChangeCallback = null;
+  stopHealthMonitoring();
+}
+
+// 기존 호출부 호환: health.startChecking / health.check / health.stopChecking 지원
+(health as unknown as Record<string, unknown>).startChecking = startChecking;
+(health as unknown as Record<string, unknown>).check = check;
+(health as unknown as Record<string, unknown>).stopChecking = stopChecking;

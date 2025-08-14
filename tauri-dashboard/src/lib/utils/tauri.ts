@@ -22,8 +22,8 @@ export const pythonBridge = {
 	// Session Management - Use centralized API client
 	get_sessions: async () => {
 		const response = await api.getSessions();
-		if (response.error) {
-			throw new Error(response.error);
+		if (response.error || !response.success) {
+			throw new Error(response.error || 'Failed to fetch sessions');
 		}
 		return response.data || [];
 	},

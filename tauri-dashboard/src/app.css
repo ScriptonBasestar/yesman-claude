@@ -2,14 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Inter 폰트 로드 */
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/inter.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
+/* 시스템/기본 폰트 사용으로 웹 폰트 의존 제거 */
 
 @layer base {
   html, body {
@@ -84,11 +77,7 @@
     @apply badge-error;
   }
 
-  .status-badge.active {
-    @apply badge-primary;
-  }
-
-  .status-badge.ready {
+  .status-badge.unknown {
     @apply badge-ghost;
   }
 
