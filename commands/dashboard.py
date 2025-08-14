@@ -238,7 +238,7 @@ class DashboardRunCommand(BaseCommand):
         - host가 0.0.0.0 또는 :: 인 경우, 브라우저 접속 확인은 127.0.0.1로 시도한다.
         """
         end_time = time.time() + timeout
-        target_host = "127.0.0.1" if host in ("0.0.0.0", "::") else host
+        target_host = "127.0.0.1" if host in {"0.0.0.0", "::"} else host  # noqa: S104
         while time.time() < end_time:
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -247,8 +247,10 @@ class DashboardRunCommand(BaseCommand):
                 sock.close()
                 if result == 0:
                     return True
-            except Exception:
-                pass
+            except Exception as e:
+                import logging
+
+                logging.getLogger(__name__).debug("Port check failed: %s", e)
             time.sleep(poll_interval)
         return False
 

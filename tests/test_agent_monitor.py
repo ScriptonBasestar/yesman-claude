@@ -506,7 +506,8 @@ class TestChaosEngineeringAgentMonitor:
         # Simulate network timeout
         def failing_list_agents():
             if chaos_scenario["failure_conditions"]["packet_loss_percent"] > 50:
-                raise TimeoutError("Network timeout during chaos test")
+                msg = "Network timeout during chaos test"
+                raise TimeoutError(msg)
             return []
 
         mock_pool.list_agents.side_effect = failing_list_agents

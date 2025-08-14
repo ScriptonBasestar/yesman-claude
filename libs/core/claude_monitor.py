@@ -564,18 +564,14 @@ class ClaudeMonitor:
         if self.async_logger:
             return
 
-        config = AsyncLoggerConfig(
+        self.async_logger = AsyncLogger(
             name=f"yesman.claude_monitor.{self.session_name}",
-            level=LogLevel.INFO,
+            min_level=LogLevel.INFO,
             max_queue_size=5000,
             batch_size=25,
-            flush_interval=3.0,
-            enable_console=False,  # Use standard logger for console
-            enable_file=True,
-            enable_batch_processor=True,
+            batch_timeout=3.0,
+            enable_batch_processing=True,
         )
-
-        self.async_logger = AsyncLogger(config)
         await self.async_logger.start()
         self.logger.info("Async logging system started")
 

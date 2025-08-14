@@ -12,6 +12,8 @@ integrating all components including visualization, alerting, and quality gates.
 import asyncio
 import logging
 
+from scripts.quality_gates_performance import QualityGatesPerformanceChecker
+
 from libs.core.async_event_bus import get_event_bus
 from libs.dashboard.monitoring_config_manager import (
     ConfigSection,
@@ -24,7 +26,6 @@ from libs.dashboard.monitoring_integration import (
     PerformanceAlert,
     get_monitoring_dashboard,
 )
-from scripts.quality_gates_performance import QualityGatesPerformanceChecker
 
 
 class MonitoringDashboardSystem:
