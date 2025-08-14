@@ -585,7 +585,8 @@ class ClaudeMonitor:
     def _async_log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
         """Log message to async logger (safe for sync contexts)."""
         if self.async_logger:
-            self.async_logger.log(level, message, **kwargs)
+            # AsyncLogger doesn't have sync log method, use standard logger
+            self.logger.log(level.level_value, message)
         else:
             # Fallback to standard logger
             self.logger.log(level.level_value, message)

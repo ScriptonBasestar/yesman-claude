@@ -1251,8 +1251,7 @@ class AsyncClaudeMonitor:
                 min_level=LogLevel.INFO,
                 enable_batch_processing=True,
                 batch_size=25,
-                enable_console=False,
-                enable_file=True,
+                batch_timeout=3.0,
             )
             await self.async_logger.start()
             self.logger.info("Async logging system started")

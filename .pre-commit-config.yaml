@@ -65,7 +65,7 @@ repos:
     rev: 1.8.6
     hooks:
       - id: bandit
-        args: [-s, B101,B404,B603,B607,B602, --severity-level, medium, --quiet]
+        args: [-r, -s, B101,B404,B603,B607,B602, --severity-level, medium, --quiet]
         exclude: ^(tests/|scripts/|debug/|docs/examples/|test_style_violation\.py)
         files: ^(libs/|commands/|api/)
         stages: [pre-push]
