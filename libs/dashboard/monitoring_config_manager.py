@@ -11,6 +11,7 @@ alert rules, and dashboard settings with hot-reload capabilities.
 
 import asyncio
 import json
+import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from enum import Enum
@@ -196,6 +197,7 @@ class MonitoringConfigManager:
                         "event_subtype": "monitoring_config_reloaded",
                         "config_path": str(self.config_path),
                     },
+                    timestamp=time.time(),
                     source="monitoring_config_manager",
                     priority=EventPriority.NORMAL,
                 )
@@ -382,6 +384,7 @@ class MonitoringConfigManager:
                     "config_path": str(self.config_path),
                     "version": self.config.version,
                 },
+                timestamp=time.time(),
                 source="monitoring_config_manager",
                 priority=EventPriority.LOW,
             )

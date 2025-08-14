@@ -87,7 +87,7 @@ class AsyncClaudeMonitor:
             "automation_analysis": deque(maxlen=100),
         }
         self._component_peak_times: dict[str, float] = {}
-        self._component_error_counts: dict[str, int] = {component: 0 for component in self._component_timings}
+        self._component_error_counts: dict[str, int] = dict.fromkeys(self._component_timings, 0)
 
         # Enhanced memory usage tracking per component
         self._component_memory_usage: dict[str, deque] = {component: deque(maxlen=50) for component in self._component_timings}
@@ -247,7 +247,7 @@ class AsyncClaudeMonitor:
         """
         try:
             memory_info = self._process.memory_info()
-            return memory_info.rss / (1024 * 1024)  # Convert bytes to MB
+            return float(memory_info.rss / (1024 * 1024))  # Convert bytes to MB
         except Exception:
             self.logger.exception("Error measuring memory usage")
             return 0.0
@@ -261,7 +261,7 @@ class AsyncClaudeMonitor:
         try:
             # Get process CPU percentage (interval=None uses cached values for efficiency)
             cpu_percent = self._process.cpu_percent(interval=None)
-            return cpu_percent
+            return float(cpu_percent)
         except Exception:
             self.logger.exception("Error measuring CPU usage")
             return 0.0
@@ -288,7 +288,7 @@ class AsyncClaudeMonitor:
             # This is a rough approximation - actual CPU usage depends on thread scheduling
             if execution_duration > 0.001:  # Only calculate for operations taking > 1ms
                 estimated_cpu = min(system_cpu, (execution_duration / 1.0) * system_cpu)
-                return estimated_cpu
+                return float(estimated_cpu)
 
             return 0.0
         except Exception:
@@ -350,7 +350,7 @@ class AsyncClaudeMonitor:
                 }
 
             # Memory metrics
-            memory_deltas = self._component_memory_usage.get(component, [])
+            memory_deltas: list[Any] = list(self._component_memory_usage.get(component, []))
             if memory_deltas:
                 memory_list = list(memory_deltas)
                 positive_deltas = [m for m in memory_list if m > 0]
@@ -371,7 +371,7 @@ class AsyncClaudeMonitor:
                 }
 
             # CPU metrics
-            cpu_usage = self._component_cpu_usage.get(component, [])
+            cpu_usage: list[Any] = list(self._component_cpu_usage.get(component, []))
             if cpu_usage:
                 cpu_list = list(cpu_usage)
                 cpu_metrics = {
@@ -391,7 +391,7 @@ class AsyncClaudeMonitor:
                 }
 
             # Network I/O metrics
-            network_io_data = self._component_network_io.get(component, [])
+            network_io_data: list[Any] = list(self._component_network_io.get(component, []))
             network_patterns = self._component_network_patterns.get(component, {})
             if network_io_data:
                 io_list = list(network_io_data)
@@ -665,7 +665,7 @@ class AsyncClaudeMonitor:
             # Run the potentially blocking pane capture in a thread pool
             loop = asyncio.get_event_loop()
             content = await loop.run_in_executor(None, cast("Any", self.session_manager).capture_pane_content)
-            return cast(str, content)
+            return cast("str", content)
         except Exception:
             self.logger.exception("Error capturing pane content")
             return ""
@@ -680,7 +680,7 @@ class AsyncClaudeMonitor:
             # Run potentially blocking process check in thread pool
             loop = asyncio.get_event_loop()
             is_running = await loop.run_in_executor(None, cast("Any", self.process_controller).is_claude_running)
-            return cast(bool, is_running)
+            return cast("bool", is_running)
         except Exception:
             self.logger.exception("Error checking Claude status")
             return False
@@ -1315,9 +1315,8 @@ class AsyncClaudeMonitor:
                 # If we're already in an async context, create a task
                 asyncio.create_task(self.start_monitoring_async())
                 return True
-            else:
-                # If not in async context, run until complete
-                return loop.run_until_complete(self.start_monitoring_async())
+            # If not in async context, run until complete
+            return loop.run_until_complete(self.start_monitoring_async())
         except RuntimeError:
             # No event loop, create new one
             return asyncio.run(self.start_monitoring_async())
@@ -1333,9 +1332,8 @@ class AsyncClaudeMonitor:
                 # If we're already in an async context, create a task
                 asyncio.create_task(self.stop_monitoring_async())
                 return True
-            else:
-                # If not in async context, run until complete
-                return loop.run_until_complete(self.stop_monitoring_async())
+            # If not in async context, run until complete
+            return loop.run_until_complete(self.stop_monitoring_async())
         except RuntimeError:
             # No event loop, create new one
             return asyncio.run(self.stop_monitoring_async())
@@ -1363,8 +1361,7 @@ def create_claude_monitor(
     """
     if prefer_async:
         return AsyncClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager, event_bus=event_bus)
-    else:
-        # Import and return legacy monitor for backward compatibility
-        from .claude_monitor import ClaudeMonitor
+    # Import and return legacy monitor for backward compatibility
+    from .claude_monitor import ClaudeMonitor
 
-        return ClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager)
+    return ClaudeMonitor(session_manager=session_manager, process_controller=process_controller, status_manager=status_manager)

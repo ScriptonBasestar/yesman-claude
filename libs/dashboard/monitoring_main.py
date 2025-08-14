@@ -11,6 +11,7 @@ integrating all components including visualization, alerting, and quality gates.
 
 import asyncio
 import logging
+from dataclasses import asdict
 
 from scripts.quality_gates_performance import QualityGatesPerformanceChecker
 
@@ -155,7 +156,7 @@ class MonitoringDashboardSystem:
         # Apply initial configuration
         config = self.config_manager.config
         self._handle_threshold_change(config.thresholds)
-        self._handle_dashboard_change(config.dashboard)
+        self._handle_dashboard_change(asdict(config.dashboard))
         self._handle_baseline_change(config.baselines)
 
         # Start monitoring dashboard
@@ -257,7 +258,7 @@ class MonitoringDashboardSystem:
             if self._evaluate_alert_condition(alert, rule.condition):
                 # Execute alert actions
                 for action in rule.actions:
-                    self._execute_alert_action(action, alert, rule)
+                    self._execute_alert_action(action, alert, asdict(rule))
 
     def _evaluate_alert_condition(self, alert: PerformanceAlert, condition: str) -> bool:
         """Evaluate alert condition.
@@ -295,13 +296,13 @@ class MonitoringDashboardSystem:
             rule: Alert rule configuration
         """
         if action == "log":
-            self.logger.error("Alert Rule '%s' triggered: %s", rule.name, alert.message)
+            self.logger.error("Alert Rule '%s' triggered: %s", rule.get("name", "Unknown"), alert.message)
         elif action == "dashboard_notification":
             # Dashboard notifications are handled by the event bus
             pass
         elif action == "email":
             # Email notification would be implemented here
-            self.logger.info("Email notification would be sent for: %s", rule.name)
+            self.logger.info("Email notification would be sent for: %s", rule.get("name", "Unknown"))
 
     async def get_system_status(self) -> dict:
         """Get current system status.

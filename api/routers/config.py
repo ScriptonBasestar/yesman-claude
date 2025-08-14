@@ -40,9 +40,9 @@ def get_app_config() -> object:
         raise HTTPException(status_code=500, detail=f"Failed to get config: {e!s}")
 
 
-# TODO(config): POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
-# See: https://github.com/project/yesman/issues/config-save
-#       YesmanConfig에 save 메서드를 추가해야 합니다.
+# FIXME(config): POST 엔드포인트를 만들어 YesmanConfig에 저장하는 로직이 필요합니다.
+# Issue: https://github.com/project/yesman/issues/config-save
+# Action: YesmanConfig에 save 메서드를 추가해야 합니다.
 @router.post("/config", status_code=204)
 def save_app_config(config: AppConfig) -> None:
     """애플리케이션 설정을 저장합니다.

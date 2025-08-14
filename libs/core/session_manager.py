@@ -5,7 +5,7 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 import libtmux
 
@@ -17,9 +17,6 @@ from libs.tmux_manager import TmuxManager
 from libs.utils import ensure_log_directory
 
 # Avoid circular import
-if TYPE_CHECKING:
-    pass
-
 from .models import PaneInfo, SessionInfo, TaskPhase, WindowInfo
 from .progress_tracker import ProgressAnalyzer
 

@@ -442,7 +442,7 @@ class SecurityMetricsIntegration:
         scan_rt = self._extract_metric_average(during_scan, "component_response_times")
 
         # Calculate impact percentage
-        impact_percent = 0
+        impact_percent = 0.0
         if baseline_rt > 0:
             impact_percent = ((scan_rt - baseline_rt) / baseline_rt) * 100
 
@@ -711,12 +711,11 @@ class SecurityMetricsIntegration:
         """
         if impact > 50:
             return f"Critical: Security scans severely impact {component}. Consider scheduling scans during low-traffic periods."
-        elif impact > 20:
+        if impact > 20:
             return f"Warning: Security scans moderately impact {component}. Consider optimizing scan patterns or caching results."
-        elif impact > 10:
+        if impact > 10:
             return f"Advisory: Security scans have minor impact on {component}. Monitor for trends."
-        else:
-            return f"Optimal: Security scans have minimal impact on {component}."
+        return f"Optimal: Security scans have minimal impact on {component}."
 
     async def _publish_correlation_summary(
         self,
@@ -749,7 +748,7 @@ class SecurityMetricsIntegration:
         Returns:
             Security metrics summary
         """
-        summary = {
+        summary: dict[str, Any] = {
             "components": {},
             "vulnerabilities": {},
             "correlations": {},
@@ -770,7 +769,7 @@ class SecurityMetricsIntegration:
 
         # Summarize vulnerabilities
         for component, vulns in self._vulnerability_inventory.items():
-            severity_counts = {}
+            severity_counts: dict[str, int] = {}
             for vuln in vulns:
                 severity = vuln["severity"]
                 severity_counts[severity] = severity_counts.get(severity, 0) + 1
@@ -791,7 +790,7 @@ class SecurityMetricsIntegration:
         current_time = time.time()
 
         # Prepare time series data for charts
-        time_series = {
+        time_series: dict[str, list[Any]] = {
             "scan_times": [],
             "violation_counts": [],
             "false_positive_rates": [],

@@ -279,9 +279,7 @@ async def startup_event() -> None:  # noqa: RUF029
     _ = task  # Keep reference to prevent garbage collection
 
     # Start WebSocket connection manager background tasks
-    from api.routers.websocket_router import manager
-
-    manager.start_background_tasks()
+    websocket_router.manager.start_background_tasks()
 
 
 # Shutdown event

@@ -55,8 +55,8 @@ class IntelligentTroubleshootingEngine:
         """Initialize the troubleshooting engine."""
         self.monitoring = get_monitoring_dashboard()
         self.troubleshooting_guides = self._load_troubleshooting_database()
-        self.user_session_context = {}
-        self.execution_history = []
+        self.user_session_context: dict[str, Any] = {}
+        self.execution_history: list[dict[str, Any]] = []
         self.project_root = Path(__file__).parent.parent.parent
 
     def _load_troubleshooting_database(self) -> list[TroubleshootingGuide]:
@@ -300,12 +300,12 @@ class IntelligentTroubleshootingEngine:
             await self._check_metric_based_issues(dashboard_data, identified_problems)
 
             # Sort by priority score (highest first)
-            identified_problems.sort(key=lambda x: x["priority_score"], reverse=True)
+            identified_problems.sort(key=lambda x: float(x["priority_score"]) if "priority_score" in x and isinstance(x["priority_score"], (int, float)) else 0, reverse=True)
 
             return identified_problems
 
         except Exception as e:
-            return [{"error": f"Failed to diagnose issues: {str(e)}", "guide": None, "context": {}, "automated_steps_available": 0, "estimated_resolution_time": 0, "priority_score": 0}]
+            return [{"error": f"Failed to diagnose issues: {e!s}", "guide": None, "context": {}, "automated_steps_available": 0, "estimated_resolution_time": 0, "priority_score": 0}]
 
     async def _check_metric_based_issues(self, dashboard_data: dict, existing_problems: list) -> None:
         """Check for issues based on metrics that may not have triggered alerts yet."""
@@ -408,7 +408,10 @@ class IntelligentTroubleshootingEngine:
         current_value = metric_data.get("current", 0)
         average_value = metric_data.get("average", 0)
 
-        return current_value > metric_threshold["current"] or average_value > metric_threshold["average"]
+        current_threshold = metric_threshold.get("current", float("inf")) if isinstance(metric_threshold, dict) else float("inf")
+        average_threshold = metric_threshold.get("average", float("inf")) if isinstance(metric_threshold, dict) else float("inf")
+        result: bool = current_value > current_threshold or average_value > average_threshold
+        return result
 
     def _estimate_resolution_time(self, guide: TroubleshootingGuide) -> int:
         """Estimate resolution time in minutes."""
@@ -471,7 +474,7 @@ class IntelligentTroubleshootingEngine:
         Returns:
             Dictionary with execution results
         """
-        results = {
+        results: dict[str, Any] = {
             "guide_id": guide.problem_id,
             "steps_executed": [],
             "steps_failed": [],
@@ -518,7 +521,7 @@ class IntelligentTroubleshootingEngine:
                     results["manual_steps_required"].append({"title": step.title, "description": step.description, "command": step.command, "safety_level": step.safety_level})
 
             except Exception as e:
-                results["steps_failed"].append({"step": step.title, "error": f"Execution error: {str(e)}", "command": step.command})
+                results["steps_failed"].append({"step": step.title, "error": f"Execution error: {e!s}", "command": step.command})
 
         # Determine resolution status
         if not results["steps_failed"] and not results["manual_steps_required"]:
@@ -589,12 +592,11 @@ class IntelligentTroubleshootingEngine:
         try:
             if "Check for Resource Bottlenecks" in step.title:
                 return await self._check_resource_bottlenecks()
-            elif "Test API Endpoints" in step.title:
+            if "Test API Endpoints" in step.title:
                 return await self._test_api_endpoints()
-            elif "Check File Permissions" in step.title:
+            if "Check File Permissions" in step.title:
                 return await self._check_file_permissions()
-            else:
-                return {"success": True, "message": "Internal step completed"}
+            return {"success": True, "message": "Internal step completed"}
 
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -705,4 +707,4 @@ class IntelligentTroubleshootingEngine:
             }
 
         except Exception as e:
-            return {"error": f"Failed to get health summary: {str(e)}", "health_score": 0, "timestamp": time.time()}
+            return {"error": f"Failed to get health summary: {e!s}", "health_score": 0, "timestamp": time.time()}

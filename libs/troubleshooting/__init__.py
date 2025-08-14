@@ -17,6 +17,6 @@ from .troubleshooting_engine import (
 
 __all__ = [
     "IntelligentTroubleshootingEngine",
-    "TroubleshootingStep",
     "TroubleshootingGuide",
+    "TroubleshootingStep",
 ]

@@ -473,10 +473,9 @@ class AsyncEventBus:
         try:
             if asyncio.iscoroutinefunction(handler):
                 return await handler(event)
-            else:
-                # Run sync handler in thread pool to avoid blocking
-                loop = asyncio.get_event_loop()
-                return await loop.run_in_executor(None, handler, event)
+            # Run sync handler in thread pool to avoid blocking
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None, handler, event)
 
         except Exception as e:
             self._metrics.handler_errors += 1
@@ -622,8 +621,7 @@ class AsyncEventBus:
         """
         if event_type is not None:
             return len(self._subscribers.get(event_type, []))
-        else:
-            return sum(len(handlers) for handlers in self._subscribers.values())
+        return sum(len(handlers) for handlers in self._subscribers.values())
 
     def is_running(self) -> bool:
         """Check if the event bus is currently running."""
