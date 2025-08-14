@@ -270,7 +270,7 @@ class AsyncConversionTestSuite:
 
         except Exception as e:
             execution_time = time.perf_counter() - start_time
-            error_msg = f"{type(e).__name__}: {str(e)}"
+            error_msg = f"{type(e).__name__}: {e!s}"
 
             self.results.append(TestResult(test_name=test_name, success=False, execution_time=execution_time, error_message=error_msg, details={"traceback": traceback.format_exc()}))
 

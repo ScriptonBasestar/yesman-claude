@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from libs.core.content_collector import ContentCollector
+from libs.core.content_collector import ClaudeContentCollector as ContentCollector
 from libs.core.prompt_detector import ClaudePromptDetector
 from libs.core.session_manager import SessionManager
 from libs.dashboard.renderers.optimizations import RenderCache

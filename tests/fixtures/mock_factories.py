@@ -620,10 +620,10 @@ class ChaosTestRunner:
 
 
 __all__ = [
+    "ChaosTestRunner",
     "ComponentMockFactory",
+    "EnhancedTestDataFactory",
     "ManagerMockFactory",
     "PatchContextFactory",
-    "EnhancedTestDataFactory",
     "PerformanceAlertFactory",
-    "ChaosTestRunner",
 ]

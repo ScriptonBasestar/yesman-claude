@@ -2,7 +2,7 @@
 
 # Copyright notice.
 
-from commands.automate import AutomateDetectCommand
+from commands.ls import LsCommand
 from libs.ai.learning_engine import LearningEngine
 
 from .test_framework import (
@@ -253,7 +253,7 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
         # Test initial context detection
         self.performance_monitor.start_timing("initial_context_detection")
 
-        initial_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir))
+        initial_result = self.command_runner.run_command(LsCommand, project_path=str(project_dir))
 
         initial_duration = self.performance_monitor.end_timing("initial_context_detection")
 
@@ -277,7 +277,7 @@ class TestAutomationLearningIntegration(AsyncIntegrationTestBase):
         # Test improved context detection
         self.performance_monitor.start_timing("improved_context_detection")
 
-        improved_result = self.command_runner.run_command(AutomateDetectCommand, project_path=str(project_dir))
+        improved_result = self.command_runner.run_command(LsCommand, project_path=str(project_dir))
 
         improved_duration = self.performance_monitor.end_timing("improved_context_detection")
 

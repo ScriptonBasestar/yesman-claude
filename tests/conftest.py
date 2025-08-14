@@ -307,7 +307,6 @@ def _cleanup_chaos_test(context: dict[str, Any]) -> None:
     """Clean up after chaos engineering test."""
     # Reset any system modifications made during chaos test
     # This would include network settings, resource limits, etc.
-    pass
 
 
 @pytest.fixture
