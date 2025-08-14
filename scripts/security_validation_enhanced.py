@@ -19,7 +19,6 @@ from pathlib import Path
 from libs.core.async_event_bus import Event, EventPriority, EventType, get_event_bus
 from libs.dashboard.security_metrics_integration import (
     SecurityMetrics,
-    VulnerabilitySeverity,
 )
 
 
