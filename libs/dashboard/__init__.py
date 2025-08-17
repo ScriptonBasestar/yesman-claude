@@ -10,16 +10,21 @@ from .keyboard_navigation import (
     get_keyboard_manager,
     reset_keyboard_manager,
 )
-from .performance_optimizer import (
-    AsyncPerformanceOptimizer,
-    OptimizationLevel,
-    PerformanceMetrics,
-    PerformanceOptimizer,
-    PerformanceProfiler,
-    PerformanceThreshold,
-    get_performance_optimizer,
-    reset_performance_optimizer,
-)
+try:  # pragma: no cover - optional feature
+    from .performance_optimizer import (
+        AsyncPerformanceOptimizer,
+        OptimizationLevel,
+        PerformanceMetrics,
+        PerformanceOptimizer,
+        PerformanceProfiler,
+        PerformanceThreshold,
+        get_performance_optimizer,
+        reset_performance_optimizer,
+    )
+except ModuleNotFoundError:  # pragma: no cover
+    AsyncPerformanceOptimizer = OptimizationLevel = PerformanceMetrics = PerformanceOptimizer = (
+        PerformanceProfiler
+    ) = PerformanceThreshold = get_performance_optimizer = reset_performance_optimizer = None  # type: ignore
 from .theme_system import (
     ColorPalette,
     Spacing,
@@ -31,18 +36,21 @@ from .theme_system import (
     get_theme_manager,
     reset_theme_manager,
 )
-from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
+try:  # pragma: no cover - optional feature
+    from .tui_dashboard import DashboardWidget, TUIDashboard, run_tui_dashboard
+except ModuleNotFoundError:  # pragma: no cover
+    DashboardWidget = TUIDashboard = run_tui_dashboard = None  # type: ignore
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
 
 """Dashboard modules for project status visualization."""
 
+
 __all__ = [
     "AsyncPerformanceOptimizer",
     "ColorPalette",
     "DashboardLauncher",
-    "DashboardWidget",
     "FocusableElement",
     "InterfaceInfo",
     "KeyBinding",
@@ -56,7 +64,6 @@ __all__ = [
     "PerformanceThreshold",
     "Spacing",
     "SystemThemeDetector",
-    "TUIDashboard",
     "Theme",
     "ThemeManager",
     "ThemeMode",
@@ -67,5 +74,7 @@ __all__ = [
     "reset_keyboard_manager",
     "reset_performance_optimizer",
     "reset_theme_manager",
-    "run_tui_dashboard",
 ]
+
+if TUIDashboard is not None:
+    __all__.extend(["DashboardWidget", "TUIDashboard", "run_tui_dashboard"])

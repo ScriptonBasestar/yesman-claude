@@ -214,31 +214,31 @@ class PatchContextFactory:
     @staticmethod
     def patch_session_manager(**kwargs: object) -> object:
         """Create a patch context for SessionManager with standard mock."""
-        mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs: dict[str, object])
+        mock_manager = ManagerMockFactory.create_session_manager_mock(**kwargs)
         return patch("libs.core.session_manager.SessionManager", return_value=mock_manager)
 
     @staticmethod
     def patch_claude_manager(**kwargs: object) -> object:
         """Create a patch context for ClaudeManager with standard mock."""
-        mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs: dict[str, object])
+        mock_manager = ManagerMockFactory.create_claude_manager_mock(**kwargs)
         return patch("libs.core.claude_manager.ClaudeManager", return_value=mock_manager)
 
     @staticmethod
     def patch_tmux_manager(**kwargs: object) -> object:
         """Create a patch context for TmuxManager with standard mock."""
-        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs: dict[str, object])
+        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
         return patch("libs.tmux_manager.TmuxManager", return_value=mock_manager)
 
     @staticmethod
     def patch_setup_tmux_manager(**kwargs: object) -> object:
         """Create a patch context for TmuxManager in setup commands."""
-        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs: dict[str, object])
+        mock_manager = ManagerMockFactory.create_tmux_manager_mock(**kwargs)
         return patch("commands.setup.TmuxManager", return_value=mock_manager)
 
     @staticmethod
     def patch_subprocess_run(**kwargs: object) -> object:
         """Create a patch context for subprocess.run with standard mock."""
-        mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs: dict[str, object])
+        mock_result = ComponentMockFactory.create_subprocess_mock(**kwargs)
         return patch("subprocess.run", return_value=mock_result)
 
 

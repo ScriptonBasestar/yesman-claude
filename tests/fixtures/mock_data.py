@@ -1,8 +1,8 @@
 # Copyright notice.
 
 from datetime import UTC, datetime
-    # Import here to avoid circular imports
-    from .mock_factories import ComponentMockFactory, ManagerMockFactory
+
+# Import here to avoid circular imports
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -128,6 +128,8 @@ def get_factory_mock(mock_type: str, **kwargs) -> object:
         Configured mock object from factory system
     """
 
+    from .mock_factories import ComponentMockFactory, ManagerMockFactory
+
     factory_map = {
         "session_manager": ManagerMockFactory.create_session_manager_mock,
         "claude_manager": ManagerMockFactory.create_claude_manager_mock,
@@ -141,7 +143,7 @@ def get_factory_mock(mock_type: str, **kwargs) -> object:
         msg = f"Unknown mock type: {mock_type}. Available: {list(factory_map.keys())}"
         raise ValueError(msg)
 
-    return factory_map[mock_type](**kwargs: dict[str, object])
+    return factory_map[mock_type](**kwargs)
 
 
 # Enhanced mock classes with factory integration
@@ -161,7 +163,7 @@ class EnhancedMockTmuxSession(MockTmuxSession):
 
 
 # Convenience functions for common mock patterns
-def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str]:
+def create_mock_session_with_controller(**kwargs: dict[str, object]) -> dict[str, object]:
     """Create a complete mock session with controller for integration tests."""
     session_mock = get_factory_mock("session_manager", **kwargs)
     claude_mock = get_factory_mock("claude_manager", **kwargs)
