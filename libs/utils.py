@@ -23,9 +23,9 @@ def ensure_log_directory(log_path: Path) -> Path:
     log_path = log_path.expanduser()
     log_path.mkdir(parents=True, exist_ok=True)
 
-    # Set permissions to 750 (rwxr-x---) - more restrictive
+    # Set permissions to 750 (rwxr-x---) to allow group access while remaining secure
     try:
-        os.chmod(log_path, 0o700)
+        os.chmod(log_path, 0o750)
     except OSError as e:
         logging.warning("Could not set permissions on %s: %s", log_path, e)
 
