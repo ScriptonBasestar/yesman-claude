@@ -8,9 +8,21 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import fastapi
-import rich
-import uvicorn
+# Optional dependencies
+try:  # pragma: no cover - optional import
+    import fastapi  # type: ignore
+except ImportError:  # pragma: no cover
+    fastapi = None  # type: ignore
+
+try:  # pragma: no cover - optional import
+    import uvicorn  # type: ignore
+except ImportError:  # pragma: no cover
+    uvicorn = None  # type: ignore
+
+try:  # pragma: no cover - optional import
+    import rich  # type: ignore
+except ImportError:  # pragma: no cover
+    rich = None  # type: ignore
 
 # Copyright (c) 2024 Yesman Claude Project
 # Licensed under the MIT License
@@ -279,9 +291,11 @@ class DashboardLauncher:
 
     def _update_interface_availability(self) -> None:
         """Update availability status for all interfaces."""
-        # TUI - always available (uses rich which is a core dependency)
-        self._interface_configs["tui"].available = True
-        self._interface_configs["tui"].reason = None
+        # TUI - available only if rich is installed
+        tui_available = self._is_python_package_available("rich")
+        tui_reason = None if tui_available else "Rich not installed"
+        self._interface_configs["tui"].available = tui_available
+        self._interface_configs["tui"].reason = tui_reason
 
         # Web - check FastAPI/uvicorn availability
         web_available = True
@@ -327,24 +341,20 @@ class DashboardLauncher:
             return True, f"Python {sys.version.split()[0]}"
 
         if requirement == "rich":
-            try:
-                # Rich might not have __version__ in older versions
-                version = getattr(rich, "__version__", "unknown")
-                return True, f"Rich {version}"
-            except ImportError:
+            if rich is None:
                 return False, "Rich not installed"
+            version = getattr(rich, "__version__", "unknown")
+            return True, f"Rich {version}"
 
         elif requirement == "fastapi":
-            try:
-                return True, f"FastAPI {fastapi.__version__}"
-            except ImportError:
+            if fastapi is None:
                 return False, "FastAPI not installed"
+            return True, f"FastAPI {fastapi.__version__}"
 
         elif requirement == "uvicorn":
-            try:
-                return True, f"Uvicorn {uvicorn.__version__}"
-            except ImportError:
+            if uvicorn is None:
                 return False, "Uvicorn not installed"
+            return True, f"Uvicorn {uvicorn.__version__}"
 
         elif requirement == "node":
             node_path = shutil.which("node")

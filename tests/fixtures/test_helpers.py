@@ -8,7 +8,7 @@ from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from pathlib import Path
 import yaml
-    from .mock_data import MockTmuxPane, MockTmuxSession
+from .mock_data import MockTmuxPane, MockTmuxSession
 import time
 
 # Copyright (c) 2024 Yesman Claude Project
