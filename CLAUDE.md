@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions and automates interactions with Claude Code. It features multiple dashboard interfaces (TUI, Web, Tauri), AI-powered learning system, and extensive session management capabilities using YAML configuration templates.
+Yesman-Claude is a comprehensive CLI automation tool that manages tmux sessions and automates interactions with Claude
+Code. It features multiple dashboard interfaces (TUI, Web, Tauri), AI-powered learning system, and extensive session
+management capabilities using YAML configuration templates.
 
 ## Development Commands
 
@@ -227,7 +229,8 @@ The adaptive response system (`libs/ai/`) learns user patterns:
 1. Web (universal access) if browser available
 1. TUI (minimal resources) as fallback
 
-**Shared Frontend**: SvelteKit codebase serves both web and Tauri interfaces, with Tauri providing native desktop integration (system tray, notifications, file system access).
+**Shared Frontend**: SvelteKit codebase serves both web and Tauri interfaces, with Tauri providing native desktop
+integration (system tray, notifications, file system access).
 
 ### Error Recovery Design
 
@@ -238,5 +241,5 @@ Errors include context-aware recovery hints:
 - Session conflicts → offer resolution strategies
 - Permission issues → suggest ownership fixes
 
-This architecture emphasizes maintainability, testability, and extensibility while providing consistent behavior across all interfaces and deployment scenarios.
-
+This architecture emphasizes maintainability, testability, and extensibility while providing consistent behavior across
+all interfaces and deployment scenarios.
