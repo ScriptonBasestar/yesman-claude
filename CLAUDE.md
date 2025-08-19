@@ -239,3 +239,4 @@ Errors include context-aware recovery hints:
 - Permission issues → suggest ownership fixes
 
 This architecture emphasizes maintainability, testability, and extensibility while providing consistent behavior across all interfaces and deployment scenarios.
+

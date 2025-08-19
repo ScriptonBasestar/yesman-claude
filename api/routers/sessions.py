@@ -64,7 +64,7 @@ class SessionService:
                     api_list.append(
                         {
                             "session_name": session_name,
-                            "status": cast("SessionStatusType", "stopped"),
+                            "status": "stopped",
                             "windows": [],
                             "created_at": None,
                             "last_activity": None,
