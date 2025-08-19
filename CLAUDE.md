@@ -101,18 +101,21 @@ pytest -m "security"                    # Security tests
 ### Core Design Patterns
 
 **Command Pattern**: All CLI commands inherit from `BaseCommand` (`libs/core/base_command.py`) providing:
+
 - Consistent error handling with recovery hints
 - Dependency injection integration
 - Standardized logging and configuration access
 - Type-safe service resolution
 
 **Dependency Injection**: Central DI container (`libs/core/container.py`) manages:
+
 - Service lifecycle (singletons vs factories)
 - Type-safe service resolution
 - Circular dependency detection
 - Configuration-based service registration
 
 **Configuration Management**: Pydantic-based system (`libs/core/config_*`) with:
+
 - Schema validation for YAML configs
 - Environment-specific overrides
 - Hierarchical config merging (global → local → project)
@@ -121,24 +124,28 @@ pytest -m "security"                    # Security tests
 ### Key Architectural Components
 
 **Session Management**:
+
 - `libs/core/session_manager.py` - Core session lifecycle
 - `libs/tmux_manager.py` - tmux integration layer
 - YAML-based session templates with Jinja2-style variables
 - Smart dependency optimization for faster session creation
 
 **Claude Code Automation**:
+
 - `libs/core/claude_manager.py` - Main automation controller
 - `libs/core/prompt_detector.py` - Pattern-based prompt recognition
 - `libs/core/content_collector.py` - Real-time content capture
 - AI learning system with confidence scoring and pattern adaptation
 
 **Multi-Interface Dashboard**:
+
 - **TUI**: Rich-based terminal interface with live updates
 - **Web**: SvelteKit + FastAPI serving static assets
 - **Tauri**: Native desktop app sharing SvelteKit codebase
 - Interface auto-detection based on environment capabilities
 
 **Error Handling**:
+
 - Centralized error system (`libs/core/error_handling.py`)
 - Categorized error types with severity levels
 - Automatic recovery hint generation
@@ -147,10 +154,10 @@ pytest -m "security"                    # Security tests
 ### Data Flow Architecture
 
 1. **Command Execution**: CLI commands → BaseCommand → Service resolution → Business logic
-2. **Configuration Loading**: YAML files → Pydantic validation → Config cache → Service injection
-3. **Session Creation**: Template selection → Variable substitution → tmux session creation → Claude automation setup
-4. **Real-time Monitoring**: Content collection → Pattern detection → AI decision → Automated response
-5. **Dashboard Updates**: Service events → FastAPI/WebSocket → Frontend updates
+1. **Configuration Loading**: YAML files → Pydantic validation → Config cache → Service injection
+1. **Session Creation**: Template selection → Variable substitution → tmux session creation → Claude automation setup
+1. **Real-time Monitoring**: Content collection → Pattern detection → AI decision → Automated response
+1. **Dashboard Updates**: Service events → FastAPI/WebSocket → Frontend updates
 
 ### File Structure Logic
 
@@ -197,15 +204,16 @@ config = container.resolve(YesmanConfig)
 ### Configuration Hierarchy
 
 1. **Global**: `~/.scripton/yesman/yesman.yaml` (logging, defaults)
-2. **Templates**: `~/.scripton/yesman/templates/*.yaml` (reusable patterns)
-3. **Sessions**: `~/.scripton/yesman/sessions/*.yaml` (individual session configs)
-4. **Local**: `./.scripton/yesman/*` (project-specific overrides)
+1. **Templates**: `~/.scripton/yesman/templates/*.yaml` (reusable patterns)
+1. **Sessions**: `~/.scripton/yesman/sessions/*.yaml` (individual session configs)
+1. **Local**: `./.scripton/yesman/*` (project-specific overrides)
 
 Templates support variable substitution and conditional logic for intelligent session creation.
 
 ### AI Learning System
 
 The adaptive response system (`libs/ai/`) learns user patterns:
+
 - Response confidence scoring with adjustable thresholds
 - Pattern classification for different prompt types
 - JSON-based persistence of learned behaviors
@@ -214,17 +222,19 @@ The adaptive response system (`libs/ai/`) learns user patterns:
 ### Dashboard Interface Strategy
 
 **Interface Selection Logic**:
+
 1. Tauri (best UX) if desktop environment detected
-2. Web (universal access) if browser available
-3. TUI (minimal resources) as fallback
+1. Web (universal access) if browser available
+1. TUI (minimal resources) as fallback
 
 **Shared Frontend**: SvelteKit codebase serves both web and Tauri interfaces, with Tauri providing native desktop integration (system tray, notifications, file system access).
 
 ### Error Recovery Design
 
 Errors include context-aware recovery hints:
+
 - Configuration errors → suggest config file locations
-- Missing dependencies → provide installation commands  
+- Missing dependencies → provide installation commands
 - Session conflicts → offer resolution strategies
 - Permission issues → suggest ownership fixes
 
