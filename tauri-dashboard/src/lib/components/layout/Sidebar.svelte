@@ -4,9 +4,9 @@
 
   const dispatch = createEventDispatcher();
 
-  // 부모에서 내려오는 상태값들 (타입 명시)
-  export let currentRoute: string | null = null; // 현재 라우트 ID
-  export let isMinimized: boolean = false; // 사이드바 축소 여부
+  // 외부 참조용 상수 (사용하지 않는 경우)
+  export const currentRoute: string | null = null; // 현재 라우트 ID
+  export const isMinimized: boolean = false; // 사이드바 축소 여부
 
   // 네비게이션 메뉴 아이템
   const navItems = [
