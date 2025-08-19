@@ -4,12 +4,12 @@ Yesman-Claude 개발 환경 설정 및 개발 워크플로우 가이드입니다
 
 ## 📋 목차
 
-1. [개발 환경 설정](#개발-환경-설정)
-2. [프로젝트 구조](#프로젝트-구조)
-3. [개발 명령어](#개발-명령어)
-4. [아키텍처 개요](#아키텍처-개요)
-5. [새로운 기능 추가](#새로운-기능-추가)
-6. [코딩 가이드라인](#코딩-가이드라인)
+1. [개발 환경 설정](#%EA%B0%9C%EB%B0%9C-%ED%99%98%EA%B2%BD-%EC%84%A4%EC%A0%95)
+1. [프로젝트 구조](#%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EA%B5%AC%EC%A1%B0)
+1. [개발 명령어](#%EA%B0%9C%EB%B0%9C-%EB%AA%85%EB%A0%B9%EC%96%B4)
+1. [아키텍처 개요](#%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EA%B0%9C%EC%9A%94)
+1. [새로운 기능 추가](#%EC%83%88%EB%A1%9C%EC%9A%B4-%EA%B8%B0%EB%8A%A5-%EC%B6%94%EA%B0%80)
+1. [코딩 가이드라인](#%EC%BD%94%EB%94%A9-%EA%B0%80%EC%9D%B4%EB%93%9C%EB%9D%BC%EC%9D%B8)
 
 ## 🛠️ 개발 환경 설정
 
@@ -76,9 +76,9 @@ make format
 ### Configuration Hierarchy
 
 1. Global config: `~/.scripton/yesman/yesman.yaml` (logging, default choices)
-2. Session files: `~/.scripton/yesman/sessions/*.yaml` (individual session definitions)
-3. Templates: `~/.scripton/yesman/templates/*.yaml` (reusable session templates)
-4. Local overrides: `./.scripton/yesman/*` (project-specific configs)
+1. Session files: `~/.scripton/yesman/sessions/*.yaml` (individual session definitions)
+1. Templates: `~/.scripton/yesman/templates/*.yaml` (reusable session templates)
+1. Local overrides: `./.scripton/yesman/*` (project-specific configs)
 
 Configuration merge modes:
 
@@ -572,18 +572,18 @@ except YesmanError as e:
 When working on this codebase:
 
 1. **Adding New Commands**: Create new command files in `commands/` directory and register them in `yesman.py:17-22`
-2. **Claude Manager Modifications**:
+1. **Claude Manager Modifications**:
    - Core logic in `libs/core/claude_manager.py` (DashboardController class)
    - Pattern detection in `libs/core/prompt_detector.py` (ClaudePromptDetector class)
    - Content collection in `libs/core/content_collector.py`
    - Auto-response patterns stored in `patterns/` subdirectories
    - Caching system components in `libs/core/cache_*.py` modules
-3. **Dashboard Updates**:
+1. **Dashboard Updates**:
    - Tauri: Native desktop app components in `tauri-dashboard/src/`
    - FastAPI: REST API endpoints in `api/routers/`
    - Web Interface: Browser-based components via Tauri's embedded WebView
-4. **Configuration Changes**: Global config structure defined in `YesmanConfig` class (`libs/yesman_config.py`)
-5. **Testing**: Use debug scripts in `debug/` directory and test files in `tests/` for component testing
+1. **Configuration Changes**: Global config structure defined in `YesmanConfig` class (`libs/yesman_config.py`)
+1. **Testing**: Use debug scripts in `debug/` directory and test files in `tests/` for component testing
 
 ## 📚 추가 리소스
 
@@ -595,10 +595,10 @@ When working on this codebase:
 ## 🤝 기여하기
 
 1. 이슈 생성 또는 기존 이슈 확인
-2. 기능 브랜치 생성: `git checkout -b feature/my-feature`
-3. 변경사항 커밋: `git commit -m 'feat: add my feature'`
-4. 브랜치 푸시: `git push origin feature/my-feature`
-5. Pull Request 생성
+1. 기능 브랜치 생성: `git checkout -b feature/my-feature`
+1. 변경사항 커밋: `git commit -m 'feat: add my feature'`
+1. 브랜치 푸시: `git push origin feature/my-feature`
+1. Pull Request 생성
 
 ### PR 체크리스트
 

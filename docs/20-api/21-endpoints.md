@@ -4,15 +4,15 @@ Yesman-Agent의 FastAPI 기반 REST API 엔드포인트 완전 가이드입니�
 
 ## 📚 목차
 
-1. [API 개요](#api-개요)
-2. [인증 및 보안](#인증-및-보안)
-3. [세션 관리](#세션-관리)
-4. [컨트롤러 관리](#컨트롤러-관리)
-5. [건강도 모니터링](#건강도-모니터링)
-6. [성능 메트릭](#성능-메트릭)
-7. [테마 및 설정](#테마-및-설정)
-8. [WebSocket 프로토콜](#websocket-프로토콜)
-9. [에러 처리](#에러-처리)
+1. [API 개요](#api-%EA%B0%9C%EC%9A%94)
+1. [인증 및 보안](#%EC%9D%B8%EC%A6%9D-%EB%B0%8F-%EB%B3%B4%EC%95%88)
+1. [세션 관리](#%EC%84%B8%EC%85%98-%EA%B4%80%EB%A6%AC)
+1. [컨트롤러 관리](#%EC%BB%A8%ED%8A%B8%EB%A1%A4%EB%9F%AC-%EA%B4%80%EB%A6%AC)
+1. [건강도 모니터링](#%EA%B1%B4%EA%B0%95%EB%8F%84-%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81)
+1. [성능 메트릭](#%EC%84%B1%EB%8A%A5-%EB%A9%94%ED%8A%B8%EB%A6%AD)
+1. [테마 및 설정](#%ED%85%8C%EB%A7%88-%EB%B0%8F-%EC%84%A4%EC%A0%95)
+1. [WebSocket 프로토콜](#websocket-%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C)
+1. [에러 처리](#%EC%97%90%EB%9F%AC-%EC%B2%98%EB%A6%AC)
 
 ## 🌐 API 개요
 
@@ -53,6 +53,7 @@ Authorization: Bearer <token>
 ### CORS 설정
 
 API 서버는 다음 도메인에서의 접근을 허용합니다:
+
 - `http://localhost:5173` (Tauri 개발 서버)
 - `http://localhost:3000` (기타 개발 서버)
 - `https://tauri.localhost` (Tauri 프로덕션)
@@ -374,6 +375,7 @@ curl -X GET "http://localhost:10501/api/health/history?days=7"
 ```
 
 **쿼리 파라미터:**
+
 - `days`: 조회할 일수 (기본값: 7)
 - `category`: 특정 카테고리만 조회 (선택사항)
 
@@ -657,30 +659,30 @@ ws.send(JSON.stringify({
 
 ### HTTP 상태 코드
 
-| 코드 | 설명 |
-|------|------|
-| 200 | 성공 |
-| 201 | 생성 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 필요 |
-| 403 | 권한 없음 |
-| 404 | 리소스 없음 |
-| 409 | 충돌 (이미 존재) |
-| 422 | 유효성 검사 실패 |
-| 500 | 서버 내부 오류 |
+| 코드 | 설명             |
+| ---- | ---------------- |
+| 200  | 성공             |
+| 201  | 생성 성공        |
+| 400  | 잘못된 요청      |
+| 401  | 인증 필요        |
+| 403  | 권한 없음        |
+| 404  | 리소스 없음      |
+| 409  | 충돌 (이미 존재) |
+| 422  | 유효성 검사 실패 |
+| 500  | 서버 내부 오류   |
 
 ### 에러 코드
 
-| 코드 | 설명 |
-|------|------|
-| `SESSION_NOT_FOUND` | 세션을 찾을 수 없음 |
-| `SESSION_ALREADY_EXISTS` | 세션이 이미 존재 |
-| `CONTROLLER_NOT_RUNNING` | 컨트롤러가 실행 중이 아님 |
-| `INVALID_TEMPLATE` | 잘못된 템플릿 |
-| `THEME_NOT_FOUND` | 테마를 찾을 수 없음 |
-| `CONFIG_VALIDATION_ERROR` | 설정 유효성 검사 실패 |
-| `TMUX_CONNECTION_ERROR` | tmux 연결 오류 |
-| `PERMISSION_DENIED` | 권한 거부 |
+| 코드                      | 설명                      |
+| ------------------------- | ------------------------- |
+| `SESSION_NOT_FOUND`       | 세션을 찾을 수 없음       |
+| `SESSION_ALREADY_EXISTS`  | 세션이 이미 존재          |
+| `CONTROLLER_NOT_RUNNING`  | 컨트롤러가 실행 중이 아님 |
+| `INVALID_TEMPLATE`        | 잘못된 템플릿             |
+| `THEME_NOT_FOUND`         | 테마를 찾을 수 없음       |
+| `CONFIG_VALIDATION_ERROR` | 설정 유효성 검사 실패     |
+| `TMUX_CONNECTION_ERROR`   | tmux 연결 오류            |
+| `PERMISSION_DENIED`       | 권한 거부                 |
 
 ### 에러 응답 예시
 
@@ -781,8 +783,8 @@ client.getHealth().then(data => {
 });
 ```
 
----
+______________________________________________________________________
 
-**마지막 업데이트**: 2025-08-19  
-**API 버전**: v1.0  
+**마지막 업데이트**: 2025-08-19\
+**API 버전**: v1.0\
 **지원 프로토콜**: HTTP/1.1, WebSocket

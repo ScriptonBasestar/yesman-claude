@@ -4,13 +4,13 @@ Yesman-Agent의 모니터링, 로깅, 성능 관리를 위한 완전한 운영 �
 
 ## 📚 목차
 
-1. [모니터링 개요](#모니터링-개요)
-2. [대시보드 설정](#대시보드-설정)
-3. [로깅 시스템](#로깅-시스템)
-4. [성능 모니터링](#성능-모니터링)
-5. [알림 시스템](#알림-시스템)
-6. [안전한 정리 워크플로우](#안전한-정리-워크플로우)
-7. [문제 해결](#문제-해결)
+1. [모니터링 개요](#%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81-%EA%B0%9C%EC%9A%94)
+1. [대시보드 설정](#%EB%8C%80%EC%8B%9C%EB%B3%B4%EB%93%9C-%EC%84%A4%EC%A0%95)
+1. [로깅 시스템](#%EB%A1%9C%EA%B9%85-%EC%8B%9C%EC%8A%A4%ED%85%9C)
+1. [성능 모니터링](#%EC%84%B1%EB%8A%A5-%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81)
+1. [알림 시스템](#%EC%95%8C%EB%A6%BC-%EC%8B%9C%EC%8A%A4%ED%85%9C)
+1. [안전한 정리 워크플로우](#%EC%95%88%EC%A0%84%ED%95%9C-%EC%A0%95%EB%A6%AC-%EC%9B%8C%ED%81%AC%ED%94%8C%EB%A1%9C%EC%9A%B0)
+1. [문제 해결](#%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0)
 
 ## 🔍 모니터링 개요
 
@@ -30,17 +30,20 @@ Yesman-Agent의 모니터링, 로깅, 성능 관리를 위한 완전한 운영 �
 ### 주요 컴포넌트
 
 1. **MonitoringIntegration** (`libs/dashboard/monitoring_integration.py`)
+
    - 핵심 모니터링 대시보드 기능
    - 알림 임계값 관리
    - 성능 메트릭 집계
    - 실시간 대시보드 업데이트
 
-2. **HealthCalculator** (`libs/dashboard/health_calculator.py`)
+1. **HealthCalculator** (`libs/dashboard/health_calculator.py`)
+
    - 8개 카테고리 건강도 분석
    - 실시간 상태 계산
    - 트렌드 분석
 
-3. **AsyncLogger** (`libs/logging/async_logger.py`)
+1. **AsyncLogger** (`libs/logging/async_logger.py`)
+
    - 고성능 비동기 로깅
    - 압축 및 로테이션
    - 구조화된 로그 처리
@@ -69,24 +72,28 @@ Yesman-Agent의 모니터링, 로깅, 성능 관리를 위한 완전한 운영 �
 ### 대시보드 기능
 
 #### 1. 세션 모니터링
+
 - 실시간 tmux 세션 상태
 - 세션별 리소스 사용량
 - 활동 히트맵
 - 클릭으로 세션 접속
 
 #### 2. 프로젝트 건강도
+
 - 8개 카테고리 점수
 - 실시간 업데이트
 - 히스토리 차트
 - 권장사항 표시
 
 #### 3. 성능 메트릭
+
 - CPU/메모리 사용량
 - 응답 시간
 - 캐시 히트율
 - 네트워크 연결 수
 
 #### 4. Claude 자동화 상태
+
 - 활성 컨트롤러 목록
 - 응답 통계
 - 신뢰도 점수
@@ -239,18 +246,21 @@ except Exception as e:
 ### 실시간 성능 메트릭
 
 #### 시스템 메트릭
+
 - CPU 사용률 (프로세스별)
 - 메모리 사용량 (RSS/VSZ)
 - 디스크 I/O
 - 네트워크 트래픽
 
 #### 애플리케이션 메트릭
+
 - 응답 시간
 - 처리량 (requests/second)
 - 에러율
 - 캐시 히트율
 
 #### tmux 메트릭
+
 - 활성 세션 수
 - 윈도우/패널 수
 - 세션별 CPU/메모리 사용량
@@ -557,6 +567,7 @@ pnpm run build
 **증상**: 대시보드가 로드되지 않거나 API 연결 실패
 
 **해결책**:
+
 ```bash
 # API 서버 상태 확인
 curl http://localhost:10501/api/health
@@ -573,6 +584,7 @@ ps aux | grep uvicorn
 **증상**: 대시보드 응답 속도 저하
 
 **해결책**:
+
 ```bash
 # 성능 메트릭 확인
 ./yesman.py status --performance
@@ -589,6 +601,7 @@ ps aux | grep uvicorn
 **증상**: 로그 파일이 너무 커짐
 
 **해결책**:
+
 ```bash
 # 로그 압축
 ./yesman.py logs compress
@@ -638,8 +651,8 @@ export YESMAN_LOG_LEVEL=DEBUG
 ./yesman.py health check --component=claude_manager
 ```
 
----
+______________________________________________________________________
 
-**마지막 업데이트**: 2025-08-19  
-**문서 버전**: v2.0  
+**마지막 업데이트**: 2025-08-19\
+**문서 버전**: v2.0\
 **지원 플랫폼**: Linux, macOS, Windows (WSL2)
