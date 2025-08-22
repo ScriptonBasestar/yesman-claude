@@ -32,6 +32,11 @@ logs: ## show recent log files
 run: ## run yesman.py
 	@echo -e "$(CYAN)Running yesman...$(RESET)"
 	uv run ./yesman.py
+	#uv run python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 10501
+
+run-dev: ## run yesman.py in development mode
+	@echo -e "$(CYAN)Running yesman in development mode...$(RESET)"
+	uv run ./yesman.py --dev
 
 run-detached: ## run yesman in background
 	@echo -e "$(CYAN)Running yesman in background...$(RESET)"
@@ -153,3 +158,80 @@ dev-status: ## show current development status
 	@echo -n -e "  Tests Passing:      "; if make test-unit > /dev/null 2>&1; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(RED)No$(RESET)"; fi
 	@echo -n -e "  Coverage File:      "; if [ -f ".coverage" ]; then echo -e "$(GREEN)Yes$(RESET)"; else echo -e "$(YELLOW)No$(RESET)"; fi
 	@echo -n -e "  Virtual Env:        "; if [ -n "$$VIRTUAL_ENV" ]; then echo -e "$(GREEN)Active$(RESET)"; else echo -e "$(YELLOW)None$(RESET)"; fi
+
+
+# ==============================================================================
+# Dashboard Development Servers
+# ==============================================================================
+
+.PHONY: dashboard dev-dashboard run-web-dashboard run-tauri-dev run-api-server debug-api stop-servers dashboard-status
+
+# Default dashboard command - auto-detect best interface
+dashboard: ## run yesman dashboard (auto-detect interface)
+	@echo -e "$(CYAN)Starting Yesman Dashboard...$(RESET)"
+	uv run ./yesman.py dashboard run
+
+dev-dashboard: run-api-server run-web-dashboard ## full development environment (API + Web dashboard)
+	@echo -e "$(GREEN)✅ Full development dashboard environment started!$(RESET)"
+
+run-web-dashboard: ## run web dashboard only (Vite dev server)
+	@echo -e "$(CYAN)Starting Web Dashboard (Vite dev server)...$(RESET)"
+	@if [ -d "tauri-dashboard" ]; then \
+		cd tauri-dashboard && npm run dev; \
+	else \
+		echo -e "$(RED)❌ tauri-dashboard directory not found$(RESET)"; \
+		echo -e "$(YELLOW)Run 'make install-dashboard-deps' first$(RESET)"; \
+	fi
+
+run-tauri-dev: ## run Tauri desktop app in development mode  
+	@echo -e "$(CYAN)Starting Tauri Development Mode...$(RESET)"
+	@if [ -d "tauri-dashboard" ]; then \
+		cd tauri-dashboard && npm run tauri dev; \
+	else \
+		echo -e "$(RED)❌ tauri-dashboard directory not found$(RESET)"; \
+		echo -e "$(YELLOW)Run 'make install-dashboard-deps' first$(RESET)"; \
+	fi
+
+run-api-server: ## run API server in background
+	@echo -e "$(CYAN)Starting API Server...$(RESET)"
+	@if pgrep -f "uvicorn.*api.main:app" > /dev/null; then \
+		echo -e "$(YELLOW)⚠️  API server already running$(RESET)"; \
+	else \
+		nohup uv run python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 10501 > api.log 2>&1 & \
+		echo -e "$(GREEN)✅ API server started in background (see api.log)$(RESET)"; \
+		echo -e "$(BLUE)🌐 API available at: http://localhost:10501$(RESET)"; \
+	fi
+
+debug-api: ## debug API server (foreground with detailed logs)
+	@echo -e "$(CYAN)Starting API Server in Debug Mode...$(RESET)"
+	@echo -e "$(YELLOW)Press Ctrl+C to stop$(RESET)"
+	uv run python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 10501 --log-level debug
+
+stop-servers: ## stop all dashboard-related servers
+	@echo -e "$(YELLOW)Stopping dashboard servers...$(RESET)"
+	@pkill -f "uvicorn.*api.main:app" || echo -e "$(BLUE)No API server running$(RESET)"
+	@pkill -f "vite.*tauri-dashboard" || echo -e "$(BLUE)No Vite server running$(RESET)"
+	@pkill -f "tauri dev" || echo -e "$(BLUE)No Tauri dev server running$(RESET)"
+	@echo -e "$(GREEN)✅ All servers stopped$(RESET)"
+
+dashboard-status: ## check dashboard server status
+	@echo -e "$(CYAN)Dashboard Server Status:$(RESET)"
+	@echo ""
+	@echo -n -e "  API Server:         "; \
+	if pgrep -f "uvicorn.*api.main:app" > /dev/null; then \
+		echo -e "$(GREEN)✅ Running$(RESET) (port 10501)"; \
+	else \
+		echo -e "$(RED)❌ Not running$(RESET)"; \
+	fi
+	@echo -n -e "  Vite Dev Server:    "; \
+	if pgrep -f "vite.*tauri-dashboard" > /dev/null; then \
+		echo -e "$(GREEN)✅ Running$(RESET) (port 5173)"; \
+	else \
+		echo -e "$(RED)❌ Not running$(RESET)"; \
+	fi
+	@echo -n -e "  Tauri Dev:          "; \
+	if pgrep -f "tauri dev" > /dev/null; then \
+		echo -e "$(GREEN)✅ Running$(RESET)"; \
+	else \
+		echo -e "$(RED)❌ Not running$(RESET)"; \
+	fi
