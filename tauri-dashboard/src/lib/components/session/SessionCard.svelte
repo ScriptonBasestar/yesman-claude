@@ -319,26 +319,65 @@
     {#if session.windows && session.windows.length > 0}
       <div class="windows-section mt-4">
         <div class="collapse collapse-arrow bg-base-200">
-          <input type="checkbox" />
+          <input type="checkbox" checked />
           <div class="collapse-title text-sm font-medium">
             📋 Windows ({session.windows.length})
           </div>
           <div class="collapse-content">
-            <div class="space-y-2">
+            <div class="space-y-1">
               {#each session.windows as window}
                 <div class="window-item bg-base-100 p-2 rounded border border-base-content/5">
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium">{window.name}</span>
-                    <div class="flex items-center gap-2 text-xs text-base-content/60">
-                      <span>{window.panes?.length || 0} panes</span>
-                      {#if window.active}
-                        <span class="badge badge-primary badge-xs">active</span>
+                  <div class="flex items-start gap-2">
+                    <span class="text-base text-base-content/60 mt-0.5">🗂️</span>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">{window.name}</span>
+                        <div class="flex items-center gap-2 text-xs text-base-content/60">
+                          <span>{window.panes?.length || 0} panes</span>
+                          {#if window.active}
+                            <span class="badge badge-primary badge-xs">active</span>
+                          {/if}
+                        </div>
+                      </div>
+                      {#if window.layout}
+                        <div class="text-xs text-base-content/50 mt-1">Layout: {window.layout}</div>
+                      {/if}
+                      
+                      <!-- Panes as sub-tree -->
+                      {#if window.panes && window.panes.length > 0}
+                        <div class="mt-2 ml-6 space-y-1">
+                          {#each window.panes as pane}
+                            <div class="flex items-start gap-2 text-xs">
+                              <span class="text-sm text-base-content/50 mt-0.5">
+                                {pane.is_claude ? '🤖' : '📄'}
+                              </span>
+                              <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                  <span class="font-mono text-base-content/80">
+                                    {pane.command || 'shell'}
+                                  </span>
+                                  <div class="flex items-center gap-1">
+                                    {#if pane.is_claude}
+                                      <span class="badge badge-info badge-xs">claude</span>
+                                    {/if}
+                                    {#if pane.active}
+                                      <span class="badge badge-success badge-xs">active</span>
+                                    {/if}
+                                  </div>
+                                </div>
+                                {#if pane.current_path}
+                                  <div class="text-base-content/50 font-mono flex items-center gap-1">
+                                    <span>📁</span>
+                                    <span>{pane.current_path}</span>
+                                  </div>
+                                {/if}
+                              </div>
+                            </div>
+                          {/each}
+                        </div>
                       {/if}
                     </div>
                   </div>
-                  {#if window.layout}
-                    <div class="text-xs text-base-content/50 mt-1">Layout: {window.layout}</div>
-                  {/if}
                 </div>
               {/each}
             </div>
