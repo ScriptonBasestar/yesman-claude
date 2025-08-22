@@ -18,7 +18,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from watchdog.events import FileModifiedEvent, FileSystemEventHandler
+from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from libs.core.async_event_bus import Event, EventPriority, EventType, get_event_bus
@@ -98,13 +98,13 @@ class ConfigFileHandler(FileSystemEventHandler):
         """
         self.manager = manager
 
-    def on_modified(self, event: FileModifiedEvent) -> None:
+    def on_modified(self, event: FileSystemEvent) -> None:
         """Handle file modification event.
 
         Args:
             event: File modification event
         """
-        if not event.is_directory and Path(event.src_path) == self.manager.config_path:
+        if not event.is_directory and Path(str(event.src_path)) == self.manager.config_path:
             asyncio.create_task(self.manager.reload_config())
 
 
@@ -133,7 +133,7 @@ class MonitoringConfigManager:
         self._change_callbacks: dict[ConfigSection, list[Callable]] = {section: [] for section in ConfigSection}
 
         # File watcher for auto-reload
-        self._observer: Observer | None = None
+        self._observer: Any = None
         self._setup_file_watcher()
 
         # Load initial configuration
@@ -570,7 +570,7 @@ class MonitoringConfigManager:
 
     def stop(self) -> None:
         """Stop the configuration manager."""
-        if self._observer and self._observer.is_alive():
+        if self._observer is not None and self._observer.is_alive():
             self._observer.stop()
             self._observer.join()
 

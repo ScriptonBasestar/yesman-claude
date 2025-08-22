@@ -557,3 +557,5 @@ results/
 refactoring/
 performance_data/
 requirements.txt
+
+.idea/
