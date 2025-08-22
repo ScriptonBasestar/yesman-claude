@@ -29,10 +29,30 @@ logs: ## show recent log files
 	@echo -e "$(CYAN)Recent log files:$(RESET)"
 	@find . -name "*.log" -type f -mtime -7 -exec ls -la {} \; 2>/dev/null || echo -e "$(YELLOW)No recent log files found$(RESET)"
 
-run: ## run yesman.py
+run: ## run yesman.py (shows help)
 	@echo -e "$(CYAN)Running yesman...$(RESET)"
-	uv run ./yesman.py
-	#uv run python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 10501
+	uv run ./yesman.py --help
+
+run-dashboard: ## run yesman dashboard  
+	@echo -e "$(CYAN)Running yesman dashboard...$(RESET)"
+	uv run ./yesman.py dashboard run
+
+run-ls: ## run yesman ls
+	@echo -e "$(CYAN)Listing projects...$(RESET)"
+	uv run ./yesman.py ls
+
+run-status: ## run yesman status
+	@echo -e "$(CYAN)Checking status...$(RESET)"
+	uv run ./yesman.py status
+
+run-show: ## run yesman show
+	@echo -e "$(CYAN)Showing sessions...$(RESET)"
+	uv run ./yesman.py show
+
+run-dashboard-debug: ## run yesman dashboard in debug mode with dev tools
+	@echo -e "$(CYAN)Running yesman dashboard in debug mode...$(RESET)"
+	@echo -e "$(YELLOW)Dev tools will be available - press F12 or right-click -> Inspect$(RESET)"
+	YESMAN_DEBUG=1 uv run ./yesman.py dashboard run --dev
 
 run-dev: ## run yesman.py in development mode
 	@echo -e "$(CYAN)Running yesman in development mode...$(RESET)"

@@ -34,13 +34,23 @@ fn main() {
             run_setup_step,
             get_system_health
         ])
-        .setup(|_app| {
+        .setup(|app| {
             // 초기 설정
             // WebKit deprecation warning 억제를 위한 환경 변수 설정
             #[cfg(target_os = "linux")]
             {
                 // WebKit GTK 경고 메시지 억제
                 std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+            }
+
+            // Debug 모드이거나 환경변수가 설정된 경우 개발자 도구 활성화
+            let enable_devtools = cfg!(debug_assertions) || std::env::var("YESMAN_DEBUG").is_ok();
+            
+            if enable_devtools {
+                if let Some(main_window) = app.get_window("main") {
+                    main_window.open_devtools();
+                    println!("🔧 Developer tools enabled");
+                }
             }
 
             Ok(())
