@@ -27,12 +27,14 @@ VULTURE_WHITELIST ?=
 .PHONY: hooks-install hooks-uninstall hooks-status pre-commit-install
 .PHONY: pre-commit-run pre-commit-update validate-hooks
 
-fmt: ## format Python files with ruff
-	@echo -e "$(CYAN)Formatting Python code...$(RESET)"
+fmt: ## format Python and Markdown files
+	@echo -e "$(CYAN)Formatting code...$(RESET)"
 	@echo "1. Running ruff format..."
 	@uv run ruff format $(PYTHON_DIRS) $(EXCLUDE_DIRS)
 	@echo "2. Running ruff check with import sorting..."
 	@uv run ruff check $(PYTHON_DIRS) --fix --select I $(EXCLUDE_DIRS)
+	@echo "3. Running mdformat..."
+	@uv run mdformat *.md docs/**/*.md --wrap 120
 	@echo -e "$(GREEN)✅ Code formatting complete!$(RESET)"
 
 format: fmt ## alias for fmt
