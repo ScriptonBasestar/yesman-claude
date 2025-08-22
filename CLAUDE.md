@@ -98,6 +98,65 @@ pytest -m "slow"                        # Long-running tests
 pytest -m "security"                    # Security tests
 ```
 
+## Library Documentation with Context7
+
+Use Context7 to get up-to-date documentation for project dependencies:
+
+### Python Libraries
+
+**Core Frameworks:**
+- FastAPI: `/tiangolo/fastapi` - topics: `middleware`, `dependency-injection`, `websocket`
+- Pydantic: `/pydantic/pydantic` - topics: `validators`, `settings`, `models`
+- Click: `/pallets/click` - topics: `commands`, `groups`, `options`
+
+**UI/TUI Libraries:**
+- Rich: `/Textualize/rich` - topics: `console`, `table`, `progress`
+- Textual: `/Textualize/textual` - topics: `widgets`, `screens`, `reactive`
+
+**Session Management:**
+- tmuxp: `/tmux-python/tmuxp` - topics: `session`, `config`, `builder`
+- libtmux: `/tmux-python/libtmux` - topics: `server`, `session`, `window`
+
+**Testing:**
+- pytest: `/pytest-dev/pytest` - topics: `fixtures`, `markers`, `plugins`
+- Hypothesis: `/HypothesisWorks/hypothesis` - topics: `strategies`, `stateful`, `properties`
+
+### JavaScript/Frontend Libraries
+
+**Frameworks:**
+- SvelteKit: `/sveltejs/kit` - topics: `routing`, `load`, `server`
+- Tauri: `/tauri-apps/tauri` - topics: `commands`, `events`, `window`
+
+**Visualization:**
+- Chart.js: `/chartjs/Chart.js` - topics: `datasets`, `scales`, `plugins`
+- D3.js: `/d3/d3` - topics: `selection`, `scale`, `transition`
+
+**Styling:**
+- TailwindCSS: `/tailwindlabs/tailwindcss` - topics: `utilities`, `components`, `responsive`
+- DaisyUI: `/saadeghi/daisyui` - topics: `themes`, `components`, `modifiers`
+
+### Context7 Usage Examples
+
+When working with specific libraries, use Context7 like this:
+
+```bash
+# Get FastAPI middleware documentation
+# Use: resolve-library-id("fastapi") then get-library-docs with topic "middleware"
+
+# Get SvelteKit routing patterns
+# Use: get-library-docs("/sveltejs/kit", topic="routing")
+
+# Get pytest fixture best practices
+# Use: get-library-docs("/pytest-dev/pytest", topic="fixtures")
+```
+
+### Best Practices
+
+1. **Always check latest docs** when implementing new features with these libraries
+2. **Specify topics** for focused documentation retrieval
+3. **Cross-reference** with project's existing patterns in codebase
+4. **Prefer official Context7 IDs** over general web searches for accuracy
+
 ## Architecture Overview
 
 ### Core Design Patterns
