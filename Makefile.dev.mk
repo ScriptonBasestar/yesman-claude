@@ -117,6 +117,14 @@ dev-info: ## show development environment information
 	@echo -e "║                         $(YELLOW)Development Information$(CYAN)                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════════════════════╝"
 	@echo -e "$(RESET)"
+	@echo -e "$(GREEN)🖥️  Dashboard Commands:$(RESET)"
+	@echo -e "  • $(CYAN)dashboard$(RESET)           Smart dashboard launcher (auto-detect)"
+	@echo -e "  • $(CYAN)dashboard-web$(RESET)       Web dashboard (Vite dev server)"
+	@echo -e "  • $(CYAN)dashboard-desktop$(RESET)   Desktop dashboard (Tauri app)"
+	@echo -e "  • $(CYAN)dashboard-open$(RESET)      Open web dashboard in browser"
+	@echo -e "  • $(CYAN)dashboard-stop$(RESET)      Stop all dashboard servers"
+	@echo -e "  • $(CYAN)dashboard-status$(RESET)    Check dashboard server status"
+	@echo ""
 	@echo -e "$(GREEN)🚀 Server Commands:$(RESET)"
 	@echo -e "  • $(CYAN)start$(RESET)               Start yesman services"
 	@echo -e "  • $(CYAN)stop$(RESET)                Stop all services"
@@ -164,19 +172,31 @@ dev-status: ## show current development status
 # Dashboard Development Servers
 # ==============================================================================
 
-.PHONY: dashboard dev-dashboard run-web-dashboard run-tauri-dev run-api-server debug-api stop-servers dashboard-status
+.PHONY: dashboard dev-dashboard run-web-dashboard run-tauri-dev run-api-server debug-api stop-servers dashboard-status dashboard-web dashboard-desktop dashboard-open dashboard-stop
 
 # Default dashboard command - auto-detect best interface
 dashboard: ## run yesman dashboard (auto-detect interface)
-	@echo -e "$(CYAN)Starting Yesman Dashboard...$(RESET)"
-	uv run ./yesman.py dashboard run
+	@echo -e "$(CYAN)Checking Dashboard Status...$(RESET)"
+	@if ps aux | grep -E "(yesman-dashboard|yesman-tauri-dashboard)$$" | grep -v grep > /dev/null 2>&1; then \
+		echo -e "$(GREEN)✅ Tauri dashboard is already running!$(RESET)"; \
+		echo -e "$(BLUE)🖥️  Desktop app should be visible on your screen$(RESET)"; \
+	elif netstat -tlnp 2>/dev/null | grep -q ":5173.*LISTEN" || ss -tlnp 2>/dev/null | grep -q ":5173.*LISTEN"; then \
+		echo -e "$(GREEN)✅ Vite dev server is running$(RESET)"; \
+		echo -e "$(BLUE)🌐 Web dashboard available at: http://localhost:5173$(RESET)"; \
+	else \
+		echo -e "$(CYAN)Starting Yesman Dashboard...$(RESET)"; \
+		uv run ./yesman.py dashboard run; \
+	fi
 
 dev-dashboard: run-api-server run-web-dashboard ## full development environment (API + Web dashboard)
 	@echo -e "$(GREEN)✅ Full development dashboard environment started!$(RESET)"
 
 run-web-dashboard: ## run web dashboard only (Vite dev server)
 	@echo -e "$(CYAN)Starting Web Dashboard (Vite dev server)...$(RESET)"
-	@if [ -d "tauri-dashboard" ]; then \
+	@if netstat -tlnp 2>/dev/null | grep -q ":5173.*LISTEN" || ss -tlnp 2>/dev/null | grep -q ":5173.*LISTEN"; then \
+		echo -e "$(GREEN)✅ Web dashboard is already running!$(RESET)"; \
+		echo -e "$(BLUE)🌐 Available at: http://localhost:5173$(RESET)"; \
+	elif [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && npm run dev; \
 	else \
 		echo -e "$(RED)❌ tauri-dashboard directory not found$(RESET)"; \
@@ -185,7 +205,10 @@ run-web-dashboard: ## run web dashboard only (Vite dev server)
 
 run-tauri-dev: ## run Tauri desktop app in development mode  
 	@echo -e "$(CYAN)Starting Tauri Development Mode...$(RESET)"
-	@if [ -d "tauri-dashboard" ]; then \
+	@if ps aux | grep -E "(yesman-dashboard|yesman-tauri-dashboard)$$" | grep -v grep > /dev/null 2>&1; then \
+		echo -e "$(GREEN)✅ Tauri desktop app is already running!$(RESET)"; \
+		echo -e "$(BLUE)🖥️  Desktop app should be visible on your screen$(RESET)"; \
+	elif [ -d "tauri-dashboard" ]; then \
 		cd tauri-dashboard && npm run tauri dev; \
 	else \
 		echo -e "$(RED)❌ tauri-dashboard directory not found$(RESET)"; \
@@ -224,14 +247,33 @@ dashboard-status: ## check dashboard server status
 		echo -e "$(RED)❌ Not running$(RESET)"; \
 	fi
 	@echo -n -e "  Vite Dev Server:    "; \
-	if pgrep -f "vite.*tauri-dashboard" > /dev/null; then \
+	if netstat -tlnp 2>/dev/null | grep -q ":5173.*LISTEN" || ss -tlnp 2>/dev/null | grep -q ":5173.*LISTEN"; then \
 		echo -e "$(GREEN)✅ Running$(RESET) (port 5173)"; \
 	else \
 		echo -e "$(RED)❌ Not running$(RESET)"; \
 	fi
 	@echo -n -e "  Tauri Dev:          "; \
-	if pgrep -f "tauri dev" > /dev/null; then \
+	if ps aux | grep -E "(yesman-dashboard|yesman-tauri-dashboard)$$" | grep -v grep > /dev/null 2>&1; then \
 		echo -e "$(GREEN)✅ Running$(RESET)"; \
 	else \
 		echo -e "$(RED)❌ Not running$(RESET)"; \
 	fi
+
+# Quick access commands
+dashboard-web: run-web-dashboard ## quick access to web dashboard
+	@echo ""
+
+dashboard-desktop: run-tauri-dev ## quick access to desktop dashboard
+	@echo ""
+
+dashboard-open: ## open dashboard in browser (if web server is running)
+	@if pgrep -f "vite.*tauri-dashboard" > /dev/null; then \
+		echo -e "$(CYAN)Opening web dashboard in browser...$(RESET)"; \
+		python -c "import webbrowser; webbrowser.open('http://localhost:5173')"; \
+	else \
+		echo -e "$(RED)❌ Web dashboard is not running$(RESET)"; \
+		echo -e "$(YELLOW)Run 'make run-web-dashboard' first$(RESET)"; \
+	fi
+
+dashboard-stop: stop-servers ## stop all dashboard servers (alias for stop-servers)
+	@echo ""
