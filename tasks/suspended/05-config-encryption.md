@@ -1,5 +1,11 @@
 # TODO: 설정 암호화 기능 구현
 
+---
+status: suspended
+reason: cryptography 의존성 추가 및 보안 아키텍처 설계 필요 - 전용 보안 스프린트에서 처리
+suspended_date: 2025-08-23
+---
+
 ## 우선순위
 낮음
 
