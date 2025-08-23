@@ -1,5 +1,11 @@
 # TODO: 동적 설정 reload 기능 구현
 
+---
+status: blocked
+reason: watchdog 의존성 추가 및 아키텍처 변경 필요 - 별도 스프린트에서 처리
+blocked_date: 2025-08-23
+---
+
 ## 우선순위
 중간
 
