@@ -5,6 +5,7 @@
 import click
 
 from commands.ai import ai
+from commands.config import config_cli
 from commands.dashboard import dashboard, dashboard_group
 from commands.enter import enter
 
@@ -38,6 +39,7 @@ cli.add_command(enter)
 cli.add_command(ai)
 cli.add_command(status)
 cli.add_command(validate)
+cli.add_command(config_cli, name='config')
 # cli.add_command(fix_lint)  # Command doesn't exist
 
 if __name__ == "__main__":

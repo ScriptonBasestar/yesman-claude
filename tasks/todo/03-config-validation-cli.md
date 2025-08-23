@@ -103,13 +103,13 @@ def auto_fix(self, errors: list[ValidationError]) -> FixResult:
 3-4시간
 
 ## 완료 기준
-- [ ] `commands/config.py` 구현
-- [ ] `libs/core/config_validator.py` 구현
-- [ ] CLI 명령어 등록 (`commands/__init__.py`)
-- [ ] 모든 검증 항목 구현
-- [ ] Rich 기반 사용자 친화적 출력
-- [ ] `--fix` 옵션 구현
-- [ ] 단위 테스트 작성
+- [x] `commands/config.py` 구현
+- [x] `libs/core/config_validator.py` 구현
+- [x] CLI 명령어 등록 (`yesman.py`)
+- [x] 모든 검증 항목 구현
+- [x] Rich 기반 사용자 친화적 출력
+- [x] `--fix` 옵션 구현
+- [x] 단위 테스트 작성
 - [ ] 통합 테스트 작성
 - [ ] 사용법 문서 추가
 
