@@ -27,17 +27,26 @@ class SetupCommand(BaseCommand, SessionCommandMixin, ConfigCommandMixin):
         Args:
             **kwargs: Keyword arguments including:
                 session_name: Optional session name to set up only that session
+                dry_run: Show what would be done without actually creating sessions
+                force: Force recreation of existing sessions without prompting
 
         Returns:
             Dictionary with setup results
         """
         session_name = kwargs.get("session_name")
+        dry_run = kwargs.get("dry_run", False)
+        force = kwargs.get("force", False)
+        
         with with_startup_progress("🔧 Initializing session setup...") as update:  # type: ignore
             setup_service = SessionSetupService(self.tmux_manager)
             update("🚀 Setting up tmux sessions...")
 
             # Set up sessions
-            successful_count, failed_count = setup_service.setup_sessions(session_name)
+            successful_count, failed_count = setup_service.setup_sessions(
+                session_filter=session_name,
+                dry_run=dry_run,
+                force=force
+            )
             update("✅ Session setup completed")
 
         # Prepare result
@@ -99,14 +108,11 @@ def setup(session_name: str | None, dry_run: bool, force: bool) -> None:
 
     if dry_run:
         command.print_info("Dry-run mode: showing what would be done")
-        command.print_warning("Dry-run mode not yet implemented")
-        return
 
     if force:
         command.print_warning("Force mode: existing sessions will be recreated without prompting")
-        command.print_warning("Force mode not yet implemented")
 
-    command.run(session_name=session_name)
+    command.run(session_name=session_name, dry_run=dry_run, force=force)
 
 
 if __name__ == "__main__":

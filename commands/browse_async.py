@@ -9,7 +9,7 @@ from rich.layout import Layout
 from rich.live import Live
 from rich.text import Text
 
-from commands.browse import BrowseCommand as SyncBrowseCommand
+# Note: SyncBrowseCommand removed as sync browse command doesn't exist
 from libs.core.async_base_command import AsyncMonitoringCommand, CommandError
 from libs.core.base_command import SessionCommandMixin
 from libs.core.session_manager import SessionManager
@@ -341,13 +341,15 @@ def browse(update_interval: float, async_mode: bool) -> None:
     if async_mode:
         command = AsyncBrowseCommand()
         command.print_info("🔥 Running in async mode for optimal performance")
+        command.run(update_interval=update_interval)
     else:
-        # Fallback to original implementation if needed
-
-        command: AsyncBrowseCommand = SyncBrowseCommand()  # type: ignore
-        command.print_warning("⚠️  Running in sync mode (consider using --async-mode)")
-
-    command.run(update_interval=update_interval)
+        # Fallback when sync mode is requested
+        click.echo("⚠️  Sync mode requested, but only async mode is available.")
+        click.echo("💡 Use 'yesman status' for basic session information, or use --async-mode for full browser.")
+        click.echo("🚀 Automatically switching to async mode...")
+        
+        command = AsyncBrowseCommand()
+        command.run(update_interval=update_interval)
 
 
 @click.command()

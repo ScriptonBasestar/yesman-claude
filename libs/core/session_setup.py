@@ -263,11 +263,13 @@ class SessionSetupService:
         self.config_builder = SessionConfigBuilder(tmux_manager)
         self.validator = SessionValidator()
 
-    def setup_sessions(self, session_filter: str | None = None) -> tuple[int, int]:
+    def setup_sessions(self, session_filter: str | None = None, dry_run: bool = False, force: bool = False) -> tuple[int, int]:
         """Set up tmux sessions.
 
         Args:
             session_filter: Optional filter to set up only specific session
+            dry_run: If True, only show what would be done without actually creating sessions
+            force: If True, recreate existing sessions without prompting
 
         Returns:
             Tuple of (successful_count, failed_count)
@@ -278,12 +280,15 @@ class SessionSetupService:
             click.echo("No sessions to set up")
             return 0, 0
 
+        if dry_run:
+            return self._dry_run_sessions(sessions)
+
         successful_count = 0
         failed_count = 0
 
         for session_name, session_conf in sessions.items():
             try:
-                if self._setup_single_session(session_name, session_conf):
+                if self._setup_single_session(session_name, session_conf, force=force):
                     successful_count += 1
                 else:
                     failed_count += 1
@@ -315,12 +320,13 @@ class SessionSetupService:
 
         return dict(all_sessions)
 
-    def _setup_single_session(self, session_name: str, session_conf: dict[str, Any]) -> bool:
+    def _setup_single_session(self, session_name: str, session_conf: dict[str, Any], force: bool = False) -> bool:
         """Set up a single tmux session.
 
         Args:
             session_name: Name of the session
             session_conf: Session configuration
+            force: If True, recreate existing sessions without prompting
 
         Returns:
             True if successful, False otherwise
@@ -340,10 +346,14 @@ class SessionSetupService:
             # Check if session already exists
             if self._session_exists(session_name):
                 click.echo(f"⚠️  Session '{session_name}' already exists")
-                if not click.confirm("Do you want to kill the existing session and recreate it?"):
+                if force:
+                    click.echo(f"🔨 Force mode: Killing existing session '{session_name}'")
+                    self._kill_session(session_name)
+                elif not click.confirm("Do you want to kill the existing session and recreate it?"):
                     click.echo(f"⏭️  Skipping session '{session_name}'")
                     return False
-                self._kill_session(session_name)
+                else:
+                    self._kill_session(session_name)
 
             # Create session
             self._create_session(config_dict)
@@ -391,3 +401,63 @@ class SessionSetupService:
         except Exception as e:
             msg = f"Failed to create tmux session: {e}"
             raise CommandError(msg) from e
+
+    def _dry_run_sessions(self, sessions: dict[str, Any]) -> tuple[int, int]:
+        """Dry run mode - show what would be done without actually creating sessions.
+
+        Args:
+            sessions: Dictionary of sessions to process
+
+        Returns:
+            Tuple of (planned_count, validation_errors_count)
+        """
+        click.echo("🔍 DRY-RUN MODE: Showing what would be done")
+        click.echo("=" * 50)
+
+        planned_count = 0
+        validation_errors_count = 0
+
+        for session_name, session_conf in sessions.items():
+            click.echo(f"\n🔧 Would set up session: {session_name}")
+            
+            try:
+                # Build configuration (validation only)
+                config_dict = self.config_builder.build_session_config(session_name, session_conf)
+                
+                # Show session details
+                click.echo(f"  📁 Working directory: {config_dict.get('start_directory', 'current')}")
+                windows = config_dict.get('windows', [])
+                click.echo(f"  🪟 Windows: {len(windows)}")
+                
+                for i, window in enumerate(windows, 1):
+                    window_name = window.get('window_name', f'window-{i}')
+                    panes = window.get('panes', [])
+                    click.echo(f"    {i}. {window_name} ({len(panes)} panes)")
+                
+                # Check validation (but don't modify anything)
+                if not self.validator.validate_session_config(session_name, config_dict):
+                    click.echo("  ❌ Validation errors:")
+                    for error in self.validator.get_validation_errors():
+                        click.echo(f"    - {error}")
+                    validation_errors_count += 1
+                else:
+                    # Check if session already exists
+                    if self._session_exists(session_name):
+                        click.echo(f"  ⚠️  Session '{session_name}' already exists (would be recreated)")
+                    else:
+                        click.echo(f"  ✨ New session would be created")
+                    
+                    planned_count += 1
+                    
+            except Exception as e:
+                click.echo(f"  ❌ Configuration error: {e}")
+                validation_errors_count += 1
+
+        # Summary
+        click.echo("\n📊 DRY-RUN Summary:")
+        click.echo(f"  ✨ Sessions planned: {planned_count}")
+        if validation_errors_count > 0:
+            click.echo(f"  ❌ Validation errors: {validation_errors_count}")
+        click.echo("\n💡 Use without --dry-run to actually create the sessions")
+
+        return planned_count, validation_errors_count
